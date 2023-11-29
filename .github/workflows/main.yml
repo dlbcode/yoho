@@ -29,5 +29,5 @@ jobs:
         run: |
           echo "$PRIVATE_KEY" > private_key.pem
           chmod 600 private_key.pem
-          rsync -avz --exclude 'mongodb' --exclude 'prvate_key.pem' --exclude 'logs' --exclude 'node_modules' --exclude 'package-lock.json' -e "ssh -i private_key.pem -o StrictHostKeyChecking=no" --delete ./ ubuntu@44.199.76.209:/home/ubuntu/reverscan/
+          rsync -avz --exclude 'mongodb' --exclude 'private_key.pem' --exclude 'logs' --exclude 'node_modules' --exclude 'package-lock.json' -e "ssh -i private_key.pem -o StrictHostKeyChecking=no" --delete ./ ubuntu@44.199.76.209:/home/ubuntu/reverscan/
           rm -f private_key.pem
