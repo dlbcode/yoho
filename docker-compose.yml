@@ -14,19 +14,22 @@ services:
     image: mongo
     container_name: rs-db
     environment:
-      MONGO_INITDB_ROOT_USERNAME: rsuser
-      MONGO_INITDB_ROOT_PASSWORD: ${MONGODB_RSUSER_PASSWORD}
+      MONGO_INITDB_ROOT_USERNAME: rsroot
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGODB_RSROOT_PASSWORD}
       MONGO_INITDB_DATABASE: rsdb
     ports:
       - "27017:27017"
     volumes:
       - ./services/mongodb:/data/db
+      - ./services/mongo/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js
 
   nodejs:
     build:
       context: ./services/nodejs
       dockerfile: Dockerfile
     container_name: rs-nodejs
+    environment:
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGODB_RSUSER_PASSWORD}
     ports:
       - "3000:3000"
     depends_on:
