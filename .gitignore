@@ -1,0 +1,5 @@
+*.env
+mongodb/
+logs/
+node_modules/
+package-lock.json
