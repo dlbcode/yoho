@@ -3,7 +3,7 @@ const MongoClient = require('mongodb').MongoClient;
 const app = express();
 const port = 3000;
 const cors = require('cors');
-const mongodbPassword = process.env.MONGODB_RSUSER_PASSWORD;
+const mongodbPassword = process.env.MONGO_RSUSER_PASSWORD;
 
 // Middleware to check the referrer 
 function checkReferrer(req, res, next) {
