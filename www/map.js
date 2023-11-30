@@ -8,7 +8,7 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 
 // Function to fetch flight data and plot routes
 function plotFlightPaths() {
-    fetch('http://44.199.76.209:3000/flights') // Adjust if your API endpoint is different
+    fetch('http://localhost:3000/flights') // Adjust if your API endpoint is different
         .then(response => response.json())
         .then(data => {
             data.forEach(flight => {
