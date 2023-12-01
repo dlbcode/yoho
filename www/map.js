@@ -1,15 +1,9 @@
-var map = L.map('map', {
-    minZoom: 2,
-    maxZoom: 19
-    }).setView([0, 0], 2); // Initialize map
-
-// Add a base layer (OpenStreetMap tiles)
+var map = L.map('map', { minZoom: 2, maxZoom: 19 }).setView([0, 0], 2);
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 19,
     attribution: '© OpenStreetMap contributors'
 }).addTo(map);
 
-// Custom blue dot icon
 var blueDotIcon = L.divIcon({
     className: 'custom-div-icon',
     html: '<div style="background-color: blue; width: 5px; height: 5px; border-radius: 50%;"></div>',
@@ -17,41 +11,96 @@ var blueDotIcon = L.divIcon({
     iconAnchor: [2, 2]
 });
 
-// Function to fetch flight data and plot routes
-function plotFlightPaths() {
-    fetch('http://localhost:3000/flights') // Adjust if your API endpoint is different
-        .then(response => response.json())
-        .then(data => {
-            data.forEach(flight => {
-                // Origin and destination coordinates
-                var originLatLng = [flight.originAirport.latitude, flight.originAirport.longitude];
-                var destinationLatLng = [flight.destinationAirport.latitude, flight.destinationAirport.longitude];
+var FlightMap = {
+    markers: {},
+    flightsByDestination: {},
+    currentLines: [],
 
-                // Create markers for each airport with the custom icon
-                var originMarker = L.marker(originLatLng, {icon: blueDotIcon}).addTo(map)
-                    .bindPopup(`<b>${flight.originAirport.name}</b><br>${flight.originAirport.city}, ${flight.originAirport.country}`);
-                var destinationMarker = L.marker(destinationLatLng, {icon: blueDotIcon}).addTo(map)
-                    .bindPopup(`<b>${flight.destinationAirport.name}</b><br>${flight.destinationAirport.city}, ${flight.destinationAirport.country}`);
+    plotFlightPaths: function() {
+        fetch('http://localhost:3000/flights')
+            .then(response => response.json())
+            .then(data => {
+                data.forEach(flight => {
+                    this.addMarker(flight.originAirport);
+                    this.addMarker(flight.destinationAirport);
 
-                // Create a geodesic line between origin and destination
-                var geodesicLine = new L.Geodesic([originLatLng, destinationLatLng], {
-                    weight: 1,
-                    opacity: 1,
-                    color: getColorBasedOnPrice(flight.price)
-                }).addTo(map);
+                    let destIata = flight.destinationAirport.iata_code;
+                    if (!this.flightsByDestination[destIata]) {
+                        this.flightsByDestination[destIata] = [];
+                    }
+                    this.flightsByDestination[destIata].push(flight);
+                });
+            })
+            .catch(error => console.error('Error:', error));
+    },
 
-                geodesicLine.bindPopup(`Flight from ${flight.originAirport.name} to ${flight.destinationAirport.name}<br>Price: $${flight.price}`);
-            });
-        })
-        .catch(error => console.error('Error:', error));
-}
+    addMarker: function(airport) {
+        let iata = airport.iata_code;
+        if (this.markers[iata]) return;
 
-// Function to determine line color based on price
-function getColorBasedOnPrice(price) {
-    price = parseFloat(price);
-    if (price < 200) return 'green';
-    if (price < 500) return 'blue';
-    return 'red';
-}
+        var latLng = L.latLng(airport.latitude, airport.longitude);
+        var marker = L.marker(latLng, {icon: blueDotIcon}).addTo(map)
+            .bindPopup(`<b>${airport.name}</b><br>${airport.city}, ${airport.country}`);
 
-plotFlightPaths();
+        marker.on('click', () => {
+            this.drawFlightPathsToDestination(iata);
+        });
+
+        this.markers[iata] = marker;
+    },
+
+    drawFlightPathsToDestination: function(destinationIata) {
+        this.clearFlightPaths();
+        var destinationFlights = this.flightsByDestination[destinationIata];
+        if (!destinationFlights) return;
+
+        destinationFlights.forEach(flight => {
+            var origin = flight.originAirport;
+            var destination = flight.destinationAirport;
+
+            var geodesicLine = new L.Geodesic([
+                [origin.latitude, origin.longitude],
+                [destination.latitude, destination.longitude]
+            ], {
+                weight: 1,
+                opacity: 1,
+                color: this.getColorBasedOnPrice(flight.price)
+            }).addTo(map);
+
+            this.currentLines.push(geodesicLine);
+        });
+    },
+
+    clearFlightPaths: function() {
+        this.currentLines.forEach(line => map.removeLayer(line));
+        this.currentLines = [];
+    },
+
+    getColorBasedOnPrice: function(price) {
+        price = parseFloat(price);
+        return price < 200 ? 'green' : price < 500 ? 'blue' : 'red';
+    },
+
+    redrawMarkers: function() {
+        Object.values(this.markers).forEach(marker => {
+            var newLatLng = this.adjustLatLng(marker.getLatLng());
+            marker.setLatLng(newLatLng);
+        });
+    },
+
+    adjustLatLng: function(latLng) {
+        var currentBounds = map.getBounds();
+        var newLng = latLng.lng;
+
+        while (newLng < currentBounds.getWest()) newLng += 360;
+        while (newLng > currentBounds.getEast()) newLng -= 360;
+
+        return L.latLng(latLng.lat, newLng);
+    }
+};
+
+map.on('moveend', function() {
+    FlightMap.redrawMarkers();
+});
+
+FlightMap.plotFlightPaths();
