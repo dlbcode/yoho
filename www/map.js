@@ -6,6 +6,14 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '© OpenStreetMap contributors'
 }).addTo(map);
 
+// Custom blue dot icon
+var blueDotIcon = L.divIcon({
+    className: 'custom-div-icon',
+    html: '<div style="background-color: blue; width: 5px; height: 5px; border-radius: 50%;"></div>',
+    iconSize: [5, 5],
+    iconAnchor: [2, 2]
+});
+
 // Function to fetch flight data and plot routes
 function plotFlightPaths() {
     fetch('http://localhost:3000/flights') // Adjust if your API endpoint is different
@@ -16,10 +24,10 @@ function plotFlightPaths() {
                 var originLatLng = [flight.originAirport.latitude, flight.originAirport.longitude];
                 var destinationLatLng = [flight.destinationAirport.latitude, flight.destinationAirport.longitude];
 
-                // Create markers for each airport
-                var originMarker = L.marker(originLatLng).addTo(map)
+                // Create markers for each airport with the custom icon
+                var originMarker = L.marker(originLatLng, {icon: blueDotIcon}).addTo(map)
                     .bindPopup(`<b>${flight.originAirport.name}</b><br>${flight.originAirport.city}, ${flight.originAirport.country}`);
-                var destinationMarker = L.marker(destinationLatLng).addTo(map)
+                var destinationMarker = L.marker(destinationLatLng, {icon: blueDotIcon}).addTo(map)
                     .bindPopup(`<b>${flight.destinationAirport.name}</b><br>${flight.destinationAirport.city}, ${flight.destinationAirport.country}`);
 
                 // Create a static curved line between origin and destination

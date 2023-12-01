@@ -5,25 +5,25 @@ const port = 3000;
 const cors = require('cors');
 const mongodbPassword = process.env.MONGO_RSUSER_PASSWORD;
 
-// Middleware to check the referrer 
-function checkReferrer(req, res, next) {
-    const referrer = req.get('Referrer');
-    if (!referrer || 
-        (!referrer.startsWith('http://44.199.76.209') && 
-         !referrer.startsWith('http://localhost'))) {
-        return res.status(403).send('Access denied');
-    }
-    next();
-}
+//// Middleware to check the referrer 
+//function checkReferrer(req, res, next) {
+//    const referrer = req.get('Referrer');
+//    if (!referrer || 
+//        (!referrer.startsWith('http://44.199.76.209') && 
+//         !referrer.startsWith('http://localhost'))) {
+//        return res.status(403).send('Access denied');
+//    }
+//    next();
+//}
 
 // use it before all route definitions
 app.use(cors({
   origin: ['http://localhost:8002', 'http://44.199.76.209:8002']
 }));
 
-// Apply the referrer check middleware to the API routes
-app.use('/airports', checkReferrer);
-app.use('/flights', checkReferrer);
+//// Apply the referrer check middleware to the API routes
+//app.use('/airports', checkReferrer);
+//app.use('/flights', checkReferrer);
 
 // MongoDB connection URL and database name
 const mongoUrl = `mongodb://rsuser:${mongodbPassword}@mongodb:27017/rsdb`;
