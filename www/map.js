@@ -30,15 +30,14 @@ function plotFlightPaths() {
                 var destinationMarker = L.marker(destinationLatLng, {icon: blueDotIcon}).addTo(map)
                     .bindPopup(`<b>${flight.destinationAirport.name}</b><br>${flight.destinationAirport.city}, ${flight.destinationAirport.country}`);
 
-                // Create a static curved line between origin and destination
-                var latlngs = [originLatLng, destinationLatLng];
-                var curvedLine = L.polyline(latlngs, {
-                    color: getColorBasedOnPrice(flight.price),
+                // Create a geodesic line between origin and destination
+                var geodesicLine = new L.Geodesic([originLatLng, destinationLatLng], {
                     weight: 1,
                     opacity: 1,
-                    smoothFactor: 1
+                    color: getColorBasedOnPrice(flight.price)
                 }).addTo(map);
-                curvedLine.bindPopup(`Flight from ${flight.originAirport.name} to ${flight.destinationAirport.name}<br>Price: $${flight.price}`);
+
+                geodesicLine.bindPopup(`Flight from ${flight.originAirport.name} to ${flight.destinationAirport.name}<br>Price: $${flight.price}`);
             });
         })
         .catch(error => console.error('Error:', error));
