@@ -44,6 +44,7 @@ var FlightMap = {
 
         marker.on('click', () => {
             this.drawFlightPathsToDestination(iata);
+            this.addToClickedList(airport); // New function call
         });
 
         marker.on('mouseover', () => {
@@ -91,6 +92,13 @@ var FlightMap = {
         }).addTo(map);
 
         this.currentLines.push(geodesicLine);
+    },
+
+    addToClickedList: function(airport) {
+        const listElement = document.getElementById('markerList'); // Ensure this ID matches your HTML
+        const listItem = document.createElement('li');
+        listItem.textContent = `City: ${airport.city}, Country: ${airport.country}, IATA: ${airport.iata_code}`;
+        listElement.appendChild(listItem);
     },
 
     clearFlightPaths: function() {
