@@ -58,18 +58,30 @@ var FlightMap = {
             var origin = flight.originAirport;
             var destination = flight.destinationAirport;
 
-            var geodesicLine = new L.Geodesic([
-                [origin.latitude, origin.longitude],
-                [destination.latitude, destination.longitude]
-            ], {
-                weight: 1,
-                opacity: 1,
-                color: this.getColorBasedOnPrice(flight.price),
-                wrap: false
-            }).addTo(map);
+            // Draw original flight path
+            this.createFlightPath(origin, destination, flight, 0);
 
-            this.currentLines.push(geodesicLine);
+            // Draw additional flight paths for each repeated map tile
+            for (let offset = -720; offset <= 720; offset += 360) {
+                if (offset !== 0) { // Avoid duplicating the original path
+                    this.createFlightPath(origin, destination, flight, offset);
+                }
+            }
         });
+    },
+
+    createFlightPath: function(origin, destination, flight, lngOffset) {
+        var adjustedOrigin = [origin.latitude, origin.longitude + lngOffset];
+        var adjustedDestination = [destination.latitude, destination.longitude + lngOffset];
+
+        var geodesicLine = new L.Geodesic([adjustedOrigin, adjustedDestination], {
+            weight: 1,
+            opacity: 1,
+            color: this.getColorBasedOnPrice(flight.price),
+            wrap: false
+        }).addTo(map);
+
+        this.currentLines.push(geodesicLine);
     },
 
     clearFlightPaths: function() {
