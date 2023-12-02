@@ -46,6 +46,15 @@ var FlightMap = {
             this.drawFlightPathsToDestination(iata);
         });
 
+        marker.on('mouseover', () => {
+            this.drawFlightPathsToDestination(airport.iata_code);
+        });
+    
+        // Optional: Clear paths when the mouse leaves the marker
+        marker.on('mouseout', () => {
+            this.clearFlightPaths();
+        });
+
         this.markers[iata] = marker;
     },
 
