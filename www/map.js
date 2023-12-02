@@ -64,7 +64,8 @@ var FlightMap = {
             ], {
                 weight: 1,
                 opacity: 1,
-                color: this.getColorBasedOnPrice(flight.price)
+                color: this.getColorBasedOnPrice(flight.price),
+                wrap: false
             }).addTo(map);
 
             this.currentLines.push(geodesicLine);
