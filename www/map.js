@@ -200,6 +200,17 @@ var FlightMap = {
         var listItem = document.createElement('li');
         listItem.innerHTML = `${flight.originAirport.iata_code} to ${flight.destinationAirport.iata_code} - $${flight.price}`;
     
+        // Create the 'X' button
+        var removeButton = document.createElement('button');
+        removeButton.innerHTML = 'X';
+        removeButton.style.marginLeft = '10px';
+        removeButton.onclick = () => {
+            list.removeChild(listItem);
+            this.clearFlightPaths(); // Call clearFlightPaths function
+        };
+    
+        listItem.appendChild(removeButton);
+    
         var details = `${flight.originAirport.city}, ${flight.originAirport.country} - ${flight.destinationAirport.city}, ${flight.destinationAirport.country} - Price: $${flight.price}`;
         
         listItem.onmouseover = function(e) {
@@ -219,7 +230,7 @@ var FlightMap = {
         };
     
         list.appendChild(listItem);
-    },
+    },    
     
     isFlightListed: function(flight) {
         var listItems = document.getElementById('flightDetailsList').children;
