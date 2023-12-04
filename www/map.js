@@ -153,24 +153,25 @@ var FlightMap = {
         decoratedLine.on('click', () => {
             this.addFlightDetailsToList(flight);
         });
+
+        geodesicLine.flight = flight;
+        decoratedLine.flight = flight;
     
         return decoratedLine;
     },                  
 
     clearFlightPaths: function(exceptIata = null) {
         this.currentLines.forEach(decoratedLine => {
-            // Remove the decorated line (which includes the line and its symbols)
-            if (decoratedLine._map) {
+            if (decoratedLine._map && !this.isFlightListed(decoratedLine.flight)) {
                 map.removeLayer(decoratedLine);
             }
         });
-        this.currentLines = [];
+        this.currentLines = this.currentLines.filter(decoratedLine => this.isFlightListed(decoratedLine.flight));
     
-        // Redraw flight paths for the excepted IATA code, if provided
         if (exceptIata) {
             this.drawFlightPathsToDestination(exceptIata);
         }
-    },
+    },    
     
     getColorBasedOnPrice: function(price) {
         price = parseFloat(price);
@@ -218,7 +219,18 @@ var FlightMap = {
         };
     
         list.appendChild(listItem);
-    }           
+    },
+    
+    isFlightListed: function(flight) {
+        var listItems = document.getElementById('flightDetailsList').children;
+        for (let i = 0; i < listItems.length; i++) {
+            if (listItems[i].innerHTML.includes(`${flight.originAirport.iata_code} to ${flight.destinationAirport.iata_code}`)) {
+                return true;
+            }
+        }
+        return false;
+    },
+    
 };
 
 map.on('moveend', function() {
