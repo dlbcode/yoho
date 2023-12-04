@@ -1,0 +1,13 @@
+:root {
+  --leaflet-tile-filter: brightness(0.6) invert(0) contrast(7) hue-rotate(200deg) saturate(0.3) brightness(0.25);
+}
+
+@media (prefers-color-scheme: dark) {
+  .leaflet-tile {
+      filter: var(--leaflet-tile-filter, none);
+  }
+
+  .leaflet-container {
+      background: #303030;
+  }
+}

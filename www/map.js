@@ -6,9 +6,9 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 
 var blueDotIcon = L.divIcon({
     className: 'custom-div-icon',
-    html: '<div style="background-color: blue; width: 5px; height: 5px; border-radius: 50%;"></div>',
-    iconSize: [5, 5],
-    iconAnchor: [2, 2]
+    html: '<div style="background-color: #3B74D5; width: 10px; height: 10px; border-radius: 50%;"></div>',
+    iconSize: [10, 10],
+    iconAnchor: [5, 5]
 });
 
 var FlightMap = {
@@ -95,7 +95,7 @@ var FlightMap = {
         var adjustedDestination = [destination.latitude, destination.longitude + lngOffset];
     
         var geodesicLine = new L.Geodesic([adjustedOrigin, adjustedDestination], {
-            weight: 1,
+            weight: 3, // Increased from 1 to 3 for thicker lines
             opacity: 1,
             color: this.getColorBasedOnPrice(flight.price),
             wrap: false
@@ -129,7 +129,7 @@ var FlightMap = {
 
     getColorBasedOnPrice: function(price) {
         price = parseFloat(price);
-        return price < 200 ? 'green' : price < 500 ? 'blue' : 'red';
+        return price < 200 ? 'green' : price < 500 ? '#3B74D5' : '#c32929';
     },
 
     redrawMarkers: function() {
