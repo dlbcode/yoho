@@ -269,6 +269,11 @@ var FlightMap = {
     },  
 };
 
+map.on('click', function() {
+    FlightMap.clearFlightPaths();
+    FlightMap.selectedMarker = null;
+});
+
 map.on('moveend', function() {
     FlightMap.redrawMarkers();
 });
