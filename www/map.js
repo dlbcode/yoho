@@ -1,4 +1,4 @@
-var map = L.map('map', { minZoom: 2, maxZoom: 19 }).setView([0, 0], 2);
+var map = L.map('map', { minZoom: 2, maxZoom: 19 }).setView([0, 0], 4);
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 19,
     attribution: '© OpenStreetMap contributors'
@@ -15,6 +15,7 @@ var FlightMap = {
     markers: {},
     flightsByDestination: {},
     currentLines: [],
+    selectedMarker: null,
 
     plotFlightPaths: function() {
         fetch('http://localhost:3000/flights')
@@ -43,23 +44,33 @@ var FlightMap = {
             .bindPopup(`<b>${airport.name}</b><br>${airport.city}, ${airport.country}`);
 
         marker.on('click', () => {
+            if (this.selectedMarker) {
+                this.clearFlightPaths(this.selectedMarker);
+            }
+            this.clearFlightPaths();
+            this.selectedMarker = iata;
             this.drawFlightPathsToDestination(iata);
         });
 
         marker.on('mouseover', () => {
-            this.drawFlightPathsToDestination(airport.iata_code);
+            if (this.selectedMarker !== iata) {
+                this.drawFlightPathsToDestination(iata);
+            }
         });
-    
-        // Optional: Clear paths when the mouse leaves the marker
+
         marker.on('mouseout', () => {
-            this.clearFlightPaths();
+            if (this.selectedMarker !== iata) {
+                this.clearFlightPaths();
+                if (this.selectedMarker) {
+                    this.drawFlightPathsToDestination(this.selectedMarker);
+                }
+            }
         });
 
         this.markers[iata] = marker;
     },
 
     drawFlightPathsToDestination: function(destinationIata) {
-        this.clearFlightPaths();
         var destinationFlights = this.flightsByDestination[destinationIata];
         if (!destinationFlights) return;
 
@@ -93,9 +104,12 @@ var FlightMap = {
         this.currentLines.push(geodesicLine);
     },
 
-    clearFlightPaths: function() {
+    clearFlightPaths: function(exceptIata = null) {
         this.currentLines.forEach(line => map.removeLayer(line));
         this.currentLines = [];
+        if (exceptIata) {
+            this.drawFlightPathsToDestination(exceptIata);
+        }
     },
 
     getColorBasedOnPrice: function(price) {
