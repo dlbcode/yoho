@@ -38,11 +38,11 @@ var FlightMap = {
     addMarker: function(airport) {
         let iata = airport.iata_code;
         if (this.markers[iata]) return;
-
+    
         var latLng = L.latLng(airport.latitude, airport.longitude);
         var marker = L.marker(latLng, {icon: blueDotIcon}).addTo(map)
             .bindPopup(`<b>${airport.name}</b><br>${airport.city}, ${airport.country}`);
-
+    
         marker.on('click', () => {
             if (this.selectedMarker) {
                 this.clearFlightPaths(this.selectedMarker);
@@ -51,13 +51,14 @@ var FlightMap = {
             this.selectedMarker = iata;
             this.drawFlightPathsToDestination(iata);
         });
-
+    
         marker.on('mouseover', () => {
             if (this.selectedMarker !== iata) {
+                this.clearFlightPaths();
                 this.drawFlightPathsToDestination(iata);
             }
         });
-
+    
         marker.on('mouseout', () => {
             if (this.selectedMarker !== iata) {
                 this.clearFlightPaths();
@@ -66,9 +67,9 @@ var FlightMap = {
                 }
             }
         });
-
+    
         this.markers[iata] = marker;
-    },
+    },    
 
     drawFlightPathsToDestination: function(destinationIata) {
         var destinationFlights = this.flightsByDestination[destinationIata];
@@ -95,41 +96,66 @@ var FlightMap = {
         var adjustedDestination = [destination.latitude, destination.longitude + lngOffset];
     
         var geodesicLine = new L.Geodesic([adjustedOrigin, adjustedDestination], {
-            weight: 3, // Increased from 1 to 3 for thicker lines
+            weight: 3,
             opacity: 1,
             color: this.getColorBasedOnPrice(flight.price),
             wrap: false
         }).addTo(map);
     
-        this.currentLines.push(geodesicLine);
+        // Define the direction symbol
+    var directionSymbol = L.Symbol.arrowHead({
+        pixelSize: 15,
+        polygon: false,
+        pathOptions: {
+            stroke: true,
+            color: '#f00'
+        }
+    });
+
+    // Use PolylineDecorator to decorate the geodesic line
+    var decoratedLine = L.polylineDecorator(geodesicLine, {
+        patterns: [
+            {offset: '5%', repeat: '10%', symbol: directionSymbol}
+        ]
+    }).addTo(map);
+
+    // Store both the geodesic line and the decorated line
+    this.currentLines.push(geodesicLine, decoratedLine);
     
-        // Attach event listeners to the geodesic line
-        geodesicLine.on('mouseover', (e) => {
+        // Attach event listeners to the decorated line
+        decoratedLine.on('mouseover', (e) => {
             L.popup()
                 .setLatLng(e.latlng)
                 .setContent(`Price: $${flight.price}`)
                 .openOn(map);
         });
     
-        geodesicLine.on('mouseout', () => {
+        decoratedLine.on('mouseout', () => {
             map.closePopup();
         });
-
-        geodesicLine.on('click', () => {
+    
+        decoratedLine.on('click', () => {
             this.addFlightDetailsToList(flight);
         });
     
-        return geodesicLine;
-    },  
+        return decoratedLine;
+    },          
 
     clearFlightPaths: function(exceptIata = null) {
-        this.currentLines.forEach(line => map.removeLayer(line));
+        this.currentLines.forEach(decoratedLine => {
+            // Remove the decorated line (which includes the line and its symbols)
+            if (decoratedLine._map) {
+                map.removeLayer(decoratedLine);
+            }
+        });
         this.currentLines = [];
+    
+        // Redraw flight paths for the excepted IATA code, if provided
         if (exceptIata) {
             this.drawFlightPathsToDestination(exceptIata);
         }
     },
-
+    
     getColorBasedOnPrice: function(price) {
         price = parseFloat(price);
         return price < 200 ? 'green' : price < 500 ? '#3B74D5' : '#c32929';
