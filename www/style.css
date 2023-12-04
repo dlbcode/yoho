@@ -1,13 +1,30 @@
-:root {
-  --leaflet-tile-filter: brightness(0.6) invert(0) contrast(7) hue-rotate(200deg) saturate(0.3) brightness(0.25);
+.container {
+  display: flex;
+  align-items: start;
 }
 
-@media (prefers-color-scheme: dark) {
-  .leaflet-tile {
-      filter: var(--leaflet-tile-filter, none);
-  }
+#map {
+  flex-grow: 1;
+}
 
-  .leaflet-container {
-      background: #303030;
-  }
+.flight-details {
+  margin-right: 20px; /* Adjust as needed */
+  flex-basis: 200px; /* Adjust width as needed */
+  overflow-y: auto; /* For scrollable list */
+}
+
+#flightDetailsList li {
+  cursor: pointer;
+  margin-bottom: 5px;
+}
+
+.tooltip {
+  position: absolute;
+  border: 1px solid #ccc;
+  background-color: white;
+  padding: 5px;
+  border-radius: 5px;
+  box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.2);
+  z-index: 1000;
+  pointer-events: none; /* Prevents the tooltip from interfering with other mouse events */
 }

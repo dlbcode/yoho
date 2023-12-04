@@ -114,10 +114,13 @@ var FlightMap = {
         geodesicLine.on('mouseout', () => {
             map.closePopup();
         });
+
+        geodesicLine.on('click', () => {
+            this.addFlightDetailsToList(flight);
+        });
     
         return geodesicLine;
-    },
-        
+    },  
 
     clearFlightPaths: function(exceptIata = null) {
         this.currentLines.forEach(line => map.removeLayer(line));
@@ -147,7 +150,33 @@ var FlightMap = {
         while (newLng > currentBounds.getEast()) newLng -= 360;
 
         return L.latLng(latLng.lat, newLng);
-    }
+    },
+
+    addFlightDetailsToList: function(flight) {
+        var list = document.getElementById('flightDetailsList');
+        var listItem = document.createElement('li');
+        listItem.innerHTML = `${flight.originAirport.iata_code} to ${flight.destinationAirport.iata_code} - $${flight.price}`;
+    
+        var details = `${flight.originAirport.city}, ${flight.originAirport.country} - ${flight.destinationAirport.city}, ${flight.destinationAirport.country} - Price: $${flight.price}`;
+        
+        listItem.onmouseover = function(e) {
+            var tooltip = document.createElement('div');
+            tooltip.className = 'tooltip';
+            tooltip.innerHTML = details;
+            tooltip.style.left = e.pageX + 'px';
+            tooltip.style.top = e.pageY + 'px';
+            document.body.appendChild(tooltip);
+        };
+    
+        listItem.onmouseout = function() {
+            var tooltips = document.getElementsByClassName('tooltip');
+            while (tooltips.length > 0) {
+                tooltips[0].parentNode.removeChild(tooltips[0]);
+            }
+        };
+    
+        list.appendChild(listItem);
+    }           
 };
 
 map.on('moveend', function() {
