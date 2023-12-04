@@ -93,16 +93,31 @@ var FlightMap = {
     createFlightPath: function(origin, destination, flight, lngOffset) {
         var adjustedOrigin = [origin.latitude, origin.longitude + lngOffset];
         var adjustedDestination = [destination.latitude, destination.longitude + lngOffset];
-
+    
         var geodesicLine = new L.Geodesic([adjustedOrigin, adjustedDestination], {
             weight: 1,
             opacity: 1,
             color: this.getColorBasedOnPrice(flight.price),
             wrap: false
         }).addTo(map);
-
+    
         this.currentLines.push(geodesicLine);
+    
+        // Attach event listeners to the geodesic line
+        geodesicLine.on('mouseover', (e) => {
+            L.popup()
+                .setLatLng(e.latlng)
+                .setContent(`Price: $${flight.price}`)
+                .openOn(map);
+        });
+    
+        geodesicLine.on('mouseout', () => {
+            map.closePopup();
+        });
+    
+        return geodesicLine;
     },
+        
 
     clearFlightPaths: function(exceptIata = null) {
         this.currentLines.forEach(line => map.removeLayer(line));
