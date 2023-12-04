@@ -102,6 +102,18 @@ var FlightMap = {
             wrap: false
         }).addTo(map);
     
+        geodesicLine.flight = flight; // Attach flight data to the line
+    
+        // Event listener for path click
+        geodesicLine.on('click', () => {
+            if (this.isFlightListed(flight)) {
+                this.removeFlightFromList(flight);
+                this.clearFlightPaths();
+            } else {
+                this.addFlightDetailsToList(flight);
+            }
+        });
+    
         // Attach event listeners to the geodesic line
         geodesicLine.on('mouseover', (e) => {
             L.popup()
@@ -112,10 +124,6 @@ var FlightMap = {
     
         geodesicLine.on('mouseout', () => {
             map.closePopup();
-        });
-    
-        geodesicLine.on('click', () => {
-            this.addFlightDetailsToList(flight);
         });
     
         var directionSymbol = L.Symbol.arrowHead({
@@ -237,6 +245,7 @@ var FlightMap = {
         list.appendChild(listItem);
     },       
     
+    // Helper function to check if a flight is listed
     isFlightListed: function(flight) {
         var listItems = document.getElementById('flightDetailsList').children;
         for (let i = 0; i < listItems.length; i++) {
@@ -246,7 +255,18 @@ var FlightMap = {
         }
         return false;
     },
-    
+
+    // Helper function to remove a flight from the list
+    removeFlightFromList: function(flight) {
+        var list = document.getElementById('flightDetailsList');
+        var listItems = list.children;
+        for (let i = 0; i < listItems.length; i++) {
+            if (listItems[i].innerHTML.includes(`${flight.originAirport.iata_code} to ${flight.destinationAirport.iata_code}`)) {
+                list.removeChild(listItems[i]);
+                break;
+            }
+        }
+    },  
 };
 
 map.on('moveend', function() {
