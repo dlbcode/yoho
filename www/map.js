@@ -209,6 +209,11 @@ var FlightMap = {
             this.clearFlightPaths(); // Call clearFlightPaths function
         };
     
+        // Prevent tooltip from showing when hovering over the remove button
+        removeButton.onmouseover = (e) => {
+            e.stopPropagation(); // Stop the mouseover event from bubbling up to the list item
+        };
+    
         listItem.appendChild(removeButton);
     
         var details = `${flight.originAirport.city}, ${flight.originAirport.country} - ${flight.destinationAirport.city}, ${flight.destinationAirport.country} - Price: $${flight.price}`;
@@ -230,7 +235,7 @@ var FlightMap = {
         };
     
         list.appendChild(listItem);
-    },    
+    },       
     
     isFlightListed: function(flight) {
         var listItems = document.getElementById('flightDetailsList').children;
