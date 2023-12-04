@@ -96,31 +96,47 @@ var FlightMap = {
         var adjustedDestination = [destination.latitude, destination.longitude + lngOffset];
     
         var geodesicLine = new L.Geodesic([adjustedOrigin, adjustedDestination], {
-            weight: 3,
-            opacity: 1,
+            weight: 6,
+            opacity: .7,
             color: this.getColorBasedOnPrice(flight.price),
             wrap: false
         }).addTo(map);
     
-        // Define the direction symbol
-    var directionSymbol = L.Symbol.arrowHead({
-        pixelSize: 15,
-        polygon: false,
-        pathOptions: {
-            stroke: true,
-            color: '#f00'
-        }
-    });
-
-    // Use PolylineDecorator to decorate the geodesic line
-    var decoratedLine = L.polylineDecorator(geodesicLine, {
-        patterns: [
-            {offset: '5%', repeat: '10%', symbol: directionSymbol}
-        ]
-    }).addTo(map);
-
-    // Store both the geodesic line and the decorated line
-    this.currentLines.push(geodesicLine, decoratedLine);
+        // Attach event listeners to the geodesic line
+        geodesicLine.on('mouseover', (e) => {
+            L.popup()
+                .setLatLng(e.latlng)
+                .setContent(`Price: $${flight.price}`)
+                .openOn(map);
+        });
+    
+        geodesicLine.on('mouseout', () => {
+            map.closePopup();
+        });
+    
+        geodesicLine.on('click', () => {
+            this.addFlightDetailsToList(flight);
+        });
+    
+        var directionSymbol = L.Symbol.arrowHead({
+            pixelSize: 5,
+            polygon: false,
+            pathOptions: {
+                stroke: true,
+                color: '#fff',
+                opacity: .7,
+                weight: 2
+            }
+        });
+        
+        var decoratedLine = L.polylineDecorator(geodesicLine, {
+            patterns: [
+                {offset: '25px', repeat: '50px', symbol: directionSymbol}
+            ]
+        }).addTo(map);
+    
+        // Store both the geodesic line and the decorated line
+        this.currentLines.push(geodesicLine, decoratedLine);
     
         // Attach event listeners to the decorated line
         decoratedLine.on('mouseover', (e) => {
@@ -139,7 +155,7 @@ var FlightMap = {
         });
     
         return decoratedLine;
-    },          
+    },                  
 
     clearFlightPaths: function(exceptIata = null) {
         this.currentLines.forEach(decoratedLine => {
