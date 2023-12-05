@@ -308,6 +308,22 @@ var FlightMap = {
         this.updateTotalCost();
     },
     
+    numTravelers: 1,
+
+    initTravelerControls: function() {
+        document.getElementById('increaseTravelers').addEventListener('click', () => {
+            this.numTravelers++;
+            this.updateTotalCost();
+        });
+
+        document.getElementById('decreaseTravelers').addEventListener('click', () => {
+            if (this.numTravelers > 1) {
+                this.numTravelers--;
+                this.updateTotalCost();
+            }
+        });
+    },
+
     updateTotalCost: function() {
         var totalCost = 0;
         var listItems = document.getElementById('flightDetailsList').children;
@@ -317,9 +333,14 @@ var FlightMap = {
                 totalCost += cost;
             }
         }
+        totalCost *= this.numTravelers;
         document.getElementById('totalCost').textContent = `Total Trip Cost: $${totalCost.toFixed(2)}`;
+        document.getElementById('numTravelers').value = this.numTravelers;
     },
 };
+
+FlightMap.plotFlightPaths();
+FlightMap.initTravelerControls();
 
 map.on('click', function() {
     FlightMap.clearFlightPaths();
@@ -337,5 +358,19 @@ document.getElementById('flightPathToggle').addEventListener('change', function(
     if (FlightMap.selectedMarker) {
         FlightMap.clearFlightPaths();
         FlightMap.drawFlightPaths(FlightMap.selectedMarker);
+    }
+});
+
+document.getElementById('increaseTravelers').addEventListener('click', function() {
+    var numTravelers = document.getElementById('numTravelers');
+    numTravelers.value = parseInt(numTravelers.value, 10) + 1;
+    FlightMap.updateTotalCost();
+});
+
+document.getElementById('decreaseTravelers').addEventListener('click', function() {
+    var numTravelers = document.getElementById('numTravelers');
+    if (numTravelers.value > 1) {
+        numTravelers.value = parseInt(numTravelers.value, 10) - 1;
+        FlightMap.updateTotalCost();
     }
 });

@@ -19,6 +19,12 @@
     </div>
     <div class="container">
         <div class="list-container">
+            <div class="travelers-container">
+                <label for="numTravelers">Number of Travelers:</label>
+                <button id="decreaseTravelers">-</button>
+                <input type="number" id="numTravelers" value="1" min="1" readonly>
+                <button id="increaseTravelers">+</button>
+            </div>
             <ol id="flightDetailsList" class="flight-details"></ol>
             <div id="totalCost">Total Trip Cost: $0</div>
         </div>
