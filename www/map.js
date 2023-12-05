@@ -16,6 +16,31 @@ var FlightMap = {
     flightsByDestination: {},
     currentLines: [],
     selectedMarker: null,
+    toggleState: 'to',
+
+    drawFlightPaths: function(iata) {
+        if (this.toggleState === 'to') {
+            this.drawFlightPathsToDestination(iata);
+        } else {
+            this.drawFlightPathsFromOrigin(iata);
+        }
+    },
+
+    drawFlightPathsFromOrigin: function(originIata) {
+        Object.values(this.flightsByDestination).forEach(flights => {
+            flights.forEach(flight => {
+                if (flight.originAirport.iata_code === originIata) {
+                    this.createFlightPath(flight.originAirport, flight.destinationAirport, flight, 0);
+                    // Draw additional flight paths for each repeated map tile
+                    for (let offset = -720; offset <= 720; offset += 360) {
+                        if (offset !== 0) {
+                            this.createFlightPath(flight.originAirport, flight.destinationAirport, flight, offset);
+                        }
+                    }
+                }
+            });
+        });
+    },
 
     plotFlightPaths: function() {
         fetch('http://localhost:3000/flights')
@@ -49,13 +74,13 @@ var FlightMap = {
             }
             this.clearFlightPaths();
             this.selectedMarker = iata;
-            this.drawFlightPathsToDestination(iata);
+            this.drawFlightPaths(iata);
         });
     
         marker.on('mouseover', () => {
             if (this.selectedMarker !== iata) {
                 this.clearFlightPaths();
-                this.drawFlightPathsToDestination(iata);
+                this.drawFlightPaths(iata);
             }
         });
     
@@ -63,7 +88,7 @@ var FlightMap = {
             if (this.selectedMarker !== iata) {
                 this.clearFlightPaths();
                 if (this.selectedMarker) {
-                    this.drawFlightPathsToDestination(this.selectedMarker);
+                    this.drawFlightPaths(this.selectedMarker);
                 }
             }
         });
@@ -279,3 +304,11 @@ map.on('moveend', function() {
 });
 
 FlightMap.plotFlightPaths();
+
+document.getElementById('flightPathToggle').addEventListener('change', function() {
+    FlightMap.toggleState = this.value;
+    if (FlightMap.selectedMarker) {
+        FlightMap.clearFlightPaths();
+        FlightMap.drawFlightPaths(FlightMap.selectedMarker);
+    }
+});

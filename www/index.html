@@ -10,6 +10,14 @@
     <link rel="stylesheet" type="text/css" href="style.css">
 </head>
 <body>
+    <!-- Add this inside the <body> tag, preferably above the <div id="map"> -->
+    <div class="toggle-container">
+        <label for="flightPathToggle">Show Flight Paths:</label>
+        <select id="flightPathToggle">
+            <option value="to">To Marker</option>
+            <option value="from">From Marker</option>
+        </select>
+    </div>
     <div class="container">
         <ol id="flightDetailsList" class="flight-details"></ol>
         <div id="map" style="height: 500px;"></div>
