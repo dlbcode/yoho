@@ -249,6 +249,7 @@ var FlightMap = {
         removeButton.style.marginLeft = '10px';
         removeButton.onclick = () => {
             list.removeChild(listItem);
+            this.updateTotalCost();
             this.clearFlightPaths(); // Call clearFlightPaths function
         };
     
@@ -256,6 +257,8 @@ var FlightMap = {
         removeButton.onmouseover = (e) => {
             e.stopPropagation(); // Stop the mouseover event from bubbling up to the list item
         };
+
+        listItem.setAttribute('data-price', flight.price);
     
         listItem.appendChild(removeButton);
     
@@ -278,6 +281,7 @@ var FlightMap = {
         };
     
         list.appendChild(listItem);
+        this.updateTotalCost();
     },       
     
     // Helper function to check if a flight is listed
@@ -301,7 +305,20 @@ var FlightMap = {
                 break;
             }
         }
-    },  
+        this.updateTotalCost();
+    },
+    
+    updateTotalCost: function() {
+        var totalCost = 0;
+        var listItems = document.getElementById('flightDetailsList').children;
+        for (let i = 0; i < listItems.length; i++) {
+            var cost = parseFloat(listItems[i].getAttribute('data-price'));
+            if (!isNaN(cost)) {
+                totalCost += cost;
+            }
+        }
+        document.getElementById('totalCost').textContent = `Total Trip Cost: $${totalCost.toFixed(2)}`;
+    },
 };
 
 map.on('click', function() {

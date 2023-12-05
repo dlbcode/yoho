@@ -1,6 +1,13 @@
 .container {
   display: flex;
-  align-items: start;
+}
+
+.list-container {
+  flex-direction: column;
+}
+
+#map {
+  flex-grow: 1;
 }
 
 #map {
@@ -28,3 +35,4 @@
   z-index: 1000;
   pointer-events: none; /* Prevents the tooltip from interfering with other mouse events */
 }
+
