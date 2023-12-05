@@ -47,9 +47,14 @@ var FlightMap = {
             .then(response => response.json())
             .then(data => {
                 data.forEach(flight => {
+                    if (!flight.originAirport || !flight.destinationAirport) {
+                        console.info('Incomplete flight data:', flight);
+                        return;
+                    }
+    
                     this.addMarker(flight.originAirport);
                     this.addMarker(flight.destinationAirport);
-
+    
                     let destIata = flight.destinationAirport.iata_code;
                     if (!this.flightsByDestination[destIata]) {
                         this.flightsByDestination[destIata] = [];
@@ -58,9 +63,14 @@ var FlightMap = {
                 });
             })
             .catch(error => console.error('Error:', error));
-    },
-
+    },    
+    
     addMarker: function(airport) {
+        if (!airport || !airport.iata_code) {
+            console.error('Incomplete airport data:', airport);
+            return;
+        }
+    
         let iata = airport.iata_code;
         if (this.markers[iata]) return;
     
