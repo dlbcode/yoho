@@ -79,12 +79,13 @@ def process_airport(iata_code, access_token):
             timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
 
             try:
-                # Store in MongoDB
-                collection.insert_one({'origin': origin, 'destination': destination, 'price': price, 'timestamp': timestamp})
-                print(f"Inserted data for flight from {origin} to {destination}")  # Confirm insertion
+                # Update or insert in MongoDB
+                query = {'origin': origin, 'destination': destination}
+                new_values = {'$set': {'origin': origin, 'destination': destination, 'price': price, 'timestamp': timestamp}}
+                collection.update_one(query, new_values, upsert=True)
+                print(f"Updated data for flight from {origin} to {destination}")  # Confirm update or insertion
             except Exception as e:
-                print(f"Error inserting data for {origin}-{destination}: {e}")
-
+                print(f"Error updating data for {origin}-{destination}: {e}")
     time.sleep(0.2)  # Wait for 200 milliseconds
 
 # Main script
