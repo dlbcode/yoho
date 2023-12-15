@@ -1,15 +1,5 @@
-var map = L.map('map', { minZoom: 2, maxZoom: 19 }).setView([0, 0], 2);
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom: 19,
-    attribution: '© OpenStreetMap contributors'
-}).addTo(map);
-
-var blueDotIcon = L.divIcon({
-    className: 'custom-div-icon',
-    html: '<div style="background-color: #3B74D5; width: 10px; height: 10px; border-radius: 50%;"></div>',
-    iconSize: [10, 10],
-    iconAnchor: [5, 5]
-});
+import { map } from './mapInit.js';
+import { blueDotIcon } from './iconsAndMarkers.js';
 
 var FlightMap = {
     markers: {},
@@ -345,35 +335,4 @@ var FlightMap = {
 FlightMap.plotFlightPaths();
 FlightMap.initTravelerControls();
 
-map.on('click', function() {
-    FlightMap.clearFlightPaths();
-    FlightMap.selectedMarker = null;
-});
-
-map.on('moveend', function() {
-    FlightMap.redrawMarkers();
-});
-
-FlightMap.plotFlightPaths();
-
-document.getElementById('flightPathToggle').addEventListener('change', function() {
-    FlightMap.toggleState = this.value;
-    if (FlightMap.selectedMarker) {
-        FlightMap.clearFlightPaths();
-        FlightMap.drawFlightPaths(FlightMap.selectedMarker);
-    }
-});
-
-document.getElementById('increaseTravelers').addEventListener('click', function() {
-    var numTravelers = document.getElementById('numTravelers');
-    numTravelers.value = parseInt(numTravelers.value, 10) + 1;
-    FlightMap.updateTotalCost();
-});
-
-document.getElementById('decreaseTravelers').addEventListener('click', function() {
-    var numTravelers = document.getElementById('numTravelers');
-    if (numTravelers.value > 1) {
-        numTravelers.value = parseInt(numTravelers.value, 10) - 1;
-        FlightMap.updateTotalCost();
-    }
-});
+export { FlightMap };
