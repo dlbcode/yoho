@@ -1,5 +1,3 @@
-import { map } from './mapInit.js';
-
 var blueDotIcon = L.divIcon({
     className: 'custom-div-icon',
     html: '<div style="background-color: #3B74D5; width: 10px; height: 10px; border-radius: 50%;"></div>',

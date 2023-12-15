@@ -1,5 +1,5 @@
 import { map } from './mapInit.js';
-import { blueDotIcon } from './iconsAndMarkers.js';
+import { blueDotIcon } from './markers.js';
 
 const FlightMap = {
     markers: {},
