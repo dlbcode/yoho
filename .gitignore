@@ -1,5 +1,7 @@
 *.env
+*.csv
 mongodb/
 logs/
 node_modules/
 package-lock.json
+

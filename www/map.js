@@ -217,6 +217,9 @@ var FlightMap = {
     },    
     
     getColorBasedOnPrice: function(price) {
+        if (price === null || price === undefined || isNaN(parseFloat(price))) {
+            return 'grey'; // Return grey for flights without price data
+        }
         price = parseFloat(price);
         return price < 200 ? 'green' : price < 500 ? '#3B74D5' : '#c32929';
     },
