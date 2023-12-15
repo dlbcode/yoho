@@ -351,6 +351,29 @@ const FlightMap = {
       // Re-fetch and re-plot the airports based on the new zoom level
       this.plotFlightPaths();
   },
+  updateVisibleMarkers() {
+    // Remove markers that are no longer in view
+    Object.keys(this.markers).forEach(iata => {
+        const marker = this.markers[iata];
+        if (!map.getBounds().contains(marker.getLatLng())) {
+            map.removeLayer(marker);
+            delete this.markers[iata];
+        }
+    });
+
+    // Add markers for airports that are now in view
+    Object.values(this.flightsByDestination).forEach(flights => {
+        flights.forEach(flight => {
+            if (flight.originAirport) {
+                this.addMarker(flight.originAirport);
+            }
+            if (flight.destinationAirport) {
+                this.addMarker(flight.destinationAirport);
+            }
+        });
+    });
+  },
+
 };
 
 export { FlightMap };

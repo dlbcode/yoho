@@ -8,6 +8,11 @@ map.on('click', function() {
 
 map.on('moveend', function() {
     FlightMap.redrawMarkers();
+    FlightMap.updateVisibleMarkers(); // Call updateVisibleMarkers on map move
+});
+
+map.on('zoomend', function() {
+    FlightMap.updateVisibleMarkers(); // Call updateVisibleMarkers on zoom change
 });
 
 document.getElementById('flightPathToggle').addEventListener('change', function() {
@@ -33,5 +38,5 @@ document.getElementById('decreaseTravelers').addEventListener('click', function(
 });
 
 document.addEventListener('zoomChanged', function() {
-  FlightMap.updateMarkersForZoom();
+    FlightMap.updateMarkersForZoom();
 });
