@@ -7,11 +7,27 @@ const FlightMap = {
     currentLines: [],
     selectedMarker: null,
     toggleState: 'to',
+    flightPathCache: {},
 
     drawFlightPaths(iata) {
-        this.toggleState === 'to' ? this.drawFlightPathsToDestination(iata) : this.drawFlightPathsFromOrigin(iata);
+      this.clearFlightPaths(); // Clear existing paths from the map
+  
+      if (this.flightPathCache[iata]) {
+          // Re-add cached paths to the map and update currentLines
+          this.flightPathCache[iata].forEach(path => {
+              if (!map.hasLayer(path)) {
+                  path.addTo(map);
+              }
+              if (!this.currentLines.includes(path)) {
+                  this.currentLines.push(path);
+              }
+          });
+      } else {
+          // Draw new paths and cache them
+          this.toggleState === 'to' ? this.drawFlightPathsToDestination(iata) : this.drawFlightPathsFromOrigin(iata);
+      }
     },
-
+  
     drawFlightPathsFromOrigin(originIata) {
         Object.values(this.flightsByDestination).forEach(flights =>
             flights.forEach(flight => {
@@ -125,6 +141,14 @@ const FlightMap = {
   
       // Store both the geodesic line and the decorated line
       this.currentLines.push(geodesicLine, decoratedLine);
+
+      // Cache the created flight paths
+      let destinationIata = flight.destinationAirport.iata_code;
+      let originIata = flight.originAirport.iata_code;
+      let cacheKey = this.toggleState === 'to' ? destinationIata : originIata;
+
+      this.flightPathCache[cacheKey] = this.flightPathCache[cacheKey] || [];
+      this.flightPathCache[cacheKey].push(geodesicLine, decoratedLine);
   
       // Attach event listeners to the decorated line
       decoratedLine.on('mouseover', (e) => {
@@ -149,19 +173,24 @@ const FlightMap = {
     },
 
     clearFlightPaths(exceptIata = null) {
-        this.currentLines = this.currentLines.filter(decoratedLine => {
-            if (!this.isFlightListed(decoratedLine.flight)) {
-                map.removeLayer(decoratedLine);
-                return false;
-            }
-            return true;
-        });
-    
-        if (exceptIata) {
-            this.drawFlightPathsToDestination(exceptIata);
-        }
+      this.currentLines = this.currentLines.filter(line => {
+          // Check if the flight associated with the line is listed
+          if (this.isFlightListed(line.flight)) {
+              return true; // Keep the line if the flight is listed
+          } else {
+              if (map.hasLayer(line)) {
+                  map.removeLayer(line); // Remove the line from the map if the flight is not listed
+              }
+              return false; // Remove the line from currentLines
+          }
+      });
+  
+      if (exceptIata) {
+          // Redraw paths for the exceptIata if provided
+          this.drawFlightPaths(exceptIata);
+      }
     },
-
+  
     getColorBasedOnPrice: function(price) {
       if (price === null || price === undefined || isNaN(parseFloat(price))) {
           return 'grey'; // Return grey for flights without price data
