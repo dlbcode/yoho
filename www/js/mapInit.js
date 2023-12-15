@@ -1,5 +1,8 @@
+var map = L.map('map', { minZoom: 2, maxZoom: 19 });
 
-var map = L.map('map', { minZoom: 2, maxZoom: 19 }).setView([0, 0], 4);
+// Set a default view in case IP geolocation fails
+map.setView([0, 0], 4);
+
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 19,
     attribution: '© OpenStreetMap contributors'
@@ -11,5 +14,20 @@ map.on('zoomend', function() {
     console.log('Map zoom level:', zoomLevel);
     document.dispatchEvent(new CustomEvent('zoomChanged'));
 });
+
+// Fetch client's approximate location using IP-API
+fetch('http://ip-api.com/json/')
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            // Set map view to the obtained location
+            map.setView([data.lat, data.lon], 4);
+        } else {
+            console.error('IP Geolocation failed:', data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error fetching IP Geolocation:', error);
+    });
 
 export { map };
