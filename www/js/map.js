@@ -1,4 +1,3 @@
-import './markers.js'; // Only needed if these exports are used elsewhere
 import { FlightMap } from './flightMap.js';
 import './eventListeners.js';
 

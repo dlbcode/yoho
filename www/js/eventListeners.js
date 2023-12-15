@@ -31,3 +31,7 @@ document.getElementById('decreaseTravelers').addEventListener('click', function(
         FlightMap.updateTotalCost();
     }
 });
+
+document.addEventListener('zoomChanged', function() {
+  FlightMap.updateMarkersForZoom();
+});

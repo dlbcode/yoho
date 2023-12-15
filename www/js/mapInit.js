@@ -1,4 +1,3 @@
-import { FlightMap } from './flightMap.js'; // Import FlightMap
 
 var map = L.map('map', { minZoom: 2, maxZoom: 19 }).setView([0, 0], 2);
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -10,7 +9,7 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 map.on('zoomend', function() {
     var zoomLevel = map.getZoom();
     console.log('Map zoom level:', zoomLevel);
-    FlightMap.updateMarkersForZoom();
+    document.dispatchEvent(new CustomEvent('zoomChanged'));
 });
 
 export { map };

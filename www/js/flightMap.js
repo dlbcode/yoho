@@ -324,7 +324,4 @@ const FlightMap = {
   },
 };
 
-FlightMap.plotFlightPaths();
-FlightMap.initTravelerControls();
-
 export { FlightMap };
