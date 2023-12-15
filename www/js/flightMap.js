@@ -12,9 +12,11 @@ const FlightMap = {
     drawFlightPaths(iata) {
       this.clearFlightPaths(); // Clear existing paths from the map
   
-      if (this.flightPathCache[iata]) {
+      let cacheKey = this.toggleState + '_' + iata; // Include toggleState in cacheKey
+  
+      if (this.flightPathCache[cacheKey]) {
           // Re-add cached paths to the map and update currentLines
-          this.flightPathCache[iata].forEach(path => {
+          this.flightPathCache[cacheKey].forEach(path => {
               if (!map.hasLayer(path)) {
                   path.addTo(map);
               }
@@ -26,7 +28,7 @@ const FlightMap = {
           // Draw new paths and cache them
           this.toggleState === 'to' ? this.drawFlightPathsToDestination(iata) : this.drawFlightPathsFromOrigin(iata);
       }
-    },
+    },  
   
     drawFlightPathsFromOrigin(originIata) {
         Object.values(this.flightsByDestination).forEach(flights =>
@@ -145,11 +147,11 @@ const FlightMap = {
       // Cache the created flight paths
       let destinationIata = flight.destinationAirport.iata_code;
       let originIata = flight.originAirport.iata_code;
-      let cacheKey = this.toggleState === 'to' ? destinationIata : originIata;
+      let cacheKey = this.toggleState + '_' + (this.toggleState === 'to' ? destinationIata : originIata);
 
       this.flightPathCache[cacheKey] = this.flightPathCache[cacheKey] || [];
       this.flightPathCache[cacheKey].push(geodesicLine, decoratedLine);
-  
+
       // Attach event listeners to the decorated line
       decoratedLine.on('mouseover', (e) => {
           L.popup()
@@ -196,7 +198,7 @@ const FlightMap = {
           return 'grey'; // Return grey for flights without price data
       }
       price = parseFloat(price);
-      return price < 200 ? 'green' : price < 500 ? '#3B74D5' : '#c32929';
+      return price < 100 ? '#0099ff' : price < 200 ? 'green' : price < 300 ? '#abb740': price <400 ? 'orange' : price < 500 ? 'amber' : '#c32929';
     },
 
     redrawMarkers: function() {
