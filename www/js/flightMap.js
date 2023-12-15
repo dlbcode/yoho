@@ -44,23 +44,26 @@ const FlightMap = {
     },
 
     addMarker(airport) {
-        if (!airport || !airport.iata_code) {
-            console.error('Incomplete airport data:', airport);
-            return;
-        }
+      if (!airport || !airport.iata_code || !airport.weight) {
+          console.error('Incomplete airport data:', airport);
+          return;
+      }
 
-        let iata = airport.iata_code;
-        if (this.markers[iata]) return;
+      let iata = airport.iata_code;
+      if (this.markers[iata]) return;
 
-        const latLng = L.latLng(airport.latitude, airport.longitude);
-        const marker = L.marker(latLng, {icon: blueDotIcon}).addTo(map)
-            .bindPopup(`<b>${airport.name}</b><br>${airport.city}, ${airport.country}`);
+      // Check if the airport's weight is less than or equal to the current zoom level
+      if (airport.weight <= map.getZoom()) {
+          const latLng = L.latLng(airport.latitude, airport.longitude);
+          const marker = L.marker(latLng, {icon: blueDotIcon}).addTo(map)
+              .bindPopup(`<b>${airport.name}</b><br>${airport.city}, ${airport.country}`);
 
-        marker.on('click', () => this.markerClickHandler(iata));
-        marker.on('mouseover', () => this.markerHoverHandler(iata, 'mouseover'));
-        marker.on('mouseout', () => this.markerHoverHandler(iata, 'mouseout'));
+          marker.on('click', () => this.markerClickHandler(iata));
+          marker.on('mouseover', () => this.markerHoverHandler(iata, 'mouseover'));
+          marker.on('mouseout', () => this.markerHoverHandler(iata, 'mouseout'));
 
-        this.markers[iata] = marker;
+          this.markers[iata] = marker;
+      }
     },
 
     drawFlightPathsToDestination(destinationIata) {
@@ -310,6 +313,15 @@ const FlightMap = {
             }
         }
     },
+
+    updateMarkersForZoom() {
+      Object.values(this.markers).forEach(marker => {
+          map.removeLayer(marker);
+      });
+      this.markers = {};
+      // Re-fetch and re-plot the airports based on the new zoom level
+      this.plotFlightPaths();
+  },
 };
 
 FlightMap.plotFlightPaths();
