@@ -1,15 +1,30 @@
-html, body {
-  height: 100%;
-  margin: 5px;
+body {
+  margin: 0;
   padding: 0;
+  height: 100vh; /* Full viewport height */
+  display: flex;
+  flex-direction: column; /* Stack elements vertically */
+}
+
+.top-container {
+  height: 20px;
+  width: 100%;
 }
 
 .container {
-  display: flex;
+  display: flex; /* Align left-container and map-container side by side */
+  flex-grow: 1; /* Take up remaining space */
 }
 
-.list-container {
-  flex-direction: column;
+.left-container {
+  flex-basis: 200px; /* Adjust width as necessary */
+  flex-shrink: 0; /* Prevent shrinking */
+}
+
+.map-container {
+  flex-grow: 1; /* Take up remaining space */
+  overflow: hidden; /* Optional, based on your previous setup */
+  height: calc(100vh - 20px); /* Adjust as necessary */
 }
 
 .tooltip {
