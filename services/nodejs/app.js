@@ -46,7 +46,16 @@ MongoClient.connect(mongoUrl, { useNewUrlParser: true, useUnifiedTopology: true 
 // Endpoint to get airports data
 app.get('/airports', async (req, res) => {
   try {
-    const airports = await airportsCollection.find({}).toArray();
+    const queryParam = req.query.query;
+    let query = {};
+
+    if (queryParam) {
+      // Create a case-insensitive regex pattern to filter airports
+      const regex = new RegExp(queryParam, 'i');
+      query = { $or: [{ name: regex }, { iata_code: regex }, { city: regex }, { country: regex }] };
+    }
+
+    const airports = await airportsCollection.find(query).toArray();
     res.json(airports);
   } catch (error) {
     res.status(500).send('Error fetching airports data');
