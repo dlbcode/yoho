@@ -8,7 +8,7 @@ const flightMap = {
     flightsByDestination: {},
     currentLines: [],
     selectedMarker: null,
-    toggleState: 'to',
+    toggleState: 'from',
     flightPathCache: {},
 
     drawFlightPaths(iata) {
