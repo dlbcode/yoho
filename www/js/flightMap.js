@@ -11,26 +11,26 @@ const flightMap = {
     flightPathCache: {},
 
     drawFlightPaths(iata) {
-      this.clearFlightPaths(); // Clear existing paths from the map
-  
-      let cacheKey = this.toggleState + '_' + iata; // Include toggleState in cacheKey
-  
-      if (this.flightPathCache[cacheKey]) {
-          // Re-add cached paths to the map and update currentLines
-          this.flightPathCache[cacheKey].forEach(path => {
-              if (!map.hasLayer(path)) {
-                  path.addTo(map);
-              }
-              if (!this.currentLines.includes(path)) {
-                  this.currentLines.push(path);
-              }
-          });
-      } else {
-          // Draw new paths and cache them
-          this.toggleState === 'to' ? this.drawFlightPathsToDestination(iata) : this.drawFlightPathsFromOrigin(iata);
-      }
-    },  
-  
+        this.clearFlightPaths(); // Clear existing paths from the map
+    
+        let cacheKey = this.toggleState + '_' + iata; // Include toggleState in cacheKey
+    
+        if (this.flightPathCache[cacheKey]) {
+            // Re-add cached paths to the map and update currentLines
+            this.flightPathCache[cacheKey].forEach(path => {
+                if (!map.hasLayer(path)) {
+                    path.addTo(map);
+                }
+                if (!this.currentLines.includes(path)) {
+                    this.currentLines.push(path);
+                }
+            });
+        } else {
+            // Draw new paths and cache them
+            this.toggleState === 'to' ? this.drawFlightPathsToDestination(iata) : this.drawFlightPathsFromOrigin(iata);
+        }
+    },
+
     drawFlightPathsFromOrigin(originIata) {
         Object.values(this.flightsByDestination).forEach(flights =>
             flights.forEach(flight => {
@@ -63,26 +63,26 @@ const flightMap = {
     },
 
     addMarker(airport) {
-      if (!airport || !airport.iata_code || !airport.weight) {
-          console.error('Incomplete airport data:', airport);
-          return;
-      }
+        if (!airport || !airport.iata_code || !airport.weight) {
+            console.error('Incomplete airport data:', airport);
+            return;
+        }
 
-      let iata = airport.iata_code;
-      if (this.markers[iata]) return;
+        let iata = airport.iata_code;
+        if (this.markers[iata]) return;
 
-      // Check if the airport's weight is less than or equal to the current zoom level
-      if (airport.weight <= map.getZoom()) {
-          const latLng = L.latLng(airport.latitude, airport.longitude);
-          const marker = L.marker(latLng, {icon: blueDotIcon}).addTo(map)
-              .bindPopup(`<b>${airport.name}</b><br>${airport.city}, ${airport.country}`);
+        // Check if the airport's weight is less than or equal to the current zoom level
+        if (airport.weight <= map.getZoom()) {
+            const latLng = L.latLng(airport.latitude, airport.longitude);
+            const marker = L.marker(latLng, {icon: blueDotIcon}).addTo(map)
+                .bindPopup(`<b>${airport.name}</b><br>${airport.city}, ${airport.country}`);
 
-          marker.on('click', () => this.markerClickHandler(iata));
-          marker.on('mouseover', () => this.markerHoverHandler(iata, 'mouseover'));
-          marker.on('mouseout', () => this.markerHoverHandler(iata, 'mouseout'));
+            marker.on('click', () => this.markerClickHandler(iata));
+            marker.on('mouseover', () => this.markerHoverHandler(iata, 'mouseover'));
+            marker.on('mouseout', () => this.markerHoverHandler(iata, 'mouseout'));
 
-          this.markers[iata] = marker;
-      }
+            this.markers[iata] = marker;
+        }
     },
 
     drawFlightPathsToDestination(destinationIata) {
@@ -90,21 +90,21 @@ const flightMap = {
         destinationFlights.forEach(flight => this.drawPaths(flight, destinationIata));
     },
 
-    createFlightPath: function(origin, destination, flight, lngOffset) {
-      var adjustedOrigin = [origin.latitude, origin.longitude + lngOffset];
-      var adjustedDestination = [destination.latitude, destination.longitude + lngOffset];
-  
-      var geodesicLine = new L.Geodesic([adjustedOrigin, adjustedDestination], {
-          weight: 6,
-          opacity: .7,
-          color: this.getColorBasedOnPrice(flight.price),
-          wrap: false
-      }).addTo(map);
-  
-      geodesicLine.flight = flight; // Attach flight data to the line
-  
-      // Event listener for path click
-      geodesicLine.on('click', () => {
+    createFlightPath(origin, destination, flight, lngOffset) {
+        var adjustedOrigin = [origin.latitude, origin.longitude + lngOffset];
+        var adjustedDestination = [destination.latitude, destination.longitude + lngOffset];
+    
+        var geodesicLine = new L.Geodesic([adjustedOrigin, adjustedDestination], {
+            weight: 6,
+            opacity: .7,
+            color: this.getColorBasedOnPrice(flight.price),
+            wrap: false
+        }).addTo(map);
+    
+        geodesicLine.flight = flight; // Attach flight data to the line
+    
+        // Event listener for path click
+        geodesicLine.on('click', () => {
             if (flightList.isFlightListed(flight)) {
                 flightList.removeFlightFromList(flight);
                 this.clearFlightPaths();
@@ -112,67 +112,67 @@ const flightMap = {
                 flightList.addFlightDetailsToList(flight, this.clearFlightPaths.bind(this));
             }
         });
-  
-      // Attach event listeners to the geodesic line
-      geodesicLine.on('mouseover', (e) => {
-          L.popup()
-              .setLatLng(e.latlng)
-              .setContent(`Price: $${flight.price}`)
-              .openOn(map);
-      });
-  
-      geodesicLine.on('mouseout', () => {
-          map.closePopup();
-      });
-  
-      var directionSymbol = L.Symbol.arrowHead({
-          pixelSize: 5,
-          polygon: false,
-          pathOptions: {
-              stroke: true,
-              color: '#fff',
-              opacity: .7,
-              weight: 2
-          }
-      });
-      
-      var decoratedLine = L.polylineDecorator(geodesicLine, {
-          patterns: [
-              {offset: '25px', repeat: '50px', symbol: directionSymbol}
-          ]
-      }).addTo(map);
-  
-      // Store both the geodesic line and the decorated line
-      this.currentLines.push(geodesicLine, decoratedLine);
+    
+        // Attach event listeners to the geodesic line
+        geodesicLine.on('mouseover', (e) => {
+            L.popup()
+                .setLatLng(e.latlng)
+                .setContent(`Price: $${flight.price}`)
+                .openOn(map);
+        });
+    
+        geodesicLine.on('mouseout', () => {
+            map.closePopup();
+        });
+    
+        var directionSymbol = L.Symbol.arrowHead({
+            pixelSize: 5,
+            polygon: false,
+            pathOptions: {
+                stroke: true,
+                color: '#fff',
+                opacity: .7,
+                weight: 2
+            }
+        });
+        
+        var decoratedLine = L.polylineDecorator(geodesicLine, {
+            patterns: [
+                {offset: '25px', repeat: '50px', symbol: directionSymbol}
+            ]
+        }).addTo(map);
+    
+        // Store both the geodesic line and the decorated line
+        this.currentLines.push(geodesicLine, decoratedLine);
 
-      // Cache the created flight paths
-      let destinationIata = flight.destinationAirport.iata_code;
-      let originIata = flight.originAirport.iata_code;
-      let cacheKey = this.toggleState + '_' + (this.toggleState === 'to' ? destinationIata : originIata);
+        // Cache the created flight paths
+        let destinationIata = flight.destinationAirport.iata_code;
+        let originIata = flight.originAirport.iata_code;
+        let cacheKey = this.toggleState + '_' + (this.toggleState === 'to' ? destinationIata : originIata);
 
-      this.flightPathCache[cacheKey] = this.flightPathCache[cacheKey] || [];
-      this.flightPathCache[cacheKey].push(geodesicLine, decoratedLine);
+        this.flightPathCache[cacheKey] = this.flightPathCache[cacheKey] || [];
+        this.flightPathCache[cacheKey].push(geodesicLine, decoratedLine);
 
-      // Attach event listeners to the decorated line
-      decoratedLine.on('mouseover', (e) => {
-          L.popup()
-              .setLatLng(e.latlng)
-              .setContent(`Price: $${flight.price}`)
-              .openOn(map);
-      });
-  
-      decoratedLine.on('mouseout', () => {
-          map.closePopup();
-      });
-  
-      decoratedLine.on('click', () => {
-          this.addFlightDetailsToList(flight, this.clearFlightPaths.bind(this));
-      });
+        // Attach event listeners to the decorated line
+        decoratedLine.on('mouseover', (e) => {
+            L.popup()
+                .setLatLng(e.latlng)
+                .setContent(`Price: $${flight.price}`)
+                .openOn(map);
+        });
+    
+        decoratedLine.on('mouseout', () => {
+            map.closePopup();
+        });
+    
+        decoratedLine.on('click', () => {
+            this.addFlightDetailsToList(flight, this.clearFlightPaths.bind(this));
+        });
 
-      geodesicLine.flight = flight;
-      decoratedLine.flight = flight;
-  
-      return decoratedLine;
+        geodesicLine.flight = flight;
+        decoratedLine.flight = flight;
+
+        return decoratedLine;
     },
 
     clearFlightPaths(exceptIata = null) {
@@ -191,23 +191,23 @@ const flightMap = {
             this.drawFlightPaths(exceptIata);
         }
     },
-  
-    getColorBasedOnPrice: function(price) {
-      if (price === null || price === undefined || isNaN(parseFloat(price))) {
-          return 'grey'; // Return grey for flights without price data
-      }
-      price = parseFloat(price);
-      return price < 100 ? '#0099ff' : price < 200 ? 'green' : price < 300 ? '#abb740': price <400 ? 'orange' : price < 500 ? 'amber' : '#c32929';
+
+    getColorBasedOnPrice(price) {
+        if (price === null || price === undefined || isNaN(parseFloat(price))) {
+            return 'grey'; // Return grey for flights without price data
+        }
+        price = parseFloat(price);
+        return price < 100 ? '#0099ff' : price < 200 ? 'green' : price < 300 ? '#abb740': price <400 ? 'orange' : price < 500 ? 'amber' : '#c32929';
     },
 
-    redrawMarkers: function() {
+    redrawMarkers() {
         Object.values(this.markers).forEach(marker => {
             var newLatLng = this.adjustLatLng(marker.getLatLng());
             marker.setLatLng(newLatLng);
         });
     },
 
-    adjustLatLng: function(latLng) {
+    adjustLatLng(latLng) {
         var currentBounds = map.getBounds();
         var newLng = latLng.lng;
 
@@ -216,8 +216,6 @@ const flightMap = {
 
         return L.latLng(latLng.lat, newLng);
     },
-
-    
 
     drawPaths(flight, iata) {
         this.createFlightPath(flight.originAirport, flight.destinationAirport, flight, 0);
@@ -249,36 +247,36 @@ const flightMap = {
     },
 
     updateMarkersForZoom() {
-      Object.values(this.markers).forEach(marker => {
-          map.removeLayer(marker);
-      });
-      this.markers = {};
-      // Re-fetch and re-plot the airports based on the new zoom level
-      this.plotFlightPaths();
-  },
-  updateVisibleMarkers() {
-    // Remove markers that are no longer in view
-    Object.keys(this.markers).forEach(iata => {
-        const marker = this.markers[iata];
-        if (!map.getBounds().contains(marker.getLatLng())) {
+        Object.values(this.markers).forEach(marker => {
             map.removeLayer(marker);
-            delete this.markers[iata];
-        }
-    });
+        });
+        this.markers = {};
+        // Re-fetch and re-plot the airports based on the new zoom level
+        this.plotFlightPaths();
+    },
 
-    // Add markers for airports that are now in view
-    Object.values(this.flightsByDestination).forEach(flights => {
-        flights.forEach(flight => {
-            if (flight.originAirport) {
-                this.addMarker(flight.originAirport);
-            }
-            if (flight.destinationAirport) {
-                this.addMarker(flight.destinationAirport);
+    updateVisibleMarkers() {
+        // Remove markers that are no longer in view
+        Object.keys(this.markers).forEach(iata => {
+            const marker = this.markers[iata];
+            if (!map.getBounds().contains(marker.getLatLng())) {
+                map.removeLayer(marker);
+                delete this.markers[iata];
             }
         });
-    });
-  },
 
+        // Add markers for airports that are now in view
+        Object.values(this.flightsByDestination).forEach(flights => {
+            flights.forEach(flight => {
+                if (flight.originAirport) {
+                    this.addMarker(flight.originAirport);
+                }
+                if (flight.destinationAirport) {
+                    this.addMarker(flight.destinationAirport);
+                }
+            });
+        });
+    },
 };
 
 export { flightMap };
