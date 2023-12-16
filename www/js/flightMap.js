@@ -1,6 +1,7 @@
 import { map } from './mapInit.js';
 import { blueDotIcon } from './markers.js';
 import { flightList } from './flightList.js';
+import { emitCustomEvent } from './eventListeners.js'; // Added for emitting custom events
 
 const flightMap = {
     markers: {},
@@ -62,6 +63,7 @@ const flightMap = {
             .catch(error => console.error('Error:', error));
     },
 
+
     addMarker(airport) {
         if (!airport || !airport.iata_code || !airport.weight) {
             console.error('Incomplete airport data:', airport);
@@ -77,13 +79,13 @@ const flightMap = {
             const marker = L.marker(latLng, {icon: blueDotIcon}).addTo(map)
                 .bindPopup(`<b>${airport.name}</b><br>${airport.city}, ${airport.country}`);
 
-            marker.on('click', () => this.markerClickHandler(iata));
-            marker.on('mouseover', () => this.markerHoverHandler(iata, 'mouseover'));
-            marker.on('mouseout', () => this.markerHoverHandler(iata, 'mouseout'));
+            // Emit custom events for marker interactions
+            emitCustomEvent('markerCreated', { iata, marker });
 
             this.markers[iata] = marker;
         }
     },
+
 
     drawFlightPathsToDestination(destinationIata) {
         const destinationFlights = this.flightsByDestination[destinationIata] || [];

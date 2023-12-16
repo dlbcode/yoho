@@ -51,8 +51,28 @@ function setupUIEventListeners() {
     });
 }
 
+// Function to attach event listeners to markers
+function attachMarkerEventListeners(iata, marker) {
+    marker.on('click', () => flightMap.markerClickHandler(iata));
+    marker.on('mouseover', () => flightMap.markerHoverHandler(iata, 'mouseover'));
+    marker.on('mouseout', () => flightMap.markerHoverHandler(iata, 'mouseout'));
+}
+
+// Function to handle custom events
+function emitCustomEvent(eventName, data) {
+    switch (eventName) {
+        case 'markerCreated':
+            attachMarkerEventListeners(data.iata, data.marker);
+            break;
+        // Add cases for other custom events if needed
+    }
+}
+
 // Initialize all event listeners after the DOM content is fully loaded
 document.addEventListener('DOMContentLoaded', function() {
     setupMapEventListeners();
     setupUIEventListeners();
 });
+
+// Exporting the custom event function
+export { emitCustomEvent };
