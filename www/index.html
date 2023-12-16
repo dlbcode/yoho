@@ -27,6 +27,13 @@
                 <input type="number" id="numTravelers" value="1" min="1" readonly>
                 <button id="increaseTravelers">+</button>
             </div>
+            <div class="airport-selection">
+                <input type="text" id="fromAirport" placeholder="From Airport">
+                <div id="fromSuggestions" class="suggestions"></div>
+        
+                <input type="text" id="toAirport" placeholder="To Airport">
+                <div id="toSuggestions" class="suggestions"></div>
+            </div>
             <ol id="flightDetailsList" class="flight-details"></ol>
             <div id="totalCost">Total Trip Cost: $0</div>
         </div>
@@ -35,5 +42,6 @@
         </div>
     </div>
     <script type="module" src="js/map.js"></script>
+    <script type="module" src="js/airportAutocomplete.js"></script>
 </body>
 </html>
