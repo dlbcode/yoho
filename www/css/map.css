@@ -23,3 +23,14 @@
   box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.2); /* Box shadow for consistency */
 }
 
+/* Change background color */
+.leaflet-control-zoom a {
+  background-color: #555555;
+  color: #bbbbbb;
+  border: 1px solid #a5a5a5;
+}
+
+.leaflet-control-zoom a:hover, a:active {
+  background-color: #222222;
+  color: #bbbbbb;
+}
