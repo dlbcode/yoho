@@ -43,26 +43,24 @@ MongoClient.connect(mongoUrl, { useNewUrlParser: true, useUnifiedTopology: true 
   console.log('Connected to MongoDB');
 });
 
-// Endpoint to get airports data
 app.get('/airports', async (req, res) => {
   try {
     const queryParam = req.query.query;
     let query = {};
 
     if (queryParam) {
-      // Create a case-insensitive regex pattern to filter airports
-      const regex = new RegExp(queryParam, 'i');
+      const regex = new RegExp("^" + queryParam, 'i'); // Strictly starts with the query
       
-      // Prioritize iata_code in the query
+      // Check iata_code first, then other fields
       query = {
         $or: [
           { iata_code: regex },
-          { $and: [{ iata_code: { $not: regex } }, { $or: [{ name: regex }, { city: regex }, { country: regex }] }] }
+          { $or: [{ name: regex }, { city: regex }, { country: regex }] }
         ]
       };
     }
 
-    const airports = await airportsCollection.find(query).limit(7).toArray(); // Limit the results to 7
+    const airports = await airportsCollection.find(query).limit(7).toArray();
     res.json(airports);
   } catch (error) {
     res.status(500).send('Error fetching airports data');
