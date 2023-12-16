@@ -3,7 +3,7 @@ var map = L.map('map', { minZoom: 2, maxZoom: 19 });
 // Set a default view in case IP geolocation fails
 map.setView([0, 0], 4);
 
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+L.tileLayer('https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png', {
     maxZoom: 19,
     attribution: '© OpenStreetMap contributors'
 }).addTo(map);
