@@ -52,10 +52,17 @@ app.get('/airports', async (req, res) => {
     if (queryParam) {
       // Create a case-insensitive regex pattern to filter airports
       const regex = new RegExp(queryParam, 'i');
-      query = { $or: [{ name: regex }, { iata_code: regex }, { city: regex }, { country: regex }] };
+      
+      // Prioritize iata_code in the query
+      query = {
+        $or: [
+          { iata_code: regex },
+          { $and: [{ iata_code: { $not: regex } }, { $or: [{ name: regex }, { city: regex }, { country: regex }] }] }
+        ]
+      };
     }
 
-    const airports = await airportsCollection.find(query).toArray();
+    const airports = await airportsCollection.find(query).limit(7).toArray(); // Limit the results to 7
     res.json(airports);
   } catch (error) {
     res.status(500).send('Error fetching airports data');
