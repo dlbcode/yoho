@@ -1,28 +1,15 @@
+html, body {
+  height: 100%;
+  margin: 5px;
+  padding: 0;
+}
+
 .container {
   display: flex;
 }
 
 .list-container {
   flex-direction: column;
-}
-
-#map {
-  flex-grow: 1;
-}
-
-#map {
-  flex-grow: 1;
-}
-
-.flight-details {
-  margin-right: 20px; /* Adjust as needed */
-  flex-basis: 200px; /* Adjust width as needed */
-  overflow-y: auto; /* For scrollable list */
-}
-
-#flightDetailsList li {
-  cursor: pointer;
-  margin-bottom: 5px;
 }
 
 .tooltip {

@@ -8,4 +8,6 @@ function initMapFunctions() {
     flightList.initTravelerControls();
 }
 
+// Initial resize on load
+document.getElementById('map').style.height = window.innerHeight + 'px';
 document.addEventListener('DOMContentLoaded', initMapFunctions);

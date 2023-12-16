@@ -199,7 +199,7 @@ const flightMap = {
             return 'grey'; // Return grey for flights without price data
         }
         price = parseFloat(price);
-        return price < 100 ? '#0099ff' : price < 200 ? 'green' : price < 300 ? '#abb740': price <400 ? 'orange' : price < 500 ? 'amber' : '#c32929';
+        return price < 100 ? '#0099ff' : price < 200 ? 'green' : price < 300 ? '#abb740': price <400 ? 'orange' : price < 500 ? '#da4500' : '#c32929';
     },
 
     redrawMarkers() {

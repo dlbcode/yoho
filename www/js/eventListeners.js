@@ -74,5 +74,10 @@ document.addEventListener('DOMContentLoaded', function() {
     setupUIEventListeners();
 });
 
+window.addEventListener('resize', function() {
+    var height = window.innerHeight;
+    document.getElementById('map').style.height = height + 'px';
+  });
+
 // Exporting the custom event function
 export { emitCustomEvent };
