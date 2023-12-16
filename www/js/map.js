@@ -1,6 +1,7 @@
-import { FlightMap } from './flightMap.js';
+import { flightMap } from './flightMap.js';
+import { flightList } from './flightList.js';
 import './eventListeners.js';
 
 // Initialize any functionality that needs to be started on load
-FlightMap.plotFlightPaths();
-FlightMap.initTravelerControls();
+flightMap.plotFlightPaths();
+flightList.initTravelerControls();

@@ -1,42 +1,43 @@
 import { map } from './mapInit.js';
-import { FlightMap } from './flightMap.js';
+import { flightMap } from './flightMap.js';
+import { flightList } from './flightList.js';
 
 map.on('click', function() {
-    FlightMap.clearFlightPaths();
-    FlightMap.selectedMarker = null;
+    flightMap.clearFlightPaths();
+    flightMap.selectedMarker = null;
 });
 
 map.on('moveend', function() {
-    FlightMap.redrawMarkers();
-    FlightMap.updateVisibleMarkers(); // Call updateVisibleMarkers on map move
+    flightMap.redrawMarkers();
+    flightMap.updateVisibleMarkers(); // Call updateVisibleMarkers on map move
 });
 
 map.on('zoomend', function() {
-    FlightMap.updateVisibleMarkers(); // Call updateVisibleMarkers on zoom change
+    flightMap.updateVisibleMarkers(); // Call updateVisibleMarkers on zoom change
 });
 
 document.getElementById('flightPathToggle').addEventListener('change', function() {
-    FlightMap.toggleState = this.value;
-    if (FlightMap.selectedMarker) {
-        FlightMap.clearFlightPaths();
-        FlightMap.drawFlightPaths(FlightMap.selectedMarker);
+    flightMap.toggleState = this.value;
+    if (flightMap.selectedMarker) {
+        flightMap.clearFlightPaths();
+        flightMap.drawFlightPaths(flightMap.selectedMarker);
     }
 });
 
 document.getElementById('increaseTravelers').addEventListener('click', function() {
     var numTravelers = document.getElementById('numTravelers');
     numTravelers.value = parseInt(numTravelers.value, 10) + 1;
-    FlightMap.updateTotalCost();
+    flightList.updateTotalCost();
 });
 
 document.getElementById('decreaseTravelers').addEventListener('click', function() {
     var numTravelers = document.getElementById('numTravelers');
     if (numTravelers.value > 1) {
         numTravelers.value = parseInt(numTravelers.value, 10) - 1;
-        FlightMap.updateTotalCost();
+        flightList.updateTotalCost();
     }
 });
 
 document.addEventListener('zoomChanged', function() {
-    FlightMap.updateMarkersForZoom();
+    flightMap.updateMarkersForZoom();
 });
