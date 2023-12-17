@@ -3,6 +3,9 @@ import { flightMap } from './flightMap.js';
 import { flightList } from './flightList.js';
 import { getIataFromField } from './airportAutocomplete.js';
 
+let selectedFromAirport = null;
+let selectedToAirport = null;
+
 // Main function to set up map event listeners
 function setupMapEventListeners() {
     map.on('click', () => {
@@ -76,6 +79,9 @@ function setupAirportFieldListeners() {
         field.addEventListener('airportSelected', async function(event) {
             const fromAirportValue = getIataFromField('fromAirport');
             const toAirportValue = getIataFromField('toAirport');
+
+            selectedFromAirport = fromAirportValue;
+            selectedToAirport = toAirportValue;
         
             if (fromAirportValue && toAirportValue) {
                 flightMap.toggleState = 'from';
@@ -105,4 +111,4 @@ window.addEventListener('resize', function() {
   });
 
 // Exporting the custom event function
-export { emitCustomEvent };
+export { emitCustomEvent, selectedFromAirport, selectedToAirport };

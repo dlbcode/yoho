@@ -2,6 +2,7 @@ import { map } from './mapInit.js';
 import { blueDotIcon } from './markers.js';
 import { flightList } from './flightList.js';
 import { emitCustomEvent } from './eventListeners.js'; // Added for emitting custom events
+import { selectedFromAirport, selectedToAirport } from './eventListeners.js';
 
 const flightMap = {
     markers: {},
@@ -225,6 +226,11 @@ const flightMap = {
 
     clearFlightPaths(exceptIata = null) {
         this.currentLines = this.currentLines.filter(line => {
+            // Check if the flight path is the currently selected one
+            if (line.flight.originAirport.iata_code === selectedFromAirport && 
+                line.flight.destinationAirport.iata_code === selectedToAirport) {
+                return true;
+            }
             if (flightList.isFlightListed(line.flight)) {
                 return true;
             } else {
@@ -234,11 +240,11 @@ const flightMap = {
                 return false;
             }
         });
-
+    
         if (exceptIata) {
             this.drawFlightPaths(exceptIata);
         }
-    },
+    },        
 
     getColorBasedOnPrice(price) {
         if (price === null || price === undefined || isNaN(parseFloat(price))) {
