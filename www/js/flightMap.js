@@ -118,7 +118,7 @@ const flightMap = {
                     };
     
                     this.createFlightPath(originAirport, destinationAirport, flightSegment, 0);
-                    flightList.addFlightDetailsToList(flightSegment);
+                    flightList.addFlightDetailsToList(flightSegment, this.clearFlightPaths.bind(this));
                 }
             });
         } catch (error) {
