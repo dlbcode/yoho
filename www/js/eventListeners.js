@@ -70,17 +70,23 @@ function emitCustomEvent(eventName, data) {
 }
 
 function setupAirportFieldListeners() {
-    const fromAirportField = document.getElementById('fromAirport');
-    const toAirportField = document.getElementById('toAirport');
+    const airportFields = document.querySelectorAll('#fromAirport, #toAirport');
 
-    fromAirportField.addEventListener('change', function() {
-        if (this.value && !toAirportField.value) {
-            const iataCode = getIataFromField('fromAirport'); // Pass the ID, not the value
-            if (iataCode) {
-                flightMap.markerClickHandler(iataCode, true);
-            }
-        }
-    });    
+    airportFields.forEach(field => {
+      field.addEventListener('change', function() {
+        const fromAirportValue = document.getElementById('fromAirport').value;
+        const toAirportValue = document.getElementById('toAirport').value;
+    
+        if (toAirportValue && !fromAirportValue) {
+            flightMap.toggleState = flightPathToggle.value = 'to';
+            flightMap.markerClickHandler(toAirportValue);
+          } else if (fromAirportValue && !toAirportValue) {
+            flightPathToggle.value = 'from';
+            flightMap.markerClickHandler(fromAirportValue);
+        }          
+      });
+    });          
+                
 }
 
 // Initialize all event listeners after the DOM content is fully loaded

@@ -44,8 +44,8 @@ document.addEventListener('DOMContentLoaded', (event) => {
 
 function getIataFromField(inputId) {
   const fieldValue = document.getElementById(inputId).value;
-  const iataCodeMatch = fieldValue.match(/\(([^)]+)\)/);
-  return iataCodeMatch ? iataCodeMatch[1] : null;
+  console.log('inputId:', inputId, 'fieldValue:', fieldValue, 'iataCodeMatch:', fieldValue);
+  return fieldValue;
 }
 
 export { getIataFromField };

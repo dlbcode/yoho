@@ -228,10 +228,8 @@ const flightMap = {
         }
     },
 
-    markerClickHandler(iata, isSimulated = false) {
-        if (isSimulated) {
-            this.toggleState = 'from';
-        }
+    markerClickHandler(iata) {
+        console.log('markerClickHandler iata:', iata, 'toggleState:', this.toggleState);
         if (this.selectedMarker) {
             this.clearFlightPaths(this.selectedMarker);
         }
