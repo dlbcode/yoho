@@ -113,6 +113,8 @@ const flightMap = {
                     };
     
                     this.createFlightPath(originAirport, destinationAirport, flightSegment, 0);
+                    // Add the flight segment to the flight list
+                    flightList.addFlightDetailsToList(flightSegment);
                 }
             }
         } catch (error) {
@@ -224,26 +226,21 @@ const flightMap = {
     },
 
     clearFlightPaths(exceptIata = null) {
-        console.log('clearFlightPaths exceptIata:', exceptIata);
-        if (this.clearMultiHopPaths) {
-            this.currentLines = this.currentLines.filter(line => {
-                if (line.flight.originAirport.iata_code === selectedFromAirport && 
-                    line.flight.destinationAirport.iata_code === selectedToAirport) {
-                    console.log('Remove is true', line.flight.originAirport.iata_code, line.flight.destinationAirport.iata_code);
-                    return true;
-                }
+        this.currentLines = this.currentLines.filter(line => {
+            if (flightList.isFlightListed(line.flight)) {
+                return true;
+            } else {
                 if (map.hasLayer(line)) {
                     map.removeLayer(line);
                 }
-                console.log('Remove is false', line.flight.originAirport.iata_code, line.flight.destinationAirport.iata_code);
                 return false;
-            });
-        }
-    
+            }
+        });
+
         if (exceptIata) {
             this.drawFlightPaths(exceptIata);
         }
-    },            
+    },           
 
     getColorBasedOnPrice(price) {
         if (price === null || price === undefined || isNaN(parseFloat(price))) {
