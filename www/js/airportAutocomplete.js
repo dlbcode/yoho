@@ -14,7 +14,6 @@ document.addEventListener('DOMContentLoaded', (event) => {
       }
   }
 
-  // Function to update suggestion dropdown
   function updateSuggestions(inputId, airports) {
     const suggestionBox = document.getElementById(inputId + 'Suggestions');
     suggestionBox.innerHTML = '';
@@ -25,14 +24,27 @@ document.addEventListener('DOMContentLoaded', (event) => {
             const inputField = document.getElementById(inputId);
             inputField.value = `${airport.city} (${airport.iata_code})`;
             suggestionBox.innerHTML = '';
-
-            // Dispatch a custom event 'airportSelected'
             const event = new CustomEvent('airportSelected', { detail: { iataCode: airport.iata_code } });
             inputField.dispatchEvent(event);
         });
         suggestionBox.appendChild(div);
     });
 }
+
+document.addEventListener('click', (event) => {
+    const fromAirport = document.getElementById('fromAirport');
+    const toAirport = document.getElementById('toAirport');
+    const fromSuggestions = document.getElementById('fromAirportSuggestions');
+    const toSuggestions = document.getElementById('toAirportSuggestions');
+
+    if (!fromAirport.contains(event.target) && !fromSuggestions.contains(event.target)) {
+        fromSuggestions.innerHTML = '';
+    }
+
+    if (!toAirport.contains(event.target) && !toSuggestions.contains(event.target)) {
+        toSuggestions.innerHTML = '';
+    }
+});
 
 
   // Event listeners for 'from' and 'to' inputs
