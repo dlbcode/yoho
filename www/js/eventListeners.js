@@ -73,7 +73,7 @@ function setupAirportFieldListeners() {
     const airportFields = document.querySelectorAll('#fromAirport, #toAirport');
 
     airportFields.forEach(field => {
-        field.addEventListener('change', async function() {
+        field.addEventListener('airportSelected', async function(event) {
             const fromAirportValue = getIataFromField('fromAirport');
             const toAirportValue = getIataFromField('toAirport');
         
@@ -87,9 +87,9 @@ function setupAirportFieldListeners() {
             } else if (fromAirportValue && !toAirportValue) {
                 flightPathToggle.value = 'from';
                 flightMap.markerClickHandler(fromAirportValue);
-            }          
+            }
         });
-    });          
+    });
 }
 
 // Initialize all event listeners after the DOM content is fully loaded
