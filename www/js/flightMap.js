@@ -11,6 +11,7 @@ const flightMap = {
     selectedMarker: null,
     toggleState: 'from',
     flightPathCache: {},
+    clearMultiHopPaths: true,
 
     drawFlightPaths(iata) {
         this.clearFlightPaths(); // Clear existing paths from the map
@@ -223,15 +224,18 @@ const flightMap = {
     },
 
     clearFlightPaths(exceptIata = null) {
+        console.log('clearFlightPaths exceptIata:', exceptIata);
         if (this.clearMultiHopPaths) {
             this.currentLines = this.currentLines.filter(line => {
                 if (line.flight.originAirport.iata_code === selectedFromAirport && 
                     line.flight.destinationAirport.iata_code === selectedToAirport) {
+                    console.log('Remove is true', line.flight.originAirport.iata_code, line.flight.destinationAirport.iata_code);
                     return true;
                 }
                 if (map.hasLayer(line)) {
                     map.removeLayer(line);
                 }
+                console.log('Remove is false', line.flight.originAirport.iata_code, line.flight.destinationAirport.iata_code);
                 return false;
             });
         }
@@ -287,6 +291,7 @@ const flightMap = {
 
     markerHoverHandler(iata, event) {
         if (this.selectedMarker !== iata) {
+            console.log('markerHoverHandler iata:', iata, 'event:', event, 'toggleState:', this.toggleState);
             this.clearFlightPaths();
             if (event === 'mouseover') {
                 this.drawFlightPaths(iata);
