@@ -83,25 +83,23 @@ function setupAirportFieldListeners() {
             selectedFromAirport = fromAirportValue;
             selectedToAirport = toAirportValue;
         
-            if (fromAirportValue && toAirportValue) {
-                flightMap.clearMultiHopPaths = false; // Do not clear multi-hop paths
-                fetch(`http://localhost:3000/cheapest-routes?origin=${fromAirportValue}&destination=${toAirportValue}`)
-                .then(response => response.json())
-                .then(routes => {
-                    console.log('API Response:', routes);
-                    if (routes.length > 0) {
-                        const cheapestRoute = routes[0];
-                        flightMap.drawFlightPathBetweenAirports(cheapestRoute);
-                    }
-                })
-                .catch(error => console.error('Error fetching cheapest routes:', error));
+            if (fromAirportValue && !toAirportValue) {
+                flightMap.toggleState = 'from';
+                flightPathToggle.value = 'from';
+                flightMap.clearFlightPaths();
+                flightMap.drawFlightPaths(fromAirportValue);
+            } else if (toAirportValue && !fromAirportValue) {
+                flightMap.toggleState = 'to';
+                flightPathToggle.value = 'to';
+                flightMap.clearFlightPaths();
+                flightMap.drawFlightPaths(toAirportValue);
             } else {
-                flightMap.clearMultiHopPaths = true; // Clear paths when either field is empty
                 flightMap.clearFlightPaths();
             }
         });
     });
 }
+
 
 // Initialize all event listeners after the DOM content is fully loaded
 document.addEventListener('DOMContentLoaded', function() {
