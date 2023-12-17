@@ -122,7 +122,7 @@ const flightMap = {
     
     getAirportDataByIata(iata) {
         console.log('getAirportDataByIata iata:', iata);
-        return fetch(`http://localhost:3000/airports`)
+        return fetch(`http://localhost:3000/airports?iata=${iata}`)
             .then(response => {
                 if (!response.ok) {
                     throw new Error(`HTTP error! Status: ${response.status}`);
@@ -130,13 +130,13 @@ const flightMap = {
                 return response.json();
             })
             .then(airports => {
-                return airports.find(airport => airport.iata_code === iata);
+                return airports.length > 0 ? airports[0] : null;
             })
             .catch(error => {
                 console.error('Error fetching airport data:', error);
                 return null;
             });
-    },
+    },    
 
     createFlightPath(origin, destination, flight, lngOffset) {
         var adjustedOrigin = [origin.latitude, origin.longitude + lngOffset];
