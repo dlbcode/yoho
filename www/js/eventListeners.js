@@ -86,14 +86,15 @@ function setupAirportFieldListeners() {
             if (fromAirportValue && toAirportValue) {
                 flightMap.clearMultiHopPaths = false; // Do not clear multi-hop paths
                 fetch(`http://localhost:3000/cheapest-routes?origin=${fromAirportValue}&destination=${toAirportValue}`)
-                    .then(response => response.json())
-                    .then(routes => {
-                        if (routes.length > 0) {
-                            const cheapestRoute = routes[0];
-                            flightMap.drawFlightPathBetweenAirports(cheapestRoute);
-                        }
-                    })
-                    .catch(error => console.error('Error fetching cheapest routes:', error));
+                .then(response => response.json())
+                .then(routes => {
+                    console.log('API Response:', routes);
+                    if (routes.length > 0) {
+                        const cheapestRoute = routes[0];
+                        flightMap.drawFlightPathBetweenAirports(cheapestRoute);
+                    }
+                })
+                .catch(error => console.error('Error fetching cheapest routes:', error));
             } else {
                 flightMap.clearMultiHopPaths = true; // Clear paths when either field is empty
                 flightMap.clearFlightPaths();

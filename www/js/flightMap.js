@@ -98,29 +98,33 @@ const flightMap = {
         this.clearFlightPaths();
     
         try {
-            const airportPromises = route.route.map(iata => this.getAirportDataByIata(iata));
-            const airports = await Promise.all(airportPromises);
+            // Verify the passed object
+            if (!route || !Array.isArray(route.segmentCosts)) {
+                console.error('Invalid route data:', route);
+                return;
+            }
     
-            for (let i = 0; i < airports.length - 1; i++) {
-                const originAirport = airports[i];
-                const destinationAirport = airports[i + 1];
+            const airportPromises = route.segmentCosts.map(segment => {
+                return Promise.all([this.getAirportDataByIata(segment.from), this.getAirportDataByIata(segment.to)]);
+            });
     
+            const airportPairs = await Promise.all(airportPromises);
+            airportPairs.forEach(([originAirport, destinationAirport], index) => {
                 if (originAirport && destinationAirport) {
                     const flightSegment = {
                         originAirport: originAirport,
                         destinationAirport: destinationAirport,
-                        price: route.totalCost // Assuming totalCost is for the entire route
+                        price: route.segmentCosts[index].price
                     };
     
                     this.createFlightPath(originAirport, destinationAirport, flightSegment, 0);
-                    // Add the flight segment to the flight list
                     flightList.addFlightDetailsToList(flightSegment);
                 }
-            }
+            });
         } catch (error) {
             console.error('Error in drawFlightPathBetweenAirports:', error);
         }
-    },            
+    },                    
     
     getAirportDataByIata(iata) {
         console.log('getAirportDataByIata iata:', iata);

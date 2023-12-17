@@ -125,18 +125,33 @@ function findCheapestRoutes(flights, origin, destination) {
   let paths = {};
 
   flights.forEach(flight => {
-      costs[flight.destination] = Infinity;
-      paths[flight.destination] = [];
+      if (!costs[flight.origin]) {
+          costs[flight.origin] = { totalCost: Infinity, segments: [] };
+          paths[flight.origin] = [];
+      }
+      if (!costs[flight.destination]) {
+          costs[flight.destination] = { totalCost: Infinity, segments: [] };
+          paths[flight.destination] = [];
+      }
   });
-  costs[origin] = 0;
+
+  costs[origin] = { totalCost: 0, segments: [] };
   paths[origin] = [origin];
+
+  flights.forEach(flight => {
+      if (!costs[flight.origin] || !costs[flight.destination]) {
+          console.error(`Missing cost or path initialization for flight:`, flight);
+      }
+  });
 
   for (let i = 0; i < flights.length; i++) {
       let updated = false;
 
       flights.forEach(flight => {
-          if (costs[flight.origin] + flight.price < costs[flight.destination]) {
-              costs[flight.destination] = costs[flight.origin] + flight.price;
+          let newCost = costs[flight.origin].totalCost + flight.price;
+          if (newCost < costs[flight.destination].totalCost) {
+              costs[flight.destination].totalCost = newCost;
+              costs[flight.destination].segments = [...costs[flight.origin].segments, { from: flight.origin, to: flight.destination, price: flight.price }];
               paths[flight.destination] = [...paths[flight.origin], flight.destination];
               updated = true;
           }
@@ -148,7 +163,8 @@ function findCheapestRoutes(flights, origin, destination) {
   return Object.keys(paths).filter(key => paths[key].includes(destination))
       .map(key => ({
           route: paths[key],
-          totalCost: costs[key]
+          totalCost: costs[key].totalCost,
+          segmentCosts: costs[key].segments
       })).sort((a, b) => a.totalCost - b.totalCost);
 }
 
