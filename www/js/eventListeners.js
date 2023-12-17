@@ -82,9 +82,10 @@ function setupAirportFieldListeners() {
 
             selectedFromAirport = fromAirportValue;
             selectedToAirport = toAirportValue;
-        
+
             if (fromAirportValue && toAirportValue) {
-                flightMap.clearMultiHopPaths = false; // Do not clear multi-hop paths
+                // Both fields are filled, fetch the cheapest routes and draw path
+                flightMap.clearMultiHopPaths = false;
                 fetch(`http://localhost:3000/cheapest-routes?origin=${fromAirportValue}&destination=${toAirportValue}`)
                 .then(response => response.json())
                 .then(routes => {
@@ -95,14 +96,21 @@ function setupAirportFieldListeners() {
                     }
                 })
                 .catch(error => console.error('Error fetching cheapest routes:', error));
+            } else if (fromAirportValue || toAirportValue) {
+                // Only one field is filled, set the toggle state and draw paths
+                flightMap.toggleState = fromAirportValue ? 'from' : 'to';
+                flightPathToggle.value = fromAirportValue ? 'from' : 'to';
+                const selectedIata = fromAirportValue || toAirportValue;
+                flightMap.clearFlightPaths();
+                flightMap.drawFlightPaths(selectedIata);
             } else {
-                flightMap.clearMultiHopPaths = true; // Clear paths when either field is empty
+                // No fields are filled, clear paths
+                flightMap.clearMultiHopPaths = true;
                 flightMap.clearFlightPaths();
             }
         });
     });
 }
-
 
 // Initialize all event listeners after the DOM content is fully loaded
 document.addEventListener('DOMContentLoaded', function() {
