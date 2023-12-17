@@ -93,6 +93,58 @@ app.get('/flights', async (req, res) => {
   }
 });
 
+app.get('/cheapest-routes', async (req, res) => {
+  const origin = req.query.origin;
+  const destination = req.query.destination;
+
+  if (!origin || !destination) {
+      return res.status(400).send('Origin and destination IATA codes are required');
+  }
+
+  try {
+      const flights = await flightsCollection.find({}).toArray();
+      let routes = findCheapestRoutes(flights, origin, destination);
+      routes = routes.slice(0, 3); // Get top 3 cheapest routes
+
+      res.json(routes);
+  } catch (error) {
+      console.error(error);
+      res.status(500).send('Error searching for routes');
+  }
+});
+
+function findCheapestRoutes(flights, origin, destination) {
+  let costs = {};
+  let paths = {};
+
+  flights.forEach(flight => {
+      costs[flight.destination] = Infinity;
+      paths[flight.destination] = [];
+  });
+  costs[origin] = 0;
+  paths[origin] = [origin];
+
+  for (let i = 0; i < flights.length; i++) {
+      let updated = false;
+
+      flights.forEach(flight => {
+          if (costs[flight.origin] + flight.price < costs[flight.destination]) {
+              costs[flight.destination] = costs[flight.origin] + flight.price;
+              paths[flight.destination] = [...paths[flight.origin], flight.destination];
+              updated = true;
+          }
+      });
+
+      if (!updated) break;
+  }
+
+  return Object.keys(paths).filter(key => paths[key].includes(destination))
+      .map(key => ({
+          route: paths[key],
+          totalCost: costs[key]
+      })).sort((a, b) => a.totalCost - b.totalCost);
+}
+
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
 });

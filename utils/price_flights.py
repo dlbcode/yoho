@@ -49,7 +49,7 @@ def update_or_create_flights(db):
             flight_data = {
                 'origin': route['origin'],
                 'destination': route['destination'],
-                'price': str(price),
+                'price': float(price),
                 'timestamp': datetime.now().strftime('%Y%m%d%H%M%S')
             }
 
