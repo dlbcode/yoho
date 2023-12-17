@@ -73,20 +73,23 @@ function setupAirportFieldListeners() {
     const airportFields = document.querySelectorAll('#fromAirport, #toAirport');
 
     airportFields.forEach(field => {
-      field.addEventListener('change', function() {
-        const fromAirportValue = document.getElementById('fromAirport').value;
-        const toAirportValue = document.getElementById('toAirport').value;
-    
-        if (toAirportValue && !fromAirportValue) {
-            flightMap.toggleState = flightPathToggle.value = 'to';
-            flightMap.markerClickHandler(toAirportValue);
-          } else if (fromAirportValue && !toAirportValue) {
-            flightPathToggle.value = 'from';
-            flightMap.markerClickHandler(fromAirportValue);
-        }          
-      });
+        field.addEventListener('change', async function() {
+            const fromAirportValue = getIataFromField('fromAirport');
+            const toAirportValue = getIataFromField('toAirport');
+        
+            if (fromAirportValue && toAirportValue) {
+                flightMap.toggleState = 'from';
+                flightMap.drawFlightPathBetweenAirports(fromAirportValue, toAirportValue);
+                console.log('setupAirportFieldListeners' + fromAirportValue + ' ' + toAirportValue);
+            } else if (toAirportValue && !fromAirportValue) {
+                flightMap.toggleState = flightPathToggle.value = 'to';
+                flightMap.markerClickHandler(toAirportValue);
+            } else if (fromAirportValue && !toAirportValue) {
+                flightPathToggle.value = 'from';
+                flightMap.markerClickHandler(fromAirportValue);
+            }          
+        });
     });          
-                
 }
 
 // Initialize all event listeners after the DOM content is fully loaded

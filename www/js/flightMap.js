@@ -63,7 +63,6 @@ const flightMap = {
             .catch(error => console.error('Error:', error));
     },
 
-
     addMarker(airport) {
         if (!airport || !airport.iata_code || !airport.weight) {
             console.error('Incomplete airport data:', airport);
@@ -90,6 +89,53 @@ const flightMap = {
     drawFlightPathsToDestination(destinationIata) {
         const destinationFlights = this.flightsByDestination[destinationIata] || [];
         destinationFlights.forEach(flight => this.drawPaths(flight, destinationIata));
+    },
+
+    async drawFlightPathBetweenAirports(fromIata, toIata) {
+        console.log('drawFlightPathBetweenAirports fromIata:', fromIata, 'toIata:', toIata);
+        this.clearFlightPaths();
+    
+        try {
+            const fromAirportPromise = this.getAirportDataByIata(fromIata);
+            const toAirportPromise = this.getAirportDataByIata(toIata);
+
+            console.log('drawFlightPathBetweenAirports fromAirportPromise:', fromAirportPromise, 'toAirportPromise:', toAirportPromise);
+    
+            const [fromAirport, toAirport] = await Promise.all([fromAirportPromise, toAirportPromise]);
+
+            console.log('drawFlightPathBetweenAirports fromAirport:', fromAirport, 'toAirport:', toAirport);
+    
+            if (fromAirport && toAirport) {
+                const flight = {
+                    originAirport: fromAirport,
+                    destinationAirport: toAirport,
+                    price: 0 // Set a default or calculate the price
+                };
+                console.log('flight:', flight);
+    
+                this.createFlightPath(fromAirport, toAirport, flight, 0);
+            }
+        } catch (error) {
+            console.error('Error in drawFlightPathBetweenAirports:', error);
+        }
+    },    
+    
+    getAirportDataByIata(iata) {
+        console.log('getAirportDataByIata iata:', iata);
+        return fetch(`http://localhost:3000/airports`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(airports => {
+                return airports.find(airport => airport.iata_code === iata);
+            })
+            .catch(error => {
+                console.error('Error fetching airport data:', error);
+                return null;
+            });
     },
 
     createFlightPath(origin, destination, flight, lngOffset) {
