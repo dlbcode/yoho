@@ -92,34 +92,32 @@ const flightMap = {
         destinationFlights.forEach(flight => this.drawPaths(flight, destinationIata));
     },
 
-    async drawFlightPathBetweenAirports(fromIata, toIata) {
-        console.log('drawFlightPathBetweenAirports fromIata:', fromIata, 'toIata:', toIata);
+    async drawFlightPathBetweenAirports(route) {
+        console.log('drawFlightPathBetweenAirports route:', route);
         this.clearFlightPaths();
     
         try {
-            const fromAirportPromise = this.getAirportDataByIata(fromIata);
-            const toAirportPromise = this.getAirportDataByIata(toIata);
-
-            console.log('drawFlightPathBetweenAirports fromAirportPromise:', fromAirportPromise, 'toAirportPromise:', toAirportPromise);
+            const airportPromises = route.route.map(iata => this.getAirportDataByIata(iata));
+            const airports = await Promise.all(airportPromises);
     
-            const [fromAirport, toAirport] = await Promise.all([fromAirportPromise, toAirportPromise]);
-
-            console.log('drawFlightPathBetweenAirports fromAirport:', fromAirport, 'toAirport:', toAirport);
+            for (let i = 0; i < airports.length - 1; i++) {
+                const originAirport = airports[i];
+                const destinationAirport = airports[i + 1];
     
-            if (fromAirport && toAirport) {
-                const flight = {
-                    originAirport: fromAirport,
-                    destinationAirport: toAirport,
-                    price: 0 // Set a default or calculate the price
-                };
-                console.log('flight:', flight);
+                if (originAirport && destinationAirport) {
+                    const flightSegment = {
+                        originAirport: originAirport,
+                        destinationAirport: destinationAirport,
+                        price: route.totalCost // Assuming totalCost is for the entire route
+                    };
     
-                this.createFlightPath(fromAirport, toAirport, flight, 0);
+                    this.createFlightPath(originAirport, destinationAirport, flightSegment, 0);
+                }
             }
         } catch (error) {
             console.error('Error in drawFlightPathBetweenAirports:', error);
         }
-    },    
+    },            
     
     getAirportDataByIata(iata) {
         console.log('getAirportDataByIata iata:', iata);
@@ -225,26 +223,23 @@ const flightMap = {
     },
 
     clearFlightPaths(exceptIata = null) {
-        this.currentLines = this.currentLines.filter(line => {
-            // Check if the flight path is the currently selected one
-            if (line.flight.originAirport.iata_code === selectedFromAirport && 
-                line.flight.destinationAirport.iata_code === selectedToAirport) {
-                return true;
-            }
-            if (flightList.isFlightListed(line.flight)) {
-                return true;
-            } else {
+        if (this.clearMultiHopPaths) {
+            this.currentLines = this.currentLines.filter(line => {
+                if (line.flight.originAirport.iata_code === selectedFromAirport && 
+                    line.flight.destinationAirport.iata_code === selectedToAirport) {
+                    return true;
+                }
                 if (map.hasLayer(line)) {
                     map.removeLayer(line);
                 }
                 return false;
-            }
-        });
+            });
+        }
     
         if (exceptIata) {
             this.drawFlightPaths(exceptIata);
         }
-    },        
+    },            
 
     getColorBasedOnPrice(price) {
         if (price === null || price === undefined || isNaN(parseFloat(price))) {

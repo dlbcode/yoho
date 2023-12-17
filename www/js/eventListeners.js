@@ -84,15 +84,19 @@ function setupAirportFieldListeners() {
             selectedToAirport = toAirportValue;
         
             if (fromAirportValue && toAirportValue) {
-                flightMap.toggleState = 'from';
-                flightMap.drawFlightPathBetweenAirports(fromAirportValue, toAirportValue);
-                console.log('setupAirportFieldListeners' + fromAirportValue + ' ' + toAirportValue);
-            } else if (toAirportValue && !fromAirportValue) {
-                flightMap.toggleState = flightPathToggle.value = 'to';
-                flightMap.markerClickHandler(toAirportValue);
-            } else if (fromAirportValue && !toAirportValue) {
-                flightPathToggle.value = 'from';
-                flightMap.markerClickHandler(fromAirportValue);
+                flightMap.clearMultiHopPaths = false; // Do not clear multi-hop paths
+                fetch(`http://localhost:3000/cheapest-routes?origin=${fromAirportValue}&destination=${toAirportValue}`)
+                    .then(response => response.json())
+                    .then(routes => {
+                        if (routes.length > 0) {
+                            const cheapestRoute = routes[0];
+                            flightMap.drawFlightPathBetweenAirports(cheapestRoute);
+                        }
+                    })
+                    .catch(error => console.error('Error fetching cheapest routes:', error));
+            } else {
+                flightMap.clearMultiHopPaths = true; // Clear paths when either field is empty
+                flightMap.clearFlightPaths();
             }
         });
     });
