@@ -22,7 +22,8 @@ document.addEventListener('DOMContentLoaded', (event) => {
           const div = document.createElement('div');
           div.textContent = `${airport.name} (${airport.iata_code}) - ${airport.city}, ${airport.country}`;
           div.addEventListener('click', () => {
-              document.getElementById(inputId).value = airport.name;
+              // Set input value to 'city (iata_code)'
+              document.getElementById(inputId).value = `${airport.city} (${airport.iata_code})`;
               suggestionBox.innerHTML = '';
           });
           suggestionBox.appendChild(div);
@@ -40,3 +41,11 @@ document.addEventListener('DOMContentLoaded', (event) => {
       updateSuggestions('toAirport', airports);
   });
 });
+
+function getIataFromField(inputId) {
+  const fieldValue = document.getElementById(inputId).value;
+  const iataCodeMatch = fieldValue.match(/\(([^)]+)\)/);
+  return iataCodeMatch ? iataCodeMatch[1] : null;
+}
+
+export { getIataFromField };

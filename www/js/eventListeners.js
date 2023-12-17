@@ -1,6 +1,7 @@
 import { map } from './mapInit.js';
 import { flightMap } from './flightMap.js';
 import { flightList } from './flightList.js';
+import { getIataFromField } from './airportAutocomplete.js';
 
 // Main function to set up map event listeners
 function setupMapEventListeners() {
@@ -68,10 +69,25 @@ function emitCustomEvent(eventName, data) {
     }
 }
 
+function setupAirportFieldListeners() {
+    const fromAirportField = document.getElementById('fromAirport');
+    const toAirportField = document.getElementById('toAirport');
+
+    fromAirportField.addEventListener('change', function() {
+        if (this.value && !toAirportField.value) {
+            const iataCode = getIataFromField('fromAirport'); // Pass the ID, not the value
+            if (iataCode) {
+                flightMap.markerClickHandler(iataCode, true);
+            }
+        }
+    });    
+}
+
 // Initialize all event listeners after the DOM content is fully loaded
 document.addEventListener('DOMContentLoaded', function() {
     setupMapEventListeners();
     setupUIEventListeners();
+    setupAirportFieldListeners();
 });
 
 window.addEventListener('resize', function() {
