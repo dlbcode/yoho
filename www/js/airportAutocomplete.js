@@ -1,62 +1,61 @@
 document.addEventListener('DOMContentLoaded', (event) => {
-  // Function to fetch airports from your endpoint
-  async function fetchAirports(query) {
-      try {
-          const response = await fetch(`http://localhost:3000/airports?query=${query}`);
-          if (!response.ok) {
-              throw new Error(`HTTP error! status: ${response.status}`);
-          }
-          const airports = await response.json();
-          return airports;
-      } catch (error) {
-          console.error('Fetch error:', error);
-          return [];
-      }
-  }
+    // Function to fetch airports from your endpoint
+    async function fetchAirports(query) {
+        try {
+            const response = await fetch(`http://localhost:3000/airports?query=${query}`);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const airports = await response.json();
+            return airports;
+        } catch (error) {
+            console.error('Fetch error:', error);
+            return [];
+        }
+    }
 
-  function updateSuggestions(inputId, airports) {
-    const suggestionBox = document.getElementById(inputId + 'Suggestions');
-    suggestionBox.innerHTML = '';
-    airports.forEach(airport => {
-        const div = document.createElement('div');
-        div.textContent = `${airport.name} (${airport.iata_code}) - ${airport.city}, ${airport.country}`;
-        div.addEventListener('click', () => {
-            const inputField = document.getElementById(inputId);
-            inputField.value = `${airport.city} (${airport.iata_code})`;
-            suggestionBox.innerHTML = '';
-            const event = new CustomEvent('airportSelected', { detail: { iataCode: airport.iata_code } });
-            inputField.dispatchEvent(event);
+    function updateSuggestions(inputId, airports) {
+        const suggestionBox = document.getElementById(inputId + 'Suggestions');
+        suggestionBox.innerHTML = '';
+        airports.forEach(airport => {
+            const div = document.createElement('div');
+            div.textContent = `${airport.name} (${airport.iata_code}) - ${airport.city}, ${airport.country}`;
+            div.addEventListener('click', () => {
+                const inputField = document.getElementById(inputId);
+                inputField.value = `${airport.city} (${airport.iata_code})`;
+                suggestionBox.innerHTML = '';
+                const event = new CustomEvent('airportSelected', { detail: { iataCode: airport.iata_code } });
+                inputField.dispatchEvent(event);
+            });
+            suggestionBox.appendChild(div);
         });
-        suggestionBox.appendChild(div);
+    }
+
+    document.addEventListener('click', (event) => {
+        const fromAirport = document.getElementById('fromAirport');
+        const toAirport = document.getElementById('toAirport');
+        const fromSuggestions = document.getElementById('fromAirportSuggestions');
+        const toSuggestions = document.getElementById('toAirportSuggestions');
+
+        if (!fromAirport.contains(event.target) && !fromSuggestions.contains(event.target)) {
+            fromSuggestions.innerHTML = '';
+        }
+
+        if (!toAirport.contains(event.target) && !toSuggestions.contains(event.target)) {
+            toSuggestions.innerHTML = '';
+        }
     });
-}
 
-document.addEventListener('click', (event) => {
-    const fromAirport = document.getElementById('fromAirport');
-    const toAirport = document.getElementById('toAirport');
-    const fromSuggestions = document.getElementById('fromAirportSuggestions');
-    const toSuggestions = document.getElementById('toAirportSuggestions');
+    // Event listeners for 'from' and 'to' inputs
+    document.getElementById('fromAirport').addEventListener('input', async (e) => {
+        const airports = await fetchAirports(e.target.value);
+        updateSuggestions('fromAirport', airports);
+    });
 
-    if (!fromAirport.contains(event.target) && !fromSuggestions.contains(event.target)) {
-        fromSuggestions.innerHTML = '';
-    }
-
-    if (!toAirport.contains(event.target) && !toSuggestions.contains(event.target)) {
-        toSuggestions.innerHTML = '';
-    }
-});
-
-
-  // Event listeners for 'from' and 'to' inputs
-  document.getElementById('fromAirport').addEventListener('input', async (e) => {
-      const airports = await fetchAirports(e.target.value);
-      updateSuggestions('fromAirport', airports);
-  });
-
-  document.getElementById('toAirport').addEventListener('input', async (e) => {
-      const airports = await fetchAirports(e.target.value);
-      updateSuggestions('toAirport', airports);
-  });
+    document.getElementById('toAirport').addEventListener('input', async (e) => {
+        const airports = await fetchAirports(e.target.value);
+        updateSuggestions('toAirport', airports);
+    });
 });
 
 function getIataFromField(inputId) {
