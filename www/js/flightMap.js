@@ -192,9 +192,10 @@ const flightMap = {
         
         var decoratedLine = L.polylineDecorator(geodesicLine, {
             patterns: [
-                {offset: '25px', repeat: '50px', symbol: directionSymbol}
+                // Place a single arrow symbol at the center of the line
+                {offset: '50%', repeat: 0, symbol: directionSymbol}
             ]
-        }).addTo(map);
+        }).addTo(map);        
     
         // Store both the geodesic line and the decorated line
         this.currentLines.push(geodesicLine, decoratedLine);
