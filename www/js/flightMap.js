@@ -44,25 +44,41 @@ const flightMap = {
         );
     },
 
+    // Add a new property to the flightMap object for caching
+cachedFlights: null,
+lastFetchTime: null,
+cacheDuration: 60000, // cache duration in milliseconds, e.g., 60000 ms = 1 minute
+
     plotFlightPaths() {
-        fetch('http://localhost:3000/flights')
-            .then(response => response.json())
-            .then(data => {
-                data.forEach(flight => {
-                    if (!flight.originAirport || !flight.destinationAirport) {
-                        console.info('Incomplete flight data:', flight);
-                        return;
-                    }
+        const currentTime = new Date().getTime();
+        if (this.cachedFlights && this.lastFetchTime && currentTime - this.lastFetchTime < this.cacheDuration) {
+            this.processFlightData(this.cachedFlights);
+        } else {
+            fetch('http://localhost:3000/flights')
+                .then(response => response.json())
+                .then(data => {
+                    this.cachedFlights = data; // Cache the fetched data
+                    this.lastFetchTime = currentTime; // Update the last fetch time
+                    this.processFlightData(data);
+                })
+                .catch(error => console.error('Error:', error));
+        }
+    },
 
-                    this.addMarker(flight.originAirport);
-                    this.addMarker(flight.destinationAirport);
+    processFlightData(data) {
+        data.forEach(flight => {
+            if (!flight.originAirport || !flight.destinationAirport) {
+                console.info('Incomplete flight data:', flight);
+                return;
+            }
 
-                    let destIata = flight.destinationAirport.iata_code;
-                    this.flightsByDestination[destIata] = this.flightsByDestination[destIata] || [];
-                    this.flightsByDestination[destIata].push(flight);
-                });
-            })
-            .catch(error => console.error('Error:', error));
+            this.addMarker(flight.originAirport);
+            this.addMarker(flight.destinationAirport);
+
+            let destIata = flight.destinationAirport.iata_code;
+            this.flightsByDestination[destIata] = this.flightsByDestination[destIata] || [];
+            this.flightsByDestination[destIata].push(flight);
+        });
     },
 
     addMarker(airport) {
