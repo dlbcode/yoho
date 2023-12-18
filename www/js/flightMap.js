@@ -149,8 +149,8 @@ const flightMap = {
         var adjustedDestination = [destination.latitude, destination.longitude + lngOffset];
     
         var geodesicLine = new L.Geodesic([adjustedOrigin, adjustedDestination], {
-            weight: 6,
-            opacity: .7,
+            weight: 1,
+            opacity: 1,
             color: this.getColorBasedOnPrice(flight.price),
             wrap: false
         }).addTo(map);
