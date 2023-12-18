@@ -220,7 +220,7 @@ const flightMap = {
         });
     
         decoratedLine.on('click', () => {
-            this.addFlightDetailsToList(flight, this.clearFlightPaths.bind(this));
+            flightList.addFlightDetailsToList(flight, this.clearFlightPaths.bind(this));
         });
 
         geodesicLine.flight = flight;

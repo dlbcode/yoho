@@ -112,6 +112,12 @@ function setupAirportFieldListeners() {
     });
 }
 
+var clearButton = document.getElementById('clearBtn');
+clearButton.addEventListener('click', function() {
+    flightList.clearFlightList();
+    flightMap.clearFlightPaths();
+});
+
 // Initialize all event listeners after the DOM content is fully loaded
 document.addEventListener('DOMContentLoaded', function() {
     setupMapEventListeners();

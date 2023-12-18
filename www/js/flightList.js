@@ -68,6 +68,14 @@ const flightList = {
     this.updateTotalCost();
   },
 
+  clearFlightList: function() {
+    var list = document.getElementById('flightDetailsList');
+    while (list.firstChild) {
+        list.removeChild(list.firstChild);
+    }
+    this.updateTotalCost();
+  },
+
   numTravelers: 1,
 
   initTravelerControls() {
