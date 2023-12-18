@@ -2,6 +2,7 @@ import { map } from './mapInit.js';
 import { flightMap } from './flightMap.js';
 import { flightList } from './flightList.js';
 import { getIataFromField } from './airportAutocomplete.js';
+import { drawAllFlightPaths } from './allPaths.js';
 
 let selectedFromAirport = null;
 let selectedToAirport = null;
@@ -112,6 +113,15 @@ function setupAirportFieldListeners() {
     });
 }
 
+function setupAllPathsButtonEventListener() {
+    const allPathsButton = document.getElementById('allPathsBtn');
+    if (allPathsButton) {
+        allPathsButton.addEventListener('click', function() {
+            drawAllFlightPaths(); // Call the function to draw all flight paths
+        });
+    }
+}
+
 var clearButton = document.getElementById('clearBtn');
 clearButton.addEventListener('click', function() {
     flightList.clearFlightList();
@@ -123,6 +133,7 @@ document.addEventListener('DOMContentLoaded', function() {
     setupMapEventListeners();
     setupUIEventListeners();
     setupAirportFieldListeners();
+    setupAllPathsButtonEventListener();
 });
 
 window.addEventListener('resize', function() {
