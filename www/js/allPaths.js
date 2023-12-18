@@ -2,6 +2,7 @@ import { map } from './mapInit.js'; // Import the map object directly from mapIn
 import { flightMap } from './flightMap.js';
 
 let allPathsDrawn = false;
+let flightDataCache = null; // Global cache for flight data
 
 // Function to draw all flight paths
 function drawAllFlightPaths() {
@@ -9,21 +10,29 @@ function drawAllFlightPaths() {
     flightMap.clearFlightPaths();
     allPathsDrawn = false;
   } else {
-    fetch('http://localhost:3000/flights')
+    // Check if data is already cached
+    if (flightDataCache) {
+      flightDataCache.forEach(flight => drawFlightPath(flight));
+      console.info('Flight data loaded from cache');
+      allPathsDrawn = true;
+    } else {
+      fetch('http://localhost:3000/flights')
         .then(response => response.json())
         .then(flights => {
+            flightDataCache = flights; // Cache the fetched data
             flights.forEach(flight => {
                 if (!flight.originAirport || !flight.destinationAirport) {
                     console.info('Incomplete flight data:', flight);
                     return;
                 }
-
                 // Draw paths without text decorations
                 drawFlightPath(flight);
                 allPathsDrawn = true;
             });
+            console.info('Flight data loaded from API');
         })
         .catch(error => console.error('Error fetching flights:', error));
+    }
   }
 }
 
