@@ -1,8 +1,14 @@
 import { map } from './mapInit.js'; // Import the map object directly from mapInit.js
 import { flightMap } from './flightMap.js';
 
+let allPathsDrawn = false;
+
 // Function to draw all flight paths
 function drawAllFlightPaths() {
+  if (allPathsDrawn) {
+    flightMap.clearFlightPaths();
+    allPathsDrawn = false;
+  } else {
     fetch('http://localhost:3000/flights')
         .then(response => response.json())
         .then(flights => {
@@ -14,33 +20,33 @@ function drawAllFlightPaths() {
 
                 // Draw paths without text decorations
                 drawFlightPath(flight);
+                allPathsDrawn = true;
             });
         })
         .catch(error => console.error('Error fetching flights:', error));
+  }
 }
 
 // Function to draw a single flight path
 function drawFlightPath(flight) {
-  const origin = [flight.originAirport.latitude, flight.originAirport.longitude];
-  const destination = [flight.destinationAirport.latitude, flight.destinationAirport.longitude];
+  // Adjust origin and destination for geodesic lines
+  const adjustedOrigin = [flight.originAirport.latitude, flight.originAirport.longitude];
+  const adjustedDestination = [flight.destinationAirport.latitude, flight.destinationAirport.longitude];
 
-  const pathOptions = {
-      color: flightMap.getColorBasedOnPrice(flight.price),
-      weight: calculatePathWeight(flight),
-      opacity: 0.7
-  };
+  const geodesicLine = new L.Geodesic([adjustedOrigin, adjustedDestination], {
+      weight: 1,
+      opacity: 0.7,
+      color: flightMap.getColorBasedOnPrice(flight.price), // Color based on price
+      wrap: false
+  }).addTo(map);
 
-  // Use the directly imported map object
-  const flightPath = L.polyline([origin, destination], pathOptions).addTo(map);
+  // Optionally add event listeners and additional functionality as needed
 
-    // Store the flight path
-    flightMap.currentLines.push(flightPath);
-}
+  // Store the geodesic line
+  flightMap.currentLines.push(geodesicLine);
 
-// Function to calculate path weight (customize as needed)
-function calculatePathWeight(flight) {
-    // Example: Weight calculation based on a specific metric (can be customized)
-    return 5; // Fixed weight for simplicity, modify as per your requirements
+  // Return the geodesic line if you need to reference it later
+  return geodesicLine;
 }
 
 // Export the drawAllFlightPaths function for use in other modules
