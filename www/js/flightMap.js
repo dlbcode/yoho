@@ -179,21 +179,26 @@ const flightMap = {
             map.closePopup();
         });
     
-        var directionSymbol = L.Symbol.arrowHead({
-            pixelSize: 5,
-            polygon: false,
-            pathOptions: {
-                stroke: true,
-                color: '#fff',
-                opacity: .7,
-                weight: 2
+        // Load the plane icon
+        var planeIcon = L.icon({
+            iconUrl: '../assets/plane_icon.png', // Path to plane-icon.png
+            iconSize: [16, 16], // Size of the icon
+            iconAnchor: [8, 12], // Anchor point of the icon
+        });
+    
+        // Replace arrow symbol with plane icon
+        var planeSymbol = L.Symbol.marker({
+            rotate: true,
+            markerOptions: {
+                icon: planeIcon
             }
         });
-        
+    
+        // Update polylineDecorator with planeSymbol
         var decoratedLine = L.polylineDecorator(geodesicLine, {
             patterns: [
-                // Place a single arrow symbol at the center of the line
-                {offset: '50%', repeat: 0, symbol: directionSymbol}
+                // Place a single plane icon at the center of the line
+                {offset: '50%', repeat: 0, symbol: planeSymbol}
             ]
         }).addTo(map);        
     
