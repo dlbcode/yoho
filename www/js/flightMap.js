@@ -94,7 +94,7 @@ cacheDuration: 60000, // cache duration in milliseconds, e.g., 60000 ms = 1 minu
                 .bindPopup(`<b>${airport.name}</b><br>${airport.city}, ${airport.country}`);
     
             // Add click event listener to the marker
-            marker.on('click', () => this.updateAirportInputField(airport));
+            marker.on('click', () => this.handleMarkerClick(airport));
     
             emitCustomEvent('markerCreated', { iata, marker });
     
@@ -102,36 +102,34 @@ cacheDuration: 60000, // cache duration in milliseconds, e.g., 60000 ms = 1 minu
         }
     },
 
-    updateAirportInputField(airport) {
+    handleMarkerClick(airport) {
         const airportInfo = `${airport.city} (${airport.iata_code})`;
         const toggleState = document.getElementById('flightPathToggle').value;
         const fromAirportElem = document.getElementById('fromAirport');
         const toAirportElem = document.getElementById('toAirport');
-    
-        if (toggleState === 'from' && fromAirportElem.value !== '') {
-            // Add the flight to the flight list
-            this.findAndAddFlightToList(fromAirportElem.value, airportInfo);
-    
-            // Update fromAirport field with the clicked airport marker
+        
+        if ((toggleState === 'from' && fromAirportElem.value !== '') || 
+            (toggleState === 'to' && toAirportElem.value !== '')) {
+            // Add flight to the flight list
+            this.findAndAddFlightToList(
+                toggleState === 'from' ? fromAirportElem.value : airportInfo, 
+                toggleState === 'from' ? airportInfo : toAirportElem.value
+            );
+
+            // Update fromAirport with the clicked marker and clear toAirport
             fromAirportElem.value = airportInfo;
-    
-            // Clear toAirport field
-            toAirportElem.value = '';
-        } else if (toggleState === 'to' && toAirportElem.value !== '') {
-            // Add the flight to the flight list
-            this.findAndAddFlightToList(airportInfo, toAirportElem.value);
-                
-            // Clear both fields
-            fromAirportElem.value = '';
             toAirportElem.value = '';
         } else {
-            // Update the corresponding field based on the toggleState
+            // Update the appropriate field based on toggleState
             if (toggleState === 'from') {
                 fromAirportElem.value = airportInfo;
-            } else if (toggleState === 'to') {
+            } else {
                 toAirportElem.value = airportInfo;
             }
         }
+
+        // Update the selected marker
+        this.selectedMarker = airport.iata_code;
     },
     
     findAndAddFlightToList(fromAirport, toAirport) {
@@ -351,16 +349,6 @@ cacheDuration: 60000, // cache duration in milliseconds, e.g., 60000 ms = 1 minu
                 this.createFlightPath(flight.originAirport, flight.destinationAirport, flight, offset);
             }
         }
-    },
-
-    markerClickHandler(iata) {
-        console.log('markerClickHandler iata:', iata, 'toggleState:', this.toggleState);
-        if (this.selectedMarker) {
-            this.clearFlightPaths(this.selectedMarker);
-        }
-        this.clearFlightPaths();
-        this.selectedMarker = iata;
-        this.drawFlightPaths(iata);
     },
 
     markerHoverHandler(iata, event) {

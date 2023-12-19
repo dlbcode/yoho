@@ -58,7 +58,6 @@ function setupUIEventListeners() {
 
 // Function to attach event listeners to markers
 function attachMarkerEventListeners(iata, marker) {
-    marker.on('click', () => flightMap.markerClickHandler(iata));
     marker.on('mouseover', () => flightMap.markerHoverHandler(iata, 'mouseover'));
     marker.on('mouseout', () => flightMap.markerHoverHandler(iata, 'mouseout'));
 }
