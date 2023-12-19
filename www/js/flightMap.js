@@ -105,11 +105,24 @@ cacheDuration: 60000, // cache duration in milliseconds, e.g., 60000 ms = 1 minu
     updateAirportInputField(airport) {
         const airportInfo = `${airport.city} (${airport.iata_code})`;
         const toggleState = document.getElementById('flightPathToggle').value;
-        
-        if (toggleState === 'from') {
-            document.getElementById('fromAirport').value = airportInfo;
-        } else if (toggleState === 'to') {
+        const fromAirportValue = document.getElementById('fromAirport').value;
+        const toAirportValue = document.getElementById('toAirport').value;
+    
+        // If toggleState is 'from' and the fromAirport field is already filled, update the toAirport field
+        if (toggleState === 'from' && fromAirportValue !== '') {
             document.getElementById('toAirport').value = airportInfo;
+        }
+        // If toggleState is 'to' and the toAirport field is already filled, update the fromAirport field
+        else if (toggleState === 'to' && toAirportValue !== '') {
+            document.getElementById('fromAirport').value = airportInfo;
+        }
+        // If the relevant field is not filled, update it
+        else {
+            if (toggleState === 'from') {
+                document.getElementById('fromAirport').value = airportInfo;
+            } else if (toggleState === 'to') {
+                document.getElementById('toAirport').value = airportInfo;
+            }
         }
     },
 
