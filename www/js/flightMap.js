@@ -84,23 +84,34 @@ cacheDuration: 60000, // cache duration in milliseconds, e.g., 60000 ms = 1 minu
             console.error('Incomplete airport data:', airport);
             return;
         }
-
+    
         let iata = airport.iata_code;
         if (this.markers[iata]) return;
-
-        // Check if the airport's weight is less than or equal to the current zoom level
+    
         if (airport.weight <= map.getZoom()) {
             const latLng = L.latLng(airport.latitude, airport.longitude);
             const marker = L.marker(latLng, {icon: blueDotIcon}).addTo(map)
                 .bindPopup(`<b>${airport.name}</b><br>${airport.city}, ${airport.country}`);
-
-            // Emit custom events for marker interactions
+    
+            // Add click event listener to the marker
+            marker.on('click', () => this.updateAirportInputField(airport));
+    
             emitCustomEvent('markerCreated', { iata, marker });
-
+    
             this.markers[iata] = marker;
         }
     },
 
+    updateAirportInputField(airport) {
+        const airportInfo = `${airport.city} (${airport.iata_code})`;
+        const toggleState = document.getElementById('flightPathToggle').value;
+        
+        if (toggleState === 'from') {
+            document.getElementById('fromAirport').value = airportInfo;
+        } else if (toggleState === 'to') {
+            document.getElementById('toAirport').value = airportInfo;
+        }
+    },
 
     drawFlightPathsToDestination(destinationIata) {
         const destinationFlights = this.flightsByDestination[destinationIata] || [];
