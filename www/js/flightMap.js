@@ -1,5 +1,4 @@
-import { map } from './mapInit.js';
-import { blueDotIcon } from './markers.js';
+import { map, blueDotIcon } from './map.js';
 import { flightList } from './flightList.js';
 import { emitCustomEvent } from './eventListeners.js';
 

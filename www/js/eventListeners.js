@@ -1,4 +1,4 @@
-import { map } from './mapInit.js';
+import { map } from './map.js';
 import { flightMap } from './flightMap.js';
 import { flightList } from './flightList.js';
 import { getIataFromField } from './airportAutocomplete.js';

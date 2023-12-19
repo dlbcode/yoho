@@ -1,4 +1,4 @@
-import { map } from './mapInit.js'; // Import the map object directly from mapInit.js
+import { map } from './map.js'; // Import the map object directly from mapInit.js
 import { flightMap } from './flightMap.js';
 
 let allPathsDrawn = false;
