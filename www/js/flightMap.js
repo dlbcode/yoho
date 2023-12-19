@@ -105,25 +105,56 @@ cacheDuration: 60000, // cache duration in milliseconds, e.g., 60000 ms = 1 minu
     updateAirportInputField(airport) {
         const airportInfo = `${airport.city} (${airport.iata_code})`;
         const toggleState = document.getElementById('flightPathToggle').value;
-        const fromAirportValue = document.getElementById('fromAirport').value;
-        const toAirportValue = document.getElementById('toAirport').value;
+        const fromAirportElem = document.getElementById('fromAirport');
+        const toAirportElem = document.getElementById('toAirport');
     
-        // If toggleState is 'from' and the fromAirport field is already filled, update the toAirport field
-        if (toggleState === 'from' && fromAirportValue !== '') {
-            document.getElementById('toAirport').value = airportInfo;
-        }
-        // If toggleState is 'to' and the toAirport field is already filled, update the fromAirport field
-        else if (toggleState === 'to' && toAirportValue !== '') {
-            document.getElementById('fromAirport').value = airportInfo;
-        }
-        // If the relevant field is not filled, update it
-        else {
+        if (toggleState === 'from' && fromAirportElem.value !== '') {
+            // Add the flight to the flight list
+            this.findAndAddFlightToList(fromAirportElem.value, airportInfo);
+    
+            // Update fromAirport field with the clicked airport marker
+            fromAirportElem.value = airportInfo;
+
+            console.log('clearing flight paths');
+            this.clearFlightPaths();
+    
+            // Clear toAirport field
+            toAirportElem.value = '';
+        } else if (toggleState === 'to' && toAirportElem.value !== '') {
+            // Add the flight to the flight list
+            this.findAndAddFlightToList(airportInfo, toAirportElem.value);
+                
+            // Clear both fields
+            fromAirportElem.value = '';
+            toAirportElem.value = '';
+        } else {
+            // Update the corresponding field based on the toggleState
             if (toggleState === 'from') {
-                document.getElementById('fromAirport').value = airportInfo;
+                fromAirportElem.value = airportInfo;
             } else if (toggleState === 'to') {
-                document.getElementById('toAirport').value = airportInfo;
+                toAirportElem.value = airportInfo;
             }
         }
+    },
+    
+    findAndAddFlightToList(fromAirport, toAirport) {
+        const fromIata = fromAirport.split('(')[1].slice(0, -1);
+        const toIata = toAirport.split('(')[1].slice(0, -1);
+        const flight = this.findFlight(fromIata, toIata);
+        if (flight) {
+            flightList.addFlightDetailsToList(flight, this.clearFlightPaths.bind(this));
+        }
+    },
+    
+    findFlight(fromIata, toIata) {
+        for (const flights of Object.values(this.flightsByDestination)) {
+            for (const flight of flights) {
+                if (flight.originAirport.iata_code === fromIata && flight.destinationAirport.iata_code === toIata) {
+                    return flight;
+                }
+            }
+        }
+        return null;
     },
 
     drawFlightPathsToDestination(destinationIata) {
