@@ -1,4 +1,4 @@
-import { map, blueDotIcon } from './map.js';
+import { map, blueDotIcon, magentaDotIcon } from './map.js';
 import { flightList } from './flightList.js';
 import { emitCustomEvent } from './eventListeners.js';
 
@@ -84,29 +84,40 @@ cacheDuration: 60000, // cache duration in milliseconds, e.g., 60000 ms = 1 minu
             console.error('Incomplete airport data:', airport);
             return;
         }
-    
+
         let iata = airport.iata_code;
         if (this.markers[iata]) return;
-    
+
         if (airport.weight <= map.getZoom()) {
             const latLng = L.latLng(airport.latitude, airport.longitude);
             const marker = L.marker(latLng, {icon: blueDotIcon}).addTo(map)
                 .bindPopup(`<b>${airport.name}</b><br>${airport.city}, ${airport.country}`);
-    
-            // Add click event listener to the marker
-            marker.on('click', () => this.handleMarkerClick(airport));
-    
+
+            marker.on('click', () => {
+                this.handleMarkerClick(airport, marker);
+            });
+
             emitCustomEvent('markerCreated', { iata, marker });
-    
             this.markers[iata] = marker;
         }
     },
 
-    handleMarkerClick(airport) {
+    handleMarkerClick(airport, clickedMarker) {
         const airportInfo = `${airport.city} (${airport.iata_code})`;
         const toggleState = document.getElementById('flightPathToggle').value;
         const fromAirportElem = document.getElementById('fromAirport');
         const toAirportElem = document.getElementById('toAirport');
+        
+        // Update selectedMarker and toggle marker icons
+        if (this.selectedMarker && this.markers[this.selectedMarker]) {
+            this.markers[this.selectedMarker].setIcon(blueDotIcon);
+        }
+        if (this.selectedMarker !== airport.iata_code) {
+            clickedMarker.setIcon(magentaDotIcon);
+            this.selectedMarker = airport.iata_code;
+        } else {
+            this.selectedMarker = null;
+        }
         
         if ((toggleState === 'from' && fromAirportElem.value !== '') || 
             (toggleState === 'to' && toAirportElem.value !== '')) {

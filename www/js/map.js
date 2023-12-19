@@ -10,6 +10,14 @@ var blueDotIcon = L.divIcon({
     iconAnchor: [5, 5]
 });
 
+// Marker configurations
+var magentaDotIcon = L.divIcon({
+    className: 'custom-div-icon',
+    html: '<div style="background-color: #b43bd5; width: 10px; height: 10px; border-radius: 50%;"></div>',
+    iconSize: [10, 10],
+    iconAnchor: [5, 5]
+});
+
 // Initialize map
 var map = L.map('map', { zoomControl: false, minZoom: 2, maxZoom: 19 });
 
@@ -60,4 +68,4 @@ document.getElementById('map').style.height = window.innerHeight + 'px';
 document.addEventListener('DOMContentLoaded', initMapFunctions);
 
 // Export the map and the blueDotIcon for use in other modules
-export { map, blueDotIcon };
+export { map, blueDotIcon, magentaDotIcon };
