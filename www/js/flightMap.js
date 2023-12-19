@@ -1,8 +1,7 @@
 import { map } from './mapInit.js';
 import { blueDotIcon } from './markers.js';
 import { flightList } from './flightList.js';
-import { emitCustomEvent } from './eventListeners.js'; // Added for emitting custom events
-import { selectedFromAirport, selectedToAirport } from './eventListeners.js';
+import { emitCustomEvent } from './eventListeners.js';
 
 const flightMap = {
     markers: {},
@@ -243,6 +242,7 @@ cacheDuration: 60000, // cache duration in milliseconds, e.g., 60000 ms = 1 minu
     
         decoratedLine.on('click', () => {
             flightList.addFlightDetailsToList(flight, this.clearFlightPaths.bind(this));
+            this.clearFlightPaths();
         });
 
         geodesicLine.flight = flight;
