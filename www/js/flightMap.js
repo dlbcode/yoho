@@ -114,9 +114,6 @@ cacheDuration: 60000, // cache duration in milliseconds, e.g., 60000 ms = 1 minu
     
             // Update fromAirport field with the clicked airport marker
             fromAirportElem.value = airportInfo;
-
-            console.log('clearing flight paths');
-            this.clearFlightPaths();
     
             // Clear toAirport field
             toAirportElem.value = '';
