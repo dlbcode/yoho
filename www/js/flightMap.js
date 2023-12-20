@@ -11,41 +11,10 @@ const flightMap = {
     flightPathCache: {},
     clearMultiHopPaths: true,
 
-    drawFlightPaths(iata) {
-        this.clearFlightPaths(); // Clear existing paths from the map
-    
-        let cacheKey = this.toggleState + '_' + iata; // Include toggleState in cacheKey
-    
-        if (this.flightPathCache[cacheKey]) {
-            // Re-add cached paths to the map and update currentLines
-            this.flightPathCache[cacheKey].forEach(path => {
-                if (!map.hasLayer(path)) {
-                    path.addTo(map);
-                }
-                if (!this.currentLines.includes(path)) {
-                    this.currentLines.push(path);
-                }
-            });
-        } else {
-            // Draw new paths and cache them
-            this.toggleState === 'to' ? this.drawFlightPathsToDestination(iata) : this.drawFlightPathsFromOrigin(iata);
-        }
-    },
-
-    drawFlightPathsFromOrigin(originIata) {
-        Object.values(this.flightsByDestination).forEach(flights =>
-            flights.forEach(flight => {
-                if (flight.originAirport.iata_code === originIata) {
-                    this.drawPaths(flight, originIata);
-                }
-            })
-        );
-    },
-
     // Add a new property to the flightMap object for caching
-cachedFlights: null,
-lastFetchTime: null,
-cacheDuration: 60000, // cache duration in milliseconds, e.g., 60000 ms = 1 minute
+    cachedFlights: null,
+    lastFetchTime: null,
+    cacheDuration: 60000, // cache duration in milliseconds, e.g., 60000 ms = 1 minute
 
     plotFlightPaths() {
         const currentTime = new Date().getTime();
@@ -109,16 +78,9 @@ cacheDuration: 60000, // cache duration in milliseconds, e.g., 60000 ms = 1 minu
         const toAirportElem = document.getElementById('toAirport');
         
         // Update selectedMarker and toggle marker icons
-        if (this.selectedMarker && this.markers[this.selectedMarker]) {
-            this.markers[this.selectedMarker].setIcon(blueDotIcon);
-        }
-        if (this.selectedMarker !== airport.iata_code) {
-            clickedMarker.setIcon(magentaDotIcon);
-            this.selectedMarker = airport.iata_code;
-        } else {
-            this.selectedMarker = null;
-        }
-        
+        clickedMarker.setIcon(magentaDotIcon);
+        this.selectedMarker = airport.iata_code; 
+
         if ((toggleState === 'from' && fromAirportElem.value !== '') || 
             (toggleState === 'to' && toAirportElem.value !== '')) {
             // Add flight to the flight list
@@ -162,6 +124,38 @@ cacheDuration: 60000, // cache duration in milliseconds, e.g., 60000 ms = 1 minu
         }
         return null;
     },
+
+    drawFlightPaths(iata) {
+        this.clearFlightPaths(); // Clear existing paths from the map
+    
+        let cacheKey = this.toggleState + '_' + iata; // Include toggleState in cacheKey
+    
+        if (this.flightPathCache[cacheKey]) {
+            // Re-add cached paths to the map and update currentLines
+            this.flightPathCache[cacheKey].forEach(path => {
+                if (!map.hasLayer(path)) {
+                    path.addTo(map);
+                }
+                if (!this.currentLines.includes(path)) {
+                    this.currentLines.push(path);
+                }
+            });
+        } else {
+            // Draw new paths and cache them
+            this.toggleState === 'to' ? this.drawFlightPathsToDestination(iata) : this.drawFlightPathsFromOrigin(iata);
+        }
+    },
+
+    drawFlightPathsFromOrigin(originIata) {
+        Object.values(this.flightsByDestination).forEach(flights =>
+            flights.forEach(flight => {
+                if (flight.originAirport.iata_code === originIata) {
+                    this.drawPaths(flight, originIata);
+                }
+            })
+        );
+    },
+    
 
     drawFlightPathsToDestination(destinationIata) {
         const destinationFlights = this.flightsByDestination[destinationIata] || [];
