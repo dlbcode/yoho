@@ -11,10 +11,10 @@ const flightMap = {
     flightPathCache: {},
     clearMultiHopPaths: true,
 
-    // Add a new property to the flightMap object for caching
+    // New properties for caching
     cachedFlights: null,
     lastFetchTime: null,
-    cacheDuration: 60000, // cache duration in milliseconds, e.g., 60000 ms = 1 minute
+    cacheDuration: 60000, // 1 minute in milliseconds
 
     plotFlightPaths() {
         const currentTime = new Date().getTime();
@@ -24,8 +24,8 @@ const flightMap = {
             fetch('http://localhost:3000/flights')
                 .then(response => response.json())
                 .then(data => {
-                    this.cachedFlights = data; // Cache the fetched data
-                    this.lastFetchTime = currentTime; // Update the last fetch time
+                    this.cachedFlights = data;
+                    this.lastFetchTime = currentTime;
                     this.processFlightData(data);
                 })
                 .catch(error => console.error('Error:', error));
@@ -60,51 +60,42 @@ const flightMap = {
         if (airport.weight <= map.getZoom()) {
             const latLng = L.latLng(airport.latitude, airport.longitude);
             const marker = L.marker(latLng, {icon: blueDotIcon}).addTo(map)
-                .bindPopup(`<b>${airport.name}</b><br>${airport.city}, ${airport.country}`);
+            .bindPopup(`<b>${airport.name}</b><br>${airport.city}, ${airport.country}`);
 
-            marker.on('click', () => {
-                this.handleMarkerClick(airport, marker);
-            });
-
-            emitCustomEvent('markerCreated', { iata, marker });
+            emitCustomEvent('markerCreated', { iata, marker, airport }); // Include the airport data
             this.markers[iata] = marker;
         }
     },
 
+    // Exposed methods for eventListeners.js
     handleMarkerClick(airport, clickedMarker) {
         const airportInfo = `${airport.city} (${airport.iata_code})`;
+        console.log('handleMarkerClick airportInfo:', airportInfo, 'toggleState:', this.toggleState);
         const toggleState = document.getElementById('flightPathToggle').value;
         const fromAirportElem = document.getElementById('fromAirport');
         const toAirportElem = document.getElementById('toAirport');
-        
-        // Update selectedMarker and toggle marker icons
+
         clickedMarker.setIcon(magentaDotIcon);
-        this.selectedMarker = airport.iata_code; 
+        this.selectedMarker = airport.iata_code;
 
         if ((toggleState === 'from' && fromAirportElem.value !== '') || 
             (toggleState === 'to' && toAirportElem.value !== '')) {
-            // Add flight to the flight list
             this.findAndAddFlightToList(
                 toggleState === 'from' ? fromAirportElem.value : airportInfo, 
                 toggleState === 'from' ? airportInfo : toAirportElem.value
             );
 
-            // Update fromAirport with the clicked marker and clear toAirport
             fromAirportElem.value = airportInfo;
             toAirportElem.value = '';
         } else {
-            // Update the appropriate field based on toggleState
             if (toggleState === 'from') {
                 fromAirportElem.value = airportInfo;
             } else {
                 toAirportElem.value = airportInfo;
             }
         }
-
-        // Update the selected marker
-        this.selectedMarker = airport.iata_code;
     },
-    
+
     findAndAddFlightToList(fromAirport, toAirport) {
         const fromIata = fromAirport.split('(')[1].slice(0, -1);
         const toIata = toAirport.split('(')[1].slice(0, -1);
@@ -113,7 +104,7 @@ const flightMap = {
             flightList.addFlightDetailsToList(flight, this.clearFlightPaths.bind(this));
         }
     },
-    
+
     findFlight(fromIata, toIata) {
         for (const flights of Object.values(this.flightsByDestination)) {
             for (const flight of flights) {
@@ -126,12 +117,9 @@ const flightMap = {
     },
 
     drawFlightPaths(iata) {
-        this.clearFlightPaths(); // Clear existing paths from the map
-    
-        let cacheKey = this.toggleState + '_' + iata; // Include toggleState in cacheKey
-    
+        this.clearFlightPaths();
+        let cacheKey = this.toggleState + '_' + iata;
         if (this.flightPathCache[cacheKey]) {
-            // Re-add cached paths to the map and update currentLines
             this.flightPathCache[cacheKey].forEach(path => {
                 if (!map.hasLayer(path)) {
                     path.addTo(map);
@@ -141,7 +129,6 @@ const flightMap = {
                 }
             });
         } else {
-            // Draw new paths and cache them
             this.toggleState === 'to' ? this.drawFlightPathsToDestination(iata) : this.drawFlightPathsFromOrigin(iata);
         }
     },
@@ -155,7 +142,6 @@ const flightMap = {
             })
         );
     },
-    
 
     drawFlightPathsToDestination(destinationIata) {
         const destinationFlights = this.flightsByDestination[destinationIata] || [];
@@ -165,18 +151,16 @@ const flightMap = {
     async drawFlightPathBetweenAirports(route) {
         console.log('drawFlightPathBetweenAirports route:', route);
         this.clearFlightPaths();
-    
         try {
-            // Verify the passed object
             if (!route || !Array.isArray(route.segmentCosts)) {
                 console.error('Invalid route data:', route);
                 return;
             }
-    
+
             const airportPromises = route.segmentCosts.map(segment => {
                 return Promise.all([this.getAirportDataByIata(segment.from), this.getAirportDataByIata(segment.to)]);
             });
-    
+
             const airportPairs = await Promise.all(airportPromises);
             airportPairs.forEach(([originAirport, destinationAirport], index) => {
                 if (originAirport && destinationAirport) {
@@ -185,7 +169,7 @@ const flightMap = {
                         destinationAirport: destinationAirport,
                         price: route.segmentCosts[index].price
                     };
-    
+
                     this.createFlightPath(originAirport, destinationAirport, flightSegment, 0);
                     flightList.addFlightDetailsToList(flightSegment, this.clearFlightPaths.bind(this));
                 }
@@ -193,10 +177,9 @@ const flightMap = {
         } catch (error) {
             console.error('Error in drawFlightPathBetweenAirports:', error);
         }
-    },                    
-    
+    },
+
     getAirportDataByIata(iata) {
-        console.log('getAirportDataByIata iata:', iata);
         return fetch(`http://localhost:3000/airports?iata=${iata}`)
             .then(response => {
                 if (!response.ok) {
@@ -211,22 +194,21 @@ const flightMap = {
                 console.error('Error fetching airport data:', error);
                 return null;
             });
-    },    
+    },
 
     createFlightPath(origin, destination, flight, lngOffset) {
         var adjustedOrigin = [origin.latitude, origin.longitude + lngOffset];
         var adjustedDestination = [destination.latitude, destination.longitude + lngOffset];
-    
+
         var geodesicLine = new L.Geodesic([adjustedOrigin, adjustedDestination], {
             weight: 1,
             opacity: 1,
             color: this.getColorBasedOnPrice(flight.price),
             wrap: false
         }).addTo(map);
-    
-        geodesicLine.flight = flight; // Attach flight data to the line
-    
-        // Event listener for path click
+
+        geodesicLine.flight = flight;
+
         geodesicLine.on('click', () => {
             if (flightList.isFlightListed(flight)) {
                 flightList.removeFlightFromList(flight);
@@ -235,26 +217,25 @@ const flightMap = {
                 flightList.addFlightDetailsToList(flight, this.clearFlightPaths.bind(this));
             }
         });
-    
-        // Attach event listeners to the geodesic line
+
         geodesicLine.on('mouseover', (e) => {
             L.popup()
                 .setLatLng(e.latlng)
                 .setContent(`Price: $${flight.price}`)
                 .openOn(map);
         });
-    
+
         geodesicLine.on('mouseout', () => {
             map.closePopup();
         });
-    
+
         // Load the plane icon
         var planeIcon = L.icon({
-            iconUrl: '../assets/plane_icon.png', // Path to plane-icon.png
-            iconSize: [16, 16], // Size of the icon
-            iconAnchor: [8, 12], // Anchor point of the icon
+            iconUrl: '../assets/plane_icon.png',
+            iconSize: [16, 16],
+            iconAnchor: [8, 12]
         });
-    
+
         // Replace arrow symbol with plane icon
         var planeSymbol = L.Symbol.marker({
             rotate: true,
@@ -262,19 +243,16 @@ const flightMap = {
                 icon: planeIcon
             }
         });
-    
+
         // Update polylineDecorator with planeSymbol
         var decoratedLine = L.polylineDecorator(geodesicLine, {
             patterns: [
-                // Place a single plane icon at the center of the line
                 {offset: '50%', repeat: 0, symbol: planeSymbol}
             ]
-        }).addTo(map);        
-    
-        // Store both the geodesic line and the decorated line
+        }).addTo(map);
+
         this.currentLines.push(geodesicLine, decoratedLine);
 
-        // Cache the created flight paths
         let destinationIata = flight.destinationAirport.iata_code;
         let originIata = flight.originAirport.iata_code;
         let cacheKey = this.toggleState + '_' + (this.toggleState === 'to' ? destinationIata : originIata);
@@ -282,18 +260,17 @@ const flightMap = {
         this.flightPathCache[cacheKey] = this.flightPathCache[cacheKey] || [];
         this.flightPathCache[cacheKey].push(geodesicLine, decoratedLine);
 
-        // Attach event listeners to the decorated line
         decoratedLine.on('mouseover', (e) => {
             L.popup()
                 .setLatLng(e.latlng)
                 .setContent(`Price: $${flight.price}`)
                 .openOn(map);
         });
-    
+
         decoratedLine.on('mouseout', () => {
             map.closePopup();
         });
-    
+
         decoratedLine.on('click', () => {
             flightList.addFlightDetailsToList(flight, this.clearFlightPaths.bind(this));
             this.clearFlightPaths();
@@ -320,14 +297,14 @@ const flightMap = {
         if (exceptIata) {
             this.drawFlightPaths(exceptIata);
         }
-    },           
+    },
 
     getColorBasedOnPrice(price) {
         if (price === null || price === undefined || isNaN(parseFloat(price))) {
             return 'grey'; // Return grey for flights without price data
         }
         price = parseFloat(price);
-        return price < 100 ? '#0099ff' : price < 200 ? 'green' : price < 300 ? '#abb740': price <400 ? 'orange' : price < 500 ? '#da4500' : '#c32929';
+        return price < 100 ? '#0099ff' : price < 200 ? 'green' : price < 300 ? '#abb740' : price < 400 ? 'orange' : price < 500 ? '#da4500' : '#c32929';
     },
 
     redrawMarkers() {
@@ -358,7 +335,6 @@ const flightMap = {
 
     markerHoverHandler(iata, event) {
         if (this.selectedMarker !== iata) {
-            console.log('markerHoverHandler iata:', iata, 'event:', event, 'toggleState:', this.toggleState);
             this.clearFlightPaths();
             if (event === 'mouseover') {
                 this.drawFlightPaths(iata);
@@ -373,12 +349,10 @@ const flightMap = {
             map.removeLayer(marker);
         });
         this.markers = {};
-        // Re-fetch and re-plot the airports based on the new zoom level
         this.plotFlightPaths();
     },
 
     updateVisibleMarkers() {
-        // Remove markers that are no longer in view
         Object.keys(this.markers).forEach(iata => {
             const marker = this.markers[iata];
             if (!map.getBounds().contains(marker.getLatLng())) {
@@ -387,7 +361,6 @@ const flightMap = {
             }
         });
 
-        // Add markers for airports that are now in view
         Object.values(this.flightsByDestination).forEach(flights => {
             flights.forEach(flight => {
                 if (flight.originAirport) {
