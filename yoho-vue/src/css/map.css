@@ -1,0 +1,36 @@
+#map {
+  flex-grow: 1;
+  height: 100%; 
+  overflow: hidden;
+}
+
+.flight-details {
+  margin-right: 20px; /* Adjust as needed */
+  flex-basis: 200px; /* Adjust width as needed */
+  overflow-y: auto; /* For scrollable list */
+}
+
+#flightDetailsList li {
+  cursor: pointer;
+  margin-bottom: 5px;
+}
+
+.leaflet-popup-content-wrapper, .leaflet-popup-tip {
+  background-color: rgb(0, 0, 0) !important; /* Dark background for popup */
+  color: #a0a0a0; /* Light text color */
+  border: 1px solid #676767; /* Border color */
+  border-radius: 5px; /* Rounded corners */
+  box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.2); /* Box shadow for consistency */
+}
+
+/* Change background color */
+.leaflet-control-zoom a {
+  background-color: #555555;
+  color: #bbbbbb;
+  border: 1px solid #a5a5a5;
+}
+
+.leaflet-control-zoom a:hover, a:active {
+  background-color: #222222;
+  color: #bbbbbb;
+}
