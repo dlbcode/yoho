@@ -20,7 +20,18 @@ export default {
       flightPathCache: {},
       clearMultiHopPaths: true,
       mapHeight: '100vh', // Adjust as needed
-      // Other data properties
+      blueDotIcon: L.divIcon({
+        className: 'custom-div-icon',
+        html: '<div style="background-color: #3B74D5; width: 10px; height: 10px; border-radius: 50%;"></div>',
+        iconSize: [10, 10],
+        iconAnchor: [5, 5]
+      }),
+      magentaDotIcon: L.divIcon({
+        className: 'custom-div-icon',
+        html: '<div style="background-color: #b43bd5; width: 10px; height: 10px; border-radius: 50%;"></div>',
+        iconSize: [10, 10],
+        iconAnchor: [5, 5]
+      }),
     };
   },
   mounted() {
@@ -29,22 +40,7 @@ export default {
   },
   methods: {
     initializeMap() {
-      // Marker configurations
-      const blueDotIcon = L.divIcon({
-        className: 'custom-div-icon',
-        html: '<div style="background-color: #3B74D5; width: 10px; height: 10px; border-radius: 50%;"></div>',
-        iconSize: [10, 10],
-        iconAnchor: [5, 5]
-      });
-
-      const magentaDotIcon = L.divIcon({
-        className: 'custom-div-icon',
-        html: '<div style="background-color: #b43bd5; width: 10px; height: 10px; border-radius: 50%;"></div>',
-        iconSize: [10, 10],
-        iconAnchor: [5, 5]
-      });
-
-      // Initialize map
+        // Initialize map
       this.map = L.map('map', { zoomControl: false, minZoom: 2, maxZoom: 19 });
 
       // Default view settings
@@ -128,11 +124,17 @@ export default {
 
           // Emit custom event or handle it within Vue component
           this.markers[iata] = marker;
-          L.marker([airport.lat, airport.lng], { icon: this.blueDotIcon }).addTo(this.map);
       }
     },
     handleMarkerClick(airport, clickedMarker) {
       this.selectedMarker = clickedMarker;
+    },
+    redrawMarkers() {
+      // Logic to redraw markers
+      // For example, iterate over this.markers and update each marker
+      Object.values(this.markers).forEach(marker => {
+        // Update marker logic
+      });
     },
     setupMapEventListeners() {
       this.map.on('click', () => {
