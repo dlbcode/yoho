@@ -5,7 +5,7 @@
 <script>
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-// Import other dependencies if needed
+import flightList from './FlightListComponent.vue'
 
 export default {
   name: 'MapComponent',
@@ -139,6 +139,42 @@ export default {
     }
   });
 },
+updateVisibleMarkers() {
+        Object.keys(this.markers).forEach(iata => {
+            const marker = this.markers[iata];
+            if (!this.map.getBounds().contains(marker.getLatLng())) {
+                this.map.removeLayer(marker);
+                delete this.markers[iata];
+            }
+        });
+
+        Object.values(this.flightsByDestination).forEach(flights => {
+            flights.forEach(flight => {
+                if (flight.originAirport) {
+                    this.addMarker(flight.originAirport);
+                }
+                if (flight.destinationAirport) {
+                    this.addMarker(flight.destinationAirport);
+                }
+            });
+        });
+    },
+    clearFlightPaths(exceptIata = null) {
+        this.currentLines = this.currentLines.filter(line => {
+            if (flightList.isFlightListed(line.flight)) {
+                return true;
+            } else {
+                if (this.map.hasLayer(line)) {
+                    this.map.removeLayer(line);
+                }
+                return false;
+            }
+        });
+
+        if (exceptIata) {
+            this.drawFlightPaths(exceptIata);
+        }
+    },
     setupMapEventListeners() {
       this.map.on('click', () => {
         this.clearFlightPaths();
