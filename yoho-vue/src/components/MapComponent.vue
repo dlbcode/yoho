@@ -109,23 +109,22 @@ export default {
       });
     },
     addMarker(airport) {
-      if (!airport || !airport.iata_code || !airport.weight) {
-          console.error('Incomplete airport data:', airport);
-          return;
-      }
+    if (!airport || !airport.latitude || !airport.longitude) {
+      console.error('Incomplete airport data:', airport);
+      return;
+    }
 
-      let iata = airport.iata_code;
-      if (this.markers[iata]) return;
+    // Example condition to choose the icon - you might need to adjust this
+    const useBlueIcon = airport.someCondition; // Replace 'someCondition' with your actual condition
+    const icon = useBlueIcon ? this.blueDotIcon : this.magentaDotIcon;
 
-      if (airport.weight <= this.map.getZoom()) {
-          const latLng = L.latLng(airport.latitude, airport.longitude);
-          const marker = L.marker(latLng, {icon: this.blueDotIcon}).addTo(this.map)
-          .bindPopup(`<b>${airport.name}</b><br>${airport.city}, ${airport.country}`);
+    const marker = L.marker([airport.latitude, airport.longitude], { icon: icon })
+      .addTo(this.map)
+      .bindPopup(`<b>${airport.name}</b><br>${airport.city}, ${airport.country}`);
 
-          // Emit custom event or handle it within Vue component
-          this.markers[iata] = marker;
-      }
-    },
+    // If you need to store the marker for later use, you can add it to the 'markers' object
+    this.markers[airport.iata_code] = marker;
+  },
     handleMarkerClick(airport, clickedMarker) {
       this.selectedMarker = clickedMarker;
     },
