@@ -67,14 +67,10 @@ export default {
     },
   },
   mounted() {
-    document.addEventListener('click', this.handleDocumentClick);
-    document.getElementById('fromAirport').addEventListener('input', this.handleInput);
-    document.getElementById('toAirport').addEventListener('input', this.handleInput);
+    // Event listeners are set up in App.vue
   },
-  beforeUnmount() { // Replaced beforeDestroy with beforeUnmount
-    document.removeEventListener('click', this.handleDocumentClick);
-    document.getElementById('fromAirport').removeEventListener('input', this.handleInput);
-    document.getElementById('toAirport').removeEventListener('input', this.handleInput);
+  beforeUnmount() {
+    // Clean up event listeners if necessary
   },
 };
 </script>

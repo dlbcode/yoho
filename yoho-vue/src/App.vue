@@ -13,6 +13,7 @@ import L from 'leaflet'; // Import Leaflet
 import FlightMap from './components/flightMap.vue';
 import FlightList from './components/flightList.vue';
 import AirportAutocomplete from './components/airportAutocomplete.vue';
+import { setupMapEventListeners, setupUIEventListeners, setupAirportFieldListeners, setupAllPathsButtonEventListener } from '@/www/js/eventListeners';
 
 export default {
   name: 'App',
@@ -86,6 +87,10 @@ export default {
   mounted() {
     this.initializeMap();
     this.setupUIEventListeners();
+    setupMapEventListeners();
+    setupUIEventListeners();
+    setupAirportFieldListeners();
+    setupAllPathsButtonEventListener();
   },
 };
 </script>

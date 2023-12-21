@@ -165,7 +165,7 @@
         const destinationFlights = this.flightsByDestination[destinationIata] || [];
         destinationFlights.forEach(flight => this.drawPaths(flight, destinationIata));
     },
-
+    // eslint-disable-next-line no-unused-vars
     drawPaths(flight, iata) {
         this.createFlightPath(flight.originAirport, flight.destinationAirport, flight, 0);
         for (let offset = -720; offset <= 720; offset += 360) {
