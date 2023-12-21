@@ -1,5 +1,7 @@
 <template>
-  <!-- Your template code goes here -->
+  <div>
+    <!-- Your template code goes here -->
+  </div>
 </template>
 
 <script>
@@ -44,18 +46,7 @@ export default {
         suggestionBox.appendChild(div);
       });
     },
-  },
-  mounted() {
-    document.addEventListener('click', this.handleDocumentClick);
-    document.getElementById('fromAirport').addEventListener('input', this.handleInput);
-    document.getElementById('toAirport').addEventListener('input', this.handleInput);
-  },
-  beforeDestroy() {
-    document.removeEventListener('click', this.handleDocumentClick);
-    document.getElementById('fromAirport').removeEventListener('input', this.handleInput);
-    document.getElementById('toAirport').removeEventListener('input', this.handleInput);
-  },
-  methods: {
+
     handleDocumentClick(event) {
       const fromSuggestions = document.getElementById('fromAirportSuggestions');
       const toSuggestions = document.getElementById('toAirportSuggestions');
@@ -68,11 +59,22 @@ export default {
         toSuggestions.innerHTML = '';
       }
     },
+
     async handleInput(e) {
       const inputId = e.target.id;
       const airports = await this.fetchAirports(e.target.value);
       this.updateSuggestions(inputId, airports);
     },
+  },
+  mounted() {
+    document.addEventListener('click', this.handleDocumentClick);
+    document.getElementById('fromAirport').addEventListener('input', this.handleInput);
+    document.getElementById('toAirport').addEventListener('input', this.handleInput);
+  },
+  beforeUnmount() { // Replaced beforeDestroy with beforeUnmount
+    document.removeEventListener('click', this.handleDocumentClick);
+    document.getElementById('fromAirport').removeEventListener('input', this.handleInput);
+    document.getElementById('toAirport').removeEventListener('input', this.handleInput);
   },
 };
 </script>
