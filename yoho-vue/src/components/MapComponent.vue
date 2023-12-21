@@ -109,32 +109,36 @@ export default {
       });
     },
     addMarker(airport) {
-    if (!airport || !airport.latitude || !airport.longitude) {
-      console.error('Incomplete airport data:', airport);
-      return;
-    }
+  if (!airport || !airport.latitude || !airport.longitude) {
+    console.error('Incomplete airport data:', airport);
+    return;
+  }
 
-    // Example condition to choose the icon - you might need to adjust this
-    const useBlueIcon = airport.someCondition; // Replace 'someCondition' with your actual condition
-    const icon = useBlueIcon ? this.blueDotIcon : this.magentaDotIcon;
+  const useBlueIcon = airport.someCondition; // Replace 'someCondition' with your actual condition
+  const icon = useBlueIcon ? this.blueDotIcon : this.magentaDotIcon;
 
-    const marker = L.marker([airport.latitude, airport.longitude], { icon: icon })
-      .addTo(this.map)
-      .bindPopup(`<b>${airport.name}</b><br>${airport.city}, ${airport.country}`);
+  // Define the marker and add it to the map
+  const marker = L.marker([airport.latitude, airport.longitude], { icon: icon })
+    .addTo(this.map)
+    .bindPopup(`<b>${airport.name}</b><br>${airport.city}, ${airport.country}`);
 
-    // If you need to store the marker for later use, you can add it to the 'markers' object
-    this.markers[airport.iata_code] = marker;
-  },
+  // Store the marker reference in the 'markers' object
+  this.markers[airport.iata_code] = marker;
+},
+
+
     handleMarkerClick(airport, clickedMarker) {
       this.selectedMarker = clickedMarker;
     },
     redrawMarkers() {
-      // Logic to redraw markers
-      // For example, iterate over this.markers and update each marker
-      Object.values(this.markers).forEach(marker => {
-        // Update marker logic
-      });
-    },
+  Object.values(this.markers).forEach(marker => {
+    if (this.map.getZoom() > 10) {
+      marker.setIcon(this.blueDotIcon);
+    } else {
+      marker.setIcon(this.magentaDotIcon);
+    }
+  });
+},
     setupMapEventListeners() {
       this.map.on('click', () => {
         this.clearFlightPaths();
