@@ -1,68 +1,105 @@
 <template>
-  <div id="flightMap" style="height: 500px;"></div>
+  <l-map 
+    ref="map" 
+    :zoom="4" 
+    :center="[51.505, -0.09]" 
+    style="height: 500px;"
+    @update:center="centerUpdated"
+    @update:zoom="zoomUpdated"
+  >
+    <l-tile-layer 
+      url="https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png"
+      :attribution="'Map data © <a href=\'https://openstreetmap.org\'>OpenStreetMap</a> contributors, © <a href=\'https://stadiamaps.com/\'>Stadia Maps</a>'"
+    ></l-tile-layer>
+    <l-marker 
+      v-for="marker in markers" 
+      :key="marker.iata_code" 
+      :lat-lng="[marker.latitude, marker.longitude]"
+    >
+      <l-popup>{{ marker.popupContent }}</l-popup>
+    </l-marker>
+  </l-map>
 </template>
 
 <script>
-import L from 'leaflet';
+import { LMap, LTileLayer, LMarker, LPopup } from '@vue-leaflet/vue-leaflet';
 import 'leaflet/dist/leaflet.css';
 
 export default {
   name: 'FlightMap',
+  components: {
+    LMap,
+    LTileLayer,
+    LMarker,
+    LPopup
+  },
   data() {
     return {
-      map: null,
-      markers: {},
+      markers: [],
       cachedFlights: null,
       lastFetchTime: null,
       cacheDuration: 60000, // 1 minute in milliseconds
     };
   },
   mounted() {
-    this.initMap();
     this.fetchAndPlotAirports();
   },
   methods: {
-    initMap() {
-      this.map = L.map('flightMap').setView([51.505, -0.09], 13);
-      L.tileLayer('https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png', {
-        attribution: 'Map data © <a href="https://openstreetmap.org">OpenStreetMap</a> contributors, © <a href="https://stadiamaps.com/">Stadia Maps</a>'
-      }).addTo(this.map);
-    },
     fetchAndPlotAirports() {
       const currentTime = new Date().getTime();
       if (this.cachedFlights && this.lastFetchTime && currentTime - this.lastFetchTime < this.cacheDuration) {
-        this.processFlightData(this.cachedFlights);
+        this.markers = this.processFlightData(this.cachedFlights);
       } else {
         fetch('http://localhost:3000/flights')
           .then(response => response.json())
           .then(data => {
             this.cachedFlights = data;
             this.lastFetchTime = currentTime;
-            this.processFlightData(data);
+            this.markers = this.processFlightData(data);
           })
           .catch(error => console.error('Error:', error));
       }
     },
     processFlightData(data) {
-      data.forEach(flight => {
-        if (flight.originAirport) {
-          this.addMarker(flight.originAirport);
-        }
-        if (flight.destinationAirport) {
-          this.addMarker(flight.destinationAirport);
-        }
+  const newMarkers = [];
+  data.forEach(flight => {
+    if (flight.originAirport && !this.markerExists(flight.originAirport.iata_code)) {
+      newMarkers.push({
+        ...flight.originAirport,
+        popupContent: `<b>${flight.originAirport.name}</b><br>${flight.originAirport.city}, ${flight.originAirport.country}`
       });
-    },
-    addMarker(airport) {
-      if (!airport || !airport.iata_code || this.markers[airport.iata_code]) {
+    }
+    if (flight.destinationAirport && !this.markerExists(flight.destinationAirport.iata_code)) {
+      newMarkers.push({
+        ...flight.destinationAirport,
+        popupContent: `<b>${flight.destinationAirport.name}</b><br>${flight.destinationAirport.city}, ${flight.destinationAirport.country}`
+      });
+    }
+  });
+  this.markers = newMarkers;
+},
+markerExists(iataCode) {
+  return this.markers.some(marker => marker.iata_code === iataCode);
+},
+    // Assuming this method is causing the 'L is not defined' error
+    addOrUpdateMarker(airport) {
+      if (!airport || !airport.iata_code) {
         return;
       }
 
-      const latLng = L.latLng(airport.latitude, airport.longitude);
-      const marker = L.marker(latLng).addTo(this.map)
-        .bindPopup(`<b>${airport.name}</b><br>${airport.city}, ${airport.country}`);
-
-      this.markers[airport.iata_code] = marker;
+      // Check if the marker already exists
+      const existingMarker = this.markers.find(m => m.iata_code === airport.iata_code);
+      if (existingMarker) {
+        // Update existing marker data
+        existingMarker.latitude = airport.latitude;
+        existingMarker.longitude = airport.longitude;
+      } else {
+        // Add new marker data
+        this.markers.push({
+          ...airport,
+          popupContent: `<b>${airport.name}</b><br>${airport.city}, ${airport.country}`
+        });
+      }
     },
   },
 };
