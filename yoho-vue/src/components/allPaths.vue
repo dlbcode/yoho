@@ -4,7 +4,7 @@
 
 <script>
 import { flightMap } from './flightMap.vue';
-import map from '..App.vue';
+import map from '../App.vue';
 
 export default {
   name: 'airportAutocomplete',
