@@ -2,7 +2,7 @@ version: '3'
 services:
   web:
     image: nginx:latest
-    container_name: rs-web
+    container_name: yh-web
     volumes:
       - ./services/nginx/nginx.conf:/etc/nginx/conf.d/default.conf
       - ./services/nginx/logs:/var/log/nginx/
@@ -12,7 +12,7 @@ services:
 
   mongodb:
     image: mongo
-    container_name: rs-db
+    container_name: yh-db
     environment:
       MONGO_INITDB_ROOT_USERNAME: rsroot
       MONGO_INITDB_ROOT_PASSWORD: ${MONGODB_RSROOT_PASSWORD}
@@ -28,7 +28,7 @@ services:
     build:
       context: ./services/nodejs
       dockerfile: Dockerfile
-    container_name: rs-nodejs
+    container_name: yh-nodejs
     environment:
       MONGO_RSUSER_PASSWORD: ${MONGODB_RSUSER_PASSWORD}
     ports:

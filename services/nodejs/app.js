@@ -18,7 +18,7 @@ const mongodbPassword = process.env.MONGO_RSUSER_PASSWORD;
 
 // use it before all route definitions
 app.use(cors({
-  origin: ['http://localhost:8002', 'http://44.199.76.209:8002']
+  origin: ['http://localhost:8002', 'http://44.199.76.209:8002', 'http://localhost:8080', 'http://44.199.76.209:8002']
 }));
 
 //// Apply the referrer check middleware to the API routes

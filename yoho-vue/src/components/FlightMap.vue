@@ -12,6 +12,9 @@ export default {
     return {
       map: null,
       markers: {},
+      cachedFlights: null,
+      lastFetchTime: null,
+      cacheDuration: 60000, // 1 minute in milliseconds
     };
   },
   mounted() {
@@ -26,19 +29,29 @@ export default {
       }).addTo(this.map);
     },
     fetchAndPlotAirports() {
-      fetch('http://localhost:3000/flights')
-        .then(response => response.json())
-        .then(data => {
-          data.forEach(flight => {
-            if (flight.originAirport) {
-              this.addMarker(flight.originAirport);
-            }
-            if (flight.destinationAirport) {
-              this.addMarker(flight.destinationAirport);
-            }
-          });
-        })
-        .catch(error => console.error('Error:', error));
+      const currentTime = new Date().getTime();
+      if (this.cachedFlights && this.lastFetchTime && currentTime - this.lastFetchTime < this.cacheDuration) {
+        this.processFlightData(this.cachedFlights);
+      } else {
+        fetch('http://localhost:3000/flights')
+          .then(response => response.json())
+          .then(data => {
+            this.cachedFlights = data;
+            this.lastFetchTime = currentTime;
+            this.processFlightData(data);
+          })
+          .catch(error => console.error('Error:', error));
+      }
+    },
+    processFlightData(data) {
+      data.forEach(flight => {
+        if (flight.originAirport) {
+          this.addMarker(flight.originAirport);
+        }
+        if (flight.destinationAirport) {
+          this.addMarker(flight.destinationAirport);
+        }
+      });
     },
     addMarker(airport) {
       if (!airport || !airport.iata_code || this.markers[airport.iata_code]) {
