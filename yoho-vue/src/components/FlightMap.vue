@@ -61,52 +61,36 @@ export default {
       }
     },
     processFlightData(data) {
-  const newMarkers = [];
-  data.forEach(flight => {
-    if (flight.originAirport && !this.markerExists(flight.originAirport.iata_code)) {
-      newMarkers.push({
-        ...flight.originAirport,
-        popupContent: `<b>${flight.originAirport.name}</b><br>${flight.originAirport.city}, ${flight.originAirport.country}`
-      });
-    }
-    if (flight.destinationAirport && !this.markerExists(flight.destinationAirport.iata_code)) {
-      newMarkers.push({
-        ...flight.destinationAirport,
-        popupContent: `<b>${flight.destinationAirport.name}</b><br>${flight.destinationAirport.city}, ${flight.destinationAirport.country}`
-      });
-    }
-  });
-  this.markers = newMarkers;
-},
-markerExists(iataCode) {
-  return this.markers.some(marker => marker.iata_code === iataCode);
-},
-    // Assuming this method is causing the 'L is not defined' error
-    addOrUpdateMarker(airport) {
-      if (!airport || !airport.iata_code) {
-        return;
-      }
+      const newMarkers = [];
+      const addedIataCodes = new Set(); // Set to track added IATA codes
 
-      // Check if the marker already exists
-      const existingMarker = this.markers.find(m => m.iata_code === airport.iata_code);
-      if (existingMarker) {
-        // Update existing marker data
-        existingMarker.latitude = airport.latitude;
-        existingMarker.longitude = airport.longitude;
-      } else {
-        // Add new marker data
-        this.markers.push({
-          ...airport,
-          popupContent: `<b>${airport.name}</b><br>${airport.city}, ${airport.country}`
-        });
-      }
+      data.forEach(flight => {
+        // Process origin airport
+        if (flight.originAirport && !addedIataCodes.has(flight.originAirport.iata_code)) {
+          newMarkers.push({
+            ...flight.originAirport,
+            popupContent: `<b>${flight.originAirport.name}</b><br>${flight.originAirport.city}, ${flight.originAirport.country}`
+          });
+          addedIataCodes.add(flight.originAirport.iata_code);
+        }
+
+        // Process destination airport
+        if (flight.destinationAirport && !addedIataCodes.has(flight.destinationAirport.iata_code)) {
+          newMarkers.push({
+            ...flight.destinationAirport,
+            popupContent: `<b>${flight.destinationAirport.name}</b><br>${flight.destinationAirport.city}, ${flight.destinationAirport.country}`
+          });
+          addedIataCodes.add(flight.destinationAirport.iata_code);
+        }
+      });
+
+      this.markers = newMarkers;
+      console.log('Processed Markers:', newMarkers); // Log processed markers
+    },
+
+    markerExists(iataCode) {
+      return this.markers.some(marker => marker.iata_code === iataCode);
     },
   },
 };
 </script>
-
-<style>
-#flightMap {
-  height: 100%;
-}
-</style>
