@@ -1,5 +1,6 @@
-import { map } from './map.js'; // Import the map object directly from mapInit.js
+import { map } from './map.js';
 import { flightMap } from './flightMap.js';
+import { pathDrawing } from './pathDrawing.js'; // Import pathDrawing
 
 let allPathsDrawn = false;
 let flightDataCache = null; // Global cache for flight data
@@ -7,7 +8,7 @@ let flightDataCache = null; // Global cache for flight data
 // Function to draw all flight paths
 function drawAllFlightPaths() {
   if (allPathsDrawn) {
-    flightMap.clearFlightPaths();
+    pathDrawing.clearFlightPaths(); // Use pathDrawing's clearFlightPaths
     allPathsDrawn = false;
   } else {
     // Check if data is already cached
@@ -25,8 +26,7 @@ function drawAllFlightPaths() {
                     console.info('Incomplete flight data:', flight);
                     return;
                 }
-                // Draw paths without text decorations
-                drawFlightPath(flight);
+                drawFlightPath(flight); // Draw paths
                 allPathsDrawn = true;
             });
             console.info('Flight data loaded from API');
@@ -38,24 +38,17 @@ function drawAllFlightPaths() {
 
 // Function to draw a single flight path
 function drawFlightPath(flight) {
-  // Adjust origin and destination for geodesic lines
   const adjustedOrigin = [flight.originAirport.latitude, flight.originAirport.longitude];
   const adjustedDestination = [flight.destinationAirport.latitude, flight.destinationAirport.longitude];
 
   const geodesicLine = new L.Geodesic([adjustedOrigin, adjustedDestination], {
       weight: 1,
       opacity: 0.7,
-      color: flightMap.getColorBasedOnPrice(flight.price), // Color based on price
+      color: flightMap.getColorBasedOnPrice(flight.price),
       wrap: false
   }).addTo(map);
 
-  // Optionally add event listeners and additional functionality as needed
-
-  // Store the geodesic line
-  flightMap.currentLines.push(geodesicLine);
-
-  // Return the geodesic line if you need to reference it later
-  return geodesicLine;
+  pathDrawing.currentLines.push(geodesicLine); // Add to pathDrawing's currentLines
 }
 
 // Export the drawAllFlightPaths function for use in other modules

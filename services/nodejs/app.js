@@ -45,34 +45,25 @@ MongoClient.connect(mongoUrl, { useNewUrlParser: true, useUnifiedTopology: true 
 
 app.get('/airports', async (req, res) => {
   try {
-    // Check for 'iata' parameter
-    const iataParam = req.query.iata;
-
     let query = {};
-    
+
+    const iataParam = req.query.iata;
+    const queryParam = req.query.query;
+
     if (iataParam) {
-      // Find airport by exact IATA code match
-      query = { iata_code: iataParam.toUpperCase() }; // Assuming IATA codes are stored in uppercase
-    } else {
-      // Original logic for 'query' parameter
-      const queryParam = req.query.query;
-      if (queryParam) {
-        const regex = new RegExp("^" + queryParam, 'i'); // Strictly starts with the queryParam
-        query = {
-          $or: [
-            { iata_code: regex },
-            { $or: [{ name: regex }, { city: regex }, { country: regex }] }
-          ]
-        };
-      }
+      query = { iata_code: iataParam.toUpperCase() };
+    } else if (queryParam) {
+      const regex = new RegExp("^" + queryParam, 'i');
+      query = { $or: [{ iata_code: regex }, { name: regex }, { city: regex }, { country: regex }] };
     }
 
-    const airports = await airportsCollection.find(query).limit(7).toArray();
+    const airports = await airportsCollection.find(query).limit(iataParam || queryParam ? 7 : 0).toArray();
     res.json(airports);
   } catch (error) {
     res.status(500).send('Error fetching airports data');
   }
 });
+
 
 // Endpoint to get flights data
 app.get('/flights', async (req, res) => {

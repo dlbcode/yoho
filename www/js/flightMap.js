@@ -117,21 +117,30 @@ const flightMap = {
         return null;
     },
 
-    getAirportDataByIata(iata) {
-        return fetch(`http://localhost:3000/airports?iata=${iata}`)
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`HTTP error! Status: ${response.status}`);
-                }
-                return response.json();
-            })
-            .then(airports => {
-                return airports.length > 0 ? airports[0] : null;
-            })
-            .catch(error => {
-                console.error('Error fetching airport data:', error);
-                return null;
+    airportDataCache: null,
+
+    fetchAndCacheAirports() {
+        if (this.airportDataCache) {
+            return Promise.resolve(this.airportDataCache);
+        }
+
+        return fetch('http://localhost:3000/airports')
+            .then(response => response.json())
+            .then(data => {
+                this.airportDataCache = data.reduce((acc, airport) => {
+                    acc[airport.iata_code] = airport;
+                    return acc;
+                }, {});
+                return this.airportDataCache;
             });
+    },
+
+    getAirportDataByIata(iata) {
+        if (this.airportDataCache && this.airportDataCache[iata]) {
+            return Promise.resolve(this.airportDataCache[iata]);
+        }
+
+        return this.fetchAndCacheAirports().then(cache => cache[iata] || null);
     },
 
     getColorBasedOnPrice(price) {
