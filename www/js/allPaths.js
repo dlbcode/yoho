@@ -1,14 +1,14 @@
 import { map } from './map.js';
 import { flightMap } from './flightMap.js';
-import { pathDrawing } from './pathDrawing.js'; // Import pathDrawing
+import { pathDrawing } from './pathDrawing.js';
 
 let allPathsDrawn = false;
-let flightDataCache = null; // Global cache for flight data
+let flightDataCache = null;
 
 // Function to draw all flight paths
 function drawAllFlightPaths() {
   if (allPathsDrawn) {
-    pathDrawing.clearFlightPaths(); // Use pathDrawing's clearFlightPaths
+    pathDrawing.clearFlightPaths();
     allPathsDrawn = false;
   } else {
     // Check if data is already cached
@@ -20,13 +20,13 @@ function drawAllFlightPaths() {
       fetch('http://localhost:3000/flights')
         .then(response => response.json())
         .then(flights => {
-            flightDataCache = flights; // Cache the fetched data
+            flightDataCache = flights;
             flights.forEach(flight => {
                 if (!flight.originAirport || !flight.destinationAirport) {
                     console.info('Incomplete flight data:', flight);
                     return;
                 }
-                drawFlightPath(flight); // Draw paths
+                drawFlightPath(flight);
                 allPathsDrawn = true;
             });
             console.info('Flight data loaded from API');
@@ -40,7 +40,7 @@ function drawAllFlightPaths() {
 function drawFlightPath(flight) {
   let flightId = `${flight.originAirport.iata_code}-${flight.destinationAirport.iata_code}`;
   if (pathDrawing.currentLines.some(line => line.flightId === flightId)) {
-      return; // Path already exists, no need to create a new one
+      return;
   }
 
   const adjustedOrigin = [flight.originAirport.latitude, flight.originAirport.longitude];
@@ -53,9 +53,8 @@ function drawFlightPath(flight) {
       wrap: false
   }).addTo(map);
 
-  geodesicLine.flightId = flightId; // Assign a unique identifier to the line
+  geodesicLine.flightId = flightId;
   pathDrawing.currentLines.push(geodesicLine);
 }
 
-// Export the drawAllFlightPaths function for use in other modules
 export { drawAllFlightPaths };
