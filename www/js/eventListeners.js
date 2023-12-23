@@ -1,5 +1,6 @@
 import { map } from './map.js';
 import { flightMap } from './flightMap.js';
+import { pathDrawing } from './pathDrawing.js';
 import { flightList } from './flightList.js';
 import { getIataFromField } from './airportAutocomplete.js';
 import { drawAllFlightPaths } from './allPaths.js';
@@ -10,7 +11,7 @@ let selectedToAirport = null;
 // Main function to set up map event listeners
 function setupMapEventListeners() {
     map.on('click', () => {
-        flightMap.clearFlightPaths();
+        pathDrawing.clearFlightPaths();
         flightMap.selectedMarker = null;
     });
 
@@ -30,7 +31,7 @@ function setupUIEventListeners() {
     flightPathToggle.addEventListener('change', function() {
         flightMap.toggleState = this.value;
         if (flightMap.selectedMarker) {
-            flightMap.clearFlightPaths();
+            pathDrawing.clearFlightPaths();
             flightMap.drawFlightPaths(flightMap.selectedMarker);
         }
     });
@@ -102,12 +103,12 @@ function setupAirportFieldListeners() {
                 flightMap.toggleState = fromAirportValue ? 'from' : 'to';
                 flightPathToggle.value = fromAirportValue ? 'from' : 'to';
                 const selectedIata = fromAirportValue || toAirportValue;
-                flightMap.clearFlightPaths();
+                pathDrawing.clearFlightPaths();
                 flightMap.drawFlightPaths(selectedIata);
             } else {
                 // No fields are filled, clear paths
                 flightMap.clearMultiHopPaths = true;
-                flightMap.clearFlightPaths();
+                pathDrawing.clearFlightPaths();
             }
         });
     });
@@ -125,7 +126,7 @@ function setupAllPathsButtonEventListener() {
 var clearButton = document.getElementById('clearBtn');
 clearButton.addEventListener('click', function() {
     flightList.clearFlightList();
-    flightMap.clearFlightPaths();
+    pathDrawing.clearFlightPaths();
 });
 
 // Initialize all event listeners after the DOM content is fully loaded
