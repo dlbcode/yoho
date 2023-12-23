@@ -38,6 +38,11 @@ function drawAllFlightPaths() {
 
 // Function to draw a single flight path
 function drawFlightPath(flight) {
+  let flightId = `${flight.originAirport.iata_code}-${flight.destinationAirport.iata_code}`;
+  if (pathDrawing.currentLines.some(line => line.flightId === flightId)) {
+      return; // Path already exists, no need to create a new one
+  }
+
   const adjustedOrigin = [flight.originAirport.latitude, flight.originAirport.longitude];
   const adjustedDestination = [flight.destinationAirport.latitude, flight.destinationAirport.longitude];
 
@@ -48,7 +53,8 @@ function drawFlightPath(flight) {
       wrap: false
   }).addTo(map);
 
-  pathDrawing.currentLines.push(geodesicLine); // Add to pathDrawing's currentLines
+  geodesicLine.flightId = flightId; // Assign a unique identifier to the line
+  pathDrawing.currentLines.push(geodesicLine);
 }
 
 // Export the drawAllFlightPaths function for use in other modules

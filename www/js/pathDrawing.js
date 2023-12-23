@@ -68,6 +68,11 @@ const pathDrawing = {
       }
   },
   createFlightPath(origin, destination, flight, lngOffset) {
+    let flightId = `${flight.originAirport.iata_code}-${flight.destinationAirport.iata_code}-${lngOffset}`;
+    if (this.flightPathCache[flightId]) {
+        return; // Path already exists, no need to create a new one
+    }
+
     var adjustedOrigin = [origin.latitude, origin.longitude + lngOffset];
     var adjustedDestination = [destination.latitude, destination.longitude + lngOffset];
 
@@ -150,21 +155,20 @@ const pathDrawing = {
       geodesicLine.flight = flight;
       decoratedLine.flight = flight;
 
-      return decoratedLine;
-  },
+      this.currentLines.push(geodesicLine, decoratedLine);
+      this.flightPathCache[flightId] = [geodesicLine, decoratedLine];
+    },
 
-  clearFlightPaths() {
-      this.currentLines = this.currentLines.filter(line => {
-          if (flightList.isFlightListed(line.flight)) {
-              return true;
-          } else {
-              if (map.hasLayer(line)) {
-                  map.removeLayer(line);
-              }
-              return false;
+    clearFlightPaths() {
+      this.currentLines.forEach(line => {
+          if (map.hasLayer(line)) {
+              map.removeLayer(line);
           }
       });
+      this.currentLines = [];
+      this.flightPathCache = {}; // Clear the cache as well
   },
+  
   drawPaths(flight, iata) {
     this.createFlightPath(flight.originAirport, flight.destinationAirport, flight, 0);
     for (let offset = -720; offset <= 720; offset += 360) {
