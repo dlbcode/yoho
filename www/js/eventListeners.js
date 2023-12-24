@@ -32,7 +32,7 @@ function setupUIEventListeners() {
         flightMap.toggleState = this.value;
         if (flightMap.selectedMarker) {
             pathDrawing.clearFlightPaths();
-            flightMap.drawFlightPaths(flightMap.selectedMarker);
+            pathDrawing.drawFlightPaths(flightMap.selectedMarker);
         }
     });
 
