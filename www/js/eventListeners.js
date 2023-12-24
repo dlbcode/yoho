@@ -88,7 +88,7 @@ function setupAirportFieldListeners() {
             if (fromAirportValue && toAirportValue) {
                 // Both fields are filled, fetch the cheapest routes and draw path
                 flightMap.clearMultiHopPaths = false;
-                fetch(`http://localhost:3000/cheapest-routes?origin=${fromAirportValue}&destination=${toAirportValue}`)
+                fetch(`http://yonderhop.com:3000/cheapest-routes?origin=${fromAirportValue}&destination=${toAirportValue}`)
                 .then(response => response.json())
                 .then(routes => {
                     console.log('API Response:', routes);

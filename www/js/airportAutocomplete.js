@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
     // Function to fetch airports from your endpoint
     async function fetchAirports(query) {
         try {
-            const response = await fetch(`http://localhost:3000/airports?query=${query}`);
+            const response = await fetch(`http://yonderhop.com:3000/airports?query=${query}`);
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }

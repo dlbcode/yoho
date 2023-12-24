@@ -10,7 +10,7 @@ const mongodbPassword = process.env.MONGO_RSUSER_PASSWORD;
 //    const referrer = req.get('Referrer');
 //    if (!referrer || 
 //        (!referrer.startsWith('http://44.199.76.209') && 
-//         !referrer.startsWith('http://localhost'))) {
+//         !referrer.startsWith('http://yonderhop.com'))) {
 //        return res.status(403).send('Access denied');
 //    }
 //    next();
@@ -18,7 +18,7 @@ const mongodbPassword = process.env.MONGO_RSUSER_PASSWORD;
 
 // use it before all route definitions
 app.use(cors({
-  origin: ['http://localhost:8002', 'http://44.199.76.209:8002', 'http://localhost:8080', 'http://44.199.76.209:8002']
+  origin: ['http://yonderhop.com:8002', 'http://44.199.76.209:8002', 'http://yonderhop.com:8080', 'http://44.199.76.209:8002']
 }));
 
 //// Apply the referrer check middleware to the API routes

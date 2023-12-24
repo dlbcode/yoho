@@ -17,7 +17,7 @@ function drawAllFlightPaths() {
       console.info('Flight data loaded from cache');
       allPathsDrawn = true;
     } else {
-      fetch('http://localhost:3000/flights')
+      fetch('http://yonderhop.com:3000/flights')
         .then(response => response.json())
         .then(flights => {
             flightDataCache = flights;

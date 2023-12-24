@@ -22,7 +22,7 @@ const flightMap = {
         if (this.cachedFlights && this.lastFetchTime && currentTime - this.lastFetchTime < this.cacheDuration) {
             this.processFlightData(this.cachedFlights);
         } else {
-            fetch('http://localhost:3000/flights')
+            fetch('http://yonderhop.com:3000/flights')
                 .then(response => response.json())
                 .then(data => {
                     this.cachedFlights = data;
@@ -124,7 +124,7 @@ const flightMap = {
             return Promise.resolve(this.airportDataCache);
         }
 
-        return fetch('http://localhost:3000/airports')
+        return fetch('http://yonderhop.com:3000/airports')
             .then(response => response.json())
             .then(data => {
                 this.airportDataCache = data.reduce((acc, airport) => {
