@@ -169,7 +169,7 @@ const pathDrawing = {
       this.flightPathCache = {}; // Clear the cache as well
   },
   
-  drawPaths(flight, iata) {
+  drawPaths(flight) {
     this.createFlightPath(flight.originAirport, flight.destinationAirport, flight, 0);
     for (let offset = -720; offset <= 720; offset += 360) {
         if (offset !== 0) {
