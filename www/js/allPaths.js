@@ -1,6 +1,7 @@
 import { map } from './map.js';
 import { flightMap } from './flightMap.js';
 import { pathDrawing } from './pathDrawing.js';
+import { appState, updateState } from './stateManager.js';
 
 let allPathsDrawn = false;
 let flightDataCache = null;

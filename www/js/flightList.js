@@ -1,3 +1,5 @@
+import { appState, updateState } from './stateManager.js';
+
 const flightList = {
 
     addFlightDetailsToList: function(flight, clearFlightPaths) {

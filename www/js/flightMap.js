@@ -2,6 +2,7 @@ import { map, blueDotIcon, magentaDotIcon } from './map.js';
 import { pathDrawing } from './pathDrawing.js';
 import { flightList } from './flightList.js';
 import { eventManager } from './eventManager.js';
+import { appState, updateState } from './stateManager.js';
 
 const flightMap = {
     markers: {},

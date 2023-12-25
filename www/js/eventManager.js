@@ -4,7 +4,7 @@ import { flightList } from './flightList.js';
 import { pathDrawing } from './pathDrawing.js';
 import { getIataFromField } from './airportAutocomplete.js';
 import { drawAllFlightPaths } from './allPaths.js';
-import { updateState, appState } from './stateManager.js';
+import { appState, updateState } from './stateManager.js';
 
 // When 'from' airport is selected
 const fromAirport = document.getElementById('fromAirport');
@@ -47,7 +47,7 @@ const eventManager = {
     setupUIEventListeners: function () {
         const flightPathToggle = document.getElementById('flightPathToggle');
         flightPathToggle.addEventListener('change', function () {
-            flightMap.toggleState = this.value;
+            updateState('flightPathToggle', this.value);
             if (flightMap.selectedMarker) {
                 pathDrawing.clearFlightPaths();
                 pathDrawing.drawFlightPaths(flightMap.selectedMarker);
@@ -56,16 +56,14 @@ const eventManager = {
 
         const increaseTravelers = document.getElementById('increaseTravelers');
         increaseTravelers.addEventListener('click', function () {
-            const numTravelers = document.getElementById('numTravelers');
-            numTravelers.value = parseInt(numTravelers.value, 10) + 1;
+            updateState('numTravelers', appState.numTravelers + 1);
             flightList.updateTotalCost();
         });
 
         const decreaseTravelers = document.getElementById('decreaseTravelers');
         decreaseTravelers.addEventListener('click', function () {
-            const numTravelers = document.getElementById('numTravelers');
-            if (numTravelers.value > 1) {
-                numTravelers.value = parseInt(numTravelers.value, 10) - 1;
+            if (appState.numTravelers > 1) {
+                updateState('numTravelers', appState.numTravelers - 1);
                 flightList.updateTotalCost();
             }
         });

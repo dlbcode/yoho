@@ -1,3 +1,5 @@
+import { updateState, appState } from './stateManager.js';
+
 document.addEventListener('DOMContentLoaded', (event) => {
     // Function to fetch airports from your endpoint
     async function fetchAirports(query) {
@@ -26,6 +28,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
                 suggestionBox.innerHTML = '';
                 const event = new CustomEvent('airportSelected', { detail: { iataCode: airport.iata_code } });
                 inputField.dispatchEvent(event);
+                updateState(inputId, airport.iata_code);
             });
             suggestionBox.appendChild(div);
         });
