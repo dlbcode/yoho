@@ -95,6 +95,7 @@ const flightMap = {
                 toAirportElem.value = airportInfo;
             }
         }
+        console.log('handleMarkerClick fromAirportElem:', fromAirportElem.value);
     },
 
     findAndAddFlightToList(fromAirport, toAirport) {
