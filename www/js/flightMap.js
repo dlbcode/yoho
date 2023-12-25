@@ -1,7 +1,7 @@
 import { map, blueDotIcon, magentaDotIcon } from './map.js';
 import { pathDrawing } from './pathDrawing.js';
 import { flightList } from './flightList.js';
-import { emitCustomEvent } from './eventListeners.js';
+import { eventManager } from './eventManager.js';
 
 const flightMap = {
     markers: {},
@@ -12,7 +12,6 @@ const flightMap = {
     flightPathCache: {},
     clearMultiHopPaths: true,
 
-    // New properties for caching
     cachedFlights: null,
     lastFetchTime: null,
     cacheDuration: 60000, // 1 minute in milliseconds
@@ -63,12 +62,12 @@ const flightMap = {
             const marker = L.marker(latLng, {icon: blueDotIcon}).addTo(map)
             .bindPopup(`<b>${airport.name}</b><br>${airport.city}, ${airport.country}`);
 
-            emitCustomEvent('markerCreated', { iata, marker, airport }); // Include the airport data
+            // Use eventManager to attach event listeners to markers
+            eventManager.attachMarkerEventListeners(iata, marker, airport);
             this.markers[iata] = marker;
         }
     },
 
-    // Exposed methods for eventListeners.js
     handleMarkerClick(airport, clickedMarker) {
         const airportInfo = `${airport.city} (${airport.iata_code})`;
         console.log('handleMarkerClick airportInfo:', airportInfo, 'toggleState:', this.toggleState);
@@ -118,8 +117,6 @@ const flightMap = {
         }
         return null;
     },
-
-    airportDataCache: null,
 
     fetchAndCacheAirports() {
         if (this.airportDataCache) {
@@ -179,7 +176,7 @@ const flightMap = {
                 pathDrawing.drawFlightPaths(this.selectedMarker, this.flightsByDestination, this.toggleState);
             }
         }
-    },    
+    },
 
     updateMarkersForZoom() {
         Object.values(this.markers).forEach(marker => {
@@ -209,6 +206,40 @@ const flightMap = {
             });
         });
     },
+
+    drawFlightPathBetweenAirports(route) {
+        console.log('drawFlightPathBetweenAirports route:', route);
+        pathDrawing.clearFlightPaths();
+        try {
+            if (!route || !Array.isArray(route.segmentCosts)) {
+                console.error('Invalid route data:', route);
+                return;
+            }
+
+            const airportPromises = route.segmentCosts.map(segment => {
+                return Promise.all([this.getAirportDataByIata(segment.from), this.getAirportDataByIata(segment.to)]);
+            });
+
+            Promise.all(airportPromises).then(airportPairs => {
+                airportPairs.forEach(([originAirport, destinationAirport], index) => {
+                    if (originAirport && destinationAirport) {
+                        const flightSegment = {
+                            originAirport: originAirport,
+                            destinationAirport: destinationAirport,
+                            price: route.segmentCosts[index].price
+                        };
+
+                        pathDrawing.createFlightPath(originAirport, destinationAirport, flightSegment, 0);
+                        flightList.addFlightDetailsToList(flightSegment, pathDrawing.clearFlightPaths.bind(this));
+                    }
+                });
+            }).catch(error => {
+                console.error('Error in drawFlightPathBetweenAirports:', error);
+            });
+        } catch (error) {
+            console.error('Error in drawFlightPathBetweenAirports:', error);
+        }
+    }
 };
 
 export { flightMap };

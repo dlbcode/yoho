@@ -1,4 +1,3 @@
-// Import dependencies (if any other files are required, import them here)
 import { flightMap } from './flightMap.js';
 import { flightList } from './flightList.js';
 
@@ -10,7 +9,6 @@ var blueDotIcon = L.divIcon({
     iconAnchor: [5, 5]
 });
 
-// Marker configurations
 var magentaDotIcon = L.divIcon({
     className: 'custom-div-icon',
     html: '<div style="background-color: #b43bd5; width: 10px; height: 10px; border-radius: 50%;"></div>',
@@ -34,13 +32,6 @@ L.tileLayer('https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{
 L.control.zoom({
     position: 'bottomright'
 }).addTo(map);
-
-// Event listener for zoom level change
-map.on('zoomend', function() {
-    var zoomLevel = map.getZoom();
-    console.log('Map zoom level:', zoomLevel);
-    document.dispatchEvent(new CustomEvent('zoomChanged'));
-});
 
 // Fetch client's approximate location using IP-API
 fetch('http://ip-api.com/json/')
@@ -67,5 +58,5 @@ function initMapFunctions() {
 document.getElementById('map').style.height = window.innerHeight + 'px';
 document.addEventListener('DOMContentLoaded', initMapFunctions);
 
-// Export the map and the blueDotIcon for use in other modules
+// Export the map and the icons for use in other modules
 export { map, blueDotIcon, magentaDotIcon };

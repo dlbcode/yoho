@@ -31,21 +31,6 @@ document.addEventListener('DOMContentLoaded', (event) => {
         });
     }
 
-    document.addEventListener('click', (event) => {
-        const fromAirport = document.getElementById('fromAirport');
-        const toAirport = document.getElementById('toAirport');
-        const fromSuggestions = document.getElementById('fromAirportSuggestions');
-        const toSuggestions = document.getElementById('toAirportSuggestions');
-
-        if (!fromAirport.contains(event.target) && !fromSuggestions.contains(event.target)) {
-            fromSuggestions.innerHTML = '';
-        }
-
-        if (!toAirport.contains(event.target) && !toSuggestions.contains(event.target)) {
-            toSuggestions.innerHTML = '';
-        }
-    });
-
     // Event listeners for 'from' and 'to' inputs
     document.getElementById('fromAirport').addEventListener('input', async (e) => {
         const airports = await fetchAirports(e.target.value);
