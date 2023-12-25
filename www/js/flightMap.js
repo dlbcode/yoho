@@ -71,8 +71,8 @@ const flightMap = {
 
     handleMarkerClick(airport, clickedMarker) {
         const airportInfo = `${airport.city} (${airport.iata_code})`;
-        console.log('handleMarkerClick airportInfo:', airportInfo, 'toggleState:', this.toggleState);
-        console.log('handleMarkerClick clicked IATA:', airport.iata_code);
+        updateState('flightPathToggle', this.toggleState);
+        updateState('selectedAirport', airport.iata_code);
         const toggleState = document.getElementById('flightPathToggle').value;
         const fromAirportElem = document.getElementById('fromAirport');
         const toAirportElem = document.getElementById('toAirport');
@@ -96,7 +96,6 @@ const flightMap = {
                 toAirportElem.value = airportInfo;
             }
         }
-        console.log('handleMarkerClick fromAirportElem:', fromAirportElem.value);
     },
 
     findAndAddFlightToList(fromAirport, toAirport) {

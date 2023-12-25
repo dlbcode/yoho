@@ -6,9 +6,9 @@ const pathDrawing = {
     currentLines: [],
     flightPathCache: {},
 
-    drawFlightPaths(iata, flightsByDestination, toggleState) {
+    drawFlightPaths(iata, flightsByDestination) {
         this.clearFlightPaths();
-        let cacheKey = toggleState + '_' + iata;
+        let cacheKey = appState.flightPathToggle + '_' + iata;
         if (this.flightPathCache[cacheKey]) {
             this.flightPathCache[cacheKey].forEach(path => {
                 if (!map.hasLayer(path)) {
@@ -19,7 +19,8 @@ const pathDrawing = {
                 }
             });
         } else {
-            toggleState === 'to' ? this.drawFlightPathsToDestination(iata, flightsByDestination) : this.drawFlightPathsFromOrigin(iata, flightsByDestination);
+            console.log('drawFligthPaths STATE flightPathToggle: ' + appState.flightPathToggle)
+            appState.flightPathToggle === 'to' ? this.drawFlightPathsToDestination(iata, flightsByDestination) : this.drawFlightPathsFromOrigin(iata, flightsByDestination);
         }
     },
 
@@ -133,7 +134,7 @@ const pathDrawing = {
 
         let destinationIata = flight.destinationAirport.iata_code;
         let originIata = flight.originAirport.iata_code;
-        let cacheKey = this.toggleState + '_' + (this.toggleState === 'to' ? destinationIata : originIata);
+        let cacheKey = appState.flightPathToggle + '_' + (appState.flightPathToggle === 'to' ? destinationIata : originIata);
 
         this.flightPathCache[cacheKey] = this.flightPathCache[cacheKey] || [];
         this.flightPathCache[cacheKey].push(geodesicLine, decoratedLine);
