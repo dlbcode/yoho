@@ -4,6 +4,21 @@ import { flightList } from './flightList.js';
 import { pathDrawing } from './pathDrawing.js';
 import { getIataFromField } from './airportAutocomplete.js';
 import { drawAllFlightPaths } from './allPaths.js';
+import { updateState, appState } from './stateManager.js';
+
+// When 'from' airport is selected
+const fromAirport = document.getElementById('fromAirport');
+fromAirport.addEventListener('change', (event) => {
+    updateState('fromAirport', event.target.value);
+    console.log('appState fromAirport: ' + appState.fromAirport)
+});
+
+// When 'to' airport is selected
+const toAirport = document.getElementById('toAirport');
+toAirport.addEventListener('change', (event) => {
+    updateState('toAirport', event.target.value);
+    console.log('appState toAirport: ' + appState.toAirport)
+});
 
 const eventManager = {
     setupEventListeners: function () {

@@ -1,5 +1,6 @@
 import { map } from './map.js';
 import { flightList } from './flightList.js';
+import { updateState } from './stateManager.js';
 
 const pathDrawing = {
     currentLines: [],
