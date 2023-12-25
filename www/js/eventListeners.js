@@ -74,6 +74,13 @@ function emitCustomEvent(eventName, data) {
     }
 }
 
+document.addEventListener('flightAdded', function(event) {
+    const flight = event.detail;
+
+    pathDrawing.clearFlightPaths();
+    pathDrawing.createFlightPath(flight.originAirport, flight.destinationAirport, flight, 0);
+});
+
 function setupAirportFieldListeners() {
     const airportFields = document.querySelectorAll('#fromAirport, #toAirport');
 

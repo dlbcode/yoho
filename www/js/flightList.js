@@ -44,6 +44,11 @@ const flightList = {
 
     list.appendChild(listItem);
     this.updateTotalCost();
+
+    // Emit a custom event
+    document.dispatchEvent(new CustomEvent('flightAdded', { detail: flight }));
+    console.log('flightAdded event emitted: ' + details, flight);
+
   },
 
   isFlightListed: function(flight) {
