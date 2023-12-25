@@ -62,40 +62,45 @@ const eventManager = {
     },
 
     setupAirportFieldListeners: function () {
-        const airportFields = document.querySelectorAll('#fromAirport, #toAirport');
-
-        airportFields.forEach((field) => {
-            field.addEventListener('airportSelected', async function (event) {
-                const fromAirportValue = getIataFromField('fromAirport');
-                const toAirportValue = getIataFromField('toAirport');
-                
-                if (fromAirportValue && toAirportValue) {
-                    // Both fields are filled, fetch the cheapest routes and draw path
-                    flightMap.clearMultiHopPaths = false;
-                    try {
-                        const response = await fetch(`http://yonderhop.com:3000/cheapest-routes?origin=${fromAirportValue}&destination=${toAirportValue}`);
-                        const routes = await response.json();
-                        if (routes.length > 0) {
-                            const cheapestRoute = routes[0];
-                            flightMap.drawFlightPathBetweenAirports(cheapestRoute);
-                        }
-                    } catch (error) {
-                        console.error('Error fetching cheapest routes:', error);
-                    }
-                } else if (fromAirportValue || toAirportValue) {
-                    // Only one field is filled, set the toggle state and draw paths
-                    flightMap.toggleState = fromAirportValue ? 'from' : 'to';
-                    flightPathToggle.value = fromAirportValue ? 'from' : 'to';
-                    const selectedIata = fromAirportValue || toAirportValue;
-                    pathDrawing.clearFlightPaths();
-                    pathDrawing.drawFlightPaths(selectedIata);
-                } else {
-                    // No fields are filled, clear paths
-                    flightMap.clearMultiHopPaths = true;
-                    pathDrawing.clearFlightPaths();
+      const airportFields = document.querySelectorAll('#fromAirport, #toAirport');
+    
+      airportFields.forEach((field) => {
+        field.addEventListener('airportSelected', async (event) => {
+          const fromAirportValue = getIataFromField('fromAirport');
+          const toAirportValue = getIataFromField('toAirport');
+                  
+          // Fetch or compute flightsByDestination
+          let flightsByDestination = await this.fetchFlightsByDestination();
+    
+          if (fromAirportValue || toAirportValue) {
+            const selectedIata = fromAirportValue || toAirportValue;
+            pathDrawing.clearFlightPaths();
+            pathDrawing.drawFlightPaths(selectedIata, flightsByDestination);
+          } else {
+            flightMap.clearMultiHopPaths = true;
+            pathDrawing.clearFlightPaths();
+          }
+        });
+      });
+    },
+    
+    fetchFlightsByDestination: async function() {
+        // Fetch flights data and structure it by destination
+        let flightsByDestination = {};
+        try {
+            const response = await fetch('http://yonderhop.com:3000/flights');
+            const flights = await response.json();
+            flights.forEach(flight => {
+                if (flight.originAirport && flight.destinationAirport) {
+                    let destIata = flight.destinationAirport.iata_code;
+                    flightsByDestination[destIata] = flightsByDestination[destIata] || [];
+                    flightsByDestination[destIata].push(flight);
                 }
             });
-        });
+        } catch (error) {
+            console.error('Error fetching flights:', error);
+        }
+        return flightsByDestination;
     },
 
     setupAllPathsButtonEventListener: function () {
