@@ -142,8 +142,6 @@ const eventManager = {
     },
 };
 
-// Additional event handling logic
-
 document.addEventListener('flightAdded', function (event) {
   const flight = event.detail;
   updateState('addFlight', flight); // Update appState with the new flight
