@@ -3,11 +3,15 @@ const appState = {
   toAirport: null,
   numTravelers: 1,
   flightPathToggle: 'from',
-  // ... other state properties
+  flights: [], 
 };
 
 function updateState(key, value) {
-  appState[key] = value;
+  if (key === 'addFlight') {
+    appState.flights.push(value); // Handle adding a flight
+  } else {
+    appState[key] = value;
+  }
   handleStateChange(key, value);
   document.dispatchEvent(new CustomEvent('stateChange', { detail: { key, value } }));
 }

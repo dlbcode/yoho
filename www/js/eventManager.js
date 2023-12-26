@@ -145,9 +145,12 @@ const eventManager = {
 // Additional event handling logic
 
 document.addEventListener('flightAdded', function (event) {
-    const flight = event.detail;
-    pathDrawing.clearFlightPaths();
-    pathDrawing.createFlightPath(flight.originAirport, flight.destinationAirport, flight, 0);
+  const flight = event.detail;
+  updateState('addFlight', flight); // Update appState with the new flight
+  // print the contents of the flights array in the console
+  console.table(appState.flights);
+  pathDrawing.clearFlightPaths();
+  pathDrawing.createFlightPath(flight.originAirport, flight.destinationAirport, flight, 0);
 });
 
 const clearButton = document.getElementById('clearBtn');
