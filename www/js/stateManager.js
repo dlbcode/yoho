@@ -3,38 +3,26 @@ const appState = {
   toAirport: null,
   numTravelers: 1,
   flightPathToggle: 'from',
+  waypoints: [],
   flights: [], 
 };
 
 function updateState(key, value) {
-  if (key === 'addFlight') {
-    appState.flights.push(value); // Handle adding a flight
-  } else {
-    appState[key] = value;
+  switch (key) {
+      case 'addWaypoint':
+          appState.waypoints.push(value);
+          break;
+      case 'removeWaypoint':
+          appState.waypoints = appState.waypoints.filter(waypoint => waypoint.iata_code !== value);
+          break;
+      case 'addFlight':
+          appState.flights.push(value);
+          break;
+      default:
+          appState[key] = value;
+          break;
   }
-  handleStateChange(key, value);
   document.dispatchEvent(new CustomEvent('stateChange', { detail: { key, value } }));
 }
 
-function handleStateChange(key, value) {
-  switch (key) {
-    case 'selectedAirport':
-      console.log('STATE Selected Airport Changed:', value);
-      break;
-      case 'fromAirport':
-          console.log('STATE From Airport Changed:', value);
-          break;
-      case 'toAirport':
-          console.log('STATE To Airport Changed:', value);
-          break;
-      case 'numTravelers':
-          console.log('STATE Number of Travelers Changed:', value);
-          break;
-      case 'flightPathToggle':
-          console.log('STATE Flight Path Toggle Changed:', value);
-          break;
-      // ... handle other state changes
-  }
-}
-
-export { appState, updateState, handleStateChange };
+export { appState, updateState };

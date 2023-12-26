@@ -73,26 +73,42 @@ const flightMap = {
         const airportInfo = `${airport.city} (${airport.iata_code})`;
         updateState('flightPathToggle', this.toggleState);
         updateState('selectedAirport', airport.iata_code);
-        const toggleState = document.getElementById('flightPathToggle').value;
+        const toggleState = appState.flightPathToggle;
         const fromAirportElem = document.getElementById('fromAirport');
         const toAirportElem = document.getElementById('toAirport');
 
-        clickedMarker.setIcon(magentaDotIcon);
-        this.selectedMarker = airport.iata_code;
+        // Check if the marker is already selected
+        if (clickedMarker.selected) {
+            // Remove the airport from waypoints if it's already selected
+            updateState('removeWaypoint', airport.iata_code);
+            clickedMarker.setIcon(blueDotIcon);
+            clickedMarker.selected = false;
+        } else {
+            // Add the airport to waypoints if it's not selected
+            updateState('addWaypoint', airport);
+            clickedMarker.setIcon(magentaDotIcon);
+            clickedMarker.selected = true;
+        }
 
-        if ((toggleState === 'from' && fromAirportElem.value !== '') || 
-            (toggleState === 'to' && toAirportElem.value !== '')) {
+        console.log('handleMarkerClick toggleState:', toggleState);
+        console.table(appState.waypoints);
+
+        if ((appState.toggleState === 'from' && fromAirportElem.value !== '') || 
+            (appState.toggleState === 'to' && toAirportElem.value !== '')) {
             this.findAndAddFlightToList(
-                toggleState === 'from' ? fromAirportElem.value : airportInfo, 
-                toggleState === 'from' ? airportInfo : toAirportElem.value
+                appState.toggleState === 'from' ? fromAirportElem.value : airportInfo, 
+                appState.toggleState === 'from' ? airportInfo : toAirportElem.value
             );
+
 
             fromAirportElem.value = airportInfo;
             toAirportElem.value = '';
         } else {
-            if (toggleState === 'from') {
+            if (appState.flightPathToggle === 'from') {
+                console.log('fromAirportElem:', fromAirportElem, 'airportInfo:', airportInfo);
                 fromAirportElem.value = airportInfo;
-            } else {
+            } else { 
+                console.log('Should Populate toAirportElem');
                 toAirportElem.value = airportInfo;
             }
         }
