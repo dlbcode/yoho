@@ -82,13 +82,13 @@ const eventManager = {
           const fromAirportValue = getIataFromField('fromAirport');
           const toAirportValue = getIataFromField('toAirport');
                   
-          // Fetch or compute flightsByDestination
-          let flightsByDestination = await this.fetchFlightsByDestination();
+          // Fetch or compute directFlights
+          let directFlights = await this.fetchdirectFlights();
     
           if (fromAirportValue || toAirportValue) {
             const selectedIata = fromAirportValue || toAirportValue;
             pathDrawing.clearFlightPaths();
-            pathDrawing.drawFlightPaths(selectedIata, flightsByDestination);
+            pathDrawing.drawFlightPaths(selectedIata, directFlights);
           } else {
             flightMap.clearMultiHopPaths = true;
             pathDrawing.clearFlightPaths();
@@ -97,23 +97,23 @@ const eventManager = {
       });
     },
     
-    fetchFlightsByDestination: async function() {
+    fetchdirectFlights: async function() {
         // Fetch flights data and structure it by destination
-        let flightsByDestination = {};
+        let directFlights = {};
         try {
             const response = await fetch('http://yonderhop.com:3000/flights');
             const flights = await response.json();
             flights.forEach(flight => {
                 if (flight.originAirport && flight.destinationAirport) {
                     let destIata = flight.destinationAirport.iata_code;
-                    flightsByDestination[destIata] = flightsByDestination[destIata] || [];
-                    flightsByDestination[destIata].push(flight);
+                    directFlights[destIata] = directFlights[destIata] || [];
+                    directFlights[destIata].push(flight);
                 }
             });
         } catch (error) {
             console.error('Error fetching flights:', error);
         }
-        return flightsByDestination;
+        return directFlights;
     },
 
     setupAllPathsButtonEventListener: function () {

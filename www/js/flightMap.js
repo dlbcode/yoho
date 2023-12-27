@@ -34,20 +34,33 @@ const flightMap = {
     },
 
     processFlightData(data) {
+        const uniqueAirports = new Set();
+    
         data.forEach(flight => {
             if (!flight.originAirport || !flight.destinationAirport) {
                 console.info('Incomplete flight data:', flight);
                 return;
             }
-
-            this.addMarker(flight.originAirport);
-            this.addMarker(flight.destinationAirport);
-
+    
+            // Check if the origin airport has already been added
+            if (!uniqueAirports.has(flight.originAirport.iata_code)) {
+                this.addMarker(flight.originAirport);
+                uniqueAirports.add(flight.originAirport.iata_code);
+            }
+    
+            // Check if the destination airport has already been added
+            if (!uniqueAirports.has(flight.destinationAirport.iata_code)) {
+                this.addMarker(flight.destinationAirport);
+                uniqueAirports.add(flight.destinationAirport.iata_code);
+            }
+    
             let destIata = flight.destinationAirport.iata_code;
             this.flightsByDestination[destIata] = this.flightsByDestination[destIata] || [];
             this.flightsByDestination[destIata].push(flight);
         });
-    },
+    
+        console.log('count of markers:', uniqueAirports.size);
+    },    
 
     addMarker(airport) {
         if (!airport || !airport.iata_code || !airport.weight) {

@@ -6,7 +6,7 @@ const pathDrawing = {
     currentLines: [],
     flightPathCache: {},
 
-    drawFlightPaths(iata, flightsByDestination) {
+    drawFlightPaths(iata, directFlights) {
         this.clearFlightPaths();
         let cacheKey = appState.flightPathToggle + '_' + iata;
         if (this.flightPathCache[cacheKey]) {
@@ -20,13 +20,13 @@ const pathDrawing = {
             });
         } else {
             console.log('drawFligthPaths STATE flightPathToggle: ' + appState.flightPathToggle)
-            appState.flightPathToggle === 'to' ? this.drawFlightPathsToDestination(iata, flightsByDestination) : this.drawFlightPathsFromOrigin(iata, flightsByDestination);
+            appState.flightPathToggle === 'to' ? this.drawFlightPathsToDestination(iata, directFlights) : this.drawFlightPathsFromOrigin(iata, directFlights);
         }
     },
 
-    drawFlightPathsFromOrigin(originIata, flightsByDestination) {
-        console.log('drawFlightPathsFromOrigin originIata:', originIata, 'flightsByDestination:', flightsByDestination);
-        Object.values(flightsByDestination).forEach(flights =>
+    drawFlightPathsFromOrigin(originIata, directFlights) {
+        console.log('drawFlightPathsFromOrigin originIata:', originIata, 'directFlights:', directFlights);
+        Object.values(directFlights).forEach(flights =>
             flights.forEach(flight => {
                 if (flight.originAirport.iata_code === originIata) {
                     this.drawPaths(flight, originIata);
@@ -35,8 +35,8 @@ const pathDrawing = {
         );
     },
 
-    drawFlightPathsToDestination(destinationIata, flightsByDestination) {
-        const destinationFlights = flightsByDestination[destinationIata] || [];
+    drawFlightPathsToDestination(destinationIata, directFlights) {
+        const destinationFlights = directFlights[destinationIata] || [];
         destinationFlights.forEach(flight => this.drawPaths(flight, destinationIata));
     },
 
