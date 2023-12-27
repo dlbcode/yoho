@@ -6,7 +6,7 @@ import { appState, updateState } from './stateManager.js';
 
 const flightMap = {
     markers: {},
-    flightsByDestination: {},
+    directFlights: {},
     currentLines: [],
     selectedMarker: null,
     toggleState: 'from',
@@ -55,8 +55,8 @@ const flightMap = {
             }
     
             let destIata = flight.destinationAirport.iata_code;
-            this.flightsByDestination[destIata] = this.flightsByDestination[destIata] || [];
-            this.flightsByDestination[destIata].push(flight);
+            this.directFlights[destIata] = this.directFlights[destIata] || [];
+            this.directFlights[destIata].push(flight);
         });
     
         console.log('count of markers:', uniqueAirports.size);
@@ -137,7 +137,7 @@ const flightMap = {
     },
 
     findFlight(fromIata, toIata) {
-        for (const flights of Object.values(this.flightsByDestination)) {
+        for (const flights of Object.values(this.directFlights)) {
             for (const flight of flights) {
                 if (flight.originAirport.iata_code === fromIata && flight.destinationAirport.iata_code === toIata) {
                     return flight;
@@ -200,9 +200,9 @@ const flightMap = {
         if (this.selectedMarker !== iata) {
             pathDrawing.clearFlightPaths();
             if (event === 'mouseover') {
-                pathDrawing.drawFlightPaths(iata, this.flightsByDestination, this.toggleState);
+                pathDrawing.drawFlightPaths(iata, this.directFlights, this.toggleState);
             } else if (this.selectedMarker) {
-                pathDrawing.drawFlightPaths(this.selectedMarker, this.flightsByDestination, this.toggleState);
+                pathDrawing.drawFlightPaths(this.selectedMarker, this.directFlights, this.toggleState);
             }
         }
     },
@@ -224,7 +224,7 @@ const flightMap = {
             }
         });
 
-        Object.values(this.flightsByDestination).forEach(flights => {
+        Object.values(this.directFlights).forEach(flights => {
             flights.forEach(flight => {
                 if (flight.originAirport) {
                     this.addMarker(flight.originAirport);
