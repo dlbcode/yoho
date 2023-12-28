@@ -7,7 +7,7 @@ const pathDrawing = {
     flightPathCache: {},
 
     drawFlightPaths(iata, directFlights) {
-        this.clearFlightPaths();
+        console.log('Drawing flight paths: ' + iata, directFlights);
         let cacheKey = appState.flightPathToggle + '_' + iata;
         if (this.flightPathCache[cacheKey]) {
             this.flightPathCache[cacheKey].forEach(path => {
@@ -160,6 +160,7 @@ const pathDrawing = {
     },
 
     clearFlightPaths() {
+        console.log('Clearing flight paths');
         // Create a set of flight IDs that should not be cleared
         const listedFlightIds = new Set(appState.flights.map(flight => 
             `${flight._id}`

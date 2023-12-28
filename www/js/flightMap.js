@@ -189,14 +189,14 @@ const flightMap = {
     },
 
     markerHoverHandler(iata, event) {
-        if (this.selectedMarker !== iata) {
-            pathDrawing.clearFlightPaths();
+        console.log('markerHoverHandler iata - Selected Marker:' + this.selectedMarker + ' iata:' + iata + ' event:' + event);
+        //if (this.selectedMarker !== iata) {
             if (event === 'mouseover') {
                 pathDrawing.drawFlightPaths(iata, this.directFlights, this.toggleState);
-            } else if (this.selectedMarker) {
-                pathDrawing.drawFlightPaths(this.selectedMarker, this.directFlights, this.toggleState);
+            } else if (event === 'mouseout') {
+                pathDrawing.clearFlightPaths();
             }
-        }
+        //}
     },
 
     updateMarkersForZoom() {

@@ -49,7 +49,6 @@ const eventManager = {
         flightPathToggle.addEventListener('change', function () {
             updateState('flightPathToggle', this.value);
             if (flightMap.selectedMarker) {
-                pathDrawing.clearFlightPaths();
                 pathDrawing.drawFlightPaths(flightMap.selectedMarker);
             }
         });
@@ -128,8 +127,7 @@ const eventManager = {
     attachMarkerEventListeners: function (iata, marker, airport) {
         marker.on('mouseover', () => flightMap.markerHoverHandler(iata, 'mouseover'));
         marker.on('mouseout', () => flightMap.markerHoverHandler(iata, 'mouseout'));
-        marker.on('click', () => {
-            flightMap.handleMarkerClick(airport, marker);
+        marker.on('click', () => { flightMap.handleMarkerClick(airport, marker);
         });
     },
 
