@@ -16,6 +16,21 @@ document.addEventListener('DOMContentLoaded', (event) => {
         }
     }
 
+    // Listen for new waypoint field creation
+    document.addEventListener('newWaypointField', (event) => {
+        const { fieldId } = event.detail;
+        setupAutocompleteForField(fieldId);
+    });
+
+    function setupAutocompleteForField(fieldId) {
+        document.getElementById(fieldId).addEventListener('input', async (e) => {
+            const airports = await fetchAirports(e.target.value);
+            updateSuggestions(fieldId, airports);
+        });
+    }
+
+    setupAutocompleteForField('waypoint1');
+
     function updateSuggestions(inputId, airports) {
         const suggestionBox = document.getElementById(inputId + 'Suggestions');
         suggestionBox.innerHTML = '';
@@ -33,15 +48,6 @@ document.addEventListener('DOMContentLoaded', (event) => {
             suggestionBox.appendChild(div);
         });
     }
-
-    function setupAutocompleteForField(fieldId) {
-        document.getElementById(fieldId).addEventListener('input', async (e) => {
-            const airports = await fetchAirports(e.target.value);
-            updateSuggestions(fieldId, airports);
-        });
-    }
-
-    setupAutocompleteForField('waypoint1');
 
     document.addEventListener('stateChange', (event) => {
         const { key, value } = event.detail;
