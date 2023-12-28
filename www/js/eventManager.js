@@ -12,11 +12,15 @@ function handleStateChange(event) {
         console.table(appState.waypoints);
         appState.waypoints.forEach((waypoint, index) => {
             let waypointField = document.getElementById(`waypoint${index + 1}`);
-            console.log('Adding ', waypoint, ' to waypointField:', waypointField);
             if (!waypointField) {
                 waypointField = createWaypointField(index + 1);
             }
             waypointField.value = `${waypoint.city} (${waypoint.iata_code})`;
+
+            // Create the next waypoint field only if the current one is filled
+            if (index === appState.waypoints.length - 1) {
+                createWaypointField(index + 2);
+            }
         });
     }
 }
@@ -26,7 +30,7 @@ function createWaypointField(index) {
     const input = document.createElement('input');
     input.type = 'text';
     input.id = `waypoint${index}`;
-    input.placeholder = `Select Airport ${index}`;
+    input.placeholder = `Select Airport`;
     container.appendChild(input);
     return input;
 }
