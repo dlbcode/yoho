@@ -80,40 +80,19 @@ const flightMap = {
     },
 
     handleMarkerClick(airport, clickedMarker) {
-        const airportInfo = `${airport.city} (${airport.iata_code})`;
-        const toggleState = appState.flightPathToggle;
-        const fromAirportElem = document.getElementById('fromAirport');
-        const toAirportElem = document.getElementById('toAirport');
-    
         if (clickedMarker.selected) {
             updateState('removeWaypoint', airport.iata_code);
             clickedMarker.setIcon(blueDotIcon);
+            console.table(appState.waypoints);
         } else {
             updateState('addWaypoint', airport);
             clickedMarker.setIcon(magentaDotIcon);
-    
-            // Update the UI and app state based on the current toggle state
-            if (toggleState === 'from') {
-                if (!fromAirportElem.value) {
-                    fromAirportElem.value = airportInfo;
-                    updateState('selectedAirport', airport.iata_code);
-                    updateState('fromAirport', airport.iata_code);
-                } else {
-                    toAirportElem.value = airportInfo;
-                    updateState('toAirport', airport.iata_code);
-                }
-            }
-    
+            updateState('selectedAirport', airport.iata_code);
             console.table(appState.waypoints);
-    
-            if (fromAirportElem.value && toAirportElem.value) {
-                this.findAndAddFlightToList(appState.fromAirport, appState.toAirport);
-            }
         }
     
         clickedMarker.selected = !clickedMarker.selected;
     },
-    
     
     findAndAddFlightToList(fromAirport, toAirport) {
         console.log('findAndAddFlightToList fromAirport:', fromAirport, 'toAirport:', toAirport);

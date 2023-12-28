@@ -6,6 +6,20 @@ import { getIataFromField } from './airportAutocomplete.js';
 import { drawAllFlightPaths } from './allPaths.js';
 import { appState, updateState } from './stateManager.js';
 
+function handleStateChange(event) {
+    const { key, value } = event.detail;
+    switch (key) {
+        case 'fromAirport':
+            document.getElementById('fromAirport').value = value;
+            break;
+        case 'toAirport':
+            document.getElementById('toAirport').value = value;
+            break;
+        // Add cases for other state changes if needed
+    }
+}
+
+
 // When 'from' airport is selected
 const fromAirport = document.getElementById('fromAirport');
 fromAirport.addEventListener('change', (event) => {
@@ -26,6 +40,7 @@ const eventManager = {
         this.setupUIEventListeners();
         this.setupAirportFieldListeners();
         this.setupAllPathsButtonEventListener();
+        document.addEventListener('stateChange', handleStateChange);
     },
 
     setupMapEventListeners: function () {
