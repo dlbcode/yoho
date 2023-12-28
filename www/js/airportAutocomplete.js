@@ -33,23 +33,31 @@ document.addEventListener('DOMContentLoaded', (event) => {
 
     function updateSuggestions(inputId, airports) {
         const suggestionBox = document.getElementById(inputId + 'Suggestions');
-        if (suggestionBox) {
-            suggestionBox.innerHTML = '';
-            airports.forEach(airport => {
-                const div = document.createElement('div');
-                div.textContent = `${airport.name} (${airport.iata_code}) - ${airport.city}, ${airport.country}`;
-                div.addEventListener('click', () => {
-                    const inputField = document.getElementById(inputId);
-                    inputField.value = `${airport.city} (${airport.iata_code})`;
-                    suggestionBox.innerHTML = '';
-                    const event = new CustomEvent('airportSelected', { detail: { iataCode: airport.iata_code } });
-                    inputField.dispatchEvent(event);
-                    updateState(inputId, airport.iata_code);
-                });
-                suggestionBox.appendChild(div);
+        suggestionBox.innerHTML = '';
+        airports.forEach(airport => {
+            const div = document.createElement('div');
+            div.textContent = `${airport.name} (${airport.iata_code}) - ${airport.city}, ${airport.country}`;
+            div.addEventListener('click', () => {
+                const inputField = document.getElementById(inputId);
+                inputField.value = `${airport.city} (${airport.iata_code})`;
+                suggestionBox.innerHTML = '';
+
+                // Dispatch custom event to add the selected airport to waypoints
+                const selectedAirportEvent = new CustomEvent('airportSelected', { detail: { airport } });
+                document.dispatchEvent(selectedAirportEvent);
+
+                updateState(inputId, airport.iata_code);
             });
+            suggestionBox.appendChild(div);
+        });
+    }
+    
+    document.addEventListener('airportSelected', (event) => {
+        const { airport } = event.detail;
+        if (airport) {
+            updateState('addWaypoint', airport);
         }
-    }    
+    });
 
     document.addEventListener('stateChange', (event) => {
         const { key, value } = event.detail;
