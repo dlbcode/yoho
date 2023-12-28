@@ -80,7 +80,8 @@ const pathDrawing = {
             weight: 1,
             opacity: 1,
             color: this.getColorBasedOnPrice(flight.price),
-            wrap: false
+            wrap: false,
+            zIndex: -1
         }).addTo(map);
 
         geodesicLine.flight = flight;
