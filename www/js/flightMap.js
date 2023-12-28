@@ -12,7 +12,6 @@ const flightMap = {
     toggleState: 'from',
     flightPathCache: {},
     clearMultiHopPaths: true,
-
     cachedFlights: null,
     lastFetchTime: null,
     cacheDuration: 60000, // 1 minute in milliseconds
@@ -58,8 +57,6 @@ const flightMap = {
             this.directFlights[destIata] = this.directFlights[destIata] || [];
             this.directFlights[destIata].push(flight);
         });
-    
-        console.log('count of markers:', uniqueAirports.size);
     },    
 
     addMarker(airport) {
@@ -84,12 +81,10 @@ const flightMap = {
 
     handleMarkerClick(airport, clickedMarker) {
         const airportInfo = `${airport.city} (${airport.iata_code})`;
-        updateState('flightPathToggle', this.toggleState);
-        updateState('selectedAirport', airport.iata_code);
         const toggleState = appState.flightPathToggle;
         const fromAirportElem = document.getElementById('fromAirport');
         const toAirportElem = document.getElementById('toAirport');
-
+    
         // Check if the marker is already selected
         if (clickedMarker.selected) {
             // Remove the airport from waypoints if it's already selected
@@ -101,35 +96,32 @@ const flightMap = {
             updateState('addWaypoint', airport);
             clickedMarker.setIcon(magentaDotIcon);
             clickedMarker.selected = true;
-        }
-
-        console.log('handleMarkerClick toggleState:', toggleState);
-        console.table(appState.waypoints);
-
-        if ((appState.toggleState === 'from' && fromAirportElem.value !== '') || 
-            (appState.toggleState === 'to' && toAirportElem.value !== '')) {
-            this.findAndAddFlightToList(
-                appState.toggleState === 'from' ? fromAirportElem.value : airportInfo, 
-                appState.toggleState === 'from' ? airportInfo : toAirportElem.value
-            );
-
-
-            fromAirportElem.value = airportInfo;
-            toAirportElem.value = '';
-        } else {
-            if (appState.flightPathToggle === 'from') {
-                console.log('fromAirportElem:', fromAirportElem, 'airportInfo:', airportInfo);
+    
+            if (toggleState === 'from') {
+                // Update appState.selectedAirport and populate fromAirport element
+                updateState('selectedAirport', airport.iata_code);
                 fromAirportElem.value = airportInfo;
-            } else { 
-                console.log('Should Populate toAirportElem');
+                updateState('fromAirport', airport.iata_code);
+                appState.flightPathToggle = 'to';
+            } else if (toggleState === 'to') {
                 toAirportElem.value = airportInfo;
+                updateState('toAirport', airport.iata_code);
+                appState.flightPathToggle = 'from';
+            }
+    
+            console.table(appState.waypoints);
+    
+            if (fromAirportElem.value !== '' && toAirportElem.value !== '') {
+                this.findAndAddFlightToList(appState.fromAirport, appState.toAirport);
             }
         }
     },
 
     findAndAddFlightToList(fromAirport, toAirport) {
-        const fromIata = fromAirport.split('(')[1].slice(0, -1);
-        const toIata = toAirport.split('(')[1].slice(0, -1);
+        console.log('findAndAddFlightToList fromAirport:', fromAirport, 'toAirport:', toAirport);
+        console.log('appState.fromAirport:' + appState.fromAirport, 'appState.toAirport:', appState.toAirport);
+        const fromIata = fromAirport.iata_code;
+        const toIata = toAirport.iata_code;
         const flight = this.findFlight(fromIata, toIata);
         if (flight) {
             flightList.addFlightDetailsToList(flight, pathDrawing.clearFlightPaths.bind(this));
@@ -237,7 +229,6 @@ const flightMap = {
     },
 
     drawFlightPathBetweenAirports(route) {
-        console.log('drawFlightPathBetweenAirports route:', route);
         pathDrawing.clearFlightPaths();
         try {
             if (!route || !Array.isArray(route.segmentCosts)) {

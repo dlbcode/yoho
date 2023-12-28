@@ -1,4 +1,5 @@
 const appState = {
+  selectedAiport: null,
   fromAirport: null,
   toAirport: null,
   numTravelers: 1,

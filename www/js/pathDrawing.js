@@ -19,13 +19,11 @@ const pathDrawing = {
                 }
             });
         } else {
-            console.log('drawFligthPaths STATE flightPathToggle: ' + appState.flightPathToggle)
             appState.flightPathToggle === 'to' ? this.drawFlightPathsToDestination(iata, directFlights) : this.drawFlightPathsFromOrigin(iata, directFlights);
         }
     },
 
     drawFlightPathsFromOrigin(originIata, directFlights) {
-        console.log('drawFlightPathsFromOrigin originIata:', originIata, 'directFlights:', directFlights);
         Object.values(directFlights).forEach(flights =>
             flights.forEach(flight => {
                 if (flight.originAirport.iata_code === originIata) {
@@ -41,7 +39,6 @@ const pathDrawing = {
     },
 
     async drawFlightPathBetweenAirports(route, getAirportDataByIata) {
-        console.log('drawFlightPathBetweenAirports route:', route);
         this.clearFlightPaths();
         try {
             if (!route || !Array.isArray(route.segmentCosts)) {
