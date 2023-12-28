@@ -85,38 +85,38 @@ const flightMap = {
         const fromAirportElem = document.getElementById('fromAirport');
         const toAirportElem = document.getElementById('toAirport');
     
-        // Check if the marker is already selected
+        // Toggle the marker selection and update the state and icon accordingly
         if (clickedMarker.selected) {
-            // Remove the airport from waypoints if it's already selected
             updateState('removeWaypoint', airport.iata_code);
             clickedMarker.setIcon(blueDotIcon);
-            clickedMarker.selected = false;
         } else {
-            // Add the airport to waypoints if it's not selected
             updateState('addWaypoint', airport);
             clickedMarker.setIcon(magentaDotIcon);
-            clickedMarker.selected = true;
     
+            // Update the UI and app state based on the current toggle state
             if (toggleState === 'from') {
-                // Update appState.selectedAirport and populate fromAirport element
-                updateState('selectedAirport', airport.iata_code);
                 fromAirportElem.value = airportInfo;
+                updateState('selectedAirport', airport.iata_code);
                 updateState('fromAirport', airport.iata_code);
                 appState.flightPathToggle = 'to';
-            } else if (toggleState === 'to') {
+            } else {
                 toAirportElem.value = airportInfo;
                 updateState('toAirport', airport.iata_code);
                 appState.flightPathToggle = 'from';
             }
-    
+
             console.table(appState.waypoints);
     
-            if (fromAirportElem.value !== '' && toAirportElem.value !== '') {
+            // Find and add flight if both airports are selected
+            if (fromAirportElem.value && toAirportElem.value) {
                 this.findAndAddFlightToList(appState.fromAirport, appState.toAirport);
             }
         }
+    
+        // Toggle the marker's selected state at the end
+        clickedMarker.selected = !clickedMarker.selected;
     },
-
+    
     findAndAddFlightToList(fromAirport, toAirport) {
         console.log('findAndAddFlightToList fromAirport:', fromAirport, 'toAirport:', toAirport);
         console.log('appState.fromAirport:' + appState.fromAirport, 'appState.toAirport:', appState.toAirport);
