@@ -34,15 +34,22 @@ document.addEventListener('DOMContentLoaded', (event) => {
         });
     }
 
-    // Event listeners for 'from' and 'to' inputs
-    document.getElementById('fromAirport').addEventListener('input', async (e) => {
-        const airports = await fetchAirports(e.target.value);
-        updateSuggestions('fromAirport', airports);
-    });
+    function setupAutocompleteForField(fieldId) {
+        document.getElementById(fieldId).addEventListener('input', async (e) => {
+            const airports = await fetchAirports(e.target.value);
+            updateSuggestions(fieldId, airports);
+        });
+    }
 
-    document.getElementById('toAirport').addEventListener('input', async (e) => {
-        const airports = await fetchAirports(e.target.value);
-        updateSuggestions('toAirport', airports);
+    setupAutocompleteForField('waypoint1');
+
+    document.addEventListener('stateChange', (event) => {
+        const { key, value } = event.detail;
+        if (key === 'waypoints') {
+            value.forEach((_, index) => {
+                setupAutocompleteForField(`waypoint${index + 1}`);
+            });
+        }
     });
 });
 

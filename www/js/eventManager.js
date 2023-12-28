@@ -7,32 +7,29 @@ import { drawAllFlightPaths } from './allPaths.js';
 import { appState, updateState } from './stateManager.js';
 
 function handleStateChange(event) {
-    const { key, value } = event.detail;
-    switch (key) {
-        case 'fromAirport':
-            document.getElementById('fromAirport').value = value;
-            break;
-        case 'toAirport':
-            document.getElementById('toAirport').value = value;
-            break;
-        // Add cases for other state changes if needed
+    const { key } = event.detail;
+    if (key === 'addWaypoint') {
+        console.table(appState.waypoints);
+        appState.waypoints.forEach((waypoint, index) => {
+            let waypointField = document.getElementById(`waypoint${index + 1}`);
+            console.log('Adding ', waypoint, ' to waypointField:', waypointField);
+            if (!waypointField) {
+                waypointField = createWaypointField(index + 1);
+            }
+            waypointField.value = `${waypoint.city} (${waypoint.iata_code})`;
+        });
     }
 }
 
-
-// When 'from' airport is selected
-const fromAirport = document.getElementById('fromAirport');
-fromAirport.addEventListener('change', (event) => {
-    updateState('fromAirport', event.target.value);
-    console.log('appState fromAirport: ' + appState.fromAirport)
-});
-
-// When 'to' airport is selected
-const toAirport = document.getElementById('toAirport');
-toAirport.addEventListener('change', (event) => {
-    updateState('toAirport', event.target.value);
-    console.log('appState toAirport: ' + appState.toAirport)
-});
+function createWaypointField(index) {
+    const container = document.querySelector('.airport-selection');
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.id = `waypoint${index}`;
+    input.placeholder = `Select Airport ${index}`;
+    container.appendChild(input);
+    return input;
+}
 
 const eventManager = {
     setupEventListeners: function () {

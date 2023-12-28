@@ -83,12 +83,10 @@ const flightMap = {
         if (clickedMarker.selected) {
             updateState('removeWaypoint', airport.iata_code);
             clickedMarker.setIcon(blueDotIcon);
-            console.table(appState.waypoints);
         } else {
             updateState('addWaypoint', airport);
             clickedMarker.setIcon(magentaDotIcon);
             updateState('selectedAirport', airport.iata_code);
-            console.table(appState.waypoints);
         }
     
         clickedMarker.selected = !clickedMarker.selected;
