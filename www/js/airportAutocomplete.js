@@ -33,21 +33,23 @@ document.addEventListener('DOMContentLoaded', (event) => {
 
     function updateSuggestions(inputId, airports) {
         const suggestionBox = document.getElementById(inputId + 'Suggestions');
-        suggestionBox.innerHTML = '';
-        airports.forEach(airport => {
-            const div = document.createElement('div');
-            div.textContent = `${airport.name} (${airport.iata_code}) - ${airport.city}, ${airport.country}`;
-            div.addEventListener('click', () => {
-                const inputField = document.getElementById(inputId);
-                inputField.value = `${airport.city} (${airport.iata_code})`;
-                suggestionBox.innerHTML = '';
-                const event = new CustomEvent('airportSelected', { detail: { iataCode: airport.iata_code } });
-                inputField.dispatchEvent(event);
-                updateState(inputId, airport.iata_code);
+        if (suggestionBox) {
+            suggestionBox.innerHTML = '';
+            airports.forEach(airport => {
+                const div = document.createElement('div');
+                div.textContent = `${airport.name} (${airport.iata_code}) - ${airport.city}, ${airport.country}`;
+                div.addEventListener('click', () => {
+                    const inputField = document.getElementById(inputId);
+                    inputField.value = `${airport.city} (${airport.iata_code})`;
+                    suggestionBox.innerHTML = '';
+                    const event = new CustomEvent('airportSelected', { detail: { iataCode: airport.iata_code } });
+                    inputField.dispatchEvent(event);
+                    updateState(inputId, airport.iata_code);
+                });
+                suggestionBox.appendChild(div);
             });
-            suggestionBox.appendChild(div);
-        });
-    }
+        }
+    }    
 
     document.addEventListener('stateChange', (event) => {
         const { key, value } = event.detail;

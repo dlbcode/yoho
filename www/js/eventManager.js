@@ -33,6 +33,11 @@ function createWaypointField(index) {
     input.placeholder = `Select Airport`;
     container.appendChild(input);
 
+    const suggestionsDiv = document.createElement('div');
+    suggestionsDiv.id = `waypoint${index}Suggestions`;
+    suggestionsDiv.className = 'suggestions';
+    container.appendChild(suggestionsDiv);
+
     // Emit custom event after creating a new waypoint field
     document.dispatchEvent(new CustomEvent('newWaypointField', { detail: { fieldId: input.id } }));
 
