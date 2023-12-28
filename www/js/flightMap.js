@@ -85,7 +85,6 @@ const flightMap = {
         const fromAirportElem = document.getElementById('fromAirport');
         const toAirportElem = document.getElementById('toAirport');
     
-        // Toggle the marker selection and update the state and icon accordingly
         if (clickedMarker.selected) {
             updateState('removeWaypoint', airport.iata_code);
             clickedMarker.setIcon(blueDotIcon);
@@ -95,27 +94,26 @@ const flightMap = {
     
             // Update the UI and app state based on the current toggle state
             if (toggleState === 'from') {
-                fromAirportElem.value = airportInfo;
-                updateState('selectedAirport', airport.iata_code);
-                updateState('fromAirport', airport.iata_code);
-                appState.flightPathToggle = 'to';
-            } else {
-                toAirportElem.value = airportInfo;
-                updateState('toAirport', airport.iata_code);
-                appState.flightPathToggle = 'from';
+                if (!fromAirportElem.value) {
+                    fromAirportElem.value = airportInfo;
+                    updateState('selectedAirport', airport.iata_code);
+                    updateState('fromAirport', airport.iata_code);
+                } else {
+                    toAirportElem.value = airportInfo;
+                    updateState('toAirport', airport.iata_code);
+                }
             }
-
+    
             console.table(appState.waypoints);
     
-            // Find and add flight if both airports are selected
             if (fromAirportElem.value && toAirportElem.value) {
                 this.findAndAddFlightToList(appState.fromAirport, appState.toAirport);
             }
         }
     
-        // Toggle the marker's selected state at the end
         clickedMarker.selected = !clickedMarker.selected;
     },
+    
     
     findAndAddFlightToList(fromAirport, toAirport) {
         console.log('findAndAddFlightToList fromAirport:', fromAirport, 'toAirport:', toAirport);

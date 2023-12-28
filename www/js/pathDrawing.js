@@ -7,11 +7,11 @@ const pathDrawing = {
     flightPathCache: {},
 
     drawFlightPaths(iata, directFlights) {
-        console.log('Drawing flight paths: ' + iata, directFlights);
         let cacheKey = appState.flightPathToggle + '_' + iata;
         if (this.flightPathCache[cacheKey]) {
             this.flightPathCache[cacheKey].forEach(path => {
                 if (!map.hasLayer(path)) {
+                    console.log('Adding path to map');
                     path.addTo(map);
                 }
                 if (!this.currentLines.includes(path)) {
