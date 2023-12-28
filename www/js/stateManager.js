@@ -1,7 +1,5 @@
 const appState = {
   selectedAiport: null,
-  fromAirport: null,
-  toAirport: null,
   numTravelers: 1,
   flightPathToggle: 'from',
   waypoints: [],
@@ -11,13 +9,15 @@ const appState = {
 function updateState(key, value) {
   switch (key) {
       case 'addWaypoint':
-          appState.waypoints.push(value);
-          break;
+        appState.waypoints.push(value);
+        break;
       case 'removeWaypoint':
           appState.waypoints = appState.waypoints.filter(waypoint => waypoint.iata_code !== value);
           break;
       case 'addFlight':
+          console.log('appState: adding flight');
           appState.flights.push(value);
+          console.table(appState.flights);
           break;
       default:
           appState[key] = value;

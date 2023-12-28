@@ -7,7 +7,8 @@ import { drawAllFlightPaths } from './allPaths.js';
 import { appState, updateState } from './stateManager.js';
 
 function handleStateChange(event) {
-    const { key } = event.detail;
+    const { key, value } = event.detail;
+
     if (key === 'addWaypoint') {
         console.table(appState.waypoints);
         appState.waypoints.forEach((waypoint, index) => {
@@ -17,13 +18,25 @@ function handleStateChange(event) {
             }
             waypointField.value = `${waypoint.city} (${waypoint.iata_code})`;
 
-            // Create the next waypoint field only if the current one is filled
             if (index === appState.waypoints.length - 1) {
                 createWaypointField(index + 2);
             }
         });
+
+        // Create a flight object if there are at least two waypoints
+        if (appState.waypoints.length > 1) {
+            console.log('handleStateChange: addWaypoint');
+            const lastWaypointIndex = appState.waypoints.length - 1;
+            const fromIata = appState.waypoints[lastWaypointIndex - 1].iata_code;
+            const toIata = appState.waypoints[lastWaypointIndex].iata_code;
+            const flight = findFlight(fromIata, toIata);
+            if (flight) {
+                updateState('addFlight', flight);
+            }
+        }
     }
 }
+
 
 function createWaypointField(index) {
     const container = document.querySelector('.airport-selection');
@@ -42,6 +55,17 @@ function createWaypointField(index) {
     document.dispatchEvent(new CustomEvent('newWaypointField', { detail: { fieldId: input.id } }));
 
     return input;
+}
+
+function findFlight(fromIata, toIata) {
+    for (const flights of Object.values(flightMap.directFlights)) {
+        for (const flight of flights) {
+            if (flight.originAirport.iata_code === fromIata && flight.destinationAirport.iata_code === toIata) {
+                return flight;
+            }
+        }
+    }
+    return null;
 }
 
 const eventManager = {
