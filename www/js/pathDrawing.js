@@ -73,7 +73,13 @@ const pathDrawing = {
         let flightId = `${flight.originAirport.iata_code}-${flight.destinationAirport.iata_code}-${lngOffset}`;
         if (this.flightPathCache[flightId]) {
             console.log('createFlightPath - Path already exists');
-            return; // Path already exists, no need to create a new one
+            // Add the cached path to the map if it's not already there
+            this.flightPathCache[flightId].forEach(path => {
+                if (!map.hasLayer(path)) {
+                    path.addTo(map);
+                }
+            });
+            return;
         }
 
         var adjustedOrigin = [origin.latitude, origin.longitude + lngOffset];
