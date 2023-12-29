@@ -35,6 +35,17 @@ function handleStateChange(event) {
             }
         }
     }
+    if (key === 'removeWaypoint') {
+        appState.flights = [];
+        for (let i = 0; i < appState.waypoints.length - 1; i++) {
+            const fromWaypoint = appState.waypoints[i];
+            const toWaypoint = appState.waypoints[i + 1];
+            const flight = flightMap.findFlight(fromWaypoint.iata_code, toWaypoint.iata_code);
+            if (flight) {
+                appState.flights.push(flight);
+            }
+        }
+    }
 }
 
 function createWaypointField(index) {
