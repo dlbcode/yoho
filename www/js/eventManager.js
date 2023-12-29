@@ -9,19 +9,19 @@ import { appState, updateState } from './stateManager.js';
 function handleStateChange(event) {
     const { key, value } = event.detail;
 
-    if (key === 'addWaypoint') {
-        console.table(appState.waypoints);
-        appState.waypoints.forEach((waypoint, index) => {
-            let waypointField = document.getElementById(`waypoint${index + 1}`);
-            if (!waypointField) {
-                waypointField = createWaypointField(index + 1);
-            }
-            waypointField.value = `${waypoint.city} (${waypoint.iata_code})`;
+    if (key === 'addWaypoint' || key === 'removeWaypoint') {
+        // Clear existing waypoint fields
+        const container = document.querySelector('.airport-selection');
+        container.innerHTML = '';
 
-            if (index === appState.waypoints.length - 1) {
-                createWaypointField(index + 2);
-            }
+        // Recreate waypoint fields based on the current waypoints
+        appState.waypoints.forEach((waypoint, index) => {
+            let waypointField = createWaypointField(index + 1);
+            waypointField.value = `${waypoint.city} (${waypoint.iata_code})`;
         });
+
+        // Create an additional field for the next waypoint
+        createWaypointField(appState.waypoints.length + 1);
 
         // Create a flight object if there are at least two waypoints
         if (appState.waypoints.length > 1) {
