@@ -168,10 +168,9 @@ const pathDrawing = {
 
     clearFlightPaths() {
         console.log('Clearing flight paths');
-        // Create a set of flight IDs that should not be cleared
         const selectedFlightIds = new Set(appState.flights.map(flight => `${flight.originAirport.iata_code}-${flight.destinationAirport.iata_code}`));
     
-        // Iterate over currentLines and remove lines not in selectedFlightIds
+        // Clear current lines
         this.currentLines.forEach(line => {
             const flightId = `${line.flight.originAirport.iata_code}-${line.flight.destinationAirport.iata_code}`;
             if (!selectedFlightIds.has(flightId) && map.hasLayer(line)) {
@@ -179,12 +178,24 @@ const pathDrawing = {
             }
         });
     
-        // Filter out the cleared lines from currentLines
+        // Update currentLines to keep only selected flights
         this.currentLines = this.currentLines.filter(line => {
             const flightId = `${line.flight.originAirport.iata_code}-${line.flight.destinationAirport.iata_code}`;
             return selectedFlightIds.has(flightId);
         });
-    },    
+    
+        // Clear paths from cache that are not part of selected flights
+        Object.keys(this.flightPathCache).forEach(cacheKey => {
+            if (!selectedFlightIds.has(cacheKey)) {
+                this.flightPathCache[cacheKey].forEach(path => {
+                    if (map.hasLayer(path)) {
+                        map.removeLayer(path);
+                    }
+                });
+                delete this.flightPathCache[cacheKey];
+            }
+        });
+    },       
     
     drawPaths(flight) {
         console.log('drawPaths: flight:', flight);
