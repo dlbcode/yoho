@@ -49,7 +49,7 @@ function handleStateChange(event) {
 
     if (key === 'addFlight') {
         console.log('handleStateChange: addFlight - ', value.origin, 'to', value.destination);
-        pathDrawing.createFlightPath(value.origin, value.destination, value, 0);
+        pathDrawing.createFlightPath(value.originAirport, value.destinationAirport, value, 0);
     }
 
 }

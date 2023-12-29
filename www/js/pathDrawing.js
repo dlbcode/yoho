@@ -69,8 +69,10 @@ const pathDrawing = {
     },
     
     createFlightPath(origin, destination, flight, lngOffset) {
+        console.log('createFlightPath - Creating flight path');
         let flightId = `${flight.originAirport.iata_code}-${flight.destinationAirport.iata_code}-${lngOffset}`;
         if (this.flightPathCache[flightId]) {
+            console.log('createFlightPath - Path already exists');
             return; // Path already exists, no need to create a new one
         }
 
