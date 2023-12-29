@@ -67,6 +67,7 @@ const pathDrawing = {
             console.error('Error in drawFlightPathBetweenAirports:', error);
         }
     },
+    
     createFlightPath(origin, destination, flight, lngOffset) {
         let flightId = `${flight.originAirport.iata_code}-${flight.destinationAirport.iata_code}-${lngOffset}`;
         if (this.flightPathCache[flightId]) {

@@ -91,17 +91,6 @@ const flightMap = {
     
         clickedMarker.selected = !clickedMarker.selected;
     },
-    
-    findAndAddFlightToList(fromAirport, toAirport) {
-        console.log('findAndAddFlightToList fromAirport:', fromAirport, 'toAirport:', toAirport);
-        console.log('appState.fromAirport:' + appState.fromAirport, 'appState.toAirport:', appState.toAirport);
-        const fromIata = fromAirport.iata_code;
-        const toIata = toAirport.iata_code;
-        const flight = this.findFlight(fromIata, toIata);
-        if (flight) {
-            flightList.addFlightDetailsToList(flight, pathDrawing.clearFlightPaths.bind(this));
-        }
-    },
 
     findFlight(fromIata, toIata) {
         for (const flights of Object.values(this.directFlights)) {
@@ -201,39 +190,6 @@ const flightMap = {
                 }
             });
         });
-    },
-
-    drawFlightPathBetweenAirports(route) {
-        pathDrawing.clearFlightPaths();
-        try {
-            if (!route || !Array.isArray(route.segmentCosts)) {
-                console.error('Invalid route data:', route);
-                return;
-            }
-
-            const airportPromises = route.segmentCosts.map(segment => {
-                return Promise.all([this.getAirportDataByIata(segment.from), this.getAirportDataByIata(segment.to)]);
-            });
-
-            Promise.all(airportPromises).then(airportPairs => {
-                airportPairs.forEach(([originAirport, destinationAirport], index) => {
-                    if (originAirport && destinationAirport) {
-                        const flightSegment = {
-                            originAirport: originAirport,
-                            destinationAirport: destinationAirport,
-                            price: route.segmentCosts[index].price
-                        };
-
-                        pathDrawing.createFlightPath(originAirport, destinationAirport, flightSegment, 0);
-                        flightList.addFlightDetailsToList(flightSegment, pathDrawing.clearFlightPaths.bind(this));
-                    }
-                });
-            }).catch(error => {
-                console.error('Error in drawFlightPathBetweenAirports:', error);
-            });
-        } catch (error) {
-            console.error('Error in drawFlightPathBetweenAirports:', error);
-        }
     }
 };
 
