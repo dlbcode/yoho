@@ -143,41 +143,43 @@ const pathDrawing = {
     },    
 
     clearFlightPaths() {
-        // console.log('Clearing flight paths from map');
-        // console.log(`Current lines before clearing: ${this.currentLines.length}`);
-    
-        // Clear current lines from the map
         this.currentLines.forEach(line => {
-            if (map.hasLayer(line)) {
+            let shouldRemove = true;
+            appState.flights.forEach(flight => {
+                let flightId = `${flight.originAirport.iata_code}-${flight.destinationAirport.iata_code}`;
+                if (this.flightPathCache[flightId] && this.flightPathCache[flightId].includes(line)) {
+                    shouldRemove = false;
+                }
+            });
+            if (shouldRemove && map.hasLayer(line)) {
                 map.removeLayer(line);
-                // console.log('Path removed from map');
             }
         });
     
         // Reset currentLines array
-        this.currentLines = [];
-    
-        // Additionally, clear any cached paths that are currently visible on the map
-        Object.keys(this.flightPathCache).forEach(cacheKey => {
-            this.flightPathCache[cacheKey].forEach(path => {
-                if (map.hasLayer(path)) {
-                    map.removeLayer(path);
-                    // console.log('Cached path removed from map');
-                }
+        this.currentLines = this.currentLines.filter(line => {
+            return appState.flights.some(flight => {
+                let flightId = `${flight.originAirport.iata_code}-${flight.destinationAirport.iata_code}`;
+                return this.flightPathCache[flightId] && this.flightPathCache[flightId].includes(line);
             });
         });
     
-        // console.log(`Current lines after clearing: ${this.currentLines.length}`);
-        // console.log(`Current cache size after clearing lines: ${Object.keys(this.flightPathCache).length} flight paths`);
-    
-        // New code to check cache for existing paths for flights in the flights array
-        appState.flights.forEach(flight => {
-            // This remains the same as your current implementation
-            let flightId = `${flight.originAirport.iata_code}-${flight.destinationAirport.iata_code}`;
-            if (this.flightPathCache[flightId]) {
-                 console.log(`Cache HIT for flight: ${flightId}`);
-            } else {
-                 console.log(`Cache MISS for flight: ${flightId}`);
+        // Clear cached paths not in the flights array
+        Object.keys(this.flightPathCache).forEach(cacheKey => {
+            let shouldRemove = true;
+            appState.flights.forEach(flight => {
+                let flightId = `${flight.originAirport.iata_code}-${flight.destinationAirport.iata_code}`;
+                if (cacheKey === flightId) {
+                    shouldRemove = false;
+                }
+            });
+            if (shouldRemove) {
+                this.flightPathCache[cacheKey].forEach(path => {
+                    if (map.hasLayer(path)) {
+                        map.removeLayer(path);
+                    }
+                });
+                delete this.flightPathCache[cacheKey];
             }
         });
     },       
