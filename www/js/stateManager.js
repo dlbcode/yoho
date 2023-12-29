@@ -10,6 +10,7 @@ function updateState(key, value) {
   switch (key) {
       case 'addWaypoint':
         appState.waypoints.push(value);
+        console.table(appState.waypoints);
         break;
         case 'removeWaypoint':
           appState.waypoints = appState.waypoints.filter(waypoint => waypoint.iata_code !== value);

@@ -14,15 +14,12 @@ const pathDrawing = {
                     console.log('Adding path to map');
                     path.addTo(map);
                 }
-                if (!this.currentLines.includes(path)) {
-                    this.currentLines.push(path);
-                }
             });
         } else {
             appState.flightPathToggle === 'to' ? this.drawFlightPathsToDestination(iata, directFlights) : this.drawFlightPathsFromOrigin(iata, directFlights);
         }
     },
-
+    
     drawFlightPathsFromOrigin(originIata, directFlights) {
         Object.values(directFlights).forEach(flights =>
             flights.forEach(flight => {
@@ -70,7 +67,7 @@ const pathDrawing = {
     
     createFlightPath(origin, destination, flight, lngOffset) {
         console.log('createFlightPath - Creating flight path');
-        let flightId = `${flight.originAirport.iata_code}-${flight.destinationAirport.iata_code}-${lngOffset}`;
+        let flightId = `${flight.originAirport.iata_code}-${flight.destinationAirport.iata_code}`;
         if (this.flightPathCache[flightId]) {
             console.log('createFlightPath - Path already exists');
             // Add the cached path to the map if it's not already there
@@ -190,13 +187,9 @@ const pathDrawing = {
     },    
     
     drawPaths(flight) {
+        console.log('drawPaths: flight:', flight);
         this.createFlightPath(flight.originAirport, flight.destinationAirport, flight, 0);
-        for (let offset = -720; offset <= 720; offset += 360) {
-            if (offset !== 0) {
-                this.createFlightPath(flight.originAirport, flight.destinationAirport, flight, offset);
-            }
-        }
-    },
+    },       
 
     getColorBasedOnPrice(price) {
         if (price === null || price === undefined || isNaN(parseFloat(price))) {
