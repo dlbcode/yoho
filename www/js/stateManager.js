@@ -1,5 +1,5 @@
 const appState = {
-  selectedAiport: null,
+  selectedAirport: null,
   numTravelers: 1,
   flightPathToggle: 'from',
   waypoints: [],

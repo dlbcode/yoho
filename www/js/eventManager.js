@@ -23,36 +23,27 @@ function handleStateChange(event) {
         // Create an additional field for the next waypoint
         createWaypointField(appState.waypoints.length + 1);
 
-        // Create a flight object if there are at least two waypoints
-        if (appState.waypoints.length > 1) {
-            // console.log('handleStateChange: addWaypoint');
-            const lastWaypointIndex = appState.waypoints.length - 1;
-            const fromIata = appState.waypoints[lastWaypointIndex - 1].iata_code;
-            const toIata = appState.waypoints[lastWaypointIndex].iata_code;
-            const flight = flightMap.findFlight(fromIata, toIata);
-            if (flight) {
-                updateState('addFlight', flight);
-            }
-        }
-    }
-    if (key === 'removeWaypoint') {
-        appState.flights = [];
-        for (let i = 0; i < appState.waypoints.length - 1; i++) {
-            const fromWaypoint = appState.waypoints[i];
-            const toWaypoint = appState.waypoints[i + 1];
-            const flight = flightMap.findFlight(fromWaypoint.iata_code, toWaypoint.iata_code);
-            if (flight) {
-                appState.flights.push(flight);
-            }
-        }
+        // Update flights array based on the current waypoints
+        updateFlightsArray();
     }
 
     if (key === 'addFlight') {
-        // console.log('handleStateChange: addFlight - ', value.origin, 'to', value.destination);
         console.table(appState.flights);
         pathDrawing.createFlightPath(value.originAirport, value.destinationAirport, value, 0);
     }
+}
 
+function updateFlightsArray() {
+    appState.flights = [];
+    for (let i = 0; i < appState.waypoints.length - 1; i++) {
+        const fromWaypoint = appState.waypoints[i];
+        const toWaypoint = appState.waypoints[i + 1];
+        const flight = flightMap.findFlight(fromWaypoint.iata_code, toWaypoint.iata_code);
+        if (flight) {
+            appState.flights.push(flight);
+            pathDrawing.createFlightPath(flight.originAirport, flight.destinationAirport, flight, 0);
+        }
+    }
 }
 
 function createWaypointField(index) {
