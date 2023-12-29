@@ -46,6 +46,11 @@ function handleStateChange(event) {
             }
         }
     }
+
+    if (key === 'addFlight') {
+        console.log('handleStateChange: addFlight - drawing flight path');
+        pathDrawing.createFlightPath(value.origin, value.destination, value, 0);
+    }
 }
 
 function createWaypointField(index) {
