@@ -153,7 +153,7 @@ const flightMap = {
     },
 
     markerHoverHandler(iata, event) {
-        console.log('markerHoverHandler iata - Selected Marker:' + this.selectedMarker + ' iata:' + iata + ' event:' + event);
+        // console.log('markerHoverHandler iata - Selected Marker:' + this.selectedMarker + ' iata:' + iata + ' event:' + event);
         if (this.selectedMarker !== iata) {
             if (event === 'mouseover') {
                 pathDrawing.drawFlightPaths(iata, this.directFlights, this.toggleState);

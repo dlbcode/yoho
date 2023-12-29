@@ -25,7 +25,7 @@ function handleStateChange(event) {
 
         // Create a flight object if there are at least two waypoints
         if (appState.waypoints.length > 1) {
-            console.log('handleStateChange: addWaypoint');
+            // console.log('handleStateChange: addWaypoint');
             const lastWaypointIndex = appState.waypoints.length - 1;
             const fromIata = appState.waypoints[lastWaypointIndex - 1].iata_code;
             const toIata = appState.waypoints[lastWaypointIndex].iata_code;
@@ -48,7 +48,8 @@ function handleStateChange(event) {
     }
 
     if (key === 'addFlight') {
-        console.log('handleStateChange: addFlight - ', value.origin, 'to', value.destination);
+        // console.log('handleStateChange: addFlight - ', value.origin, 'to', value.destination);
+        console.table(appState.flights);
         pathDrawing.createFlightPath(value.originAirport, value.destinationAirport, value, 0);
     }
 

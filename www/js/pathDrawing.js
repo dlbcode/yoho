@@ -11,7 +11,7 @@ const pathDrawing = {
         if (this.flightPathCache[cacheKey]) {
             this.flightPathCache[cacheKey].forEach(path => {
                 if (!map.hasLayer(path)) {
-                    console.log('Adding path to map');
+                    // console.log('Adding path to map');
                     path.addTo(map);
                 }
             });
@@ -66,10 +66,10 @@ const pathDrawing = {
     },
     
     createFlightPath(origin, destination, flight, lngOffset) {
-        console.log('createFlightPath - Creating flight path');
-        let flightId = `${flight.originAirport.iata_code}-${flight.destinationAirport.iata_code}-${lngOffset}`;
+        // console.log('createFlightPath - Creating flight path');
+        let flightId = `${flight.originAirport.iata_code}-${flight.destinationAirport.iata_code}`;
         if (this.flightPathCache[flightId]) {
-            console.log('createFlightPath - Path already exists');
+            // console.log('createFlightPath - Path already exists');
             // Add the cached path to the map if it's not already there
             this.flightPathCache[flightId].forEach(path => {
                 if (!map.hasLayer(path)) {
@@ -138,18 +138,19 @@ const pathDrawing = {
     
         // Cache the flight paths
         this.flightPathCache[flightId] = [geodesicLine, decoratedLine];
-        console.log(`Path added to cache for flightId: ${flightId}`);
-        console.log(`Current cache size: ${Object.keys(this.flightPathCache).length} flight paths`);
+        // console.log(`Path added to cache for flightId: ${flightId}`);
+        // console.log(`Current cache size: ${Object.keys(this.flightPathCache).length} flight paths`);
     },    
 
     clearFlightPaths() {
-        console.log('Clearing flight paths from map');
+        // console.log('Clearing flight paths from map');
+        // console.log(`Current lines before clearing: ${this.currentLines.length}`);
     
         // Clear current lines from the map
         this.currentLines.forEach(line => {
             if (map.hasLayer(line)) {
                 map.removeLayer(line);
-                console.log('Path removed from map');
+                // console.log('Path removed from map');
             }
         });
     
@@ -161,17 +162,28 @@ const pathDrawing = {
             this.flightPathCache[cacheKey].forEach(path => {
                 if (map.hasLayer(path)) {
                     map.removeLayer(path);
-                    console.log('Cached path removed from map');
+                    // console.log('Cached path removed from map');
                 }
             });
         });
     
-        console.log(`Current lines after clearing: ${this.currentLines.length}`);
-        console.log(`Current cache size after clearing lines: ${Object.keys(this.flightPathCache).length} flight paths`);
+        // console.log(`Current lines after clearing: ${this.currentLines.length}`);
+        // console.log(`Current cache size after clearing lines: ${Object.keys(this.flightPathCache).length} flight paths`);
+    
+        // New code to check cache for existing paths for flights in the flights array
+        appState.flights.forEach(flight => {
+            // This remains the same as your current implementation
+            let flightId = `${flight.originAirport.iata_code}-${flight.destinationAirport.iata_code}`;
+            if (this.flightPathCache[flightId]) {
+                 console.log(`Cache HIT for flight: ${flightId}`);
+            } else {
+                 console.log(`Cache MISS for flight: ${flightId}`);
+            }
+        });
     },       
     
     drawPaths(flight) {
-        console.log('drawPaths: flight:', flight);
+        // console.log('drawPaths: flight:', flight);
         this.createFlightPath(flight.originAirport, flight.destinationAirport, flight, 0);
     },       
 

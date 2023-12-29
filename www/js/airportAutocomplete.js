@@ -73,7 +73,7 @@ function getIataFromField(inputId) {
     const fieldValue = document.getElementById(inputId).value;
     const iataCodeMatch = fieldValue.match(/\(([^)]+)\)/);
     const iataCode = iataCodeMatch ? iataCodeMatch[1] : null;
-    console.log('getIataFromField:', inputId, 'fieldValue:', fieldValue, 'iataCode:', iataCode);
+    // console.log('getIataFromField:', inputId, 'fieldValue:', fieldValue, 'iataCode:', iataCode);
     return iataCode;
 }
 
