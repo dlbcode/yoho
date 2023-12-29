@@ -48,9 +48,10 @@ function handleStateChange(event) {
     }
 
     if (key === 'addFlight') {
-        console.log('handleStateChange: addFlight - drawing flight path');
+        console.log('handleStateChange: addFlight - ', value.origin, 'to', value.destination);
         pathDrawing.createFlightPath(value.origin, value.destination, value, 0);
     }
+
 }
 
 function createWaypointField(index) {
