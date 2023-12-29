@@ -33,6 +33,11 @@ function handleStateChange(event) {
     }
 }
 
+function processFlight(flight) {
+    appState.flights.push(flight);
+    pathDrawing.createFlightPath(flight.originAirport, flight.destinationAirport, flight, 0);
+}
+
 function updateFlightsArray() {
     appState.flights = [];
     for (let i = 0; i < appState.waypoints.length - 1; i++) {
@@ -40,8 +45,7 @@ function updateFlightsArray() {
         const toWaypoint = appState.waypoints[i + 1];
         const flight = flightMap.findFlight(fromWaypoint.iata_code, toWaypoint.iata_code);
         if (flight) {
-            appState.flights.push(flight);
-            pathDrawing.createFlightPath(flight.originAirport, flight.destinationAirport, flight, 0);
+            processFlight(flight);
         }
     }
 }
@@ -187,12 +191,8 @@ const eventManager = {
 };
 
 document.addEventListener('flightAdded', function (event) {
-  const flight = event.detail;
-  updateState('addFlight', flight); // Update appState with the new flight
-  // print the contents of the flights array in the console
-  console.table(appState.flights);
-  pathDrawing.clearFlightPaths();
-  pathDrawing.createFlightPath(flight.originAirport, flight.destinationAirport, flight, 0);
+    const flight = event.detail;
+    processFlight(flight);
 });
 
 const clearButton = document.getElementById('clearBtn');
