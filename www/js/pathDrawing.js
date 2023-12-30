@@ -64,6 +64,16 @@ const pathDrawing = {
             console.error('Error in drawFlightPathBetweenAirports:', error);
         }
     },
+
+    adjustLatLng(latLng) {
+        var currentBounds = map.getBounds();
+        var newLng = latLng.lng;
+
+        while (newLng < currentBounds.getWest()) newLng += 360;
+        while (newLng > currentBounds.getEast()) newLng -= 360;
+
+        return L.latLng(latLng.lat, newLng);
+    },
     
     createFlightPath(origin, destination, flight, lngOffset) {
         // console.log('createFlightPath - Creating flight path');
@@ -78,11 +88,11 @@ const pathDrawing = {
             });
             return;
         }
-    
-        var adjustedOrigin = [origin.latitude, origin.longitude + lngOffset];
-        var adjustedDestination = [destination.latitude, destination.longitude + lngOffset];
-    
-        var geodesicLine = new L.Geodesic([adjustedOrigin, adjustedDestination], {
+
+        const adjustedOriginLatLng = this.adjustLatLng(L.latLng(origin.latitude, origin.longitude));
+        const adjustedDestinationLatLng = this.adjustLatLng(L.latLng(destination.latitude, destination.longitude));
+
+        var geodesicLine = new L.Geodesic([adjustedOriginLatLng, adjustedDestinationLatLng], {
             weight: 1,
             opacity: 1,
             color: this.getColorBasedOnPrice(flight.price),
@@ -195,7 +205,17 @@ const pathDrawing = {
         }
         price = parseFloat(price);
         return price < 100 ? '#0099ff' : price < 200 ? 'green' : price < 300 ? '#abb740' : price < 400 ? 'orange' : price < 500 ? '#da4500' : '#c32929';
-    }
+    },
+
+    adjustLongitude(longitude) {
+        var currentBounds = map.getBounds();
+        var newLng = longitude;
+
+        while (newLng < currentBounds.getWest()) newLng += 360;
+        while (newLng > currentBounds.getEast()) newLng -= 360;
+
+        return newLng;
+    },
 };
 
 export { pathDrawing };

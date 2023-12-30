@@ -137,19 +137,9 @@ const flightMap = {
 
     redrawMarkers() {
         Object.values(this.markers).forEach(marker => {
-            var newLatLng = this.adjustLatLng(marker.getLatLng());
+            var newLatLng = pathDrawing.adjustLatLng(marker.getLatLng());
             marker.setLatLng(newLatLng);
         });
-    },
-
-    adjustLatLng(latLng) {
-        var currentBounds = map.getBounds();
-        var newLng = latLng.lng;
-
-        while (newLng < currentBounds.getWest()) newLng += 360;
-        while (newLng > currentBounds.getEast()) newLng -= 360;
-
-        return L.latLng(latLng.lat, newLng);
     },
 
     markerHoverHandler(iata, event) {
