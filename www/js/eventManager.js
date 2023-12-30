@@ -26,6 +26,9 @@ function handleStateChange(event) {
         // Update flights array based on the current waypoints
         updateFlightsArray();
         console.table(appState.flights);
+
+        console.log('appState: updating price');
+        flightList.updateTotalCost();
     }
 }
 

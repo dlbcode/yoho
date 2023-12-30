@@ -10,18 +10,14 @@ const flightList = {
     },
 
     updateTotalCost: function() {
-        var totalCost = 0;
-        var listItems = document.getElementById('flightDetailsList').children;
-        for (let i = 0; i < listItems.length; i++) {
-            var cost = parseFloat(listItems[i].getAttribute('data-price'));
-            if (!isNaN(cost)) {
-                totalCost += cost;
-            }
-        }
+        let totalCost = 0;
+        appState.flights.forEach(flight => {
+            totalCost += flight.price;
+        });
         totalCost *= this.numTravelers;
         document.getElementById('totalCost').textContent = `Total Trip Cost: $${totalCost.toFixed(2)}`;
         document.getElementById('numTravelers').value = this.numTravelers;
-    },
+    },    
 
     updateTravelers(id) {
         if (id === 'increaseTravelers') {
