@@ -23,9 +23,33 @@ document.addEventListener('DOMContentLoaded', (event) => {
     });
 
     function setupAutocompleteForField(fieldId) {
-        document.getElementById(fieldId).addEventListener('input', async (e) => {
+        const inputField = document.getElementById(fieldId);
+        const suggestionBox = document.getElementById(fieldId + 'Suggestions');
+
+        inputField.addEventListener('input', async (e) => {
             const airports = await fetchAirports(e.target.value);
             updateSuggestions(fieldId, airports);
+        });
+
+        // Close suggestions and blur input when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!inputField.contains(e.target) && !suggestionBox.contains(e.target)) {
+                suggestionBox.style.display = 'none'; // Hide the suggestion box
+                inputField.blur();
+            }
+        });
+
+        // Show suggestions when the input field is focused
+        inputField.addEventListener('focus', () => {
+            suggestionBox.style.display = 'block';
+        });
+
+        // Close suggestions and blur input on escape key
+        inputField.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                suggestionBox.style.display = 'none'; // Hide the suggestion box
+                inputField.blur();
+            }
         });
     }
 
@@ -34,13 +58,14 @@ document.addEventListener('DOMContentLoaded', (event) => {
     function updateSuggestions(inputId, airports) {
         const suggestionBox = document.getElementById(inputId + 'Suggestions');
         suggestionBox.innerHTML = '';
+        suggestionBox.style.display = 'block'; // Show the suggestion box
         airports.forEach(airport => {
             const div = document.createElement('div');
             div.textContent = `${airport.name} (${airport.iata_code}) - ${airport.city}, ${airport.country}`;
             div.addEventListener('click', () => {
                 const inputField = document.getElementById(inputId);
                 inputField.value = `${airport.city} (${airport.iata_code})`;
-                suggestionBox.innerHTML = '';
+                suggestionBox.style.display = 'none'; // Hide the suggestion box
 
                 // Dispatch custom event to add the selected airport to waypoints
                 const selectedAirportEvent = new CustomEvent('airportSelected', { detail: { airport } });
@@ -73,7 +98,6 @@ function getIataFromField(inputId) {
     const fieldValue = document.getElementById(inputId).value;
     const iataCodeMatch = fieldValue.match(/\(([^)]+)\)/);
     const iataCode = iataCodeMatch ? iataCodeMatch[1] : null;
-    // console.log('getIataFromField:', inputId, 'fieldValue:', fieldValue, 'iataCode:', iataCode);
     return iataCode;
 }
 

@@ -12,7 +12,7 @@ function updateState(key, value) {
         appState.waypoints.push(value);
         console.table(appState.waypoints);
         break;
-        case 'removeWaypoint':
+      case 'removeWaypoint':
           appState.waypoints = appState.waypoints.filter(waypoint => waypoint.iata_code !== value);
           break;
       case 'addFlight':
@@ -26,7 +26,5 @@ function updateState(key, value) {
   }
   document.dispatchEvent(new CustomEvent('stateChange', { detail: { key, value } }));
 }
-
-
 
 export { appState, updateState };

@@ -1,4 +1,4 @@
-import { map } from './map.js';
+import { map, blueDotIcon, magentaDotIcon } from './map.js';
 import { flightMap } from './flightMap.js';
 import { flightList } from './flightList.js';
 import { pathDrawing } from './pathDrawing.js';
@@ -12,6 +12,7 @@ function handleStateChange(event) {
     if (key === 'addWaypoint' || key === 'removeWaypoint') {
         // Clear existing waypoint fields
         const container = document.querySelector('.airport-selection');
+
         container.innerHTML = '';
 
         // Recreate waypoint fields based on the current waypoints
@@ -19,6 +20,9 @@ function handleStateChange(event) {
             let waypointField = createWaypointField(index + 1);
             waypointField.value = `${waypoint.city} (${waypoint.iata_code})`;
         });
+
+        // Update marker icons based on the current waypoints
+        updateMarkerIcons();
 
         // Create an additional field for the next waypoint
         createWaypointField(appState.waypoints.length + 1);
@@ -30,6 +34,14 @@ function handleStateChange(event) {
         console.log('appState: updating price');
         flightList.updateTotalCost();
     }
+}
+
+function updateMarkerIcons() {
+    console.log('appState: updating marker icons');
+    const waypointIataCodes = new Set(appState.waypoints.map(waypoint => waypoint.iata_code));
+    Object.entries(flightMap.markers).forEach(([iata, marker]) => {
+        marker.setIcon(waypointIataCodes.has(iata) ? magentaDotIcon : blueDotIcon);
+    });
 }
 
 function updateFlightsArray() {
