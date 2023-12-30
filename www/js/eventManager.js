@@ -25,11 +25,7 @@ function handleStateChange(event) {
 
         // Update flights array based on the current waypoints
         updateFlightsArray();
-    }
-
-    if (key === 'addFlight') {
         console.table(appState.flights);
-        pathDrawing.createFlightPath(value.originAirport, value.destinationAirport, value, 0);
     }
 }
 
@@ -128,7 +124,7 @@ const eventManager = {
           const toAirportValue = getIataFromField('toAirport');
                   
           // Fetch or compute directFlights
-          let directFlights = await this.fetchdirectFlights();
+          let directFlights = await flightMap.plotFlightPaths();
     
           if (fromAirportValue || toAirportValue) {
             const selectedIata = fromAirportValue || toAirportValue;
@@ -140,25 +136,6 @@ const eventManager = {
           }
         });
       });
-    },
-    
-    fetchdirectFlights: async function() {
-        // Fetch flights data and structure it by destination
-        let directFlights = {};
-        try {
-            const response = await fetch('http://yonderhop.com:3000/flights');
-            const flights = await response.json();
-            flights.forEach(flight => {
-                if (flight.originAirport && flight.destinationAirport) {
-                    let destIata = flight.destinationAirport.iata_code;
-                    directFlights[destIata] = directFlights[destIata] || [];
-                    directFlights[destIata].push(flight);
-                }
-            });
-        } catch (error) {
-            console.error('Error fetching flights:', error);
-        }
-        return directFlights;
     },
 
     setupAllPathsButtonEventListener: function () {
@@ -185,15 +162,6 @@ const eventManager = {
         }
     },
 };
-
-document.addEventListener('flightAdded', function (event) {
-  const flight = event.detail;
-  updateState('addFlight', flight); // Update appState with the new flight
-  // print the contents of the flights array in the console
-  console.table(appState.flights);
-  pathDrawing.clearFlightPaths();
-  pathDrawing.createFlightPath(flight.originAirport, flight.destinationAirport, flight, 0);
-});
 
 const clearButton = document.getElementById('clearBtn');
 clearButton.addEventListener('click', function () {

@@ -16,7 +16,7 @@ const flightMap = {
     lastFetchTime: null,
     cacheDuration: 60000, // 1 minute in milliseconds
 
-    plotFlightPaths() {
+    async plotFlightPaths() {
         const currentTime = new Date().getTime();
         if (this.cachedFlights && this.lastFetchTime && currentTime - this.lastFetchTime < this.cacheDuration) {
             this.processFlightData(this.cachedFlights);
