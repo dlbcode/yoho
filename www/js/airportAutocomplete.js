@@ -17,10 +17,12 @@ async function fetchAirports(query) {
 function setupAutocompleteForField(fieldId) {
     const inputField = document.getElementById(fieldId);
     const suggestionBox = document.getElementById(fieldId + 'Suggestions');
+    let selectionMade = false; // Track if a selection has been made
 
     inputField.addEventListener('input', async () => {
         const airports = await fetchAirports(inputField.value);
-        updateSuggestions(fieldId, airports);
+        updateSuggestions(fieldId, airports, (value) => selectionMade = value);
+        selectionMade = false; // Reset selection flag on new input
     });
 
     // Toggle suggestion box display
@@ -28,22 +30,34 @@ function setupAutocompleteForField(fieldId) {
         suggestionBox.style.display = display ? 'block' : 'none';
     };
 
+    // Clear input field if no selection is made
+    const clearInputField = () => {
+        if (!selectionMade) {
+            inputField.value = '';
+        }
+    };
+
     // Event listener for outside click
     const outsideClickListener = (e) => {
         if (!inputField.contains(e.target) && !suggestionBox.contains(e.target)) {
             toggleSuggestionBox(false);
+            clearInputField();
         }
     };
 
     // Add event listeners for focus, keydown, and blur
     inputField.addEventListener('focus', () => toggleSuggestionBox(true));
     inputField.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') toggleSuggestionBox(false);
+        if (e.key === 'Escape') {
+            toggleSuggestionBox(false);
+            clearInputField();
+        }
     });
-
-    // Delay hiding the suggestion box on blur to allow for selection
     inputField.addEventListener('blur', () => {
-        setTimeout(() => toggleSuggestionBox(false), 200); // Delay can be adjusted
+        setTimeout(() => {
+            toggleSuggestionBox(false);
+            clearInputField();
+        }, 200); // Delay to allow for selection
     });
 
     // Add outside click listener once
@@ -53,17 +67,19 @@ function setupAutocompleteForField(fieldId) {
     }
 }
 
-function updateSuggestions(inputId, airports) {
+function updateSuggestions(inputId, airports, setSelectionMade) {
     const suggestionBox = document.getElementById(inputId + 'Suggestions');
     suggestionBox.innerHTML = '';
     airports.forEach(airport => {
         const div = document.createElement('div');
         div.textContent = `${airport.name} (${airport.iata_code}) - ${airport.city}, ${airport.country}`;
         div.addEventListener('click', () => {
-            document.getElementById(inputId).value = `${airport.city} (${airport.iata_code})`;
+            const inputField = document.getElementById(inputId);
+            inputField.value = `${airport.city} (${airport.iata_code})`;
             suggestionBox.style.display = 'none';
             document.dispatchEvent(new CustomEvent('airportSelected', { detail: { airport } }));
             updateState(inputId, airport.iata_code);
+            setSelectionMade(true); // Update selectionMade
         });
         suggestionBox.appendChild(div);
     });
