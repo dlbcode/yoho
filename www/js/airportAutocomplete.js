@@ -1,104 +1,99 @@
-import { updateState, appState } from './stateManager.js';
+import { updateState } from './stateManager.js';
 
-document.addEventListener('DOMContentLoaded', (event) => {
-    // Function to fetch airports from your endpoint
-    async function fetchAirports(query) {
-        try {
-            const response = await fetch(`http://yonderhop.com:3000/airports?query=${query}`);
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            const airports = await response.json();
-            return airports;
-        } catch (error) {
-            console.error('Fetch error:', error);
-            return [];
+// Function to fetch airports from your endpoint
+async function fetchAirports(query) {
+    try {
+        const response = await fetch(`http://yonderhop.com:3000/airports?query=${query}`);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
         }
+        return await response.json();
+    } catch (error) {
+        console.error('Fetch error:', error);
+        return [];
     }
+}
 
-    // Listen for new waypoint field creation
-    document.addEventListener('newWaypointField', (event) => {
-        const { fieldId } = event.detail;
-        setupAutocompleteForField(fieldId);
+function setupAutocompleteForField(fieldId) {
+    const inputField = document.getElementById(fieldId);
+    const suggestionBox = document.getElementById(fieldId + 'Suggestions');
+
+    inputField.addEventListener('input', async () => {
+        const airports = await fetchAirports(inputField.value);
+        updateSuggestions(fieldId, airports);
     });
 
-    function setupAutocompleteForField(fieldId) {
-        const inputField = document.getElementById(fieldId);
-        const suggestionBox = document.getElementById(fieldId + 'Suggestions');
+    // Toggle suggestion box display
+    const toggleSuggestionBox = (display) => {
+        suggestionBox.style.display = display ? 'block' : 'none';
+    };
 
-        inputField.addEventListener('input', async (e) => {
-            const airports = await fetchAirports(e.target.value);
-            updateSuggestions(fieldId, airports);
-        });
+    // Event listener for outside click
+    const outsideClickListener = (e) => {
+        if (!inputField.contains(e.target) && !suggestionBox.contains(e.target)) {
+            toggleSuggestionBox(false);
+        }
+    };
 
-        // Close suggestions and blur input when clicking outside
-        document.addEventListener('click', (e) => {
-            if (!inputField.contains(e.target) && !suggestionBox.contains(e.target)) {
-                suggestionBox.style.display = 'none'; // Hide the suggestion box
-                inputField.blur();
-            }
-        });
+    // Add event listeners for focus, keydown, and blur
+    inputField.addEventListener('focus', () => toggleSuggestionBox(true));
+    inputField.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') toggleSuggestionBox(false);
+    });
 
-        // Show suggestions when the input field is focused
-        inputField.addEventListener('focus', () => {
-            suggestionBox.style.display = 'block';
-        });
+    // Delay hiding the suggestion box on blur to allow for selection
+    inputField.addEventListener('blur', () => {
+        setTimeout(() => toggleSuggestionBox(false), 200); // Delay can be adjusted
+    });
 
-        // Close suggestions and blur input on escape key
-        inputField.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') {
-                suggestionBox.style.display = 'none'; // Hide the suggestion box
-                inputField.blur();
-            }
-        });
+    // Add outside click listener once
+    if (!window.outsideClickListenerAdded) {
+        document.addEventListener('click', outsideClickListener);
+        window.outsideClickListenerAdded = true;
     }
+}
 
+function updateSuggestions(inputId, airports) {
+    const suggestionBox = document.getElementById(inputId + 'Suggestions');
+    suggestionBox.innerHTML = '';
+    airports.forEach(airport => {
+        const div = document.createElement('div');
+        div.textContent = `${airport.name} (${airport.iata_code}) - ${airport.city}, ${airport.country}`;
+        div.addEventListener('click', () => {
+            document.getElementById(inputId).value = `${airport.city} (${airport.iata_code})`;
+            suggestionBox.style.display = 'none';
+            document.dispatchEvent(new CustomEvent('airportSelected', { detail: { airport } }));
+            updateState(inputId, airport.iata_code);
+        });
+        suggestionBox.appendChild(div);
+    });
+    if (airports.length > 0) suggestionBox.style.display = 'block';
+}
+
+document.addEventListener('DOMContentLoaded', () => {
     setupAutocompleteForField('waypoint1');
 
-    function updateSuggestions(inputId, airports) {
-        const suggestionBox = document.getElementById(inputId + 'Suggestions');
-        suggestionBox.innerHTML = '';
-        suggestionBox.style.display = 'block'; // Show the suggestion box
-        airports.forEach(airport => {
-            const div = document.createElement('div');
-            div.textContent = `${airport.name} (${airport.iata_code}) - ${airport.city}, ${airport.country}`;
-            div.addEventListener('click', () => {
-                const inputField = document.getElementById(inputId);
-                inputField.value = `${airport.city} (${airport.iata_code})`;
-                suggestionBox.style.display = 'none'; // Hide the suggestion box
+    document.addEventListener('newWaypointField', (event) => {
+        setupAutocompleteForField(event.detail.fieldId);
+    });
 
-                // Dispatch custom event to add the selected airport to waypoints
-                const selectedAirportEvent = new CustomEvent('airportSelected', { detail: { airport } });
-                document.dispatchEvent(selectedAirportEvent);
-
-                updateState(inputId, airport.iata_code);
-            });
-            suggestionBox.appendChild(div);
-        });
-    }
-    
     document.addEventListener('airportSelected', (event) => {
-        const { airport } = event.detail;
-        if (airport) {
-            updateState('addWaypoint', airport);
+        if (event.detail.airport) {
+            updateState('addWaypoint', event.detail.airport);
         }
     });
 
     document.addEventListener('stateChange', (event) => {
-        const { key, value } = event.detail;
-        if (key === 'waypoints') {
-            value.forEach((_, index) => {
+        if (event.detail.key === 'waypoints') {
+            event.detail.value.forEach((_, index) => {
                 setupAutocompleteForField(`waypoint${index + 1}`);
             });
         }
     });
 });
 
-function getIataFromField(inputId) {
+export function getIataFromField(inputId) {
     const fieldValue = document.getElementById(inputId).value;
     const iataCodeMatch = fieldValue.match(/\(([^)]+)\)/);
-    const iataCode = iataCodeMatch ? iataCodeMatch[1] : null;
-    return iataCode;
+    return iataCodeMatch ? iataCodeMatch[1] : null;
 }
-
-export { getIataFromField };
