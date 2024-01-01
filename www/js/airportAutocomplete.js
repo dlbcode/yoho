@@ -90,7 +90,8 @@ function updateSuggestions(inputId, airports, setSelectionMade) {
             inputField.value = `${airport.city} (${airport.iata_code})`;
             suggestionBox.style.display = 'none';
             document.dispatchEvent(new CustomEvent('airportSelected', { detail: { airport } }));
-            updateState(inputId, airport.iata_code);
+            // updateState(inputId, airport.iata_code);
+            // console.log('appState: adding waypoint, fieldId:', inputId, 'iata_code:', airport.iata_code);
             setSelectionMade(true); // Update selectionMade
         });
         suggestionBox.appendChild(div);

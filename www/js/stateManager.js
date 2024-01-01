@@ -13,6 +13,7 @@ function updateState(key, value) {
         if (waypointIndex !== -1) {
             appState.waypoints[waypointIndex].iata_code = value.iataCode;
         }
+        console.table(appState.waypoints);
         break;
       case 'addWaypoint':
         appState.waypoints.push(value);

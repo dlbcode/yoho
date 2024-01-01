@@ -9,7 +9,7 @@ import { appState, updateState } from './stateManager.js';
 function handleStateChange(event) {
     const { key, value } = event.detail;
 
-    if (key === 'addWaypoint' || key === 'removeWaypoint') {
+    if (key === 'addWaypoint' || key === 'removeWaypoint' || key === 'updateWaypoint') {
         // Clear existing waypoint fields
         const container = document.querySelector('.airport-selection');
         container.innerHTML = '';
@@ -29,6 +29,7 @@ function handleStateChange(event) {
         // Update flights array based on the current waypoints
         updateFlightsArray();
         console.table(appState.flights);
+        pathDrawing.clearFlightPaths();
 
         console.log('appState: updating price');
         flightList.updateTotalCost();
@@ -79,7 +80,6 @@ const eventManager = {
     setupEventListeners: function () {
         this.setupMapEventListeners();
         this.setupUIEventListeners();
-        this.setupAirportFieldListeners();
         this.setupAllPathsButtonEventListener();
         document.addEventListener('stateChange', handleStateChange);
     },
@@ -126,29 +126,6 @@ const eventManager = {
         // Assuming you have a flightMap object, you should use it here
         map.addEventListener('zoomChanged', function () {
             flightMap.updateMarkersForZoom();
-        });
-    },
-
-    setupAirportFieldListeners: function () {
-        const airportFields = document.querySelectorAll('#fromAirport, #toAirport');
-
-        airportFields.forEach((field) => {
-            field.addEventListener('airportSelected', async (event) => {
-                const fromAirportValue = getIataFromField('fromAirport');
-                const toAirportValue = getIataFromField('toAirport');
-
-                // Fetch or compute directFlights
-                let directFlights = await flightMap.plotFlightPaths();
-
-                if (fromAirportValue || toAirportValue) {
-                    const selectedIata = fromAirportValue || toAirportValue;
-                    pathDrawing.clearFlightPaths();
-                    pathDrawing.drawFlightPaths(selectedIata, directFlights);
-                } else {
-                    flightMap.clearMultiHopPaths = true;
-                    pathDrawing.clearFlightPaths();
-                }
-            });
         });
     },
 
