@@ -1,4 +1,5 @@
 import { appState, updateState } from './stateManager.js';
+import { map } from './map.js';
 
 async function fetchAirports(query) {
     try {
@@ -110,6 +111,12 @@ document.addEventListener('DOMContentLoaded', () => {
             updateState('updateWaypoint', { index: waypointIndex, data: airport });
         } else {
             updateState('addWaypoint', airport);
+        }
+
+        // Move map view to include the selected airport marker
+        if (airport && airport.latitude && airport.longitude) {
+            const latLng = L.latLng(airport.latitude, airport.longitude);
+            map.flyTo(latLng, 4); // Adjust zoom level as needed
         }
     });
          
