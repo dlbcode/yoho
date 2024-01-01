@@ -64,19 +64,21 @@ const flightMap = {
             console.error('Incomplete airport data:', airport);
             return;
         }
-
+    
         let iata = airport.iata_code;
         if (this.markers[iata]) return;
-
+    
+        let icon = appState.waypoints.some(wp => wp.iata_code === iata) ? magentaDotIcon : blueDotIcon;
+    
         if (airport.weight <= map.getZoom()) {
             const latLng = L.latLng(airport.latitude, airport.longitude);
-            const marker = L.marker(latLng, {icon: blueDotIcon}).addTo(map)
+            const marker = L.marker(latLng, {icon: icon}).addTo(map)
             .bindPopup(`<b>${airport.name}</b><br>${airport.city}, ${airport.country}`);
-
+    
             eventManager.attachMarkerEventListeners(iata, marker, airport);
             this.markers[iata] = marker;
         }
-    },
+    },    
 
     handleMarkerClick(airport, clickedMarker) {
         const lastWaypoint = appState.waypoints[appState.waypoints.length - 1];
