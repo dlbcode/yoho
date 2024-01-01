@@ -1,6 +1,5 @@
 import { appState, updateState } from './stateManager.js';
 
-// Function to fetch airports from your endpoint
 async function fetchAirports(query) {
     try {
         const response = await fetch(`http://yonderhop.com:3000/airports?query=${query}`);
@@ -61,10 +60,8 @@ function setupAutocompleteForField(fieldId) {
             const iataCode = getIataFromField(fieldId);
             const index = parseInt(fieldId.replace('waypoint', '')) - 1;
             if (iataCode) {
-              // Update waypoint
               updateState('updateWaypoint', { index, data: { iataCode } });
             } else {
-              // Remove waypoint by index
               updateState('removeWaypoint', index);
             }
           }
@@ -89,7 +86,7 @@ function updateSuggestions(inputId, airports, setSelectionMade) {
             inputField.value = `${airport.city} (${airport.iata_code})`;
             suggestionBox.style.display = 'none';
             document.dispatchEvent(new CustomEvent('airportSelected', { 
-                detail: { airport, fieldId: inputId } // Ensure fieldId is passed here
+                detail: { airport, fieldId: inputId }
             }));
             setSelectionMade(true);
         });        
@@ -106,7 +103,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     document.addEventListener('airportSelected', (event) => {
-        const { airport, fieldId } = event.detail; // Ensure fieldId is obtained from event detail
+        const { airport, fieldId } = event.detail;
         const waypointIndex = parseInt(fieldId.replace('waypoint', '')) - 1;
     
         if (waypointIndex >= 0 && waypointIndex < appState.waypoints.length) {
@@ -116,7 +113,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
          
-
     document.addEventListener('stateChange', (event) => {
         if (event.detail.key === 'waypoints') {
             event.detail.value.forEach((_, index) => {

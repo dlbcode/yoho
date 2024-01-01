@@ -123,7 +123,6 @@ const eventManager = {
             }
         });
 
-        // Assuming you have a flightMap object, you should use it here
         map.addEventListener('zoomChanged', function () {
             flightMap.updateMarkersForZoom();
         });
@@ -157,7 +156,6 @@ window.addEventListener('resize', function () {
     document.getElementById('map').style.height = height + 'px';
 });
 
-// Initialize all event listeners after the DOM content is fully loaded
 document.addEventListener('DOMContentLoaded', function () {
     eventManager.setupEventListeners();
 });

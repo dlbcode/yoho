@@ -73,15 +73,16 @@ const flightMap = {
             const marker = L.marker(latLng, {icon: blueDotIcon}).addTo(map)
             .bindPopup(`<b>${airport.name}</b><br>${airport.city}, ${airport.country}`);
 
-            // Use eventManager to attach event listeners to markers
             eventManager.attachMarkerEventListeners(iata, marker, airport);
             this.markers[iata] = marker;
         }
     },
 
     handleMarkerClick(airport, clickedMarker) {
-        if (clickedMarker.selected) {
-            updateState('removeWaypoint', airport.iata_code);
+        const lastWaypoint = appState.waypoints[appState.waypoints.length - 1];
+        console.log('lastWaypoint:', lastWaypoint);
+        if (lastWaypoint && lastWaypoint.iata_code === airport.iata_code) {
+            updateState('removeWaypoint', appState.waypoints.length - 1);
             clickedMarker.setIcon(blueDotIcon);
         } else {
             updateState('addWaypoint', airport);
@@ -90,7 +91,7 @@ const flightMap = {
         }
     
         clickedMarker.selected = !clickedMarker.selected;
-    },
+    },    
 
     findFlight(fromIata, toIata) {
         for (const flights of Object.values(this.directFlights)) {
@@ -129,7 +130,7 @@ const flightMap = {
 
     getColorBasedOnPrice(price) {
         if (price === null || price === undefined || isNaN(parseFloat(price))) {
-            return 'grey'; // Return grey for flights without price data
+            return 'grey';
         }
         price = parseFloat(price);
         return price < 100 ? '#0099ff' : price < 200 ? 'green' : price < 300 ? '#abb740' : price < 400 ? 'orange' : price < 500 ? '#da4500' : '#c32929';
@@ -143,7 +144,6 @@ const flightMap = {
     },
 
     markerHoverHandler(iata, event) {
-        // console.log('markerHoverHandler iata - Selected Marker:' + this.selectedMarker + ' iata:' + iata + ' event:' + event);
         if (this.selectedMarker !== iata) {
             if (event === 'mouseover') {
                 pathDrawing.drawFlightPaths(iata, this.directFlights, this.toggleState);

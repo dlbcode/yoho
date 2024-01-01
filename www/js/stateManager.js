@@ -10,7 +10,6 @@ function updateState(key, value) {
   switch (key) {
     case 'updateWaypoint':
       console.log('updateWaypoint');
-      // Assuming value contains the index and the updated waypoint data
       if (value.index >= 0 && value.index < appState.waypoints.length) {
         appState.waypoints[value.index] = {...appState.waypoints[value.index], ...value.data};
       }
