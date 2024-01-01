@@ -91,9 +91,7 @@ function updateSuggestions(inputId, airports, setSelectionMade) {
             const inputField = document.getElementById(inputId);
             inputField.value = `${airport.city} (${airport.iata_code})`;
             suggestionBox.style.display = 'none';
-            document.dispatchEvent(new CustomEvent('airportSelected', { detail: { airport } }));
-            // updateState(inputId, airport.iata_code);
-            // console.log('appState: adding waypoint, fieldId:', inputId, 'iata_code:', airport.iata_code);
+            document.dispatchEvent(new CustomEvent('airportSelected', { detail: { airport, fieldId: inputId } }));
             setSelectionMade(true); // Update selectionMade
         });
         suggestionBox.appendChild(div);
@@ -109,8 +107,17 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     document.addEventListener('airportSelected', (event) => {
-        if (event.detail.airport) {
-            updateState('addWaypoint', event.detail.airport);
+        const { airport, fieldId } = event.detail;
+        if (airport && fieldId) {
+            const waypointIndex = parseInt(fieldId.replace('waypoint', '')) - 1;
+
+            if (waypointIndex >= 0 && waypointIndex < appState.waypoints.length) {
+                // Update existing waypoint
+                updateState('updateWaypoint', { ...airport, fieldId });
+            } else {
+                // Add new waypoint
+                updateState('addWaypoint', { ...airport, fieldId });
+            }
         }
     });
 
