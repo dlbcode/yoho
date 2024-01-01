@@ -1,4 +1,4 @@
-import { updateState } from './stateManager.js';
+import { appState, updateState } from './stateManager.js';
 
 // Function to fetch airports from your endpoint
 async function fetchAirports(query) {
@@ -56,9 +56,21 @@ function setupAutocompleteForField(fieldId) {
     inputField.addEventListener('blur', () => {
         setTimeout(() => {
             toggleSuggestionBox(false);
-            clearInputField();
+            const iataCode = getIataFromField(fieldId);
+            if (iataCode) {
+                // Update waypoint
+                updateState('updateWaypoint', { fieldId, iataCode });
+            } else {
+                // Remove waypoint by IATA code
+                const index = parseInt(fieldId.replace('waypoint', '')) - 1;
+                const waypointToRemove = appState.waypoints[index]?.iata_code;
+                if (waypointToRemove) {
+                    updateState('removeWaypoint', waypointToRemove);
+                }
+            }
         }, 200); // Delay to allow for selection
     });
+            
 
     // Add outside click listener once
     if (!window.outsideClickListenerAdded) {
