@@ -59,16 +59,17 @@ function setupAutocompleteForField(fieldId) {
           if (!selectionMade) {
             toggleSuggestionBox(false);
             const iataCode = getIataFromField(fieldId);
+            const index = parseInt(fieldId.replace('waypoint', '')) - 1;
             if (iataCode) {
               // Update waypoint
-              updateState('updateWaypoint', { fieldId, iataCode });
+              updateState('updateWaypoint', { index, data: { iataCode } });
             } else {
-              // Remove waypoint by fieldId
-              updateState('removeWaypoint', fieldId);
+              // Remove waypoint by index
+              updateState('removeWaypoint', index);
             }
           }
         }, 200); // Delay to allow for selection
-      });              
+      });                    
 
     // Add outside click listener once
     if (!window.outsideClickListenerAdded) {
@@ -87,9 +88,11 @@ function updateSuggestions(inputId, airports, setSelectionMade) {
             const inputField = document.getElementById(inputId);
             inputField.value = `${airport.city} (${airport.iata_code})`;
             suggestionBox.style.display = 'none';
-            document.dispatchEvent(new CustomEvent('airportSelected', { detail: { airport, fieldId: inputId } }));
-            setSelectionMade(true); // Update selectionMade
-        });
+            document.dispatchEvent(new CustomEvent('airportSelected', { 
+                detail: { airport, fieldId: inputId } // Ensure fieldId is passed here
+            }));
+            setSelectionMade(true);
+        });        
         suggestionBox.appendChild(div);
     });
     if (airports.length > 0) suggestionBox.style.display = 'block';
@@ -103,19 +106,16 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     document.addEventListener('airportSelected', (event) => {
-        const { airport, fieldId } = event.detail;
-        if (airport && fieldId) {
-            const waypointIndex = parseInt(fieldId.replace('waypoint', '')) - 1;
-
-            if (waypointIndex >= 0 && waypointIndex < appState.waypoints.length) {
-                // Update existing waypoint
-                updateState('updateWaypoint', { ...airport, fieldId });
-            } else {
-                // Add new waypoint
-                updateState('addWaypoint', { ...airport, fieldId });
-            }
+        const { airport, fieldId } = event.detail; // Ensure fieldId is obtained from event detail
+        const waypointIndex = parseInt(fieldId.replace('waypoint', '')) - 1;
+    
+        if (waypointIndex >= 0 && waypointIndex < appState.waypoints.length) {
+            updateState('updateWaypoint', { index: waypointIndex, data: airport });
+        } else {
+            updateState('addWaypoint', airport);
         }
     });
+         
 
     document.addEventListener('stateChange', (event) => {
         if (event.detail.key === 'waypoints') {

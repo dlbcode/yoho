@@ -10,10 +10,9 @@ function updateState(key, value) {
   switch (key) {
     case 'updateWaypoint':
       console.log('updateWaypoint');
-      const waypointIndex = appState.waypoints.findIndex(w => w.fieldId === value.fieldId);
-      if (waypointIndex !== -1) {
-          // Update the existing waypoint entry
-          appState.waypoints[waypointIndex] = {...appState.waypoints[waypointIndex], ...value};
+      // Assuming value contains the index and the updated waypoint data
+      if (value.index >= 0 && value.index < appState.waypoints.length) {
+        appState.waypoints[value.index] = {...appState.waypoints[value.index], ...value.data};
       }
       console.table(appState.waypoints);
       break;
@@ -24,7 +23,7 @@ function updateState(key, value) {
       break;
     case 'removeWaypoint':
       console.log('removeWaypoint');
-      appState.waypoints = appState.waypoints.filter(waypoint => waypoint.fieldId !== value);
+      appState.waypoints.splice(value, 1);
       console.table(appState.waypoints);
       break;      
     case 'addFlight':
