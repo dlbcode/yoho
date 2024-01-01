@@ -12,7 +12,6 @@ function handleStateChange(event) {
     if (key === 'addWaypoint' || key === 'removeWaypoint') {
         // Clear existing waypoint fields
         const container = document.querySelector('.airport-selection');
-
         container.innerHTML = '';
 
         // Recreate waypoint fields based on the current waypoints
@@ -102,25 +101,25 @@ const eventManager = {
     },
 
     setupUIEventListeners: function () {
-        const flightPathToggle = document.getElementById('flightPathToggle');
-        flightPathToggle.addEventListener('change', function () {
-            updateState('flightPathToggle', this.value);
-            if (flightMap.selectedMarker) {
-                pathDrawing.drawFlightPaths(flightMap.selectedMarker);
+        document.addEventListener('change', function (event) {
+            if (event.target.id === 'flightPathToggle') {
+                updateState('flightPathToggle', event.target.value);
+                if (flightMap.selectedMarker) {
+                    pathDrawing.drawFlightPaths(flightMap.selectedMarker);
+                }
             }
         });
 
-        const increaseTravelers = document.getElementById('increaseTravelers');
-        increaseTravelers.addEventListener('click', function () {
-            updateState('numTravelers', appState.numTravelers + 1);
-            flightList.updateTotalCost();
-        });
-
-        const decreaseTravelers = document.getElementById('decreaseTravelers');
-        decreaseTravelers.addEventListener('click', function () {
-            if (appState.numTravelers > 1) {
+        document.addEventListener('click', function (event) {
+            if (event.target.id === 'increaseTravelers') {
+                updateState('numTravelers', appState.numTravelers + 1);
+                flightList.updateTotalCost();
+            } else if (event.target.id === 'decreaseTravelers' && appState.numTravelers > 1) {
                 updateState('numTravelers', appState.numTravelers - 1);
                 flightList.updateTotalCost();
+            } else if (event.target.id === 'clearBtn') {
+                flightList.clearFlightList();
+                pathDrawing.clearFlightPaths();
             }
         });
 
@@ -131,42 +130,40 @@ const eventManager = {
     },
 
     setupAirportFieldListeners: function () {
-      const airportFields = document.querySelectorAll('#fromAirport, #toAirport');
-    
-      airportFields.forEach((field) => {
-        field.addEventListener('airportSelected', async (event) => {
-          const fromAirportValue = getIataFromField('fromAirport');
-          const toAirportValue = getIataFromField('toAirport');
-                  
-          // Fetch or compute directFlights
-          let directFlights = await flightMap.plotFlightPaths();
-    
-          if (fromAirportValue || toAirportValue) {
-            const selectedIata = fromAirportValue || toAirportValue;
-            pathDrawing.clearFlightPaths();
-            pathDrawing.drawFlightPaths(selectedIata, directFlights);
-          } else {
-            flightMap.clearMultiHopPaths = true;
-            pathDrawing.clearFlightPaths();
-          }
+        const airportFields = document.querySelectorAll('#fromAirport, #toAirport');
+
+        airportFields.forEach((field) => {
+            field.addEventListener('airportSelected', async (event) => {
+                const fromAirportValue = getIataFromField('fromAirport');
+                const toAirportValue = getIataFromField('toAirport');
+
+                // Fetch or compute directFlights
+                let directFlights = await flightMap.plotFlightPaths();
+
+                if (fromAirportValue || toAirportValue) {
+                    const selectedIata = fromAirportValue || toAirportValue;
+                    pathDrawing.clearFlightPaths();
+                    pathDrawing.drawFlightPaths(selectedIata, directFlights);
+                } else {
+                    flightMap.clearMultiHopPaths = true;
+                    pathDrawing.clearFlightPaths();
+                }
+            });
         });
-      });
     },
 
     setupAllPathsButtonEventListener: function () {
-        const allPathsButton = document.getElementById('allPathsBtn');
-        if (allPathsButton) {
-            allPathsButton.addEventListener('click', function () {
+        document.addEventListener('click', function (event) {
+            if (event.target.id === 'allPathsBtn') {
                 drawAllFlightPaths();
-            });
-        }
+            }
+        });
     },
 
     attachMarkerEventListeners: function (iata, marker, airport) {
         marker.on('mouseover', () => flightMap.markerHoverHandler(iata, 'mouseover'));
         marker.on('mouseout', () => flightMap.markerHoverHandler(iata, 'mouseout'));
-        marker.on('click', () => { flightMap.handleMarkerClick(airport, marker);
-        });
+        marker.on('click', () => { flightMap.handleMarkerClick(airport, marker); });
     },
 
     emitCustomEvent: function (eventName, data) {
@@ -177,12 +174,6 @@ const eventManager = {
         }
     },
 };
-
-const clearButton = document.getElementById('clearBtn');
-clearButton.addEventListener('click', function () {
-    flightList.clearFlightList();
-    pathDrawing.clearFlightPaths();
-});
 
 window.addEventListener('resize', function () {
     const height = window.innerHeight;
