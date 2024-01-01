@@ -24,9 +24,9 @@ function updateState(key, value) {
       break;
     case 'removeWaypoint':
       console.log('removeWaypoint');
-      appState.waypoints = appState.waypoints.filter(waypoint => waypoint.iata_code !== value);
+      appState.waypoints = appState.waypoints.filter(waypoint => waypoint.fieldId !== value);
       console.table(appState.waypoints);
-      break;
+      break;      
     case 'addFlight':
       console.log('appState: adding flight');
       appState.flights.push(value);
