@@ -142,13 +142,36 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             updateState('addWaypoint', airport);
         }
-
+    
         // Move map view to include the selected airport marker
         if (airport && airport.latitude && airport.longitude) {
             const latLng = L.latLng(airport.latitude, airport.longitude);
-            map.flyTo(latLng, 4); // Adjust zoom level as needed
+            const currentLatLng = map.getCenter();
+            const adjustedLatLng = adjustLatLngForShortestPath(currentLatLng, latLng);
+            map.flyTo(adjustedLatLng, 4); // Adjust zoom level as needed
         }
-    }); 
+    });
+    
+    function adjustLatLngForShortestPath(currentLatLng, targetLatLng) {
+        let currentLng = currentLatLng.lng;
+        let targetLng = targetLatLng.lng;
+    
+        // Normalize longitudes to be within -180 to 180 range
+        currentLng = ((currentLng + 180) % 360 + 360) % 360 - 180;
+        targetLng = ((targetLng + 180) % 360 + 360) % 360 - 180;
+    
+        // Calculate the difference in longitude between the current and target positions
+        let lngDifference = targetLng - currentLng;
+    
+        // Adjust the target longitude for the shortest path
+        if (lngDifference > 180) {
+            targetLng -= 360;
+        } else if (lngDifference < -180) {
+            targetLng += 360;
+        }
+    
+        return L.latLng(targetLatLng.lat, targetLng);
+    }         
      
     document.addEventListener('stateChange', (event) => {
         if (event.detail.key === 'waypoints') {
