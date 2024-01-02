@@ -16,8 +16,12 @@ var magentaDotIcon = L.divIcon({
     iconAnchor: [5, 5]
 });
 
-// Initialize map
-var map = L.map('map', { zoomControl: false, minZoom: 2, maxZoom: 19 });
+var map = L.map('map', { 
+    zoomControl: false, 
+    minZoom: 2, 
+    maxZoom: 19,
+    worldCopyJump: true // This option makes the map jump to the original world copy
+});
 
 // Default view settings
 map.setView([0, 0], 4);
