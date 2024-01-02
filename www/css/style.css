@@ -69,4 +69,9 @@ a:active, button:active, input:focus, select:focus, textarea:focus {
   color: #ffffff; /* White text for readability */
 }
 
+.autocomplete-active {
+  /* Your styles for highlighting the active suggestion */
+  color: #e7e7e7;
+}
+
 

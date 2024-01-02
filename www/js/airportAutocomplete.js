@@ -18,6 +18,7 @@ function setupAutocompleteForField(fieldId) {
     const inputField = document.getElementById(fieldId);
     const suggestionBox = document.getElementById(fieldId + 'Suggestions');
     let selectionMade = false; // Track if a selection has been made
+    let currentFocus = -1; // Track the currently focused item in the suggestion box
 
     inputField.addEventListener('input', async () => {
         const airports = await fetchAirports(inputField.value);
@@ -51,9 +52,21 @@ function setupAutocompleteForField(fieldId) {
         if (e.key === 'Escape') {
             toggleSuggestionBox(false);
             clearInputField();
+        } else if (e.key === 'ArrowDown') {
+            currentFocus++;
+            addActive(suggestionBox.getElementsByTagName('div'));
+        } else if (e.key === 'ArrowUp') {
+            currentFocus--;
+            addActive(suggestionBox.getElementsByTagName('div'));
+        } else if (e.key === 'Enter') {
+            e.preventDefault();
+            if (currentFocus > -1) {
+                const items = suggestionBox.getElementsByTagName('div');
+                if (items) items[currentFocus].click();
+            }
         }
     });
-    
+
     inputField.addEventListener('blur', () => {
         setTimeout(() => {
           if (!selectionMade) {
@@ -67,12 +80,28 @@ function setupAutocompleteForField(fieldId) {
             }
           }
         }, 200); // Delay to allow for selection
-      });                    
+      });
 
     // Add outside click listener once
     if (!window.outsideClickListenerAdded) {
         document.addEventListener('click', outsideClickListener);
         window.outsideClickListenerAdded = true;
+    }
+
+    // Function to classify an item as "active"
+    function addActive(items) {
+        if (!items) return false;
+        removeActive(items);
+        if (currentFocus >= items.length) currentFocus = 0;
+        if (currentFocus < 0) currentFocus = (items.length - 1);
+        items[currentFocus].classList.add('autocomplete-active');
+    }
+
+    // Function to remove the "active" class from all autocomplete items
+    function removeActive(items) {
+        for (let i = 0; i < items.length; i++) {
+            items[i].classList.remove('autocomplete-active');
+        }
     }
 }
 
@@ -118,8 +147,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const latLng = L.latLng(airport.latitude, airport.longitude);
             map.flyTo(latLng, 4); // Adjust zoom level as needed
         }
-    });
-         
+    }); 
+     
     document.addEventListener('stateChange', (event) => {
         if (event.detail.key === 'waypoints') {
             event.detail.value.forEach((_, index) => {
