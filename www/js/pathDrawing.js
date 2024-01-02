@@ -153,7 +153,6 @@ const pathDrawing = {
     },    
 
     clearFlightPaths() {
-        console.log('clearFlightPaths - Clearing flight paths');
         this.currentLines.forEach(line => {
             let shouldRemove = true;
             appState.flights.forEach(flight => {
