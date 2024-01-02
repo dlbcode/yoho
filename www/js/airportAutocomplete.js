@@ -130,6 +130,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.addEventListener('newWaypointField', (event) => {
         setupAutocompleteForField(event.detail.fieldId);
+        document.getElementById(event.detail.fieldId).focus();
     });
 
     document.addEventListener('airportSelected', (event) => {
