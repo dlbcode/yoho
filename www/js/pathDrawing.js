@@ -76,11 +76,8 @@ const pathDrawing = {
     },
     
     createFlightPath(origin, destination, flight, lngOffset) {
-        // console.log('createFlightPath - Creating flight path');
         let flightId = `${flight.originAirport.iata_code}-${flight.destinationAirport.iata_code}`;
         if (this.flightPathCache[flightId]) {
-            // console.log('createFlightPath - Path already exists');
-            // Add the cached path to the map if it's not already there
             this.flightPathCache[flightId].forEach(path => {
                 if (!map.hasLayer(path)) {
                     path.addTo(map);
@@ -88,10 +85,10 @@ const pathDrawing = {
             });
             return;
         }
-
+    
         const adjustedOriginLatLng = this.adjustLatLng(L.latLng(origin.latitude, origin.longitude));
         const adjustedDestinationLatLng = this.adjustLatLng(L.latLng(destination.latitude, destination.longitude));
-
+    
         var geodesicLine = new L.Geodesic([adjustedOriginLatLng, adjustedDestinationLatLng], {
             weight: 1,
             opacity: 1,
@@ -122,35 +119,39 @@ const pathDrawing = {
             map.closePopup();
         });
     
-        // Load the plane icon
-        var planeIcon = L.icon({
-            iconUrl: '../assets/plane_icon.png',
-            iconSize: [16, 16],
-            iconAnchor: [8, 12]
-        });
+        // Check if the flight is in the flights array before adding the decorated line
+        if (appState.flights.some(f => f === flight)) {
+            // Load the plane icon
+            var planeIcon = L.icon({
+                iconUrl: '../assets/plane_icon.png',
+                iconSize: [16, 16],
+                iconAnchor: [8, 12]
+            });
     
-        // Replace arrow symbol with plane icon
-        var planeSymbol = L.Symbol.marker({
-            rotate: true,
-            markerOptions: {
-                icon: planeIcon
-            }
-        });
+            // Replace arrow symbol with plane icon
+            var planeSymbol = L.Symbol.marker({
+                rotate: true,
+                markerOptions: {
+                    icon: planeIcon
+                }
+            });
     
-        // Update polylineDecorator with planeSymbol
-        var decoratedLine = L.polylineDecorator(geodesicLine, {
-            patterns: [
-                {offset: '50%', repeat: 0, symbol: planeSymbol}
-            ]
-        }).addTo(map);
+            // Update polylineDecorator with planeSymbol
+            var decoratedLine = L.polylineDecorator(geodesicLine, {
+                patterns: [
+                    {offset: '50%', repeat: 0, symbol: planeSymbol}
+                ]
+            }).addTo(map);
     
-        this.currentLines.push(geodesicLine, decoratedLine);
+            this.currentLines.push(geodesicLine, decoratedLine);
     
-        // Cache the flight paths
-        this.flightPathCache[flightId] = [geodesicLine, decoratedLine];
-        // console.log(`Path added to cache for flightId: ${flightId}`);
-        // console.log(`Current cache size: ${Object.keys(this.flightPathCache).length} flight paths`);
-    },    
+            // Cache the flight paths
+            this.flightPathCache[flightId] = [geodesicLine, decoratedLine];
+        } else {
+            this.currentLines.push(geodesicLine);
+            this.flightPathCache[flightId] = [geodesicLine];
+        }
+    },       
 
     clearFlightPaths() {
         this.currentLines.forEach(line => {
