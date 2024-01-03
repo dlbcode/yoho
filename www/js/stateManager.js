@@ -19,12 +19,14 @@ function updateState(key, value) {
       console.log('addWaypoint');
       appState.waypoints.push(value);
       console.table(appState.waypoints);
+      updateUrlWithWaypoints();
       break;
     case 'removeWaypoint':
       console.log('removeWaypoint');
       appState.waypoints.splice(value, 1);
       console.table(appState.waypoints);
-      break;      
+      updateUrlWithWaypoints();
+      break;
     case 'addFlight':
       console.log('appState: adding flight');
       appState.flights.push(value);
@@ -35,6 +37,12 @@ function updateState(key, value) {
       break;
   }
   document.dispatchEvent(new CustomEvent('stateChange', { detail: { key, value } }));
+}
+
+function updateUrlWithWaypoints() {
+  const waypointIatas = appState.waypoints.map(wp => wp.iata_code);
+  const encodedUri = encodeURIComponent(waypointIatas.join(','));
+  window.history.pushState({}, '', `?waypoints=${encodedUri}`);
 }
 
 export { appState, updateState };

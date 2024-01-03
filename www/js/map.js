@@ -1,5 +1,25 @@
 import { flightMap } from './flightMap.js';
 import { flightList } from './flightList.js';
+import { updateState } from './stateManager.js';
+
+function initMapFunctions() {
+    flightMap.plotFlightPaths();
+    flightList.initTravelerControls();
+
+    // New logic to initialize waypoints from URL
+    const params = new URLSearchParams(window.location.search);
+    const waypointParam = params.get('waypoints');
+    if (waypointParam) {
+        const waypointIatas = waypointParam.split(',').map(decodeURIComponent);
+        waypointIatas.forEach(iata => {
+            flightMap.getAirportDataByIata(iata).then(airport => {
+                if (airport) {
+                    updateState('addWaypoint', airport);
+                }
+            });
+        });
+    }
+}
 
 // Marker configurations
 var blueDotIcon = L.divIcon({
@@ -51,12 +71,6 @@ fetch('http://ip-api.com/json/')
     .catch(error => {
         console.error('Error fetching IP Geolocation:', error);
     });
-
-// Initialize map-related functionalities
-function initMapFunctions() {
-    flightMap.plotFlightPaths();
-    flightList.initTravelerControls();
-}
 
 // Initial resize on load
 document.getElementById('map').style.height = window.innerHeight + 'px';
