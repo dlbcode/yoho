@@ -53,6 +53,7 @@ body {
   padding: 0;
   margin: 5px;
   box-sizing: border-box;
+  white-space: nowrap;
 }
 
 .leaflet-popup-content p, .leaflet-popup-content h1, .leaflet-popup-content div {
