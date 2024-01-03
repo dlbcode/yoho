@@ -155,15 +155,9 @@ document.addEventListener('DOMContentLoaded', () => {
     function adjustLatLngForShortestPath(currentLatLng, targetLatLng) {
         let currentLng = currentLatLng.lng;
         let targetLng = targetLatLng.lng;
-    
-        // Normalize longitudes to be within -180 to 180 range
-        currentLng = ((currentLng + 180) % 360 + 360) % 360 - 180;
-        targetLng = ((targetLng + 180) % 360 + 360) % 360 - 180;
-    
-        // Calculate the difference in longitude between the current and target positions
         let lngDifference = targetLng - currentLng;
     
-        // Adjust the target longitude for the shortest path
+        // Check if crossing the antimeridian offers a shorter path
         if (lngDifference > 180) {
             targetLng -= 360;
         } else if (lngDifference < -180) {
@@ -171,7 +165,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     
         return L.latLng(targetLatLng.lat, targetLng);
-    }         
+    }                                            
      
     document.addEventListener('stateChange', (event) => {
         if (event.detail.key === 'waypoints') {
