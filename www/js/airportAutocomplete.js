@@ -178,6 +178,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 export function getIataFromField(inputId) {
     const fieldValue = document.getElementById(inputId).value;
-    const iataCodeMatch = fieldValue.match(/\(([^)]+)\)/);
+    // Adjusted regex to match a pattern of three uppercase letters, possibly surrounded by parentheses
+    const iataCodeMatch = fieldValue.match(/\b([A-Z]{3})\b/);
     return iataCodeMatch ? iataCodeMatch[1] : null;
 }
