@@ -39,6 +39,27 @@ body {
   pointer-events: none; /* Prevents the tooltip from interfering with other mouse events */
 }
 
+.leaflet-popup {
+  transition: none !important;
+  min-width: 0px;
+  min-height: 0px; /* Allow the popup height to shrink */
+}
+
+.leaflet-popup-close-button {
+  display: none;
+}
+
+.leaflet-popup-content {
+  padding: 0;
+  margin: 5px;
+  box-sizing: border-box;
+}
+
+.leaflet-popup-content p, .leaflet-popup-content h1, .leaflet-popup-content div {
+  margin: 0;
+  padding: 0;
+}
+
 /* Apply to the whole body of the page */
 body {
   background-color: #121212; /* Dark background */
