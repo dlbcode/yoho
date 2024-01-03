@@ -82,6 +82,9 @@ const eventManager = {
         this.setupUIEventListeners();
         this.setupAllPathsButtonEventListener();
         document.addEventListener('stateChange', handleStateChange);
+        document.addEventListener('waypointsLoadedFromURL', () => {
+            updateFlightsArray();
+        });
     },
 
     setupMapEventListeners: function () {

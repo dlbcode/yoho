@@ -6,17 +6,21 @@ function initMapFunctions() {
     flightMap.plotFlightPaths();
     flightList.initTravelerControls();
 
-    // New logic to initialize waypoints from URL
     const params = new URLSearchParams(window.location.search);
     const waypointParam = params.get('waypoints');
     if (waypointParam) {
         const waypointIatas = waypointParam.split(',').map(decodeURIComponent);
-        waypointIatas.forEach(iata => {
+        Promise.all(waypointIatas.map(iata => 
             flightMap.getAirportDataByIata(iata).then(airport => {
                 if (airport) {
                     updateState('addWaypoint', airport);
                 }
-            });
+            })
+        )).then(() => {
+            // Delay the update of flights array by a certain amount of time (e.g., 500 milliseconds)
+            setTimeout(() => {
+                document.dispatchEvent(new CustomEvent('waypointsLoadedFromURL'));
+            }, 400); // Adjust the delay time as needed
         });
     }
 }
