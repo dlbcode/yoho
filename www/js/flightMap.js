@@ -72,28 +72,23 @@ const flightMap = {
     
         if (airport.weight <= map.getZoom()) {
             const latLng = L.latLng(airport.latitude, airport.longitude);
-            const marker = L.marker(latLng, {icon: icon}).addTo(map)
-            .bindPopup(`<b>${airport.name}</b><br>${airport.city}, ${airport.country}`);
+            const marker = L.marker(latLng, {icon: icon}).addTo(map);
+    
+            // Bind a popup with the airport name
+            marker.bindPopup(`<b>${airport.name}</b><br>${airport.city}, ${airport.country}`);
+    
+            // Add event listeners for mouseover and mouseout
+            marker.on('mouseover', function(e) {
+                this.openPopup();
+            });
+            marker.on('mouseout', function(e) {
+                this.closePopup();
+            });
     
             eventManager.attachMarkerEventListeners(iata, marker, airport);
             this.markers[iata] = marker;
         }
-    },    
-
-    handleMarkerClick(airport, clickedMarker) {
-        const lastWaypoint = appState.waypoints[appState.waypoints.length - 1];
-        console.log('lastWaypoint:', lastWaypoint);
-        if (lastWaypoint && lastWaypoint.iata_code === airport.iata_code) {
-            updateState('removeWaypoint', appState.waypoints.length - 1);
-            clickedMarker.setIcon(blueDotIcon);
-        } else {
-            updateState('addWaypoint', airport);
-            clickedMarker.setIcon(magentaDotIcon);
-            updateState('selectedAirport', airport.iata_code);
-        }
-    
-        clickedMarker.selected = !clickedMarker.selected;
-    },    
+    },      
 
     findFlight(fromIata, toIata) {
         for (const flights of Object.values(this.directFlights)) {
