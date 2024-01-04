@@ -25,6 +25,7 @@ body {
   flex-grow: 1; /* Take up remaining space */
   overflow: hidden; /* Optional, based on your previous setup */
   height: calc(100vh - 20px); /* Adjust as necessary */
+  background-color: #333; /* Dark grey background */
 }
 
 .tooltip {
