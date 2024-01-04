@@ -4,12 +4,9 @@ import { map } from './map.js';
 async function fetchAirports(query) {
     try {
         const response = await fetch(`http://yonderhop.com:3000/airports?query=${query}`);
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
         return await response.json();
     } catch (error) {
-        console.error('Fetch error:', error);
+        console.warn('Airport not found');
         return [];
     }
 }
