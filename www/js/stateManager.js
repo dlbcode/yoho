@@ -32,6 +32,11 @@ function updateState(key, value) {
       appState.flights.push(value);
       console.table(appState.flights);
       break;
+    case 'clearData':
+      appState.waypoints = [];
+      appState.flights = [];
+      updateUrlWithWaypoints(); // This will clear the waypoints from the URL
+      break;  
     default:
       appState[key] = value;
       break;

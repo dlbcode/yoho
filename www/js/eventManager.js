@@ -2,7 +2,6 @@ import { map, blueDotIcon, magentaDotIcon } from './map.js';
 import { flightMap } from './flightMap.js';
 import { flightList } from './flightList.js';
 import { pathDrawing } from './pathDrawing.js';
-import { getIataFromField } from './airportAutocomplete.js';
 import { drawAllFlightPaths } from './allPaths.js';
 import { appState, updateState } from './stateManager.js';
 
@@ -34,6 +33,13 @@ function handleStateChange(event) {
         console.log('appState: updating price');
         flightList.updateTotalCost();
     }
+
+    if (key === 'clearData') {
+        // Clear existing waypoint fields
+        const container = document.querySelector('.airport-selection');
+        container.innerHTML = '';
+        createWaypointField(1); // Create the first waypoint field
+    }    
 }
 
 function updateMarkerIcons() {
@@ -121,9 +127,11 @@ const eventManager = {
                 updateState('numTravelers', appState.numTravelers - 1);
                 flightList.updateTotalCost();
             } else if (event.target.id === 'clearBtn') {
-                flightList.clearFlightList();
+                updateState('clearData', null);
+                flightList.updateTotalCost();
                 pathDrawing.clearFlightPaths();
-            }
+                updateMarkerIcons(); // Reset marker icons
+            }            
         });
 
         map.addEventListener('zoomChanged', function () {
