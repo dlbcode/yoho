@@ -17,19 +17,33 @@ const flightMap = {
     cacheDuration: 60000, // 1 minute in milliseconds
 
     async plotFlightPaths() {
-        const currentTime = new Date().getTime();
-        if (this.cachedFlights && this.lastFetchTime && currentTime - this.lastFetchTime < this.cacheDuration) {
-            this.processFlightData(this.cachedFlights);
-        } else {
+        return new Promise((resolve, reject) => {
+            const currentTime = new Date().getTime();
+            if (this.cachedFlights && this.lastFetchTime && currentTime - this.lastFetchTime < this.cacheDuration) {
+                this.processFlightData(this.cachedFlights);
+            } else {
+                fetch('http://yonderhop.com:3000/flights')
+                    .then(response => response.json())
+                    .then(data => {
+                        this.cachedFlights = data;
+                        this.lastFetchTime = currentTime;
+                        this.processFlightData(data);
+                    })
+                    .catch(error => console.error('Error:', error));
+            }
             fetch('http://yonderhop.com:3000/flights')
-                .then(response => response.json())
-                .then(data => {
-                    this.cachedFlights = data;
-                    this.lastFetchTime = currentTime;
-                    this.processFlightData(data);
-                })
-                .catch(error => console.error('Error:', error));
-        }
+            .then(response => response.json())
+            .then(data => {
+                this.cachedFlights = data;
+                this.lastFetchTime = new Date().getTime();
+                this.processFlightData(data);
+                resolve(); // Resolve the promise after processing is complete
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                reject(error); // Reject the promise on error
+            });
+        });
     },
 
     processFlightData(data) {

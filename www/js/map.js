@@ -2,27 +2,23 @@ import { flightMap } from './flightMap.js';
 import { flightList } from './flightList.js';
 import { updateState } from './stateManager.js';
 
-function initMapFunctions() {
-    flightMap.plotFlightPaths();
+async function initMapFunctions() {
+    await flightMap.plotFlightPaths(); // Wait for flights data to be loaded and processed
     flightList.initTravelerControls();
 
     const params = new URLSearchParams(window.location.search);
     const waypointParam = params.get('waypoints');
     if (waypointParam) {
         const waypointIatas = waypointParam.split(',').map(decodeURIComponent);
-        Promise.all(waypointIatas.map(iata => 
-            flightMap.getAirportDataByIata(iata).then(airport => {
-                if (airport) {
-                    updateState('addWaypoint', airport);
-                }
-            })
-        )).then(() => {
-            // Delay the update of flights array by a certain amount of time (e.g., 500 milliseconds)
-            setTimeout(() => {
-                document.dispatchEvent(new CustomEvent('waypointsLoadedFromURL'));
-            }, 400); // Adjust the delay time as needed
-        });
+        for (const iata of waypointIatas) {
+            const airport = await flightMap.getAirportDataByIata(iata);
+            if (airport) {
+                updateState('addWaypoint', airport);
+            }
+        }
     }
+
+    document.dispatchEvent(new CustomEvent('waypointsLoadedFromURL'));
 }
 
 // Marker configurations
