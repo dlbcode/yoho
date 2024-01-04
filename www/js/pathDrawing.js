@@ -75,7 +75,7 @@ const pathDrawing = {
         return L.latLng(latLng.lat, newLng);
     },
     
-    createFlightPath(origin, destination, flight, lngOffset) {
+    createFlightPath(origin, destination, flight) {
         let flightId = `${flight.originAirport.iata_code}-${flight.destinationAirport.iata_code}`;
         if (this.flightPathCache[flightId]) {
             this.flightPathCache[flightId].forEach(path => {
@@ -86,71 +86,52 @@ const pathDrawing = {
             return;
         }
     
-        const adjustedOriginLatLng = this.adjustLatLng(L.latLng(origin.latitude, origin.longitude));
-        const adjustedDestinationLatLng = this.adjustLatLng(L.latLng(destination.latitude, destination.longitude));
+        const drawPath = (origin, destination, offset) => {
+            const adjustedOrigin = L.latLng(origin.latitude, origin.longitude + offset);
+            const adjustedDestination = L.latLng(destination.latitude, destination.longitude + offset);
     
-        var geodesicLine = new L.Geodesic([adjustedOriginLatLng, adjustedDestinationLatLng], {
-            weight: 1,
-            opacity: 1,
-            color: this.getColorBasedOnPrice(flight.price),
-            wrap: false,
-            zIndex: -1
-        }).addTo(map);
+            var geodesicLine = new L.Geodesic([adjustedOrigin, adjustedDestination], {
+                weight: 1,
+                opacity: 1,
+                color: this.getColorBasedOnPrice(flight.price),
+                wrap: false,
+                zIndex: -1
+            }).addTo(map);
     
-        geodesicLine.flight = flight;
+            geodesicLine.flight = flight;
     
-        geodesicLine.on('click', () => {
-            if (flightList.isFlightListed(flight)) {
-                flightList.removeFlightFromList(flight);
-                this.clearFlightPaths();
-            } else {
-                flightList.addFlightDetailsToList(flight, this.clearFlightPaths.bind(this));
-            }
-        });
-    
-        geodesicLine.on('mouseover', (e) => {
-            L.popup()
-                .setLatLng(e.latlng)
-                .setContent(`Price: $${flight.price}`)
-                .openOn(map);
-        });
-    
-        geodesicLine.on('mouseout', () => {
-            map.closePopup();
-        });
-    
-        // Check if the flight is in the flights array before adding the decorated line
-        if (appState.flights.some(f => f === flight)) {
-            // Load the plane icon
-            var planeIcon = L.icon({
-                iconUrl: '../assets/plane_icon.png',
-                iconSize: [16, 16],
-                iconAnchor: [8, 12]
-            });
-    
-            // Replace arrow symbol with plane icon
-            var planeSymbol = L.Symbol.marker({
-                rotate: true,
-                markerOptions: {
-                    icon: planeIcon
+            geodesicLine.on('click', () => {
+                if (flightList.isFlightListed(flight)) {
+                    flightList.removeFlightFromList(flight);
+                    this.clearFlightPaths();
+                } else {
+                    flightList.addFlightDetailsToList(flight, this.clearFlightPaths.bind(this));
                 }
             });
     
-            // Update polylineDecorator with planeSymbol
-            var decoratedLine = L.polylineDecorator(geodesicLine, {
-                patterns: [
-                    {offset: '50%', repeat: 0, symbol: planeSymbol}
-                ]
-            }).addTo(map);
+            geodesicLine.on('mouseover', (e) => {
+                L.popup()
+                    .setLatLng(e.latlng)
+                    .setContent(`Price: $${flight.price}`)
+                    .openOn(map);
+            });
     
-            this.currentLines.push(geodesicLine, decoratedLine);
+            geodesicLine.on('mouseout', () => {
+                map.closePopup();
+            });
     
-            // Cache the flight paths
-            this.flightPathCache[flightId] = [geodesicLine, decoratedLine];
-        } else {
             this.currentLines.push(geodesicLine);
-            this.flightPathCache[flightId] = [geodesicLine];
-        }
+            if (!this.flightPathCache[flightId]) {
+                this.flightPathCache[flightId] = [];
+            }
+            this.flightPathCache[flightId].push(geodesicLine);
+        };
+    
+        // Draw path for each world copy
+        const worldCopies = [-720, -360, 0, 360, 720]; // Adjust range based on your needs
+        worldCopies.forEach(offset => {
+            drawPath(origin, destination, offset);
+        });
     },       
 
     clearFlightPaths() {
