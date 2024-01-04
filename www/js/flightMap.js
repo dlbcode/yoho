@@ -19,33 +19,27 @@ const flightMap = {
     async plotFlightPaths() {
         return new Promise((resolve, reject) => {
             const currentTime = new Date().getTime();
+            // Check if cached data is available and still valid
             if (this.cachedFlights && this.lastFetchTime && currentTime - this.lastFetchTime < this.cacheDuration) {
                 this.processFlightData(this.cachedFlights);
+                resolve(); // Resolve the promise as data is already processed
             } else {
+                // Fetch new data as cache is empty or outdated
                 fetch('http://yonderhop.com:3000/flights')
                     .then(response => response.json())
                     .then(data => {
                         this.cachedFlights = data;
                         this.lastFetchTime = currentTime;
                         this.processFlightData(data);
+                        resolve(); // Resolve the promise after processing is complete
                     })
-                    .catch(error => console.error('Error:', error));
+                    .catch(error => {
+                        console.error('Error:', error);
+                        reject(error); // Reject the promise on error
+                    });
             }
-            fetch('http://yonderhop.com:3000/flights')
-            .then(response => response.json())
-            .then(data => {
-                this.cachedFlights = data;
-                this.lastFetchTime = new Date().getTime();
-                this.processFlightData(data);
-                resolve(); // Resolve the promise after processing is complete
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                reject(error); // Reject the promise on error
-            });
         });
-    },
-
+    },    
     processFlightData(data) {
         const uniqueAirports = new Set();
     
