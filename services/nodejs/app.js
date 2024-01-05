@@ -42,6 +42,7 @@ MongoClient.connect(mongoUrl, { useNewUrlParser: true, useUnifiedTopology: true 
   db = client.db(dbName);
   airportsCollection = db.collection('airports');
   routesCollection = db.collection('routes');
+  flightsCollection = db.collection('flights');
   console.log('Connected to MongoDB');
 });
 
@@ -66,8 +67,6 @@ app.get('/airports', async (req, res) => {
   }
 });
 
-
-// Endpoint to get routes data
 app.get('/routes', async (req, res) => {
   try {
       const routes = await routesCollection.find({}).toArray();
@@ -92,6 +91,16 @@ app.get('/routes', async (req, res) => {
       res.status(500).send("Error fetching routes data");
   }
 })
+
+app.get('/flights', async (req, res) => {
+  try {
+    const flights = await flightsCollection.find({}).toArray();
+    res.status(200).json(flights);
+  } catch (e) {
+    console.error(e);
+    res.status(500).send("Error fetching flights data");
+  }
+});
 
 app.get('/cheapest-routes', async (req, res) => {
   const origin = req.query.origin;
