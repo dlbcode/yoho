@@ -1,6 +1,6 @@
 import { appState, updateState } from './stateManager.js';
 
-const flightList = {
+const routeList = {
 
     numTravelers: 1,
 
@@ -11,8 +11,8 @@ const flightList = {
 
     updateTotalCost: function() {
         let totalCost = 0;
-        appState.flights.forEach(flight => {
-            totalCost += flight.price;
+        appState.routes.forEach(route => {
+            totalCost += route.price;
         });
         totalCost *= this.numTravelers;
         document.getElementById('totalCost').textContent = `Total Trip Cost: $${totalCost.toFixed(2)}`;
@@ -29,4 +29,4 @@ const flightList = {
     }
 };
 
-export { flightList };
+export { routeList };

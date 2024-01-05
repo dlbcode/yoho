@@ -1,8 +1,8 @@
 import { map, blueDotIcon, magentaDotIcon } from './map.js';
 import { flightMap } from './flightMap.js';
-import { flightList } from './flightList.js';
+import { routeList } from './flightList.js';
 import { pathDrawing } from './pathDrawing.js';
-import { drawAllFlightPaths } from './allPaths.js';
+import { drawAllRoutePaths } from './allPaths.js';
 import { appState, updateState } from './stateManager.js';
 
 function handleStateChange(event) {
@@ -25,13 +25,13 @@ function handleStateChange(event) {
         // Create an additional field for the next waypoint
         createWaypointField(appState.waypoints.length + 1);
 
-        // Update flights array based on the current waypoints
-        updateFlightsArray();
-        console.table(appState.flights);
-        pathDrawing.clearFlightPaths();
+        // Update routes array based on the current waypoints
+        updateRoutesArray();
+        console.table(appState.routes);
+        pathDrawing.clearRoutePaths();
 
         console.log('appState: updating price');
-        flightList.updateTotalCost();
+        routeList.updateTotalCost();
     }
 
     if (key === 'clearData') {
@@ -50,15 +50,15 @@ function updateMarkerIcons() {
     });
 }
 
-function updateFlightsArray() {
-    appState.flights = [];
+function updateRoutesArray() {
+    appState.routes = [];
     for (let i = 0; i < appState.waypoints.length - 1; i++) {
         const fromWaypoint = appState.waypoints[i];
         const toWaypoint = appState.waypoints[i + 1];
-        const flight = flightMap.findFlight(fromWaypoint.iata_code, toWaypoint.iata_code);
-        if (flight) {
-            appState.flights.push(flight);
-            pathDrawing.createFlightPath(flight.originAirport, flight.destinationAirport, flight, 0);
+        const route = flightMap.findRoute(fromWaypoint.iata_code, toWaypoint.iata_code);
+        if (route) {
+            appState.routes.push(route);
+            pathDrawing.createRoutePath(route.originAirport, route.destinationAirport, route, 0);
         }
     }
 }
@@ -89,13 +89,13 @@ const eventManager = {
         this.setupAllPathsButtonEventListener();
         document.addEventListener('stateChange', handleStateChange);
         document.addEventListener('waypointsLoadedFromURL', () => {
-            updateFlightsArray();
+            updateRoutesArray();
         });
     },
 
     setupMapEventListeners: function () {
         map.on('click', () => {
-            pathDrawing.clearFlightPaths();
+            pathDrawing.clearRoutePaths();
             flightMap.selectedMarker = null;
         });
 
@@ -111,10 +111,10 @@ const eventManager = {
 
     setupUIEventListeners: function () {
         document.addEventListener('change', function (event) {
-            if (event.target.id === 'flightPathToggle') {
-                updateState('flightPathToggle', event.target.value);
+            if (event.target.id === 'routePathToggle') {
+                updateState('routePathToggle', event.target.value);
                 if (flightMap.selectedMarker) {
-                    pathDrawing.drawFlightPaths(flightMap.selectedMarker);
+                    pathDrawing.drawRoutePaths(flightMap.selectedMarker);
                 }
             }
         });
@@ -122,14 +122,14 @@ const eventManager = {
         document.addEventListener('click', function (event) {
             if (event.target.id === 'increaseTravelers') {
                 updateState('numTravelers', appState.numTravelers + 1);
-                flightList.updateTotalCost();
+                routeList.updateTotalCost();
             } else if (event.target.id === 'decreaseTravelers' && appState.numTravelers > 1) {
                 updateState('numTravelers', appState.numTravelers - 1);
-                flightList.updateTotalCost();
+                routeList.updateTotalCost();
             } else if (event.target.id === 'clearBtn') {
                 updateState('clearData', null);
-                flightList.updateTotalCost();
-                pathDrawing.clearFlightPaths();
+                routeList.updateTotalCost();
+                pathDrawing.clearRoutePaths();
                 updateMarkerIcons(); // Reset marker icons
             }            
         });
@@ -142,7 +142,7 @@ const eventManager = {
     setupAllPathsButtonEventListener: function () {
         document.addEventListener('click', function (event) {
             if (event.target.id === 'allPathsBtn') {
-                drawAllFlightPaths();
+                drawAllRoutePaths();
             }
         });
     },

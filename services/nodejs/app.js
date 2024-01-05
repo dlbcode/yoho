@@ -25,7 +25,7 @@ app.use(cors({
 
 //// Apply the referrer check middleware to the API routes
 //app.use('/airports', checkReferrer);
-//app.use('/flights', checkReferrer);
+//app.use('/routes', checkReferrer);
 
 // MongoDB connection URL and database name
 const mongoUrl = `mongodb://rsuser:${mongodbPassword}@mongodb:27017/rsdb`;
@@ -33,7 +33,7 @@ const dbName = 'rsdb';
 
 let db;
 let airportsCollection;
-let flightsCollection;
+let routesCollection;
 
 // Connect to MongoDB
 MongoClient.connect(mongoUrl, { useNewUrlParser: true, useUnifiedTopology: true }, (err, client) => {
@@ -41,7 +41,7 @@ MongoClient.connect(mongoUrl, { useNewUrlParser: true, useUnifiedTopology: true 
 
   db = client.db(dbName);
   airportsCollection = db.collection('airports');
-  flightsCollection = db.collection('flights');
+  routesCollection = db.collection('routes');
   console.log('Connected to MongoDB');
 });
 
@@ -67,10 +67,10 @@ app.get('/airports', async (req, res) => {
 });
 
 
-// Endpoint to get flights data
-app.get('/flights', async (req, res) => {
+// Endpoint to get routes data
+app.get('/routes', async (req, res) => {
   try {
-      const flights = await flightsCollection.find({}).toArray();
+      const routes = await routesCollection.find({}).toArray();
       const airports = await airportsCollection.find({}).toArray();
 
       const airportMap = airports.reduce((map, airport) => {
@@ -78,20 +78,20 @@ app.get('/flights', async (req, res) => {
           return map;
       }, {});
 
-      const enrichedFlights = flights.map(flight => {
+      const enrichedRoutes = routes.map(route => {
           return {
-              ...flight,
-              originAirport: airportMap[flight.origin],
-              destinationAirport: airportMap[flight.destination]
+              ...route,
+              originAirport: airportMap[route.origin],
+              destinationAirport: airportMap[route.destination]
           };
       });
 
-      res.status(200).json(enrichedFlights);
+      res.status(200).json(enrichedRoutes);
   } catch (e) {
       console.error(e);
-      res.status(500).send("Error fetching flights data");
+      res.status(500).send("Error fetching routes data");
   }
-});
+})
 
 app.get('/cheapest-routes', async (req, res) => {
   const origin = req.query.origin;
@@ -102,50 +102,50 @@ app.get('/cheapest-routes', async (req, res) => {
   }
 
   try {
-      const flights = await flightsCollection.find({}).toArray();
-      let routes = findCheapestRoutes(flights, origin, destination);
-      routes = routes.slice(0, 3); // Get top 3 cheapest routes
+      const routes = await routesCollection.find({}).toArray();
+      let cheapestRoutes = findCheapestRoutes(routes, origin, destination);
+      routes = cheapestRoutes.slice(0, 3); // Get top 3 cheapest routes
 
-      res.json(routes);
+      res.json(cheapestRoutes);
   } catch (error) {
       console.error(error);
-      res.status(500).send('Error searching for routes');
+      res.status(500).send('Error searching for cheapestRoutes');
   }
 });
 
-function findCheapestRoutes(flights, origin, destination) {
+function findCheapestRoutes(routes, origin, destination) {
   let costs = {};
   let paths = {};
 
-  flights.forEach(flight => {
-      if (!costs[flight.origin]) {
-          costs[flight.origin] = { totalCost: Infinity, segments: [] };
-          paths[flight.origin] = [];
+  routes.forEach(route => {
+      if (!costs[route.origin]) {
+          costs[route.origin] = { totalCost: Infinity, segments: [] };
+          paths[route.origin] = [];
       }
-      if (!costs[flight.destination]) {
-          costs[flight.destination] = { totalCost: Infinity, segments: [] };
-          paths[flight.destination] = [];
+      if (!costs[route.destination]) {
+          costs[route.destination] = { totalCost: Infinity, segments: [] };
+          paths[route.destination] = [];
       }
   });
 
   costs[origin] = { totalCost: 0, segments: [] };
   paths[origin] = [origin];
 
-  flights.forEach(flight => {
-      if (!costs[flight.origin] || !costs[flight.destination]) {
-          console.error(`Missing cost or path initialization for flight:`, flight);
+  routes.forEach(route => {
+      if (!costs[route.origin] || !costs[route.destination]) {
+          console.error(`Missing cost or path initialization for route:`, route);
       }
   });
 
-  for (let i = 0; i < flights.length; i++) {
+  for (let i = 0; i < routes.length; i++) {
       let updated = false;
 
-      flights.forEach(flight => {
-          let newCost = costs[flight.origin].totalCost + flight.price;
-          if (newCost < costs[flight.destination].totalCost) {
-              costs[flight.destination].totalCost = newCost;
-              costs[flight.destination].segments = [...costs[flight.origin].segments, { from: flight.origin, to: flight.destination, price: flight.price }];
-              paths[flight.destination] = [...paths[flight.origin], flight.destination];
+      routes.forEach(route => {
+          let newCost = costs[route.origin].totalCost + route.price;
+          if (newCost < costs[route.destination].totalCost) {
+              costs[route.destination].totalCost = newCost;
+              costs[route.destination].segments = [...costs[route.origin].segments, { from: route.origin, to: route.destination, price: route.price }];
+              paths[route.destination] = [...paths[route.origin], route.destination];
               updated = true;
           }
       });

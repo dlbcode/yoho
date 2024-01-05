@@ -1,36 +1,36 @@
 import { map, blueDotIcon, magentaDotIcon } from './map.js';
 import { pathDrawing } from './pathDrawing.js';
-import { flightList } from './flightList.js';
+import { routeList } from './flightList.js';
 import { eventManager } from './eventManager.js';
 import { appState, updateState } from './stateManager.js';
 
 const flightMap = {
     markers: {},
-    directFlights: {},
+    directRoutes: {},
     currentLines: [],
     selectedMarker: null,
     toggleState: 'from',
-    flightPathCache: {},
+    routePathCache: {},
     clearMultiHopPaths: true,
-    cachedFlights: null,
+    cachedRoutes: null,
     lastFetchTime: null,
     cacheDuration: 60000, // 1 minute in milliseconds
 
-    async plotFlightPaths() {
+    async plotRoutePaths() {
         return new Promise((resolve, reject) => {
             const currentTime = new Date().getTime();
             // Check if cached data is available and still valid
-            if (this.cachedFlights && this.lastFetchTime && currentTime - this.lastFetchTime < this.cacheDuration) {
-                this.processFlightData(this.cachedFlights);
+            if (this.cachedRoutes && this.lastFetchTime && currentTime - this.lastFetchTime < this.cacheDuration) {
+                this.processRouteData(this.cachedRoutes);
                 resolve(); // Resolve the promise as data is already processed
             } else {
                 // Fetch new data as cache is empty or outdated
-                fetch('http://yonderhop.com:3000/flights')
+                fetch('http://yonderhop.com:3000/routes')
                     .then(response => response.json())
                     .then(data => {
-                        this.cachedFlights = data;
+                        this.cachedRoutes = data;
                         this.lastFetchTime = currentTime;
-                        this.processFlightData(data);
+                        this.processRouteData(data);
                         resolve(); // Resolve the promise after processing is complete
                     })
                     .catch(error => {
@@ -40,30 +40,30 @@ const flightMap = {
             }
         });
     },    
-    processFlightData(data) {
+    processRouteData(data) {
         const uniqueAirports = new Set();
     
-        data.forEach(flight => {
-            if (!flight.originAirport || !flight.destinationAirport) {
-                console.info('Incomplete flight data:', flight);
+        data.forEach(route => {
+            if (!route.originAirport || !route.destinationAirport) {
+                console.info('Incomplete route data:', route);
                 return;
             }
     
             // Check if the origin airport has already been added
-            if (!uniqueAirports.has(flight.originAirport.iata_code)) {
-                this.addMarker(flight.originAirport);
-                uniqueAirports.add(flight.originAirport.iata_code);
+            if (!uniqueAirports.has(route.originAirport.iata_code)) {
+                this.addMarker(route.originAirport);
+                uniqueAirports.add(route.originAirport.iata_code);
             }
     
             // Check if the destination airport has already been added
-            if (!uniqueAirports.has(flight.destinationAirport.iata_code)) {
-                this.addMarker(flight.destinationAirport);
-                uniqueAirports.add(flight.destinationAirport.iata_code);
+            if (!uniqueAirports.has(route.destinationAirport.iata_code)) {
+                this.addMarker(route.destinationAirport);
+                uniqueAirports.add(route.destinationAirport.iata_code);
             }
     
-            let destIata = flight.destinationAirport.iata_code;
-            this.directFlights[destIata] = this.directFlights[destIata] || [];
-            this.directFlights[destIata].push(flight);
+            let destIata = route.destinationAirport.iata_code;
+            this.directRoutes[destIata] = this.directRoutes[destIata] || [];
+            this.directRoutes[destIata].push(route);
         });
     },    
 
@@ -113,11 +113,11 @@ const flightMap = {
         clickedMarker.selected = !clickedMarker.selected;
     },    
 
-    findFlight(fromIata, toIata) {
-        for (const flights of Object.values(this.directFlights)) {
-            for (const flight of flights) {
-                if (flight.originAirport.iata_code === fromIata && flight.destinationAirport.iata_code === toIata) {
-                    return flight;
+    findRoute(fromIata, toIata) {
+        for (const routes of Object.values(this.directRoutes)) {
+            for (const route of routes) {
+                if (route.originAirport.iata_code === fromIata && route.destinationAirport.iata_code === toIata) {
+                    return route;
                 }
             }
         }
@@ -166,9 +166,9 @@ const flightMap = {
     markerHoverHandler(iata, event) {
         if (this.selectedMarker !== iata) {
             if (event === 'mouseover') {
-                pathDrawing.drawFlightPaths(iata, this.directFlights, this.toggleState);
+                pathDrawing.drawRoutePaths(iata, this.directRoutes, this.toggleState);
             } else if (event === 'mouseout') {
-                pathDrawing.clearFlightPaths();
+                pathDrawing.clearRoutePaths();
             }
         }
     },
@@ -178,7 +178,7 @@ const flightMap = {
             map.removeLayer(marker);
         });
         this.markers = {};
-        this.plotFlightPaths();
+        this.plotRoutePaths();
     },
 
     updateVisibleMarkers() {
@@ -190,13 +190,13 @@ const flightMap = {
             }
         });
 
-        Object.values(this.directFlights).forEach(flights => {
-            flights.forEach(flight => {
-                if (flight.originAirport) {
-                    this.addMarker(flight.originAirport);
+        Object.values(this.directRoutes).forEach(routes => {
+            routes.forEach(route => {
+                if (route.originAirport) {
+                    this.addMarker(route.originAirport);
                 }
-                if (flight.destinationAirport) {
-                    this.addMarker(flight.destinationAirport);
+                if (route.destinationAirport) {
+                    this.addMarker(route.destinationAirport);
                 }
             });
         });

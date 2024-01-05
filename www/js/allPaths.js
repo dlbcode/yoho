@@ -4,58 +4,58 @@ import { pathDrawing } from './pathDrawing.js';
 import { appState, updateState } from './stateManager.js';
 
 let allPathsDrawn = false;
-let flightDataCache = null;
+let routeDataCache = null;
 
-// Function to draw all flight paths
-function drawAllFlightPaths() {
+// Function to draw all route paths
+function drawAllRoutePaths() {
   if (allPathsDrawn) {
-    pathDrawing.clearFlightPaths();
+    pathDrawing.clearRoutePaths();
     allPathsDrawn = false;
   } else {
     // Check if data is already cached
-    if (flightDataCache) {
-      flightDataCache.forEach(flight => drawFlightPath(flight));
-      console.info('Flight data loaded from cache');
+    if (routeDataCache) {
+      routeDataCache.forEach(route => drawRoutePath(route));
+      console.info('Route data loaded from cache');
       allPathsDrawn = true;
     } else {
-      fetch('http://yonderhop.com:3000/flights')
+      fetch('http://yonderhop.com:3000/routes')
         .then(response => response.json())
-        .then(flights => {
-            flightDataCache = flights;
-            flights.forEach(flight => {
-                if (!flight.originAirport || !flight.destinationAirport) {
-                    console.info('Incomplete flight data:', flight);
+        .then(routes => {
+            routeDataCache = routes;
+            routes.forEach(route => {
+                if (!route.originAirport || !route.destinationAirport) {
+                    console.info('Incomplete route data:', route);
                     return;
                 }
-                drawFlightPath(flight);
+                drawRoutePath(route);
                 allPathsDrawn = true;
             });
-            console.info('Flight data loaded from API');
+            console.info('Route data loaded from API');
         })
-        .catch(error => console.error('Error fetching flights:', error));
+        .catch(error => console.error('Error fetching routes:', error));
     }
   }
 }
 
-// Function to draw a single flight path
-function drawFlightPath(flight) {
-  let flightId = `${flight.originAirport.iata_code}-${flight.destinationAirport.iata_code}`;
-  if (pathDrawing.currentLines.some(line => line.flightId === flightId)) {
+// Function to draw a single route path
+function drawRoutePath(route) {
+  let routeId = `${route.originAirport.iata_code}-${route.destinationAirport.iata_code}`;
+  if (pathDrawing.currentLines.some(line => line.routeId === routeId)) {
       return;
   }
 
-  const adjustedOrigin = [flight.originAirport.latitude, flight.originAirport.longitude];
-  const adjustedDestination = [flight.destinationAirport.latitude, flight.destinationAirport.longitude];
+  const adjustedOrigin = [route.originAirport.latitude, route.originAirport.longitude];
+  const adjustedDestination = [route.destinationAirport.latitude, route.destinationAirport.longitude];
 
   const geodesicLine = new L.Geodesic([adjustedOrigin, adjustedDestination], {
       weight: 1,
       opacity: 0.7,
-      color: flightMap.getColorBasedOnPrice(flight.price),
+      color: flightMap.getColorBasedOnPrice(route.price),
       wrap: false
   }).addTo(map);
 
-  geodesicLine.flightId = flightId;
+  geodesicLine.routeId = routeId;
   pathDrawing.currentLines.push(geodesicLine);
 }
 
-export { drawAllFlightPaths };
+export { drawAllRoutePaths };

@@ -1,10 +1,10 @@
 import { flightMap } from './flightMap.js';
-import { flightList } from './flightList.js';
+import { routeList } from './flightList.js';
 import { updateState } from './stateManager.js';
 
 async function initMapFunctions() {
-    await flightMap.plotFlightPaths(); // Wait for flights data to be loaded and processed
-    flightList.initTravelerControls();
+    await flightMap.plotRoutePaths(); // Wait for routes data to be loaded and processed
+    routeList.initTravelerControls();
 
     const params = new URLSearchParams(window.location.search);
     const waypointParam = params.get('waypoints');

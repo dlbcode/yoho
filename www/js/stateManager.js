@@ -1,9 +1,9 @@
 const appState = {
   selectedAirport: null,
   numTravelers: 1,
-  flightPathToggle: 'from',
+  routePathToggle: 'from',
   waypoints: [],
-  flights: [], 
+  routes: [], 
 };
 
 function updateState(key, value) {
@@ -27,14 +27,14 @@ function updateState(key, value) {
       console.table(appState.waypoints);
       updateUrlWithWaypoints();
       break;
-    case 'addFlight':
-      console.log('appState: adding flight');
-      appState.flights.push(value);
-      console.table(appState.flights);
+    case 'addRoute':
+      console.log('appState: adding route');
+      appState.routes.push(value);
+      console.table(appState.routes);
       break;
     case 'clearData':
       appState.waypoints = [];
-      appState.flights = [];
+      appState.routes = [];
       updateUrlWithWaypoints(); // This will clear the waypoints from the URL
       break;  
     default:
