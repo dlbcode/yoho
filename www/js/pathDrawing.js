@@ -1,5 +1,5 @@
 import { map } from './map.js';
-import { routeList } from './flightList.js';
+import { routeList } from './routeList.js';
 import { updateState, appState } from './stateManager.js';
 
 const pathDrawing = {

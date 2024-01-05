@@ -1,0 +1,22 @@
+.flight-info-pane {
+  margin-top: 20px;
+  padding: 10px;
+  border: 1px solid #ddd;
+  background-color: #f9f9f9;
+}
+
+.flight-info-pane h3 {
+  margin-bottom: 10px;
+}
+
+.flight-info-pane ul {
+  list-style: none;
+  padding: 0;
+}
+
+.flight-info-pane li {
+  margin-bottom: 5px;
+  padding: 5px;
+  background-color: #eef;
+  border: 1px solid #ccd;
+}

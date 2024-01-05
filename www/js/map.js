@@ -1,5 +1,5 @@
 import { flightMap } from './flightMap.js';
-import { routeList } from './flightList.js';
+import { routeList } from './routeList.js';
 import { updateState } from './stateManager.js';
 
 async function initMapFunctions() {

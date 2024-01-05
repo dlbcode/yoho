@@ -1,6 +1,5 @@
 import { map, blueDotIcon, magentaDotIcon } from './map.js';
 import { pathDrawing } from './pathDrawing.js';
-import { routeList } from './flightList.js';
 import { eventManager } from './eventManager.js';
 import { appState, updateState } from './stateManager.js';
 
