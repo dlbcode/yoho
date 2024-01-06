@@ -1,6 +1,7 @@
 import { flightMap } from './flightMap.js';
 import { routeList } from './routeList.js';
 import { updateState } from './stateManager.js';
+import { infoPane } from './infoPane.js';
 
 async function initMapFunctions() {
     await flightMap.plotRoutePaths(); // Wait for routes data to be loaded and processed
@@ -74,7 +75,10 @@ fetch('http://ip-api.com/json/')
 
 // Initial resize on load
 document.getElementById('map').style.height = window.innerHeight + 'px';
-document.addEventListener('DOMContentLoaded', initMapFunctions);
+document.addEventListener('DOMContentLoaded', () => {
+    initMapFunctions();
+    infoPane.init(); // Initialize the infoPane
+  });
 
 // Export the map and the icons for use in other modules
 export { map, blueDotIcon, magentaDotIcon };

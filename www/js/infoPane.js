@@ -1,5 +1,12 @@
 const infoPane = {
 
+  init() {
+    // Initialize the infoPane
+    const infoPaneElement = document.getElementById('infoPane');
+    infoPaneElement.innerHTML = '<h3>Info Pane</h3><p>Content goes here...</p>';
+    // Add more initialization logic if needed
+  },
+
   // New function to fetch and display flight data
   async displayFlightInfo(originIata, destIata) {
     try {
@@ -21,4 +28,6 @@ const infoPane = {
           flightInfoList.appendChild(listItem);
       });
   },
-}
+};
+
+export { infoPane };
