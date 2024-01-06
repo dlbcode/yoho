@@ -4,7 +4,11 @@ body {
   height: 100vh; /* Full viewport height */
   display: flex;
   flex-direction: column; /* Stack elements vertically */
+  overflow: hidden;
+  background-color: #121212;
+  color: #a9a9a9;
 }
+
 
 .top-container {
   height: 20px;
@@ -15,6 +19,7 @@ body {
   display: flex; /* Align left-container and map-container side by side */
   flex-grow: 1; /* Take up remaining space */
   height: calc(100vh - 320px);
+  overflow: hidden;
 }
 
 .left-container {
@@ -24,22 +29,30 @@ body {
 
 .map-container {
   flex-grow: 1; /* Take up remaining space */
-  overflow: hidden; /* Optional, based on your previous setup */
-  height: calc(100vh - 20px); /* Adjust as necessary */
-  background-color: #333; /* Dark grey background */
-  height: 100%; /* Adjust to take full height of the container */
+  overflow: hidden;
+  /* height: calc(100vh - 20px); */
+  background-color: #333;
+  /*height: 100%;*/
 }
 
-.tooltip {
-  position: absolute;
-  border: 1px solid #676767;
-  background-color: rgb(44, 44, 44);
-  color: #c7c7c7;
-  padding: 5px;
-  border-radius: 5px;
-  box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.2);
-  z-index: 1000;
-  pointer-events: none; /* Prevents the tooltip from interfering with other mouse events */
+a {
+  color: #d3d3d3;
+}
+
+a:hover, button:hover, input:hover, select:hover, textarea:hover {
+  background-color: #333;
+  color: #fff;
+}
+
+a:active, button:active, input:focus, select:focus, textarea:focus {
+  background-color: #4f9dff;
+  color: #fff;
+}
+
+input, button, select, textarea {
+  background-color: #1e1e1e;
+  color: #e0e0e0;
+  border: 1px solid #333333;
 }
 
 .leaflet-popup {
@@ -64,34 +77,16 @@ body {
   padding: 0;
 }
 
-/* Apply to the whole body of the page */
-body {
-  background-color: #121212; /* Dark background */
-  color: #a9a9a9; /* Lighter text */
-}
-
-/* Ensure input fields, buttons, etc., are also styled appropriately */
-input, button, select, textarea {
-  background-color: #1e1e1e; /* Slightly lighter than the body for contrast */
-  color: #e0e0e0; /* Much lighter text for readability */
-  border: 1px solid #333333;
-}
-
-/* You might also want to style links to ensure they are readable */
-a {
-  color: #d3d3d3; /* A light blue color for links */
-}
-
-/* Style hover effects for interactive elements */
-a:hover, button:hover, input:hover, select:hover, textarea:hover {
-  background-color: #333333; /* Darker background on hover */
-  color: #ffffff; /* White text on hover */
-}
-
-/* Style for active or focused elements */
-a:active, button:active, input:focus, select:focus, textarea:focus {
-  background-color: #4f9dff; /* Light blue background for active/focused state */
-  color: #ffffff; /* White text for readability */
+.tooltip {
+  position: absolute;
+  border: 1px solid #676767;
+  background-color: rgb(44, 44, 44);
+  color: #c7c7c7;
+  padding: 5px;
+  border-radius: 5px;
+  box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.2);
+  z-index: 1000;
+  pointer-events: none; /* Prevents the tooltip from interfering with other mouse events */
 }
 
 .autocomplete-active {
