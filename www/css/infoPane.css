@@ -1,5 +1,6 @@
 .info-pane {
   /*position: fixed;*/
+  height: 160px;
   bottom: 0;
   left: 0;
   width: 100%; /* Stretch across the screen */

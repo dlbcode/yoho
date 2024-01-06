@@ -14,6 +14,7 @@ body {
 .container {
   display: flex; /* Align left-container and map-container side by side */
   flex-grow: 1; /* Take up remaining space */
+  height: calc(100vh - 320px);
 }
 
 .left-container {
@@ -26,6 +27,7 @@ body {
   overflow: hidden; /* Optional, based on your previous setup */
   height: calc(100vh - 20px); /* Adjust as necessary */
   background-color: #333; /* Dark grey background */
+  height: 100%; /* Adjust to take full height of the container */
 }
 
 .tooltip {
