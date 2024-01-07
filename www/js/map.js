@@ -2,7 +2,7 @@ import { flightMap } from './flightMap.js';
 import { routeList } from './routeList.js';
 import { updateState } from './stateManager.js';
 import { getPrice } from './getPrice.js';
-// import { infoPane } from './infoPane.js';
+import { infoPane } from './infoPane.js';
 
 async function initMapFunctions() {
     await flightMap.plotRoutePaths(); // Wait for routes data to be loaded and processed
@@ -87,9 +87,9 @@ window.addEventListener('resize', adjustMapHeight);
 
 function adjustMapHeight() {
     const mapElement = document.getElementById('map');
-    // const infoPaneHeight = 165; // Height of the infoPane
+    const infoPaneHeight = 165; // Height of the infoPane
     const windowHeight = window.innerHeight;
-    // mapElement.style.height = `${windowHeight - infoPaneHeight}px`;
+    mapElement.style.height = `${windowHeight - infoPaneHeight}px`;
 }
 
 
