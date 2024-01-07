@@ -77,8 +77,20 @@ fetch('http://ip-api.com/json/')
 document.getElementById('map').style.height = window.innerHeight + 'px';
 document.addEventListener('DOMContentLoaded', () => {
     initMapFunctions();
-    infoPane.init(); // Initialize the infoPane
-  });
+    infoPane.init();
+    adjustMapHeight();
+});
+
+window.addEventListener('resize', adjustMapHeight);
+
+function adjustMapHeight() {
+    const mapElement = document.getElementById('map');
+    const infoPaneHeight = 165; // Height of the infoPane
+    const windowHeight = window.innerHeight;
+    mapElement.style.height = `${windowHeight - infoPaneHeight}px`;
+}
+
+
 
 // Export the map and the icons for use in other modules
 export { map, blueDotIcon, magentaDotIcon };

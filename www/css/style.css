@@ -5,7 +5,7 @@ body {
   display: flex;
   flex-direction: column; /* Stack elements vertically */
   overflow: hidden;
-  background-color: #121212;
+  background-color: #1f1f1f;
   color: #a9a9a9;
 }
 
@@ -27,14 +27,14 @@ body {
   flex-shrink: 0; /* Prevent shrinking */
   padding-left: 5px;
   padding-top: 5px;
+  border-right: 1px solid #525252;
 }
 
 .map-container {
   flex-grow: 1; /* Take up remaining space */
   overflow: hidden;
-  /* height: calc(100vh - 20px); */
   background-color: #333;
-  /*height: 100%;*/
+  height: calc(100vh - 160px); /* Subtract the height of the infoPane */
 }
 
 a {
