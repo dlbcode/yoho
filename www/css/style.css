@@ -18,7 +18,7 @@ body {
 .container {
   display: flex; /* Align left-container and map-container side by side */
   flex-grow: 1; /* Take up remaining space */
-  height: calc(100vh - 320px);
+  /* height: calc(100vh - 320px); */
   overflow: hidden;
 }
 
@@ -34,7 +34,7 @@ body {
   flex-grow: 1; /* Take up remaining space */
   overflow: hidden;
   background-color: #333;
-  height: calc(100vh - 160px); /* Subtract the height of the infoPane */
+  /* height: calc(100vh - 160px); /* Subtract the height of the infoPane */
 }
 
 a {
