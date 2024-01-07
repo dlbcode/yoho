@@ -1,6 +1,7 @@
 import { flightMap } from './flightMap.js';
 import { routeList } from './routeList.js';
 import { updateState } from './stateManager.js';
+import { getPrice } from './getPrice.js';
 // import { infoPane } from './infoPane.js';
 
 async function initMapFunctions() {
@@ -77,6 +78,7 @@ fetch('http://ip-api.com/json/')
 document.getElementById('map').style.height = window.innerHeight + 'px';
 document.addEventListener('DOMContentLoaded', () => {
     initMapFunctions();
+    getPrice.init();
     // infoPane.init();
     adjustMapHeight();
 });
