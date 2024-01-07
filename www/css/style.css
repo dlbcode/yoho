@@ -23,8 +23,10 @@ body {
 }
 
 .left-container {
-  flex-basis: 200px; /* Adjust width as necessary */
+  flex-basis: 180px; /* Adjust width as necessary */
   flex-shrink: 0; /* Prevent shrinking */
+  padding-left: 5px;
+  padding-top: 5px;
 }
 
 .map-container {
