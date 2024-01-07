@@ -94,7 +94,19 @@ app.get('/routes', async (req, res) => {
 
 app.get('/flights', async (req, res) => {
   try {
-    const flights = await flightsCollection.find({}).toArray();
+    const { origin, destination } = req.query;
+
+    // Check if both origin and destination are provided
+    if (!origin || !destination) {
+      return res.status(400).send('Both origin and destination are required');
+    }
+
+    const query = {
+      origin_iata: origin.toUpperCase(),
+      dest_iata: destination.toUpperCase()
+    };
+
+    const flights = await flightsCollection.find(query).toArray();
     res.status(200).json(flights);
   } catch (e) {
     console.error(e);
