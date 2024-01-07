@@ -12,12 +12,18 @@ const getPrice = {
         if (waypoints.length === 1) {
             // Single waypoint: Explore one-way flights from this origin
             searchQuery = `One-way flights from ${waypoints[0].iata_code}`;
-        } else if (waypoints.length >= 2) {
-            // Two or more waypoints: Construct a one-way flight search query
-            for (let i = 0; i < waypoints.length - 1; i++) {
-                if (i > 0) searchQuery += ', ';
-                searchQuery += `One-way flight from ${waypoints[i].iata_code} to ${waypoints[i + 1].iata_code}`;
-            }
+        } else if (waypoints.length === 2) {
+            // Two waypoints: One-way flight from origin to destination
+            searchQuery = `One-way flight from ${waypoints[0].iata_code} to ${waypoints[1].iata_code}`;
+        } else {
+            // More than two waypoints: Construct a multi-hop flight search query
+            searchQuery = 'Multi-city flight ';
+            waypoints.forEach((waypoint, index) => {
+                if (index < waypoints.length - 1) {
+                    if (index > 0) searchQuery += ', ';
+                    searchQuery += `from ${waypoint.iata_code} to ${waypoints[index + 1].iata_code}`;
+                }
+            });
         }
 
         // Construct the Google Flights URL with natural language query
