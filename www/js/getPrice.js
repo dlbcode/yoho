@@ -10,13 +10,13 @@ const getPrice = {
         let searchQuery = '';
 
         if (waypoints.length === 1) {
-            // Single waypoint: Explore flights from this origin
-            searchQuery = `Flights from ${waypoints[0].iata_code}`;
+            // Single waypoint: Explore one-way flights from this origin
+            searchQuery = `One-way flights from ${waypoints[0].iata_code}`;
         } else if (waypoints.length >= 2) {
-            // Two or more waypoints: Construct a flight search query
+            // Two or more waypoints: Construct a one-way flight search query
             for (let i = 0; i < waypoints.length - 1; i++) {
                 if (i > 0) searchQuery += ', ';
-                searchQuery += `Flights from ${waypoints[i].iata_code} to ${waypoints[i + 1].iata_code}`;
+                searchQuery += `One-way flight from ${waypoints[i].iata_code} to ${waypoints[i + 1].iata_code}`;
             }
         }
 
