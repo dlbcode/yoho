@@ -3,11 +3,13 @@ import { appState } from './stateManager.js';
 const infoPane = {
 
   init() {
-    // Initialize the infoPane
-    const infoPaneElement = document.getElementById('infoPane');
-    infoPaneElement.innerHTML = '<h3>Info Pane</h3><p>Content goes here...</p>';
+    // Update only the content of infoPaneContent
+    const infoPaneContent = document.getElementById('infoPaneContent');
+    infoPaneContent.innerHTML = '<h3>Info Pane</h3>';
+
     document.addEventListener('stateChange', this.handleStateChange.bind(this));
-  },
+},
+
 
   handleStateChange(event) {
     const { key, value } = event.detail;
@@ -41,11 +43,16 @@ const infoPane = {
 
   updateFlightInfoPane(flights) {
       const flightInfoList = document.getElementById('flightInfoList');
-      flightInfoList.innerHTML = ''; // Clear existing list
+      flightInfoList.innerHTML = '';
+      // convert flight.departure and flight.arrival from YYYYMMDDHHMM to HH:MM
+      flights.forEach(flight => {
+          flight.departure = flight.departure.slice(8, 10) + ':' + flight.departure.slice(10, 12);
+          flight.arrival = flight.arrival.slice(8, 10) + ':' + flight.arrival.slice(10, 12);
+      });
 
       flights.forEach(flight => {
           const listItem = document.createElement('li');
-          listItem.textContent = `Flight ${flight.flight_number} from ${flight.origin_iata} to ${flight.dest_iata}, Duration: ${flight.duration}`;
+          listItem.textContent = `Flight ${flight.flight_number} from ${flight.origin_iata} to ${flight.dest_iata}, Departure: ${flight.departure}, Arrival: ${flight.arrival}, Duration: ${flight.duration}`;
           flightInfoList.appendChild(listItem);
       });
   },
