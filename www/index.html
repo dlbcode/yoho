@@ -13,14 +13,6 @@
     
 </head>
 <body>
-    <div class="top-container">
-        <label for="routePathToggle">Show route Paths:</label>
-        <select id="routePathToggle">
-            <option value="from">From Marker</option>
-            <option value="to">To Marker</option>
-        </select>
-        <button id="allPathsBtn">Show All Paths</button>
-    </div>
     <div class="container">
         <div class="left-container">
             <div class="travelers-container">
@@ -39,6 +31,14 @@
         </div>
         <div class="map-container">
             <div id="map"></div>
+            <div class="floating-controls">
+                <label for="routePathToggle">Show route Paths:</label>
+                <select id="routePathToggle">
+                    <option value="from">From Marker</option>
+                    <option value="to">To Marker</option>
+                </select>
+                <button id="allPathsBtn">Show All Paths</button>
+            </div>
         </div>
     </div>
     <div id="infoPane" class="info-pane"></div>
