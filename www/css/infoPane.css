@@ -1,12 +1,54 @@
 .info-pane {
   /*position: fixed;*/
   height: 160px;
-  bottom: 0;
-  left: 0;
   width: 100%; /* Stretch across the screen */
   background-color: #222222; /* Adjust the background color as needed */
-  border-top: 1px solid #555555; /* Top border for separation */
+  border-top: 1px solid #555; /* Top border for separation */
   padding: 10px;
-  box-shadow: 0 -2px 5px rgba(0,0,0,0.1); /* Shadow for depth */
+  box-sizing: border-box;
   z-index: 100; /* Ensure it's above other elements */
+}
+
+/* Style for the table */
+table {
+  border-collapse: collapse;
+  font-family: 'Consolas', 'Courier New', Courier, monospace; /* Monospace font */
+  font-size: 12px; /* Similar to default console font size */
+  color: #2ad8ff; /* Default text color */
+  border: 1px solid #555;
+  box-sizing: border-box; /* Include padding and border in the table's total width */
+}
+
+/* Style for table headers */
+th {
+  background-color: #222; /* Very light grey background */
+  color: #ccc;
+  text-align: left;
+  padding: 8px; /* Padding for table cells */
+  /*border: 1px solid #555; /* Subtle bottom border */
+}
+
+/* Style for table rows */
+td {
+  padding: 4px; /* Padding for table cells */
+  /*border: 1px solid #555; /* Subtle bottom border */
+}
+
+/* Style for alternating row colors */
+tr:nth-child(even) {
+  background-color: #222; /* Very light grey for even rows */
+}
+
+/* Style for the cells in the "Price" column */
+td:nth-child(3) { /* Assuming "Price" is the third column */
+  color: rgb(153, 113, 255); /* Change text color to purple */
+}
+
+tr:nth-child(odd) {
+  background-color: #222; /* White for odd rows */
+}
+
+/* Style for table rows on hover */
+tr:hover {
+  background-color: #222; /* Slightly darker background on hover */
 }

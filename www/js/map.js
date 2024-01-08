@@ -79,7 +79,7 @@ document.getElementById('map').style.height = window.innerHeight + 'px';
 document.addEventListener('DOMContentLoaded', () => {
     initMapFunctions();
     getPrice.init();
-    // infoPane.init();
+    infoPane.init();
     adjustMapHeight();
 });
 
