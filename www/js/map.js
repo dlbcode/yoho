@@ -87,7 +87,7 @@ window.addEventListener('resize', adjustMapHeight);
 
 function adjustMapHeight() {
     const mapElement = document.getElementById('map');
-    const infoPaneHeight = 165; // Height of the infoPane
+    const infoPaneHeight = 160; // Height of the infoPane
     const windowHeight = window.innerHeight;
     mapElement.style.height = `${windowHeight - infoPaneHeight}px`;
 }
