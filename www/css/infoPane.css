@@ -1,4 +1,4 @@
-.info-pane {
+#infoPane {
   /*position: fixed;*/
   height: 160px;
   width: 100%; /* Stretch across the screen */
@@ -8,21 +8,18 @@
   z-index: 100; /* Ensure it's above other elements */
 }
 
-.infoPaneContent {
-  height: 100%;
-  width: 100%;
-  overflow-y: auto;
-  overflow-x: hidden;
+#infoPaneContent {
+  height: 138px;
+  overflow-y: auto !important;
   box-sizing: border-box;
 }
 
-
-.menu-bar {
+#menu-bar {
   background-color: #333; /* Dark grey background */
   color: #ccc; /* Light text color for contrast */
-  padding: 10px; /* Add some padding */
+  height:16px;
+  padding: 3px; /* Add some padding */
   text-align: left; /* Align menu items to the left */
-  border-bottom: 1px solid #444; /* Optional bottom border for visual separation */
 }
 
 /* Style for the table */
@@ -74,13 +71,13 @@ tr:hover {
 }
 
 /* Style the scrollbar thumb (scrollable handle) */
-.infoPaneContent::-webkit-scrollbar-thumb {
+#infoPaneContent::-webkit-scrollbar-thumb {
   background-color: #555; /* Dark thumb color */
   border-radius: 2px; /* Rounded corners for the thumb */
 }
 
 /* Style the scrollbar itself (width and height) */
-.infoPaneContent::-webkit-scrollbar {
+#infoPaneContent::-webkit-scrollbar {
   width: 5px; /* Thin scrollbar width */
   height: 5px; /* Thin scrollbar height for horizontal scroll */
 }
