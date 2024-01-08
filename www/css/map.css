@@ -22,10 +22,11 @@
 .leaflet-control-zoom a {
   background-color: #555555;
   color: #bbbbbb;
-  border: 1px solid #a5a5a5;
+  border: 1px solid #a5a5a5 !important;
 }
 
 .leaflet-control-zoom a:hover, a:active {
   background-color: #222222;
   color: #bbbbbb;
+  border-bottom: 1px solid #a5a5a5 !important;
 }
