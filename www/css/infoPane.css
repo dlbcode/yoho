@@ -8,7 +8,7 @@
   z-index: 100; /* Ensure it's above other elements */
 }
 
-.inforPaneContent {
+.infoPaneContent {
   height: 100%;
   width: 100%;
   overflow-y: auto;
