@@ -1,5 +1,6 @@
 import { appState, updateState } from './stateManager.js';
 import { map } from './map.js';
+import { flightMap } from './flightMap.js';
 
 async function fetchAirports(query) {
     try {
@@ -138,6 +139,21 @@ document.addEventListener('DOMContentLoaded', () => {
             updateState('updateWaypoint', { index: waypointIndex, data: airport });
         } else {
             updateState('addWaypoint', airport);
+        }
+
+        // Additional logic to handle route finding
+        if (appState.waypoints.length > 1) {
+            const lastWaypoint = appState.waypoints[appState.waypoints.length - 2];
+            const newWaypoint = appState.waypoints[appState.waypoints.length - 1];
+
+            if (lastWaypoint.iata_code !== newWaypoint.iata_code) {
+                const directRoute = flightMap.findRoute(lastWaypoint.iata_code, newWaypoint.iata_code);
+                if (!directRoute) {
+                    // Remove the newly added waypoint before finding the cheapest route
+                    updateState('removeWaypoint', appState.waypoints.length - 1);
+                    flightMap.findCheapestRouteAndAddWaypoints(lastWaypoint.iata_code, newWaypoint.iata_code);
+                }
+            }
         }
     
         // Move map view to include the selected airport marker
