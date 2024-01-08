@@ -17,7 +17,13 @@ function updateState(key, value) {
       break;
     case 'addWaypoint':
       console.log('addWaypoint');
-      appState.waypoints.push(value);
+      if (Array.isArray(value)) {
+        // If value is an array, add each waypoint in the array
+        value.forEach(waypoint => appState.waypoints.push(waypoint));
+      } else {
+        // If value is a single waypoint, add it directly
+        appState.waypoints.push(value);
+      }
       console.table(appState.waypoints);
       updateUrlWithWaypoints();
       break;

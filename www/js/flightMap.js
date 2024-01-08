@@ -99,18 +99,29 @@ const flightMap = {
 
     handleMarkerClick(airport, clickedMarker) {
         const lastWaypoint = appState.waypoints[appState.waypoints.length - 1];
-        console.log('lastWaypoint:', lastWaypoint);
-        if (lastWaypoint && lastWaypoint.iata_code === airport.iata_code) {
+    
+        if (lastWaypoint && lastWaypoint.iata_code !== airport.iata_code) {
+            const directRoute = this.findRoute(lastWaypoint.iata_code, airport.iata_code);
+            if (!directRoute) {
+                // No direct route, find the cheapest route
+                this.findCheapestRouteAndAddWaypoints(lastWaypoint.iata_code, airport.iata_code);
+            } else {
+                // Direct route exists, add the clicked airport as a waypoint
+                updateState('addWaypoint', airport);
+                clickedMarker.setIcon(magentaDotIcon);
+            }
+        } else if (lastWaypoint && lastWaypoint.iata_code === airport.iata_code) {
+            // Remove the last waypoint if the same airport is clicked again
             updateState('removeWaypoint', appState.waypoints.length - 1);
             clickedMarker.setIcon(blueDotIcon);
         } else {
+            // If there is no last waypoint, simply add the clicked airport
             updateState('addWaypoint', airport);
             clickedMarker.setIcon(magentaDotIcon);
-            updateState('selectedAirport', airport.iata_code);
         }
     
         clickedMarker.selected = !clickedMarker.selected;
-    },    
+    },       
 
     findRoute(fromIata, toIata) {
         for (const routes of Object.values(this.directRoutes)) {
@@ -122,6 +133,26 @@ const flightMap = {
         }
         return null;
     },
+
+    async findCheapestRouteAndAddWaypoints(originIata, destinationIata) {
+        try {
+            const response = await fetch(`http://yonderhop.com:3000/cheapest-routes?origin=${originIata}&destination=${destinationIata}`);
+            const cheapestRoutes = await response.json();
+    
+            if (cheapestRoutes && cheapestRoutes.length > 0) {
+                // Start from index 1 if the first waypoint is the same as the last selected waypoint
+                const startIndex = (cheapestRoutes[0].route[0] === originIata) ? 1 : 0;
+    
+                for (let i = startIndex; i < cheapestRoutes[0].route.length; i++) {
+                    const iataCode = cheapestRoutes[0].route[i];
+                    const airportData = await flightMap.getAirportDataByIata(iataCode);
+                    updateState('addWaypoint', airportData);
+                }
+            }
+        } catch (error) {
+            console.error('Error fetching cheapest routes:', error);
+        }
+    },       
 
     fetchAndCacheAirports() {
         if (this.airportDataCache) {
