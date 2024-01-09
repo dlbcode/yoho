@@ -12,7 +12,7 @@ const infoPane = {
    const { key, value } = event.detail;
    if (key === 'addWaypoint' || key === 'updateWaypoint' || key === 'removeWaypoint') {
      // this.displayFlightsForWaypoints();
-     this.updateFlightInfoPane(appState.routes);
+     this.updateRouteInfoPane(appState.routes);
    }
  },
 
@@ -39,7 +39,7 @@ const infoPane = {
  //   }
  // },
 
-  updateFlightInfoPane(flights) {
+  updateRouteInfoPane(routes) {
     const infoPaneContent = document.getElementById('infoPaneContent');
     infoPaneContent.innerHTML = '';
 
@@ -60,11 +60,11 @@ const infoPane = {
 
     // Create table body
     const tbody = document.createElement('tbody');
-    flights.forEach(flight => {
+    routes.forEach(route => {
         let row = `<tr>
-                      <td>${flight.originAirport.city} (${flight.origin})</td>
-                      <td>${flight.destinationAirport.city} (${flight.destination})</td>
-                      <td>${flight.price}</td>
+                      <td>${route.originAirport.city} (${route.origin})</td>
+                      <td>${route.destinationAirport.city} (${route.destination})</td>
+                      <td>${route.price}</td>
                    </tr>`;
         tbody.innerHTML += row;
     });

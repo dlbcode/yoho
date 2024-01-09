@@ -24,7 +24,7 @@ const flightMap = {
                 resolve(); // Resolve the promise as data is already processed
             } else {
                 // Fetch new data as cache is empty or outdated
-                fetch('http://yonderhop.com:3000/allRoutes')
+                fetch('http://yonderhop.com:3000/directRoutes')
                     .then(response => response.json())
                     .then(data => {
                         this.cachedRoutes = data;
