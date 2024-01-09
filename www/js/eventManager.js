@@ -25,14 +25,6 @@ function handleStateChange(event) {
         // Create an additional field for the next waypoint
         createWaypointField(appState.waypoints.length + 1);
 
-        // Check if the added waypoint is the last one
-        if (appState.waypoints.length > 0) {
-            const lastWaypoint = appState.waypoints[appState.waypoints.length - 1];
-            // Call drawRoutePaths from pathDrawing.js
-            // You need to provide the directRoutes data relevant to your application
-            pathDrawing.drawRoutePathsFromOrigin(lastWaypoint.iata_code, flightMap.directRoutes);
-        }
-
         // Update routes array based on the current waypoints
         updateRoutesArray();
         console.table(appState.routes);
