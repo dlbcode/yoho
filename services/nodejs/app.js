@@ -67,9 +67,9 @@ app.get('/airports', async (req, res) => {
   }
 });
 
-app.get('/routes', async (req, res) => {
+app.get('/allRoutes', async (req, res) => {
   try {
-      const routes = await routesCollection.find({}).toArray();
+      const allRoutes = await routesCollection.find({}).toArray();
       const airports = await airportsCollection.find({}).toArray();
 
       const airportMap = airports.reduce((map, airport) => {
@@ -77,7 +77,7 @@ app.get('/routes', async (req, res) => {
           return map;
       }, {});
 
-      const enrichedRoutes = routes.map(route => {
+      const enrichedRoutes = allRoutes.map(route => {
           return {
               ...route,
               originAirport: airportMap[route.origin],

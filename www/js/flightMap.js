@@ -11,7 +11,7 @@ const flightMap = {
     toggleState: 'from',
     routePathCache: {},
     clearMultiHopPaths: true,
-    cachedRoutes: null,
+    cachedRoutes: [],
     lastFetchTime: null,
     cacheDuration: 60000, // 1 minute in milliseconds
 
@@ -24,7 +24,7 @@ const flightMap = {
                 resolve(); // Resolve the promise as data is already processed
             } else {
                 // Fetch new data as cache is empty or outdated
-                fetch('http://yonderhop.com:3000/routes')
+                fetch('http://yonderhop.com:3000/allRoutes')
                     .then(response => response.json())
                     .then(data => {
                         this.cachedRoutes = data;
