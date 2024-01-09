@@ -161,6 +161,9 @@ const pathDrawing = {
     },          
 
     clearRoutePaths() {
+        const lastWaypoint = appState.waypoints[appState.waypoints.length - 1];
+        const lastWaypointId = lastWaypoint ? `${lastWaypoint.iata_code}` : null;
+    
         this.currentLines.forEach(line => {
             let shouldRemove = true;
             appState.routes.forEach(route => {
@@ -169,6 +172,12 @@ const pathDrawing = {
                     shouldRemove = false;
                 }
             });
+    
+            // Check if the line is part of the last waypoint's route
+            if (lastWaypointId && line.route && (line.route.originAirport.iata_code === lastWaypointId || line.route.destinationAirport.iata_code === lastWaypointId)) {
+                shouldRemove = false;
+            }
+    
             if (shouldRemove && map.hasLayer(line)) {
                 map.removeLayer(line);
             }
@@ -179,10 +188,10 @@ const pathDrawing = {
             return appState.routes.some(route => {
                 let routeId = `${route.originAirport.iata_code}-${route.destinationAirport.iata_code}`;
                 return this.routePathCache[routeId] && this.routePathCache[routeId].includes(line);
-            });
+            }) || (lastWaypointId && line.route && (line.route.originAirport.iata_code === lastWaypointId || line.route.destinationAirport.iata_code === lastWaypointId));
         });
     
-        // Clear cached paths not in the routes array
+        // Clear cached paths not in the routes array and not part of the last waypoint
         Object.keys(this.routePathCache).forEach(cacheKey => {
             let shouldRemove = true;
             appState.routes.forEach(route => {
@@ -191,6 +200,9 @@ const pathDrawing = {
                     shouldRemove = false;
                 }
             });
+            if (lastWaypointId && cacheKey.includes(lastWaypointId)) {
+                shouldRemove = false;
+            }
             if (shouldRemove) {
                 this.routePathCache[cacheKey].forEach(path => {
                     if (map.hasLayer(path)) {
@@ -200,7 +212,7 @@ const pathDrawing = {
                 delete this.routePathCache[cacheKey];
             }
         });
-    },       
+    },           
     
     drawPaths(route) {
         // console.log('drawPaths: route:', route);
