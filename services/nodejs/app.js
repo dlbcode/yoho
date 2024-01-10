@@ -54,23 +54,49 @@ MongoClient.connect(mongoUrl, { useNewUrlParser: true, useUnifiedTopology: true 
   console.log('Connected to MongoDB');
 });
 
-// New endpoint for 'atdroutes'
-app.get('/atdroutes', async (req, res) => {
+app.get('/atdRoutes', async (req, res) => {
   try {
-    const { origin, destination } = req.query;
+    const { origin, destination, tripType } = req.query;
 
-    // Validate input
     if (!origin || !destination) {
       return res.status(400).send('Origin and destination IATA codes are required');
     }
 
-    // Fetch flight offers from Amadeus API
-    const response = await amadeus.shopping.flightOffersSearch.get({
+    // Set up parameters for Amadeus API request
+    const flightSearchParams = {
       originLocationCode: origin,
       destinationLocationCode: destination,
       departureDate: '2024-01-15', // Example date, adjust as needed
       adults: '1'
-    });
+    };
+
+    // Add return date only for round-trip flights
+    if (tripType && tripType.toUpperCase() === 'ROUNDTRIP') {
+      flightSearchParams.returnDate = '2024-01-22'; // Example return date, adjust as needed
+    }
+
+    const response = await amadeus.shopping.flightOffersSearch.get(flightSearchParams);
+
+    for (const offer of response.data) {
+      for (const itinerary of offer.itineraries) {
+        if (itinerary.segments.length === 1) { // Check for direct flight
+          const segment = itinerary.segments[0];
+          const routeQuery = { origin: segment.departure.iataCode, destination: segment.arrival.iataCode };
+          const existingRoute = await routesCollection.findOne(routeQuery);
+
+          if (existingRoute && offer.price.total < existingRoute.price) {
+            const updateData = {
+              price: offer.price.total,
+              carrierCode: segment.carrierCode,
+              departure: segment.departure,
+              arrival: segment.arrival,
+              source: 'atd' // Set source to 'atd'
+            };
+            await routesCollection.updateOne(routeQuery, { $set: updateData }, { upsert: true });
+          }
+        }
+      }
+    }
 
     res.json(response.data);
   } catch (error) {
@@ -78,6 +104,7 @@ app.get('/atdroutes', async (req, res) => {
     res.status(500).send('Error fetching flight offers');
   }
 });
+
 
 app.get('/airports', async (req, res) => {
   try {
