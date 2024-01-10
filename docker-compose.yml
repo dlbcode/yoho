@@ -31,6 +31,8 @@ services:
     container_name: yh-nodejs
     environment:
       MONGO_RSUSER_PASSWORD: ${MONGODB_RSUSER_PASSWORD}
+      AMADEUS_TEST_API_SECRET: ${AMADEUS_TEST_API_SECRET}
+      AMADEUS_TEST_API_KEY: ${AMADEUS_TEST_API_KEY}
     ports:
       - "3000:3000"
     depends_on:

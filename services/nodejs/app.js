@@ -1,9 +1,17 @@
 const express = require('express');
+const Amadeus = require('amadeus');
 const MongoClient = require('mongodb').MongoClient;
 const app = express();
 const port = 3000;
 const cors = require('cors');
 const mongodbPassword = process.env.MONGO_RSUSER_PASSWORD;
+
+// Amadeus client setup
+const amadeus = new Amadeus({
+  clientId: process.env.AMADEUS_TEST_API_KEY,
+  clientSecret: process.env.AMADEUS_TEST_API_SECRET
+});
+
 
 //// Middleware to check the referrer 
 //function checkReferrer(req, res, next) {
@@ -44,6 +52,31 @@ MongoClient.connect(mongoUrl, { useNewUrlParser: true, useUnifiedTopology: true 
   routesCollection = db.collection('routes');
   flightsCollection = db.collection('flights');
   console.log('Connected to MongoDB');
+});
+
+// New endpoint for 'atdroutes'
+app.get('/atdroutes', async (req, res) => {
+  try {
+    const { origin, destination } = req.query;
+
+    // Validate input
+    if (!origin || !destination) {
+      return res.status(400).send('Origin and destination IATA codes are required');
+    }
+
+    // Fetch flight offers from Amadeus API
+    const response = await amadeus.shopping.flightOffersSearch.get({
+      originLocationCode: origin,
+      destinationLocationCode: destination,
+      departureDate: '2024-01-15', // Example date, adjust as needed
+      adults: '1'
+    });
+
+    res.json(response.data);
+  } catch (error) {
+    console.error('Error fetching flight offers:', error);
+    res.status(500).send('Error fetching flight offers');
+  }
 });
 
 app.get('/airports', async (req, res) => {
