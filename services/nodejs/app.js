@@ -49,7 +49,7 @@ MongoClient.connect(mongoUrl, { useNewUrlParser: true, useUnifiedTopology: true 
 
   db = client.db(dbName);
   airportsCollection = db.collection('airports');
-  routesCollection = db.collection('routes');
+  routesCollection = db.collection('directRoutes');
   flightsCollection = db.collection('flights');
   console.log('Connected to MongoDB');
 });
