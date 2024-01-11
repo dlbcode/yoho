@@ -14,31 +14,6 @@ const flightMap = {
     cachedRoutes: [],
     lastFetchTime: null,
     cacheDuration: 600000, // 10 minutes in milliseconds
-
-    async plotRoutePaths() {
-        return new Promise((resolve, reject) => {
-            const currentTime = new Date().getTime();
-            // Check if cached data is available and still valid
-            if (this.cachedRoutes && this.lastFetchTime && currentTime - this.lastFetchTime < this.cacheDuration) {
-                this.processRouteData(this.cachedRoutes);
-                resolve(); // Resolve the promise as data is already processed
-            } else {
-                // Fetch new data as cache is empty or outdated
-                fetch('http://yonderhop.com:3000/directRoutes')
-                    .then(response => response.json())
-                    .then(data => {
-                        this.cachedRoutes = data;
-                        this.lastFetchTime = currentTime;
-                        this.processRouteData(data);
-                        resolve(); // Resolve the promise after processing is complete
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        reject(error); // Reject the promise on error
-                    });
-            }
-        });
-    },
         
     processRouteData(data) {
         const uniqueAirports = new Set();
@@ -176,11 +151,36 @@ const flightMap = {
     markerHoverHandler(iata, event) {
         if (this.selectedMarker !== iata) {
             if (event === 'mouseover') {
-                pathDrawing.drawRoutePaths(iata, this.directRoutes, this.toggleState);
+                this.fetchAndCacheRoutes(iata).then(() => {
+                    pathDrawing.drawRoutePaths(iata, this.directRoutes, this.toggleState);
+                });
             } else if (event === 'mouseout') {
                 pathDrawing.clearLines();
                 pathDrawing.drawLines();
             }
+        }
+    },
+    
+    async fetchAndCacheRoutes(iata) {
+        if (!this.directRoutes[iata]) {
+            try {
+                const response = await fetch(`http://yonderhop.com:3000/directRoutes?origin=${iata}`);
+                const routes = await response.json();
+                this.directRoutes[iata] = routes;
+            } catch (error) {
+                console.error('Error fetching routes:', error);
+            }
+        }
+    },
+    
+    async fetchAndDisplayAirports() {
+        try {
+            const airports = await this.fetchAndCacheAirports();
+            Object.values(airports).forEach(airport => {
+                this.addMarker(airport);
+            });
+        } catch (error) {
+            console.error('Error fetching airports:', error);
         }
     },
 
@@ -189,7 +189,7 @@ const flightMap = {
             map.removeLayer(marker);
         });
         this.markers = {};
-        this.plotRoutePaths();
+        //this.plotRoutePaths();
     },
 
     updateVisibleMarkers() {
@@ -201,17 +201,9 @@ const flightMap = {
             }
         });
 
-        Object.values(this.directRoutes).forEach(routes => {
-            routes.forEach(route => {
-                if (route.originAirport) {
-                    this.addMarker(route.originAirport);
-                }
-                if (route.destinationAirport) {
-                    this.addMarker(route.destinationAirport);
-                }
-            });
-        });
-    }
+        // Fetch and display airports if needed
+        this.fetchAndDisplayAirports();
+    },
 };
 
 export { flightMap };

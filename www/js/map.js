@@ -5,7 +5,7 @@ import { getPrice } from './getPrice.js';
 import { infoPane } from './infoPane.js';
 
 async function initMapFunctions() {
-    await flightMap.plotRoutePaths(); // Wait for routes data to be loaded and processed
+    // await flightMap.plotRoutePaths(); // Wait for routes data to be loaded and processed
     routeList.initTravelerControls();
 
     const params = new URLSearchParams(window.location.search);

@@ -177,6 +177,7 @@ window.addEventListener('resize', function () {
 });
 
 document.addEventListener('DOMContentLoaded', function () {
+    flightMap.fetchAndDisplayAirports();
     eventManager.setupEventListeners();
 });
 
