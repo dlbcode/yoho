@@ -99,18 +99,19 @@ const pathDrawing = {
     
     createRoutePath(origin, destination, route) {
         let routeId = `${route.originAirport.iata_code}-${route.destinationAirport.iata_code}`;
+    
+        // Check if the route is in the cache
         if (this.routePathCache[routeId]) {
+            // Add each path in the cache to the map if it's not already there
             this.routePathCache[routeId].forEach(path => {
                 if (!map.hasLayer(path)) {
                     path.addTo(map);
                 }
             });
-            return;
-        }
-    
-        const drawPath = (origin, destination, offset) => {
-            const adjustedOrigin = L.latLng(origin.latitude, origin.longitude + offset);
-            const adjustedDestination = L.latLng(destination.latitude, destination.longitude + offset);
+        } else {
+            // Create and draw the geodesic line
+            const adjustedOrigin = L.latLng(origin.latitude, origin.longitude);
+            const adjustedDestination = L.latLng(destination.latitude, destination.longitude);
     
             var geodesicLine = new L.Geodesic([adjustedOrigin, adjustedDestination], {
                 weight: 1,
@@ -120,31 +121,13 @@ const pathDrawing = {
                 zIndex: -1
             }).addTo(map);
     
-            geodesicLine.route = route;
+            // Store the newly created geodesic line
+            let newPaths = [geodesicLine];
     
-            geodesicLine.on('click', () => {
-                if (routeList.isRouteListed(route)) {
-                    routeList.removeRouteFromList(route);
-                    this.clearLines();
-                } else {
-                    routeList.addRouteDetailsToList(route, this.clearLines.bind(this));
-                }
-            });
-    
-            geodesicLine.on('mouseover', (e) => {
-                L.popup()
-                    .setLatLng(e.latlng)
-                    .setContent(`Price: $${route.price}`)
-                    .openOn(map);
-            });
-    
-            geodesicLine.on('mouseout', () => {
-                map.closePopup();
-            });
-    
-            if (appState.routes.some(r => r === route)) {
+            // Add the decorated line for direct routes
+            if (route.isDirect) {
                 var planeIcon = L.icon({
-                    iconUrl: '../assets/plane_icon.png',
+                    iconUrl: '../assets/plane_icon.png', // Adjust the path as needed
                     iconSize: [16, 16],
                     iconAnchor: [8, 12]
                 });
@@ -162,24 +145,13 @@ const pathDrawing = {
                     ]
                 }).addTo(map);
     
-                this.currentLines.push(geodesicLine, decoratedLine);
-                if (!this.routePathCache[routeId]) {
-                    this.routePathCache[routeId] = [];
-                }
-                this.routePathCache[routeId].push(geodesicLine, decoratedLine);
-            } else {
-                this.currentLines.push(geodesicLine);
-                if (!this.routePathCache[routeId]) {
-                    this.routePathCache[routeId] = [];
-                }
-                this.routePathCache[routeId].push(geodesicLine);
+                // Store the decorated line along with the geodesic line
+                newPaths.push(decoratedLine);
             }
-        };
     
-        const worldCopies = [-720, -360, 0, 360, 720];
-        worldCopies.forEach(offset => {
-            drawPath(origin, destination, offset);
-        });
+            // Add the newly created line(s) to the routePathCache
+            this.routePathCache[routeId] = newPaths;
+        }
     },          
 
     clearLines() {
