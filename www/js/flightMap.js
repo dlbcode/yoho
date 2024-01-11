@@ -135,17 +135,6 @@ const flightMap = {
         return null;
     },
 
-    async handleNoDirectRoute(originIata, destinationIata) {
-        const originAirport = await this.getAirportDataByIata(originIata);
-        const destinationAirport = await this.getAirportDataByIata(destinationIata);
-    
-        if (originAirport && destinationAirport) {
-            pathDrawing.drawDashedLine(originAirport, destinationAirport);
-        } else {
-            console.error('Airport data not found for one or both IATAs:', originIata, destinationIata);
-        }
-    },
-
     async findCheapestRouteAndAddWaypoints(originIata, destinationIata) {
         try {
             const response = await fetch(`http://yonderhop.com:3000/cheapest-routes?origin=${originIata}&destination=${destinationIata}`);
