@@ -38,7 +38,8 @@ const flightMap = {
                     });
             }
         });
-    },    
+    },
+        
     processRouteData(data) {
         const uniqueAirports = new Set();
     
