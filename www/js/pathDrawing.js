@@ -24,7 +24,7 @@ const pathDrawing = {
         Object.values(directRoutes).forEach(routes =>
             routes.forEach(route => {
                 if (route.originAirport.iata_code === originIata) {
-                    this.drawPaths(route, originIata);
+                    this.drawPaths(route);
                 }
             })
         );
@@ -32,7 +32,7 @@ const pathDrawing = {
 
     drawRoutePathsToDestination(destinationIata, directRoutes) {
         const destinationRoutes = directRoutes[destinationIata] || [];
-        destinationRoutes.forEach(route => this.drawPaths(route, destinationIata));
+        destinationRoutes.forEach(route => this.drawPaths(route));
     },
 
     async drawRoutePathBetweenAirports(route, getAirportDataByIata) {
@@ -84,6 +84,7 @@ const pathDrawing = {
         worldCopies.forEach(offset => {
             drawPath(originAirport, destinationAirport, offset);
         });
+
     },    
 
     adjustLatLng(latLng) {
@@ -203,6 +204,7 @@ const pathDrawing = {
     },    
     
     drawLines() {
+        console.log('appState: drawing lines');
         // Iterate through each pair of consecutive waypoints
         for (let i = 0; i < appState.waypoints.length - 1; i++) {
             const origin = appState.waypoints[i];
