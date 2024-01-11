@@ -129,7 +129,17 @@ app.get('/airports', async (req, res) => {
 
 app.get('/directRoutes', async (req, res) => {
   try {
-      const directRoutes = await routesCollection.find({}).toArray();
+      const { origin, destination } = req.query;
+      let query = {};
+
+      if (origin) {
+          query.origin = origin.toUpperCase();
+      }
+      if (destination) {
+          query.destination = destination.toUpperCase();
+      }
+
+      const directRoutes = await routesCollection.find(query).toArray();
       const airports = await airportsCollection.find({}).toArray();
 
       const airportMap = airports.reduce((map, airport) => {
@@ -150,7 +160,7 @@ app.get('/directRoutes', async (req, res) => {
       console.error(e);
       res.status(500).send("Error fetching routes data");
   }
-})
+});
 
 app.get('/flights', async (req, res) => {
   try {
