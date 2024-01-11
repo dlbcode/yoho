@@ -3,7 +3,7 @@ const appState = {
   numTravelers: 1,
   routePathToggle: 'from',
   waypoints: [],
-  routes: [], 
+  routes: [],
 };
 
 function updateState(key, value) {

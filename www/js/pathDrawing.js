@@ -36,7 +36,6 @@ const pathDrawing = {
     },
 
     async drawRoutePathBetweenAirports(route, getAirportDataByIata) {
-        this.clearRoutePaths();
         try {
             if (!route || !Array.isArray(route.segmentCosts)) {
                 console.error('Invalid route data:', route);
@@ -57,7 +56,7 @@ const pathDrawing = {
                     };
 
                     this.createRoutePath(originAirport, destinationAirport, routeSegment, 0);
-                    routeList.addRouteDetailsToList(routeSegment, this.clearRoutePaths.bind(this));
+                    routeList.addRouteDetailsToList(routeSegment, this.clearLines.bind(this));
                 }
             });
         } catch (error) {
@@ -66,7 +65,6 @@ const pathDrawing = {
     },
 
     drawDashedLine(originAirport, destinationAirport) {
-        // Reuse the drawPath logic from createRoutePath
         const drawPath = (origin, destination, offset) => {
             const adjustedOrigin = L.latLng(origin.latitude, origin.longitude + offset);
             const adjustedDestination = L.latLng(destination.latitude, destination.longitude + offset);
@@ -82,12 +80,11 @@ const pathDrawing = {
             this.currentLines.push(geodesicLine);
         };
     
-        // Draw the geodesic line for each world copy
         const worldCopies = [-720, -360, 0, 360, 720];
         worldCopies.forEach(offset => {
             drawPath(originAirport, destinationAirport, offset);
         });
-    },
+    },    
 
     adjustLatLng(latLng) {
         var currentBounds = map.getBounds();
@@ -127,9 +124,9 @@ const pathDrawing = {
             geodesicLine.on('click', () => {
                 if (routeList.isRouteListed(route)) {
                     routeList.removeRouteFromList(route);
-                    this.clearRoutePaths();
+                    this.clearLines();
                 } else {
-                    routeList.addRouteDetailsToList(route, this.clearRoutePaths.bind(this));
+                    routeList.addRouteDetailsToList(route, this.clearLines.bind(this));
                 }
             });
     
@@ -184,50 +181,52 @@ const pathDrawing = {
         });
     },          
 
-    clearRoutePaths() {
-        this.currentLines.forEach(line => {
-            let shouldRemove = true;
-            appState.routes.forEach(route => {
-                let routeId = `${route.originAirport.iata_code}-${route.destinationAirport.iata_code}`;
-                if (this.routePathCache[routeId] && this.routePathCache[routeId].includes(line)) {
-                    shouldRemove = false;
-                }
-            });
-            if (shouldRemove && map.hasLayer(line)) {
+    clearLines() {
+        // Remove lines tracked in currentLines from the map
+        pathDrawing.currentLines.forEach(line => {
+            if (map.hasLayer(line)) {
                 map.removeLayer(line);
             }
         });
     
-        // Reset currentLines array
-        this.currentLines = this.currentLines.filter(line => {
-            return appState.routes.some(route => {
-                let routeId = `${route.originAirport.iata_code}-${route.destinationAirport.iata_code}`;
-                return this.routePathCache[routeId] && this.routePathCache[routeId].includes(line);
-            });
-        });
-    
-        // Clear cached paths not in the routes array
-        Object.keys(this.routePathCache).forEach(cacheKey => {
-            let shouldRemove = true;
-            appState.routes.forEach(route => {
-                let routeId = `${route.originAirport.iata_code}-${route.destinationAirport.iata_code}`;
-                if (cacheKey === routeId) {
-                    shouldRemove = false;
+        // Remove lines from the routePathCache from the map
+        Object.keys(pathDrawing.routePathCache).forEach(cacheKey => {
+            pathDrawing.routePathCache[cacheKey].forEach(path => {
+                if (map.hasLayer(path)) {
+                    map.removeLayer(path);
                 }
             });
-            if (shouldRemove) {
-                this.routePathCache[cacheKey].forEach(path => {
-                    if (map.hasLayer(path)) {
-                        map.removeLayer(path);
-                    }
-                });
-                delete this.routePathCache[cacheKey];
-            }
         });
-    },       
+    
+        // Reset the currentLines array but retain the routePathCache
+        pathDrawing.currentLines = [];
+    },    
+    
+    drawLines() {
+        // Iterate through each pair of consecutive waypoints
+        for (let i = 0; i < appState.waypoints.length - 1; i++) {
+            const origin = appState.waypoints[i];
+            const destination = appState.waypoints[i + 1];
+    
+            // Check if there is a route between the origin and destination
+            const route = appState.routes.find(route => 
+                route.originAirport.iata_code === origin.iata_code && 
+                route.destinationAirport.iata_code === destination.iata_code
+            );
+    
+            if (route) {
+                if (route.isDirect) {
+                    // Draw a regular line for direct routes
+                    pathDrawing.createRoutePath(origin, destination, route);
+                } else {
+                    // Draw a dashed line for non-direct routes
+                    pathDrawing.drawDashedLine(origin, destination);
+                }
+            }
+        }
+    },        
     
     drawPaths(route) {
-        // console.log('drawPaths: route:', route);
         this.createRoutePath(route.originAirport, route.destinationAirport, route, 0);
     },       
 

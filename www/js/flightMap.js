@@ -210,7 +210,8 @@ const flightMap = {
             if (event === 'mouseover') {
                 pathDrawing.drawRoutePaths(iata, this.directRoutes, this.toggleState);
             } else if (event === 'mouseout') {
-                pathDrawing.clearRoutePaths();
+                pathDrawing.clearLines();
+                pathDrawing.drawLines();
             }
         }
     },

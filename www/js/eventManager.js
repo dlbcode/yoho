@@ -28,7 +28,8 @@ function handleStateChange(event) {
         // Update routes array based on the current waypoints
         updateRoutesArray();
         console.table(appState.routes);
-        pathDrawing.clearRoutePaths();
+        pathDrawing.clearLines();
+        pathDrawing.drawLines();
 
         console.log('appState: updating price');
         routeList.updateTotalCost();
@@ -55,13 +56,18 @@ function updateRoutesArray() {
     for (let i = 0; i < appState.waypoints.length - 1; i++) {
         const fromWaypoint = appState.waypoints[i];
         const toWaypoint = appState.waypoints[i + 1];
-        const route = flightMap.findRoute(fromWaypoint.iata_code, toWaypoint.iata_code);
+        let route = flightMap.findRoute(fromWaypoint.iata_code, toWaypoint.iata_code);
+
         if (route) {
+            route.isDirect = true;
             appState.routes.push(route);
-            pathDrawing.createRoutePath(route.originAirport, route.destinationAirport, route, 0);
         } else {
-            // No direct route found, draw a grey dashed geodesic line
-            flightMap.handleNoDirectRoute(fromWaypoint.iata_code, toWaypoint.iata_code);
+            const indirectRoute = {
+                originAirport: fromWaypoint,
+                destinationAirport: toWaypoint,
+                isDirect: false
+            };
+            appState.routes.push(indirectRoute);
         }
     }
 }
@@ -98,7 +104,6 @@ const eventManager = {
 
     setupMapEventListeners: function () {
         map.on('click', () => {
-            pathDrawing.clearRoutePaths();
             flightMap.selectedMarker = null;
         });
 
@@ -132,7 +137,8 @@ const eventManager = {
             } else if (event.target.id === 'clearBtn') {
                 updateState('clearData', null);
                 routeList.updateTotalCost();
-                pathDrawing.clearRoutePaths();
+                pathDrawing.clearLines();
+                // pathDrawing.drawLines();
                 updateMarkerIcons(); // Reset marker icons
             }            
         });
