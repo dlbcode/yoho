@@ -104,7 +104,7 @@ const flightMap = {
             const directRoute = this.findRoute(lastWaypoint.iata_code, airport.iata_code);
             if (!directRoute) {
                 // No direct route, find the cheapest route
-                this.findCheapestRouteAndAddWaypoints(lastWaypoint.iata_code, airport.iata_code);
+                this.handleNoDirectRoute(lastWaypoint.iata_code, airport.iata_code);
             } else {
                 // Direct route exists, add the clicked airport as a waypoint
                 updateState('addWaypoint', airport);
@@ -132,6 +132,17 @@ const flightMap = {
             }
         }
         return null;
+    },
+
+    async handleNoDirectRoute(originIata, destinationIata) {
+        const originAirport = await this.getAirportDataByIata(originIata);
+        const destinationAirport = await this.getAirportDataByIata(destinationIata);
+    
+        if (originAirport && destinationAirport) {
+            pathDrawing.drawDashedLine(originAirport, destinationAirport);
+        } else {
+            console.error('Airport data not found for one or both IATAs:', originIata, destinationIata);
+        }
     },
 
     async findCheapestRouteAndAddWaypoints(originIata, destinationIata) {

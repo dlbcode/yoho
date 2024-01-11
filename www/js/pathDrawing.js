@@ -65,6 +65,20 @@ const pathDrawing = {
         }
     },
 
+    drawDashedLine(originAirport, destinationAirport) {
+        const originLatLng = L.latLng(originAirport.latitude, originAirport.longitude);
+        const destinationLatLng = L.latLng(destinationAirport.latitude, destinationAirport.longitude);
+
+        const dashedLine = L.polyline([originLatLng, destinationLatLng], {
+            color: 'yellow',
+            dashArray: '5, 10', // Dashed line style
+            weight: 2,
+            opacity: 0.5
+        }).addTo(map);
+
+        this.currentLines.push(dashedLine);
+    },
+
     adjustLatLng(latLng) {
         var currentBounds = map.getBounds();
         var newLng = latLng.lng;
