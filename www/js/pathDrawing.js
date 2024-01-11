@@ -171,16 +171,6 @@ const pathDrawing = {
         price = parseFloat(price);
         return price < 100 ? '#0099ff' : price < 200 ? 'green' : price < 300 ? '#abb740' : price < 400 ? 'orange' : price < 500 ? '#da4500' : '#c32929';
     },
-
-    adjustLongitude(longitude) {
-        var currentBounds = map.getBounds();
-        var newLng = longitude;
-
-        while (newLng < currentBounds.getWest()) newLng += 360;
-        while (newLng > currentBounds.getEast()) newLng -= 360;
-
-        return newLng;
-    },
         
     clearLines() {
         [...this.currentLines, ...Object.values(this.routePathCache).flat()].forEach(line => {
