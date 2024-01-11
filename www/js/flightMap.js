@@ -105,11 +105,9 @@ const flightMap = {
             if (!directRoute) {
                 // No direct route, find the cheapest route
                 updateState('addWaypoint', airport);
-                clickedMarker.setIcon(magentaDotIcon);
             } else {
                 // Direct route exists, add the clicked airport as a waypoint
                 updateState('addWaypoint', airport);
-                clickedMarker.setIcon(magentaDotIcon);
             }
         } else if (lastWaypoint && lastWaypoint.iata_code === airport.iata_code) {
             // Remove the last waypoint if the same airport is clicked again

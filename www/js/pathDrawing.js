@@ -1,6 +1,5 @@
 import { map } from './map.js';
-import { routeList } from './routeList.js';
-import { updateState, appState } from './stateManager.js';
+import { appState } from './stateManager.js';
 
 const pathDrawing = {
     currentLines: [],
@@ -38,8 +37,8 @@ const pathDrawing = {
                 const [originAirport, destinationAirport] = await Promise.all([
                     getAirportDataByIata(segment.from), getAirportDataByIata(segment.to)
                 ]);
-                // ... [Rest of the logic] ...
             }
+
         } catch (error) {
             console.error('Error in drawRoutePathBetweenAirports:', error);
         }
