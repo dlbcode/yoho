@@ -11,81 +11,51 @@ const pathDrawing = {
         if (this.routePathCache[cacheKey]) {
             this.routePathCache[cacheKey].forEach(path => {
                 if (!map.hasLayer(path)) {
-                    // console.log('Adding path to map');
                     path.addTo(map);
                 }
             });
         } else {
-            appState.RoutePathToggle === 'to' ? this.drawRoutePathsToDestination(iata, directRoutes) : this.drawRoutePathsFromOrigin(iata, directRoutes);
+            this.drawRoutePathsGeneric(iata, directRoutes, appState.routePathToggle);
         }
     },
     
-    drawRoutePathsFromOrigin(originIata, directRoutes) {
-        Object.values(directRoutes).forEach(routes =>
-            routes.forEach(route => {
-                if (route.originAirport.iata_code === originIata) {
-                    this.drawPaths(route);
-                }
-            })
-        );
+    drawRoutePathsGeneric(iata, directRoutes, direction) {
+        const routes = direction === 'to' ? directRoutes[iata] || [] : Object.values(directRoutes).flat();
+        routes.forEach(route => {
+            if (direction === 'from' && route.originAirport.iata_code !== iata) return;
+            this.drawPaths(route);
+        });
     },
-
-    drawRoutePathsToDestination(destinationIata, directRoutes) {
-        const destinationRoutes = directRoutes[destinationIata] || [];
-        destinationRoutes.forEach(route => this.drawPaths(route));
-    },
-
-    async drawRoutePathBetweenAirports(route, getAirportDataByIata) {
+    
+    async drawRoutePathBetweenAirports(route) {
+        if (!route || !Array.isArray(route.segmentCosts)) {
+            console.error('Invalid route data:', route);
+            return;
+        }
+    
         try {
-            if (!route || !Array.isArray(route.segmentCosts)) {
-                console.error('Invalid route data:', route);
-                return;
+            for (const segment of route.segmentCosts) {
+                const [originAirport, destinationAirport] = await Promise.all([
+                    getAirportDataByIata(segment.from), getAirportDataByIata(segment.to)
+                ]);
+                // ... [Rest of the logic] ...
             }
-
-            const airportPromises = route.segmentCosts.map(segment => {
-                return Promise.all([getAirportDataByIata(segment.from), getAirportDataByIata(segment.to)]);
-            });
-
-            const airportPairs = await Promise.all(airportPromises);
-            airportPairs.forEach(([originAirport, destinationAirport], index) => {
-                if (originAirport && destinationAirport) {
-                    const routeSegment = {
-                        originAirport: originAirport,
-                        destinationAirport: destinationAirport,
-                        price: route.segmentCosts[index].price
-                    };
-
-                    this.createRoutePath(originAirport, destinationAirport, routeSegment, 0);
-                    routeList.addRouteDetailsToList(routeSegment, this.clearLines.bind(this));
-                }
-            });
         } catch (error) {
             console.error('Error in drawRoutePathBetweenAirports:', error);
         }
     },
 
     drawDashedLine(originAirport, destinationAirport) {
-        const drawPath = (origin, destination, offset) => {
-            const adjustedOrigin = L.latLng(origin.latitude, origin.longitude + offset);
-            const adjustedDestination = L.latLng(destination.latitude, destination.longitude + offset);
-    
-            var geodesicLine = new L.Geodesic([adjustedOrigin, adjustedDestination], {
-                weight: 2,
-                opacity: 0.5,
-                color: 'white',
-                dashArray: '5, 10', // Dashed line style
-                wrap: false
-            }).addTo(map);
-    
-            this.currentLines.push(geodesicLine);
-        };
-    
         const worldCopies = [-720, -360, 0, 360, 720];
         worldCopies.forEach(offset => {
-            drawPath(originAirport, destinationAirport, offset);
+            const adjustedOrigin = L.latLng(originAirport.latitude, originAirport.longitude + offset);
+            const adjustedDestination = L.latLng(destinationAirport.latitude, destinationAirport.longitude + offset);
+            const geodesicLine = new L.Geodesic([adjustedOrigin, adjustedDestination], {
+                weight: 2, opacity: 0.5, color: 'white', dashArray: '5, 10', wrap: false
+            }).addTo(map);
+            this.currentLines.push(geodesicLine);
         });
-
-    },    
+    },  
 
     adjustLatLng(latLng) {
         var currentBounds = map.getBounds();
@@ -100,6 +70,30 @@ const pathDrawing = {
     createRoutePath(origin, destination, route) {
         let routeId = `${route.originAirport.iata_code}-${route.destinationAirport.iata_code}`;
     
+        // Function to create and add a decorated line
+        const addDecoratedLine = (geodesicLine) => {
+            var planeIcon = L.icon({
+                iconUrl: '../assets/plane_icon.png', // Adjust the path as needed
+                iconSize: [16, 16],
+                iconAnchor: [8, 12]
+            });
+    
+            var planeSymbol = L.Symbol.marker({
+                rotate: true,
+                markerOptions: {
+                    icon: planeIcon
+                }
+            });
+    
+            var decoratedLine = L.polylineDecorator(geodesicLine, {
+                patterns: [
+                    {offset: '50%', repeat: 0, symbol: planeSymbol}
+                ]
+            }).addTo(map);
+    
+            return decoratedLine;
+        };
+    
         // Check if the route is in the cache
         if (this.routePathCache[routeId]) {
             // Add each path in the cache to the map if it's not already there
@@ -108,6 +102,12 @@ const pathDrawing = {
                     path.addTo(map);
                 }
             });
+    
+            // If the route is direct and not already decorated, add a decorated line
+            if (route.isDirect && this.routePathCache[routeId].length === 1) {
+                let decoratedLine = addDecoratedLine(this.routePathCache[routeId][0]);
+                this.routePathCache[routeId].push(decoratedLine);
+            }
         } else {
             // Create and draw the geodesic line
             const adjustedOrigin = L.latLng(origin.latitude, origin.longitude);
@@ -126,55 +126,15 @@ const pathDrawing = {
     
             // Add the decorated line for direct routes
             if (route.isDirect) {
-                var planeIcon = L.icon({
-                    iconUrl: '../assets/plane_icon.png', // Adjust the path as needed
-                    iconSize: [16, 16],
-                    iconAnchor: [8, 12]
-                });
-    
-                var planeSymbol = L.Symbol.marker({
-                    rotate: true,
-                    markerOptions: {
-                        icon: planeIcon
-                    }
-                });
-    
-                var decoratedLine = L.polylineDecorator(geodesicLine, {
-                    patterns: [
-                        {offset: '50%', repeat: 0, symbol: planeSymbol}
-                    ]
-                }).addTo(map);
-    
-                // Store the decorated line along with the geodesic line
+                let decoratedLine = addDecoratedLine(geodesicLine);
                 newPaths.push(decoratedLine);
             }
     
             // Add the newly created line(s) to the routePathCache
             this.routePathCache[routeId] = newPaths;
         }
-    },          
+    },             
 
-    clearLines() {
-        // Remove lines tracked in currentLines from the map
-        pathDrawing.currentLines.forEach(line => {
-            if (map.hasLayer(line)) {
-                map.removeLayer(line);
-            }
-        });
-    
-        // Remove lines from the routePathCache from the map
-        Object.keys(pathDrawing.routePathCache).forEach(cacheKey => {
-            pathDrawing.routePathCache[cacheKey].forEach(path => {
-                if (map.hasLayer(path)) {
-                    map.removeLayer(path);
-                }
-            });
-        });
-    
-        // Reset the currentLines array but retain the routePathCache
-        pathDrawing.currentLines = [];
-    },    
-    
     drawLines() {
         console.log('appState: drawing lines');
         // Iterate through each pair of consecutive waypoints
@@ -220,6 +180,15 @@ const pathDrawing = {
         while (newLng > currentBounds.getEast()) newLng -= 360;
 
         return newLng;
+    },
+        
+    clearLines() {
+        [...this.currentLines, ...Object.values(this.routePathCache).flat()].forEach(line => {
+            if (map.hasLayer(line)) {
+                map.removeLayer(line);
+            }
+        });
+        this.currentLines = [];
     },
 };
 
