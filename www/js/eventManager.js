@@ -59,6 +59,9 @@ function updateRoutesArray() {
         if (route) {
             appState.routes.push(route);
             pathDrawing.createRoutePath(route.originAirport, route.destinationAirport, route, 0);
+        } else {
+            // No direct route found, draw a grey dashed geodesic line
+            flightMap.handleNoDirectRoute(fromWaypoint.iata_code, toWaypoint.iata_code);
         }
     }
 }
