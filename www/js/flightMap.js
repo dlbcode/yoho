@@ -104,7 +104,8 @@ const flightMap = {
             const directRoute = this.findRoute(lastWaypoint.iata_code, airport.iata_code);
             if (!directRoute) {
                 // No direct route, find the cheapest route
-                this.handleNoDirectRoute(lastWaypoint.iata_code, airport.iata_code);
+                updateState('addWaypoint', airport);
+                clickedMarker.setIcon(magentaDotIcon);
             } else {
                 // Direct route exists, add the clicked airport as a waypoint
                 updateState('addWaypoint', airport);

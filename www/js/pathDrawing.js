@@ -66,17 +66,27 @@ const pathDrawing = {
     },
 
     drawDashedLine(originAirport, destinationAirport) {
-        const originLatLng = L.latLng(originAirport.latitude, originAirport.longitude);
-        const destinationLatLng = L.latLng(destinationAirport.latitude, destinationAirport.longitude);
-
-        const dashedLine = L.polyline([originLatLng, destinationLatLng], {
-            color: 'yellow',
-            dashArray: '5, 10', // Dashed line style
-            weight: 2,
-            opacity: 0.5
-        }).addTo(map);
-
-        this.currentLines.push(dashedLine);
+        // Reuse the drawPath logic from createRoutePath
+        const drawPath = (origin, destination, offset) => {
+            const adjustedOrigin = L.latLng(origin.latitude, origin.longitude + offset);
+            const adjustedDestination = L.latLng(destination.latitude, destination.longitude + offset);
+    
+            var geodesicLine = new L.Geodesic([adjustedOrigin, adjustedDestination], {
+                weight: 2,
+                opacity: 0.5,
+                color: 'white',
+                dashArray: '5, 10', // Dashed line style
+                wrap: false
+            }).addTo(map);
+    
+            this.currentLines.push(geodesicLine);
+        };
+    
+        // Draw the geodesic line for each world copy
+        const worldCopies = [-720, -360, 0, 360, 720];
+        worldCopies.forEach(offset => {
+            drawPath(originAirport, destinationAirport, offset);
+        });
     },
 
     adjustLatLng(latLng) {
