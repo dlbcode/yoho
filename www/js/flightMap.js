@@ -30,9 +30,9 @@ const flightMap = {
             const latLng = L.latLng(airport.latitude, airport.longitude);
             const marker = L.marker(latLng, {icon: icon}).addTo(map);
     
-            marker.bindPopup(`<b>${airport.city}</b>`, { maxWidth: 'auto' }); // Bind a popup with the airport name
+            marker.bindPopup(`<b>${airport.city}</b>`, { maxWidth: 'auto' });
     
-            marker.on('mouseover', function(e) { // Add event listeners for mouseover and mouseout
+            marker.on('mouseover', function(e) {
                 this.openPopup();
             });
             marker.on('mouseout', function(e) {
