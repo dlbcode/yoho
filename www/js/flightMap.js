@@ -161,15 +161,26 @@ const flightMap = {
     },
 
     updateVisibleMarkers() {
+        const currentBounds = map.getBounds();
+        console.log("Current map bounds:", currentBounds);
+    
         Object.keys(this.markers).forEach(iata => {
             const marker = this.markers[iata];
-            if (!map.getBounds().contains(marker.getLatLng())) {
-                map.removeLayer(marker);
-                delete this.markers[iata];
+            if (currentBounds.contains(marker.getLatLng())) {
+                if (!map.hasLayer(marker)) {
+                    console.log(`Adding marker for ${iata}`);
+                    marker.addTo(map);
+                    marker.update(); // Force update of the marker
+                }
+            } else {
+                if (map.hasLayer(marker)) {
+                    console.log(`Removing marker for ${iata}`);
+                    map.removeLayer(marker);
+                }
             }
         });
 
-        this.fetchAndDisplayAirports(); // Fetch and display airports if needed
+        this.fetchAndDisplayAirports();
     },
 };
 

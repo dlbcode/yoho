@@ -145,7 +145,10 @@ document.addEventListener('DOMContentLoaded', () => {
             const latLng = L.latLng(airport.latitude, airport.longitude);
             const currentLatLng = map.getCenter();
             const adjustedLatLng = adjustLatLngForShortestPath(currentLatLng, latLng);
-            map.flyTo(adjustedLatLng, 4); // Adjust zoom level as needed
+            map.flyTo(adjustedLatLng, 4, {
+                animate: true,
+                duration: 0.5 // Duration in seconds
+            });            
         }
     });
     
