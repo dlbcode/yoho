@@ -132,8 +132,6 @@ const pathDrawing = {
         for (let i = 0; i < appState.waypoints.length - 1; i++) {
             const origin = appState.waypoints[i];
             const destination = appState.waypoints[i + 1];
-            
-            console.log('checking route between', origin.iata_code, destination.iata_code);
             const route = appState.routes.find(route => // Check if there is a route between the origin and destination
                 route.originAirport.iata_code === origin.iata_code && 
                 route.destinationAirport.iata_code === destination.iata_code

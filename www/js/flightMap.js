@@ -66,7 +66,6 @@ const flightMap = {
     },       
 
     findRoute(fromIata, toIata) {
-        console.log('routes:', this.directRoutes);
         for (const routes of Object.values(this.directRoutes)) {
             for (const route of routes) {
                 if (route.originAirport.iata_code === fromIata && route.destinationAirport.iata_code === toIata) {
@@ -162,7 +161,6 @@ const flightMap = {
 
     updateVisibleMarkers() {
         const currentBounds = map.getBounds();
-        console.log("Current map bounds:", currentBounds);
     
         Object.keys(this.markers).forEach(iata => {
             const marker = this.markers[iata];
