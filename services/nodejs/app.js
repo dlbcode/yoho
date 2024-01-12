@@ -126,7 +126,7 @@ app.get('/airports', async (req, res) => {
 
 app.get('/directRoutes', async (req, res) => {
   try {
-      const { origin, destination } = req.query;
+      const { origin, destination, direction } = req.query;
       let query = {};
 
       if (origin) {
@@ -144,7 +144,16 @@ app.get('/directRoutes', async (req, res) => {
           return map;
       }, {});
 
-      const enrichedRoutes = directRoutes.map(route => {
+      let filteredRoutes = directRoutes;
+      if (direction) {
+          const filterDirection = direction.toLowerCase();
+          filteredRoutes = directRoutes.filter(route => 
+              filterDirection === 'to' ? route.destination === query.destination :
+              filterDirection === 'from' ? route.origin === query.origin : true
+          );
+      }
+
+      const enrichedRoutes = filteredRoutes.map(route => {
           return {
               ...route,
               originAirport: airportMap[route.origin],

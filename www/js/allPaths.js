@@ -26,7 +26,7 @@ function drawRoutesFromCache() {
 }
 
 function fetchRoutesFromAPI() {
-  fetch('http://yonderhop.com:3000/directRoutes')
+  fetch('http://yonderhop.com:3000/directRoutes?to')
       .then(response => response.json())
       .then(routes => {
           routeDataCache = routes;
