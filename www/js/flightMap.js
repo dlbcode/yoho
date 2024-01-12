@@ -66,6 +66,7 @@ const flightMap = {
     },       
 
     findRoute(fromIata, toIata) {
+        console.log('routes:', this.directRoutes);
         for (const routes of Object.values(this.directRoutes)) {
             for (const route of routes) {
                 if (route.originAirport.iata_code === fromIata && route.destinationAirport.iata_code === toIata) {

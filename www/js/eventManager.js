@@ -43,8 +43,27 @@ function updateMarkerIcons() {
     });
 }
 
-function updateRoutesArray() {
+async function updateRoutesArray() {
     appState.routes = [];
+    let fetchPromises = [];
+
+    for (let i = 0; i < appState.waypoints.length - 1; i++) {
+        const fromWaypoint = appState.waypoints[i];
+        const toWaypoint = appState.waypoints[i + 1];
+
+        // Fetch and cache routes if not already done
+        if (!flightMap.directRoutes[fromWaypoint.iata_code]) {
+            fetchPromises.push(flightMap.fetchAndCacheRoutes(fromWaypoint.iata_code));
+        }
+        if (!flightMap.directRoutes[toWaypoint.iata_code]) {
+            fetchPromises.push(flightMap.fetchAndCacheRoutes(toWaypoint.iata_code));
+        }
+    }
+
+    // Wait for all fetches to complete
+    await Promise.all(fetchPromises);
+
+    // Now find and add routes
     for (let i = 0; i < appState.waypoints.length - 1; i++) {
         const fromWaypoint = appState.waypoints[i];
         const toWaypoint = appState.waypoints[i + 1];
@@ -62,6 +81,10 @@ function updateRoutesArray() {
             appState.routes.push(indirectRoute);
         }
     }
+
+    pathDrawing.clearLines();
+    pathDrawing.drawLines();
+    routeList.updateTotalCost();
 }
 
 function createWaypointField(index) {
