@@ -13,34 +13,7 @@ const flightMap = {
     clearMultiHopPaths: true,
     cachedRoutes: [],
     lastFetchTime: null,
-    cacheDuration: 600000, // 10 minutes in milliseconds
-        
-    processRouteData(data) {
-        const uniqueAirports = new Set();
-    
-        data.forEach(route => {
-            if (!route.originAirport || !route.destinationAirport) {
-                console.info('Incomplete route data:', route);
-                return;
-            }
-    
-            // Check if the origin airport has already been added
-            if (!uniqueAirports.has(route.originAirport.iata_code)) {
-                this.addMarker(route.originAirport);
-                uniqueAirports.add(route.originAirport.iata_code);
-            }
-    
-            // Check if the destination airport has already been added
-            if (!uniqueAirports.has(route.destinationAirport.iata_code)) {
-                this.addMarker(route.destinationAirport);
-                uniqueAirports.add(route.destinationAirport.iata_code);
-            }
-    
-            let destIata = route.destinationAirport.iata_code;
-            this.directRoutes[destIata] = this.directRoutes[destIata] || [];
-            this.directRoutes[destIata].push(route);
-        });
-    },    
+    cacheDuration: 600000, // 10 minutes in milliseconds   
 
     addMarker(airport) {
         if (!airport || !airport.iata_code || !airport.weight) {
@@ -107,7 +80,18 @@ const flightMap = {
             }
         }
         return null;
-    },      
+    },
+
+    async fetchAndDisplayAirports() {
+        try {
+            const airports = await this.fetchAndCacheAirports();
+            Object.values(airports).forEach(airport => {
+                this.addMarker(airport);
+            });
+        } catch (error) {
+            console.error('Error fetching airports:', error);
+        }
+    },
 
     fetchAndCacheAirports() {
         if (this.airportDataCache) {
@@ -170,17 +154,6 @@ const flightMap = {
             } catch (error) {
                 console.error('Error fetching routes:', error);
             }
-        }
-    },
-    
-    async fetchAndDisplayAirports() {
-        try {
-            const airports = await this.fetchAndCacheAirports();
-            Object.values(airports).forEach(airport => {
-                this.addMarker(airport);
-            });
-        } catch (error) {
-            console.error('Error fetching airports:', error);
         }
     },
 

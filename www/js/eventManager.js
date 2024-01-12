@@ -30,8 +30,6 @@ function handleStateChange(event) {
         console.table(appState.routes);
         pathDrawing.clearLines();
         pathDrawing.drawLines();
-
-        console.log('appState: updating price');
         routeList.updateTotalCost();
     }
 
@@ -44,7 +42,6 @@ function handleStateChange(event) {
 }
 
 function updateMarkerIcons() {
-    console.log('appState: updating marker icons');
     const waypointIataCodes = new Set(appState.waypoints.map(waypoint => waypoint.iata_code));
     Object.entries(flightMap.markers).forEach(([iata, marker]) => {
         marker.setIcon(waypointIataCodes.has(iata) ? magentaDotIcon : blueDotIcon);

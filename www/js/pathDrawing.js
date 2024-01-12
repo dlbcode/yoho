@@ -135,7 +135,6 @@ const pathDrawing = {
     },             
 
     drawLines() {
-        console.log('appState: drawing lines');
         // Iterate through each pair of consecutive waypoints
         for (let i = 0; i < appState.waypoints.length - 1; i++) {
             const origin = appState.waypoints[i];
