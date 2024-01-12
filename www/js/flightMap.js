@@ -174,7 +174,6 @@ const flightMap = {
                 }
             } else {
                 if (map.hasLayer(marker)) {
-                    console.log(`Removing marker for ${iata}`);
                     map.removeLayer(marker);
                 }
             }
