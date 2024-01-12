@@ -35,7 +35,6 @@ app.use(cors({
 //app.use('/airports', checkReferrer);
 //app.use('/routes', checkReferrer);
 
-// MongoDB connection URL and database name
 const mongoUrl = `mongodb://rsuser:${mongodbPassword}@mongodb:27017/rsdb`;
 const dbName = 'rsdb';
 
@@ -62,16 +61,14 @@ app.get('/atdRoutes', async (req, res) => {
       return res.status(400).send('Origin and destination IATA codes are required');
     }
 
-    // Set up parameters for Amadeus API request
-    const flightSearchParams = {
+    const flightSearchParams = { // Set up parameters for Amadeus API request
       originLocationCode: origin,
       destinationLocationCode: destination,
       departureDate: '2024-01-15', // Example date, adjust as needed
       adults: '1'
     };
 
-    // Add return date only for round-trip flights
-    if (tripType && tripType.toUpperCase() === 'ROUNDTRIP') {
+    if (tripType && tripType.toUpperCase() === 'ROUNDTRIP') { // Add return date only for round-trip flights
       flightSearchParams.returnDate = '2024-01-22'; // Example return date, adjust as needed
     }
 
@@ -166,8 +163,7 @@ app.get('/flights', async (req, res) => {
   try {
     const { origin, destination } = req.query;
 
-    // Check if both origin and destination are provided
-    if (!origin || !destination) {
+    if (!origin || !destination) { // Check if both origin and destination are provided
       return res.status(400).send('Both origin and destination are required');
     }
 
@@ -188,8 +184,7 @@ function findCheapestRoutes(routes, origin, destination) {
   let costs = {};
   let paths = {};
 
-  try {
-    // Initialize costs and paths
+  try { // Initialize costs and paths
     routes.forEach(route => {
       if (!costs[route.origin]) {
         costs[route.origin] = { totalCost: Infinity, segments: [] };
@@ -201,12 +196,10 @@ function findCheapestRoutes(routes, origin, destination) {
       }
     });
 
-    // Set the starting point
-    costs[origin] = { totalCost: 0, segments: [] };
+    costs[origin] = { totalCost: 0, segments: [] }; // Set the starting point
     paths[origin] = [origin];
 
-    // Calculate the cheapest paths
-    for (let i = 0; i < routes.length; i++) {
+    for (let i = 0; i < routes.length; i++) { // Calculate the cheapest paths
       let updated = false;
 
       routes.forEach(route => {
@@ -222,8 +215,7 @@ function findCheapestRoutes(routes, origin, destination) {
       if (!updated) break;
     }
 
-    // Filter routes that start with the origin and end with the destination
-    let validRoutes = Object.keys(paths)
+    let validRoutes = Object.keys(paths) // Filter routes that start with the origin and end with the destination
       .filter(key => paths[key][0] === origin && paths[key][paths[key].length - 1] === destination)
       .map(key => ({
         route: paths[key],
@@ -231,8 +223,7 @@ function findCheapestRoutes(routes, origin, destination) {
         segmentCosts: costs[key].segments
       }));
 
-    // Sort by total cost and return the top 3 cheapest routes
-    return validRoutes.sort((a, b) => a.totalCost - b.totalCost).slice(0, 3);
+    return validRoutes.sort((a, b) => a.totalCost - b.totalCost).slice(0, 3); // Sort by total cost and return the top 3 cheapest routes
   } catch (error) {
     console.error("Error in findCheapestRoutes function:", error);
     throw error; // Re-throw the error to be caught by the caller

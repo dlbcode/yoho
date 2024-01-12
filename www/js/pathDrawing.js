@@ -69,8 +69,7 @@ const pathDrawing = {
     createRoutePath(origin, destination, route) {
         let routeId = `${route.originAirport.iata_code}-${route.destinationAirport.iata_code}`;
     
-        // Function to create and add a decorated line
-        const addDecoratedLine = (geodesicLine) => {
+        const addDecoratedLine = (geodesicLine) => { // Function to create and add a decorated line
             var planeIcon = L.icon({
                 iconUrl: '../assets/plane_icon.png', // Adjust the path as needed
                 iconSize: [16, 16],
@@ -93,22 +92,18 @@ const pathDrawing = {
             return decoratedLine;
         };
     
-        // Check if the route is in the cache
-        if (this.routePathCache[routeId]) {
-            // Add each path in the cache to the map if it's not already there
-            this.routePathCache[routeId].forEach(path => {
+        if (this.routePathCache[routeId]) { // Check if the route is in the cache
+            this.routePathCache[routeId].forEach(path => { // Add each path in the cache to the map if it's not already there
                 if (!map.hasLayer(path)) {
                     path.addTo(map);
                 }
             });
     
-            // If the route is direct and not already decorated, add a decorated line
-            if (route.isDirect && this.routePathCache[routeId].length === 1) {
+            if (route.isDirect && this.routePathCache[routeId].length === 1) { // If the route is direct and not already decorated, add a decorated line
                 let decoratedLine = addDecoratedLine(this.routePathCache[routeId][0]);
                 this.routePathCache[routeId].push(decoratedLine);
             }
-        } else {
-            // Create and draw the geodesic line
+        } else { // Create and draw the geodesic line
             const adjustedOrigin = L.latLng(origin.latitude, origin.longitude);
             const adjustedDestination = L.latLng(destination.latitude, destination.longitude);
     
@@ -120,38 +115,31 @@ const pathDrawing = {
                 zIndex: -1
             }).addTo(map);
     
-            // Store the newly created geodesic line
-            let newPaths = [geodesicLine];
+            let newPaths = [geodesicLine]; // Store the newly created geodesic line
     
-            // Add the decorated line for direct routes
-            if (route.isDirect) {
+            if (route.isDirect) { // Add the decorated line for direct routes
                 let decoratedLine = addDecoratedLine(geodesicLine);
                 newPaths.push(decoratedLine);
             }
     
-            // Add the newly created line(s) to the routePathCache
-            this.routePathCache[routeId] = newPaths;
+            this.routePathCache[routeId] = newPaths; // Add the newly created line(s) to the routePathCache
         }
     },             
 
-    drawLines() {
-        // Iterate through each pair of consecutive waypoints
+    drawLines() { // Iterate through each pair of consecutive waypoints
         for (let i = 0; i < appState.waypoints.length - 1; i++) {
             const origin = appState.waypoints[i];
             const destination = appState.waypoints[i + 1];
     
-            // Check if there is a route between the origin and destination
-            const route = appState.routes.find(route => 
+            const route = appState.routes.find(route => // Check if there is a route between the origin and destination
                 route.originAirport.iata_code === origin.iata_code && 
                 route.destinationAirport.iata_code === destination.iata_code
             );
     
             if (route) {
-                if (route.isDirect) {
-                    // Draw a regular line for direct routes
+                if (route.isDirect) { // Draw a regular line for direct routes
                     pathDrawing.createRoutePath(origin, destination, route);
-                } else {
-                    // Draw a dashed line for non-direct routes
+                } else { // Draw a dashed line for non-direct routes
                     pathDrawing.drawDashedLine(origin, destination);
                 }
             }

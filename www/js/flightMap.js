@@ -30,11 +30,9 @@ const flightMap = {
             const latLng = L.latLng(airport.latitude, airport.longitude);
             const marker = L.marker(latLng, {icon: icon}).addTo(map);
     
-            // Bind a popup with the airport name
-            marker.bindPopup(`<b>${airport.city}</b>`, { maxWidth: 'auto' });
+            marker.bindPopup(`<b>${airport.city}</b>`, { maxWidth: 'auto' }); // Bind a popup with the airport name
     
-            // Add event listeners for mouseover and mouseout
-            marker.on('mouseover', function(e) {
+            marker.on('mouseover', function(e) { // Add event listeners for mouseover and mouseout
                 this.openPopup();
             });
             marker.on('mouseout', function(e) {
@@ -52,19 +50,15 @@ const flightMap = {
         if (lastWaypoint && lastWaypoint.iata_code !== airport.iata_code) {
             const directRoute = this.findRoute(lastWaypoint.iata_code, airport.iata_code);
             if (!directRoute) {
-                // No direct route, find the cheapest route
-                updateState('addWaypoint', airport);
+                updateState('addWaypoint', airport); // No direct route, find the cheapest route
             } else {
-                // Direct route exists, add the clicked airport as a waypoint
-                updateState('addWaypoint', airport);
+                updateState('addWaypoint', airport); // Direct route exists, add the clicked airport as a waypoint
             }
         } else if (lastWaypoint && lastWaypoint.iata_code === airport.iata_code) {
-            // Remove the last waypoint if the same airport is clicked again
-            updateState('removeWaypoint', appState.waypoints.length - 1);
+            updateState('removeWaypoint', appState.waypoints.length - 1); // Remove the last waypoint if the same airport is clicked again
             clickedMarker.setIcon(blueDotIcon);
         } else {
-            // If there is no last waypoint, simply add the clicked airport
-            updateState('addWaypoint', airport);
+            updateState('addWaypoint', airport); // If there is no last waypoint, simply add the clicked airport
             clickedMarker.setIcon(magentaDotIcon);
         }
     
@@ -162,7 +156,6 @@ const flightMap = {
             map.removeLayer(marker);
         });
         this.markers = {};
-        //this.plotRoutePaths();
     },
 
     updateVisibleMarkers() {
@@ -174,8 +167,7 @@ const flightMap = {
             }
         });
 
-        // Fetch and display airports if needed
-        this.fetchAndDisplayAirports();
+        this.fetchAndDisplayAirports(); // Fetch and display airports if needed
     },
 };
 

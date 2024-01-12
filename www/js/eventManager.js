@@ -9,24 +9,19 @@ function handleStateChange(event) {
     const { key, value } = event.detail;
 
     if (key === 'addWaypoint' || key === 'removeWaypoint' || key === 'updateWaypoint') {
-        // Clear existing waypoint fields
-        const container = document.querySelector('.airport-selection');
+        const container = document.querySelector('.airport-selection'); // Clear existing waypoint fields
         container.innerHTML = '';
 
-        // Recreate waypoint fields based on the current waypoints
-        appState.waypoints.forEach((waypoint, index) => {
+        appState.waypoints.forEach((waypoint, index) => { // Recreate waypoint fields based on the current waypoints
             let waypointField = createWaypointField(index + 1);
             waypointField.value = `${waypoint.city} (${waypoint.iata_code})`;
         });
 
-        // Update marker icons based on the current waypoints
-        updateMarkerIcons();
+        updateMarkerIcons(); // Update marker icons based on the current waypoints
 
-        // Create an additional field for the next waypoint
-        createWaypointField(appState.waypoints.length + 1);
+        createWaypointField(appState.waypoints.length + 1); // Create an additional field for the next waypoint
 
-        // Update routes array based on the current waypoints
-        updateRoutesArray();
+        updateRoutesArray(); // Update routes array based on the current waypoints
         console.table(appState.routes);
         pathDrawing.clearLines();
         pathDrawing.drawLines();
@@ -135,8 +130,7 @@ const eventManager = {
                 updateState('clearData', null);
                 routeList.updateTotalCost();
                 pathDrawing.clearLines();
-                // pathDrawing.drawLines();
-                updateMarkerIcons(); // Reset marker icons
+                updateMarkerIcons();
             }            
         });
 

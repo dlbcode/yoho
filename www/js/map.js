@@ -5,7 +5,6 @@ import { getPrice } from './getPrice.js';
 import { infoPane } from './infoPane.js';
 
 async function initMapFunctions() {
-    // await flightMap.plotRoutePaths(); // Wait for routes data to be loaded and processed
     routeList.initTravelerControls();
 
     const params = new URLSearchParams(window.location.search);
@@ -23,8 +22,7 @@ async function initMapFunctions() {
     document.dispatchEvent(new CustomEvent('waypointsLoadedFromURL'));
 }
 
-// Marker configurations
-var blueDotIcon = L.divIcon({
+var blueDotIcon = L.divIcon({ // Marker configurations
     className: 'custom-div-icon',
     html: '<div style="background-color: #3B74D5; width: 8px; height: 8px; border-radius: 50%;"></div>',
     iconSize: [8, 8],
@@ -45,26 +43,21 @@ var map = L.map('map', {
     worldCopyJump: true // This option makes the map jump to the original world copy
 });
 
-// Default view settings
-map.setView([0, 0], 4);
+map.setView([0, 0], 4); // Default view settings
 
-// Tile layer settings
-L.tileLayer('https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png', {
+L.tileLayer('https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png', { // Tile layer settings
     maxZoom: 19,
     attribution: '© OpenStreetMap contributors'
 }).addTo(map);
 
-// Zoom control settings
-L.control.zoom({
+L.control.zoom({ // Zoom control settings
     position: 'bottomright'
 }).addTo(map);
 
-// Fetch client's approximate location using IP-API
-fetch('http://ip-api.com/json/')
+fetch('http://ip-api.com/json/') // Fetch client's approximate location using IP-API
     .then(response => response.json())
     .then(data => {
-        if (data.status === 'success') {
-            // Set map view to the obtained location
+        if (data.status === 'success') { // Set map view to the obtained location
             map.setView([data.lat, data.lon], 4);
         } else {
             console.error('IP Geolocation failed:', data.message);
@@ -74,8 +67,7 @@ fetch('http://ip-api.com/json/')
         console.error('Error fetching IP Geolocation:', error);
     });
 
-// Initial resize on load
-document.getElementById('map').style.height = window.innerHeight + 'px';
+document.getElementById('map').style.height = window.innerHeight + 'px'; // Initial resize on load
 document.addEventListener('DOMContentLoaded', () => {
     initMapFunctions();
     getPrice.init();
@@ -92,7 +84,4 @@ function adjustMapHeight() {
     mapElement.style.height = `${windowHeight - infoPaneHeight}px`;
 }
 
-
-
-// Export the map and the icons for use in other modules
 export { map, blueDotIcon, magentaDotIcon };

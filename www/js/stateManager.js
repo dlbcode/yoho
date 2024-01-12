@@ -17,11 +17,9 @@ function updateState(key, value) {
       break;
     case 'addWaypoint':
       console.log('addWaypoint');
-      if (Array.isArray(value)) {
-        // If value is an array, add each waypoint in the array
+      if (Array.isArray(value)) { // If value is an array, add each waypoint in the array
         value.forEach(waypoint => appState.waypoints.push(waypoint));
-      } else {
-        // If value is a single waypoint, add it directly
+      } else { // If value is a single waypoint, add it directly
         appState.waypoints.push(value);
       }
       console.table(appState.waypoints);
@@ -40,8 +38,8 @@ function updateState(key, value) {
       break;
     case 'clearData':
       appState.waypoints = [];
-      appState.routes = [];
-      updateUrlWithWaypoints(); // This will clear the waypoints from the URL
+      appState.routes = []; // This will clear the waypoints from the URL
+      updateUrlWithWaypoints();
       break;  
     default:
       appState[key] = value;
