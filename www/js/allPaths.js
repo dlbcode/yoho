@@ -8,7 +8,7 @@ let routeDataCache = null;
 // Function to draw all route paths
 function drawAllRoutePaths() {
     if (allPathsDrawn) {
-        pathDrawing.clearRoutePaths();
+        pathDrawing.clearLines();
         allPathsDrawn = false;
     } else {
         // Check if data is already cached
@@ -26,7 +26,7 @@ function drawRoutesFromCache() {
 }
 
 function fetchRoutesFromAPI() {
-  fetch('http://yonderhop.com:3000/routes')
+  fetch('http://yonderhop.com:3000/directRoutes')
       .then(response => response.json())
       .then(routes => {
           routeDataCache = routes;
