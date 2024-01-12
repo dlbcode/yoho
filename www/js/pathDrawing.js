@@ -19,12 +19,11 @@ const pathDrawing = {
     },
     
     drawRoutePathsGeneric(iata, directRoutes, direction) {
-        const routes = direction === 'to' ? directRoutes[iata] || [] : Object.values(directRoutes).flat();
+        const routes = directRoutes[iata] || [];
         routes.forEach(route => {
-            if (direction === 'from' && route.originAirport.iata_code !== iata) return;
             this.drawPaths(route);
         });
-    },
+    },    
     
     async drawRoutePathBetweenAirports(route) {
         if (!route || !Array.isArray(route.segmentCosts)) {

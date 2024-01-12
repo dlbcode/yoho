@@ -142,14 +142,15 @@ const flightMap = {
     async fetchAndCacheRoutes(iata) {
         if (!this.directRoutes[iata]) {
             try {
-                const response = await fetch(`http://yonderhop.com:3000/directRoutes?origin=${iata}`);
+                const direction = this.toggleState; // 'to' or 'from'
+                const response = await fetch(`http://yonderhop.com:3000/directRoutes?origin=${iata}&direction=${direction}`);
                 const routes = await response.json();
                 this.directRoutes[iata] = routes;
             } catch (error) {
                 console.error('Error fetching routes:', error);
             }
         }
-    },
+    },    
 
     updateMarkersForZoom() {
         Object.values(this.markers).forEach(marker => {
