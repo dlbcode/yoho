@@ -29,6 +29,8 @@ const flightMap = {
         if (airport.weight <= map.getZoom()) {
             const latLng = L.latLng(airport.latitude, airport.longitude);
             const marker = L.marker(latLng, {icon: icon}).addTo(map);
+
+            marker.hovered = false;
     
             marker.bindPopup(`<b>${airport.city}</b>`, { maxWidth: 'auto' });
     
@@ -127,14 +129,23 @@ const flightMap = {
     },
 
     markerHoverHandler(iata, event) {
+        const marker = this.markers[iata];
+        if (!marker) return;
         if (this.selectedMarker !== iata) {
             if (event === 'mouseover') {
                 this.fetchAndCacheRoutes(iata).then(() => {
                     pathDrawing.drawRoutePaths(iata, this.directRoutes, this.toggleState);
                 });
             } else if (event === 'mouseout') {
-                pathDrawing.clearLines();
-                pathDrawing.drawLines();
+                if (!marker.hovered) {  // Delay only for the first hover
+                    setTimeout(() => {pathDrawing.clearLines();
+                    pathDrawing.drawLines();
+                    }, 200);
+                    marker.hovered = true; // Set the flag to true after the first hover
+                } else {
+                    pathDrawing.clearLines();
+                    pathDrawing.drawLines();
+                }
             }
         }
     },
