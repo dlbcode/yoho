@@ -15,11 +15,22 @@ async function initMapFunctions() {
             const airport = await flightMap.getAirportDataByIata(iata);
             if (airport) {
                 updateState('addWaypoint', airport);
+                await waitForRoutesUpdate();
             }
         }
     }
 
     document.dispatchEvent(new CustomEvent('waypointsLoadedFromURL'));
+}
+
+function waitForRoutesUpdate() {
+    return new Promise(resolve => {
+        const listener = () => {
+            document.removeEventListener('routesArrayUpdated', listener);
+            resolve();
+        };
+        document.addEventListener('routesArrayUpdated', listener);
+    });
 }
 
 var blueDotIcon = L.divIcon({ // Marker configurations

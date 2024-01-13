@@ -17,15 +17,9 @@ function handleStateChange(event) {
             waypointField.value = `${waypoint.city} (${waypoint.iata_code})`;
         });
 
-        updateMarkerIcons(); // Update marker icons based on the current waypoints
-
-        createWaypointField(appState.waypoints.length + 1); // Create an additional field for the next waypoint
-
-        updateRoutesArray(); // Update routes array based on the current waypoints
-        console.table(appState.routes);
-        pathDrawing.clearLines();
-        pathDrawing.drawLines();
-        routeList.updateTotalCost();
+        updateMarkerIcons();
+        createWaypointField(appState.waypoints.length + 1);
+        updateRoutesArray();
     }
 
     if (key === 'clearData') {
@@ -72,6 +66,9 @@ async function updateRoutesArray() {
         if (route) {
             route.isDirect = true;
             appState.routes.push(route);
+            pathDrawing.clearLines();
+            pathDrawing.drawLines();
+            routeList.updateTotalCost();
         } else {
             const indirectRoute = {
                 originAirport: fromWaypoint,
@@ -85,6 +82,7 @@ async function updateRoutesArray() {
     pathDrawing.clearLines();
     pathDrawing.drawLines();
     routeList.updateTotalCost();
+    document.dispatchEvent(new CustomEvent('routesArrayUpdated'));
 }
 
 function createWaypointField(index) {
