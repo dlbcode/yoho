@@ -195,20 +195,4 @@ document.addEventListener('DOMContentLoaded', function () {
     eventManager.setupEventListeners();
 });
 
-window.addEventListener('popstate', function(event) {
-    // Parse the URI to get the updated waypoints
-    const params = new URLSearchParams(window.location.search);
-    const waypointParam = params.get('waypoints');
-    const waypointIatas = waypointParam ? waypointParam.split(',').map(decodeURIComponent) : [];
-
-    // Clear existing waypoints and add new ones from the URI
-    updateState('clearData', null);
-    waypointIatas.forEach(async (iata) => {
-        const airport = await flightMap.getAirportDataByIata(iata);
-        if (airport) {
-            updateState('addWaypoint', airport);
-        }
-    });
-});
-
 export { eventManager };
