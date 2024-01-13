@@ -6,7 +6,7 @@ import { infoPane } from './infoPane.js';
 
 async function initMapFunctions() {
     routeList.initTravelerControls();
-
+    
     const params = new URLSearchParams(window.location.search);
     const waypointParam = params.get('waypoints');
     if (waypointParam) {
