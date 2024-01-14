@@ -14,7 +14,7 @@ function handleStateChange(event) {
 
         appState.waypoints.forEach((waypoint, index) => { // Recreate waypoint fields based on the current waypoints
             let waypointField = createWaypointField(index + 1);
-            waypointField.value = `${waypoint.city} (${waypoint.iata_code})`;
+            waypointField.value = `${waypoint.iata_code}`;
         });
 
         updateMarkerIcons();
