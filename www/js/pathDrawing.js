@@ -108,7 +108,7 @@ const pathDrawing = {
             });
     
             if (route.isDirect) {
-                let decoratedLine = this.addDecoratedLine(newPaths[2]); // Decorate the central line
+                let decoratedLine = this.addDecoratedLine(newPaths[2], route); // Decorate the central line
                 newPaths.push(decoratedLine);
             }
     
@@ -116,7 +116,7 @@ const pathDrawing = {
         }
     },
     
-    addDecoratedLine(geodesicLine) {
+    addDecoratedLine(geodesicLine, route) {
         var planeIcon = L.icon({
             iconUrl: '../assets/plane_icon.png',
             iconSize: [16, 16],
@@ -136,8 +136,21 @@ const pathDrawing = {
             ]
         }).addTo(map);
     
+        // Add mouseover event listener to the planeSymbol
+        decoratedLine.on('mouseover', (e) => {
+            L.popup()
+            .setLatLng(e.latlng)
+            .setContent(`Price: $${route.price}`)
+            .openOn(map);
+        });
+    
+        // Add mouseout event listener to close the popup
+        decoratedLine.on('mouseout', () => {
+            map.closePopup();
+        });
+
         return decoratedLine;
-    },                 
+    },
 
     drawLines() { // Iterate through each pair of consecutive waypoints
         for (let i = 0; i < appState.waypoints.length - 1; i++) {
