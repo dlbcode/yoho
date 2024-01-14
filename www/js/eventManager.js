@@ -38,47 +38,48 @@ function updateMarkerIcons() {
 }
 
 async function updateRoutesArray() {
-    appState.routes = [];
+    let newRoutes = [];
     let fetchPromises = [];
-
+  
     for (let i = 0; i < appState.waypoints.length - 1; i++) {
-        const fromWaypoint = appState.waypoints[i];
-        const toWaypoint = appState.waypoints[i + 1];
-
-        // Fetch and cache routes if not already done
-        if (!flightMap.directRoutes[fromWaypoint.iata_code]) {
-            fetchPromises.push(flightMap.fetchAndCacheRoutes(fromWaypoint.iata_code));
-        }
-        if (!flightMap.directRoutes[toWaypoint.iata_code]) {
-            fetchPromises.push(flightMap.fetchAndCacheRoutes(toWaypoint.iata_code));
-        }
+      const fromWaypoint = appState.waypoints[i];
+      const toWaypoint = appState.waypoints[i + 1];
+  
+      // Fetch and cache routes if not already done
+      if (!flightMap.directRoutes[fromWaypoint.iata_code]) {
+        fetchPromises.push(flightMap.fetchAndCacheRoutes(fromWaypoint.iata_code));
+      }
+      if (!flightMap.directRoutes[toWaypoint.iata_code]) {
+        fetchPromises.push(flightMap.fetchAndCacheRoutes(toWaypoint.iata_code));
+      }
     }
-
+  
     // Wait for all fetches to complete
     await Promise.all(fetchPromises);
-
+  
     // Now find and add routes
     for (let i = 0; i < appState.waypoints.length - 1; i++) {
         const fromWaypoint = appState.waypoints[i];
-        const toWaypoint = appState.waypoints[i + 1];
+        const toWaypoint =
+        appState.waypoints[i + 1];
         let route = flightMap.findRoute(fromWaypoint.iata_code, toWaypoint.iata_code);
-
         if (route) {
             route.isDirect = true;
-            appState.routes.push(route);
-            pathDrawing.clearLines();
-            pathDrawing.drawLines();
-            routeList.updateTotalCost();
+            newRoutes.push(route);
         } else {
             const indirectRoute = {
-                originAirport: fromWaypoint,
-                destinationAirport: toWaypoint,
-                isDirect: false
+            originAirport: fromWaypoint,
+            destinationAirport: toWaypoint,
+            isDirect: false
             };
-            appState.routes.push(indirectRoute);
+            newRoutes.push(indirectRoute);
         }
     }
 
+    // Update the routes in the state using the stateManager
+    updateState('updateRoutes', newRoutes);
+
+    // Additional UI updates and event dispatches as needed
     pathDrawing.clearLines();
     pathDrawing.drawLines();
     routeList.updateTotalCost();

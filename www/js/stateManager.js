@@ -4,6 +4,7 @@ const appState = {
   routePathToggle: 'from',
   waypoints: [],
   routes: [],
+  startDate: null,
 };
 
 function updateState(key, value) {
@@ -15,6 +16,7 @@ function updateState(key, value) {
       }
       console.table(appState.waypoints);
       break;
+
     case 'addWaypoint':
       console.log('addWaypoint');
       if (Array.isArray(value)) { // If value is an array, add each waypoint in the array
@@ -25,22 +27,32 @@ function updateState(key, value) {
       console.table(appState.waypoints);
       updateUrlWithWaypoints();
       break;
+
     case 'removeWaypoint':
       console.log('removeWaypoint');
       appState.waypoints.splice(value, 1);
       console.table(appState.waypoints);
       updateUrlWithWaypoints();
       break;
+
     case 'addRoute':
       console.log('appState: adding route');
       appState.routes.push(value);
       console.table(appState.routes);
       break;
+
+    case 'updateRoutes':
+      console.log('updateRoutes');
+      appState.routes = value;
+      console.table(appState.routes);
+      break;
+
     case 'clearData':
       appState.waypoints = [];
       appState.routes = []; // This will clear the waypoints from the URL
       updateUrlWithWaypoints();
-      break;  
+      break;
+
     default:
       appState[key] = value;
       break;
