@@ -151,6 +151,7 @@ const pathDrawing = {
             map.closePopup();
         });
 
+        this.currentLines.push(decoratedLine); // Track the decorated line for later removal
         return decoratedLine;
     },
 
