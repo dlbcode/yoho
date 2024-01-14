@@ -82,7 +82,6 @@ async function updateRoutesArray() {
     pathDrawing.clearLines();
     pathDrawing.drawLines();
     routeList.updateTotalCost();
-    console.log('Routes array updated');
     console.table(appState.routes);
     document.dispatchEvent(new CustomEvent('routesArrayUpdated'));
 }
@@ -154,6 +153,7 @@ const eventManager = {
                 routeList.updateTotalCost();
                 pathDrawing.clearLines();
                 updateMarkerIcons();
+                updateRoutesArray();
             }            
         });
 
