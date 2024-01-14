@@ -177,7 +177,6 @@ const flightMap = {
             const marker = this.markers[iata];
             if (currentBounds.contains(marker.getLatLng())) {
                 if (!map.hasLayer(marker)) {
-                    console.log(`Adding marker for ${iata}`);
                     marker.addTo(map);
                     marker.update(); // Force update of the marker
                 }
