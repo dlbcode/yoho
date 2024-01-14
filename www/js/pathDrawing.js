@@ -79,6 +79,17 @@ const pathDrawing = {
                 wrap: false,
                 zIndex: -1
             }).addTo(map);
+
+            geodesicLine.on('mouseover', (e) => {
+                L.popup()
+                    .setLatLng(e.latlng)
+                    .setContent(`Price: $${route.price}`)
+                    .openOn(map);
+            });
+        
+            geodesicLine.on('mouseout', () => {
+                map.closePopup();
+            });
     
             return geodesicLine;
         };
