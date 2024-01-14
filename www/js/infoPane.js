@@ -1,19 +1,18 @@
 import { appState } from './stateManager.js';
+import { findCheapestRoutes } from './findCheapestRoutes.js';
 
 const infoPane = {
 
   init() {
     // Update only the content of infoPaneContent
     const infoPaneContent = document.getElementById('infoPaneContent');
-    document.addEventListener('stateChange', this.handleStateChange.bind(this));
+    document.addEventListener('routesArrayUpdated', this.handleStateChange.bind(this));
 },
 
  handleStateChange(event) {
-   const { key, value } = event.detail;
-   if (key === 'addWaypoint' || key === 'updateWaypoint' || key === 'removeWaypoint') {
      // this.displayFlightsForWaypoints();
      this.updateRouteInfoPane(appState.routes);
-   }
+     findCheapestRoutes.findCheapestRouteAndAddWaypoints();
  },
 
  // async displayFlightsForWaypoints() {
