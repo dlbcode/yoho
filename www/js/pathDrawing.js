@@ -79,7 +79,7 @@ const pathDrawing = {
                 wrap: false,
                 zIndex: -1
             }).addTo(map);
-
+    
             geodesicLine.on('mouseover', (e) => {
                 L.popup()
                     .setLatLng(e.latlng)
@@ -94,25 +94,27 @@ const pathDrawing = {
             return geodesicLine;
         };
     
+        let newPaths = [];
         if (this.routePathCache[routeId]) {
             this.routePathCache[routeId].forEach(path => {
                 if (!map.hasLayer(path)) {
                     path.addTo(map);
                 }
+                newPaths.push(path);
             });
         } else {
-            let newPaths = [];
             const worldCopies = [-720, -360, 0, 360, 720];
             worldCopies.forEach(offset => {
                 newPaths.push(drawPath(origin, destination, offset));
             });
     
-            if (route.isDirect) {
-                let decoratedLine = this.addDecoratedLine(newPaths[2], route); // Decorate the central line
-                newPaths.push(decoratedLine);
-            }
-            
             this.routePathCache[routeId] = newPaths;
+        }
+    
+        if (route.isDirect) {
+            // Decorate the central line whether it's from cache or newly created
+            let decoratedLine = this.addDecoratedLine(newPaths[2], route);
+            newPaths.push(decoratedLine);
         }
     },
     
