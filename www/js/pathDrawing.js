@@ -111,7 +111,7 @@ const pathDrawing = {
                 let decoratedLine = this.addDecoratedLine(newPaths[2], route); // Decorate the central line
                 newPaths.push(decoratedLine);
             }
-    
+            
             this.routePathCache[routeId] = newPaths;
         }
     },
