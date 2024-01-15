@@ -89,16 +89,21 @@ async function updateRoutesArray() {
 
 function createWaypointField(index) {
     const container = document.querySelector('.airport-selection');
+    const waypointContainer = document.createElement('div');
+    waypointContainer.className = 'waypoint-container';
+
     const input = document.createElement('input');
     input.type = 'text';
     input.id = `waypoint${index}`;
     input.placeholder = `Select Airport`;
-    container.appendChild(input);
+    waypointContainer.appendChild(input);
 
     const suggestionsDiv = document.createElement('div');
     suggestionsDiv.id = `waypoint${index}Suggestions`;
     suggestionsDiv.className = 'suggestions';
-    container.appendChild(suggestionsDiv);
+    waypointContainer.appendChild(suggestionsDiv);
+
+    container.appendChild(waypointContainer);
 
     // Emit custom event after creating a new waypoint field
     document.dispatchEvent(new CustomEvent('newWaypointField', { detail: { fieldId: input.id } }));

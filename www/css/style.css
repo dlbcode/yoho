@@ -99,3 +99,9 @@ input, button, select, textarea {
   z-index: 1000; /* Ensure it's above the map */
 }
 
+.waypoint-container {
+  display: inline-block;
+  width: 48%; /* Adjust the width to slightly less than half to accommodate margins */
+  margin-right: 2%; /* Adjust margin as needed */
+  vertical-align: top; /* Aligns containers at the top */
+}
