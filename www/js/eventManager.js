@@ -96,14 +96,32 @@ function createWaypointField(index) {
     if (!routeDiv) {
         routeDiv = document.createElement('div');
         routeDiv.id = routeDivId;
+        routeDiv.className = 'route-container'; 
         container.appendChild(routeDiv);
+
+        // Create two input fields for new route divs (route2, route3, etc.)
+        if (index > 2) {
+            // Create origin input field
+            createInputField(routeDiv, index, appState.waypoints[index - 2].iata_code);
+
+            // Create destination input field and set focus
+            const destinationInput = createInputField(routeDiv, index + 1);
+            destinationInput.focus();
+
+            return destinationInput;
+        }
     }
 
+    // Create input field as usual if it's the first route or the second input of a route
+    return createInputField(routeDiv, index);
+}
+
+function createInputField(routeDiv, index, defaultValue = '') {
     const input = document.createElement('input');
     input.type = 'text';
     input.id = `waypoint${index}`;
     input.placeholder = `Select Airport`;
-    routeDiv.className = 'route-container'; 
+    input.value = defaultValue;
     routeDiv.appendChild(input);
 
     const suggestionsDiv = document.createElement('div');
