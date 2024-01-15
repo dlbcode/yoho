@@ -37,47 +37,63 @@ function updateMarkerIcons() {
     });
 }
 
+function areRoutesEqual(routes1, routes2) {
+    if (routes1.length !== routes2.length) {
+        return false;
+    }
+    for (let i = 0; i < routes1.length; i++) {
+        if (routes1[i].origin !== routes2[i].origin || 
+            routes1[i].destination !== routes2[i].destination || 
+            routes1[i].isDirect !== routes2[i].isDirect) {
+            return false;
+        }
+    }
+    return true;
+}
+
+// Updated updateRoutesArray function
 async function updateRoutesArray() {
     let newRoutes = [];
     let fetchPromises = [];
-  
+
     for (let i = 0; i < appState.waypoints.length - 1; i++) {
-      const fromWaypoint = appState.waypoints[i];
-      const toWaypoint = appState.waypoints[i + 1];
-  
-      // Fetch and cache routes if not already done
-      if (!flightMap.directRoutes[fromWaypoint.iata_code]) {
-        fetchPromises.push(flightMap.fetchAndCacheRoutes(fromWaypoint.iata_code));
-      }
-      if (!flightMap.directRoutes[toWaypoint.iata_code]) {
-        fetchPromises.push(flightMap.fetchAndCacheRoutes(toWaypoint.iata_code));
-      }
+        const fromWaypoint = appState.waypoints[i];
+        const toWaypoint = appState.waypoints[i + 1];
+
+        // Fetch and cache routes if not already done
+        if (!flightMap.directRoutes[fromWaypoint.iata_code]) {
+            fetchPromises.push(flightMap.fetchAndCacheRoutes(fromWaypoint.iata_code));
+        }
+        if (!flightMap.directRoutes[toWaypoint.iata_code]) {
+            fetchPromises.push(flightMap.fetchAndCacheRoutes(toWaypoint.iata_code));
+        }
     }
-  
+
     // Wait for all fetches to complete
     await Promise.all(fetchPromises);
-  
+
     // Now find and add routes
     for (let i = 0; i < appState.waypoints.length - 1; i++) {
         const fromWaypoint = appState.waypoints[i];
-        const toWaypoint =
-        appState.waypoints[i + 1];
+        const toWaypoint = appState.waypoints[i + 1];
         let route = flightMap.findRoute(fromWaypoint.iata_code, toWaypoint.iata_code);
         if (route) {
             route.isDirect = true;
             newRoutes.push(route);
         } else {
             const indirectRoute = {
-            originAirport: fromWaypoint,
-            destinationAirport: toWaypoint,
-            isDirect: false
+                originAirport: fromWaypoint,
+                destinationAirport: toWaypoint,
+                isDirect: false
             };
             newRoutes.push(indirectRoute);
         }
     }
 
-    // Update the routes in the state using the stateManager
-    updateState('updateRoutes', newRoutes);
+    // Check if newRoutes are different from appState.routes
+    if (!areRoutesEqual(appState.routes, newRoutes)) {
+        updateState('updateRoutes', newRoutes);
+    }
 
     // Additional UI updates and event dispatches as needed
     pathDrawing.clearLines();
