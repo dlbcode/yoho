@@ -122,6 +122,16 @@ function updateSuggestions(inputId, airports, setSelectionMade) {
     if (airports.length > 0) suggestionBox.style.display = 'block';
 }
 
+function setupDynamicAutocomplete() {
+    const waypointFields = document.querySelectorAll('.airport-selection input[type="text"]');
+    waypointFields.forEach(field => {
+        if (!field.hasAttribute('autocomplete-setup')) {
+            setupAutocompleteForField(field.id);
+            field.setAttribute('autocomplete-setup', 'true');
+        }
+    });
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     setupAutocompleteForField('waypoint1');
 
@@ -172,6 +182,13 @@ document.addEventListener('DOMContentLoaded', () => {
             event.detail.value.forEach((_, index) => {
                 setupAutocompleteForField(`waypoint${index + 1}`);
             });
+        }
+    });
+
+    setupDynamicAutocomplete();
+    document.addEventListener('stateChange', event => {
+        if (event.detail.key === 'updateRoutes') {
+            setupDynamicAutocomplete();
         }
     });
 });

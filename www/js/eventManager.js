@@ -22,6 +22,10 @@ function handleStateChange(event) {
         updateRoutesArray();
     }
 
+    if (key === 'updateRoutes') {
+        createWaypointField(); // Recreate waypoint fields based on the routes array
+    }
+
     if (key === 'clearData') {
         // Clear existing waypoint fields
         const container = document.querySelector('.airport-selection');
@@ -87,28 +91,30 @@ async function updateRoutesArray() {
     document.dispatchEvent(new CustomEvent('routesArrayUpdated'));
 }
 
-function createWaypointField(index) {
+function createWaypointField() {
     const container = document.querySelector('.airport-selection');
-    const waypointContainer = document.createElement('div');
-    waypointContainer.className = 'waypoint-container';
+    container.innerHTML = ''; // Clear existing fields
 
-    const input = document.createElement('input');
-    input.type = 'text';
-    input.id = `waypoint${index}`;
-    input.placeholder = `Select Airport`;
-    waypointContainer.appendChild(input);
+    // Calculate the number of waypoint fields needed
+    const numberOfFields = (appState.routes.length + 1) * 2;
 
-    const suggestionsDiv = document.createElement('div');
-    suggestionsDiv.id = `waypoint${index}Suggestions`;
-    suggestionsDiv.className = 'suggestions';
-    waypointContainer.appendChild(suggestionsDiv);
+    for (let i = 1; i <= numberOfFields; i++) {
+        const waypointContainer = document.createElement('div');
+        waypointContainer.className = 'waypoint-container';
 
-    container.appendChild(waypointContainer);
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.id = `waypoint${i}`;
+        input.placeholder = `Select Airport`;
+        waypointContainer.appendChild(input);
 
-    // Emit custom event after creating a new waypoint field
-    document.dispatchEvent(new CustomEvent('newWaypointField', { detail: { fieldId: input.id } }));
+        const suggestionsDiv = document.createElement('div');
+        suggestionsDiv.id = `waypoint${i}Suggestions`;
+        suggestionsDiv.className = 'suggestions';
+        waypointContainer.appendChild(suggestionsDiv);
 
-    return input;
+        container.appendChild(waypointContainer);
+    }
 }
 
 const eventManager = {
