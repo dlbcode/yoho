@@ -99,3 +99,17 @@ input, button, select, textarea {
   z-index: 1000; /* Ensure it's above the map */
 }
 
+.route-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px; /* Adjust as needed */
+}
+
+.route-container input {
+  width: 80px;
+}
+
+.route-container input:last-child {
+  margin-right: 0; /* Remove margin for the last input */
+}
