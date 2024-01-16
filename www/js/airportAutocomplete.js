@@ -162,9 +162,15 @@ document.addEventListener('DOMContentLoaded', () => {
         if (waypointIndex >= 0 && waypointIndex < appState.waypoints.length) {
             updateState('updateWaypoint', { index: waypointIndex, data: airport });
         } else {
-            updateState('addWaypoint', airport);
+            // Check if the waypoint index is even (e.g., waypoint2, waypoint4, etc.)
+            if (waypointIndex % 2 === 1) {
+                // Add two identical waypoints for the selected airport
+                updateState('addWaypoint', [airport, {...airport}]);
+            } else {
+                updateState('addWaypoint', airport);
+            }
         }
-
+    
         // Move map view to include the selected airport marker
         if (airport && airport.latitude && airport.longitude) {
             const latLng = L.latLng(airport.latitude, airport.longitude);
@@ -175,7 +181,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 duration: 0.5 // Duration in seconds
             });            
         }
-    });
+    });    
     
     function adjustLatLngForShortestPath(currentLatLng, targetLatLng) {
         let currentLng = currentLatLng.lng;
