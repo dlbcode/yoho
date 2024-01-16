@@ -35,11 +35,12 @@ function updateState(key, value) {
       updateUrlWithWaypoints();
       break;
 
-    case 'addRoute':
-      console.log('appState: adding route');
-      appState.routes.push(value);
-      console.table(appState.routes);
-      break;
+      case 'addRoute':
+        console.log('appState: adding route');
+        appState.routes.push(value);
+        console.table(appState.routes);
+        document.dispatchEvent(new CustomEvent('routeAdded', { detail: { newRoute: value } }));
+        break;      
 
     case 'updateRoutes':
       console.log('updateRoutes');

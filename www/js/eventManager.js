@@ -22,6 +22,10 @@ function handleStateChange(event) {
         updateRoutesArray();
     }
 
+    if (key === 'routeAdded') {
+        addRouteDiv(value.newRoute);
+      }
+
     if (key === 'clearData') {
         // Clear existing waypoint fields
         const container = document.querySelector('.airport-selection');
@@ -85,6 +89,31 @@ async function updateRoutesArray() {
     routeList.updateTotalCost();
     console.table(appState.routes);
     document.dispatchEvent(new CustomEvent('routesArrayUpdated'));
+}
+
+function addRouteDiv(newRoute) {
+    const container = document.querySelector('.airport-selection');
+    const routeDivId = `route${appState.routes.length + 1}`;
+    let routeDiv = document.createElement('div');
+    routeDiv.id = routeDivId;
+    routeDiv.className = 'route-container';
+
+    // Create two waypoint input fields for the new route
+    for (let i = 0; i < 2; i++) {
+        let input = document.createElement('input');
+        input.type = 'text';
+        input.id = `waypoint${appState.waypoints.length + i + 1}`;
+        input.placeholder = i === 0 ? 'Origin' : 'Destination';
+        routeDiv.appendChild(input);
+
+        // Add suggestions div for each waypoint
+        const suggestionsDiv = document.createElement('div');
+        suggestionsDiv.id = `waypoint${appState.waypoints.length + i + 1}Suggestions`;
+        suggestionsDiv.className = 'suggestions';
+        routeDiv.appendChild(suggestionsDiv);
+    }
+
+    container.appendChild(routeDiv);
 }
 
 function createWaypointField(index) {
@@ -152,6 +181,10 @@ const eventManager = {
         document.addEventListener('waypointsLoadedFromURL', () => {
             updateRoutesArray();
         });
+
+        document.addEventListener('routeAdded', function(event) {
+            addRouteDiv(event.detail.newRoute);
+          });
     },
 
     setupMapEventListeners: function () {
