@@ -24,11 +24,15 @@
             <div class="date-picker-container">
                 <label for="startDate">Start:</label>
                 <input type="date" id="startDate" name="startDate">
-            </div>            
+            </div>
             <div class="airport-selection">
-                <input type="text" id="waypoint1" placeholder="Select Airport">
-                <div id="waypoint1Suggestions" class="suggestions"></div>
-            </div>            
+                <div id="route1" class="route-container">
+                    <input type="text" id="waypoint1" placeholder="Origin">
+                    <div id="waypoint1Suggestions" class="suggestions"></div>
+                    <input type="text" id="waypoint2" placeholder="Destination">
+                    <div id="waypoint2Suggestions" class="suggestions"></div>
+                </div>
+            </div>
             <ol id="routeDetailsList" class="route-details"></ol>
             <div id="totalCost">Total Trip Cost: $0</div>
             <div><button id="getPriceBtn">Get Price</button></div>

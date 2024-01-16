@@ -9,29 +9,32 @@ function handleStateChange(event) {
     const { key, value } = event.detail;
 
     if (key === 'addWaypoint' || key === 'removeWaypoint' || key === 'updateWaypoint') {
-        const container = document.querySelector('.airport-selection'); // Clear existing waypoint fields
+        // Clear existing route divs
+        const container = document.querySelector('.airport-selection');
         container.innerHTML = '';
 
-        appState.waypoints.forEach((waypoint, index) => { // Recreate waypoint fields based on the current waypoints
-            let waypointField = createWaypointField(index + 1);
-            waypointField.value = `${waypoint.iata_code}`;
-        });
+        // Recreate route divs and waypoint fields based on the current waypoints
+        for (let i = 0; i < appState.waypoints.length; i += 2) {
+            addRouteDiv(i / 2 + 1);
+        }
+
+        // Add an extra route div for the next waypoints
+        addRouteDiv(Math.ceil(appState.waypoints.length / 2) + 1);
 
         updateMarkerIcons();
-        createWaypointField(appState.waypoints.length + 1);
         updateRoutesArray();
     }
 
     if (key === 'routeAdded') {
         addRouteDiv(value.newRoute);
-      }
+    }
 
     if (key === 'clearData') {
-        // Clear existing waypoint fields
+        // Clear existing route divs
         const container = document.querySelector('.airport-selection');
         container.innerHTML = '';
-        createWaypointField(1); // Create the first waypoint field
-    }    
+        addRouteDiv(1); // Create the first route div
+    }
 }
 
 function updateMarkerIcons() {
@@ -91,85 +94,32 @@ async function updateRoutesArray() {
     document.dispatchEvent(new CustomEvent('routesArrayUpdated'));
 }
 
-function addRouteDiv(newRoute) {
+function addRouteDiv(routeNumber) {
     const container = document.querySelector('.airport-selection');
-    const routeDivId = `route${appState.routes.length + 1}`;
+    const routeDivId = `route${routeNumber}`;
     let routeDiv = document.createElement('div');
     routeDiv.id = routeDivId;
     routeDiv.className = 'route-container';
 
     // Create two waypoint input fields for the new route
     for (let i = 0; i < 2; i++) {
+        let index = (routeNumber - 1) * 2 + i;
+        let waypoint = appState.waypoints[index];
         let input = document.createElement('input');
         input.type = 'text';
-        input.id = `waypoint${appState.waypoints.length + i + 1}`;
+        input.id = `waypoint${index + 1}`;
         input.placeholder = i === 0 ? 'Origin' : 'Destination';
+        input.value = waypoint ? waypoint.iata_code : '';
         routeDiv.appendChild(input);
 
         // Add suggestions div for each waypoint
         const suggestionsDiv = document.createElement('div');
-        suggestionsDiv.id = `waypoint${appState.waypoints.length + i + 1}Suggestions`;
+        suggestionsDiv.id = `waypoint${index + 1}Suggestions`;
         suggestionsDiv.className = 'suggestions';
         routeDiv.appendChild(suggestionsDiv);
     }
 
     container.appendChild(routeDiv);
-}
-
-function createWaypointField(index) {
-    const container = document.querySelector('.airport-selection');
-    let routeDivId = `route${Math.ceil(index / 2)}`;
-    let routeDiv = document.getElementById(routeDivId);
-
-    // Create a new div for the route if it doesn't exist
-    if (!routeDiv) {
-        routeDiv = document.createElement('div');
-        routeDiv.id = routeDivId;
-        routeDiv.className = 'route-container'; 
-        container.appendChild(routeDiv);
-
-        // Set the default value for the first input of new route (except for the first route) to the value of the second input of the previous route
-        if (index > 2) {
-            const previousRouteLastInputId = `waypoint${index - 1}`;
-            const previousRouteLastInput = document.getElementById(previousRouteLastInputId);
-        if (previousRouteLastInput) {
-            const defaultValue = previousRouteLastInput.value;
-            const input = document.createElement('input');
-            input.type = 'text';
-            input.id = `waypoint${index}`;
-            input.placeholder = 'Select Airport';
-            input.value = defaultValue; // Set default value
-            routeDiv.appendChild(input);
-            const suggestionsDiv = document.createElement('div');
-            suggestionsDiv.id = `waypoint${index}Suggestions`;
-            suggestionsDiv.className = 'suggestions';
-            routeDiv.appendChild(suggestionsDiv);
-
-            // Emit custom event after creating a new waypoint field
-            document.dispatchEvent(new CustomEvent('newWaypointField', { detail: { fieldId: input.id }            
-        }));
-            input.focus();
-            return input;
-        }
-    }
-}
-
-// Create input field as usual if it's the first route or the second input of a route
-const input = document.createElement('input');
-input.type = 'text';
-input.id = `waypoint${index}`;
-input.placeholder = `Select Airport`;
-routeDiv.appendChild(input);
-
-const suggestionsDiv = document.createElement('div');
-suggestionsDiv.id = `waypoint${index}Suggestions`;
-suggestionsDiv.className = 'suggestions';
-routeDiv.appendChild(suggestionsDiv);
-
-// Emit custom event after creating a new waypoint field
-document.dispatchEvent(new CustomEvent('newWaypointField', { detail: { fieldId: input.id } }));
-
-return input;
 }
 
 const eventManager = {

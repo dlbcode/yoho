@@ -9,54 +9,43 @@ const appState = {
 
 function updateState(key, value) {
   switch (key) {
-    case 'updateWaypoint':
-      console.log('updateWaypoint');
-      if (value.index >= 0 && value.index < appState.waypoints.length) {
-        appState.waypoints[value.index] = {...appState.waypoints[value.index], ...value.data};
-      }
-      console.table(appState.waypoints);
-      break;
+      case 'updateWaypoint':
+          if (value.index >= 0 && value.index < appState.waypoints.length) {
+              appState.waypoints[value.index] = {...appState.waypoints[value.index], ...value.data};
+          }
+          break;
 
-    case 'addWaypoint':
-      console.log('addWaypoint');
-      if (Array.isArray(value)) { // If value is an array, add each waypoint in the array
-        value.forEach(waypoint => appState.waypoints.push(waypoint));
-      } else { // If value is a single waypoint, add it directly
-        appState.waypoints.push(value);
-      }
-      console.table(appState.waypoints);
-      updateUrlWithWaypoints();
-      break;
+      case 'addWaypoint':
+          if (Array.isArray(value)) {
+              value.forEach(waypoint => appState.waypoints.push(waypoint));
+          } else {
+              appState.waypoints.push(value);
+          }
+          updateUrlWithWaypoints();
+          break;
 
-    case 'removeWaypoint':
-      console.log('removeWaypoint');
-      appState.waypoints.splice(value, 1);
-      console.table(appState.waypoints);
-      updateUrlWithWaypoints();
-      break;
+      case 'removeWaypoint':
+          appState.waypoints.splice(value, 1);
+          updateUrlWithWaypoints();
+          break;
 
       case 'addRoute':
-        console.log('appState: adding route');
-        appState.routes.push(value);
-        console.table(appState.routes);
-        document.dispatchEvent(new CustomEvent('routeAdded', { detail: { newRoute: value } }));
-        break;      
+          appState.routes.push(value);
+          break;
 
-    case 'updateRoutes':
-      console.log('updateRoutes');
-      appState.routes = value;
-      console.table(appState.routes);
-      break;
+      case 'updateRoutes':
+          appState.routes = value;
+          break;
 
     case 'clearData':
       appState.waypoints = [];
-      appState.routes = []; // This will clear the waypoints from the URL
+      appState.routes = [];
       updateUrlWithWaypoints();
       break;
 
-    default:
-      appState[key] = value;
-      break;
+      default:
+          appState[key] = value;
+          break;
   }
   document.dispatchEvent(new CustomEvent('stateChange', { detail: { key, value } }));
 }
