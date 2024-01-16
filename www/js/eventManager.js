@@ -117,12 +117,16 @@ function addRouteDiv(routeNumber) {
         suggestionsDiv.id = `waypoint${index + 1}Suggestions`;
         suggestionsDiv.className = 'suggestions';
         routeDiv.appendChild(suggestionsDiv);
-
-        // Setup autocomplete for the new input field
-        setupAutocompleteForField(input.id);
     }
 
+    // Append the routeDiv to the container before setting up autocomplete
     container.appendChild(routeDiv);
+
+    // Setup autocomplete for the input fields after appending to DOM
+    for (let i = 0; i < 2; i++) {
+        let index = (routeNumber - 1) * 2 + i;
+        setupAutocompleteForField(`waypoint${index + 1}`);
+    }
 }
 
 const eventManager = {
