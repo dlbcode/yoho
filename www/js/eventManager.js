@@ -117,9 +117,9 @@ function createWaypointField(index) {
             routeDiv.appendChild(suggestionsDiv);
 
             // Emit custom event after creating a new waypoint field
-            document.dispatchEvent(new CustomEvent('newWaypointField', { detail: { fieldId: input.id } 
+            document.dispatchEvent(new CustomEvent('newWaypointField', { detail: { fieldId: input.id }            
         }));
-
+            input.focus();
             return input;
         }
     }
