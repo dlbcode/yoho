@@ -182,3 +182,5 @@ export function getIataFromField(inputId) {
     const iataCodeMatch = fieldValue.match(/\b([A-Z]{3})\b/);
     return iataCodeMatch ? iataCodeMatch[1] : null;
 }
+
+export { setupAutocompleteForField }

@@ -4,6 +4,7 @@ import { routeList } from './routeList.js';
 import { pathDrawing } from './pathDrawing.js';
 import { drawAllRoutePaths } from './allPaths.js';
 import { appState, updateState } from './stateManager.js';
+import { setupAutocompleteForField } from './airportAutocomplete.js';
 
 function handleStateChange(event) {
     const { key, value } = event.detail;
@@ -30,7 +31,6 @@ function handleStateChange(event) {
     }
 
     if (key === 'clearData') {
-        // Clear existing route divs
         const container = document.querySelector('.airport-selection');
         container.innerHTML = '';
         addRouteDiv(1); // Create the first route div
@@ -117,6 +117,9 @@ function addRouteDiv(routeNumber) {
         suggestionsDiv.id = `waypoint${index + 1}Suggestions`;
         suggestionsDiv.className = 'suggestions';
         routeDiv.appendChild(suggestionsDiv);
+
+        // Setup autocomplete for the new input field
+        setupAutocompleteForField(input.id);
     }
 
     container.appendChild(routeDiv);
