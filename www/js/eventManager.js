@@ -10,7 +10,6 @@ function handleStateChange(event) {
     const { key, value } = event.detail;
 
     if (key === 'addWaypoint' || key === 'removeWaypoint' || key === 'updateWaypoint') {
-        // Clear existing route divs
         const container = document.querySelector('.airport-selection');
         container.innerHTML = '';
 
@@ -19,8 +18,10 @@ function handleStateChange(event) {
             addRouteDiv(i / 2 + 1);
         }
 
-        // Add an extra route div for the next waypoints
-        addRouteDiv(Math.ceil(appState.waypoints.length / 2) + 1);
+        // Add an extra route div only if the number of waypoints equals the number of input fields
+        if (appState.waypoints.length % 2 === 0) {
+            addRouteDiv(Math.ceil(appState.waypoints.length / 2) + 1);
+        }
 
         updateMarkerIcons();
         updateRoutesArray();
@@ -119,7 +120,6 @@ function addRouteDiv(routeNumber) {
         routeDiv.appendChild(suggestionsDiv);
     }
 
-    // Append the routeDiv to the container before setting up autocomplete
     container.appendChild(routeDiv);
 
     // Setup autocomplete for the input fields after appending to DOM
