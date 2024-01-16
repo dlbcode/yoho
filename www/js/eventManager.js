@@ -49,36 +49,35 @@ async function updateRoutesArray() {
     let newRoutes = [];
     let fetchPromises = [];
   
-    for (let i = 0; i < appState.waypoints.length - 1; i++) {
-      const fromWaypoint = appState.waypoints[i];
-      const toWaypoint = appState.waypoints[i + 1];
+    for (let i = 0; i < appState.waypoints.length - 1; i += 2) {
+        const fromWaypoint = appState.waypoints[i];
+        const toWaypoint = appState.waypoints[i + 1];
   
-      // Fetch and cache routes if not already done
-      if (!flightMap.directRoutes[fromWaypoint.iata_code]) {
-        fetchPromises.push(flightMap.fetchAndCacheRoutes(fromWaypoint.iata_code));
-      }
-      if (!flightMap.directRoutes[toWaypoint.iata_code]) {
-        fetchPromises.push(flightMap.fetchAndCacheRoutes(toWaypoint.iata_code));
-      }
+        // Fetch and cache routes if not already done
+        if (!flightMap.directRoutes[fromWaypoint.iata_code]) {
+            fetchPromises.push(flightMap.fetchAndCacheRoutes(fromWaypoint.iata_code));
+        }
+        if (!flightMap.directRoutes[toWaypoint.iata_code]) {
+            fetchPromises.push(flightMap.fetchAndCacheRoutes(toWaypoint.iata_code));
+        }
     }
   
     // Wait for all fetches to complete
     await Promise.all(fetchPromises);
   
     // Now find and add routes
-    for (let i = 0; i < appState.waypoints.length - 1; i++) {
+    for (let i = 0; i < appState.waypoints.length - 1; i += 2) {
         const fromWaypoint = appState.waypoints[i];
-        const toWaypoint =
-        appState.waypoints[i + 1];
+        const toWaypoint = appState.waypoints[i + 1];
         let route = flightMap.findRoute(fromWaypoint.iata_code, toWaypoint.iata_code);
         if (route) {
             route.isDirect = true;
             newRoutes.push(route);
         } else {
             const indirectRoute = {
-            originAirport: fromWaypoint,
-            destinationAirport: toWaypoint,
-            isDirect: false
+                originAirport: fromWaypoint,
+                destinationAirport: toWaypoint,
+                isDirect: false
             };
             newRoutes.push(indirectRoute);
         }
