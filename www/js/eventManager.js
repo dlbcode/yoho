@@ -126,6 +126,8 @@ function addRouteDiv(routeNumber) {
     for (let i = 0; i < 2; i++) {
         let index = (routeNumber - 1) * 2 + i;
         setupAutocompleteForField(`waypoint${index + 1}`);
+        // set focus to first field in the new route div
+        if (i === 0) document.getElementById(`waypoint${index + 1}`).focus();
     }
 }
 
