@@ -109,7 +109,15 @@ function addRouteDiv(routeNumber) {
         input.type = 'text';
         input.id = `waypoint${index + 1}`;
         input.placeholder = i === 0 ? 'Origin' : 'Destination';
-        input.value = waypoint ? waypoint.iata_code : '';
+
+        // Set the value of the first waypoint of the new route
+        if (routeNumber > 1 && i === 0) {
+            let prevRouteSecondWaypoint = appState.waypoints[index - 1];
+            input.value = prevRouteSecondWaypoint ? prevRouteSecondWaypoint.iata_code : '';
+        } else {
+            input.value = waypoint ? waypoint.iata_code : '';
+        }
+
         routeDiv.appendChild(input);
 
         // Add suggestions div for each waypoint
@@ -125,8 +133,8 @@ function addRouteDiv(routeNumber) {
     for (let i = 0; i < 2; i++) {
         let index = (routeNumber - 1) * 2 + i;
         setupAutocompleteForField(`waypoint${index + 1}`);
-        // set focus to first field in the new route div
-        if (i === 0) document.getElementById(`waypoint${index + 1}`).focus();
+        // set focus to the second field in the new route div
+        if (i === 1) document.getElementById(`waypoint${index + 1}`).focus();
     }
 }
 
