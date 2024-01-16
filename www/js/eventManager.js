@@ -37,63 +37,47 @@ function updateMarkerIcons() {
     });
 }
 
-function areRoutesEqual(routes1, routes2) {
-    if (routes1.length !== routes2.length) {
-        return false;
-    }
-    for (let i = 0; i < routes1.length; i++) {
-        if (routes1[i].origin !== routes2[i].origin || 
-            routes1[i].destination !== routes2[i].destination || 
-            routes1[i].isDirect !== routes2[i].isDirect) {
-            return false;
-        }
-    }
-    return true;
-}
-
-// Updated updateRoutesArray function
 async function updateRoutesArray() {
     let newRoutes = [];
     let fetchPromises = [];
-
+  
     for (let i = 0; i < appState.waypoints.length - 1; i++) {
-        const fromWaypoint = appState.waypoints[i];
-        const toWaypoint = appState.waypoints[i + 1];
-
-        // Fetch and cache routes if not already done
-        if (!flightMap.directRoutes[fromWaypoint.iata_code]) {
-            fetchPromises.push(flightMap.fetchAndCacheRoutes(fromWaypoint.iata_code));
-        }
-        if (!flightMap.directRoutes[toWaypoint.iata_code]) {
-            fetchPromises.push(flightMap.fetchAndCacheRoutes(toWaypoint.iata_code));
-        }
+      const fromWaypoint = appState.waypoints[i];
+      const toWaypoint = appState.waypoints[i + 1];
+  
+      // Fetch and cache routes if not already done
+      if (!flightMap.directRoutes[fromWaypoint.iata_code]) {
+        fetchPromises.push(flightMap.fetchAndCacheRoutes(fromWaypoint.iata_code));
+      }
+      if (!flightMap.directRoutes[toWaypoint.iata_code]) {
+        fetchPromises.push(flightMap.fetchAndCacheRoutes(toWaypoint.iata_code));
+      }
     }
-
+  
     // Wait for all fetches to complete
     await Promise.all(fetchPromises);
-
+  
     // Now find and add routes
     for (let i = 0; i < appState.waypoints.length - 1; i++) {
         const fromWaypoint = appState.waypoints[i];
-        const toWaypoint = appState.waypoints[i + 1];
+        const toWaypoint =
+        appState.waypoints[i + 1];
         let route = flightMap.findRoute(fromWaypoint.iata_code, toWaypoint.iata_code);
         if (route) {
             route.isDirect = true;
             newRoutes.push(route);
         } else {
             const indirectRoute = {
-                originAirport: fromWaypoint,
-                destinationAirport: toWaypoint,
-                isDirect: false
+            originAirport: fromWaypoint,
+            destinationAirport: toWaypoint,
+            isDirect: false
             };
             newRoutes.push(indirectRoute);
         }
     }
 
-    // Check if newRoutes are different from appState.routes
-    if (!areRoutesEqual(appState.routes, newRoutes)) {
-        updateState('updateRoutes', newRoutes);
-    }
+    // Update the routes in the state using the stateManager
+    updateState('updateRoutes', newRoutes);
 
     // Additional UI updates and event dispatches as needed
     pathDrawing.clearLines();
@@ -115,40 +99,48 @@ function createWaypointField(index) {
         routeDiv.className = 'route-container'; 
         container.appendChild(routeDiv);
 
-        // Create two input fields for new route divs (route2, route3, etc.)
+        // Set the default value for the first input of new route (except for the first route) to the value of the second input of the previous route
         if (index > 2) {
-            // Create origin input field
-            createInputField(routeDiv, index, appState.waypoints[index - 2].iata_code);
+            const previousRouteLastInputId = `waypoint${index - 1}`;
+            const previousRouteLastInput = document.getElementById(previousRouteLastInputId);
+        if (previousRouteLastInput) {
+            const defaultValue = previousRouteLastInput.value;
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.id = `waypoint${index}`;
+            input.placeholder = 'Select Airport';
+            input.value = defaultValue; // Set default value
+            routeDiv.appendChild(input);
+            const suggestionsDiv = document.createElement('div');
+            suggestionsDiv.id = `waypoint${index}Suggestions`;
+            suggestionsDiv.className = 'suggestions';
+            routeDiv.appendChild(suggestionsDiv);
 
-            // Create destination input field and set focus
-            const destinationInput = createInputField(routeDiv, index + 1);
-            destinationInput.focus();
+            // Emit custom event after creating a new waypoint field
+            document.dispatchEvent(new CustomEvent('newWaypointField', { detail: { fieldId: input.id } 
+        }));
 
-            return destinationInput;
+            return input;
         }
     }
-
-    // Create input field as usual if it's the first route or the second input of a route
-    return createInputField(routeDiv, index);
 }
 
-function createInputField(routeDiv, index, defaultValue = '') {
-    const input = document.createElement('input');
-    input.type = 'text';
-    input.id = `waypoint${index}`;
-    input.placeholder = `Select Airport`;
-    input.value = defaultValue;
-    routeDiv.appendChild(input);
+// Create input field as usual if it's the first route or the second input of a route
+const input = document.createElement('input');
+input.type = 'text';
+input.id = `waypoint${index}`;
+input.placeholder = `Select Airport`;
+routeDiv.appendChild(input);
 
-    const suggestionsDiv = document.createElement('div');
-    suggestionsDiv.id = `waypoint${index}Suggestions`;
-    suggestionsDiv.className = 'suggestions';
-    routeDiv.appendChild(suggestionsDiv);
+const suggestionsDiv = document.createElement('div');
+suggestionsDiv.id = `waypoint${index}Suggestions`;
+suggestionsDiv.className = 'suggestions';
+routeDiv.appendChild(suggestionsDiv);
 
-    // Emit custom event after creating a new waypoint field
-    document.dispatchEvent(new CustomEvent('newWaypointField', { detail: { fieldId: input.id } }));
+// Emit custom event after creating a new waypoint field
+document.dispatchEvent(new CustomEvent('newWaypointField', { detail: { fieldId: input.id } }));
 
-    return input;
+return input;
 }
 
 const eventManager = {
