@@ -113,3 +113,15 @@ input, button, select, textarea {
 .route-container input:last-child {
   margin-right: 0; /* Remove margin for the last input */
 }
+
+.suggestions {
+  position: absolute;
+  border: 1px solid #777;
+  border-bottom: none;
+  border-top: none;
+  z-index: 99;
+  overflow: auto;
+  background-color: #222;
+  color: #888;
+  min-width: 100%; /* At least as wide as the input field */
+}

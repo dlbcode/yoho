@@ -23,9 +23,14 @@ function setupAutocompleteForField(fieldId) {
         selectionMade = false; // Reset selection flag on new input
     });
 
-    // Toggle suggestion box display
     const toggleSuggestionBox = (display) => {
         suggestionBox.style.display = display ? 'block' : 'none';
+        // Position the suggestion box below the input field
+        if (display) {
+            const rect = inputField.getBoundingClientRect();
+            suggestionBox.style.left = `${rect.left}px`;
+            suggestionBox.style.top = `${rect.bottom}px`;
+        }
     };
 
     // Clear input field if no selection is made
