@@ -121,10 +121,30 @@ function updateSuggestions(inputId, airports, setSelectionMade) {
                 detail: { airport, fieldId: inputId }
             }));
             setSelectionMade(true);
+
+            // Move focus to the next waypoint input field
+            const nextInputId = getNextInputId(inputId);
+            if (nextInputId) {
+                document.getElementById(nextInputId).focus();
+            }
         });        
         suggestionBox.appendChild(div);
     });
     if (airports.length > 0) suggestionBox.style.display = 'block';
+}
+
+// Function to get the next input field's ID
+function getNextInputId(currentInputId) {
+    const match = currentInputId.match(/(waypoint)(\d+)/);
+    if (match && match[2]) {
+        const currentNumber = parseInt(match[2]);
+        const nextNumber = currentNumber + 1;
+        const nextInputId = `waypoint${nextNumber}`;
+        if (document.getElementById(nextInputId)) {
+            return nextInputId;
+        }
+    }
+    return null;
 }
 
 document.addEventListener('DOMContentLoaded', () => {
