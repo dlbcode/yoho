@@ -116,12 +116,11 @@ input, button, select, textarea {
 
 .suggestions {
   position: absolute;
-  border: 1px solid #777;
   border-bottom: none;
   border-top: none;
-  z-index: 99;
+  z-index: 9999;
   overflow: auto;
   background-color: #222;
   color: #888;
-  min-width: 100%; /* At least as wide as the input field */
+  /*min-width: 100%; /* At least as wide as the input field */
 }
