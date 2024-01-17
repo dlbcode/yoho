@@ -127,12 +127,14 @@ function buildRouteDivs(routeNumber) {
 
 function setFocusToNextUnsetInput() {
     const waypointInputs = document.querySelectorAll('.airport-selection input[type="text"]');
-    for (let input of waypointInputs) {
-        if (!input.value) {
-            input.focus();
-            break;
+    requestAnimationFrame(() => {
+        for (let input of waypointInputs) {
+            if (!input.value) {
+                input.focus();
+                break;
+            }
         }
-    }
+    });
 }
 
 const eventManager = {
