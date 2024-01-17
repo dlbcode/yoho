@@ -149,6 +149,7 @@ function getNextInputId(currentInputId) {
 
 document.addEventListener('DOMContentLoaded', () => {
     setupAutocompleteForField('waypoint1');
+    setupAutocompleteForField('waypoint2');
 
     document.addEventListener('newWaypointField', (event) => {
         setupAutocompleteForField(event.detail.fieldId);
