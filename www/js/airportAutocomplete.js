@@ -163,13 +163,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (waypointIndex >= 0 && waypointIndex < appState.waypoints.length) {
             updateState('updateWaypoint', { index: waypointIndex, data: airport });
         } else {
-            // Check if the waypoint index is even (e.g., waypoint2, waypoint4, etc.)
-            if (waypointIndex % 2 === 1) {
-                // Add two identical waypoints for the selected airport
-                updateState('addWaypoint', [airport, {...airport}]);
-            } else {
-                updateState('addWaypoint', airport);
-            }
+            updateState('addWaypoint', airport);
         }
     
         // Move map view to include the selected airport marker

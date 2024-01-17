@@ -12,7 +12,9 @@ function handleStateChange(event) {
     if (key === 'addWaypoint' || key === 'removeWaypoint' || key === 'updateWaypoint') {
         const container = document.querySelector('.airport-selection');
         container.innerHTML = '';
-    
+
+        console.log('waypoints length: ' + appState.waypoints.length);
+
         if (appState.waypoints.length === 2) {
             console.log('adding add button');
             buildRouteDivs(1);
@@ -26,7 +28,7 @@ function handleStateChange(event) {
     
         updateMarkerIcons();
         updateRoutesArray();
-    }    
+    }
 
     if (key === 'routeAdded') {
         buildRouteDivs(value.newRoute);
@@ -55,7 +57,7 @@ function handleAddButtonClick() {
     const lastWaypoint = appState.waypoints[appState.waypoints.length - 1];
     updateState('addWaypoint', lastWaypoint);
     const newRouteNumber = Math.ceil(appState.waypoints.length / 2);
-    buildRouteDivs(newRouteNumber);
+    // buildRouteDivs(newRouteNumber);
     setFocusToNextUnsetInput();
 }
 
