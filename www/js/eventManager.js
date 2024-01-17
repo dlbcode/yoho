@@ -13,10 +13,7 @@ function handleStateChange(event) {
         const container = document.querySelector('.airport-selection');
         container.innerHTML = '';
 
-        console.log('waypoints length: ' + appState.waypoints.length);
-
         if (appState.waypoints.length === 2) {
-            console.log('adding add button');
             buildRouteDivs(1);
             addAddButton();
         } else {
@@ -25,9 +22,23 @@ function handleStateChange(event) {
                 buildRouteDivs(i / 2 + 1);
             }
         }
-    
+
         updateMarkerIcons();
         updateRoutesArray();
+    }
+
+    // Check if the number of waypoints is even and if the last waypoint field was just filled
+    if (key === 'addWaypoint' && appState.waypoints.length % 2 === 0) {
+        const lastWaypointFieldId = `waypoint${appState.waypoints.length}`;
+        const lastWaypointField = document.getElementById(lastWaypointFieldId);
+
+        // Check if the last waypoint field has a value (i.e., an airport selected)
+        if (lastWaypointField && lastWaypointField.value) {
+            // Add the 'Add' button only if it's not already present
+            if (!document.getElementById('addRouteButton')) {
+                addAddButton();
+            }
+        }
     }
 
     if (key === 'routeAdded') {
