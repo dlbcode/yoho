@@ -12,20 +12,21 @@ function handleStateChange(event) {
     if (key === 'addWaypoint' || key === 'removeWaypoint' || key === 'updateWaypoint') {
         const container = document.querySelector('.airport-selection');
         container.innerHTML = '';
-
-        // Recreate route divs and waypoint fields based on the current waypoints
-        for (let i = 0; i < appState.waypoints.length; i += 2) {
-            buildRouteDivs(i / 2 + 1);
-        }
-
-        // Add an 'Add' button only if the number of waypoints equals the number of input fields
-        if (appState.waypoints.length % 2 === 0) {
+    
+        if (appState.waypoints.length === 2) {
+            console.log('adding add button');
+            buildRouteDivs(1);
             addAddButton();
+        } else {
+            // Recreate route divs for more than two waypoints
+            for (let i = 0; i < appState.waypoints.length; i += 2) {
+                buildRouteDivs(i / 2 + 1);
+            }
         }
-
+    
         updateMarkerIcons();
         updateRoutesArray();
-    }
+    }    
 
     if (key === 'routeAdded') {
         buildRouteDivs(value.newRoute);
@@ -46,6 +47,7 @@ function addAddButton() {
     addButton.id = 'addRouteButton';
     addButton.addEventListener('click', handleAddButtonClick);
     container.appendChild(addButton);
+    console.log("Button added to the container");
 }
 
 function handleAddButtonClick() {
