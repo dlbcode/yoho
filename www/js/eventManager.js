@@ -18,9 +18,9 @@ function handleStateChange(event) {
             buildRouteDivs(i / 2 + 1);
         }
 
-        // Add an extra route div only if the number of waypoints equals the number of input fields
+        // Add an 'Add' button only if the number of waypoints equals the number of input fields
         if (appState.waypoints.length % 2 === 0) {
-            buildRouteDivs(Math.ceil(appState.waypoints.length / 2) + 1);
+            addAddButton();
         }
 
         updateMarkerIcons();
@@ -36,6 +36,24 @@ function handleStateChange(event) {
         container.innerHTML = '';
         buildRouteDivs(1);
     }
+    setFocusToNextUnsetInput();
+}
+
+function addAddButton() {
+    const container = document.querySelector('.airport-selection');
+    let addButton = document.createElement('button');
+    addButton.textContent = 'Add';
+    addButton.id = 'addRouteButton';
+    addButton.addEventListener('click', handleAddButtonClick);
+    container.appendChild(addButton);
+}
+
+function handleAddButtonClick() {
+    // Duplicate the last waypoint and create a new route div
+    const lastWaypoint = appState.waypoints[appState.waypoints.length - 1];
+    updateState('addWaypoint', lastWaypoint);
+    const newRouteNumber = Math.ceil(appState.waypoints.length / 2);
+    buildRouteDivs(newRouteNumber);
     setFocusToNextUnsetInput();
 }
 
