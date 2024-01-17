@@ -34,7 +34,7 @@ function handleStateChange(event) {
     if (key === 'clearData') {
         const container = document.querySelector('.airport-selection');
         container.innerHTML = '';
-        buildRouteDivs(1); // Create the first route div
+        buildRouteDivs(1);
     }
     setFocusToNextUnsetInput();
 }
@@ -62,8 +62,7 @@ async function updateRoutesArray() {
             fetchPromises.push(flightMap.fetchAndCacheRoutes(toWaypoint.iata_code));
         }
     }
-  
-    // Wait for all fetches to complete
+
     await Promise.all(fetchPromises);
   
     // Now find and add routes
@@ -84,10 +83,7 @@ async function updateRoutesArray() {
         }
     }
 
-    // Update the routes in the state using the stateManager
     updateState('updateRoutes', newRoutes);
-
-    // Additional UI updates and event dispatches as needed
     pathDrawing.clearLines();
     pathDrawing.drawLines();
     routeList.updateTotalCost();
@@ -110,13 +106,10 @@ function buildRouteDivs(routeNumber) {
         input.type = 'text';
         input.id = `waypoint${index + 1}`;
         input.placeholder = i === 0 ? 'Origin' : 'Destination';
-
-        // Set the value of the waypoint input fields
         input.value = waypoint ? waypoint.iata_code : '';
 
-        routeDiv.appendChild(input);
+        routeDiv.appendChild(input); // Set the value of the waypoint input fields
 
-        // Add suggestions div for each waypoint
         const suggestionsDiv = document.createElement('div');
         suggestionsDiv.id = `waypoint${index + 1}Suggestions`;
         suggestionsDiv.className = 'suggestions';
@@ -125,8 +118,7 @@ function buildRouteDivs(routeNumber) {
 
     container.appendChild(routeDiv);
 
-    // Setup autocomplete for the input fields after appending to DOM
-    for (let i = 0; i < 2; i++) {
+    for (let i = 0; i < 2; i++) { // Setup autocomplete for the input fields after appending to DOM
         let index = (routeNumber - 1) * 2 + i;
         setupAutocompleteForField(`waypoint${index + 1}`);
         setFocusToNextUnsetInput();
