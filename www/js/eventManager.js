@@ -15,12 +15,12 @@ function handleStateChange(event) {
 
         // Recreate route divs and waypoint fields based on the current waypoints
         for (let i = 0; i < appState.waypoints.length; i += 2) {
-            addRouteDiv(i / 2 + 1);
+            buildRouteDivs(i / 2 + 1);
         }
 
         // Add an extra route div only if the number of waypoints equals the number of input fields
         if (appState.waypoints.length % 2 === 0) {
-            addRouteDiv(Math.ceil(appState.waypoints.length / 2) + 1);
+            buildRouteDivs(Math.ceil(appState.waypoints.length / 2) + 1);
         }
 
         updateMarkerIcons();
@@ -28,13 +28,13 @@ function handleStateChange(event) {
     }
 
     if (key === 'routeAdded') {
-        addRouteDiv(value.newRoute);
+        buildRouteDivs(value.newRoute);
     }
 
     if (key === 'clearData') {
         const container = document.querySelector('.airport-selection');
         container.innerHTML = '';
-        addRouteDiv(1); // Create the first route div
+        buildRouteDivs(1); // Create the first route div
     }
 }
 
@@ -94,7 +94,7 @@ async function updateRoutesArray() {
     document.dispatchEvent(new CustomEvent('routesArrayUpdated'));
 }
 
-function addRouteDiv(routeNumber) {
+function buildRouteDivs(routeNumber) {
     const container = document.querySelector('.airport-selection');
     const routeDivId = `route${routeNumber}`;
     let routeDiv = document.createElement('div');
@@ -110,13 +110,8 @@ function addRouteDiv(routeNumber) {
         input.id = `waypoint${index + 1}`;
         input.placeholder = i === 0 ? 'Origin' : 'Destination';
 
-        // Set the value of the first waypoint of the new route
-        if (routeNumber > 1 && i === 0) {
-            let prevRouteSecondWaypoint = appState.waypoints[index - 1];
-            input.value = prevRouteSecondWaypoint ? prevRouteSecondWaypoint.iata_code : '';
-        } else {
-            input.value = waypoint ? waypoint.iata_code : '';
-        }
+        // Set the value of the waypoint input fields
+        input.value = waypoint ? waypoint.iata_code : '';
 
         routeDiv.appendChild(input);
 
@@ -149,7 +144,7 @@ const eventManager = {
         });
 
         document.addEventListener('routeAdded', function(event) {
-            addRouteDiv(event.detail.newRoute);
+            buildRouteDivs(event.detail.newRoute);
           });
     },
 
