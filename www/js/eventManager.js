@@ -36,6 +36,7 @@ function handleStateChange(event) {
         container.innerHTML = '';
         buildRouteDivs(1); // Create the first route div
     }
+    setFocusToNextUnsetInput();
 }
 
 function updateMarkerIcons() {
@@ -128,8 +129,17 @@ function buildRouteDivs(routeNumber) {
     for (let i = 0; i < 2; i++) {
         let index = (routeNumber - 1) * 2 + i;
         setupAutocompleteForField(`waypoint${index + 1}`);
-        // set focus to the second field in the new route div
-        if (i === 1) document.getElementById(`waypoint${index + 1}`).focus();
+        setFocusToNextUnsetInput();
+    }
+}
+
+function setFocusToNextUnsetInput() {
+    const waypointInputs = document.querySelectorAll('.airport-selection input[type="text"]');
+    for (let input of waypointInputs) {
+        if (!input.value) {
+            input.focus();
+            break;
+        }
     }
 }
 
