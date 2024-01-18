@@ -63,8 +63,6 @@ function addAddButton() {
 
     // Bring the 'Add' button into focus
     addButton.focus();
-
-    console.log("Button added to the container");
 }
 
 function handleAddButtonClick() {
@@ -188,8 +186,6 @@ function removeRouteDiv(routeNumber) {
     if (appState.waypoints.length > 1 && !document.getElementById('addRouteButton')) {
         addAddButton();
     }
-
-    handleStateChange({ detail: { key: 'removeRoute', value: routeNumber } });
 }
 
 function setFocusToNextUnsetInput() {

@@ -30,7 +30,6 @@ const appState = {
         break;
 
       case 'removeWaypoints':
-        // Assuming each route has exactly 2 waypoints
         let startIndex = (value.routeNumber - 1) * 2;
         appState.waypoints.splice(startIndex, 2);
         updateUrlWithWaypoints();
