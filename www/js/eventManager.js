@@ -183,6 +183,10 @@ function removeRouteDiv(routeNumber) {
     updateMarkerIcons();
     routeList.updateTotalCost();
 
+    if (appState.waypoints.length > 1 && !document.getElementById('addRouteButton')) {
+        addAddButton();
+    }
+
     handleStateChange({ detail: { key: 'removeRoute', value: routeNumber } });
 }
 
