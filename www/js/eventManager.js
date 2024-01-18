@@ -141,7 +141,7 @@ function buildRouteDivs(routeNumber) {
         input.placeholder = i === 0 ? 'Origin' : 'Destination';
         input.value = waypoint ? waypoint.iata_code : '';
 
-        routeDiv.appendChild(input); // Set the value of the waypoint input fields
+        routeDiv.appendChild(input);
 
         const suggestionsDiv = document.createElement('div');
         suggestionsDiv.id = `waypoint${index + 1}Suggestions`;
@@ -149,22 +149,20 @@ function buildRouteDivs(routeNumber) {
         routeDiv.appendChild(suggestionsDiv);
     }
 
-    // Add a minus button for each route div greater than route1
-    if (routeNumber > 1) {
-        let minusButton = document.createElement('button');
-        minusButton.textContent = '-';
-        minusButton.className = 'remove-route-button';
-        minusButton.onclick = () => removeRouteDiv(routeNumber);
-        routeDiv.appendChild(minusButton);
-    }
+    // Add a minus button for each route div
+    let minusButton = document.createElement('button');
+    minusButton.textContent = '-';
+    minusButton.className = 'remove-route-button';
+    minusButton.onclick = () => removeRouteDiv(routeNumber);
+    routeDiv.appendChild(minusButton);
 
     container.appendChild(routeDiv);
 
-    for (let i = 0; i < 2; i++) { // Setup autocomplete for the input fields after appending to DOM
+    for (let i = 0; i < 2; i++) {
         let index = (routeNumber - 1) * 2 + i;
         setupAutocompleteForField(`waypoint${index + 1}`);
-        setFocusToNextUnsetInput();
     }
+    setFocusToNextUnsetInput();
 }
 
 function removeRouteDiv(routeNumber) {
