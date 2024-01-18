@@ -149,6 +149,15 @@ function buildRouteDivs(routeNumber) {
         routeDiv.appendChild(suggestionsDiv);
     }
 
+    // Add a minus button for each route div greater than route1
+    if (routeNumber > 1) {
+        let minusButton = document.createElement('button');
+        minusButton.textContent = '-';
+        minusButton.className = 'remove-route-button';
+        minusButton.onclick = () => removeRouteDiv(routeNumber);
+        routeDiv.appendChild(minusButton);
+    }
+
     container.appendChild(routeDiv);
 
     for (let i = 0; i < 2; i++) { // Setup autocomplete for the input fields after appending to DOM
@@ -156,6 +165,20 @@ function buildRouteDivs(routeNumber) {
         setupAutocompleteForField(`waypoint${index + 1}`);
         setFocusToNextUnsetInput();
     }
+}
+
+function removeRouteDiv(routeNumber) {
+    // Remove the route div
+    let routeDiv = document.getElementById(`route${routeNumber}`);
+    if (routeDiv) {
+        routeDiv.remove();
+    }
+
+    // Remove the associated waypoints from the appState
+    updateState('removeWaypoints', { routeNumber: routeNumber });
+
+    // Update the UI accordingly
+    handleStateChange({ detail: { key: 'removeRoute', value: routeNumber } });
 }
 
 function setFocusToNextUnsetInput() {
