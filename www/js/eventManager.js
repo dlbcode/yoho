@@ -60,6 +60,10 @@ function addAddButton() {
     addButton.id = 'addRouteButton';
     addButton.addEventListener('click', handleAddButtonClick);
     container.appendChild(addButton);
+
+    // Bring the 'Add' button into focus
+    addButton.focus();
+
     console.log("Button added to the container");
 }
 
@@ -175,7 +179,7 @@ function removeRouteDiv(routeNumber) {
     // Remove the associated waypoints from the appState
     updateState('removeWaypoints', { routeNumber: routeNumber });
 
-    // Redraw the path lines
+    
     pathDrawing.clearLines();
     pathDrawing.drawLines();
 
