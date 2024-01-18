@@ -134,6 +134,7 @@ function buildRouteDivs(routeNumber) {
     let routeDiv = document.createElement('div');
     routeDiv.id = routeDivId;
     routeDiv.className = 'route-container';
+    routeDiv.setAttribute('data-route-number', routeNumber.toString());
 
     // Create two waypoint input fields for the new route
     for (let i = 0; i < 2; i++) {
@@ -175,6 +176,7 @@ function removeRouteDiv(routeNumber) {
         routeDiv.remove();
     }
 
+    console.log('removing waypoints for route ', routeNumber);
     updateState('removeWaypoints', { routeNumber: routeNumber });
     updateRoutesArray();
 
