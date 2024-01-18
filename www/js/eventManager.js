@@ -176,6 +176,7 @@ function removeRouteDiv(routeNumber) {
     }
 
     updateState('removeWaypoints', { routeNumber: routeNumber });
+    updateRoutesArray();
 
     pathDrawing.clearLines();
     pathDrawing.drawLines();
