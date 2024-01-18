@@ -211,10 +211,9 @@ const eventManager = {
         document.addEventListener('waypointsLoadedFromURL', () => {
             updateRoutesArray();
         });
-
         document.addEventListener('routeAdded', function(event) {
             buildRouteDivs(event.detail.newRoute);
-          });
+        });
     },
 
     setupMapEventListeners: function () {
@@ -233,12 +232,10 @@ const eventManager = {
     },
 
     setupUIEventListeners: function () {
-        document.addEventListener('change', function (event) {
-            if (event.target.id === 'routePathToggle') {
-                updateState('routePathToggle', event.target.value);
-                if (flightMap.selectedMarker) {
-                    pathDrawing.drawRoutePaths(flightMap.selectedMarker);
-                }
+        document.querySelector('.airport-selection').addEventListener('click', function(event) {
+            if (event.target.classList.contains('remove-route-button')) {
+                const routeNumber = event.target.closest('.route-container').dataset.routeNumber;
+                removeRouteDiv(routeNumber);
             }
         });
 
