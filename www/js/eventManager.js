@@ -170,23 +170,18 @@ function buildRouteDivs(routeNumber) {
 }
 
 function removeRouteDiv(routeNumber) {
-    // Remove the route div
     let routeDiv = document.getElementById(`route${routeNumber}`);
     if (routeDiv) {
         routeDiv.remove();
     }
 
-    // Remove the associated waypoints from the appState
     updateState('removeWaypoints', { routeNumber: routeNumber });
 
-    // Redraw the path lines
     pathDrawing.clearLines();
     pathDrawing.drawLines();
-
-    // Refresh marker icons
     updateMarkerIcons();
+    routeList.updateTotalCost();
 
-    // Update the UI accordingly
     handleStateChange({ detail: { key: 'removeRoute', value: routeNumber } });
 }
 
