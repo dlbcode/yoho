@@ -176,7 +176,6 @@ function removeRouteDiv(routeNumber) {
 
     console.log('removing waypoints for route ', routeNumber);
     updateState('removeWaypoints', { routeNumber: routeNumber });
-    updateRoutesArray();
 
     pathDrawing.clearLines();
     pathDrawing.drawLines();
@@ -206,9 +205,6 @@ const eventManager = {
         this.setupUIEventListeners();
         this.setupAllPathsButtonEventListener();
         document.addEventListener('stateChange', handleStateChange);
-        document.addEventListener('waypointsLoadedFromURL', () => {
-            updateRoutesArray();
-        });
         document.addEventListener('routeAdded', function(event) {
             buildRouteDivs(event.detail.newRoute);
         });
