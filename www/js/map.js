@@ -24,30 +24,6 @@ async function initMapFunctions() {
     document.dispatchEvent(new CustomEvent('waypointsLoadedFromURL'));
 }
 
-function waitForRoutesUpdate() {
-    return new Promise(resolve => {
-        const listener = () => {
-            document.removeEventListener('routesArrayUpdated', listener);
-            resolve();
-        };
-        document.addEventListener('routesArrayUpdated', listener);
-    });
-}
-
-var blueDotIcon = L.divIcon({ // Marker configurations
-    className: 'custom-div-icon',
-    html: '<div style="background-color: #3B74D5; width: 8px; height: 8px; border-radius: 50%;"></div>',
-    iconSize: [8, 8],
-    iconAnchor: [5, 5]
-});
-
-var magentaDotIcon = L.divIcon({
-    className: 'custom-div-icon',
-    html: '<div style="background-color: #b43bd5; width: 10px; height: 10px; border-radius: 50%;"></div>',
-    iconSize: [10, 10],
-    iconAnchor: [6, 6]
-});
-
 var map = L.map('map', { 
     zoomControl: false, 
     minZoom: 2, 
@@ -95,5 +71,19 @@ function adjustMapHeight() {
     const windowHeight = window.innerHeight;
     mapElement.style.height = `${windowHeight - infoPaneHeight}px`;
 }
+
+var blueDotIcon = L.divIcon({ // Marker configurations
+    className: 'custom-div-icon',
+    html: '<div style="background-color: #3B74D5; width: 8px; height: 8px; border-radius: 50%;"></div>',
+    iconSize: [8, 8],
+    iconAnchor: [5, 5]
+  });
+  
+  var magentaDotIcon = L.divIcon({
+    className: 'custom-div-icon',
+    html: '<div style="background-color: #b43bd5; width: 10px; height: 10px; border-radius: 50%;"></div>',
+    iconSize: [10, 10],
+    iconAnchor: [6, 6]
+  });
 
 export { map, blueDotIcon, magentaDotIcon };
