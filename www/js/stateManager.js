@@ -39,9 +39,11 @@ const appState = {
         appState.routes.push(value);
         break;
   
-      case 'updateRoutes':
-        appState.routes = value;
-        break;
+    case 'updateRoutes':
+        if (JSON.stringify(appState.routes) !== JSON.stringify(value)) {
+            appState.routes = value;
+        }
+        break;        
   
       case 'clearData':
         appState.waypoints = [];
