@@ -1,6 +1,6 @@
 import { flightMap } from './flightMap.js';
 import { routeList } from './routeList.js';
-import { updateState } from './stateManager.js';
+import { updateState, appState } from './stateManager.js';
 import { getPrice } from './getPrice.js';
 import { infoPane } from './infoPane.js';
 
@@ -15,13 +15,17 @@ async function initMapFunctions() {
             const airport = await flightMap.getAirportDataByIata(iata);
             if (airport) {
                 updateState('addWaypoint', airport);
-                await waitForRoutesUpdate();
             }
+        }
+        // Trigger route update after processing all waypoints
+        if (appState.waypoints.length > 0) {
+            await waitForRoutesUpdate();
         }
     }
 
     document.dispatchEvent(new CustomEvent('waypointsLoadedFromURL'));
 }
+
 
 function waitForRoutesUpdate() {
     return new Promise(resolve => {
