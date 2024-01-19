@@ -11,16 +11,14 @@ async function initMapFunctions() {
     const waypointParam = params.get('waypoints');
     if (waypointParam) {
         const waypointIatas = waypointParam.split(',').map(decodeURIComponent);
+        const airports = [];
         for (const iata of waypointIatas) {
             const airport = await flightMap.getAirportDataByIata(iata);
             if (airport) {
-                updateState('addWaypoint', airport);
+                airports.push(airport);
             }
         }
-        // Trigger route update after processing all waypoints
-        if (appState.waypoints.length > 0) {
-            await waitForRoutesUpdate();
-        }
+        updateState('addWaypoint', airports); // Add all waypoints in one operation
     }
 
     document.dispatchEvent(new CustomEvent('waypointsLoadedFromURL'));
