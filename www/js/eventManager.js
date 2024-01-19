@@ -7,7 +7,6 @@ import { appState, updateState } from './stateManager.js';
 import { setupAutocompleteForField } from './airportAutocomplete.js';
 
 function handleStateChange(event) {
-    console.log('state change: ', event.detail);
     const { key, value } = event.detail;
 
     if (key === 'addWaypoint' || key === 'removeWaypoint' || key === 'updateWaypoint') {
@@ -174,6 +173,8 @@ function removeRouteDiv(routeNumber) {
     if (routeDiv) {
         routeDiv.remove();
     }
+
+    console.log('removing waypoints for route ', routeNumber);
     updateState('removeWaypoints', { routeNumber: routeNumber });
     updateRoutesArray();
 
@@ -232,7 +233,6 @@ const eventManager = {
         document.querySelector('.airport-selection').addEventListener('click', function(event) {
             if (event.target.classList.contains('remove-route-button')) {
                 const routeNumber = event.target.closest('.route-container').dataset.routeNumber;
-                //removeRouteDiv(routeNumber);
             }
         });
 
