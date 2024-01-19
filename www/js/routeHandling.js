@@ -4,6 +4,7 @@ import { uiHandling } from './uiHandling.js';
 import { flightMap } from './flightMap.js';
 import { pathDrawing } from './pathDrawing.js';
 import { routeList } from './routeList.js';
+import { mapHandling } from './mapHandling.js';
 
 const routeHandling = {
 
@@ -37,7 +38,7 @@ const routeHandling = {
     let minusButton = document.createElement('button');
     minusButton.textContent = '-';
     minusButton.className = 'remove-route-button';
-    minusButton.onclick = () => removeRouteDiv(routeNumber);
+    minusButton.onclick = () => this.removeRouteDiv(routeNumber);
     routeDiv.appendChild(minusButton);
 
     container.appendChild(routeDiv);
@@ -60,7 +61,7 @@ const routeHandling = {
 
     pathDrawing.clearLines();
     pathDrawing.drawLines();
-    updateMarkerIcons();
+    mapHandling.updateMarkerIcons();
     routeList.updateTotalCost();
 
     if (appState.waypoints.length > 1 && !document.getElementById('addRouteButton')) {

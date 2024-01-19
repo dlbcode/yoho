@@ -7,7 +7,7 @@ const uiHandling = {
     let addButton = document.createElement('button');
     addButton.textContent = 'Add';
     addButton.id = 'addRouteButton';
-    addButton.addEventListener('click', this.handleAddButtonClick());
+    addButton.addEventListener('click', this.handleAddButtonClick);
     container.appendChild(addButton);
 
     // Bring the 'Add' button into focus
