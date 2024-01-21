@@ -45,20 +45,16 @@ const pathDrawing = {
     },
 
     drawDashedLine(originAirport, destinationAirport) {
-        const worldCopies = [-720, -360, 0, 360, 720];
-        worldCopies.forEach(offset => {
-            const adjustedOrigin = L.latLng(originAirport.latitude, originAirport.longitude + offset);
-            const adjustedDestination = L.latLng(destinationAirport.latitude, destinationAirport.longitude + offset);
-            const geodesicLine = new L.Geodesic([adjustedOrigin, adjustedDestination], {
-                weight: 2, opacity: 1.0, color: 'grey', dashArray: '5, 10', wrap: false
-            }).addTo(map);
-            const routeId = `${originAirport.iata_code}-${destinationAirport.iata_code}`;
-            if (!this.dashedRoutePathCache[routeId]) {
-                this.dashedRoutePathCache[routeId] = [];
-            }
-            this.dashedRoutePathCache[routeId].push(geodesicLine);
-        });
-    },  
+        const adjustedOrigin = L.latLng(originAirport.latitude, originAirport.longitude);
+        const adjustedDestination = L.latLng(destinationAirport.latitude, destinationAirport.longitude);
+        const geodesicLine = new L.Geodesic([adjustedOrigin, adjustedDestination], {
+            weight: 2, opacity: 1.0, color: 'grey', dashArray: '5, 10', wrap: false
+        }).addTo(map);
+    
+        const routeId = `${originAirport.iata_code}-${destinationAirport.iata_code}`;
+        this.dashedRoutePathCache[routeId] = this.dashedRoutePathCache[routeId] || [];
+        this.dashedRoutePathCache[routeId].push(geodesicLine);
+    },     
 
     adjustLatLng(latLng) {
         var currentBounds = map.getBounds();
@@ -195,28 +191,14 @@ const pathDrawing = {
     },
      
     clearLines() {
-        // Clear all regular lines
-        [...this.currentLines, ...Object.values(this.routePathCache).flat()].forEach(line => {
+        [...Object.values(this.routePathCache).flat(), ...Object.values(this.dashedRoutePathCache).flat()].forEach(line => {
             if (map.hasLayer(line)) {
                 map.removeLayer(line);
             }
         });
-    
-        // Clear all dashed lines (if they are stored separately)
-        if (this.dashedRoutePathCache) {
-            Object.values(this.dashedRoutePathCache).flat().forEach(dashedLine => {
-                if (map.hasLayer(dashedLine)) {
-                    map.removeLayer(dashedLine);
-                }
-            });
-        }
-    
-        // Reset the caches
-        this.currentLines = [];
-        if (this.dashedRoutePathCache) {
-            this.dashedRoutePathCache = {};
-        }
-    },           
+        this.routePathCache = {};
+        this.dashedRoutePathCache = {};
+    },        
 };
 
 export { pathDrawing };
