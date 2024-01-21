@@ -60,6 +60,8 @@ const routeHandling = {
             const originalColor = routeDiv.dataset.originalColor;
             pathLines.forEach(path => path.setStyle({ color: originalColor }));
         }
+        pathDrawing.clearLines();
+        pathDrawing.drawLines();
     });    
 
     container.appendChild(routeDiv);
