@@ -1,13 +1,10 @@
 import { map, blueDotIcon, magentaDotIcon } from './map.js';
 import { pathDrawing } from './pathDrawing.js';
 import { eventManager } from './eventManager.js';
-import { routeHandling } from './routeHandling.js';
-import { uiHandling } from './uiHandling.js';
 import { appState, updateState } from './stateManager.js';
 
 const flightMap = {
     markers: {},
-    directRoutes: {},
     currentLines: [],
     selectedMarker: null,
     toggleState: 'from',
@@ -61,6 +58,7 @@ const flightMap = {
                 return; // Exit the function after removing the waypoints
             } else {
             updateState('removeWaypoint', appState.waypoints.length - 1);
+            appState.selectedAirport = null;
             clickedMarker.setIcon(blueDotIcon);
             return;
             }
@@ -75,11 +73,13 @@ const flightMap = {
             updateState('addWaypoint', airport);
             clickedMarker.setIcon(magentaDotIcon);
         }
-        clickedMarker.selected = !clickedMarker.selected;
+        //clickedMarker.selected = !clickedMarker.selected;
+        appState.selectedAirport = airport;
+        console.log('Selected Airport: ',appState.selectedAirport);
     },        
 
     findRoute(fromIata, toIata) {
-        for (const routes of Object.values(this.directRoutes)) {
+        for (const routes of Object.values(appState.directRoutes)) {
             for (const route of routes) {
                 if (route.originAirport.iata_code === fromIata && route.destinationAirport.iata_code === toIata) {
                     return route;
@@ -145,7 +145,7 @@ const flightMap = {
         if (this.selectedMarker !== iata) {
             if (event === 'mouseover') {
                 this.fetchAndCacheRoutes(iata).then(() => {
-                    pathDrawing.drawRoutePaths(iata, this.directRoutes, this.toggleState);
+                    pathDrawing.drawRoutePaths(iata, appState.directRoutes, this.toggleState);
                 });
             } else if (event === 'mouseout') {
                 if (!marker.hovered) {  // Delay only for the first hover
@@ -162,12 +162,12 @@ const flightMap = {
     },
     
     async fetchAndCacheRoutes(iata) {
-        if (!this.directRoutes[iata]) {
+        if (!appState.directRoutes[iata]) {
             try {
                 const direction = this.toggleState; // 'to' or 'from'
                 const response = await fetch(`http://yonderhop.com:3000/directRoutes?origin=${iata}&direction=${direction}`);
                 const routes = await response.json();
-                this.directRoutes[iata] = routes;
+                appState.directRoutes[iata] = routes;
             } catch (error) {
                 console.error('Error fetching routes:', error);
             }

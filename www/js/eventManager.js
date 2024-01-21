@@ -64,6 +64,9 @@ const eventManager = {
     setupMapEventListeners: function () {
         map.on('click', () => {
             flightMap.selectedMarker = null;
+            appState.selectedAirport = null;
+            pathDrawing.clearLines();
+            pathDrawing.drawLines();
         });
 
         map.on('moveend', () => {

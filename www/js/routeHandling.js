@@ -78,10 +78,10 @@ const routeHandling = {
         const toWaypoint = appState.waypoints[i + 1];
 
         // Fetch and cache routes if not already done
-        if (!flightMap.directRoutes[fromWaypoint.iata_code]) {
+        if (!appState.directRoutes[fromWaypoint.iata_code]) {
             fetchPromises.push(flightMap.fetchAndCacheRoutes(fromWaypoint.iata_code));
         }
-        if (!flightMap.directRoutes[toWaypoint.iata_code]) {
+        if (!appState.directRoutes[toWaypoint.iata_code]) {
             fetchPromises.push(flightMap.fetchAndCacheRoutes(toWaypoint.iata_code));
         }
     }

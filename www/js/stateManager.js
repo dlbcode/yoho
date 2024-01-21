@@ -5,6 +5,7 @@ const appState = {
     waypoints: [],
     routes: [],
     startDate: null,
+    directRoutes: [],
   };
   
   function updateState(key, value) {
