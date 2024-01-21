@@ -43,24 +43,22 @@ const routeHandling = {
 
     // Add event listeners to change the route line color on mouseover
     routeDiv.addEventListener('mouseover', () => {
-    const routeId = this.getRouteIdFromDiv(routeDiv);
-    const pathLines = pathDrawing.routePathCache[routeId];
+        const routeId = this.getRouteIdFromDiv(routeDiv);
+        const pathLines = pathDrawing.routePathCache[routeId] || pathDrawing.dashedRoutePathCache[routeId];
         if (pathLines && pathLines.length > 0) {
-            // Store the current color of the first path line
             routeDiv.dataset.originalColor = pathLines[0].options.color;
-            pathLines.forEach(path => path.setStyle({ color: 'white' }));
+            pathLines.forEach(path => path.setStyle({ color: 'white'}));
         }
-    });
+    });    
 
     routeDiv.addEventListener('mouseout', () => {
         const routeId = this.getRouteIdFromDiv(routeDiv);
-        // Restore the original color of all path lines
-        const pathLines = pathDrawing.routePathCache[routeId];
+        const pathLines = pathDrawing.routePathCache[routeId] || pathDrawing.dashedRoutePathCache[routeId];
         if (pathLines && pathLines.length > 0) {
             const originalColor = routeDiv.dataset.originalColor;
             pathLines.forEach(path => path.setStyle({ color: originalColor }));
         }
-    });
+    });    
 
     container.appendChild(routeDiv);
 

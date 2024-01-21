@@ -4,6 +4,7 @@ import { appState } from './stateManager.js';
 const pathDrawing = {
     currentLines: [],
     routePathCache: {},
+    dashedRoutePathCache: [],
 
     drawRoutePaths(iata, directRoutes) {
         let cacheKey = appState.routePathToggle + '_' + iata;
@@ -49,9 +50,13 @@ const pathDrawing = {
             const adjustedOrigin = L.latLng(originAirport.latitude, originAirport.longitude + offset);
             const adjustedDestination = L.latLng(destinationAirport.latitude, destinationAirport.longitude + offset);
             const geodesicLine = new L.Geodesic([adjustedOrigin, adjustedDestination], {
-                weight: 2, opacity: 0.5, color: 'white', dashArray: '5, 10', wrap: false
+                weight: 2, opacity: 1.0, color: 'grey', dashArray: '5, 10', wrap: false
             }).addTo(map);
-            this.currentLines.push(geodesicLine);
+            const routeId = `${originAirport.iata_code}-${destinationAirport.iata_code}`;
+            if (!this.dashedRoutePathCache[routeId]) {
+                this.dashedRoutePathCache[routeId] = [];
+            }
+            this.dashedRoutePathCache[routeId].push(geodesicLine);
         });
     },  
 
@@ -190,13 +195,28 @@ const pathDrawing = {
     },
      
     clearLines() {
+        // Clear all regular lines
         [...this.currentLines, ...Object.values(this.routePathCache).flat()].forEach(line => {
             if (map.hasLayer(line)) {
                 map.removeLayer(line);
             }
         });
+    
+        // Clear all dashed lines (if they are stored separately)
+        if (this.dashedRoutePathCache) {
+            Object.values(this.dashedRoutePathCache).flat().forEach(dashedLine => {
+                if (map.hasLayer(dashedLine)) {
+                    map.removeLayer(dashedLine);
+                }
+            });
+        }
+    
+        // Reset the caches
         this.currentLines = [];
-    },
+        if (this.dashedRoutePathCache) {
+            this.dashedRoutePathCache = {};
+        }
+    },           
 };
 
 export { pathDrawing };
