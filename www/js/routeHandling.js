@@ -41,6 +41,27 @@ const routeHandling = {
     minusButton.onclick = () => this.removeRouteDiv(routeNumber);
     routeDiv.appendChild(minusButton);
 
+    // Add event listeners to change the route line color on mouseover
+    routeDiv.addEventListener('mouseover', () => {
+    const routeId = this.getRouteIdFromDiv(routeDiv);
+    const pathLines = pathDrawing.routePathCache[routeId];
+        if (pathLines && pathLines.length > 0) {
+            // Store the current color of the first path line
+            routeDiv.dataset.originalColor = pathLines[0].options.color;
+            pathLines.forEach(path => path.setStyle({ color: 'white' }));
+        }
+    });
+
+    routeDiv.addEventListener('mouseout', () => {
+        const routeId = this.getRouteIdFromDiv(routeDiv);
+        // Restore the original color of all path lines
+        const pathLines = pathDrawing.routePathCache[routeId];
+        if (pathLines && pathLines.length > 0) {
+            const originalColor = routeDiv.dataset.originalColor;
+            pathLines.forEach(path => path.setStyle({ color: originalColor }));
+        }
+    });
+
     container.appendChild(routeDiv);
 
     for (let i = 0; i < 2; i++) {
@@ -68,6 +89,16 @@ const routeHandling = {
         uiHandling.addAddButton();
     }
   },
+
+  getRouteIdFromDiv: function (routeDiv) {
+    const inputs = routeDiv.querySelectorAll('input[type="text"]');
+    if (inputs.length === 2) {
+        const originIata = inputs[0].value; // IATA code of the origin
+        const destinationIata = inputs[1].value; // IATA code of the destination
+        return `${originIata}-${destinationIata}`; // Concatenate to form the route ID
+    }
+    return null; // Return null if the route ID cannot be determined
+},
 
   updateRoutesArray: async function () {
     let newRoutes = [];
