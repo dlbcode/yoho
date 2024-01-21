@@ -1,4 +1,5 @@
 import { appState } from './stateManager.js';
+import { pathDrawing } from './pathDrawing.js';
 import { findCheapestRoutes } from './findCheapestRoutes.js';
 
 const infoPane = {
@@ -60,18 +61,38 @@ const infoPane = {
     // Create table body
     const tbody = document.createElement('tbody');
     routes.forEach(route => {
-        let row = `<tr>
-                      <td>${route.originAirport.city} (${route.origin})</td>
-                      <td>${route.destinationAirport.city} (${route.destination})</td>
-                      <td>${route.price}</td>
-                   </tr>`;
-        tbody.innerHTML += row;
+        let row = document.createElement('tr');
+        row.innerHTML = `<td>${route.originAirport.city} (${route.origin})</td>
+                         <td>${route.destinationAirport.city} (${route.destination})</td>
+                         <td>${route.price}</td>`;
+
+        // Add event listeners for hover
+        row.addEventListener('mouseover', () => {
+            const routeId = `${route.origin}-${route.destination}`;
+            const pathLines = pathDrawing.routePathCache[routeId] || pathDrawing.dashedRoutePathCache[routeId];
+            if (pathLines && pathLines.length > 0) {
+                row.dataset.originalColor = pathLines[0].options.color;
+                pathLines.forEach(path => path.setStyle({ color: 'white' }));
+            }
+        });
+        row.addEventListener('mouseout', () => {
+            const routeId = `${route.origin}-${route.destination}`;
+            const pathLines = pathDrawing.routePathCache[routeId] || pathDrawing.dashedRoutePathCache[routeId];
+            if (pathLines && pathLines.length > 0) {
+                const originalColor = row.dataset.originalColor;
+                pathLines.forEach(path => path.setStyle({ color: originalColor }));
+            }
+            pathDrawing.clearLines();
+            pathDrawing.drawLines();
+        });
+
+        tbody.appendChild(row);
     });
     table.appendChild(tbody);
 
     // Append the table to the infoPaneContent
     infoPaneContent.appendChild(table);
-  },
+},
 };
 
 export { infoPane };
