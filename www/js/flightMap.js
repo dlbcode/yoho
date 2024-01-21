@@ -1,6 +1,8 @@
 import { map, blueDotIcon, magentaDotIcon } from './map.js';
 import { pathDrawing } from './pathDrawing.js';
 import { eventManager } from './eventManager.js';
+import { routeHandling } from './routeHandling.js';
+import { uiHandling } from './uiHandling.js';
 import { appState, updateState } from './stateManager.js';
 
 const flightMap = {
@@ -49,23 +51,32 @@ const flightMap = {
     handleMarkerClick(airport, clickedMarker) {
         const lastWaypoint = appState.waypoints[appState.waypoints.length - 1];
     
-        if (lastWaypoint && lastWaypoint.iata_code !== airport.iata_code) {
-            const directRoute = this.findRoute(lastWaypoint.iata_code, airport.iata_code);
-            if (!directRoute) {
-                updateState('addWaypoint', airport); // No direct route, find the cheapest route
+        // Remove the last waypoint if the same airport is clicked again
+        if (lastWaypoint && lastWaypoint.iata_code === airport.iata_code) {
+            // Remove the last two waypoints if the number of waypoint is even
+            if (appState.waypoints.length % 2 === 0) {
+                updateState('removeWaypoint', appState.waypoints.length - 1);
+                updateState('removeWaypoint', appState.waypoints.length - 2);
+                clickedMarker.setIcon(blueDotIcon);
+                return; // Exit the function after removing the waypoints
             } else {
-                updateState('addWaypoint', airport); // Direct route exists, add the clicked airport as a waypoint
-            }
-        } else if (lastWaypoint && lastWaypoint.iata_code === airport.iata_code) {
-            updateState('removeWaypoint', appState.waypoints.length - 1); // Remove the last waypoint if the same airport is clicked again
+            updateState('removeWaypoint', appState.waypoints.length - 1);
             clickedMarker.setIcon(blueDotIcon);
-        } else {
-            updateState('addWaypoint', airport); // If there is no last waypoint, simply add the clicked airport
-            clickedMarker.setIcon(magentaDotIcon);
+            return;
+            }
         }
     
+        // Check if the number of waypoints is >= 2 and equal to the number of waypoint entry fields
+        if (appState.waypoints.length >= 2 && appState.waypoints.length === document.querySelectorAll('.airport-selection input[type="text"]').length) {
+            updateState('addWaypoint', lastWaypoint); // Duplicate the last waypoint
+            updateState('addWaypoint', airport); // Add the new waypoint
+        } else {
+            // Add the clicked airport as a waypoint
+            updateState('addWaypoint', airport);
+            clickedMarker.setIcon(magentaDotIcon);
+        }
         clickedMarker.selected = !clickedMarker.selected;
-    },       
+    },        
 
     findRoute(fromIata, toIata) {
         for (const routes of Object.values(this.directRoutes)) {
