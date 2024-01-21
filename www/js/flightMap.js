@@ -51,7 +51,7 @@ const flightMap = {
         // Remove the last waypoint if the same airport is clicked again
         if (lastWaypoint && lastWaypoint.iata_code === airport.iata_code) {
             // Remove the last two waypoints if the number of waypoint is even
-            if (appState.waypoints.length % 2 === 0) {
+            if (appState.waypoints.length % 2 === 0 && appState.waypoints.length > 2) {
                 updateState('removeWaypoint', appState.waypoints.length - 1);
                 updateState('removeWaypoint', appState.waypoints.length - 2);
                 clickedMarker.setIcon(blueDotIcon);
