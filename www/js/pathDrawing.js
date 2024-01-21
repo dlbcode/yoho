@@ -3,7 +3,7 @@ import { appState } from './stateManager.js';
 
 const pathDrawing = {
     currentLines: [],
-    routePathCache: {},
+    routePathCache: [],
     dashedRoutePathCache: [],
 
     drawRoutePaths(iata, directRoutes) {
@@ -112,8 +112,13 @@ const pathDrawing = {
             this.routePathCache[routeId] = newPaths;
         }
     
-        if (route.isDirect) {
-            // Decorate the central line whether it's from cache or newly created
+        // Check if the route is direct and currently exists in appState.routes
+        const routeExists = appState.routes.some(r => 
+            r.origin === route.originAirport.iata_code &&
+            r.destination === route.destinationAirport.iata_code
+        );
+
+        if (route.isDirect && routeExists) {
             let decoratedLine = this.addDecoratedLine(newPaths[2], route);
             newPaths.push(decoratedLine);
         }
@@ -191,14 +196,24 @@ const pathDrawing = {
     },
      
     clearLines() {
-        [...Object.values(this.routePathCache).flat(), ...Object.values(this.dashedRoutePathCache).flat()].forEach(line => {
+        [...Object.values(this.routePathCache).flat(), 
+         ...Object.values(this.dashedRoutePathCache).flat()].forEach(line => {
             if (map.hasLayer(line)) {
                 map.removeLayer(line);
             }
         });
+
+        this.currentLines.forEach(decoratedLine => {
+            if (map.hasLayer(decoratedLine)) {
+                map.removeLayer(decoratedLine);
+            }
+        });
+
         this.routePathCache = {};
         this.dashedRoutePathCache = {};
-    },        
+        this.currentLines = [];
+    },
+            
 };
 
 export { pathDrawing };
