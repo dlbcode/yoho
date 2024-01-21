@@ -35,11 +35,13 @@ const routeHandling = {
     }
 
     // Add a minus button for each route div
-    let minusButton = document.createElement('button');
-    minusButton.textContent = '-';
-    minusButton.className = 'remove-route-button';
-    minusButton.onclick = () => this.removeRouteDiv(routeNumber);
-    routeDiv.appendChild(minusButton);
+    if (routeNumber > 1) {
+        let minusButton = document.createElement('button');
+        minusButton.textContent = '-';
+        minusButton.className = 'remove-route-button';
+        minusButton.onclick = () => this.removeRouteDiv(routeNumber);
+        routeDiv.appendChild(minusButton);
+    }
 
     // Add event listeners to change the route line color on mouseover
     routeDiv.addEventListener('mouseover', () => {
