@@ -100,14 +100,16 @@ input, button, select, textarea {
 }
 
 .route-container {
+  width: 80px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 10px; /* Adjust as needed */
+  margin-bottom: 10px;
 }
 
 .route-container input {
-  width: 80px;
+  width: 75px;
+  flex-grow: 1;
 }
 
 .route-container input:last-child {
