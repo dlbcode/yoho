@@ -67,7 +67,7 @@ tr:hover {
 }
 
 #infoPaneContent table tr:hover {
-  background-color: #1c3143; /* Lighter shade for hover, adjust as needed */
+  background-color: #282828; /* Lighter shade for hover, adjust as needed */
 }
 
 .infoPaneContent::-webkit-scrollbar-track {

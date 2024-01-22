@@ -38,34 +38,32 @@ const infoPane = {
  //   }
  // },
 
-  updateRouteInfoPane(routes) {
-    const infoPaneContent = document.getElementById('infoPaneContent');
-    infoPaneContent.innerHTML = '';
+ updateRouteInfoPane(routes) {
+  const infoPaneContent = document.getElementById('infoPaneContent');
+  infoPaneContent.innerHTML = '';
 
-    // Create a table element
-    const table = document.createElement('table');
-    table.style.width = '100%';
-    table.setAttribute('border', '1');
+  const table = document.createElement('table');
+  table.style.width = '100%';
+  table.setAttribute('border', '1');
 
-    // Create table header
-    const thead = document.createElement('thead');
-    let headerRow = `<tr>
-                        <th>Origin</th>
-                        <th>Destination</th>
-                        <th>Price</th>
-                     </tr>`;
-    thead.innerHTML = headerRow;
-    table.appendChild(thead);
+  const thead = document.createElement('thead');
+  let headerRow = `<tr>
+                      <th>Origin</th>
+                      <th>Destination</th>
+                      <th>Price</th>
+                      <th>Action</th>
+                   </tr>`;
+  thead.innerHTML = headerRow;
+  table.appendChild(thead);
 
-    // Create table body
-    const tbody = document.createElement('tbody');
-    routes.forEach(route => {
-        let row = document.createElement('tr');
-        row.innerHTML = `<td>${route.originAirport.city} (${route.origin})</td>
-                         <td>${route.destinationAirport.city} (${route.destination})</td>
-                         <td>${route.price}</td>`;
+  const tbody = document.createElement('tbody');
+  routes.forEach(route => {
+      let row = document.createElement('tr');
+      row.innerHTML = `<td>${route.originAirport.city} (${route.origin})</td>
+                       <td>${route.destinationAirport.city} (${route.destination})</td>
+                       <td>${route.price}</td>
+                       <td><button class='update-price-btn'>Update Price</button></td>`;
 
-        // Add event listeners for hover
         row.addEventListener('mouseover', () => {
             const routeId = `${route.origin}-${route.destination}`;
             const pathLines = pathDrawing.routePathCache[routeId] || pathDrawing.dashedRoutePathCache[routeId];
@@ -85,11 +83,17 @@ const infoPane = {
             pathDrawing.drawLines();
         });
 
+        // Add event listener for 'Update Price' button
+        const updateButton = row.querySelector('.update-price-btn');
+        updateButton.addEventListener('click', () => {
+            // Logic to handle price update
+            console.log(`Update price for route: ${route.origin}-${route.destination}`);
+        });
+
         tbody.appendChild(row);
     });
     table.appendChild(tbody);
 
-    // Append the table to the infoPaneContent
     infoPaneContent.appendChild(table);
 },
 };
