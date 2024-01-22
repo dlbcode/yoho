@@ -190,27 +190,13 @@ const flightMap = {
     },    
 
     updateVisibleMarkers() {
-        const currentBounds = map.getBounds();
-        const currentZoom = map.getZoom();
-    
-        // First, remove all markers from the map
         Object.values(this.markers).forEach(marker => {
             map.removeLayer(marker);
         });
-    
-        // Clear the existing markers object
+
         this.markers = {};
-    
-        // Fetch and display airports based on the new zoom level
-        this.fetchAndDisplayAirports().then(airports => {
-            Object.values(airports).forEach(airport => {
-                if (this.shouldDisplayAirport(airport.weight, currentZoom) && 
-                    currentBounds.contains(L.latLng(airport.latitude, airport.longitude))) {
-                    this.addMarker(airport);
-                }
-            });
-        });
-    },           
+        this.fetchAndDisplayAirports();
+    },              
 };
 
 export { flightMap };
