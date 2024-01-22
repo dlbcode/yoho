@@ -5,7 +5,6 @@ import { findCheapestRoutes } from './findCheapestRoutes.js';
 const infoPane = {
 
   init() {
-    // Update only the content of infoPaneContent
     const infoPaneContent = document.getElementById('infoPaneContent');
     document.addEventListener('routesArrayUpdated', this.handleStateChange.bind(this));
 },
