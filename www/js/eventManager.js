@@ -15,14 +15,12 @@ function handleStateChange(event) {
         const container = document.querySelector('.airport-selection');
         container.innerHTML = '';
 
-        if (appState.waypoints.length === 2) {
-            routeHandling.buildRouteDivs(1);
-            uiHandling.addAddButton();
-        } else { // Recreate route divs for more than two waypoints
-            for (let i = 0; i < appState.waypoints.length; i += 2) {
-                routeHandling.buildRouteDivs(i / 2 + 1);
-            }
+        // Ensure at least one route div is present
+        const routeCount = Math.max(1, Math.ceil(appState.waypoints.length / 2));
+        for (let i = 0; i < routeCount; i++) {
+            routeHandling.buildRouteDivs(i + 1);
         }
+
         mapHandling.updateMarkerIcons();
         routeHandling.updateRoutesArray();
     }
