@@ -85,3 +85,11 @@ tr:hover {
   width: 5px; /* Thin scrollbar width */
   height: 5px; /* Thin scrollbar height for horizontal scroll */
 }
+
+.update-price-btn {
+  background-color: rgb(60, 93, 110);
+}
+
+.update-price-btn:hover {
+  background-color: #3b7897;
+}
