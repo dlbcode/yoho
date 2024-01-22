@@ -145,7 +145,7 @@ const flightMap = {
         if (this.selectedMarker !== iata) {
             if (event === 'mouseover') {
                 this.fetchAndCacheRoutes(iata).then(() => {
-                    pathDrawing.drawRoutePaths(iata, appState.directRoutes, appState.routePathToggle);
+                    pathDrawing.drawRoutePaths(iata, appState.directRoutes, appState.routeDirection);
                 });
             } else if (event === 'mouseout') {
                 if (!marker.hovered) {  // Delay only for the first hover
@@ -164,7 +164,7 @@ const flightMap = {
     async fetchAndCacheRoutes(iata) {
         if (!appState.directRoutes[iata]) {
             try {
-                const direction = appState.routePathToggle // 'to' or 'from'
+                const direction = appState.routeDirection // 'to' or 'from'
                 const response = await fetch(`http://yonderhop.com:3000/directRoutes?origin=${iata}&direction=${direction}`);
                 const routes = await response.json();
                 appState.directRoutes[iata] = routes;

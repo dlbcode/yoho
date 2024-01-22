@@ -1,7 +1,7 @@
 const appState = {
     selectedAirport: null,
     numTravelers: 1,
-    routePathToggle: 'from',
+    routeDirection: 'from',
     waypoints: [],
     routes: [],
     startDate: null,

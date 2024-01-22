@@ -7,7 +7,7 @@ const pathDrawing = {
     dashedRoutePathCache: [],
 
     drawRoutePaths(iata, directRoutes) {
-        let cacheKey = appState.routePathToggle + '_' + iata;
+        let cacheKey = appState.routeDirection + '_' + iata;
         if (this.routePathCache[cacheKey]) {
             this.routePathCache[cacheKey].forEach(path => {
                 if (!map.hasLayer(path)) {
@@ -15,7 +15,7 @@ const pathDrawing = {
                 }
             });
         } else {
-            this.drawRoutePathsGeneric(iata, directRoutes, appState.routePathToggle);
+            this.drawRoutePathsGeneric(iata, directRoutes, appState.routeDirection);
         }
     },
     
@@ -179,7 +179,7 @@ const pathDrawing = {
             }
         }
         if (appState.selectedAirport) {
-            this.drawRoutePaths(appState.selectedAirport.iata_code, appState.directRoutes, appState.routePathToggle);
+            this.drawRoutePaths(appState.selectedAirport.iata_code, appState.directRoutes, appState.routeDirection);
         }
     },        
     

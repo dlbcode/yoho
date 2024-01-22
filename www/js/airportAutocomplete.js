@@ -188,7 +188,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });          
         }
         flightMap.fetchAndCacheRoutes(iata).then(() => {
-            pathDrawing.drawRoutePaths(iata, appState.directRoutes, appState.routePathToggle);
+            pathDrawing.drawRoutePaths(iata, appState.directRoutes, appState.routeDirection);
         });
     });    
     
