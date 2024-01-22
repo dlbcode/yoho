@@ -24,12 +24,16 @@ const flightMap = {
     
         let icon = appState.waypoints.some(wp => wp.iata_code === iata) ? magentaDotIcon : blueDotIcon;
     
-        if (airport.weight <= map.getZoom()) {
+        // Determine if the airport should be displayed based on its weight and the current zoom level
+        let zoom = map.getZoom();
+        if ((zoom >= 2 && zoom <= 4 && airport.weight >= 1 && airport.weight <= 3) ||
+            (zoom >= 5 && zoom <= 6 && airport.weight >= 4 && airport.weight <= 6) ||
+            (zoom >= 7 && zoom <= 19 && airport.weight >= 7 && airport.weight <= 10)) {
             const latLng = L.latLng(airport.latitude, airport.longitude);
             const marker = L.marker(latLng, {icon: icon}).addTo(map);
-
-            marker.hovered = false;
     
+            marker.hovered = false;
+
             marker.bindPopup(`<b>${airport.city}</b>`, { maxWidth: 'auto' });
     
             marker.on('mouseover', function(e) {
@@ -42,7 +46,7 @@ const flightMap = {
             eventManager.attachMarkerEventListeners(iata, marker, airport);
             this.markers[iata] = marker;
         }
-    },    
+    },      
 
     handleMarkerClick(airport, clickedMarker) {
         const lastWaypoint = appState.waypoints[appState.waypoints.length - 1];
@@ -196,7 +200,7 @@ const flightMap = {
                 }
             }
         });
-
+    
         this.fetchAndDisplayAirports();
     },
 };

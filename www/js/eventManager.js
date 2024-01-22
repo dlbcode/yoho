@@ -101,10 +101,6 @@ const eventManager = {
                 routeHandling.updateRoutesArray();
             }            
         });
-
-        map.addEventListener('zoomChanged', function () {
-            flightMap.updateMarkersForZoom();
-        });
     },
 
     setupAllPathsButtonEventListener: function () {
