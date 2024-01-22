@@ -19,6 +19,14 @@ function setupAutocompleteForField(fieldId) {
     let selectionMade = false; // Track if a selection has been made
     let currentFocus = -1; // Track the currently focused item in the suggestion box
 
+    // Disable browser autofill
+    inputField.setAttribute('autocomplete', 'new-password');
+    inputField.setAttribute('name', 'waypoint-' + Date.now());
+
+    // Set readonly on load and remove on focus
+    inputField.setAttribute('readonly', true);
+    inputField.addEventListener('focus', () => inputField.removeAttribute('readonly'));
+
     inputField.addEventListener('input', async () => {
         const airports = await fetchAirports(inputField.value);
         updateSuggestions(fieldId, airports, (value) => selectionMade = value);
