@@ -71,53 +71,58 @@ const pathDrawing = {
     
     createRoutePath(origin, destination, route) {
         let routeId = `${route.originAirport.iata_code}-${route.destinationAirport.iata_code}`;
-    
-        const drawPath = (origin, destination, offset) => {
-            const adjustedOrigin = L.latLng(origin.latitude, origin.longitude + offset);
-            const adjustedDestination = L.latLng(destination.latitude, destination.longitude + offset);
-    
-            var geodesicLine = new L.Geodesic([adjustedOrigin, adjustedDestination], {
-                weight: 1,
-                opacity: 1,
-                color: this.getColorBasedOnPrice(route.price),
-                wrap: false,
-                zIndex: -1
-            }).addTo(map);
-    
-            geodesicLine.on('mouseover', (e) => {
-                L.popup()
-                    .setLatLng(e.latlng)
-                    .setContent(`Price: $${route.price}`)
-                    .openOn(map);
-            });
-        
-            geodesicLine.on('mouseout', () => {
-                map.closePopup();
-            });
-    
-            return geodesicLine;
-        };
         let newPaths = [];
-        const worldCopies = [-720, -360, 0, 360, 720];
-        worldCopies.forEach(offset => {
-            newPaths.push(drawPath(origin, destination, offset));
-        });
-
-        this.routePathCache[routeId] = newPaths;
-
+    
+        if (this.routePathCache[routeId]) {
+            this.routePathCache[routeId].forEach(path => {
+                if (!map.hasLayer(path)) {
+                    path.addTo(map);
+                }
+                newPaths.push(path);
+            });
+        } else {
+            const worldCopies = [-720, -360, 0, 360, 720];
+            worldCopies.forEach(offset => {
+                const adjustedOrigin = L.latLng(origin.latitude, origin.longitude + offset);
+                const adjustedDestination = L.latLng(destination.latitude, destination.longitude + offset);
+    
+                var geodesicLine = new L.Geodesic([adjustedOrigin, adjustedDestination], {
+                    weight: 1,
+                    opacity: 1,
+                    color: this.getColorBasedOnPrice(route.price),
+                    wrap: false,
+                    zIndex: -1
+                }).addTo(map);
+    
+                // Add mouseover and mouseout event listeners
+                geodesicLine.on('mouseover', (e) => {
+                    L.popup()
+                        .setLatLng(e.latlng)
+                        .setContent(`Price: $${route.price}`)
+                        .openOn(map);
+                });
+                geodesicLine.on('mouseout', () => {
+                    map.closePopup();
+                });
+    
+                newPaths.push(geodesicLine);
+            });
+            this.routePathCache[routeId] = newPaths;
+        }
+    
         // Check if the route is direct and currently exists in appState.routes
         const routeExists = appState.routes.some(r => 
             r.origin === route.originAirport.iata_code &&
             r.destination === route.destinationAirport.iata_code
         );
-
+    
         if (route.isDirect && routeExists) {
-            worldCopies.forEach(offset => {
-                let decoratedLine = this.addDecoratedLine(newPaths[worldCopies.indexOf(offset)], route);
-                newPaths.push(decoratedLine);
+            newPaths.forEach(path => {
+                let decoratedLine = this.addDecoratedLine(path, route);
+                this.currentLines.push(decoratedLine);
             });
         }
-    },
+    },    
     
     addDecoratedLine(geodesicLine, route) {
         var planeIcon = L.icon({
