@@ -45,16 +45,19 @@ const pathDrawing = {
     },
 
     drawDashedLine(originAirport, destinationAirport) {
-        const adjustedOrigin = L.latLng(originAirport.latitude, originAirport.longitude);
-        const adjustedDestination = L.latLng(destinationAirport.latitude, destinationAirport.longitude);
-        const geodesicLine = new L.Geodesic([adjustedOrigin, adjustedDestination], {
-            weight: 2, opacity: 1.0, color: 'grey', dashArray: '5, 10', wrap: false
-        }).addTo(map);
+        const worldCopies = [-720, -360, 0, 360, 720]; // Define world copies
+        worldCopies.forEach(offset => {
+            const adjustedOrigin = L.latLng(originAirport.latitude, originAirport.longitude + offset);
+            const adjustedDestination = L.latLng(destinationAirport.latitude, destinationAirport.longitude + offset);
+            const geodesicLine = new L.Geodesic([adjustedOrigin, adjustedDestination], {
+                weight: 2, opacity: 1.0, color: 'grey', dashArray: '5, 10', wrap: false
+            }).addTo(map);
     
-        const routeId = `${originAirport.iata_code}-${destinationAirport.iata_code}`;
-        this.dashedRoutePathCache[routeId] = this.dashedRoutePathCache[routeId] || [];
-        this.dashedRoutePathCache[routeId].push(geodesicLine);
-    },     
+            const routeId = `${originAirport.iata_code}-${destinationAirport.iata_code}`;
+            this.dashedRoutePathCache[routeId] = this.dashedRoutePathCache[routeId] || [];
+            this.dashedRoutePathCache[routeId].push(geodesicLine);
+        });
+    },         
 
     adjustLatLng(latLng) {
         var currentBounds = map.getBounds();
@@ -94,24 +97,14 @@ const pathDrawing = {
     
             return geodesicLine;
         };
-    
         let newPaths = [];
-        if (this.routePathCache[routeId]) {
-            this.routePathCache[routeId].forEach(path => {
-                if (!map.hasLayer(path)) {
-                    path.addTo(map);
-                }
-                newPaths.push(path);
-            });
-        } else {
-            const worldCopies = [-720, -360, 0, 360, 720];
-            worldCopies.forEach(offset => {
-                newPaths.push(drawPath(origin, destination, offset));
-            });
-    
-            this.routePathCache[routeId] = newPaths;
-        }
-    
+        const worldCopies = [-720, -360, 0, 360, 720];
+        worldCopies.forEach(offset => {
+            newPaths.push(drawPath(origin, destination, offset));
+        });
+
+        this.routePathCache[routeId] = newPaths;
+
         // Check if the route is direct and currently exists in appState.routes
         const routeExists = appState.routes.some(r => 
             r.origin === route.originAirport.iata_code &&
@@ -119,8 +112,10 @@ const pathDrawing = {
         );
 
         if (route.isDirect && routeExists) {
-            let decoratedLine = this.addDecoratedLine(newPaths[2], route);
-            newPaths.push(decoratedLine);
+            worldCopies.forEach(offset => {
+                let decoratedLine = this.addDecoratedLine(newPaths[worldCopies.indexOf(offset)], route);
+                newPaths.push(decoratedLine);
+            });
         }
     },
     
