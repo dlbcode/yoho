@@ -1,5 +1,7 @@
 import { appState, updateState } from './stateManager.js';
 import { map } from './map.js';
+import { pathDrawing } from './pathDrawing.js';
+import { flightMap } from './flightMap.js';
 
 async function fetchAirports(query) {
     try {
@@ -25,7 +27,6 @@ function setupAutocompleteForField(fieldId) {
 
     const toggleSuggestionBox = (display) => {
         suggestionBox.style.display = display ? 'block' : 'none';
-        // Position the suggestion box below the input field
         if (display) {
             const rect = inputField.getBoundingClientRect();
             suggestionBox.style.left = `${rect.left}px`;
@@ -159,13 +160,15 @@ document.addEventListener('DOMContentLoaded', () => {
     document.addEventListener('airportSelected', (event) => {
         const { airport, fieldId } = event.detail;
         const waypointIndex = parseInt(fieldId.replace('waypoint', '')) - 1;
+        const iata = airport.iata_code;
     
         if (waypointIndex >= 0 && waypointIndex < appState.waypoints.length) {
             updateState('updateWaypoint', { index: waypointIndex, data: airport });
         } else {
             updateState('addWaypoint', airport);
         }
-    
+        appState.selectedAirport = airport;
+
         // Move map view to include the selected airport marker
         if (airport && airport.latitude && airport.longitude) {
             const latLng = L.latLng(airport.latitude, airport.longitude);
@@ -174,8 +177,11 @@ document.addEventListener('DOMContentLoaded', () => {
             map.flyTo(adjustedLatLng, 4, {
                 animate: true,
                 duration: 0.5 // Duration in seconds
-            });            
+            });          
         }
+        flightMap.fetchAndCacheRoutes(iata).then(() => {
+            pathDrawing.drawRoutePaths(iata, appState.directRoutes, appState.routePathToggle);
+        });
     });    
     
     function adjustLatLngForShortestPath(currentLatLng, targetLatLng) {
