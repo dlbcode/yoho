@@ -177,6 +177,13 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         appState.selectedAirport = airport;
 
+       // Check if the origin is empty and destination has a selection
+        if (waypointIndex === 1 && !document.getElementById('waypoint1').value) {
+            updateState('routeDirection', 'to');
+        } else {
+            updateState('routeDirection', 'from');
+        }
+        
         // Move map view to include the selected airport marker
         if (airport && airport.latitude && airport.longitude) {
             const latLng = L.latLng(airport.latitude, airport.longitude);
