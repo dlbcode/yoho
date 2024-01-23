@@ -169,13 +169,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const { airport, fieldId } = event.detail;
         const waypointIndex = parseInt(fieldId.replace('waypoint', '')) - 1;
         const iata = airport.iata_code;
-    
-        if (waypointIndex >= 0 && waypointIndex < appState.waypoints.length) {
-            updateState('updateWaypoint', { index: waypointIndex, data: airport });
-        } else {
-            updateState('addWaypoint', airport);
-        }
-        appState.selectedAirport = airport;
 
        // Check if the origin is empty and destination has a selection
         if (waypointIndex === 1 && !document.getElementById('waypoint1').value) {
@@ -183,6 +176,13 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             updateState('routeDirection', 'from');
         }
+
+        if (waypointIndex >= 0 && waypointIndex < appState.waypoints.length) {
+            updateState('updateWaypoint', { index: waypointIndex, data: airport });
+        } else {
+            updateState('addWaypoint', airport);
+        }
+        appState.selectedAirport = airport;
         
         // Move map view to include the selected airport marker
         if (airport && airport.latitude && airport.longitude) {
