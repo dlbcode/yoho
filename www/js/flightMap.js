@@ -23,11 +23,13 @@ const flightMap = {
         if (this.markers[iata]) return;
     
         let icon = appState.waypoints.some(wp => wp.iata_code === iata) ? magentaDotIcon : blueDotIcon;
-    
+        
         let zoom = map.getZoom();
         if (this.shouldDisplayAirport(airport.weight, zoom)) {
             const latLng = L.latLng(airport.latitude, airport.longitude);
             const marker = L.marker(latLng, {icon: icon}).addTo(map);
+    
+            marker.airportWeight = airport.weight;
     
             marker.hovered = false;
     
@@ -43,7 +45,7 @@ const flightMap = {
             eventManager.attachMarkerEventListeners(iata, marker, airport);
             this.markers[iata] = marker;
         }
-    },            
+    },                
 
     handleMarkerClick(airport, clickedMarker) {
         const lastWaypoint = appState.waypoints[appState.waypoints.length - 1];
@@ -174,13 +176,6 @@ const flightMap = {
         }
     },    
 
-    updateMarkersForZoom() {
-        Object.values(this.markers).forEach(marker => {
-            map.removeLayer(marker);
-        });
-        this.markers = {};
-    },
-
     shouldDisplayAirport(airportWeight, currentZoom) {
         return (
             (currentZoom >= 2 && currentZoom <= 4 && airportWeight <= 3) ||
@@ -190,13 +185,30 @@ const flightMap = {
     },    
 
     updateVisibleMarkers() {
-        Object.values(this.markers).forEach(marker => {
-            map.removeLayer(marker);
+        const currentZoom = map.getZoom();
+        const currentBounds = map.getBounds();
+    
+        // Check and add markers for airports that should be visible at the current zoom level
+        Object.values(this.airportDataCache).forEach(airport => {
+            if (this.shouldDisplayAirport(airport.weight, currentZoom) &&
+                currentBounds.contains(L.latLng(airport.latitude, airport.longitude)) &&
+                !this.markers[airport.iata_code]) {
+                this.addMarker(airport);
+            }
         });
-
-        this.markers = {};
-        this.fetchAndDisplayAirports();
-    },              
+    
+        // Update visibility of existing markers
+        Object.values(this.markers).forEach(marker => {
+            if (this.shouldDisplayAirport(marker.airportWeight, currentZoom) &&
+                currentBounds.contains(marker.getLatLng())) {
+                if (!map.hasLayer(marker)) {
+                    marker.addTo(map);
+                }
+            } else {
+                map.removeLayer(marker);
+            }
+        });
+    },                  
 };
 
 export { flightMap };
