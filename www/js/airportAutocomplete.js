@@ -173,7 +173,9 @@ document.addEventListener('DOMContentLoaded', () => {
        // Check if the origin is empty and destination has a selection
         if (waypointIndex === 1 && !document.getElementById('waypoint1').value) {
             updateState('routeDirection', 'to');
-        } else {
+        }
+        
+        if (waypointIndex === 0 && !document.getElementById('waypoint2').value) {
             updateState('routeDirection', 'from');
         }
 

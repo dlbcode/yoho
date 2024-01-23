@@ -64,7 +64,12 @@ const routeHandling = {
         pathDrawing.drawLines();
     });    
 
-    container.appendChild(routeDiv);
+    // Prepend or append the route div based on routeDirection
+    if (appState.routeDirection === 'to') {
+        container.prepend(routeDiv);
+    } else {
+        container.appendChild(routeDiv);
+    }
 
     for (let i = 0; i < 2; i++) {
         let index = (routeNumber - 1) * 2 + i;

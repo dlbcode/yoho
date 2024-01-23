@@ -189,13 +189,18 @@ const flightMap = {
         );
     },    
 
-    updateVisibleMarkers() {
-        Object.values(this.markers).forEach(marker => {
-            map.removeLayer(marker);
+    updateVisibleMarkers: function() {
+        const bounds = map.getBounds();
+        Object.values(this.airportDataCache).forEach(airport => {
+            const airportLatLng = L.latLng(airport.latitude, airport.longitude);
+            if (bounds.contains(airportLatLng) && !this.markers[airport.iata_code]) {
+                this.addMarker(airport);
+            } else if (!bounds.contains(airportLatLng) && this.markers[airport.iata_code]) {
+                const marker = this.markers[airport.iata_code];
+                map.removeLayer(marker);
+                delete this.markers[airport.iata_code];
+            }
         });
-
-        this.markers = {};
-        this.fetchAndDisplayAirports();
     },              
 };
 
