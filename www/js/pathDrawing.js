@@ -101,18 +101,28 @@ const pathDrawing = {
                     opacity: 0, // Make the line invisible
                     wrap: false
                 }).addTo(map);
-    
-                // Attach the same event handlers to the invisible line
-                invisibleLine.on('mouseover', (e) => {
+
+                // Function to handle mouseover event
+                const onMouseOver = (e) => {
+                    geodesicLine.setStyle({ color: 'white' });
                     L.popup()
                         .setLatLng(e.latlng)
                         .setContent(`Price: $${route.price}`)
                         .openOn(map);
-                });
-                invisibleLine.on('mouseout', () => {
+                };
+
+                // Function to handle mouseout event
+                const onMouseOut = () => {
+                    geodesicLine.setStyle({ color: this.getColorBasedOnPrice(route.price) });
                     map.closePopup();
-                });
-    
+                };
+
+                // Attach event handlers to both visible and invisible lines
+                geodesicLine.on('mouseover', onMouseOver);
+                geodesicLine.on('mouseout', onMouseOut);
+                invisibleLine.on('mouseover', onMouseOver);
+                invisibleLine.on('mouseout', onMouseOut);
+
                 newPaths.push(geodesicLine);
                 this.invisibleLines.push(invisibleLine); // Track the invisible line
             });
