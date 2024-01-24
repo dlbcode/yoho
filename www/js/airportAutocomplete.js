@@ -170,19 +170,21 @@ document.addEventListener('DOMContentLoaded', () => {
         const waypointIndex = parseInt(fieldId.replace('waypoint', '')) - 1;
         const iata = airport.iata_code;
     
+        // Check if the origin is empty and destination has a selection
+        if (waypointIndex === 1 && !document.getElementById('waypoint1').value) {
+            updateState('routeDirection', 'to');
+        }
+        
+        if (waypointIndex === 0 && !document.getElementById('waypoint2').value) {
+            updateState('routeDirection', 'from');
+        }
+
         if (waypointIndex >= 0 && waypointIndex < appState.waypoints.length) {
             updateState('updateWaypoint', { index: waypointIndex, data: airport });
         } else {
             updateState('addWaypoint', airport);
         }
         appState.selectedAirport = airport;
-
-       // Check if the origin is empty and destination has a selection
-        if (waypointIndex === 1 && !document.getElementById('waypoint1').value) {
-            updateState('routeDirection', 'to');
-        } else {
-            updateState('routeDirection', 'from');
-        }
         
         // Move map view to include the selected airport marker
         if (airport && airport.latitude && airport.longitude) {
