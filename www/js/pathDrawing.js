@@ -1,5 +1,5 @@
 import { map } from './map.js';
-import { appState } from './stateManager.js';
+import { appState, updateState } from './stateManager.js';
 
 const pathDrawing = {
     currentLines: [],
@@ -117,11 +117,19 @@ const pathDrawing = {
                     map.closePopup();
                 };
 
+                // Function to handle click event
+                const onClick = () => {
+                    updateState('addWaypoint', destination);
+                    map.closePopup();
+                };
+
                 // Attach event handlers to both visible and invisible lines
                 geodesicLine.on('mouseover', onMouseOver);
                 geodesicLine.on('mouseout', onMouseOut);
+                geodesicLine.on('click', onClick);
                 invisibleLine.on('mouseover', onMouseOver);
                 invisibleLine.on('mouseout', onMouseOut);
+                invisibleLine.on('click', onClick);
 
                 newPaths.push(geodesicLine);
                 this.invisibleLines.push(invisibleLine); // Track the invisible line
