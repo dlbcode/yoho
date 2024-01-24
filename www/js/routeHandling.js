@@ -79,7 +79,6 @@ const routeHandling = {
         routeDiv.remove();
     }
 
-    console.log('removing waypoints for route ', routeNumber);
     updateState('removeWaypoints', { routeNumber: routeNumber });
 
     pathDrawing.clearLines();

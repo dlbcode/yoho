@@ -78,7 +78,6 @@ const flightMap = {
         }
         //clickedMarker.selected = !clickedMarker.selected;
         appState.selectedAirport = airport;
-        console.log('Selected Airport: ',appState.selectedAirport);
     },        
 
     findRoute(fromIata, toIata) {

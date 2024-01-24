@@ -107,7 +107,7 @@ const pathDrawing = {
                     geodesicLine.setStyle({ color: 'white' });
                     L.popup()
                         .setLatLng(e.latlng)
-                        .setContent(`Price: $${route.price}`)
+                        .setContent(`${destination.city}<br><strong>Price: $${route.price}</strong>`)
                         .openOn(map);
                 };
 
