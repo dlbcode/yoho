@@ -8,6 +8,7 @@ const flightMap = {
     currentLines: [],
     selectedMarker: null,
     routePathCache: {},
+    airportDataCache: {},
     clearMultiHopPaths: true,
     cachedRoutes: [],
     lastFetchTime: null,
@@ -102,21 +103,25 @@ const flightMap = {
         }
     },
 
-    fetchAndCacheAirports() {
-        if (this.airportDataCache) {
+    async fetchAndCacheAirports() {
+        if (this.airportDataCache && Object.keys(this.airportDataCache).length > 0) {
             return Promise.resolve(this.airportDataCache);
         }
-
-        return fetch('http://yonderhop.com:3000/airports')
-            .then(response => response.json())
-            .then(data => {
-                this.airportDataCache = data.reduce((acc, airport) => {
-                    acc[airport.iata_code] = airport;
-                    return acc;
-                }, {});
-                return this.airportDataCache;
-            });
-    },
+    
+        try {
+            const response = await fetch('http://yonderhop.com:3000/airports');
+            const data = await response.json();
+            this.airportDataCache = data.reduce((acc, airport) => {
+                acc[airport.iata_code] = airport;
+                return acc;
+            }, {});
+            this.updateVisibleMarkers(); // Call updateVisibleMarkers after data is fetched
+            return this.airportDataCache;
+        } catch (error) {
+            console.error('Error fetching airports:', error);
+            return {};
+        }
+    },    
 
     getAirportDataByIata(iata) {
         if (this.airportDataCache && this.airportDataCache[iata]) {
@@ -196,7 +201,7 @@ const flightMap = {
                 this.addMarker(airport);
             }
         });
-    
+
         // Update visibility of existing markers
         Object.values(this.markers).forEach(marker => {
             if (this.shouldDisplayAirport(marker.airportWeight, currentZoom) &&
@@ -208,7 +213,7 @@ const flightMap = {
                 map.removeLayer(marker);
             }
         });
-    },                  
+    },                      
 };
 
 export { flightMap };
