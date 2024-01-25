@@ -8,31 +8,37 @@ import { mapHandling } from './mapHandling.js';
 
 const routeHandling = {
 
-  buildRouteDivs: function(routeNumber) {
-    const container = document.querySelector('.airport-selection');
-    const routeDivId = `route${routeNumber}`;
-    let routeDiv = document.createElement('div');
-    routeDiv.id = routeDivId;
-    routeDiv.className = 'route-container';
-    routeDiv.setAttribute('data-route-number', routeNumber.toString());
-
-    // Create two waypoint input fields for the new route
-    for (let i = 0; i < 2; i++) {
-        let index = (routeNumber - 1) * 2 + i;
-        let waypoint = appState.waypoints[index];
-        let input = document.createElement('input');
-        input.type = 'text';
-        input.id = `waypoint${index + 1}`;
-        input.placeholder = i === 0 ? 'Origin' : 'Destination';
-        input.value = waypoint ? waypoint.iata_code : '';
-
-        routeDiv.appendChild(input);
-
-        const suggestionsDiv = document.createElement('div');
-        suggestionsDiv.id = `waypoint${index + 1}Suggestions`;
-        suggestionsDiv.className = 'suggestions';
-        routeDiv.appendChild(suggestionsDiv);
-    }
+    buildRouteDivs: function(routeNumber) {
+        const container = document.querySelector('.airport-selection');
+        const routeDivId = `route${routeNumber}`;
+        let routeDiv = document.createElement('div');
+        routeDiv.id = routeDivId;
+        routeDiv.className = 'route-container';
+        routeDiv.setAttribute('data-route-number', routeNumber.toString());
+    
+        // Determine the order of waypoints based on appState.routeDirection
+        let waypointsOrder = [0, 1]; // Default order: Origin, Destination
+        if (appState.routeDirection === 'to') {
+            waypointsOrder = [1, 0]; // Reverse order for 'to' direction
+        }
+    
+        // Create two waypoint input fields for the new route
+        for (let i = 0; i < 2; i++) {
+            let index = (routeNumber - 1) * 2 + waypointsOrder[i];
+            let waypoint = appState.waypoints[index];
+            let input = document.createElement('input');
+            input.type = 'text';
+            input.id = `waypoint${index + 1}`;
+            input.placeholder = waypointsOrder[i] === 0 ? 'Origin' : 'Destination';
+            input.value = waypoint ? waypoint.iata_code : '';
+    
+            routeDiv.appendChild(input);
+    
+            const suggestionsDiv = document.createElement('div');
+            suggestionsDiv.id = `waypoint${index + 1}Suggestions`;
+            suggestionsDiv.className = 'suggestions';
+            routeDiv.appendChild(suggestionsDiv);
+        }
 
     // Add a minus button for each route div
     if (routeNumber > 1) {
