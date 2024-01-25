@@ -17,10 +17,7 @@ const routeHandling = {
         routeDiv.setAttribute('data-route-number', routeNumber.toString());
     
         // Determine the order of waypoints based on appState.routeDirection
-        let waypointsOrder = [0, 1]; // Default order: Origin, Destination
-        if (appState.routeDirection === 'to') {
-            waypointsOrder = [1, 0]; // Reverse order for 'to' direction
-        }
+        let waypointsOrder = appState.routeDirection === 'to' ? [1, 0] : [0, 1];
     
         // Create two waypoint input fields for the new route
         for (let i = 0; i < 2; i++) {
@@ -39,45 +36,50 @@ const routeHandling = {
             suggestionsDiv.className = 'suggestions';
             routeDiv.appendChild(suggestionsDiv);
         }
-
-    // Add a minus button for each route div
-    if (routeNumber > 1) {
-        let minusButton = document.createElement('button');
-        minusButton.textContent = '-';
-        minusButton.className = 'remove-route-button';
-        minusButton.onclick = () => this.removeRouteDiv(routeNumber);
-        routeDiv.appendChild(minusButton);
-    }
-
-    // Add event listeners to change the route line color on mouseover
-    routeDiv.addEventListener('mouseover', () => {
-        const routeId = this.getRouteIdFromDiv(routeDiv);
-        const pathLines = pathDrawing.routePathCache[routeId] || pathDrawing.dashedRoutePathCache[routeId];
-        if (pathLines && pathLines.length > 0) {
-            routeDiv.dataset.originalColor = pathLines[0].options.color;
-            pathLines.forEach(path => path.setStyle({ color: 'white'}));
+    
+        // Add a minus button for each route div
+        if (routeNumber > 1) {
+            let minusButton = document.createElement('button');
+            minusButton.textContent = '-';
+            minusButton.className = 'remove-route-button';
+            minusButton.onclick = () => this.removeRouteDiv(routeNumber);
+            routeDiv.appendChild(minusButton);
         }
-    });    
-
-    routeDiv.addEventListener('mouseout', () => {
-        const routeId = this.getRouteIdFromDiv(routeDiv);
-        const pathLines = pathDrawing.routePathCache[routeId] || pathDrawing.dashedRoutePathCache[routeId];
-        if (pathLines && pathLines.length > 0) {
-            const originalColor = routeDiv.dataset.originalColor;
-            pathLines.forEach(path => path.setStyle({ color: originalColor }));
+    
+        // Add event listeners to change the route line color on mouseover
+        routeDiv.addEventListener('mouseover', () => {
+            const routeId = this.getRouteIdFromDiv(routeDiv);
+            const pathLines = pathDrawing.routePathCache[routeId] || pathDrawing.dashedRoutePathCache[routeId];
+            if (pathLines && pathLines.length > 0) {
+                routeDiv.dataset.originalColor = pathLines[0].options.color;
+                pathLines.forEach(path => path.setStyle({ color: 'white'}));
+            }
+        });
+    
+        routeDiv.addEventListener('mouseout', () => {
+            const routeId = this.getRouteIdFromDiv(routeDiv);
+            const pathLines = pathDrawing.routePathCache[routeId] || pathDrawing.dashedRoutePathCache[routeId];
+            if (pathLines && pathLines.length > 0) {
+                const originalColor = routeDiv.dataset.originalColor;
+                pathLines.forEach(path => path.setStyle({ color: originalColor }));
+            }
+            pathDrawing.clearLines();
+            pathDrawing.drawLines();
+        });
+    
+        // Prepend the new route div so it appears above the last one if routeDirection is 'to'
+        if (appState.routeDirection === 'to') {
+            container.prepend(routeDiv);
+        } else {
+            container.appendChild(routeDiv);
         }
-        pathDrawing.clearLines();
-        pathDrawing.drawLines();
-    });    
-
-    container.appendChild(routeDiv);
-
-    for (let i = 0; i < 2; i++) {
-        let index = (routeNumber - 1) * 2 + i;
-        setupAutocompleteForField(`waypoint${index + 1}`);
-    }
-    uiHandling.setFocusToNextUnsetInput();
-  },
+    
+        for (let i = 0; i < 2; i++) {
+            let index = (routeNumber - 1) * 2 + i;
+            setupAutocompleteForField(`waypoint${index + 1}`);
+        }
+        uiHandling.setFocusToNextUnsetInput();
+    },    
 
   removeRouteDiv: function(routeNumber) {
     let routeDiv = document.getElementById(`route${routeNumber}`);
