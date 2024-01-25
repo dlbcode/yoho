@@ -188,27 +188,26 @@ const pathDrawing = {
         return decoratedLine;
     },
 
-    drawLines() { // Iterate through each pair of consecutive waypoints
-        for (let i = 0; i < appState.waypoints.length - 1; i++) {
-            const origin = appState.waypoints[i];
-            const destination = appState.waypoints[i + 1];
-            const route = appState.routes.find(route => // Check if there is a route between the origin and destination
-                route.originAirport.iata_code === origin.iata_code && 
-                route.destinationAirport.iata_code === destination.iata_code
-            );
+    drawLines() {
+        // Iterate through the routes in appState.routes
+        appState.routes.forEach(route => {
+            // Determine the origin and destination based on routeDirection
+            const origin = appState.routeDirection === 'to' ? route.destinationAirport : route.originAirport;
+            const destination = appState.routeDirection === 'to' ? route.originAirport : route.destinationAirport;
     
-            if (route) {
-                if (route.isDirect) { // Draw a regular line for direct routes
-                    pathDrawing.createRoutePath(origin, destination, route);
-                } else { // Draw a dashed line for non-direct routes
-                    pathDrawing.drawDashedLine(origin, destination);
-                }
+            // Draw the route path
+            if (route.isDirect) {
+                this.createRoutePath(origin, destination, route);
+            } else {
+                this.drawDashedLine(origin, destination);
             }
-        }
+        });
+    
+        // Additional logic if needed for selectedAirport
         if (appState.selectedAirport) {
             this.drawRoutePaths(appState.selectedAirport.iata_code, appState.directRoutes, appState.routeDirection);
         }
-    },        
+    },            
     
     drawPaths(route) {
         this.createRoutePath(route.originAirport, route.destinationAirport, route, 0);
