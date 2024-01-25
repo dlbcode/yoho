@@ -189,21 +189,16 @@ const pathDrawing = {
     },
 
     drawLines() {
-        // Clear any existing lines before drawing new ones
         this.clearLines();
-    
-        // Iterate through each route in the appState.routes array
+
         appState.routes.forEach(route => {
-            // Check if the route is direct and draw the appropriate line
             if (route.isDirect) {
                 this.createRoutePath(route.originAirport, route.destinationAirport, route);
             } else {
-                // For indirect routes, you might want to draw a dashed line or handle differently
                 this.drawDashedLine(route.originAirport, route.destinationAirport);
             }
         });
-    
-        // Additional logic if needed for selectedAirport
+
         if (appState.selectedAirport) {
             this.drawRoutePaths(appState.selectedAirport.iata_code, appState.directRoutes, appState.routeDirection);
         }
