@@ -135,14 +135,28 @@ updateRoutesArray: async function () {
         const fromWaypoint = waypoints[i];
         const toWaypoint = waypoints[i + 1];
         let route = flightMap.findRoute(fromWaypoint.iata_code, toWaypoint.iata_code);
+
         if (route) {
             route.isDirect = true;
             newRoutes.push(route);
         } else {
+            // Fetch airport data for both origin and destination
+            const [originAirport, destinationAirport] = await Promise.all([
+                flightMap.getAirportDataByIata(fromWaypoint.iata_code),
+                flightMap.getAirportDataByIata(toWaypoint.iata_code)
+            ]);
+
+            // Create an indirect route with full airport information and additional fields
             const indirectRoute = {
-                originAirport: fromWaypoint,
-                destinationAirport: toWaypoint,
-                isDirect: false
+                origin: fromWaypoint.iata_code,
+                destination: toWaypoint.iata_code,
+                originAirport: originAirport,
+                destinationAirport: destinationAirport,
+                isDirect: false,
+                // Set default values for missing fields if necessary
+                price: null,
+                source: 'indirect',
+                timestamp: new Date().toISOString()
             };
             newRoutes.push(indirectRoute);
         }
@@ -156,6 +170,7 @@ updateRoutesArray: async function () {
     console.table(appState.routes);
     document.dispatchEvent(new CustomEvent('routesArrayUpdated'));
 }
+
 }
 
 export { routeHandling }
