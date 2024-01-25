@@ -1,7 +1,10 @@
+const params = new URLSearchParams(window.location.search);
+const defaultDirection = params.get('direction') || 'from';
+
 const appState = {
     selectedAirport: null,
     numTravelers: 1,
-    routeDirection: 'from',
+    routeDirection: defaultDirection,
     waypoints: [],
     routes: [],
     startDate: null,
