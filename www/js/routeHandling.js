@@ -107,13 +107,15 @@ const routeHandling = {
     return null; // Return null if the route ID cannot be determined
 },
 
-  updateRoutesArray: async function () {
+updateRoutesArray: async function () {
     let newRoutes = [];
     let fetchPromises = [];
 
-    for (let i = 0; i < appState.waypoints.length - 1; i += 2) {
-        const fromWaypoint = appState.waypoints[i];
-        const toWaypoint = appState.waypoints[i + 1];
+    const waypoints = appState.routeDirection === 'to' ? [...appState.waypoints].reverse() : appState.waypoints;
+
+    for (let i = 0; i < waypoints.length - 1; i += 2) {
+        const fromWaypoint = waypoints[i];
+        const toWaypoint = waypoints[i + 1];
 
         // Fetch and cache routes if not already done
         if (!appState.directRoutes[fromWaypoint.iata_code]) {
@@ -127,9 +129,9 @@ const routeHandling = {
     await Promise.all(fetchPromises);
 
     // Now find and add routes
-    for (let i = 0; i < appState.waypoints.length - 1; i += 2) {
-        const fromWaypoint = appState.waypoints[i];
-        const toWaypoint = appState.waypoints[i + 1];
+    for (let i = 0; i < waypoints.length - 1; i += 2) {
+        const fromWaypoint = waypoints[i];
+        const toWaypoint = waypoints[i + 1];
         let route = flightMap.findRoute(fromWaypoint.iata_code, toWaypoint.iata_code);
         if (route) {
             route.isDirect = true;
@@ -148,9 +150,10 @@ const routeHandling = {
     pathDrawing.clearLines();
     pathDrawing.drawLines();
     routeList.updateTotalCost();
+    console.table(appState.waypoints);
     console.table(appState.routes);
     document.dispatchEvent(new CustomEvent('routesArrayUpdated'));
-  }
+}
 }
 
 export { routeHandling }

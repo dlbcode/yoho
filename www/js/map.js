@@ -20,6 +20,10 @@ async function initMapFunctions() {
         }
         updateState('addWaypoint', airports); // Add all waypoints in one operation
     }
+    const directionParam = params.get('direction');
+    if (directionParam) {
+        updateState('routeDirection', directionParam);
+    }
 
     document.dispatchEvent(new CustomEvent('waypointsLoadedFromURL'));
 }

@@ -12,7 +12,7 @@ function updateState(key, value) {
     switch (key) {
         case 'routeDirection':
             appState.routeDirection = value;
-            console.log('routeDirection: ', appState.routeDirection);
+            updateUrlWithWaypoints();
             break;
             
         case 'updateWaypoint':
@@ -67,8 +67,12 @@ function updateState(key, value) {
 function updateUrlWithWaypoints() {
     const waypointIatas = appState.waypoints.map(wp => wp.iata_code);
     const encodedUri = encodeURIComponent(waypointIatas.join(','));
-    window.history.pushState({}, '', `?waypoints=${encodedUri}`);
+    const routeDirection = appState.routeDirection; // Get the routeDirection from appState
+    const encodedRouteDirection = encodeURIComponent(routeDirection); // Encode the routeDirection
+
+    window.history.pushState({}, '', `?direction=${encodedRouteDirection}&waypoints=${encodedUri}`);
 }
+
   
 export { appState, updateState };
   
