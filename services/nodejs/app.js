@@ -53,6 +53,28 @@ MongoClient.connect(mongoUrl, { useNewUrlParser: true, useUnifiedTopology: true 
   console.log('Connected to MongoDB');
 });
 
+app.get('/atcd', async (req, res) => {
+  try {
+      const { origin, destination } = req.query;
+
+      if (!origin || !destination) {
+          return res.status(400).send('Origin and destination IATA codes are required');
+      }
+
+      // Fetch the cheapest date/flight information from Amadeus API
+      const response = await amadeus.shopping.flightDates.get({
+          origin: origin,
+          destination: destination
+      });
+
+      // Format and return the response data
+      res.json(response.data);
+  } catch (error) {
+      console.error('Error fetching cheapest date/flight information:', error);
+      res.status(500).send('Error fetching cheapest date/flight information');
+  }
+});
+
 app.get('/atdRoutes', async (req, res) => {
   try {
     const { origin, destination, tripType } = req.query;
@@ -64,12 +86,12 @@ app.get('/atdRoutes', async (req, res) => {
     const flightSearchParams = { // Set up parameters for Amadeus API request
       originLocationCode: origin,
       destinationLocationCode: destination,
-      departureDate: '2024-01-15', // Example date, adjust as needed
+      departureDate: '2024-02-15', // Example date, adjust as needed
       adults: '1'
     };
 
     if (tripType && tripType.toUpperCase() === 'ROUNDTRIP') { // Add return date only for round-trip flights
-      flightSearchParams.returnDate = '2024-01-22'; // Example return date, adjust as needed
+      flightSearchParams.returnDate = '2024-02-22'; // Example return date, adjust as needed
     }
 
     const response = await amadeus.shopping.flightOffersSearch.get(flightSearchParams);
