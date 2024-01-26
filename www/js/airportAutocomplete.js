@@ -171,12 +171,17 @@ document.addEventListener('DOMContentLoaded', () => {
         const iata = airport.iata_code;
     
         // Check if the origin is empty and destination has a selection
-        if (waypointIndex === 1 && !appState.routeDirection === 'from' && !document.getElementById('waypoint1').value) {
+        console.log('waypointIndex', waypointIndex, 'inputId', fieldId, 'iata', iata);
+        if (appState.routeDirection == 'from') {
+            if (waypointIndex <= 1 && !document.getElementById('waypoint1').value) {
             updateState('routeDirection', 'to');
+            }
         }
-        
-        if (waypointIndex === 0 && !appState.routeDirection === 'to' && !document.getElementById('waypoint2').value) {
+
+        if (appState.routeDirection == 'to') {
+            if (waypointIndex <= 1 && !document.getElementById('waypoint2').value) {
             updateState('routeDirection', 'from');
+            }
         }
 
         if (waypointIndex >= 0 && waypointIndex < appState.waypoints.length) {
