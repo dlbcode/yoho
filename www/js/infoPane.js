@@ -10,33 +10,28 @@ const infoPane = {
 },
 
  handleStateChange(event) {
-     // this.displayFlightsForWaypoints();
+     this.updateRouteButtons();
      this.updateRouteInfoPane(appState.routes);
      findCheapestRoutes.findCheapestRouteAndAddWaypoints();
  },
 
- // async displayFlightsForWaypoints() {
- //   const waypoints = appState.waypoints;
- //   if (waypoints.length < 2) return;
+ updateRouteButtons: function() {
+    const menuBar = document.getElementById('menu-bar');
+    menuBar.innerHTML = ''; // Clear existing buttons
 
- //   for (let i = 0; i < waypoints.length - 1; i++) {
- //     const originIata = waypoints[i].iata_code;
- //     const destIata = waypoints[i + 1].iata_code;
- //     await this.displayFlightInfo(originIata, destIata);
- //   }
- // },
+    appState.routes.forEach((route, index) => {
+        let button = document.createElement('button');
+        button.textContent = `${route.originAirport.iata_code}-${route.destinationAirport.iata_code}`;
+        button.className = 'route-info-button';
+        button.onclick = () => this.handleRouteInfoClick(index);
+        menuBar.appendChild(button);
+    });
+},
 
- // // New function to fetch and display flight data
- // async displayFlightInfo(originIata, destIata) {
- //   console.log('Fetching flight data for', originIata, destIata);
- //   try {
- //       const response = await fetch(`http://yonderhop.com:3000/flights?origin=${originIata}&destination=${destIata}`);
- //       const flights = await response.json();
- //       this.updateFlightInfoPane(flights);
- //   } catch (error) {
- //       console.error('Error fetching flight data:', error);
- //   }
- // },
+handleRouteInfoClick: function(routeIndex) {
+    // Logic for handling route info button click
+    console.log(`Route button clicked for route index: ${routeIndex}`);
+},
 
  updateRouteInfoPane(routes) {
   const infoPaneContent = document.getElementById('infoPaneContent');

@@ -108,7 +108,7 @@ input, button, select, textarea {
 }
 
 .route-container input {
-  width: 75px;
+  width: 60px;
   flex-grow: 1;
 }
 
