@@ -26,13 +26,22 @@ function drawRoutesFromCache() {
 }
 
 function fetchRoutesFromAPI() {
-  fetch('http://yonderhop.com:3000/directRoutes?to')
-      .then(response => response.json())
-      .then(routes => {
-          routeDataCache = routes;
-          drawRoutesAsync(routes);
-      })
-      .catch(error => console.error('Error fetching routes:', error));
+    // Fetch the list of airports first
+    fetch('http://yonderhop.com:3000/airports')
+        .then(response => response.json())
+        .then(airports => {
+            airports.forEach(airport => {
+                // For each airport, fetch the 'to' routes
+                fetch(`http://yonderhop.com:3000/directRoutes?origin=${airport.iata_code}&direction=to`)
+                    .then(response => response.json())
+                    .then(routes => {
+                        routeDataCache = routes;
+                        drawRoutesAsync(routes);
+                    })
+                    .catch(error => console.error(`Error fetching routes for ${airport.iata_code}:`, error));
+            });
+        })
+        .catch(error => console.error('Error fetching airports:', error));
 }
 
 function drawRoutesAsync(routes) {
