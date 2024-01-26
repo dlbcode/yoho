@@ -73,10 +73,6 @@ const routeHandling = {
         } else {
             container.appendChild(routeDiv);
         }
-
-        if (appState.waypoints.length > 1 && !document.getElementById('addRouteButton')) {
-            uiHandling.addAddButton();
-        }
     
         for (let i = 0; i < 2; i++) {
             let index = (routeNumber - 1) * 2 + i;
