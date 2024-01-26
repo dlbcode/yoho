@@ -61,17 +61,15 @@ app.get('/atcd', async (req, res) => {
           return res.status(400).send('Origin and destination IATA codes are required');
       }
 
-      // Fetch the cheapest date/flight information from Amadeus API
       const response = await amadeus.shopping.flightDates.get({
           origin: origin,
           destination: destination
       });
 
-      // Format and return the response data
       res.json(response.data);
   } catch (error) {
       console.error('Error fetching cheapest date/flight information:', error);
-      res.status(500).send('Error fetching cheapest date/flight information');
+      res.status(500).send(`Error fetching cheapest date/flight information: ${error.message}`);
   }
 });
 
