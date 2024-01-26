@@ -36,6 +36,17 @@ const routeHandling = {
             suggestionsDiv.className = 'suggestions';
             routeDiv.appendChild(suggestionsDiv);
         }
+
+         // Create a swap button with a symbol
+        let swapButton = document.createElement('button');
+        swapButton.innerHTML = '&#8646;'; // Double-headed arrow symbol
+        swapButton.className = 'swap-route-button';
+        swapButton.onclick = () => this.handleSwapButtonClick(routeNumber);
+        swapButton.title = 'Swap waypoints'; // Tooltip for accessibility
+
+        // Insert the swap button between the waypoint input fields
+        let firstInput = routeDiv.querySelector('input[type="text"]');
+        routeDiv.insertBefore(swapButton, firstInput.nextSibling);
     
         // Add a minus button for each route div
         if (routeNumber > 1) {
@@ -79,7 +90,26 @@ const routeHandling = {
             setupAutocompleteForField(`waypoint${index + 1}`);
         }
         uiHandling.setFocusToNextUnsetInput();
-    },    
+    },
+    
+    handleSwapButtonClick: function(routeNumber) {
+        let routeDiv = document.getElementById(`route${routeNumber}`);
+        let inputs = routeDiv.querySelectorAll('input[type="text"]');
+        if (inputs.length === 2) {
+            // Swap the values of the input fields
+            let temp = inputs[0].value;
+            inputs[0].value = inputs[1].value;
+            inputs[1].value = temp;
+    
+            // Update the appState.waypoints array
+            let waypointIndex = (routeNumber - 1) * 2;
+            [appState.waypoints[waypointIndex], appState.waypoints[waypointIndex + 1]] = 
+                [appState.waypoints[waypointIndex + 1], appState.waypoints[waypointIndex]];
+    
+            // Update the routes and redraw the map
+            routeHandling.updateRoutesArray();
+        }
+    },
 
   removeRouteDiv: function(routeNumber) {
     let routeDiv = document.getElementById(`route${routeNumber}`);
