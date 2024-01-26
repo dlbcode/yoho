@@ -7,6 +7,12 @@ const infoPane = {
   init() {
     const infoPaneContent = document.getElementById('infoPaneContent');
     document.addEventListener('routesArrayUpdated', this.handleStateChange.bind(this));
+    const mapButton = document.getElementById('mapButton');
+    mapButton.addEventListener('click', this.displayAllRoutesSummary.bind(this));
+},
+
+displayAllRoutesSummary: function() {
+    this.updateRouteInfoPane(appState.routes); // Use the existing function to display the default route table
 },
 
  handleStateChange(event) {
@@ -48,8 +54,19 @@ const infoPane = {
 },
 
 handleRouteInfoClick: function(routeIndex) {
-    // Logic for handling route info button click
-    console.log(`Route button clicked for route index: ${routeIndex}`);
+    const selectedRoute = appState.routes[routeIndex];
+    const infoPaneContent = document.getElementById('infoPaneContent');
+    infoPaneContent.innerHTML = ''; // Clear existing content
+
+    // Create and append elements to display route-specific information
+    // Example: Displaying origin, destination, and price
+    const routeDetails = document.createElement('div');
+    routeDetails.innerHTML = `
+        <p>Origin: ${selectedRoute.originAirport.city} (${selectedRoute.originAirport.iata_code})</p>
+        <p>Destination: ${selectedRoute.destinationAirport.city} (${selectedRoute.destinationAirport.iata_code})</p>
+        <p>Price: ${selectedRoute.price}</p>
+    `;
+    infoPaneContent.appendChild(routeDetails);
 },
 
  updateRouteInfoPane(routes) {
