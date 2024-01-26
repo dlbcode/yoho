@@ -25,7 +25,7 @@ function handleStateChange(event) {
         routeHandling.updateRoutesArray();
     }
 
-    if (key === 'addWaypoint' && appState.waypoints.length % 2 === 0) {
+    if (key === 'addWaypoint' || 'updateWaypoint' && appState.waypoints.length % 2 === 0) {
         const lastWaypointFieldId = `waypoint${appState.waypoints.length}`;
         const lastWaypointField = document.getElementById(lastWaypointFieldId);
 
