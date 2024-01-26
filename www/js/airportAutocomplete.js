@@ -171,7 +171,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const iata = airport.iata_code;
     
         // Check if the origin is empty and destination has a selection
-        console.log('waypointIndex', waypointIndex, 'inputId', fieldId, 'iata', iata);
         if (appState.routeDirection == 'from') {
             if (waypointIndex <= 1 && !document.getElementById('waypoint1').value) {
             updateState('routeDirection', 'to');
