@@ -111,24 +111,26 @@ const routeHandling = {
         }
     },
 
-  removeRouteDiv: function(routeNumber) {
-    let routeDiv = document.getElementById(`route${routeNumber}`);
-    if (routeDiv) {
-        routeDiv.remove();
-    }
-
-    updateState('removeWaypoints', { routeNumber: routeNumber });
-
-    pathDrawing.clearLines();
-    pathDrawing.drawLines();
-    mapHandling.updateMarkerIcons();
-    routeList.updateTotalCost();
-
-    if (appState.waypoints.length > 1 && !document.getElementById('addRouteButton')) {
-        uiHandling.addAddButton();
-    }
-  },
-
+    removeRouteDiv: function(routeNumber) {
+        let routeDiv = document.getElementById(`route${routeNumber}`);
+        if (routeDiv) {
+            routeDiv.remove();
+        }
+    
+        updateState('removeWaypoints', { routeNumber: routeNumber });
+    
+        pathDrawing.clearLines();
+        pathDrawing.drawLines();
+        mapHandling.updateMarkerIcons();
+        routeList.updateTotalCost();
+    
+        if (appState.waypoints.length > 1 && !document.getElementById('addRouteButton')) {
+            uiHandling.addAddButton();
+        }
+        
+        this.updateRoutesArray();
+    },
+    
   getRouteIdFromDiv: function (routeDiv) {
     const inputs = routeDiv.querySelectorAll('input[type="text"]');
     if (inputs.length === 2) {

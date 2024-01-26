@@ -14,6 +14,7 @@
 
 #menu-bar {
   display: flex;
+  height: 20px;
   align-items: center;
   flex-grow: 1; /* Allows the menu bar to take up remaining space */
 }
@@ -41,7 +42,7 @@
 #infoPaneContent {
   overflow-y: auto !important;
   box-sizing: border-box;
-  height: calc(100% - 32px); /* Adjust height to account for top-bar */
+  height: 140px; /* Adjust height to account for top-bar */
 }
 
 table {
