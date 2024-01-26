@@ -92,6 +92,7 @@ const eventManager = {
                 updateState('numTravelers', appState.numTravelers - 1);
                 routeList.updateTotalCost();
             } else if (event.target.id === 'clearBtn') {
+                updateState('routeDirection', 'from');
                 updateState('clearData', null);
                 appState.selectedAirport = null;
                 routeList.updateTotalCost();
