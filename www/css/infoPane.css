@@ -1,28 +1,45 @@
 #infoPane {
-  /*position: fixed;*/
-  height: 160px;
-  width: 100%; /* Stretch across the screen */
-  background-color: #222222; /* Adjust the background color as needed */
-  border-top: 1px solid #555; /* Top border for separation */
+  width: 100%;
+  background-color: #222222;
+  border-top: 1px solid #555;
   box-sizing: border-box;
-  z-index: 100; /* Ensure it's above other elements */
+  z-index: 100;
 }
 
-#infoPaneContent {
-  height: 138px;
-  overflow-y: auto !important;
-  box-sizing: border-box;
+#top-bar {
+  display: flex;
+  align-items: center;
+  background-color: #333; /* Optional: to match the menu bar's background */
 }
 
 #menu-bar {
-  background-color: #333; /* Dark grey background */
-  color: #ccc; /* Light text color for contrast */
-  height:16px;
-  padding: 3px; /* Add some padding */
-  text-align: left; /* Align menu items to the left */
+  display: flex;
+  align-items: center;
+  flex-grow: 1; /* Allows the menu bar to take up remaining space */
 }
 
-/* Style for the table */
+.map-icon-button {
+  margin-right: 10px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.map-icon-button img {
+  width: 16px;
+  height: 16px;
+}
+
+#infoPaneContent {
+  overflow-y: auto !important;
+  box-sizing: border-box;
+  height: calc(100% - 32px); /* Adjust height to account for top-bar */
+}
+
 table {
   border-collapse: collapse;
   font-family: 'Consolas', 'Courier New', Courier, monospace; /* Monospace font */
