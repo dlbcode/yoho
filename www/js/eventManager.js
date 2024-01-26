@@ -93,6 +93,7 @@ const eventManager = {
                 routeList.updateTotalCost();
             } else if (event.target.id === 'clearBtn') {
                 updateState('clearData', null);
+                appState.selectedAirport = null;
                 routeList.updateTotalCost();
                 pathDrawing.clearLines();
                 mapHandling.updateMarkerIcons();
