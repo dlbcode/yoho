@@ -73,6 +73,10 @@ const routeHandling = {
         } else {
             container.appendChild(routeDiv);
         }
+
+        if (appState.waypoints.length > 1 && !document.getElementById('addRouteButton')) {
+            uiHandling.addAddButton();
+        }
     
         for (let i = 0; i < 2; i++) {
             let index = (routeNumber - 1) * 2 + i;
@@ -166,8 +170,6 @@ updateRoutesArray: async function () {
     pathDrawing.clearLines();
     pathDrawing.drawLines();
     routeList.updateTotalCost();
-    console.table(appState.waypoints);
-    console.table(appState.routes);
     document.dispatchEvent(new CustomEvent('routesArrayUpdated'));
 }
 
