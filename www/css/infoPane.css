@@ -34,6 +34,10 @@
   height: 16px;
 }
 
+.map-icon-button:hover {
+  background-color: #666; /* Lighter grey background on hover */
+}
+
 #infoPaneContent {
   overflow-y: auto !important;
   box-sizing: border-box;
