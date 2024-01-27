@@ -82,13 +82,7 @@ function setupAutocompleteForField(fieldId) {
         setTimeout(() => {
             if (!selectionMade) {
                 toggleSuggestionBox(false);
-                const iataCode = getIataFromField(fieldId);
-                const index = parseInt(fieldId.replace('waypoint', '')) - 1;
-                if (iataCode && appState.waypoints[index]?.iata_code !== iataCode) {
-                    updateState('updateWaypoint', { index, data: { iataCode } });
-                } else if (!iataCode && appState.waypoints[index]) {
-                    updateState('removeWaypoint', index);
-                }
+                clearInputField();
             }
         }, 200); // Delay to allow for selection
     });
