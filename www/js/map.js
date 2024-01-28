@@ -8,6 +8,10 @@ async function initMapFunctions() {
     routeList.initTravelerControls();
     
     const params = new URLSearchParams(window.location.search);
+    const roundTripParam = params.get('roundTrip');
+    if (roundTripParam === 'false') {
+        updateState('roundTrip', 'false');
+    }
     const waypointParam = params.get('waypoints');
     if (waypointParam) {
         const waypointIatas = waypointParam.split(',').map(decodeURIComponent);

@@ -8,18 +8,18 @@ const uiHandling = {
 
     oneWayButton.addEventListener('click', () => {
         updateState('roundTrip', false);
-        this.updateButtonStyles();
+        this.updateTripTypeButtonStyles();
     });
 
     roundTripButton.addEventListener('click', () => {
         updateState('roundTrip', true);
-        this.updateButtonStyles();
+        this.updateTripTypeButtonStyles();
     });
 
-    this.updateButtonStyles(); // Call this to set initial styles
+    this.updateTripTypeButtonStyles(); // Initialize button styles based on appState
   },
 
-  updateButtonStyles: function() {
+  updateTripTypeButtonStyles: function() {
       const oneWayButton = document.getElementById('oneWay');
       const roundTripButton = document.getElementById('roundTrip');
 
@@ -31,6 +31,7 @@ const uiHandling = {
           oneWayButton.classList.add('active');
       }
   },
+
 
   addAddButton: function() {
     const container = document.querySelector('.airport-selection');

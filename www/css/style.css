@@ -126,3 +126,8 @@ input, button, select, textarea {
   color: #888;
   /*min-width: 100%; /* At least as wide as the input field */
 }
+
+.trip-type-button.active {
+  background-color: rgb(60, 93, 110);
+  color: white;
+}
