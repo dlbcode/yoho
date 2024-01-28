@@ -1,43 +1,50 @@
 module.exports = function(app, amadeus, flightsCollection) {
   app.get('/atcd', async (req, res) => {
-  try {
-      const { origin, destination } = req.query;
+    try {
+        const { origin, destination } = req.query;
 
-      if (!origin || !destination) {
-          return res.status(400).send('Origin and destination IATA codes are required');
-      }
+        if (!origin || !destination) {
+            return res.status(400).send('Origin and destination IATA codes are required');
+        }
 
-      const response = await amadeus.shopping.flightDates.get({
-        origin: origin,
-        destination: destination
-      });
-
-      // Process the flight data
-      const flightsData = response.data.map(flight => {
-          return {
-              origin: origin,
-              destination: destination,
-              departureDate: flight.departureDate,
-              returnDate: flight.returnDate,
-              price: flight.price.total,
-              timestamp: new Date().toISOString().replace(/[-:.TZ]/g, '').slice(0, 12),
-              source: "atcd"
-          };
-      });
-
-      // Remove existing flights with the same origin and destination
-      await flightsCollection.deleteMany({
+        const response = await amadeus.shopping.flightDates.get({
           origin: origin,
-          dest: destination
-      });
+          destination: destination
+        });
 
-      // Insert the new flights
-      await flightsCollection.insertMany(flightsData);
+        // Group flights by departureDate and keep the one with the lowest price
+        const flightsMap = response.data.reduce((acc, flight) => {
+            const key = flight.departureDate;
+            if (!acc[key] || parseFloat(flight.price.total) < parseFloat(acc[key].price)) {
+                acc[key] = {
+                    origin: origin,
+                    destination: destination,
+                    departureDate: flight.departureDate,
+                    returnDate: flight.returnDate,
+                    price: flight.price.total,
+                    timestamp: new Date().toISOString().replace(/[-:.TZ]/g, '').slice(0, 12),
+                    source: "atcd"
+                };
+            }
+            return acc;
+        }, {});
 
-      res.json(flightsData);
-  } catch (error) {
-      console.error('Error fetching cheapest date/flight information:', error);
-      res.status(500).send(`Error fetching cheapest date/flight information: ${error.message}`);
-  }
-});
+        // Convert the map to an array of flight objects
+        const flightsData = Object.values(flightsMap);
+
+        // Remove existing flights with the same origin and destination
+        await flightsCollection.deleteMany({
+            origin: origin,
+            dest: destination
+        });
+
+        // Insert the new flights
+        await flightsCollection.insertMany(flightsData);
+
+        res.json(flightsData);
+    } catch (error) {
+        console.error('Error fetching cheapest date/flight information:', error);
+        res.status(500).send(`Error fetching cheapest date/flight information: ${error.message}`);
+    }
+  });
 };
