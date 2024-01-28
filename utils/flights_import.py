@@ -15,9 +15,9 @@ def read_flights_csv(flights_file):
         reader = csv.DictReader(file)
         for row in reader:
             yield {
-                'origin_iata': row['origin_iata'],
+                'origin': row['origin'],
                 'flight_number': row['flight_number'],
-                'dest_iata': row['dest_iata'],
+                'destination': row['destination'],
                 'departure': row['departure'],
                 'arrival': row['arrival'],
                 'duration': row['duration']

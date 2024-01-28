@@ -37,7 +37,7 @@ const infoPane = {
         const selectedRoute = appState.routes[routeIndex];
         const infoPaneContent = document.getElementById('infoPaneContent');
         infoPaneContent.innerHTML = '';
-
+    
         fetch(`http://yonderhop.com:3000/atcd?origin=${selectedRoute.originAirport.iata_code}&destination=${selectedRoute.destinationAirport.iata_code}`)
             .then(response => {
                 if (!response.ok) {
@@ -50,7 +50,7 @@ const infoPane = {
                 table.className = 'sortable-table';
                 table.style.width = '100%';
                 table.setAttribute('border', '1');
-
+    
                 const thead = document.createElement('thead');
                 let headerRow = `<tr>
                                     <th><button class="sort-header">Departure Date</button></th>
@@ -59,17 +59,17 @@ const infoPane = {
                                 </tr>`;
                 thead.innerHTML = headerRow;
                 table.appendChild(thead);
-
+    
                 const tbody = document.createElement('tbody');
                 data.forEach(item => {
                     let row = document.createElement('tr');
                     row.innerHTML = `<td>${item.departureDate}</td>
                                      <td>${item.returnDate}</td>
-                                     <td>${item.price.total}</td>`;
+                                     <td>${item.price}</td>`; // Directly accessing the price
                     tbody.appendChild(row);
                 });
                 table.appendChild(tbody);
-
+    
                 infoPaneContent.appendChild(table);
                 this.attachSortingEventListeners(table);
             })
@@ -77,7 +77,7 @@ const infoPane = {
                 console.error('Error fetching cheapest route data:', error);
                 infoPaneContent.textContent = 'Error loading cheapest route data.';
             });
-    },
+    },        
 
     attachSortingEventListeners: function(table) {
         table.querySelectorAll(".sort-header").forEach(headerButton => {
@@ -125,11 +125,11 @@ const infoPane = {
     updateRouteInfoPane: function(routes) {
         const infoPaneContent = document.getElementById('infoPaneContent');
         infoPaneContent.innerHTML = '';
-
+    
         const table = document.createElement('table');
         table.style.width = '100%';
         table.setAttribute('border', '1');
-
+    
         const thead = document.createElement('thead');
         let headerRow = `<tr>
                             <th>Origin</th>
@@ -139,20 +139,20 @@ const infoPane = {
                          </tr>`;
         thead.innerHTML = headerRow;
         table.appendChild(thead);
-
+    
         const tbody = document.createElement('tbody');
         routes.forEach(route => {
             let row = document.createElement('tr');
-            row.innerHTML = `<td>${route.originAirport.city} (${route.origin})</td>
-                             <td>${route.destinationAirport.city} (${route.destination})</td>
+            row.innerHTML = `<td>${route.originAirport.city} (${route.originAirport.iata_code})</td>
+                             <td>${route.destinationAirport.city} (${route.destinationAirport.iata_code})</td>
                              <td>${route.price}</td>
                              <td><button class='update-price-btn'>Update Price</button></td>`;
             tbody.appendChild(row);
         });
         table.appendChild(tbody);
-
+    
         infoPaneContent.appendChild(table);
-    },
+    },    
 };
 
 export { infoPane };
