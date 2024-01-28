@@ -5,7 +5,7 @@ const findCheapestRoutes = {
   async findCheapestRouteAndAddWaypoints(originIata, destinationIata) {
     //console.log('Fetching cheapest routes for', originIata, destinationIata);
     try {
-        const response = await fetch(`http://yonderhop.com:3000/cheapest-routes?origin=${originIata}&destination=${destinationIata}`);
+        const response = await fetch(`http://yonderhop.com:3000/cheapestRoutes?origin=${originIata}&destination=${destinationIata}`);
         const cheapestRoutes = await response.json();
 
         if (cheapestRoutes && cheapestRoutes.length > 0) {

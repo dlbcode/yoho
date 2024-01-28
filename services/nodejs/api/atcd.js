@@ -1,4 +1,4 @@
-module.exports = function(app, flightsCollection) {
+module.exports = function(app, amadeus, flightsCollection) {
   app.get('/atcd', async (req, res) => {
   try {
       const { origin, destination } = req.query;
@@ -8,8 +8,8 @@ module.exports = function(app, flightsCollection) {
       }
 
       const response = await amadeus.shopping.flightDates.get({
-          origin: origin,
-          destination: destination
+        origin: origin,
+        destination: destination
       });
 
       // Process the flight data
