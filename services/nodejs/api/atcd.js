@@ -12,14 +12,14 @@ module.exports = function(app, amadeus, flightsCollection) {
           destination: destination
         });
 
-        // Group flights by departureDate and keep the one with the lowest price
-        const flightsMap = response.data.reduce((acc, flight) => {
-            const key = flight.departureDate;
-            if (!acc[key] || parseFloat(flight.price.total) < parseFloat(acc[key].price)) {
-                acc[key] = {
+        // Group flights by departureDate and find the cheapest flight for each date
+        const cheapestFlights = response.data.reduce((acc, flight) => {
+            const departureDate = flight.departureDate;
+            if (!acc[departureDate] || flight.price.total < acc[departureDate].price) {
+                acc[departureDate] = {
                     origin: origin,
                     destination: destination,
-                    departureDate: flight.departureDate,
+                    departureDate: departureDate,
                     returnDate: flight.returnDate,
                     price: flight.price.total,
                     timestamp: new Date().toISOString().replace(/[-:.TZ]/g, '').slice(0, 12),
@@ -29,19 +29,25 @@ module.exports = function(app, amadeus, flightsCollection) {
             return acc;
         }, {});
 
-        // Convert the map to an array of flight objects
-        const flightsData = Object.values(flightsMap);
+        // Convert the map to an array of bulk operations
+        const bulkOps = Object.values(cheapestFlights).map(flight => ({
+            updateOne: {
+                filter: {
+                    origin: flight.origin,
+                    destination: flight.destination,
+                    departureDate: flight.departureDate
+                },
+                update: { $set: flight },
+                upsert: true
+            }
+        }));
 
-        // Remove existing flights with the same origin and destination
-        await flightsCollection.deleteMany({
-            origin: origin,
-            dest: destination
-        });
+        // Execute bulk operations
+        if (bulkOps.length > 0) {
+            await flightsCollection.bulkWrite(bulkOps);
+        }
 
-        // Insert the new flights
-        await flightsCollection.insertMany(flightsData);
-
-        res.json(flightsData);
+        res.json(Object.values(cheapestFlights));
     } catch (error) {
         console.error('Error fetching cheapest date/flight information:', error);
         res.status(500).send(`Error fetching cheapest date/flight information: ${error.message}`);
