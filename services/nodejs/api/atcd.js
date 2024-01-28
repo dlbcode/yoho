@@ -7,6 +7,23 @@ module.exports = function(app, amadeus, flightsCollection) {
             return res.status(400).send('Origin and destination IATA codes are required');
         }
 
+        // Calculate the timestamp for one day ago
+        const oneDayAgo = new Date();
+        oneDayAgo.setDate(oneDayAgo.getDate() - 1);
+        const oneDayAgoIso = oneDayAgo.toISOString();
+
+        // Check for existing flights less than one day old
+        const existingFlights = await flightsCollection.find({
+            origin: origin,
+            destination: destination,
+            timestamp: { $gte: oneDayAgoIso }
+        }).toArray();
+
+        if (existingFlights.length > 0) {
+            // Return existing flights if they are recent
+            return res.json(existingFlights);
+        }
+
         const response = await amadeus.shopping.flightDates.get({
           origin: origin,
           destination: destination
