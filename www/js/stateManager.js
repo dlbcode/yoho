@@ -3,6 +3,7 @@ const defaultDirection = params.get('direction') || 'from';
 
 const appState = {
     selectedAirport: null,
+    roundTrip: true,
     numTravelers: 1,
     routeDirection: defaultDirection,
     waypoints: [],
@@ -23,6 +24,11 @@ function updateState(key, value) {
           appState.waypoints[value.index] = {...appState.waypoints[value.index], ...value.data};
         }
         break;
+
+        case 'roundTrip':
+            appState.roundTrip = value;
+            updateUrlWithWaypoints();
+            break;
   
         case 'addWaypoint':
             if (Array.isArray(value)) {
@@ -72,10 +78,10 @@ function updateUrlWithWaypoints() {
     const encodedUri = encodeURIComponent(waypointIatas.join(','));
     const routeDirection = appState.routeDirection; // Get the routeDirection from appState
     const encodedRouteDirection = encodeURIComponent(routeDirection); // Encode the routeDirection
+    const encodedRoundTrip = encodeURIComponent(appState.roundTrip); // Use appState.roundTrip
 
-    window.history.pushState({}, '', `?direction=${encodedRouteDirection}&waypoints=${encodedUri}`);
+    window.history.pushState({}, '', `?roundTrip=${encodedRoundTrip}&direction=${encodedRouteDirection}&waypoints=${encodedUri}`);
 }
-
-  
+ 
 export { appState, updateState };
   
