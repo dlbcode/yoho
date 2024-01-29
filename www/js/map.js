@@ -8,9 +8,9 @@ async function initMapFunctions() {
     routeList.initTravelerControls();
     
     const params = new URLSearchParams(window.location.search);
-    const roundTripParam = params.get('roundTrip');
-    if (roundTripParam === 'false') {
-        updateState('roundTrip', 'false');
+    const oneWayParam = params.get('oneWay');
+    if (oneWayParam === 'false') {
+        updateState('oneWay', 'false');
     }
     const waypointParam = params.get('waypoints');
     if (waypointParam) {

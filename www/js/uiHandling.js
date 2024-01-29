@@ -9,12 +9,12 @@ const uiHandling = {
     document.addEventListener('routesArrayUpdated', this.handleStateChange.bind(this));
     
     oneWayButton.addEventListener('click', () => {
-        updateState('roundTrip', false);
+        updateState('oneWay', true);
         this.updateTripTypeButtonStyles();
     });
 
     roundTripButton.addEventListener('click', () => {
-        updateState('roundTrip', true);
+        updateState('oneWay', false);
         this.updateTripTypeButtonStyles();
     });
   },
@@ -28,12 +28,12 @@ const uiHandling = {
       const oneWayButton = document.getElementById('oneWay');
       const roundTripButton = document.getElementById('roundTrip');
 
-      if (appState.roundTrip === true) {
-          roundTripButton.classList.add('active');
-          oneWayButton.classList.remove('active');
+      if (appState.oneWay === true) {
+        oneWayButton.classList.add('active');  
+        roundTripButton.classList.remove('active');
       } else {
-          roundTripButton.classList.remove('active');
-          oneWayButton.classList.add('active');
+          oneWayButton.classList.remove('active');
+          roundTripButton.classList.add('active');
       }
   },
 
@@ -41,7 +41,7 @@ const uiHandling = {
     const tripTypeContainer = document.querySelector('.trip-type-container');
     if (appState.routes.length > 1) {
         tripTypeContainer.style.display = 'none';
-        updateState('roundTrip', false);
+        updateState('oneWay', true);
     } else {
         tripTypeContainer.style.display = 'block';
     }
