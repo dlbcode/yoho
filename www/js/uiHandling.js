@@ -6,6 +6,8 @@ const uiHandling = {
     const oneWayButton = document.getElementById('oneWay');
     const roundTripButton = document.getElementById('roundTrip');
 
+    document.addEventListener('routesArrayUpdated', this.handleStateChange.bind(this));
+    
     oneWayButton.addEventListener('click', () => {
         updateState('roundTrip', false);
         this.updateTripTypeButtonStyles();
@@ -15,15 +17,18 @@ const uiHandling = {
         updateState('roundTrip', true);
         this.updateTripTypeButtonStyles();
     });
+  },
 
-    this.updateTripTypeButtonStyles(); // Initialize button styles based on appState
+  handleStateChange: function(event) {
+        this.updateTripTypeContainerVisibility();
+        this.updateTripTypeButtonStyles();
   },
 
   updateTripTypeButtonStyles: function() {
       const oneWayButton = document.getElementById('oneWay');
       const roundTripButton = document.getElementById('roundTrip');
 
-      if (appState.roundTrip) {
+      if (appState.roundTrip === true) {
           roundTripButton.classList.add('active');
           oneWayButton.classList.remove('active');
       } else {
@@ -32,6 +37,15 @@ const uiHandling = {
       }
   },
 
+  updateTripTypeContainerVisibility: function() {
+    const tripTypeContainer = document.querySelector('.trip-type-container');
+    if (appState.routes.length > 1) {
+        tripTypeContainer.style.display = 'none';
+        updateState('roundTrip', false);
+    } else {
+        tripTypeContainer.style.display = 'block';
+    }
+  },
 
   addAddButton: function() {
     const container = document.querySelector('.airport-selection');

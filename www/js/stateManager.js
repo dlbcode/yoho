@@ -20,10 +20,10 @@ function updateState(key, value) {
             break;
             
         case 'updateWaypoint':
-        if (value.index >= 0 && value.index < appState.waypoints.length) {
-          appState.waypoints[value.index] = {...appState.waypoints[value.index], ...value.data};
-        }
-        break;
+            if (value.index >= 0 && value.index < appState.waypoints.length) {
+            appState.waypoints[value.index] = {...appState.waypoints[value.index], ...value.data};
+            }
+            break;
 
         case 'roundTrip':
             appState.roundTrip = value;
