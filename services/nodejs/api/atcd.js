@@ -7,26 +7,37 @@ module.exports = function(app, amadeus, flightsCollection) {
             return res.status(400).send('Origin and destination IATA codes are required');
         }
 
+        // Convert the oneWay string to a boolean
+        const oneWayBool = oneWay === 'true';
+
         // Calculate the timestamp for one day ago
         const oneDayAgo = new Date();
         oneDayAgo.setDate(oneDayAgo.getDate() - 1);
         const oneDayAgoIso = oneDayAgo.toISOString();
 
-        // Check for existing flights less than one day old
-        const existingFlights = await flightsCollection.find({
+        // Define the query based on oneWay parameter
+        let query = {
             origin: origin,
             destination: destination,
             timestamp: { $gte: oneDayAgoIso }
-        }).toArray();
+        };
+
+        // Adjust the query based on whether the flight is one-way or round-trip
+        if (oneWayBool) {
+            query.returnDate = null; // For one-way flights, returnDate should be null
+        } else {
+            query.returnDate = { $ne: null }; // For round-trip flights, returnDate should not be null
+        }
+
+        // Check for existing flights less than one day old
+        const existingFlights = await flightsCollection.find(query).toArray();
 
         if (existingFlights.length > 0) {
-            // Return existing flights if they are recent
+            // Return existing flights if they are recent and match the oneWay criteria
             return res.json(existingFlights);
         }
 
-        // Convert the oneWay string to a boolean
-        const oneWayBool = oneWay === 'true';
-
+        // Fetch new flight data from Amadeus API
         const response = await amadeus.shopping.flightDates.get({
             origin: origin,
             destination: destination,
