@@ -5,9 +5,9 @@ import { findCheapestRoutes } from './findCheapestRoutes.js';
 const infoPane = {
     init() {
         const infoPaneContent = document.getElementById('infoPaneContent');
-        document.addEventListener('routesArrayUpdated', this.handleStateChange.bind(this));
         const mapButton = document.getElementById('mapButton');
         mapButton.addEventListener('click', this.displayAllRoutesSummary.bind(this));
+        document.addEventListener('stateChange', this.handleStateChange.bind(this));
     },
 
     displayAllRoutesSummary: function() {
@@ -71,19 +71,23 @@ const infoPane = {
     
                 const thead = document.createElement('thead');
                 let headerRow = `<tr>
-                                    <th><button class="sort-header">Departure Date</button></th>
-                                    <th><button class="sort-header">Return Date</button></th>
-                                    <th><button class="sort-header">Price</button></th>
-                                </tr>`;
+                                    <th><button class="sort-header">Departure Date</button></th>`;
+                if (!appState.oneWay) {
+                    headerRow += `<th><button class="sort-header">Return Date</button></th>`;
+                }
+                headerRow += `<th><button class="sort-header">Price</button></th>
+                              </tr>`;
                 thead.innerHTML = headerRow;
                 table.appendChild(thead);
     
                 const tbody = document.createElement('tbody');
                 data.forEach(item => {
                     let row = document.createElement('tr');
-                    row.innerHTML = `<td>${item.departureDate}</td>
-                                     <td>${item.returnDate}</td>
-                                     <td>${item.price}</td>`; // Directly accessing the price
+                    row.innerHTML = `<td>${item.departureDate}</td>`;
+                    if (!appState.oneWay) {
+                        row.innerHTML += `<td>${item.returnDate}</td>`;
+                    }
+                    row.innerHTML += `<td>${item.price}</td>`;
                     tbody.appendChild(row);
                 });
                 table.appendChild(tbody);
