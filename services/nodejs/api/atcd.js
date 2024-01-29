@@ -1,7 +1,7 @@
 module.exports = function(app, amadeus, flightsCollection) {
   app.get('/atcd', async (req, res) => {
     try {
-        const { origin, destination } = req.query;
+        const { origin, destination, oneWay } = req.query;
 
         if (!origin || !destination) {
             return res.status(400).send('Origin and destination IATA codes are required');
@@ -24,9 +24,13 @@ module.exports = function(app, amadeus, flightsCollection) {
             return res.json(existingFlights);
         }
 
+        // Convert the oneWay string to a boolean
+        const oneWayBool = oneWay === 'true';
+
         const response = await amadeus.shopping.flightDates.get({
-          origin: origin,
-          destination: destination
+            origin: origin,
+            destination: destination,
+            oneWay: oneWayBool
         });
 
         // Group flights by departureDate and find the cheapest flight for each date

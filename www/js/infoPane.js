@@ -56,7 +56,7 @@ const infoPane = {
         const infoPaneContent = document.getElementById('infoPaneContent');
         infoPaneContent.innerHTML = '';
     
-        fetch(`http://yonderhop.com:3000/atcd?origin=${selectedRoute.originAirport.iata_code}&destination=${selectedRoute.destinationAirport.iata_code}`)
+        fetch(`http://yonderhop.com:3000/atcd?origin=${selectedRoute.originAirport.iata_code}&destination=${selectedRoute.destinationAirport.iata_code}&oneWay=${appState.oneWay}`)
             .then(response => {
                 if (!response.ok) {
                     throw new Error('Failed to fetch cheapest route data');
