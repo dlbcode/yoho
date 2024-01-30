@@ -8,8 +8,9 @@ const mongodbPassword = process.env.MONGO_RSUSER_PASSWORD;
 
 // Amadeus client setup
 const amadeus = new Amadeus({
-  clientId: process.env.AMADEUS_PROD_API_KEY,
-  clientSecret: process.env.AMADEUS_PROD_API_SECRET
+  clientId: process.env.AMADEUS_TEST_API_KEY,
+  clientSecret: process.env.AMADEUS_TEST_API_SECRET,
+  // hostname: 'production'
 });
 
 // use it before all route definitions
