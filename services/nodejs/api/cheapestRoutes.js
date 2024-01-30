@@ -36,23 +36,23 @@ module.exports = function(app, routesCollection) {
     const processed = new Set();
     const parents = {};
     const pq = new PriorityQueue((a, b) => costs[a] < costs[b]);
-
+  
     Object.keys(graph).forEach(node => {
       if (node !== origin) {
         costs[node] = Infinity;
       }
     });
-
+  
     costs[origin] = 0;
     pq.enqueue(origin);
-
+  
     while (!pq.isEmpty()) {
       const node = pq.dequeue();
-
+  
       if (node === destination) {
         break;
       }
-
+  
       processed.add(node);
       const neighbors = graph[node];
       for (let n in neighbors) {
@@ -66,10 +66,13 @@ module.exports = function(app, routesCollection) {
         }
       }
     }
-
-    return buildPath(parents, destination);
+  
+    return {
+      path: buildPath(parents, destination),
+      totalCost: costs[destination]
+    };
   }
-
+  
   function buildPath(parents, destination) {
     const path = [destination];
     let lastStep = destination;
@@ -78,5 +81,5 @@ module.exports = function(app, routesCollection) {
       lastStep = parents[lastStep];
     }
     return path;
-  }
+  }  
 };
