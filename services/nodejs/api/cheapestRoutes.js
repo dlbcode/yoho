@@ -32,16 +32,46 @@ module.exports = function(app, routesCollection) {
   }
 
   function findCheapestRoutes(graph, origin, destination) {
+    const originalCosts = {};
+    const routes = [];
+  
+    // Initialize original costs
+    for (let node in graph) {
+      for (let neighbor in graph[node]) {
+        originalCosts[`${node}-${neighbor}`] = graph[node][neighbor];
+      }
+    }
+  
+    for (let i = 0; i < 3; i++) {
+      const { path, cost } = dijkstra(graph, origin, destination);
+      if (!path) break; // No more routes found
+      routes.push({ path, totalCost: cost });
+  
+      // Penalize the edges used in the found path to find alternative routes
+      for (let j = 0; j < path.length - 1; j++) {
+        graph[path[j]][path[j + 1]] *= 1.1; // Increase cost by 10%
+      }
+    }
+  
+    // Restore original costs
+    for (let node in graph) {
+      for (let neighbor in graph[node]) {
+        graph[node][neighbor] = originalCosts[`${node}-${neighbor}`];
+      }
+    }
+  
+    return routes;
+  }
+  
+  function dijkstra(graph, origin, destination) {
     const costs = {};
-    const processed = new Set();
     const parents = {};
     const pq = new PriorityQueue((a, b) => costs[a] < costs[b]);
   
-    Object.keys(graph).forEach(node => {
-      if (node !== origin) {
-        costs[node] = Infinity;
-      }
-    });
+    for (let node in graph) {
+      costs[node] = Infinity;
+      parents[node] = null;
+    }
   
     costs[origin] = 0;
     pq.enqueue(origin);
@@ -50,36 +80,32 @@ module.exports = function(app, routesCollection) {
       const node = pq.dequeue();
   
       if (node === destination) {
-        break;
+        return {
+          path: buildPath(parents, destination),
+          cost: costs[destination]
+        };
       }
   
-      processed.add(node);
-      const neighbors = graph[node];
-      for (let n in neighbors) {
-        if (!processed.has(n)) {
-          const newCost = costs[node] + neighbors[n];
-          if (newCost < (costs[n] || Infinity)) {
-            costs[n] = newCost;
-            parents[n] = node;
-            pq.enqueue(n);
-          }
+      for (let neighbor in graph[node]) {
+        const newCost = costs[node] + graph[node][neighbor];
+        if (newCost < costs[neighbor]) {
+          costs[neighbor] = newCost;
+          parents[neighbor] = node;
+          pq.enqueue(neighbor);
         }
       }
     }
   
-    return {
-      path: buildPath(parents, destination),
-      totalCost: costs[destination]
-    };
+    return { path: null, cost: 0 }; // No path found
   }
   
   function buildPath(parents, destination) {
-    const path = [destination];
-    let lastStep = destination;
-    while (parents[lastStep]) {
-      path.unshift(parents[lastStep]);
-      lastStep = parents[lastStep];
+    const path = [];
+    let currentNode = destination;
+    while (currentNode !== null) {
+      path.unshift(currentNode);
+      currentNode = parents[currentNode];
     }
     return path;
-  }  
+  }    
 };
