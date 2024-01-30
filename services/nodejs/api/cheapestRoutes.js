@@ -1,3 +1,5 @@
+const { PriorityQueue } = require('./priorityQueue.js');
+
 module.exports = function(app, routesCollection) {
   app.get('/cheapestRoutes', async (req, res) => {
     const origin = req.query.origin;
@@ -9,7 +11,8 @@ module.exports = function(app, routesCollection) {
 
     try {
       const routes = await routesCollection.find({}).toArray();
-      let cheapestRoutes = findCheapestRoutes(routes, origin, destination);
+      const graph = buildGraph(routes);
+      const cheapestRoutes = findCheapestRoutes(graph, origin, destination);
       res.json(cheapestRoutes);
     } catch (error) {
       console.error("Error in /cheapest-routes endpoint:", error);
@@ -17,59 +20,63 @@ module.exports = function(app, routesCollection) {
     }
   });
 
-  function findCheapestRoutes(routes, origin, destination) {
-    let allRoutes = {};
-  
-    // Initialize allRoutes with direct routes
+  function buildGraph(routes) {
+    const graph = {};
     routes.forEach(route => {
-      if (!allRoutes[route.origin]) {
-        allRoutes[route.origin] = [];
+      if (!graph[route.origin]) {
+        graph[route.origin] = {};
       }
-      allRoutes[route.origin].push({ to: route.destination, price: route.price });
+      graph[route.origin][route.destination] = route.price;
     });
-  
-    // Function to find all possible paths from origin to destination
-    function findAllPaths(currentPath, destination, visited, depth = 0, maxDepth = 4) {
-      if (depth > maxDepth) {
-        return []; // Exceeding max depth, return empty array
+    return graph;
+  }
+
+  function findCheapestRoutes(graph, origin, destination) {
+    const costs = {};
+    const processed = new Set();
+    const parents = {};
+    const pq = new PriorityQueue((a, b) => costs[a] < costs[b]);
+
+    Object.keys(graph).forEach(node => {
+      if (node !== origin) {
+        costs[node] = Infinity;
       }
-    
-      let lastNode = currentPath[currentPath.length - 1];
-      if (lastNode === destination) {
-        return [currentPath];
+    });
+
+    costs[origin] = 0;
+    pq.enqueue(origin);
+
+    while (!pq.isEmpty()) {
+      const node = pq.dequeue();
+
+      if (node === destination) {
+        break;
       }
-    
-      let paths = [];
-      allRoutes[lastNode]?.forEach(nextRoute => {
-        if (!visited.has(nextRoute.to)) {
-          visited.add(nextRoute.to);
-          let newPath = [...currentPath, nextRoute.to];
-          paths.push(...findAllPaths(newPath, destination, new Set(visited), depth + 1, maxDepth));
-          visited.delete(nextRoute.to);
+
+      processed.add(node);
+      const neighbors = graph[node];
+      for (let n in neighbors) {
+        if (!processed.has(n)) {
+          const newCost = costs[node] + neighbors[n];
+          if (newCost < (costs[n] || Infinity)) {
+            costs[n] = newCost;
+            parents[n] = node;
+            pq.enqueue(n);
+          }
         }
-      });
-    
-      return paths;
-    }    
-  
-    // Calculate the total cost of a path
-    function calculatePathCost(path) {
-      let totalCost = 0;
-      for (let i = 0; i < path.length - 1; i++) {
-        let segment = allRoutes[path[i]].find(route => route.to === path[i + 1]);
-        totalCost += segment.price;
       }
-      return totalCost;
     }
-  
-    // Find all paths and calculate their costs
-    let validPaths = findAllPaths([origin], destination, new Set([origin]));
-    let pathCosts = validPaths.map(path => ({
-      route: path,
-      totalCost: calculatePathCost(path)
-    }));
-  
-    // Sort by total cost and return the top 3 cheapest routes
-    return pathCosts.sort((a, b) => a.totalCost - b.totalCost).slice(0, 3);
-  }  
-}
+
+    return buildPath(parents, destination);
+  }
+
+  function buildPath(parents, destination) {
+    const path = [destination];
+    let lastStep = destination;
+    while (parents[lastStep]) {
+      path.unshift(parents[lastStep]);
+      lastStep = parents[lastStep];
+    }
+    return path;
+  }
+};
