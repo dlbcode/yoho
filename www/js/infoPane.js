@@ -55,51 +55,44 @@ const infoPane = {
         const selectedRoute = appState.routes[routeIndex];
         const infoPaneContent = document.getElementById('infoPaneContent');
         infoPaneContent.innerHTML = '';
-    
-        fetch(`http://yonderhop.com:3000/atcd?origin=${selectedRoute.originAirport.iata_code}&destination=${selectedRoute.destinationAirport.iata_code}&oneWay=${appState.oneWay}`)
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Failed to fetch cheapest route data');
-                }
-                return response.json();
-            })
-            .then(data => {
-                const table = document.createElement('table');
-                table.className = 'sortable-table';
-                table.style.width = '100%';
-                table.setAttribute('border', '1');
-    
-                const thead = document.createElement('thead');
-                let headerRow = `<tr>
-                                    <th><button class="sort-header">Departure Date</button></th>`;
-                if (!appState.oneWay) {
-                    headerRow += `<th><button class="sort-header">Return Date</button></th>`;
-                }
-                headerRow += `<th><button class="sort-header">Price</button></th>
-                              </tr>`;
-                thead.innerHTML = headerRow;
-                table.appendChild(thead);
-    
-                const tbody = document.createElement('tbody');
-                data.forEach(item => {
-                    let row = document.createElement('tr');
-                    row.innerHTML = `<td>${item.departureDate}</td>`;
-                    if (!appState.oneWay) {
-                        row.innerHTML += `<td>${item.returnDate}</td>`;
-                    }
-                    row.innerHTML += `<td>${item.price}</td>`;
-                    tbody.appendChild(row);
-                });
-                table.appendChild(tbody);
-    
-                infoPaneContent.appendChild(table);
-                this.attachSortingEventListeners(table);
-            })
-            .catch(error => {
-                console.error('Error fetching cheapest route data:', error);
-                infoPaneContent.textContent = 'Error loading cheapest route data.';
+      
+        fetch(`http://127.0.0.1:3000/cheapestRoutes?origin=${selectedRoute.originAirport.iata_code}&destination=${selectedRoute.destinationAirport.iata_code}`)
+          .then(response => {
+            if (!response.ok) {
+              throw new Error('Failed to fetch cheapest route data');
+            }
+            return response.json();
+          })
+          .then(data => {
+            const table = document.createElement('table');
+            table.className = 'sortable-table';
+            table.style.width = '100%';
+            table.setAttribute('border', '1');
+      
+            const thead = document.createElement('thead');
+            let headerRow = `<tr>
+                              <th>Route</th>
+                              <th>Total Cost</th>
+                            </tr>`;
+            thead.innerHTML = headerRow;
+            table.appendChild(thead);
+      
+            const tbody = document.createElement('tbody');
+            data.forEach(item => {
+              let row = document.createElement('tr');
+              row.innerHTML = `<td>${item.route.join(' -> ')}</td>
+                               <td>${item.totalCost}</td>`;
+              tbody.appendChild(row);
             });
-    },        
+            table.appendChild(tbody);
+      
+            infoPaneContent.appendChild(table);
+          })
+          .catch(error => {
+            console.error('Error fetching cheapest route data:', error);
+            infoPaneContent.textContent = 'Error loading cheapest route data.';
+          });
+      },              
 
     attachSortingEventListeners: function(table) {
         table.querySelectorAll(".sort-header").forEach(headerButton => {
