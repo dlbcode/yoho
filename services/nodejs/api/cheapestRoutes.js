@@ -1,111 +1,69 @@
-const { PriorityQueue } = require('./priorityQueue');
-
 module.exports = function(app, routesCollection) {
   app.get('/cheapestRoutes', async (req, res) => {
     const origin = req.query.origin;
     const destination = req.query.destination;
-
+  
     if (!origin || !destination) {
       return res.status(400).send('Origin and destination IATA codes are required');
     }
-
+  
     try {
       const routes = await routesCollection.find({}).toArray();
-      const graph = buildGraph(routes);
-      const cheapestRoutes = findCheapestRoutes(graph, origin, destination);
+      let cheapestRoutes = findCheapestRoutes(routes, origin, destination);
       res.json(cheapestRoutes);
     } catch (error) {
       console.error("Error in /cheapest-routes endpoint:", error);
-      res.status(500).send('Error searching for cheapestRoutes: ' + error.message);
+      res.status(500).send('Error searching for cheapestRoutes');
     }
   });
 
-  function buildGraph(routes) {
-    const graph = {};
-    routes.forEach(route => {
-      if (!graph[route.origin]) {
-        graph[route.origin] = {};
-      }
-      graph[route.origin][route.destination] = route.price;
-    });
-    return graph;
-  }
-
-  function findCheapestRoutes(graph, origin, destination) {
-    const originalCosts = {};
-    const routes = [];
+  function findCheapestRoutes(routes, origin, destination) {
+    let costs = {};
+    let paths = {};
   
-    // Initialize original costs
-    for (let node in graph) {
-      for (let neighbor in graph[node]) {
-        originalCosts[`${node}-${neighbor}`] = graph[node][neighbor];
-      }
-    }
-  
-    for (let i = 0; i < 3; i++) {
-      const { path, cost } = dijkstra(graph, origin, destination);
-      if (!path) break; // No more routes found
-      routes.push({ path, totalCost: cost });
-  
-      // Penalize the edges used in the found path to find alternative routes
-      for (let j = 0; j < path.length - 1; j++) {
-        graph[path[j]][path[j + 1]] *= 1.1; // Increase cost by 10%
-      }
-    }
-  
-    // Restore original costs
-    for (let node in graph) {
-      for (let neighbor in graph[node]) {
-        graph[node][neighbor] = originalCosts[`${node}-${neighbor}`];
-      }
-    }
-  
-    return routes;
-  }
-  
-  function dijkstra(graph, origin, destination) {
-    const costs = {};
-    const parents = {};
-    const pq = new PriorityQueue((a, b) => costs[a] < costs[b]);
-  
-    for (let node in graph) {
-      costs[node] = Infinity;
-      parents[node] = null;
-    }
-  
-    costs[origin] = 0;
-    pq.enqueue(origin);
-  
-    while (!pq.isEmpty()) {
-      const node = pq.dequeue();
-  
-      if (node === destination) {
-        return {
-          path: buildPath(parents, destination),
-          cost: costs[destination]
-        };
-      }
-  
-      for (let neighbor in graph[node]) {
-        const newCost = costs[node] + graph[node][neighbor];
-        if (newCost < costs[neighbor]) {
-          costs[neighbor] = newCost;
-          parents[neighbor] = node;
-          pq.enqueue(neighbor);
+    try { // Initialize costs and paths
+      routes.forEach(route => {
+        if (!costs[route.origin]) {
+          costs[route.origin] = { totalCost: Infinity, segments: [] };
+          paths[route.origin] = [];
         }
+        if (!costs[route.destination]) {
+          costs[route.destination] = { totalCost: Infinity, segments: [] };
+          paths[route.destination] = [];
+        }
+      });
+  
+      costs[origin] = { totalCost: 0, segments: [] }; // Set the starting point
+      paths[origin] = [origin];
+  
+      for (let i = 0; i < routes.length; i++) { // Calculate the cheapest paths
+        let updated = false;
+  
+        routes.forEach(route => {
+          let newCost = parseFloat((costs[route.origin].totalCost + route.price).toFixed(2));
+          if (newCost < costs[route.destination].totalCost) {
+            costs[route.destination].totalCost = newCost;
+            costs[route.destination].segments = [...costs[route.origin].segments, { from: route.origin, to: route.destination, price: parseFloat(route.price.toFixed(2)) }];
+            paths[route.destination] = [...paths[route.origin], route.destination];
+            updated = true;
+          }
+        });
+  
+        if (!updated) break;
       }
-    }
   
-    return { path: null, cost: 0 }; // No path found
+      let validRoutes = Object.keys(paths) // Filter routes that start with the origin and end with the destination
+        .filter(key => paths[key][0] === origin && paths[key][paths[key].length - 1] === destination)
+        .map(key => ({
+          route: paths[key],
+          totalCost: costs[key].totalCost,
+          segmentCosts: costs[key].segments
+        }));
+  
+      return validRoutes.sort((a, b) => a.totalCost - b.totalCost).slice(0, 3); // Sort by total cost and return the top 3 cheapest routes
+    } catch (error) {
+      console.error("Error in findCheapestRoutes function:", error);
+      throw error; // Re-throw the error to be caught by the caller
+    }
   }
-  
-  function buildPath(parents, destination) {
-    const path = [];
-    let currentNode = destination;
-    while (currentNode !== null) {
-      path.unshift(currentNode);
-      currentNode = parents[currentNode];
-    }
-    return path;
-  }    
-};
+}
