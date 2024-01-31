@@ -198,11 +198,12 @@ const infoPane = {
     table.querySelector(`th:nth-child(${column + 1})`).classList.toggle("th-sort-desc", !asc);
   },
 
-  updateRouteInfoPane(routes) {
+  updateRouteInfoPane: function(routes) {
     const infoPaneContent = document.getElementById('infoPaneContent');
     infoPaneContent.innerHTML = '';
 
     const table = document.createElement('table');
+    table.className = 'sortable-table';
     table.style.width = '100%';
     table.setAttribute('border', '1');
 
@@ -224,11 +225,24 @@ const infoPane = {
                        <td>${route.price}</td>
                        <td><button class='update-price-btn'>Update Price</button></td>`;
       tbody.appendChild(row);
+
+      // Assuming pathDrawing.js has a method to fetch paths by route
+      row.addEventListener('mouseover', () => {
+          const routeId = `${route.originAirport.iata_code}-${route.destinationAirport.iata_code}`;
+          const pathLines = pathDrawing.routePathCache[routeId] || [];
+          pathLines.forEach(path => path.setStyle({ color: 'white' }));
+      });
+
+      row.addEventListener('mouseout', () => {
+          const routeId = `${route.originAirport.iata_code}-${route.destinationAirport.iata_code}`;
+          const pathLines = pathDrawing.routePathCache[routeId] || [];
+          pathLines.forEach(path => path.setStyle({ color: pathDrawing.getColorBasedOnPrice(route.price) }));
+      });
     });
     table.appendChild(tbody);
 
     infoPaneContent.appendChild(table);
-  },
+},
 };
 
 export { infoPane };
