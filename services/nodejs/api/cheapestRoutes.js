@@ -21,29 +21,29 @@ module.exports = function(app, routesCollection) {
     let costs = {};
     let paths = {};
   
-    try { // Initialize costs and paths
+    try {
+      // Initialize costs and paths
       routes.forEach(route => {
         if (!costs[route.origin]) {
-          costs[route.origin] = { totalCost: Infinity, segments: [] };
+          costs[route.origin] = { totalCost: Infinity };
           paths[route.origin] = [];
         }
         if (!costs[route.destination]) {
-          costs[route.destination] = { totalCost: Infinity, segments: [] };
+          costs[route.destination] = { totalCost: Infinity };
           paths[route.destination] = [];
         }
       });
   
-      costs[origin] = { totalCost: 0, segments: [] }; // Set the starting point
+      costs[origin] = { totalCost: 0 }; // Set the starting point
       paths[origin] = [origin];
   
-      for (let i = 0; i < routes.length; i++) { // Calculate the cheapest paths
+      for (let i = 0; i < routes.length; i++) {
         let updated = false;
   
         routes.forEach(route => {
           let newCost = parseFloat((costs[route.origin].totalCost + route.price).toFixed(2));
           if (newCost < costs[route.destination].totalCost) {
             costs[route.destination].totalCost = newCost;
-            costs[route.destination].segments = [...costs[route.origin].segments, { from: route.origin, to: route.destination, price: parseFloat(route.price.toFixed(2)) }];
             paths[route.destination] = [...paths[route.origin], route.destination];
             updated = true;
           }
@@ -52,12 +52,11 @@ module.exports = function(app, routesCollection) {
         if (!updated) break;
       }
   
-      let validRoutes = Object.keys(paths) // Filter routes that start with the origin and end with the destination
+      let validRoutes = Object.keys(paths)
         .filter(key => paths[key][0] === origin && paths[key][paths[key].length - 1] === destination)
         .map(key => ({
           route: paths[key],
-          totalCost: costs[key].totalCost,
-          segmentCosts: costs[key].segments
+          totalCost: costs[key].totalCost
         }));
   
       return validRoutes.sort((a, b) => a.totalCost - b.totalCost).slice(0, 3); // Sort by total cost and return the top 3 cheapest routes
@@ -65,5 +64,5 @@ module.exports = function(app, routesCollection) {
       console.error("Error in findCheapestRoutes function:", error);
       throw error; // Re-throw the error to be caught by the caller
     }
-  }
+  }  
 }
