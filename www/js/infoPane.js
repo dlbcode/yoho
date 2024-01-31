@@ -56,43 +56,82 @@ const infoPane = {
         const infoPaneContent = document.getElementById('infoPaneContent');
         infoPaneContent.innerHTML = '';
     
-        fetch(`http://127.0.0.1:3000/cheapestRoutes?origin=${selectedRoute.originAirport.iata_code}&destination=${selectedRoute.destinationAirport.iata_code}`)
+        // Fetch airport data
+        fetch('http://127.0.0.1:3000/airports')
           .then(response => {
             if (!response.ok) {
-              throw new Error('Failed to fetch cheapest route data');
+              throw new Error('Failed to fetch airports data');
             }
             return response.json();
           })
-          .then(data => {
-            const table = document.createElement('table');
-            table.className = 'sortable-table';
-            table.style.width = '100%';
-            table.setAttribute('border', '1');
+          .then(airports => {
+            // Now fetch the cheapest routes data
+            return fetch(`http://127.0.0.1:3000/cheapestRoutes?origin=${selectedRoute.originAirport.iata_code}&destination=${selectedRoute.destinationAirport.iata_code}`)
+              .then(response => {
+                if (!response.ok) {
+                  throw new Error('Failed to fetch cheapest route data');
+                }
+                return response.json();
+              })
+              .then(data => {
+                const table = document.createElement('table');
+                table.className = 'sortable-table';
+                table.style.width = '100%';
+                table.setAttribute('border', '1');
     
-            const thead = document.createElement('thead');
-            let headerRow = `<tr>
-                              <th>Route</th>
-                              <th>Estimated Price</th>
-                            </tr>`;
-            thead.innerHTML = headerRow;
-            table.appendChild(thead);
+                const thead = document.createElement('thead');
+                let headerRow = `<tr>
+                                  <th>Route</th>
+                                  <th>Estimated Price</th>
+                                </tr>`;
+                thead.innerHTML = headerRow;
+                table.appendChild(thead);
     
-            const tbody = document.createElement('tbody');
-            data.forEach(item => {
-              let row = document.createElement('tr');
-              row.innerHTML = `<td>${item.route.join(' -> ')}</td>
-                               <td>${item.totalCost}</td>`;
-              tbody.appendChild(row);
-            });
-            table.appendChild(tbody);
+                const tbody = document.createElement('tbody');
+                data.forEach(item => {
+                  let row = document.createElement('tr');
+                  row.innerHTML = `<td>${item.route.join(' -> ')}</td>
+                                   <td>${item.totalCost}</td>`;
+                  tbody.appendChild(row);
     
-            infoPaneContent.appendChild(table);
+                  // Add hover effects
+                  row.addEventListener('mouseover', () => {
+                      item.route.forEach((iataCode, index) => {
+                        if (index < item.route.length - 1) {
+                          const origin = airports.find(airport => airport.iata_code === iataCode);
+                          const destination = airports.find(airport => airport.iata_code === item.route[index + 1]);
+                          if (origin && destination) {
+                            // Draw the line for this segment
+                            pathDrawing.createRoutePath(origin, destination, { originAirport: origin, destinationAirport: destination, price: item.totalCost });
+    
+                            // Change the color of the line to white
+                            const routeId = `${origin.iata_code}-${destination.iata_code}`;
+                            const pathLines = pathDrawing.routePathCache[routeId] || [];
+                            pathLines.forEach(path => path.setStyle({ color: 'white' }));
+                          }
+                        }
+                      });
+                  });
+                  row.addEventListener('mouseout', () => {
+                      // Reset the color of all lines to their original state
+                      appState.routes.forEach(route => {
+                          const routeId = `${route.originAirport.iata_code}-${route.destinationAirport.iata_code}`;
+                          const pathLines = pathDrawing.routePathCache[routeId] || [];
+                          pathLines.forEach(path => path.setStyle({ color: pathDrawing.getColorBasedOnPrice(route.price) }));
+                      });
+                      pathDrawing.clearLines();
+                  });
+                });
+                table.appendChild(tbody);
+    
+                infoPaneContent.appendChild(table);
+              });
           })
           .catch(error => {
-            console.error('Error fetching cheapest route data:', error);
-            infoPaneContent.textContent = 'Error loading cheapest route data.';
+            console.error('Error:', error);
+            infoPaneContent.textContent = 'Error loading data.';
           });
-      },                  
+    },            
 
     attachSortingEventListeners: function(table) {
         table.querySelectorAll(".sort-header").forEach(headerButton => {
