@@ -55,7 +55,7 @@ const infoPane = {
         const selectedRoute = appState.routes[routeIndex];
         const infoPaneContent = document.getElementById('infoPaneContent');
         infoPaneContent.innerHTML = '';
-      
+    
         fetch(`http://127.0.0.1:3000/cheapestRoutes?origin=${selectedRoute.originAirport.iata_code}&destination=${selectedRoute.destinationAirport.iata_code}`)
           .then(response => {
             if (!response.ok) {
@@ -68,15 +68,15 @@ const infoPane = {
             table.className = 'sortable-table';
             table.style.width = '100%';
             table.setAttribute('border', '1');
-      
+    
             const thead = document.createElement('thead');
             let headerRow = `<tr>
                               <th>Route</th>
-                              <th>Total Cost</th>
+                              <th>Estimated Price</th>
                             </tr>`;
             thead.innerHTML = headerRow;
             table.appendChild(thead);
-      
+    
             const tbody = document.createElement('tbody');
             data.forEach(item => {
               let row = document.createElement('tr');
@@ -85,14 +85,14 @@ const infoPane = {
               tbody.appendChild(row);
             });
             table.appendChild(tbody);
-      
+    
             infoPaneContent.appendChild(table);
           })
           .catch(error => {
             console.error('Error fetching cheapest route data:', error);
             infoPaneContent.textContent = 'Error loading cheapest route data.';
           });
-      },              
+      },                  
 
     attachSortingEventListeners: function(table) {
         table.querySelectorAll(".sort-header").forEach(headerButton => {
