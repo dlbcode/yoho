@@ -1,4 +1,4 @@
-const { PriorityQueue } = require('./priorityQueue.js');
+const { PriorityQueue } = require('./priorityQueue');
 
 module.exports = function(app, routesCollection) {
   app.get('/cheapestRoutes', async (req, res) => {
