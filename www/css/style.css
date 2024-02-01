@@ -108,7 +108,7 @@ input, button, select, textarea {
 .floating-controls {
   position: absolute;
   top: 5px; /* Adjust as needed */
-  left: 205px; /* Adjust as needed */
+  left: 230px; /* Adjust as needed */
   padding: 5px;
   background-color: rgba(255, 255, 255, 0.1); /* Semi-transparent white */
   border-radius: 5px;

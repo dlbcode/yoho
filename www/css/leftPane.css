@@ -1,53 +1,67 @@
+/* Apply box-sizing globally for consistency */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+/* Styling for the left pane */
 .leftPane {
-  flex-basis: 180px;
+  flex-basis: 200px;
   flex-shrink: 0;
   padding: 10px;
   border-right: 1px solid #525252;
 }
 
+/* Styling for the travelers container */
 .travelers-container {
   display: flex;
+  width: 100%;
   align-items: center;
+  justify-content: space-between;
   gap: 5px;
+  margin-bottom: 10px;
 }
 
+/* Styling for the number of travelers input */
 #numTravelers {
   width: 40px;
   text-align: center;
 }
 
+/* Styling for the decrease and increase travelers buttons */
 #decreaseTravelers, #increaseTravelers {
   padding: 5px 10px;
 }
 
+/* Styling for the date picker, trip type, and airport selection containers */
 .date-picker-container,
 .trip-type-container,
 .airport-selection {
   margin-bottom: 10px;
 }
 
+/* Styling for the route container */
 .route-container {
-  width: 80px;
   display: flex;
-  justify-content: space-between;
+  width: 100%;
   align-items: center;
+  justify-content: space-between;
+  gap: 5px;
   margin-bottom: 10px;
 }
 
+/* Styling for the input fields in the route container */
 .route-container input {
   width: 60px;
   flex-grow: 1;
 }
 
-.route-container input:last-child {
-  margin-right: 0; /* Remove margin for the last input */
-}
-
+/* Styling for active autocomplete suggestions */
 .autocomplete-active {
   /* Your styles for highlighting the active suggestion */
   color: #e7e7e7;
 }
 
+/* Styling for the suggestions dropdown */
 .suggestions {
   position: absolute;
   border-bottom: none;
@@ -58,17 +72,18 @@
   color: #888;
 }
 
+/* Styling for the active trip type button */
 .trip-type-button.active {
   background-color: rgb(60, 93, 110);
   color: white;
 }
 
+/* Styling for the start date input */
 #startDate {
-  width: 95%;
-  margin-right: 10px;
+  width: 100%;
 }
 
-/* Responsive Design for Left Pane */
+/* Responsive design adjustments for smaller screens */
 @media (max-width: 768px) {
   .leftPane {
     flex-basis: 100px;
