@@ -142,7 +142,6 @@ const infoPane = {
                         }
                     }
                 }
-    
                 console.table(appState.waypoints);
                 updateState('updateWaypoint', false);
               });
