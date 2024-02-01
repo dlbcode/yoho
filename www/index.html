@@ -1,20 +1,20 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Flight Path Map</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/leaflet.geodesic"></script>
     <script src="https://unpkg.com/leaflet-polylinedecorator"></script>
-
     <link rel="stylesheet" type="text/css" href="css/style.css">
     <link rel="stylesheet" href="css/map.css" />
     <link rel="stylesheet" href="css/infoPane.css" />
-    
 </head>
 <body>
     <div class="container">
-        <div class="left-container">
+        <nav class="left-container">
             <div class="travelers-container">
                 <label for="numTravelers">Travelers:</label>
                 <button id="decreaseTravelers">-</button>
@@ -43,25 +43,15 @@
             <ol id="routeDetailsList" class="route-details"></ol>
             <div id="totalCost">Estimated Cost: $0</div>
             <div><button id="getPriceBtn">Get Price</button></div>
-            <divv><button id="clearBtn">Clear</button></divv>
-        </div>
-        <div class="map-container">
+            <div><button id="clearBtn">Clear</button></div>
+        </nav>
+        <main class="map-container">
             <div id="map"></div>
             <div class="floating-controls">
                 <button id="allPathsBtn">Show All Paths</button>
             </div>
-        </div>
+        </main>
     </div>
-    <div id="infoPane">
-        <div id="top-bar">
-            <button id="mapButton" class="map-icon-button">
-                <img src="./assets/map.png" alt="Trip Overview">
-            </button>
-            <div id="menu-bar">
-            </div>
-        </div>
-        <div id="infoPaneContent">
-        </div>
     <script type="module" src="js/map.js"></script>
     <script type="module" src="js/airportAutocomplete.js"></script>
 </body>
