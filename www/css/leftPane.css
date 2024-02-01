@@ -2,13 +2,30 @@
 *, *::before, *::after {
   box-sizing: border-box;
 }
-
-/* Styling for the left pane */
 .leftPane {
+  transition: transform 0.5s ease-in-out;
   flex-basis: 200px;
   flex-shrink: 0;
   padding: 10px;
   border-right: 1px solid #525252;
+}
+
+.toggle-pane-button {
+  position: absolute;
+  top: 10px;
+  left: 200px; /* Adjust based on the width of the leftPane */
+  z-index: 10;
+  cursor: pointer;
+}
+
+.leftPane-hidden {
+  transform: translateX(-100%);
+  transition: transform 0.5s ease-in-out;
+}
+
+.mapPane-expanded {
+  flex-grow: 1;
+  transition: flex-grow 0.5s ease-in-out;
 }
 
 /* Styling for the travelers container */

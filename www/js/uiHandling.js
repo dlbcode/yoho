@@ -76,11 +76,24 @@ const uiHandling = {
             }
         }
     });
-  }
+  },
+  
+  initTogglePaneButton: function() {
+    const toggleBtn = document.getElementById('togglePaneBtn');
+    const leftPane = document.querySelector('.leftPane');
+    const mapPane = document.querySelector('.mapPane');
+
+    toggleBtn.addEventListener('click', () => {
+        leftPane.classList.toggle('leftPane-hidden');
+        mapPane.classList.toggle('mapPane-expanded');
+    });
+  },
 }
 
 document.addEventListener('DOMContentLoaded', () => {
   uiHandling.initTripTypeButtons();
+  uiHandling.initTogglePaneButton();
 });
+
 
 export { uiHandling }
