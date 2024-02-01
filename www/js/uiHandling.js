@@ -1,4 +1,5 @@
 import { appState, updateState } from "./stateManager.js";
+import { adjustMapSize } from "./map.js";
 
 const uiHandling = {
 
@@ -86,8 +87,9 @@ const uiHandling = {
     toggleBtn.addEventListener('click', () => {
         leftPane.classList.toggle('leftPane-hidden');
         mapPane.classList.toggle('mapPane-expanded');
+        adjustMapSize();
     });
-  },
+  }, 
 }
 
 document.addEventListener('DOMContentLoaded', () => {

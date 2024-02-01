@@ -68,17 +68,28 @@ document.addEventListener('DOMContentLoaded', () => {
     initMapFunctions();
     getPrice.init();
     infoPane.init();
-    adjustMapHeight();
+    adjustMapSize();
 });
 
-window.addEventListener('resize', adjustMapHeight);
-
-function adjustMapHeight() {
+function adjustMapSize() {
     const mapElement = document.getElementById('map');
     const infoPaneHeight = 144; // Height of the infoPane
     const windowHeight = window.innerHeight;
     mapElement.style.height = `${windowHeight - infoPaneHeight}px`;
+
+    // Adjusting the width
+    const leftPane = document.querySelector('.leftPane');
+    const leftPaneWidth = leftPane.offsetWidth;
+    const windowWidth = window.innerWidth;
+    const mapWidth = leftPane.classList.contains('leftPane-hidden') ? windowWidth : windowWidth - leftPaneWidth;
+    mapElement.style.width = `${mapWidth}px`;
+
+    if (map) {
+        map.invalidateSize(); // This is a Leaflet method to update the map size
+    }
 }
+
+window.addEventListener('resize', adjustMapSize);
 
 var blueDotIcon = L.divIcon({ // Marker configurations
     className: 'custom-div-icon',
@@ -94,4 +105,4 @@ var blueDotIcon = L.divIcon({ // Marker configurations
     iconAnchor: [6, 6]
   });
 
-export { map, blueDotIcon, magentaDotIcon };
+export { map, blueDotIcon, magentaDotIcon, adjustMapSize };

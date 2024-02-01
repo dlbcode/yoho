@@ -25,10 +25,10 @@
 
 .mapPane-expanded {
   flex-grow: 1;
+  width: 100%; /* Add this line */
   transition: flex-grow 0.5s ease-in-out;
 }
 
-/* Styling for the travelers container */
 .travelers-container {
   display: flex;
   width: 100%;
