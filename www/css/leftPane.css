@@ -1,12 +1,25 @@
-/* Left Pane Specific Styles */
 .leftPane {
-  flex-basis: 180px; /* Adjust width as necessary */
-  flex-shrink: 0; /* Prevent shrinking */
+  flex-basis: 180px;
+  flex-shrink: 0;
   padding: 10px;
   border-right: 1px solid #525252;
 }
 
-.travelers-container,
+.travelers-container {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+#numTravelers {
+  width: 40px;
+  text-align: center;
+}
+
+#decreaseTravelers, #increaseTravelers {
+  padding: 5px 10px;
+}
+
 .date-picker-container,
 .trip-type-container,
 .airport-selection {
