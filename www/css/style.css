@@ -10,19 +10,19 @@ body {
 }
 
 .container {
-  display: flex; /* Align left-container and map-container side by side */
+  display: flex; /* Align leftPane and mapPane side by side */
   flex-grow: 1; /* Take up remaining space */
   overflow: hidden;
 }
 
-.map-container {
+.mapPane {
   flex-grow: 1; /* Take up remaining space */
   overflow: hidden;
 }
 
 /* Responsive Design */
 @media (max-width: 768px) {
-  .left-container {
+  .leftPane {
     flex-basis: 100px;
   }
 }
