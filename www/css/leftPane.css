@@ -14,15 +14,15 @@
   position: absolute;
   top: 10px;
   left: 200px; /* Adjust based on the width of the leftPane */
-  z-index: 10;
+  z-index: 999;
   cursor: pointer;
 }
 
 .leftPane-hidden {
-  transform: translateX(-100%);
-  width: 0; /* Add this line */
-  overflow: hidden; /* Add this line */
-  transition: transform 0.5s ease-in-out, width 0.5s ease-in-out; /* Add width transition */
+  visibility: hidden;
+  width: 0;
+  overflow: hidden;
+  position: absolute;
 }
 
 .mapPane-expanded {
