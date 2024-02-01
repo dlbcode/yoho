@@ -89,3 +89,16 @@
     flex-basis: 100px;
   }
 }
+
+.date-picker-container input[type="date"] {
+  background-color: #333; /* Dark background */
+  color: whrgb(108, 106, 106);/* Light text */
+  border: 1px solid #555; /* Darker border for contrast */
+  padding: 5px;
+  border-radius: 4px;
+}
+
+.date-picker-container input[type="date"]:focus {
+  outline: none; /* Optional: Removes the default focus outline */
+  border-color: #777; /* Optional: Changes border color on focus */
+}
