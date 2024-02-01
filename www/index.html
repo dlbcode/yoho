@@ -9,8 +9,9 @@
     <script src="https://cdn.jsdelivr.net/npm/leaflet.geodesic"></script>
     <script src="https://unpkg.com/leaflet-polylinedecorator"></script>
     <link rel="stylesheet" type="text/css" href="css/style.css">
-    <link rel="stylesheet" href="css/map.css" />
-    <link rel="stylesheet" href="css/infoPane.css" />
+    <link rel="stylesheet" type="text/css" href="css/leftPane.css">
+    <link rel="stylesheet" type="text/css" href="css/map.css" />
+    <link rel="stylesheet" type="text/css" href="css/infoPane.css" />
 </head>
 <body>
     <div class="container">
@@ -51,6 +52,16 @@
                 <button id="allPathsBtn">Show All Paths</button>
             </div>
         </main>
+    </div>
+    <div id="infoPane">
+        <div id="top-bar">
+            <button id="mapButton" class="map-icon-button">
+                <img src="./assets/map.png" alt="Trip Overview">
+            </button>
+            <div id="menu-bar">
+            </div>
+        </div>
+        <div id="infoPaneContent">
     </div>
     <script type="module" src="js/map.js"></script>
     <script type="module" src="js/airportAutocomplete.js"></script>

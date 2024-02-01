@@ -15,13 +15,6 @@ body {
   overflow: hidden;
 }
 
-.left-container {
-  flex-basis: 180px; /* Adjust width as necessary */
-  flex-shrink: 0; /* Prevent shrinking */
-  padding: 10px;
-  border-right: 1px solid #525252;
-}
-
 .map-container {
   flex-grow: 1; /* Take up remaining space */
   overflow: hidden;
@@ -112,11 +105,6 @@ input, button, select, textarea {
   pointer-events: none; /* Prevents the tooltip from interfering with other mouse events */
 }
 
-.autocomplete-active {
-  /* Your styles for highlighting the active suggestion */
-  color: #e7e7e7;
-}
-
 .floating-controls {
   position: absolute;
   top: 5px; /* Adjust as needed */
@@ -126,42 +114,4 @@ input, button, select, textarea {
   border-radius: 5px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
   z-index: 1000; /* Ensure it's above the map */
-}
-
-.route-container {
-  width: 80px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 10px;
-}
-
-.route-container input {
-  width: 60px;
-  flex-grow: 1;
-}
-
-.route-container input:last-child {
-  margin-right: 0; /* Remove margin for the last input */
-}
-
-.suggestions {
-  position: absolute;
-  border-bottom: none;
-  border-top: none;
-  z-index: 9999;
-  overflow: auto;
-  background-color: #222;
-  color: #888;
-  /*min-width: 100%; /* At least as wide as the input field */
-}
-
-.trip-type-button.active {
-  background-color: rgb(60, 93, 110);
-  color: white;
-}
-
-#startDate {
-  width: 95%;
-  margin-right: 10px;
 }
