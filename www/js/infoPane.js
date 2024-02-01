@@ -1,7 +1,6 @@
 import { appState, updateState } from './stateManager.js';
 import { pathDrawing } from './pathDrawing.js';
 import { findCheapestRoutes } from './findCheapestRoutes.js';
-import { routeHandling } from './routeHandling.js';
 
 const infoPane = {
   init() {
