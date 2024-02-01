@@ -1,5 +1,5 @@
 /* Left Pane Specific Styles */
-.left-container {
+.leftPane {
   flex-basis: 180px; /* Adjust width as necessary */
   flex-shrink: 0; /* Prevent shrinking */
   padding: 10px;
@@ -57,7 +57,7 @@
 
 /* Responsive Design for Left Pane */
 @media (max-width: 768px) {
-  .left-container {
+  .leftPane {
     flex-basis: 100px;
   }
 }
