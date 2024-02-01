@@ -20,12 +20,13 @@
 
 .leftPane-hidden {
   transform: translateX(-100%);
-  transition: transform 0.5s ease-in-out;
+  width: 0; /* Add this line */
+  overflow: hidden; /* Add this line */
+  transition: transform 0.5s ease-in-out, width 0.5s ease-in-out; /* Add width transition */
 }
 
 .mapPane-expanded {
   flex-grow: 1;
-  width: 100%; /* Add this line */
   transition: flex-grow 0.5s ease-in-out;
 }
 

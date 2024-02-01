@@ -82,6 +82,7 @@ function adjustMapSize() {
     const leftPaneWidth = leftPane.offsetWidth;
     const windowWidth = window.innerWidth;
     const mapWidth = leftPane.classList.contains('leftPane-hidden') ? windowWidth : windowWidth - leftPaneWidth;
+    console.log('mapWidth: ', mapWidth);
     mapElement.style.width = `${mapWidth}px`;
 
     if (map) {
