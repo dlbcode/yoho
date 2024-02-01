@@ -123,23 +123,26 @@ const infoPane = {
               });
               /// Add click event to handle waypoints
               row.addEventListener('click', () => {
-                const intermediaryIatas = item.route; // Use the full route including origin and destination
+                const intermediaryIatas = item.route;
                 const originIndex = appState.waypoints.findIndex(wp => wp.iata_code === selectedRoute.originAirport.iata_code);
-
+    
                 for (let i = 0; i < intermediaryIatas.length - 1; i++) {
-                  const waypointOrigin = airports.find(airport => airport.iata_code === intermediaryIatas[i]);
-                  const waypointDestination = airports.find(airport => airport.iata_code === intermediaryIatas[i + 1]);
-
-                  if (waypointOrigin && waypointDestination) {
-                    // Insert the origin (except for the first element)
-                    if (i > 0) {
-                      appState.waypoints.splice(originIndex + 1 + (i * 2) - 1, 0, waypointOrigin);
+                    const waypointOrigin = airports.find(airport => airport.iata_code === intermediaryIatas[i]);
+                    const waypointDestination = airports.find(airport => airport.iata_code === intermediaryIatas[i + 1]);
+    
+                    if (waypointOrigin && waypointDestination) {
+                        // Insert the origin (except for the first element)
+                        if (i > 0) {
+                            appState.waypoints.splice(originIndex + 1 + (i * 2) - 1, 0, waypointOrigin);
+                        }
+    
+                        // Insert the destination (except for the last element)
+                        if (i < intermediaryIatas.length - 2) {
+                            appState.waypoints.splice(originIndex + 1 + (i * 2), 0, waypointDestination);
+                        }
                     }
-                    // Insert the destination
-                    appState.waypoints.splice(originIndex + 1 + (i * 2), 0, waypointDestination);
-                  }
                 }
-
+    
                 console.table(appState.waypoints);
                 updateState('updateWaypoint', false);
               });
