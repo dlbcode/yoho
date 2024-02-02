@@ -106,23 +106,43 @@ const uiHandling = {
 
     let startY, startHeight;
 
-    resizeHandle.addEventListener('mousedown', function(e) {
+    const startDrag = function(e) {
+        // Prevent default action for touch events to avoid scrolling and other touch actions
         e.preventDefault();
-        startY = e.clientY;
+
+        // Use touch events if available, otherwise use mouse event
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
+        startY = clientY;
         startHeight = parseInt(document.defaultView.getComputedStyle(infoPane).height, 10);
+
+        // Add event listeners for both mouse and touch move/end events
         document.documentElement.addEventListener('mousemove', doDrag, false);
         document.documentElement.addEventListener('mouseup', stopDrag, false);
-    }, false);
+        document.documentElement.addEventListener('touchmove', doDrag, false);
+        document.documentElement.addEventListener('touchend', stopDrag, false);
+    };
 
-    function doDrag(e) {
-      infoPane.style.height = (startHeight - (e.clientY - startY)) + 'px';
-      requestAnimationFrame(adjustMapSize);
-    }
+    const doDrag = function(e) {
+        // Prevent default action here as well
+        e.preventDefault();
 
-    function stopDrag() {
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        const newHeight = startHeight - (clientY - startY);
+        infoPane.style.height = `${newHeight}px`;
+        requestAnimationFrame(adjustMapSize);
+    };
+
+    const stopDrag = function() {
         document.documentElement.removeEventListener('mousemove', doDrag, false);
         document.documentElement.removeEventListener('mouseup', stopDrag, false);
-    }
+        document.documentElement.removeEventListener('touchmove', doDrag, false);
+        document.documentElement.removeEventListener('touchend', stopDrag, false);
+    };
+
+    // Attach the startDrag function to both mousedown and touchstart events
+    resizeHandle.addEventListener('mousedown', startDrag, false);
+    resizeHandle.addEventListener('touchstart', startDrag, false);
   }
 }
 
