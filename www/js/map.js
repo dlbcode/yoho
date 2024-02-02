@@ -73,24 +73,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
 function adjustMapSize() {
     const mapElement = document.getElementById('map');
-    const infoPaneHeight = document.getElementById('infoPane').offsetHeight; // Ensure dynamic height is used
+    const infoPaneHeight = document.getElementById('infoPane').offsetHeight;
     const windowHeight = window.innerHeight;
     mapElement.style.height = `${windowHeight - infoPaneHeight}px`;
 
-    const leftPane = document.querySelector('.leftPane');
-    const leftPaneWidth = leftPane.offsetWidth;
-    const windowWidth = window.innerWidth;
-    const mapWidth = leftPane.classList.contains('leftPane-hidden') ? windowWidth : windowWidth - leftPaneWidth;
-    mapElement.style.width = `${mapWidth}px`;
-
     if (map) {
-        map.invalidateSize();
-    } else {
-        console.error("Leaflet map instance 'map' is not accessible.");
+        map.invalidateSize(); // Ensure Leaflet map adjusts to new size
     }
 }
 
+// Call adjustMapSize on window resize and orientation change
 window.addEventListener('resize', adjustMapSize);
+window.addEventListener('orientationchange', adjustMapSize);
+
+// Initial call to adjust map size
+document.addEventListener('DOMContentLoaded', adjustMapSize);
 
 var blueDotIcon = L.divIcon({ // Marker configurations
     className: 'custom-div-icon',
