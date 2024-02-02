@@ -90,6 +90,17 @@ function adjustMapSize() {
     }
 }
 
+function adjustMapHeightForAndroid() {
+    const mapElement = document.getElementById('map');
+    if (!mapElement) return;
+
+    // Use window.innerHeight to set the map height, ensuring it accounts for any OS-level UI elements.
+    mapElement.style.height = `${window.innerHeight}px`;
+}
+
+window.addEventListener('load', adjustMapHeightForAndroid);
+window.addEventListener('resize', adjustMapHeightForAndroid);
+
 window.addEventListener('resize', adjustMapSize);
 
 var blueDotIcon = L.divIcon({ // Marker configurations
