@@ -100,7 +100,7 @@ const uiHandling = {
     });
   },
 
-  initDragInfoPaneTab: function() {
+  initInfoPaneDragTab: function() {
     const dragTab = document.getElementById('dragTab');
     let startY, startHeight;
 
@@ -126,7 +126,7 @@ const uiHandling = {
 document.addEventListener('DOMContentLoaded', () => {
   uiHandling.initTripTypeButtons();
   uiHandling.initTogglePaneButton();
-  uiHandling.initDragInfoPaneTab();
+  uiHandling.initInfoPaneDragTab();
 });
 
 
