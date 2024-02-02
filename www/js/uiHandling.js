@@ -107,8 +107,9 @@ const uiHandling = {
     let startY, startHeight;
 
     const startDrag = function(e) {
-        // Prevent default action for touch events to avoid scrolling and other touch actions
+      if (e.cancelable) {
         e.preventDefault();
+      }
 
         // Use touch events if available, otherwise use mouse event
         const clientY = e.touches ? e.touches[0].clientY : e.clientY;
@@ -119,13 +120,14 @@ const uiHandling = {
         // Add event listeners for both mouse and touch move/end events
         document.documentElement.addEventListener('mousemove', doDrag, false);
         document.documentElement.addEventListener('mouseup', stopDrag, false);
-        document.documentElement.addEventListener('touchmove', doDrag, false);
+        document.documentElement.addEventListener('touchmove', doDrag, { passive: false });
         document.documentElement.addEventListener('touchend', stopDrag, false);
     };
 
     const doDrag = function(e) {
-        // Prevent default action here as well
+      if (e.cancelable) {
         e.preventDefault();
+      }
 
         const clientY = e.touches ? e.touches[0].clientY : e.clientY;
         const newHeight = startHeight - (clientY - startY);
@@ -142,7 +144,7 @@ const uiHandling = {
 
     // Attach the startDrag function to both mousedown and touchstart events
     resizeHandle.addEventListener('mousedown', startDrag, false);
-    resizeHandle.addEventListener('touchstart', startDrag, false);
+    resizeHandle.addEventListener('touchstart', startDrag, { passive: false });
   }
 }
 
