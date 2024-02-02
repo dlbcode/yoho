@@ -115,7 +115,8 @@ const uiHandling = {
     }, false);
 
     function doDrag(e) {
-        infoPane.style.height = (startHeight - (e.clientY - startY)) + 'px';
+      infoPane.style.height = (startHeight - (e.clientY - startY)) + 'px';
+      requestAnimationFrame(adjustMapSize);
     }
 
     function stopDrag() {

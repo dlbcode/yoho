@@ -73,20 +73,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
 function adjustMapSize() {
     const mapElement = document.getElementById('map');
-    const infoPaneHeight = 144; // Height of the infoPane
+    const infoPaneHeight = document.getElementById('infoPane').offsetHeight; // Ensure dynamic height is used
     const windowHeight = window.innerHeight;
     mapElement.style.height = `${windowHeight - infoPaneHeight}px`;
 
-    // Adjusting the width
     const leftPane = document.querySelector('.leftPane');
     const leftPaneWidth = leftPane.offsetWidth;
     const windowWidth = window.innerWidth;
     const mapWidth = leftPane.classList.contains('leftPane-hidden') ? windowWidth : windowWidth - leftPaneWidth;
-    console.log('mapWidth: ', mapWidth);
     mapElement.style.width = `${mapWidth}px`;
 
     if (map) {
-        map.invalidateSize(); // This is a Leaflet method to update the map size
+        console.log("Invalidating map size...");
+        map.invalidateSize();
+    } else {
+        console.error("Leaflet map instance 'map' is not accessible.");
     }
 }
 
