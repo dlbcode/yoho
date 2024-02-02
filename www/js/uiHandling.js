@@ -88,8 +88,17 @@ const uiHandling = {
         leftPane.classList.toggle('leftPane-hidden');
         mapPane.classList.toggle('mapPane-expanded');
         adjustMapSize();
+
+        // Check if leftPane is hidden and adjust toggle button position and text accordingly
+        if (leftPane.classList.contains('leftPane-hidden')) {
+            toggleBtn.style.left = '0px'; // Move button to the edge when leftPane is hidden
+            toggleBtn.textContent = '❯'; // Right arrow when leftPane is hidden
+        } else {
+            toggleBtn.style.left = '200px'; // Original position when leftPane is visible
+            toggleBtn.textContent = '❮';  // Left arrow when leftPane is visible
+        }
     });
-  }, 
+  },
 }
 
 document.addEventListener('DOMContentLoaded', () => {
