@@ -117,5 +117,5 @@ input, button, select, textarea {
   background-color: rgba(255, 255, 255, 0.1); /* Semi-transparent white */
   border-radius: 5px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-  z-index: 1000; /* Ensure it's above the map */
+  z-index: 400; /* Ensure it's above the map */
 }
