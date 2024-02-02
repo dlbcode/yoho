@@ -15,7 +15,7 @@
   height: 60px;
   top: calc((100vh - 144px) / 2);
   left: 200px;
-  z-index: 999;
+  z-index: 500;
   cursor: pointer;
 }
 

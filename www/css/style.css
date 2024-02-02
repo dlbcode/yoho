@@ -42,13 +42,17 @@ button:hover {
 }
 
 button.active, button:focus {
-  background-color: #4f9dff;
+  background-color: #294e7c;
   color: #fff;
 }
 
-/* Accessibility Improvements */
 button, input[type="number"], input[type="date"], input[type="text"] {
-  font-size: 16px; /* Improve readability on mobile devices */
+  background-color: #1f1f1f;
+  color: #a9a9a9;
+  border: 1px solid #525252;
+  padding: 4px;
+  border-radius: 3px;
+  font-size: 14px; /* Updated font size */
 }
 
 a {
@@ -61,7 +65,7 @@ a:hover, button:hover, input:hover, select:hover, textarea:hover {
 }
 
 a:active, button:active, input:focus, select:focus, textarea:focus {
-  background-color: #4f9dff;
+  background-color: #294e7c;
   color: #fff;
 }
 
