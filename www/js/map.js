@@ -84,7 +84,6 @@ function adjustMapSize() {
     mapElement.style.width = `${mapWidth}px`;
 
     if (map) {
-        console.log("Invalidating map size...");
         map.invalidateSize();
     } else {
         console.error("Leaflet map instance 'map' is not accessible.");
