@@ -75,10 +75,11 @@ function adjustMapSize() {
     const mapElement = document.getElementById('map');
     const infoPaneHeight = document.getElementById('infoPane').offsetHeight;
     const windowHeight = window.innerHeight;
-    mapElement.style.height = `${windowHeight - infoPaneHeight}px`;
+    const newMapHeight = windowHeight - infoPaneHeight;
+    mapElement.style.height = `${newMapHeight}px`;
 
     if (map) {
-        map.invalidateSize(); // Ensure Leaflet map adjusts to new size
+        map.invalidateSize(); // Ensure Leaflet adjusts to the new size
     }
 }
 
