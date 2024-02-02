@@ -20,11 +20,6 @@ body {
   overflow: hidden;
 }
 
-#map {
-  height: 100vh; /* Cover the viewport height */
-  width: 100%; /* Cover the viewport width */
-}
-
 /* Responsive Design */
 @media (max-width: 768px) {
   .leftPane {
