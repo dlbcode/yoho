@@ -13,7 +13,7 @@
 .toggle-pane-button {
   position: absolute;
   top: 10px;
-  left: 200px; /* Adjust based on the width of the leftPane */
+  left: 200px; /* Adjust this value based on where you want the button */
   z-index: 999;
   cursor: pointer;
 }
