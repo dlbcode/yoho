@@ -74,7 +74,7 @@ document.addEventListener('DOMContentLoaded', () => {
 function adjustMapSize() {
     const mapElement = document.getElementById('map');
     const infoPaneHeight = document.getElementById('infoPane').offsetHeight; // Ensure dynamic height is used
-    const windowHeight = window.innerHeight + 140;
+    const windowHeight = window.innerHeight;
     mapElement.style.height = `${windowHeight - infoPaneHeight}px`;
 
     const leftPane = document.querySelector('.leftPane');
