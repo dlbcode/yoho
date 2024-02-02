@@ -99,12 +99,36 @@ const uiHandling = {
         }
     });
   },
+
+  initInfoPaneDragButton: function() {
+    const infoPane = document.getElementById('infoPane');
+    const resizeHandle = document.getElementById('resizeHandle');
+
+    let startY, startHeight;
+
+    resizeHandle.addEventListener('mousedown', function(e) {
+        e.preventDefault();
+        startY = e.clientY;
+        startHeight = parseInt(document.defaultView.getComputedStyle(infoPane).height, 10);
+        document.documentElement.addEventListener('mousemove', doDrag, false);
+        document.documentElement.addEventListener('mouseup', stopDrag, false);
+    }, false);
+
+    function doDrag(e) {
+        infoPane.style.height = (startHeight - (e.clientY - startY)) + 'px';
+    }
+
+    function stopDrag() {
+        document.documentElement.removeEventListener('mousemove', doDrag, false);
+        document.documentElement.removeEventListener('mouseup', stopDrag, false);
+    }
+  }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
   uiHandling.initTripTypeButtons();
   uiHandling.initTogglePaneButton();
-  uiHandling.initInfoPaneDragTab();
+  uiHandling.initInfoPaneDragButton();
 });
 
 

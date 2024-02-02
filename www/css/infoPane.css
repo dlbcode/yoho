@@ -115,3 +115,9 @@ tr:hover {
 .update-price-btn:hover {
   background-color: #3b7897;
 }
+
+.resize-handle {
+  height: 10px;
+  background-color: #ccc;
+  cursor: ns-resize; /* Cursor indicates resizable area */
+}
