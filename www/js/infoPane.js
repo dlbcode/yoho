@@ -66,7 +66,7 @@ const infoPane = {
       })
       .then(airports => {
         // Now fetch the cheapest routes data
-        return fetch(`https://yonderhop:3000/cheapestRoutes?origin=${selectedRoute.originAirport.iata_code}&destination=${selectedRoute.destinationAirport.iata_code}`)
+        return fetch(`https://yonderhopS:3000/cheapestRoutes?origin=${selectedRoute.originAirport.iata_code}&destination=${selectedRoute.destinationAirport.iata_code}`)
           .then(response => {
             if (!response.ok) {
               throw new Error('Failed to fetch cheapest route data');

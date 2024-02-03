@@ -50,7 +50,7 @@ L.control.zoom({ // Zoom control settings
     position: 'bottomright'
 }).addTo(map);
 
-fetch('http://ip-api.com/json/') // Fetch client's approximate location using IP-API
+fetch('https://ip-api.com/json/') // Fetch client's approximate location using IP-API
     .then(response => response.json())
     .then(data => {
         if (data.status === 'success') { // Set map view to the obtained location
