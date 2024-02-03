@@ -20,8 +20,8 @@ app.use(cors({
     'https://www.yonderhop.com',
     'http://yonderhop.com',
     'https://yonderhop.com',
-    'http://localhost:8002', // Assuming you're using this for development purposes
-    'https://localhost:8002' // If you also test HTTPS locally
+    'http://localhost:8002',
+    'https://localhost:8002'
   ]
 }));
 

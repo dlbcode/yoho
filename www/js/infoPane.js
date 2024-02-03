@@ -57,7 +57,7 @@ const infoPane = {
     infoPaneContent.innerHTML = '';
 
     // Fetch airport data
-    fetch('http://127.0.0.1:3000/airports')
+    fetch('https://yonderhop:3000/airports')
       .then(response => {
         if (!response.ok) {
           throw new Error('Failed to fetch airports data');
@@ -66,7 +66,7 @@ const infoPane = {
       })
       .then(airports => {
         // Now fetch the cheapest routes data
-        return fetch(`http://127.0.0.1:3000/cheapestRoutes?origin=${selectedRoute.originAirport.iata_code}&destination=${selectedRoute.destinationAirport.iata_code}`)
+        return fetch(`https://yonderhop:3000/cheapestRoutes?origin=${selectedRoute.originAirport.iata_code}&destination=${selectedRoute.destinationAirport.iata_code}`)
           .then(response => {
             if (!response.ok) {
               throw new Error('Failed to fetch cheapest route data');
