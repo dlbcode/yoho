@@ -1,7 +1,14 @@
+.mapPane {
+  display: flex; /* Ensure this is a flex container */
+  flex-direction: column; /* Stack children vertically */
+  height: 100%; /* Fill the height of its parent */
+  overflow: hidden; /* Prevent overflow */
+}
+
 #map {
-  flex-grow: 1;
-  height: 100Vh; 
-  overflow: hidden;
+  flex-grow: 1; /* Allow the map to fill the available space */
+  width: 100%; /* Fill the width of its parent */
+  height: 100%; /* This should be adjusted by JS if not filling */
 }
 
 .flight-details {

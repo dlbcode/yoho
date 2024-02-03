@@ -78,9 +78,9 @@ function adjustMapSize() {
     const newMapHeight = windowHeight - infoPaneHeight;
     mapElement.style.height = `${newMapHeight}px`;
 
-    if (map) {
-        map.invalidateSize(); // Ensure Leaflet adjusts to the new size
-    }
+    if (window.map) {
+        map.invalidateSize();
+    }    
 }
 
 // Call adjustMapSize on window resize and orientation change
