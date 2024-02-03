@@ -15,7 +15,14 @@ const amadeus = new Amadeus({
 
 // use it before all route definitions
 app.use(cors({
-  origin: ['http://yonderhop.com:8002', 'http://localhost:8002']
+  origin: [
+    'http://www.yonderhop.com',
+    'https://www.yonderhop.com',
+    'http://yonderhop.com',
+    'https://yonderhop.com',
+    'http://localhost:8002', // Assuming you're using this for development purposes
+    'https://localhost:8002' // If you also test HTTPS locally
+  ]
 }));
 
 const mongoUrl = `mongodb://rsuser:${mongodbPassword}@mongodb:27017/rsdb`;
