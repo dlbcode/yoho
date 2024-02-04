@@ -27,12 +27,12 @@ function drawRoutesFromCache() {
 
 function fetchRoutesFromAPI() {
     // Fetch the list of airports first
-    fetch('https://yonderhop.com:3000/airports')
+    fetch('https://yonderhop.com/api/airports')
         .then(response => response.json())
         .then(airports => {
             airports.forEach(airport => {
                 // For each airport, fetch the 'to' routes
-                fetch(`https://yonderhop.com:3000/directRoutes?origin=${airport.iata_code}&direction=to`)
+                fetch(`https://yonderhop.com/api/directRoutes?origin=${airport.iata_code}&direction=to`)
                     .then(response => response.json())
                     .then(routes => {
                         routeDataCache = routes;

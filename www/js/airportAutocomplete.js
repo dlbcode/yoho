@@ -5,7 +5,7 @@ import { flightMap } from './flightMap.js';
 
 async function fetchAirports(query) {
     try {
-        const response = await fetch(`https://yonderhop.com:3000/airports?query=${query}`);
+        const response = await fetch(`https://yonderhop.com/api/airports?query=${query}`);
         return await response.json();
     } catch (error) {
         console.warn('Airport not found');

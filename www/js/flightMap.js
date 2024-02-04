@@ -108,7 +108,7 @@ const flightMap = {
         }
     
         try {
-            const response = await fetch('https://yonderhop.com:3000/airports');
+            const response = await fetch('http://yonderhop.com/api/airports');
             const data = await response.json();
             this.airportDataCache = data.reduce((acc, airport) => {
                 acc[airport.iata_code] = airport;
@@ -171,7 +171,7 @@ const flightMap = {
         if (!appState.directRoutes[iata]) {
             try {
                 const direction = appState.routeDirection // 'to' or 'from'
-                const response = await fetch(`https://yonderhop.com:3000/directRoutes?origin=${iata}&direction=${direction}`);
+                const response = await fetch(`http://yonderhop.com/api/directRoutes?origin=${iata}&direction=${direction}`);
                 const routes = await response.json();
                 appState.directRoutes[iata] = routes;
             } catch (error) {
