@@ -19,9 +19,7 @@ app.use(cors({
     'http://www.yonderhop.com',
     'https://www.yonderhop.com',
     'http://yonderhop.com',
-    'https://yonderhop.com',
-    'http://localhost:8002',
-    'https://localhost:8002'
+    'https://yonderhop.com'
   ]
 }));
 

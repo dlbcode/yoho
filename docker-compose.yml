@@ -6,6 +6,7 @@ services:
     volumes:
       - ./services/nginx/nginx.conf:/etc/nginx/conf.d/default.conf
       - ./services/nginx/logs:/var/log/nginx/
+      - /etc/letsencrypt:/etc/letsencrypt:ro
       - ./www:/var/www/
     ports:
       - "8002:80"
