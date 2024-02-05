@@ -9,7 +9,8 @@ services:
       - /etc/letsencrypt:/etc/letsencrypt:ro
       - ./www:/var/www/
     ports:
-      - "8002:80"
+      - "80:80"
+      - "443:443"
 
   mongodb:
     image: mongo
