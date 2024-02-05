@@ -50,18 +50,18 @@ L.control.zoom({ // Zoom control settings
     position: 'bottomright'
 }).addTo(map);
 
-fetch('http://ip-api.com/json/') // Fetch client's approximate location using IP-API (no hpttps)
-    .then(response => response.json())
-    .then(data => {
-        if (data.status === 'success') { // Set map view to the obtained location
-            map.setView([data.lat, data.lon], 4);
-        } else {
-            console.error('IP Geolocation failed:', data.message);
-        }
-    })
-    .catch(error => {
-        console.error('Error fetching IP Geolocation:', error);
+// Use HTML5 Geolocation API to fetch client's location
+if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(function(position) {
+        map.setView([position.coords.latitude, position.coords.longitude], 4);
+    }, function(error) {
+        console.error('Geolocation API Error:', error);
+        // Optionally, set a fallback location here
     });
+} else {
+    console.error('Geolocation API not supported by this browser.');
+    // Optionally, set a fallback location here
+}
 
 document.getElementById('map').style.height = window.innerHeight + 'px'; // Initial resize on load
 document.addEventListener('DOMContentLoaded', () => {
