@@ -57,7 +57,7 @@ const infoPane = {
     infoPaneContent.innerHTML = '';
 
     // Fetch airport data
-    fetch('https://yonderhop/api/airports')
+    fetch('https://yonderhop.com/api/airports')
       .then(response => {
         if (!response.ok) {
           throw new Error('Failed to fetch airports data');
