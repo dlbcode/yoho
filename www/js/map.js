@@ -1,12 +1,9 @@
 import { flightMap } from './flightMap.js';
-import { routeList } from './routeList.js';
-import { updateState, appState } from './stateManager.js';
+import { updateState } from './stateManager.js';
 import { getPrice } from './getPrice.js';
 import { infoPane } from './infoPane.js';
 
 async function initMapFunctions() {
-    routeList.initTravelerControls();
-    
     const params = new URLSearchParams(window.location.search);
     const oneWayParam = params.get('oneWay');
     if (oneWayParam === 'false') {

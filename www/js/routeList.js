@@ -9,7 +9,7 @@ const routeList = {
         this.addStateChangeListener();
     },
 
-    initTravelerControls() {
+    initTravelerControls: function() {
         ['increaseTravelers', 'decreaseTravelers'].forEach(id =>
             document.getElementById(id).addEventListener('click', () => this.updateTravelers(id)));
     },
