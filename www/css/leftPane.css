@@ -4,7 +4,7 @@
 }
 .leftPane {
   transition: transform 0.5s ease-in-out;
-  flex-basis: 200px;
+  flex-basis: 150px;
   flex-shrink: 0;
   padding: 10px;
   border-right: 1px solid #525252;
@@ -42,8 +42,10 @@
 
 /* Styling for the number of travelers input */
 #numTravelers {
-  width: 40px;
-  text-align: center;
+  width: 26px;
+  padding-left: 0px;
+  padding-right: 0px;
+  text-align: left;
 }
 
 /* Styling for the decrease and increase travelers buttons */
@@ -70,7 +72,7 @@
 
 /* Styling for the input fields in the route container */
 .route-container input {
-  width: 60px;
+  width: 30px;
   flex-grow: 1;
 }
 
@@ -95,6 +97,14 @@
 .trip-type-button.active {
   background-color: rgb(60, 93, 110);
   color: white;
+}
+
+.trip-type-button {
+  margin-right: 0px !important;
+}
+
+.trip-type-button + .trip-type-button {
+  margin-left: 0 !important;
 }
 
 /* Styling for the start date input */
