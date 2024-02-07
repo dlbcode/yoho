@@ -8,6 +8,20 @@
   flex-shrink: 0;
   padding: 10px;
   border-right: 1px solid #525252;
+  overflow-y: auto;
+}
+
+.leftPane::-webkit-scrollbar-track {
+  background-color: #222;
+}
+
+.leftPane::-webkit-scrollbar-thumb {
+  background-color: #555;
+  border-radius: 2px;
+}
+
+.leftPane::-webkit-scrollbar {
+  width: 5px;
 }
 
 .toggle-pane-button {
