@@ -249,3 +249,11 @@
 .trip-type-container {
   margin-right: 0;
 }
+
+.travelers-dropdown-btn, .trip-type-dropdown-btn {
+  padding: 5px 5px; /* Adjust padding as needed */
+  margin-right: 5px;
+  white-space: nowrap; /* Prevent text from wrapping */
+  overflow: hidden; /* Hide overflow */
+  text-overflow: ellipsis; /* Add ellipsis for overflow text */
+}
