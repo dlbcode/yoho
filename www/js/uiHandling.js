@@ -14,7 +14,7 @@ const uiHandling = {
 
     dropdown.querySelectorAll('li').forEach(item => {
         item.addEventListener('click', function() {
-            dropdownBtn.innerHTML = `<img src="assets/person.svg" alt="" class="icon-person"> ${this.textContent} <span class="icon-dropdown">&#9660;</span>`;
+            dropdownBtn.innerHTML = `<img src="assets/person.svg" alt="" class="icon-person"> ${this.textContent} <span class="icon-dropdown"></span>`;
             dropdown.classList.add('hidden');
             // Update the number of travelers in your app state here
         });
