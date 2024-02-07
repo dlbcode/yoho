@@ -178,10 +178,10 @@
   left: 10px; /* Align it with the left edge of the parent container */
   z-index: 1000; /* Ensure it overlays other content */
   list-style: none;
-  padding: 10px;
-  margin: 5px 0 0;
+  padding: 5px;
+  margin: 0px 0 0;
   background-color: #333;
-  border: 1px solid #555;
+  border: 0px solid #555;
   border-radius: 4px;;
   width: 50px; /* Adjust width as needed, accounting for padding */
 }
@@ -217,10 +217,10 @@
   left: 20px;
   z-index: 1000;
   list-style: none;
-  padding: 10px;
-  margin: 5px 0 0;
+  padding: 5px;
+  margin: 0px 0 0;
   background-color: #333;
-  border: 1px solid #555;
+  border: 0px solid #555;
   border-radius: 4px;;
   width: 120px;
 }

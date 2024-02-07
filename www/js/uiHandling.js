@@ -28,20 +28,27 @@ const uiHandling = {
     const dropdown = document.getElementById('tripTypeDropdown');
 
     dropdownBtn.addEventListener('click', function() {
+        // Clear existing dropdown items
+        dropdown.innerHTML = '';
+        // Determine which option to display based on the current button text
+        const optionToShow = dropdownBtn.textContent.trim() === 'One way' ? 'Round trip' : 'One way';
+        // Create and append the non-selected option
+        const li = document.createElement('li');
+        li.textContent = optionToShow;
+        dropdown.appendChild(li);
+        // Toggle dropdown visibility
         dropdown.classList.toggle('hidden');
-        console.log('dropdown.classList', dropdown.classList);
     });
 
-    dropdown.querySelectorAll('li').forEach(item => {
-        item.addEventListener('click', function() {
-            dropdownBtn.innerHTML = `${this.textContent} <span class="icon-dropdown"></span>`;
-            if (this.textContent === 'One way') {
-                updateState('oneWay', true);
-            } else if (this.textContent === 'Round trip') {
-                updateState('oneWay', false);
-            }
+    // Handle selection of the dropdown option
+    dropdown.addEventListener('click', function(event) {
+        if (event.target.tagName === 'LI') {
+            // Update button text and appState
+            dropdownBtn.innerHTML = `${event.target.textContent} <span class="icon-dropdown"></span>`;
+            const isOneWay = event.target.textContent === 'One way';
+            updateState('oneWay', isOneWay);
             dropdown.classList.add('hidden');
-        });
+        }
     });
   },
 
