@@ -19,11 +19,16 @@
         <button id="togglePaneBtn" class="toggle-pane-button">❮</button>
         <nav class="leftPane">
             <div class="travelers-container">
-                <label for="numTravelers" class="travelers-icon-label"></label>
-                <button id="decreaseTravelers">-</button>
-                <input type="number" id="numTravelers" value="1" min="1" max="9" readonly>
-                <button id="increaseTravelers">+</button>
-            </div>            
+                <button id="travelersDropdownBtn" class="travelers-dropdown-btn">
+                    <img src="assets/person.svg" alt="" class="icon-person"> 1 
+                    <span class="icon-dropdown">&#9660;</span>
+                </button>
+                <ul id="travelersDropdown" class="travelers-dropdown hidden">
+                    <li>1 Adult</li>
+                    <li>2 Adults</li>
+                    <!-- Add more list items as needed -->
+                </ul>
+            </div>                       
             <!-- <div class="date-picker-container">
                 <input type="date" id="startDate" name="startDate">
             </div> -->            

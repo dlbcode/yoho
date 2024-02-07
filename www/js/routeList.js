@@ -5,13 +5,16 @@ const routeList = {
     numTravelers: 1,
 
     init() {
-        this.initTravelerControls();
+        this.initTravelersDropdown();
         this.addStateChangeListener();
     },
 
-    initTravelerControls: function() {
-        ['increaseTravelers', 'decreaseTravelers'].forEach(id =>
-            document.getElementById(id).addEventListener('click', () => this.updateTravelers(id)));
+    initTravelersDropdown: function() {
+        const travelersDropdown = document.getElementById('travelersDropdown');
+        travelersDropdown.addEventListener('change', (event) => {
+            this.numTravelers = parseInt(event.target.value, 10);
+            this.updateTotalCost();
+        });
     },
 
     updateTotalCost: function() {
@@ -27,16 +30,6 @@ const routeList = {
 
         totalCost *= this.numTravelers;
         document.getElementById('totalCost').textContent = `Estimated price: $${totalCost.toFixed(2)}`;
-        document.getElementById('numTravelers').value = this.numTravelers;
-    },
-
-    updateTravelers(id) {
-        if (id === 'increaseTravelers') {
-            this.numTravelers++;
-        } else if (this.numTravelers > 1) {
-            this.numTravelers--;
-        }
-        this.updateTotalCost();
     },
 
     addStateChangeListener() {

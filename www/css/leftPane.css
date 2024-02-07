@@ -142,3 +142,48 @@
   display: inline-block;
   cursor: pointer;
 }
+
+
+.travelers-dropdown-btn {
+  display: flex;
+  align-items: center;
+  background-color: #333;
+  color: white;
+  border: 1px solid #555;
+  padding: 5px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.icon-person {
+  width: 16px;
+  height: 16px;
+  margin-right: 5px;
+}
+
+.icon-dropdown {
+  margin-left: auto;
+}
+
+.travelers-dropdown {
+  list-style: none;
+  padding: 0;
+  margin: 5px 0 0;
+  background-color: #333;
+  border: 1px solid #555;
+  border-radius: 4px;
+  display: none; /* Hidden by default */
+}
+
+.travelers-dropdown li {
+  padding: 5px 10px;
+  cursor: pointer;
+}
+
+.travelers-dropdown li:hover {
+  background-color: #555;
+}
+
+.hidden {
+  display: none;
+}

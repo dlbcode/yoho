@@ -3,6 +3,23 @@ import { adjustMapSize } from "./map.js";
 
 const uiHandling = {
 
+  initTravelersDropdown: function() {
+    const dropdownBtn = document.getElementById('travelersDropdownBtn');
+    const dropdown = document.getElementById('travelersDropdown');
+
+    dropdownBtn.addEventListener('click', function() {
+        dropdown.classList.toggle('hidden');
+    });
+
+    dropdown.querySelectorAll('li').forEach(item => {
+        item.addEventListener('click', function() {
+            dropdownBtn.innerHTML = `<img src="assets/person.svg" alt="" class="icon-person"> ${this.textContent} <span class="icon-dropdown">&#9660;</span>`;
+            dropdown.classList.add('hidden');
+            // Update the number of travelers in your app state here
+        });
+    });
+  },  
+
   initTripTypeSelect: function() {
     const tripTypeSelect = document.getElementById('tripTypeSelect');
 
@@ -130,6 +147,7 @@ const uiHandling = {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+  uiHandling.initTravelersDropdown();
   uiHandling.initTripTypeSelect();
   uiHandling.initTogglePaneButton();
   uiHandling.initInfoPaneDragButton();
