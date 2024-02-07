@@ -26,7 +26,7 @@ const routeList = {
         }
 
         totalCost *= this.numTravelers;
-        document.getElementById('totalCost').textContent = `Total Trip Cost: $${totalCost.toFixed(2)}`;
+        document.getElementById('totalCost').textContent = `Estimated price: $${totalCost.toFixed(2)}`;
         document.getElementById('numTravelers').value = this.numTravelers;
     },
 
