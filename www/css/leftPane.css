@@ -93,14 +93,6 @@
   color: #e7e7e7;
 }
 
-.suggestions {
-  position: absolute;
-  z-index: 9999;
-  overflow: auto;
-  background-color: #222;
-  color: #888;
-}
-
 @media (max-width: 768px) {
   .leftPane {
     flex-basis: 100px;
@@ -191,7 +183,32 @@
 }
 
 #tripTypeDropdownBtn:disabled {
-  background-color: #ccc;
-  color: #666;
+  background-color: #999;
+  color: #444;
   cursor: not-allowed;
+}
+
+/* Styling for any suggestions container related to waypoint fields */
+[id$='Suggestions'] {
+  background-color: #333; /* Match dropdown background */
+  border: 1px solid #525252; /* Match dropdown border */
+  border-radius: 4px; /* Match dropdown border radius */
+  color: white; /* Match dropdown text color */
+  position: absolute;
+  z-index: 1000;
+  width: auto;
+  max-height: 200px;
+  overflow-y: auto;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.5); /* Optional: for depth */
+}
+
+/* Styling individual suggestion items within any suggestions container */
+[id$='Suggestions'] div {
+  padding: 10px;
+  cursor: pointer;
+}
+
+/* Highlighting items on hover within any suggestions container */
+[id$='Suggestions'] div:hover {
+  background-color: #555;
 }
