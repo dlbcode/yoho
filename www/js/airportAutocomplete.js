@@ -98,9 +98,18 @@ function setupAutocompleteForField(fieldId) {
         if (!items) return false;
         removeActive(items);
         if (currentFocus >= items.length) currentFocus = 0;
-        if (currentFocus < 0) currentFocus = (items.length - 1);
+        if (currentFocus < 0) currentFocus = items.length - 1;
+    
+        // Add the "active" class to the current item
         items[currentFocus].classList.add('autocomplete-active');
-    }
+    
+        // Scroll the active item into view
+        items[currentFocus].scrollIntoView({
+            behavior: 'smooth',
+            block: 'nearest',
+            inline: 'start'
+        });
+    }    
 
     // Function to remove the "active" class from all autocomplete items
     function removeActive(items) {
