@@ -209,21 +209,20 @@
   padding: 5px 10px;
   border-radius: 4px;
   cursor: pointer;
-  width: 100%; /* Match the button width to its container */
+  width: 100%;
 }
 
 .trip-type-dropdown {
   position: absolute;
-  top: 100%; /* Position it right below the button */
-  left: 10px; /* Align it with the left edge of the parent container */
-  z-index: 1000; /* Ensure it overlays other content */
+  left: 20px;
+  z-index: 1000;
   list-style: none;
   padding: 10px;
   margin: 5px 0 0;
   background-color: #333;
   border: 1px solid #555;
   border-radius: 4px;;
-  width: 50px; /* Adjust width as needed, accounting for padding */
+  width: 120px;
 }
 
 .trip-type-dropdown li {
