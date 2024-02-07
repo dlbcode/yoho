@@ -94,7 +94,7 @@ const uiHandling = {
             toggleBtn.style.left = '0px'; // Move button to the edge when leftPane is hidden
             toggleBtn.textContent = '❯'; // Right arrow when leftPane is hidden
         } else {
-            toggleBtn.style.left = '150px'; // Original position when leftPane is visible
+            toggleBtn.style.left = '170px'; // Original position when leftPane is visible
             toggleBtn.textContent = '❮';  // Left arrow when leftPane is visible
         }
     });
