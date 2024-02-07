@@ -1,11 +1,10 @@
-/* Apply box-sizing globally for consistency */
 *, *::before, *::after {
   box-sizing: border-box;
 }
+
 .leftPane {
   transition: transform 0.5s ease-in-out;
-  flex-basis: 170px;
-  flex-shrink: 0;
+  flex: 0 0 170px;
   padding: 10px;
   border-right: 1px solid #525252;
   overflow-y: auto;
@@ -27,7 +26,8 @@
 .toggle-pane-button {
   position: absolute;
   height: 60px;
-  top: calc((100vh - 144px) / 2);
+  top: 50%;
+  transform: translateY(-50%);
   left: 170px;
   z-index: 500;
   cursor: pointer;
@@ -41,94 +41,82 @@
 }
 
 .mapPane-expanded {
-  flex-grow: 1;
-  transition: flex-grow 0.5s ease-in-out;
+  flex: 1 1 auto;
+  transition: flex 0.5s ease-in-out;
 }
 
 .options-container {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 10px; /* Adjust based on your layout */
+  margin-bottom: 10px;
 }
 
 .travelers-container {
-  position: relative; /* Add this line */
+  position: relative;
   display: flex;
-  width: 100%;
   align-items: center;
   justify-content: space-between;
   gap: 5px;
   margin-bottom: 10px;
 }
 
-/* Styling for the number of travelers input */
 #numTravelers {
   width: 26px;
-  padding-left: 0px;
-  padding-right: 0px;
+  padding: 0;
   text-align: left;
 }
 
-/* Styling for the decrease and increase travelers buttons */
 #decreaseTravelers, #increaseTravelers {
   padding: 5px 10px;
 }
 
-/* Styling for the date picker, trip type, and airport selection containers */
 .date-picker-container,
 .trip-type-container,
 .airport-selection {
   margin-bottom: 10px;
 }
 
-/* Styling for the route container */
 .route-container {
   display: flex;
-  width: 100%;
   align-items: center;
   justify-content: space-between;
   gap: 5px;
   margin-bottom: 10px;
 }
 
-/* Styling for the input fields in the route container */
 .route-container input {
   width: 30px;
   flex-grow: 1;
 }
 
-/* Styling for active autocomplete suggestions */
 .autocomplete-active {
   color: #e7e7e7;
 }
 
-/* Styling for the suggestions dropdown */
 .suggestions {
   position: absolute;
-  border-bottom: none;
-  border-top: none;
   z-index: 9999;
   overflow: auto;
   background-color: #222;
   color: #888;
 }
 
-/* Styling for the start date input */
-#startDate {
-  width: 100%;
-}
-
-/* Responsive design adjustments for smaller screens */
 @media (max-width: 768px) {
   .leftPane {
     flex-basis: 100px;
   }
 }
 
+/*
+
+#startDate {
+  width: 100%;
+}
+
 .date-picker-container input[type="date"] {
   background-color: #333;
-  color: whrgb(108, 106, 106);
+  color: #6c6a6a;
   border: 1px solid #555;
   padding: 5px;
   border-radius: 4px;
@@ -138,28 +126,13 @@
   outline: none;
   border-color: #777;
 }
+*/
 
-/* New styles for the travelers icon label */
 .travelers-icon-label {
-  background-image: url('../assets/person.svg');
-  background-size: 24px 24px;
-  background-repeat: no-repeat;
-  background-position: center;
+  background: url('../assets/person.svg') no-repeat center;
   width: 16px;
   height: 16px;
   display: inline-block;
-  cursor: pointer;
-}
-
-
-.travelers-dropdown-btn {
-  display: flex;
-  align-items: center;
-  background-color: #333;
-  color: white;
-  border: 0px solid #555;
-  padding: 5px 5px;
-  border-radius: 4px;
   cursor: pointer;
 }
 
@@ -174,23 +147,22 @@
   height: 0;
   border-left: 6px solid transparent;
   border-right: 6px solid transparent;
-  border-top: 6px solid #7f7f7f; /* Adjust color as needed */
+  border-top: 6px solid #7f7f7f;
   display: inline-block;
   margin-left: 5px;
 }
 
-.travelers-dropdown {
+.travelers-dropdown, .trip-type-dropdown {
   position: absolute;
-  top: 100%; /* Position it right below the button */
-  left: 10px; /* Align it with the left edge of the parent container */
-  z-index: 1000; /* Ensure it overlays other content */
+  left: 0;
+  z-index: 1000;
   list-style: none;
   padding: 5px;
-  margin: 0px 0 0;
+  margin: 0;
   background-color: #333;
-  border: 0px solid #555;
-  border-radius: 4px;;
-  width: 50px; /* Adjust width as needed, accounting for padding */
+  border: 0;
+  border-radius: 4px;
+  width: auto;
 }
 
 .travelers-dropdown li {
@@ -198,7 +170,7 @@
   cursor: pointer;
 }
 
-.travelers-dropdown li:hover {
+.travelers-dropdown li:hover, .trip-type-dropdown li:hover{
   background-color: #555;
 }
 
@@ -206,54 +178,24 @@
   display: none;
 }
 
-.trip-type-dropdown-btn {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background-color: #333;
-  color: white;
-  border: 0px solid #555;
-  padding: 5px 5px;
-  border-radius: 4px;
-  cursor: pointer;
-  width: 100%;
-}
-
-.trip-type-dropdown {
-  position: absolute;
-  left: 95px;
-  z-index: 1000;
-  list-style: none;
-  padding: 5px;
-  margin: 0px 0 0;
-  background-color: #333;
-  border: 0px solid #555;
-  border-radius: 4px;;
-  width: 120px;
-}
-
 .trip-type-dropdown li {
   padding: 5px 10px;
   cursor: pointer;
 }
 
-.trip-type-dropdown li:hover {
-  background-color: #555;
-}
-
-.travelers-container, .trip-type-container {
-  flex: 1; /* Allows both containers to share available space equally */
-  
-}
-
-.trip-type-container {
-  margin-right: 0;
-}
-
-.travelers-dropdown-btn, .trip-type-dropdown-btn {
-  padding: 5px 5px; /* Adjust padding as needed */
+.travelers-dropdown-btn,
+.trip-type-dropdown-btn {
+  padding: 5px; /* Combined padding rules */
   margin-right: 5px;
-  white-space: nowrap; /* Prevent text from wrapping */
-  overflow: hidden; /* Hide overflow */
-  text-overflow: ellipsis; /* Add ellipsis for overflow text */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #333;
+  color: white;
+  border-radius: 4px;
+  cursor: pointer;
+  width: 100%;
 }
