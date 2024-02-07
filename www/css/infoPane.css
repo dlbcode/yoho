@@ -1,8 +1,10 @@
 #infoPane {
+  position: relative;
   width: 100%;
   background-color: #222;
   box-sizing: border-box;
-  z-index: 600;
+  z-index: 1000;
+  bottom: 18px;
 }
 
 #top-bar {
