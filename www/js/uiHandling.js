@@ -9,6 +9,7 @@ const uiHandling = {
 
     dropdownBtn.addEventListener('click', function() {
         dropdown.classList.toggle('hidden');
+        console.log('dropdown.classList', dropdown.classList);
     });
 
     dropdown.querySelectorAll('li').forEach(item => {
