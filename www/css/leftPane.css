@@ -96,7 +96,7 @@
 
 @media (max-width: 768px) {
   .leftPane {
-    flex-basis: 100px;
+    flex-basis: 170px; /* Ensure left pane remains 170px wide on mobile */
   }
 }
 
