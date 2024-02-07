@@ -27,6 +27,8 @@ const uiHandling = {
     const dropdownBtn = document.getElementById('tripTypeDropdownBtn');
     const dropdown = document.getElementById('tripTypeDropdown');
 
+    document.addEventListener('routesArrayUpdated', this.handleStateChange.bind(this));
+
     dropdownBtn.addEventListener('click', function() {
         // Clear existing dropdown items
         dropdown.innerHTML = '';
