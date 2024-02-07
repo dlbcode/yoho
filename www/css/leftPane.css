@@ -209,6 +209,6 @@
 }
 
 /* Highlighting items on hover within any suggestions container */
-[id$='Suggestions'] div:hover {
+[id$='Suggestions'] div:hover, .autocomplete-active {
   background-color: #555;
 }
