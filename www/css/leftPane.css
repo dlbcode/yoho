@@ -46,6 +46,7 @@
 }
 
 .travelers-container {
+  position: relative; /* Add this line */
   display: flex;
   width: 100%;
   align-items: center;
@@ -162,16 +163,27 @@
 }
 
 .icon-dropdown {
-  margin-left: auto;
+  width: 0;
+  height: 0;
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-top: 8px solid #7f7f7f; /* Adjust color as needed */
+  display: inline-block;
+  margin-left: 5px;
 }
 
 .travelers-dropdown {
+  position: absolute;
+  top: 100%; /* Position it right below the button */
+  left: 0; /* Align it with the left edge of the parent container */
+  z-index: 1000; /* Ensure it overlays other content */
   list-style: none;
   padding: 0;
   margin: 5px 0 0;
   background-color: #333;
   border: 1px solid #555;
   border-radius: 4px;
+  width: calc(100% - 10px); /* Adjust width as needed, accounting for padding */
 }
 
 .travelers-dropdown li {
