@@ -31,23 +31,20 @@ const infoPane = {
       button.onclick = () => this.handleRouteInfoClick(index);
       menuBar.appendChild(button);
 
-      // Add mouseover event listener
       button.addEventListener('mouseover', () => {
         const routeId = `${route.originAirport.iata_code}-${route.destinationAirport.iata_code}`;
-        const pathLines = pathDrawing.routePathCache[routeId] || [];
-        if (pathLines.length > 0) {
-          pathLines.forEach(path => path.setStyle({ color: 'white' }));
-        }
+        const pathLines = pathDrawing.routePathCache[routeId] || pathDrawing.dashedRoutePathCache[routeId] || [];
+        pathLines.forEach(path => path.setStyle({ color: 'white' }));
       });
-
-      // Add mouseout event listener
+      
       button.addEventListener('mouseout', () => {
-        const routeId = `${route.originAirport.iata_code}-${route.destinationAirport.iata_code}`;
-        const pathLines = pathDrawing.routePathCache[routeId] || [];
-        if (pathLines.length > 0) {
-          pathLines.forEach(path => path.setStyle({ color: pathDrawing.getColorBasedOnPrice(route.price) }));
-        };
-      });
+          const routeId = `${route.originAirport.iata_code}-${route.destinationAirport.iata_code}`;
+          const pathLines = pathDrawing.routePathCache[routeId] || pathDrawing.dashedRoutePathCache[routeId] || [];
+          pathLines.forEach(path => {
+              const originalColor = pathDrawing.getColorBasedOnPrice(route.price);
+              path.setStyle({ color: originalColor });
+          });
+      });    
     });
   },
 
