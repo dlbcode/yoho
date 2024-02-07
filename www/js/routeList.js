@@ -2,8 +2,6 @@ import { appState } from './stateManager.js';
 
 const routeList = {
 
-    numTravelers: 1,
-
     init() {
         this.initTravelersDropdown();
         this.addStateChangeListener();
@@ -12,7 +10,7 @@ const routeList = {
     initTravelersDropdown: function() {
         const travelersDropdown = document.getElementById('travelersDropdown');
         travelersDropdown.addEventListener('change', (event) => {
-            this.numTravelers = parseInt(event.target.value, 10);
+            appState.numTravelers = parseInt(event.target.value, 10);
             this.updateTotalCost();
         });
     },
@@ -28,7 +26,7 @@ const routeList = {
             totalCost *= 2;
         }
 
-        totalCost *= this.numTravelers;
+        totalCost *= appState.numTravelers;
         document.getElementById('totalCost').textContent = `Estimated price: $${totalCost.toFixed(2)}`;
     },
 

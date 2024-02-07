@@ -17,7 +17,8 @@ const uiHandling = {
             const numTravelers = parseInt(numTravelersText, 10);
             dropdownBtn.innerHTML = `<img src="assets/person.svg" alt="" class="icon-person"> ${numTravelersText} <span class="icon-dropdown"></span>`;
             dropdown.classList.add('hidden');
-            updateState('numTravelers', numTravelers); // Ensure this function correctly updates the state
+            updateState('numTravelers', numTravelers);
+
         });
     });
   },  
