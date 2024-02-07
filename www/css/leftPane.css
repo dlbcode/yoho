@@ -92,7 +92,6 @@
 
 /* Styling for active autocomplete suggestions */
 .autocomplete-active {
-  /* Your styles for highlighting the active suggestion */
   color: #e7e7e7;
 }
 
@@ -120,14 +119,26 @@
 }
 
 .date-picker-container input[type="date"] {
-  background-color: #333; /* Dark background */
-  color: whrgb(108, 106, 106);/* Light text */
-  border: 1px solid #555; /* Darker border for contrast */
+  background-color: #333;
+  color: whrgb(108, 106, 106);
+  border: 1px solid #555;
   padding: 5px;
   border-radius: 4px;
 }
 
 .date-picker-container input[type="date"]:focus {
-  outline: none; /* Optional: Removes the default focus outline */
-  border-color: #777; /* Optional: Changes border color on focus */
+  outline: none;
+  border-color: #777;
+}
+
+/* New styles for the travelers icon label */
+.travelers-icon-label {
+  background-image: url('../assets/person.svg');
+  background-size: 24px 24px;
+  background-repeat: no-repeat;
+  background-position: center;
+  width: 16px;
+  height: 16px;
+  display: inline-block;
+  cursor: pointer;
 }
