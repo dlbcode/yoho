@@ -107,20 +107,6 @@
   color: #888;
 }
 
-/* Styling for the active trip type button */
-.trip-type-button.active {
-  background-color: rgb(60, 93, 110);
-  color: white;
-}
-
-.trip-type-button {
-  margin-right: 0px !important;
-}
-
-.trip-type-button + .trip-type-button {
-  margin-left: 0 !important;
-}
-
 /* Styling for the start date input */
 #startDate {
   width: 100%;

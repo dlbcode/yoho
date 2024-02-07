@@ -3,39 +3,20 @@ import { adjustMapSize } from "./map.js";
 
 const uiHandling = {
 
-  initTripTypeButtons: function() {
-    const oneWayButton = document.getElementById('oneWay');
-    const roundTripButton = document.getElementById('roundTrip');
+  initTripTypeSelect: function() {
+    const tripTypeSelect = document.getElementById('tripTypeSelect');
 
     document.addEventListener('routesArrayUpdated', this.handleStateChange.bind(this));
     
-    oneWayButton.addEventListener('click', () => {
-        updateState('oneWay', true);
-        this.updateTripTypeButtonStyles();
-    });
+    tripTypeSelect.addEventListener('change', () => {
+        const isOneWay = tripTypeSelect.value === 'oneWay';
+        updateState('oneWay', isOneWay);
 
-    roundTripButton.addEventListener('click', () => {
-        updateState('oneWay', false);
-        this.updateTripTypeButtonStyles();
     });
   },
 
   handleStateChange: function(event) {
         this.updateTripTypeContainerVisibility();
-        this.updateTripTypeButtonStyles();
-  },
-
-  updateTripTypeButtonStyles: function() {
-      const oneWayButton = document.getElementById('oneWay');
-      const roundTripButton = document.getElementById('roundTrip');
-
-      if (appState.oneWay === true) {
-        oneWayButton.classList.add('active');  
-        roundTripButton.classList.remove('active');
-      } else {
-          oneWayButton.classList.remove('active');
-          roundTripButton.classList.add('active');
-      }
   },
 
   updateTripTypeContainerVisibility: function() {
@@ -149,7 +130,7 @@ const uiHandling = {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  uiHandling.initTripTypeButtons();
+  uiHandling.initTripTypeSelect();
   uiHandling.initTogglePaneButton();
   uiHandling.initInfoPaneDragButton();
 });

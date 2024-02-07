@@ -26,7 +26,7 @@ const routeHandling = {
             let input = document.createElement('input');
             input.type = 'text';
             input.id = `waypoint${index + 1}`;
-            input.placeholder = waypointsOrder[i] === 0 ? 'Origin' : 'Destination';
+            input.placeholder = waypointsOrder[i] === 0 ? 'From' : 'To';
             input.value = waypoint ? waypoint.iata_code : '';
     
             routeDiv.appendChild(input);
