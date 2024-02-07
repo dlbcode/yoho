@@ -18,26 +18,28 @@
     <div class="container">
         <button id="togglePaneBtn" class="toggle-pane-button">❮</button>
         <nav class="leftPane">
-            <div class="travelers-container">
-                <button id="travelersDropdownBtn" class="travelers-dropdown-btn">
-                    <img src="assets/person.svg" alt="" class="icon-person"> 1 
-                    <span class="icon-dropdown"></span>
-                </button>
-                <ul id="travelersDropdown" class="travelers-dropdown hidden">
-                    <li>1</li><li>2</li><li>3</li><li>4</li><li>5</li><li>6</li><li>7</li><li>8</li>
-                </ul>
-            </div>                       
-            <!-- <div class="date-picker-container">
-                <input type="date" id="startDate" name="startDate">
-            </div> -->            
-            <div class="trip-type-container">
-                <button id="tripTypeDropdownBtn" class="trip-type-dropdown-btn">
-                    <span>One way</span> <span class="icon-dropdown"></span>
-                </button>
-                <ul id="tripTypeDropdown" class="trip-type-dropdown hidden">
-                    <li>Round trip</li>
-                </ul>
-            </div>                                                                       
+            <div class="options-container">
+                <div class="travelers-container">
+                    <button id="travelersDropdownBtn" class="travelers-dropdown-btn">
+                        <img src="assets/person.svg" alt="" class="icon-person"> 1 
+                        <span class="icon-dropdown"></span>
+                    </button>
+                    <ul id="travelersDropdown" class="travelers-dropdown hidden">
+                        <li>1</li>
+                        <li>2</li>
+                        <!-- other options -->
+                    </ul>
+                </div>
+                <div class="trip-type-container">
+                    <button id="tripTypeDropdownBtn" class="trip-type-dropdown-btn">
+                        <span>One way</span> <span class="icon-dropdown"></span>
+                    </button>
+                    <ul id="tripTypeDropdown" class="trip-type-dropdown hidden">
+                        <li>Round trip</li>
+                    </ul>
+                </div>
+            </div>
+                                                                                  
             <div class="airport-selection">
                 <div id="route1" class="route-container" data-route-number="1">
                     <input type="text" id="waypoint1" placeholder="From">

@@ -45,6 +45,13 @@
   transition: flex-grow 0.5s ease-in-out;
 }
 
+.options-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px; /* Adjust based on your layout */
+}
+
 .travelers-container {
   position: relative; /* Add this line */
   display: flex;
@@ -150,8 +157,8 @@
   align-items: center;
   background-color: #333;
   color: white;
-  border: 1px solid #555;
-  padding: 5px 10px;
+  border: 0px solid #555;
+  padding: 5px 5px;
   border-radius: 4px;
   cursor: pointer;
 }
@@ -165,9 +172,9 @@
 .icon-dropdown {
   width: 0;
   height: 0;
-  border-left: 8px solid transparent;
-  border-right: 8px solid transparent;
-  border-top: 8px solid #7f7f7f; /* Adjust color as needed */
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-top: 6px solid #7f7f7f; /* Adjust color as needed */
   display: inline-block;
   margin-left: 5px;
 }
@@ -205,8 +212,8 @@
   justify-content: space-between;
   background-color: #333;
   color: white;
-  border: 1px solid #555;
-  padding: 5px 10px;
+  border: 0px solid #555;
+  padding: 5px 5px;
   border-radius: 4px;
   cursor: pointer;
   width: 100%;
@@ -214,7 +221,7 @@
 
 .trip-type-dropdown {
   position: absolute;
-  left: 20px;
+  left: 95px;
   z-index: 1000;
   list-style: none;
   padding: 5px;
@@ -232,4 +239,13 @@
 
 .trip-type-dropdown li:hover {
   background-color: #555;
+}
+
+.travelers-container, .trip-type-container {
+  flex: 1; /* Allows both containers to share available space equally */
+  
+}
+
+.trip-type-container {
+  margin-right: 0;
 }
