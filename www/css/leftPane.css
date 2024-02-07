@@ -10,16 +10,17 @@
   overflow-y: auto;
 }
 
-.leftPane::-webkit-scrollbar-track {
+/* Scrollbar styles for leftPane and suggestions containers */
+.leftPane::-webkit-scrollbar-track, [id$='Suggestions']::-webkit-scrollbar-track {
   background-color: #222;
 }
 
-.leftPane::-webkit-scrollbar-thumb {
+.leftPane::-webkit-scrollbar-thumb, [id$='Suggestions']::-webkit-scrollbar-thumb {
   background-color: #555;
   border-radius: 2px;
 }
 
-.leftPane::-webkit-scrollbar {
+.leftPane::-webkit-scrollbar, [id$='Suggestions']::-webkit-scrollbar {
   width: 5px;
 }
 
