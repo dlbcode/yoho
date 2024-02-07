@@ -52,7 +52,7 @@
   margin-bottom: 10px;
 }
 
-.travelers-container {
+.travelers-container, .trip-type-container {
   position: relative;
   display: flex;
   align-items: center;
@@ -154,20 +154,19 @@
 
 .travelers-dropdown, .trip-type-dropdown {
   position: absolute;
+  top: 100%;
   left: 0;
   z-index: 1000;
   list-style: none;
-  padding: 5px;
+  padding: 10px;
   margin: 0;
   background-color: #333;
   border: 0;
   border-radius: 4px;
   width: auto;
-}
-
-.travelers-dropdown li {
-  padding: 5px 10px;
+  min-width: 40px;
   cursor: pointer;
+  white-space: nowrap;
 }
 
 .travelers-dropdown li:hover, .trip-type-dropdown li:hover{
@@ -178,15 +177,9 @@
   display: none;
 }
 
-.trip-type-dropdown li {
-  padding: 5px 10px;
-  cursor: pointer;
-}
-
 .travelers-dropdown-btn,
 .trip-type-dropdown-btn {
   padding: 5px; /* Combined padding rules */
-  margin-right: 5px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
