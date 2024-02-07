@@ -54,6 +54,26 @@ const uiHandling = {
     });
   },
 
+  hideDropdowns: function(dropdown) {
+    document.addEventListener('click', function(event) {
+      const travelersDropdown = document.getElementById('travelersDropdown');
+      const tripTypeDropdown = document.getElementById('tripTypeDropdown');
+      const travelersBtn = document.getElementById('travelersDropdownBtn');
+      const tripTypeBtn = document.getElementById('tripTypeDropdownBtn');
+  
+      // Check if the click is outside the travelers dropdown and button
+      if (!travelersDropdown.contains(event.target) && !travelersBtn.contains(event.target)) {
+          travelersDropdown.classList.add('hidden');
+      }
+  
+      // Check if the click is outside the trip type dropdown and button
+      if (!tripTypeDropdown.contains(event.target) && !tripTypeBtn.contains(event.target)) {
+          tripTypeDropdown.classList.add('hidden');
+      }
+    });
+  },
+
+
   handleStateChange: function(event) {
         this.updateTripTypeContainerVisibility();
   },
@@ -174,7 +194,7 @@ document.addEventListener('DOMContentLoaded', () => {
   uiHandling.initTripTypeDropdown();
   uiHandling.initTogglePaneButton();
   uiHandling.initInfoPaneDragButton();
+  uiHandling.hideDropdowns();
 });
-
 
 export { uiHandling }
