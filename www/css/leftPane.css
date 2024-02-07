@@ -192,3 +192,9 @@
   cursor: pointer;
   width: 100%;
 }
+
+#tripTypeDropdownBtn:disabled {
+  background-color: #ccc;
+  color: #666;
+  cursor: not-allowed;
+}

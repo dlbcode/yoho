@@ -59,14 +59,15 @@ const uiHandling = {
   },
 
   updateTripTypeContainerVisibility: function() {
-    const tripTypeContainer = document.querySelector('.trip-type-container');
+    const tripTypeDropdownBtn = document.getElementById('tripTypeDropdownBtn');
     if (appState.routes.length > 1) {
-        tripTypeContainer.style.display = 'none';
-        updateState('oneWay', true);
+      updateState('oneWay', true);
+      tripTypeDropdownBtn.disabled = true;
+      tripTypeDropdownBtn.innerHTML = "One way <span class='icon-dropdown'></span";
     } else {
-        tripTypeContainer.style.display = 'block';
+        tripTypeDropdownBtn.disabled = false;
     }
-  },
+  },  
 
   addAddButton: function() {
     const container = document.querySelector('.airport-selection');
