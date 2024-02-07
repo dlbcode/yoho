@@ -9,14 +9,15 @@ const uiHandling = {
 
     dropdownBtn.addEventListener('click', function() {
         dropdown.classList.toggle('hidden');
-        console.log('dropdown.classList', dropdown.classList);
     });
 
     dropdown.querySelectorAll('li').forEach(item => {
         item.addEventListener('click', function() {
-            dropdownBtn.innerHTML = `<img src="assets/person.svg" alt="" class="icon-person"> ${this.textContent} <span class="icon-dropdown"></span>`;
+            const numTravelersText = this.textContent.match(/\d+/)[0]; // Extracts the number
+            const numTravelers = parseInt(numTravelersText, 10);
+            dropdownBtn.innerHTML = `<img src="assets/person.svg" alt="" class="icon-person"> ${numTravelersText} <span class="icon-dropdown"></span>`;
             dropdown.classList.add('hidden');
-            // Update the number of travelers in your app state here
+            updateState('numTravelers', numTravelers); // Ensure this function correctly updates the state
         });
     });
   },  
