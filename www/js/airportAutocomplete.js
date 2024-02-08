@@ -17,15 +17,18 @@ function setupAutocompleteForField(fieldId) {
     const inputField = document.getElementById(fieldId);
     const suggestionBox = document.getElementById(fieldId + 'Suggestions');
     let selectionMade = false; // Track if a selection has been made
+    let initialInputValue = ""; // Store the initial input value on focus
     let currentFocus = -1; // Track the currently focused item in the suggestion box
 
     // Disable browser autofill
     inputField.setAttribute('autocomplete', 'new-password');
     inputField.setAttribute('name', 'waypoint-' + Date.now());
-
-    // Set readonly on load and remove on focus
     inputField.setAttribute('readonly', true);
-    inputField.addEventListener('focus', () => inputField.removeAttribute('readonly'));
+    inputField.addEventListener('focus', () => {
+        inputField.removeAttribute('readonly');
+        toggleSuggestionBox(true);
+        initialInputValue = inputField.value; // Store the initial value on focus
+    });
 
     inputField.addEventListener('input', async () => {
         const airports = await fetchAirports(inputField.value);
@@ -42,14 +45,15 @@ function setupAutocompleteForField(fieldId) {
         }
     };
 
-    // Clear input field if no selection is made
-    const clearInputField = () => {
-        if (!selectionMade) {
+    const clearInputField = (inputField) => {
+        const currentInputValue = inputField.value;
+        const selectedIata = inputField.getAttribute('data-selected-iata');
+        const isCurrentIataValid = currentInputValue.includes(selectedIata);
+        if (!selectionMade && !isCurrentIataValid && initialInputValue !== currentInputValue) {
             inputField.value = '';
         }
     };
 
-    // Event listener for outside click
     const outsideClickListener = (e) => {
         if (!inputField.contains(e.target) && !suggestionBox.contains(e.target)) {
             toggleSuggestionBox(false);
@@ -80,29 +84,24 @@ function setupAutocompleteForField(fieldId) {
 
     inputField.addEventListener('blur', () => {
         setTimeout(() => {
-            if (!selectionMade) {
-                toggleSuggestionBox(false);
-            }
+            clearInputField(inputField);
+            toggleSuggestionBox(false);
         }, 200); // Delay to allow for selection
     });
 
-    // Add outside click listener once
     if (!window.outsideClickListenerAdded) {
         document.addEventListener('click', outsideClickListener);
         window.outsideClickListenerAdded = true;
     }
 
-    // Function to classify an item as "active"
     function addActive(items) {
         if (!items) return false;
         removeActive(items);
         if (currentFocus >= items.length) currentFocus = 0;
         if (currentFocus < 0) currentFocus = items.length - 1;
-    
-        // Add the "active" class to the current item
+
         items[currentFocus].classList.add('autocomplete-active');
-    
-        // Scroll the active item into view
+
         items[currentFocus].scrollIntoView({
             behavior: 'smooth',
             block: 'nearest',
@@ -110,7 +109,6 @@ function setupAutocompleteForField(fieldId) {
         });
     }    
 
-    // Function to remove the "active" class from all autocomplete items
     function removeActive(items) {
         for (let i = 0; i < items.length; i++) {
             items[i].classList.remove('autocomplete-active');
@@ -118,9 +116,12 @@ function setupAutocompleteForField(fieldId) {
     }
 }
 
+let lastFetchedAirports = [];
+
 function updateSuggestions(inputId, airports, setSelectionMade) {
     const suggestionBox = document.getElementById(inputId + 'Suggestions');
     suggestionBox.innerHTML = '';
+    lastFetchedAirports = airports; // Update the last fetched airports whenever suggestions are updated
     airports.forEach(airport => {
         const div = document.createElement('div');
         div.textContent = `${airport.name} (${airport.iata_code}) - ${airport.city}, ${airport.country}`;
@@ -131,31 +132,12 @@ function updateSuggestions(inputId, airports, setSelectionMade) {
             document.dispatchEvent(new CustomEvent('airportSelected', { 
                 detail: { airport, fieldId: inputId }
             }));
+            inputField.setAttribute('data-selected-iata', airport.iata_code);
             setSelectionMade(true);
-
-            // Move focus to the next waypoint input field
-            const nextInputId = getNextInputId(inputId);
-            if (nextInputId) {
-                document.getElementById(nextInputId).focus();
-            }
-        });        
+        });       
         suggestionBox.appendChild(div);
     });
     if (airports.length > 0) suggestionBox.style.display = 'block';
-}
-
-// Function to get the next input field's ID
-function getNextInputId(currentInputId) {
-    const match = currentInputId.match(/(waypoint)(\d+)/);
-    if (match && match[2]) {
-        const currentNumber = parseInt(match[2]);
-        const nextNumber = currentNumber + 1;
-        const nextInputId = `waypoint${nextNumber}`;
-        if (document.getElementById(nextInputId)) {
-            return nextInputId;
-        }
-    }
-    return null;
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -233,7 +215,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
 export function getIataFromField(inputId) {
     const fieldValue = document.getElementById(inputId).value;
-    // Adjusted regex to match a pattern of three uppercase letters, possibly surrounded by parentheses
     const iataCodeMatch = fieldValue.match(/\b([A-Z]{3})\b/);
     return iataCodeMatch ? iataCodeMatch[1] : null;
 }
