@@ -98,10 +98,10 @@ function setupAutocompleteForField(fieldId) {
             clearInputField();
         } else if (e.key === 'ArrowDown') {
             currentFocus++;
-            addActive(suggestionBox.getElementsByTagName('div'));
+            updateActiveItem(suggestionBox.getElementsByTagName('div'));
         } else if (e.key === 'ArrowUp') {
             currentFocus--;
-            addActive(suggestionBox.getElementsByTagName('div'));
+            updateActiveItem(suggestionBox.getElementsByTagName('div'));
         } else if (e.key === 'Enter') {
             e.preventDefault();
             if (currentFocus > -1) {
@@ -123,26 +123,21 @@ function setupAutocompleteForField(fieldId) {
         window.outsideClickListenerAdded = true;
     }
 
-    function addActive(items) {
-        if (!items) return false;
-        removeActive(items);
-        if (currentFocus >= items.length) currentFocus = 0;
-        if (currentFocus < 0) currentFocus = items.length - 1;
-
-        items[currentFocus].classList.add('autocomplete-active');
-
-        items[currentFocus].scrollIntoView({
-            behavior: 'smooth',
-            block: 'nearest',
-            inline: 'start'
-        });
-    }    
-
-    function removeActive(items) {
-        for (let i = 0; i < items.length; i++) {
-            items[i].classList.remove('autocomplete-active');
+    function updateActiveItem(items) {
+        if (!items || items.length === 0) return false;
+        const itemsArray = Array.from(items);
+        itemsArray.forEach(item => item.classList.remove('autocomplete-active'));
+        currentFocus = ((currentFocus % itemsArray.length) + itemsArray.length) % itemsArray.length;
+        const activeItem = itemsArray[currentFocus];
+        if (activeItem) {
+            activeItem.classList.add('autocomplete-active');
+            activeItem.scrollIntoView({
+                behavior: 'smooth',
+                block: 'nearest',
+                inline: 'start'
+            });
         }
-    }
+    }         
 }
 
 let lastFetchedAirports = [];
@@ -151,6 +146,11 @@ function updateSuggestions(inputId, airports, setSelectionMade) {
     const suggestionBox = document.getElementById(inputId + 'Suggestions');
     suggestionBox.innerHTML = '';
     lastFetchedAirports = airports; // Update the last fetched airports whenever suggestions are updated
+    
+    document.querySelectorAll('.waypointTooltip').forEach(tooltip => {
+        tooltip.remove(); // Remove any existing tooltips
+    });
+
     airports.forEach(airport => {
         const div = document.createElement('div');
         div.textContent = `${airport.name} (${airport.iata_code}) - ${airport.city}, ${airport.country}`;
