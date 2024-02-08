@@ -42,6 +42,7 @@ const routeHandling = {
 
             // Add mouseout event listener to hide tooltip
             input.addEventListener('mouseout', function() {
+                console.log('mouseout');
                 routeHandling.hideWaypointTooltip();
             });
     
