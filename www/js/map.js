@@ -80,8 +80,30 @@ function adjustMapSize() {
     }    
 }
 
+function adjustInfoPaneForSmallScreens() {
+    setTimeout(function() {
+        const mapPane = document.getElementById('map');
+        const infoPane = document.getElementById('infoPane');
+        
+        console.log('mapPane.offsetWidth:', mapPane.offsetWidth);
+        if (mapPane.offsetWidth < 200) {
+            infoPane.style.bottom = '33px';
+        } else {
+            infoPane.style.bottom = '18px';
+        }
+    }, 10);
+}
+
+// Initial call to adjust #infoPane based on small screens
+adjustInfoPaneForSmallScreens();
+
 // Call adjustMapSize on window resize and orientation change
+document.getElementById('togglePaneBtn').addEventListener('click', function() {
+    adjustInfoPaneForSmallScreens();
+});
+
 window.addEventListener('resize', adjustMapSize);
+window.addEventListener('resize', adjustInfoPaneForSmallScreens);
 window.addEventListener('orientationchange', adjustMapSize);
 
 // Initial call to adjust map size
@@ -101,4 +123,4 @@ var magentaDotIcon = L.divIcon({
     iconAnchor: [6, 6]
 });
 
-export { map, blueDotIcon, magentaDotIcon, adjustMapSize };
+export { map, blueDotIcon, magentaDotIcon, adjustMapSize, adjustInfoPaneForSmallScreens };
