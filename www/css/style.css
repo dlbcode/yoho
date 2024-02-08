@@ -3,9 +3,9 @@
 body {
   margin: 0;
   padding: 0;
-  height: 100vh; /* Full viewport height */
+  height: 100vh;
   display: flex;
-  flex-direction: column; /* Stack elements vertically */
+  flex-direction: column;
   overflow: hidden;
   background-color: #1f1f1f;
   color: #a9a9a9;
@@ -26,7 +26,6 @@ body {
   z-index: 1;
 }
 
-/* Responsive Design */
 @media (max-width: 768px) {
   .leftPane {
     flex-basis: 100px;
@@ -58,7 +57,7 @@ button, input[type="number"], input[type="date"], input[type="text"] {
   border: 1px solid #525252;
   padding: 4px;
   border-radius: 3px;
-  font-size: 14px; /* Updated font size */
+  font-size: 14px;
 }
 
 a {
@@ -117,11 +116,11 @@ input, button, select, textarea {
 
 .floating-controls {
   position: absolute;
-  top: 5px; /* Adjust as needed */
-  left: 230px; /* Adjust as needed */
+  top: 5px;
+  left: 20px;
   padding: 5px;
   background-color: rgba(255, 255, 255, 0.1); /* Semi-transparent white */
   border-radius: 5px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-  z-index: 400; /* Ensure it's above the map */
+  z-index: 500;
 }
