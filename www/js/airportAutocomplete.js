@@ -115,7 +115,7 @@ function setupAutocompleteForField(fieldId) {
         setTimeout(() => {
             clearInputField(inputField);
             toggleSuggestionBox(false);
-        }, 200); // Delay to allow for selection
+        }, 300); // Delay to allow for selection
     });
 
     if (!window.outsideClickListenerAdded) {
@@ -154,7 +154,10 @@ function updateSuggestions(inputId, airports, setSelectionMade) {
     airports.forEach(airport => {
         const div = document.createElement('div');
         div.textContent = `${airport.name} (${airport.iata_code}) - ${airport.city}, ${airport.country}`;
-        div.addEventListener('click', () => {
+        function handleSelection(e) {
+            e.preventDefault(); // Prevent the default touchend action
+            e.stopPropagation(); // Stop the event from propagating further
+        
             const inputField = document.getElementById(inputId);
             inputField.value = `${airport.iata_code}`;
             suggestionBox.style.display = 'none';
@@ -163,7 +166,10 @@ function updateSuggestions(inputId, airports, setSelectionMade) {
             }));
             inputField.setAttribute('data-selected-iata', airport.iata_code);
             setSelectionMade(true);
-        });       
+        }
+        
+        div.addEventListener('click', handleSelection);
+        div.addEventListener('touchend', handleSelection);                   
         suggestionBox.appendChild(div);
     });
     if (airports.length > 0) suggestionBox.style.display = 'block';
