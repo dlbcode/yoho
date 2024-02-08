@@ -223,8 +223,9 @@
 
 .waypointTooltip {
   position: absolute;
-  background-color: #fff;
-  border: 1px solid #ccc;
+  background-color: #333;
+  border: 1px solid #525252;
+  color: white;
   padding: 8px;
   z-index: 99999;
   white-space: nowrap;
