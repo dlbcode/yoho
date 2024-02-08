@@ -1,5 +1,5 @@
 import { appState, updateState } from './stateManager.js';
-import { setupAutocompleteForField } from './airportAutocomplete.js';
+import { setupAutocompleteForField, fetchAirportByIata } from './airportAutocomplete.js';
 import { uiHandling } from './uiHandling.js';
 import { flightMap } from './flightMap.js';
 import { pathDrawing } from './pathDrawing.js';
@@ -28,6 +28,22 @@ const routeHandling = {
             input.id = `waypoint${index + 1}`;
             input.placeholder = waypointsOrder[i] === 0 ? 'From' : 'To';
             input.value = waypoint ? waypoint.iata_code : '';
+
+            // Add mouseover event listener to show tooltip
+            input.addEventListener('mouseover', async function() {
+                const iataCode = this.value.match(/\b([A-Z]{3})\b/); // Extract IATA code using regex
+                if (iataCode) {
+                    const airportInfo = await fetchAirportByIata(iataCode[1]);
+                    if (airportInfo) {
+                        routeHandling.showWaypointTooltip(this, `${airportInfo.name} (${airportInfo.iata_code}) ${airportInfo.city}, ${airportInfo.country}`);
+                    }
+                }
+            });
+
+            // Add mouseout event listener to hide tooltip
+            input.addEventListener('mouseout', function() {
+                routeHandling.hideWaypointTooltip();
+            });
     
             routeDiv.appendChild(input);
     
@@ -131,76 +147,89 @@ const routeHandling = {
         this.updateRoutesArray();
     },
     
-  getRouteIdFromDiv: function (routeDiv) {
-    const inputs = routeDiv.querySelectorAll('input[type="text"]');
-    if (inputs.length === 2) {
-        const originIata = inputs[0].value; // IATA code of the origin
-        const destinationIata = inputs[1].value; // IATA code of the destination
-        return `${originIata}-${destinationIata}`; // Concatenate to form the route ID
-    }
-    return null; // Return null if the route ID cannot be determined
-},
-
-updateRoutesArray: async function () {
-    let newRoutes = [];
-    let fetchPromises = [];
-
-    const waypoints = appState.routeDirection === 'to' ? [...appState.waypoints].reverse() : appState.waypoints;
-
-    for (let i = 0; i < waypoints.length - 1; i += 2) {
-        const fromWaypoint = waypoints[i];
-        const toWaypoint = waypoints[i + 1];
-
-        // Fetch and cache routes if not already done
-        if (!appState.directRoutes[fromWaypoint.iata_code]) {
-            fetchPromises.push(flightMap.fetchAndCacheRoutes(fromWaypoint.iata_code));
+    getRouteIdFromDiv: function (routeDiv) {
+        const inputs = routeDiv.querySelectorAll('input[type="text"]');
+        if (inputs.length === 2) {
+            const originIata = inputs[0].value; // IATA code of the origin
+            const destinationIata = inputs[1].value; // IATA code of the destination
+            return `${originIata}-${destinationIata}`; // Concatenate to form the route ID
         }
-        if (!appState.directRoutes[toWaypoint.iata_code]) {
-            fetchPromises.push(flightMap.fetchAndCacheRoutes(toWaypoint.iata_code));
+        return null; // Return null if the route ID cannot be determined
+    },
+
+    showWaypointTooltip: function (element, text) {
+        const tooltip = document.createElement('div');
+        tooltip.className = 'waypointTooltip';
+        tooltip.textContent = text;
+        element.closest('.route-container').appendChild(tooltip); // Append to the parent route container
+    },
+    
+    hideWaypointTooltip: function () {
+        const tooltip = document.querySelector('.waypointTooltip');
+        if (tooltip) {
+            tooltip.remove();
         }
-    }
+    },                    
 
-    await Promise.all(fetchPromises);
+    updateRoutesArray: async function () {
+        let newRoutes = [];
+        let fetchPromises = [];
 
-    // Now find and add routes
-    for (let i = 0; i < waypoints.length - 1; i += 2) {
-        const fromWaypoint = waypoints[i];
-        const toWaypoint = waypoints[i + 1];
-        let route = flightMap.findRoute(fromWaypoint.iata_code, toWaypoint.iata_code);
+        const waypoints = appState.routeDirection === 'to' ? [...appState.waypoints].reverse() : appState.waypoints;
 
-        if (route) {
-            route.isDirect = true;
-            newRoutes.push(route);
-        } else {
-            // Fetch airport data for both origin and destination
-            const [originAirport, destinationAirport] = await Promise.all([
-                flightMap.getAirportDataByIata(fromWaypoint.iata_code),
-                flightMap.getAirportDataByIata(toWaypoint.iata_code)
-            ]);
+        for (let i = 0; i < waypoints.length - 1; i += 2) {
+            const fromWaypoint = waypoints[i];
+            const toWaypoint = waypoints[i + 1];
 
-            // Create an indirect route with full airport information and additional fields
-            const indirectRoute = {
-                origin: fromWaypoint.iata_code,
-                destination: toWaypoint.iata_code,
-                originAirport: originAirport,
-                destinationAirport: destinationAirport,
-                isDirect: false,
-                // Set default values for missing fields if necessary
-                price: null,
-                source: 'indirect',
-                timestamp: new Date().toISOString()
-            };
-            newRoutes.push(indirectRoute);
+            // Fetch and cache routes if not already done
+            if (!appState.directRoutes[fromWaypoint.iata_code]) {
+                fetchPromises.push(flightMap.fetchAndCacheRoutes(fromWaypoint.iata_code));
+            }
+            if (!appState.directRoutes[toWaypoint.iata_code]) {
+                fetchPromises.push(flightMap.fetchAndCacheRoutes(toWaypoint.iata_code));
+            }
         }
+
+        await Promise.all(fetchPromises);
+
+        // Now find and add routes
+        for (let i = 0; i < waypoints.length - 1; i += 2) {
+            const fromWaypoint = waypoints[i];
+            const toWaypoint = waypoints[i + 1];
+            let route = flightMap.findRoute(fromWaypoint.iata_code, toWaypoint.iata_code);
+
+            if (route) {
+                route.isDirect = true;
+                newRoutes.push(route);
+            } else {
+                // Fetch airport data for both origin and destination
+                const [originAirport, destinationAirport] = await Promise.all([
+                    flightMap.getAirportDataByIata(fromWaypoint.iata_code),
+                    flightMap.getAirportDataByIata(toWaypoint.iata_code)
+                ]);
+
+                // Create an indirect route with full airport information and additional fields
+                const indirectRoute = {
+                    origin: fromWaypoint.iata_code,
+                    destination: toWaypoint.iata_code,
+                    originAirport: originAirport,
+                    destinationAirport: destinationAirport,
+                    isDirect: false,
+                    // Set default values for missing fields if necessary
+                    price: null,
+                    source: 'indirect',
+                    timestamp: new Date().toISOString()
+                };
+                newRoutes.push(indirectRoute);
+            }
+        }
+
+        updateState('updateRoutes', newRoutes);
+        pathDrawing.clearLines();
+        pathDrawing.drawLines();
+        routeList.updateTotalCost();
+        document.dispatchEvent(new CustomEvent('routesArrayUpdated'));
     }
-
-    updateState('updateRoutes', newRoutes);
-    pathDrawing.clearLines();
-    pathDrawing.drawLines();
-    routeList.updateTotalCost();
-    document.dispatchEvent(new CustomEvent('routesArrayUpdated'));
-}
-
 }
 
 export { routeHandling }

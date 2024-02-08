@@ -79,6 +79,7 @@
 }
 
 .route-container {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -89,6 +90,12 @@
 .route-container input {
   width: 30px;
   flex-grow: 1;
+}
+
+.route-container:hover .waypointTooltip {
+  position: absolute;
+  top: calc(100% + 5px); /* Adjust as needed to position the tooltip below the route div */
+  left: 0;
 }
 
 .autocomplete-active {
@@ -213,4 +220,13 @@
 /* Highlighting items on hover within any suggestions container */
 [id$='Suggestions'] div:hover, .autocomplete-active {
   background-color: #555;
+}
+
+.waypointTooltip {
+  position: absolute;
+  background-color: #fff;
+  border: 1px solid #ccc;
+  padding: 8px;
+  z-index: 99999;
+  white-space: nowrap;
 }

@@ -19,8 +19,10 @@ body {
 }
 
 .mapPane {
+  position: relative;
   flex-grow: 1; /* Take up remaining space */
   overflow: hidden;
+  z-index: 1;
 }
 
 /* Responsive Design */

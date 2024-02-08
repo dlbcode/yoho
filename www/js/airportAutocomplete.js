@@ -248,4 +248,4 @@ export function getIataFromField(inputId) {
     return iataCodeMatch ? iataCodeMatch[1] : null;
 }
 
-export { setupAutocompleteForField }
+export { setupAutocompleteForField, fetchAirportByIata }
