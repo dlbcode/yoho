@@ -198,16 +198,16 @@
 
 /* Styling for any suggestions container related to waypoint fields */
 [id$='Suggestions'] {
-  background-color: #333; /* Match dropdown background */
-  border: 1px solid #525252; /* Match dropdown border */
-  border-radius: 4px; /* Match dropdown border radius */
-  color: white; /* Match dropdown text color */
+  background-color: #333;
+  border: 1px solid #525252;
+  border-radius: 4px;
+  color: white;
   position: absolute;
   z-index: 1000;
   width: auto;
   max-height: 200px;
   overflow-y: auto;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.5); /* Optional: for depth */
+  box-shadow: 0 2px 4px rgba(0,0,0,0.5);
 }
 
 /* Styling individual suggestion items within any suggestions container */
