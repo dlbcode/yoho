@@ -13,6 +13,17 @@ async function fetchAirports(query) {
     }
 }
 
+async function fetchAirportByIata(iata) {
+    try {
+        const response = await fetch(`https://yonderhop.com/api/airports?iata=${iata}`);
+        const airports = await response.json();
+        return airports.length > 0 ? airports[0] : null;
+    } catch (error) {
+        console.error('Failed to fetch airport data', error);
+        return null;
+    }
+}
+
 function setupAutocompleteForField(fieldId) {
     const inputField = document.getElementById(fieldId);
     const suggestionBox = document.getElementById(fieldId + 'Suggestions');
@@ -28,6 +39,24 @@ function setupAutocompleteForField(fieldId) {
         inputField.removeAttribute('readonly');
         toggleSuggestionBox(true);
         initialInputValue = inputField.value; // Store the initial value on focus
+    });
+
+    inputField.addEventListener('focus', async () => {
+        inputField.removeAttribute('readonly');
+        toggleSuggestionBox(true);
+        initialInputValue = inputField.value; // Store the initial value on focus
+
+        // New functionality to center map on airport
+        const iataCode = inputField.getAttribute('data-selected-iata') || getIataFromField(fieldId);
+        if (iataCode) {
+            const airport = await fetchAirportByIata(iataCode);
+            if (airport && airport.latitude && airport.longitude) {
+                map.flyTo([airport.latitude, airport.longitude], 6, {
+                    animate: true,
+                    duration: 0.5 // Adjust duration as needed
+                });
+            }
+        }
     });
 
     inputField.addEventListener('input', async () => {
