@@ -13,6 +13,7 @@ body {
 }
 
 .container {
+  position: relative;
   display: flex; /* Align leftPane and mapPane side by side */
   flex-grow: 1; /* Take up remaining space */
   overflow: hidden;

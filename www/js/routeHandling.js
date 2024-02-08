@@ -161,8 +161,17 @@ const routeHandling = {
         const tooltip = document.createElement('div');
         tooltip.className = 'waypointTooltip';
         tooltip.textContent = text;
-        element.closest('.route-container').appendChild(tooltip); // Append to the parent route container
-    },
+        document.querySelector('.container').appendChild(tooltip); // Append to the .container for global positioning
+    
+        // Calculate the position of the element
+        const rect = element.getBoundingClientRect();
+        const containerRect = document.querySelector('.container').getBoundingClientRect();
+    
+        // Position the tooltip relative to the element and the container
+        tooltip.style.position = 'absolute';
+        tooltip.style.left = `${rect.left - containerRect.left}px`; // Adjust based on actual layout
+        tooltip.style.top = `${rect.bottom - containerRect.top}px`; // Position below the element
+    },    
     
     hideWaypointTooltip: function () {
         const tooltip = document.querySelector('.waypointTooltip');
