@@ -85,7 +85,6 @@ function adjustInfoPaneForSmallScreens() {
         const mapPane = document.getElementById('map');
         const infoPane = document.getElementById('infoPane');
         
-        console.log('mapPane.offsetWidth:', mapPane.offsetWidth);
         if (mapPane.offsetWidth < 200) {
             infoPane.style.bottom = '33px';
         } else {

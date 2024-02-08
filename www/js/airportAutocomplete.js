@@ -86,9 +86,9 @@ function setupAutocompleteForField(fieldId) {
     const outsideClickListener = (e) => {
         if (!inputField.contains(e.target) && !suggestionBox.contains(e.target)) {
             toggleSuggestionBox(false);
-            clearInputField();
+            clearInputField(inputField); // Pass the correct inputField reference
         }
-    };
+    };    
 
     // Add event listeners for focus, keydown, and blur
     inputField.addEventListener('focus', () => toggleSuggestionBox(true));
