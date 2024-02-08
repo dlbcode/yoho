@@ -173,12 +173,11 @@ const routeHandling = {
         tooltip.style.top = `${rect.bottom - containerRect.top}px`; // Position below the element
     },    
     
-    hideWaypointTooltip: function () {
-        const tooltip = document.querySelector('.waypointTooltip');
-        if (tooltip) {
+    hideWaypointTooltip: function() {
+        document.querySelectorAll('.waypointTooltip').forEach(tooltip => {
             tooltip.remove();
-        }
-    },                    
+        });
+    },                        
 
     updateRoutesArray: async function () {
         let newRoutes = [];
