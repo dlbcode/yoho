@@ -82,7 +82,6 @@ function setupAutocompleteForField(fieldId) {
         setTimeout(() => {
             if (!selectionMade) {
                 toggleSuggestionBox(false);
-                clearInputField();
             }
         }, 200); // Delay to allow for selection
     });
