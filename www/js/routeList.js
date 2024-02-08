@@ -27,7 +27,7 @@ const routeList = {
         }
 
         totalCost *= appState.numTravelers;
-        document.getElementById('totalCost').textContent = `Estimated price: $${totalCost.toFixed(2)}`;
+        document.getElementById('totalCost').innerHTML = `Estimated: <span style="color: #fff;">$${totalCost.toFixed(2)}</span>`;
     },
 
     addStateChangeListener() {
