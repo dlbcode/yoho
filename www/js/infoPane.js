@@ -53,7 +53,6 @@ const infoPane = {
     const infoPaneContent = document.getElementById('infoPaneContent');
     infoPaneContent.innerHTML = '';
 
-    // Fetch airport data
     fetch('https://yonderhop.com/api/airports')
       .then(response => {
         if (!response.ok) {
@@ -62,7 +61,7 @@ const infoPane = {
         return response.json();
       })
       .then(airports => {
-        // Now fetch the cheapest routes data
+
         return fetch(`https://yonderhop.com/api/cheapestRoutes?origin=${selectedRoute.originAirport.iata_code}&destination=${selectedRoute.destinationAirport.iata_code}`)
           .then(response => {
             if (!response.ok) {
@@ -87,21 +86,21 @@ const infoPane = {
             const tbody = document.createElement('tbody');
             data.forEach(item => {
               let row = document.createElement('tr');
+              // Format totalCost as currency
+              let formattedTotalCost = `$${parseFloat(item.totalCost).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
               row.innerHTML = `<td>${item.route.join(' -> ')}</td>
-                               <td>${item.totalCost}</td>`;
+                               <td>${formattedTotalCost}</td>`;
               tbody.appendChild(row);
 
-              // Add hover effects
               row.addEventListener('mouseover', () => {
                 item.route.forEach((iataCode, index) => {
                   if (index < item.route.length - 1) {
                     const origin = airports.find(airport => airport.iata_code === iataCode);
                     const destination = airports.find(airport => airport.iata_code === item.route[index + 1]);
                     if (origin && destination) {
-                      // Draw the line for this segment
+
                       pathDrawing.createRoutePath(origin, destination, { originAirport: origin, destinationAirport: destination, price: item.totalCost });
 
-                      // Change the color of the line to white
                       const routeId = `${origin.iata_code}-${destination.iata_code}`;
                       const pathLines = pathDrawing.routePathCache[routeId] || [];
                       pathLines.forEach(path => path.setStyle({ color: 'white' }));
@@ -110,14 +109,14 @@ const infoPane = {
                 });
               });
               row.addEventListener('mouseout', () => {
-                // Reset the color of all lines to their original state
+
                 appState.routes.forEach(route => {
                   const routeId = `${route.originAirport.iata_code}-${route.destinationAirport.iata_code}`;
                   const pathLines = pathDrawing.routePathCache[routeId] || [];
                   pathLines.forEach(path => path.setStyle({ color: pathDrawing.getColorBasedOnPrice(route.price) }));
                 });
               });
-              /// Add click event to handle waypoints
+
               row.addEventListener('click', () => {
                 const intermediaryIatas = item.route;
                 const originIndex = appState.waypoints.findIndex(wp => wp.iata_code === selectedRoute.originAirport.iata_code);
@@ -127,12 +126,11 @@ const infoPane = {
                     const waypointDestination = airports.find(airport => airport.iata_code === intermediaryIatas[i + 1]);
     
                     if (waypointOrigin && waypointDestination) {
-                        // Insert the origin (except for the first element)
+
                         if (i > 0) {
                             appState.waypoints.splice(originIndex + 1 + (i * 2) - 1, 0, waypointOrigin);
                         }
-    
-                        // Insert the destination (except for the last element)
+
                         if (i < intermediaryIatas.length - 2) {
                             appState.waypoints.splice(originIndex + 1 + (i * 2), 0, waypointDestination);
                         }
