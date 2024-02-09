@@ -217,13 +217,13 @@ const infoPane = {
     const tbody = document.createElement('tbody');
     routes.forEach(route => {
       let row = document.createElement('tr');
+      let formattedPrice = `$${parseFloat(route.price).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
       row.innerHTML = `<td>${route.originAirport.city} (${route.originAirport.iata_code})</td>
                        <td>${route.destinationAirport.city} (${route.destinationAirport.iata_code})</td>
-                       <td>${route.price}</td>
+                       <td>${formattedPrice}</td>
                        <td><button class='update-price-btn'>Update Price</button></td>`;
       tbody.appendChild(row);
 
-      // Assuming pathDrawing.js has a method to fetch paths by route
       row.addEventListener('mouseover', () => {
           const routeId = `${route.originAirport.iata_code}-${route.destinationAirport.iata_code}`;
           const pathLines = pathDrawing.routePathCache[routeId] || [];
