@@ -95,10 +95,9 @@ const uiHandling = {
     this.toggleTripButtonsVisibility(false);
   },
 
-  toggleTripButtonsVisibility: function(show) {
-      const tripButtonsDiv = document.getElementById('tripButtons');
-      tripButtonsDiv.style.display = show ? 'flex' : 'none';
-      addBtn.focus();
+  toggleTripButtonsVisibility: function() {
+    document.getElementById('tripButtons').style.display =
+      appState.routes.length > 0 ? 'flex' : 'none';
   },
 
   handleAddButtonClick: function() {
