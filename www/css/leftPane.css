@@ -213,6 +213,7 @@
 /* Styling individual suggestion items within any suggestions container */
 [id$='Suggestions'] div {
   padding: 10px;
+  border-bottom: 1px solid #525252;
   cursor: pointer;
 }
 
