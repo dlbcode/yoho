@@ -140,8 +140,8 @@ const routeHandling = {
         mapHandling.updateMarkerIcons();
         routeList.updateTotalCost();
     
-        if (appState.waypoints.length > 1 && !document.getElementById('addRouteButton')) {
-            uiHandling.addAddButton();
+        if (appState.waypoints.length < 2) {
+            uiHandling.toggleTripButtonsVisibility(true);
         }
         
         this.updateRoutesArray();

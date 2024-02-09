@@ -230,3 +230,14 @@
   z-index: 1001;
   white-space: nowrap;
 }
+
+#tripButtons {
+  display: none; /* Initially hidden, will be shown via JS */
+  justify-content: space-between; /* Adjust as needed for layout */
+  margin-top: 10px; /* Space above the buttons */
+}
+
+#tripButtons button {
+  flex: 1; /* Allows buttons to share the container space equally */
+  margin: 0 5px; /* Adds some space around the buttons */
+}

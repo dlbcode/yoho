@@ -89,20 +89,19 @@ const uiHandling = {
     }
   },  
 
-  addAddButton: function() {
-    const container = document.querySelector('.airport-selection');
-    let addButton = document.createElement('button');
-    addButton.textContent = 'Add';
-    addButton.id = 'addRouteButton';
-    addButton.addEventListener('click', this.handleAddButtonClick);
-    container.appendChild(addButton);
+  initTripButtons: function() {
+    const addButton = document.getElementById('addBtn'); 
+    addButton.addEventListener('click', this.handleAddButtonClick.bind(this));
+    this.toggleTripButtonsVisibility(false);
+  },
 
-    // Bring the 'Add' button into focus
-    addButton.focus();
+  toggleTripButtonsVisibility: function(show) {
+      const tripButtonsDiv = document.getElementById('tripButtons');z
+      tripButtonsDiv.style.display = show ? 'flex' : 'none';
   },
 
   handleAddButtonClick: function() {
-    // Duplicate the last waypoint and create a new route div
+    console.log('Add button clicked');
     const lastWaypoint = appState.waypoints[appState.waypoints.length - 1];
     updateState('addWaypoint', lastWaypoint);
     const newRouteNumber = Math.ceil(appState.waypoints.length / 2);
@@ -195,6 +194,7 @@ document.addEventListener('DOMContentLoaded', () => {
   uiHandling.initTogglePaneButton();
   uiHandling.initInfoPaneDragButton();
   uiHandling.hideDropdowns();
+  uiHandling.initTripButtons();
 });
 
 export { uiHandling }

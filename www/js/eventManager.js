@@ -28,11 +28,8 @@ function handleStateChange(event) {
     if (key === 'addWaypoint' || 'updateWaypoint' && appState.waypoints.length % 2 === 0) {
         const lastWaypointFieldId = `waypoint${appState.waypoints.length}`;
         const lastWaypointField = document.getElementById(lastWaypointFieldId);
-
         if (lastWaypointField && lastWaypointField.value) {
-            if (!document.getElementById('addRouteButton')) {
-                uiHandling.addAddButton();
-            }
+                uiHandling.toggleTripButtonsVisibility(true);
         }
     }
 
@@ -99,6 +96,7 @@ const eventManager = {
                 pathDrawing.clearLines();
                 mapHandling.updateMarkerIcons();
                 routeHandling.updateRoutesArray();
+                uiHandling.toggleTripButtonsVisibility(false);
             }            
         });
     },
