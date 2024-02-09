@@ -23,6 +23,7 @@ function handleStateChange(event) {
 
         mapHandling.updateMarkerIcons();
         routeHandling.updateRoutesArray();
+        uiHandling.toggleTripButtonsVisibility();
     }
 
     if (key === 'addWaypoint' || 'updateWaypoint' && appState.waypoints.length % 2 === 0) {

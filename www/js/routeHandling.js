@@ -139,11 +139,6 @@ const routeHandling = {
         pathDrawing.drawLines();
         mapHandling.updateMarkerIcons();
         routeList.updateTotalCost();
-    
-        if (appState.waypoints.length < 2) {
-            uiHandling.toggleTripButtonsVisibility(true);
-        }
-        
         this.updateRoutesArray();
     },
     
