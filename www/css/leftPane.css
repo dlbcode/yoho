@@ -82,8 +82,8 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 5px;
-  margin-bottom: 10px;
+  gap: 10px;
+  margin-bottom: -7px;
 }
 
 .route-container input {
@@ -231,13 +231,12 @@
   white-space: nowrap;
 }
 
-#tripButtons {
-  display: none; /* Initially hidden, will be shown via JS */
-  justify-content: space-between; /* Adjust as needed for layout */
-  margin-top: 10px; /* Space above the buttons */
+#tripButtons button {
+  flex: 1;
+  margin-right: 10px;
+  margin-bottom: 10px;
 }
 
-#tripButtons button {
-  flex: 1; /* Allows buttons to share the container space equally */
-  margin: 0 5px; /* Adds some space around the buttons */
+#tripButtons button:last-child {
+  margin-right: 0; /* Remove margin for the last button */
 }
