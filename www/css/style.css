@@ -77,7 +77,7 @@ a:active, button:active, input:focus, select:focus, textarea:focus {
 input, button, select, textarea {
   background-color: #1e1e1e;
   color: #e0e0e0;
-  border: 1px solid #333333;
+  border: 1px solid #525252;
 }
 
 .leaflet-popup {

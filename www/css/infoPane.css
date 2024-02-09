@@ -8,23 +8,23 @@
 }
 
 #top-bar {
+  height: 26px;
   display: flex;
   align-items: center;
   background-color: #333; /* Optional: to match the menu bar's background */
+  border-top: 2px solid #0060bb;
 }
 
 #menu-bar {
   display: flex;
   height: 26px;
-  padding-top: 1px;
   align-items: center;
   flex-grow: 1; /* Allows the menu bar to take up remaining space */
 }
 
 .map-icon-button {
+  height: 24px;
   margin-right: 10px;
-  border: none;
-  background: none;
   cursor: pointer;
   padding: 0;
   display: flex;
@@ -39,6 +39,10 @@
 
 .map-icon-button:hover {
   background-color: #3b7897;
+}
+
+.route-info-button {
+  height: 23px;
 }
 
 .route-info-button:focus, .route-info-button:active {
@@ -124,7 +128,37 @@ tr:hover {
 }
 
 .resize-handle {
-  height: 3px;
-  background-color: #38536c;
-  cursor: ns-resize; /* Cursor indicates resizable area */
+  position: absolute;
+  top: -25px; /* Adjust as needed to position just above the infoPane */
+  left: calc(50% - 35px);
+  height: 25px;
+  width: 70px;
+  border: 1px solid #525252;
+  border-radius: 3px;
+  cursor: ns-resize;
+  background-color: #1f1f1f;
+  z-index: 9999;
+}
+
+.resize-handle:hover {
+  background-color: #333;
+}
+
+.resize-handle::before,
+.resize-handle::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  height: 2px;
+  width: 50px;
+  background-color: #aaa; /* Change to desired color */
+}
+
+.resize-handle::before {
+  top: 7px; /* Position the first line */
+}
+
+.resize-handle::after {
+  top: 15px; /* Position the second line with 8px vertical spacing from the first */
 }
