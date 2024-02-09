@@ -253,6 +253,11 @@
   margin-bottom: 10px;
 }
 
+#estPriceLabel {
+  font-size: 14px;
+  bottom: 0px;
+}
+
 #estPriceValue {
   font-weight: 500; /* Makes the text bold */
   color: #fff; /* Sets the text color to white */
