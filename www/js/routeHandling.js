@@ -16,20 +16,22 @@ const routeHandling = {
         routeDiv.className = 'route-container';
         routeDiv.setAttribute('data-route-number', routeNumber.toString());
     
-        // Determine the order of waypoints based on appState.routeDirection
+        // Define placeholders independently from the waypointsOrder
+        let placeholders = ['From', 'To'];
+    
+        // Determine the order of waypoints based on routeDirection
         let waypointsOrder = appState.routeDirection === 'to' ? [1, 0] : [0, 1];
     
-        // Create two waypoint input fields for the new route
         for (let i = 0; i < 2; i++) {
             let index = (routeNumber - 1) * 2 + waypointsOrder[i];
             let waypoint = appState.waypoints[index];
             let input = document.createElement('input');
             input.type = 'text';
             input.id = `waypoint${index + 1}`;
-            input.placeholder = waypointsOrder[i] === 0 ? 'From' : 'To';
+            // Assign placeholders based on the original order, not waypointsOrder
+            input.placeholder = placeholders[i];
             input.value = waypoint ? waypoint.iata_code : '';
-
-            // Add mouseover event listener to show tooltip
+    
             input.addEventListener('mouseover', async function() {
                 const iataCode = this.value.match(/\b([A-Z]{3})\b/); // Extract IATA code using regex
                 if (iataCode) {
@@ -39,8 +41,7 @@ const routeHandling = {
                     }
                 }
             });
-
-            // Add mouseout event listener to hide tooltip
+    
             input.addEventListener('mouseout', function() {
                 routeHandling.hideWaypointTooltip();
             });
