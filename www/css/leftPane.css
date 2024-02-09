@@ -240,3 +240,20 @@
 #tripButtons button:last-child {
   margin-right: 0; /* Remove margin for the last button */
 }
+
+#estPrice {
+  display: flex; /* Ensures the label and value are on the same row */
+  align-items: center; /* Aligns items vertically */
+  white-space: nowrap; /* Prevents wrapping */
+  margin-bottom: 10px;
+}
+
+#estPriceLabel {
+  /* No specific changes needed unless you want to style the label differently */
+}
+
+#estPriceValue {
+  font-weight: 500; /* Makes the text bold */
+  color: #fff; /* Sets the text color to white */
+  margin-left: 5px; /* Optional: Adds a small gap between the label and value */
+}
