@@ -230,7 +230,7 @@ const routeHandling = {
         updateState('updateRoutes', newRoutes);
         pathDrawing.clearLines();
         pathDrawing.drawLines();
-        routeList.updateTotalCost();
+        routeList.updateEstPrice();
         document.dispatchEvent(new CustomEvent('routesArrayUpdated'));
     }
 }

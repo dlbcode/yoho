@@ -11,29 +11,30 @@ const routeList = {
         const travelersDropdown = document.getElementById('travelersDropdown');
         travelersDropdown.addEventListener('change', (event) => {
             appState.numTravelers = parseInt(event.target.value, 10);
-            this.updateTotalCost();
+            this.updateEstPrice();
         });
     },
 
-    updateTotalCost: function() {
-        let totalCost = 0;
+    updateEstPrice: function() {
+        let estPrice = 0;
         appState.routes.forEach(route => {
-            totalCost += route.price;
+            estPrice += route.price;
         });
 
         // Double the cost if the trip is not one-way
         if (!appState.oneWay) {
-            totalCost *= 2;
+            estPrice *= 2;
         }
 
-        totalCost *= appState.numTravelers;
-        document.getElementById('totalCost').innerHTML = `Estimated: <span style="color: #fff;">$${totalCost.toFixed(2)}</span>`;
+        estPrice *= appState.numTravelers;
+        console.log('estPrice: ', estPrice);
+        document.getElementById('estPriceValue').innerHTML = `$${estPrice.toFixed(2)}`;
     },
 
     addStateChangeListener() {
         document.addEventListener('stateChange', (event) => {
             if (event.detail.key === 'oneWay' || event.detail.key === 'numTravelers' || event.detail.key === 'routes') {
-                this.updateTotalCost();
+                this.updateEstPrice();
             }
         });
     }
