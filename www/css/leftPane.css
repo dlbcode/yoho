@@ -248,10 +248,6 @@
   margin-bottom: 10px;
 }
 
-#estPriceLabel {
-  /* No specific changes needed unless you want to style the label differently */
-}
-
 #estPriceValue {
   font-weight: 500; /* Makes the text bold */
   color: #fff; /* Sets the text color to white */
