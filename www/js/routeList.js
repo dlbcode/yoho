@@ -27,7 +27,6 @@ const routeList = {
         }
 
         estPrice *= appState.numTravelers;
-        console.log('estPrice: ', estPrice);
         document.getElementById('estPriceValue').innerHTML = `$${estPrice.toFixed(2)}`;
     },
 
