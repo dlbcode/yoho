@@ -152,23 +152,27 @@ const routeHandling = {
         return null;
     },
 
-    showWaypointTooltip: function (element, text) {
-        const tooltip = document.createElement('div');
-        tooltip.className = 'waypointTooltip';
-        tooltip.textContent = text;
-        document.querySelector('.container').appendChild(tooltip);
+    showWaypointTooltip: function(element, text) {
+        clearTimeout(this.tooltipTimeout);
     
-        // Calculate the position of the element
-        const rect = element.getBoundingClientRect();
-        const containerRect = document.querySelector('.container').getBoundingClientRect();
+        this.tooltipTimeout = setTimeout(() => {
+            const tooltip = document.createElement('div');
+            tooltip.className = 'waypointTooltip';
+            tooltip.textContent = text;
+            document.querySelector('.container').appendChild(tooltip);
     
-        // Position the tooltip relative to the element and the container
-        tooltip.style.position = 'absolute';
-        tooltip.style.left = `${rect.left - containerRect.left}px`;
-        tooltip.style.top = `${rect.bottom - containerRect.top}px`;
-    },    
+            const rect = element.getBoundingClientRect();
+            const containerRect = document.querySelector('.container').getBoundingClientRect();
+    
+            tooltip.style.position = 'absolute';
+            tooltip.style.left = `${rect.left - containerRect.left}px`;
+            tooltip.style.top = `${rect.bottom - containerRect.top}px`;
+        }, 300);
+    },
     
     hideWaypointTooltip: function() {
+        clearTimeout(this.tooltipTimeout);
+    
         document.querySelectorAll('.waypointTooltip').forEach(tooltip => {
             tooltip.remove();
         });
