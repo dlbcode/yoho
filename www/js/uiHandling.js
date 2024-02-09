@@ -96,12 +96,12 @@ const uiHandling = {
   },
 
   toggleTripButtonsVisibility: function(show) {
-      const tripButtonsDiv = document.getElementById('tripButtons');z
+      const tripButtonsDiv = document.getElementById('tripButtons');
       tripButtonsDiv.style.display = show ? 'flex' : 'none';
+      addBtn.focus();
   },
 
   handleAddButtonClick: function() {
-    console.log('Add button clicked');
     const lastWaypoint = appState.waypoints[appState.waypoints.length - 1];
     updateState('addWaypoint', lastWaypoint);
     const newRouteNumber = Math.ceil(appState.waypoints.length / 2);
