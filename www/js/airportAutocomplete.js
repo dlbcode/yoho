@@ -145,31 +145,54 @@ let lastFetchedAirports = [];
 function updateSuggestions(inputId, airports, setSelectionMade) {
     const suggestionBox = document.getElementById(inputId + 'Suggestions');
     suggestionBox.innerHTML = '';
-    lastFetchedAirports = airports; // Update the last fetched airports whenever suggestions are updated
+    lastFetchedAirports = airports;
+    
+    let selectionHandledByTouch = false; // Flag to track if selection was handled by touch
     
     document.querySelectorAll('.waypointTooltip').forEach(tooltip => {
         tooltip.remove(); // Remove any existing tooltips
     });
-
     airports.forEach(airport => {
         const div = document.createElement('div');
         div.textContent = `${airport.name} (${airport.iata_code}) - ${airport.city}, ${airport.country}`;
+        let touchStartY = 0;
+        let touchEndY = 0;
+
         function handleSelection(e) {
-            e.preventDefault(); // Prevent the default touchend action
-            e.stopPropagation(); // Stop the event from propagating further
-        
-            const inputField = document.getElementById(inputId);
-            inputField.value = `${airport.iata_code}`;
-            suggestionBox.style.display = 'none';
-            document.dispatchEvent(new CustomEvent('airportSelected', { 
-                detail: { airport, fieldId: inputId }
-            }));
-            inputField.setAttribute('data-selected-iata', airport.iata_code);
-            setSelectionMade(true);
+            if (e.type === 'click' && selectionHandledByTouch) {
+                // Reset the flag and return if the selection was already handled by touchend
+                selectionHandledByTouch = false;
+                return;
+            }
+            // Proceed with selection logic for click or if it was a tap (not scroll)
+            if (e.type === 'touchend' && Math.abs(touchEndY - touchStartY) < 10) {
+                selectionHandledByTouch = true; // Mark that selection was handled
+            }
+            if (selectionHandledByTouch || e.type === 'click') {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                const inputField = document.getElementById(inputId);
+                inputField.value = `${airport.iata_code}`;
+                suggestionBox.style.display = 'none';
+                document.dispatchEvent(new CustomEvent('airportSelected', { 
+                    detail: { airport, fieldId: inputId }
+                }));
+                inputField.setAttribute('data-selected-iata', airport.iata_code);
+                setSelectionMade(true);
+            }
         }
         
+        div.addEventListener('touchstart', (e) => {
+            touchStartY = e.touches[0].clientY;
+        });
+
+        div.addEventListener('touchmove', (e) => {
+            touchEndY = e.touches[0].clientY;
+        });
+
+        div.addEventListener('touchend', handleSelection);
         div.addEventListener('click', handleSelection);
-        div.addEventListener('touchend', handleSelection);                   
         suggestionBox.appendChild(div);
     });
     if (airports.length > 0) suggestionBox.style.display = 'block';
