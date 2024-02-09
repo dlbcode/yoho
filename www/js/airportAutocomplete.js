@@ -147,28 +147,37 @@ function updateSuggestions(inputId, airports, setSelectionMade) {
     suggestionBox.innerHTML = '';
     lastFetchedAirports = airports; // Update the last fetched airports whenever suggestions are updated
     
-    document.querySelectorAll('.waypointTooltip').forEach(tooltip => {
-        tooltip.remove(); // Remove any existing tooltips
-    });
-
     airports.forEach(airport => {
         const div = document.createElement('div');
         div.textContent = `${airport.name} (${airport.iata_code}) - ${airport.city}, ${airport.country}`;
+        let touchStartY = 0;
+        let touchEndY = 0;
+
         function handleSelection(e) {
-            e.preventDefault(); // Prevent the default touchend action
-            e.stopPropagation(); // Stop the event from propagating further
-        
-            const inputField = document.getElementById(inputId);
-            inputField.value = `${airport.iata_code}`;
-            suggestionBox.style.display = 'none';
-            document.dispatchEvent(new CustomEvent('airportSelected', { 
-                detail: { airport, fieldId: inputId }
-            }));
-            inputField.setAttribute('data-selected-iata', airport.iata_code);
-            setSelectionMade(true);
+            // Only proceed if this was a tap, not a scroll
+            if (Math.abs(touchEndY - touchStartY) < 10) {
+                e.preventDefault(); // Prevent the default touchend action
+                e.stopPropagation(); // Stop the event from propagating further
+            
+                const inputField = document.getElementById(inputId);
+                inputField.value = `${airport.iata_code}`;
+                suggestionBox.style.display = 'none';
+                document.dispatchEvent(new CustomEvent('airportSelected', { 
+                    detail: { airport, fieldId: inputId }
+                }));
+                inputField.setAttribute('data-selected-iata', airport.iata_code);
+                setSelectionMade(true);
+            }
         }
         
-        div.addEventListener('click', handleSelection);
+        div.addEventListener('touchstart', (e) => {
+            touchStartY = e.touches[0].clientY;
+        });
+
+        div.addEventListener('touchmove', (e) => {
+            touchEndY = e.touches[0].clientY;
+        });
+
         div.addEventListener('touchend', handleSelection);                   
         suggestionBox.appendChild(div);
     });
