@@ -83,7 +83,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 10px;
-  margin-bottom: -7px;
+  margin-bottom: 10px;
 }
 
 .route-container input {
@@ -231,6 +231,10 @@
   white-space: nowrap;
 }
 
+#tripButtons {
+  margin-top: -5px;
+}
+
 #tripButtons button {
   flex: 1;
   margin-right: 10px;
@@ -242,14 +246,14 @@
 }
 
 #estPrice {
-  display: flex; /* Ensures the label and value are on the same row */
-  align-items: center; /* Aligns items vertically */
-  white-space: nowrap; /* Prevents wrapping */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
   margin-bottom: 10px;
 }
 
 #estPriceValue {
   font-weight: 500; /* Makes the text bold */
   color: #fff; /* Sets the text color to white */
-  margin-left: 5px; /* Optional: Adds a small gap between the label and value */
 }

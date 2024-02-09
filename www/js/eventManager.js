@@ -85,15 +85,15 @@ const eventManager = {
         document.addEventListener('click', function (event) {
             if (event.target.id === 'increaseTravelers') {
                 updateState('numTravelers', appState.numTravelers + 1);
-                routeList.updateTotalCost();
+                routeList.updateEstPrice();
             } else if (event.target.id === 'decreaseTravelers' && appState.numTravelers > 1) {
                 updateState('numTravelers', appState.numTravelers - 1);
-                routeList.updateTotalCost();
+                routeList.updateEstPrice();
             } else if (event.target.id === 'clearBtn') {
                 updateState('routeDirection', 'from');
                 updateState('clearData', null);
                 appState.selectedAirport = null;
-                routeList.updateTotalCost();
+                routeList.updateEstPrice();
                 pathDrawing.clearLines();
                 mapHandling.updateMarkerIcons();
                 routeHandling.updateRoutesArray();

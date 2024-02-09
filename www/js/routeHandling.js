@@ -138,7 +138,7 @@ const routeHandling = {
         pathDrawing.clearLines();
         pathDrawing.drawLines();
         mapHandling.updateMarkerIcons();
-        routeList.updateTotalCost();
+        routeList.updateEstPrice();
         this.updateRoutesArray();
     },
     
