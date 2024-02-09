@@ -123,7 +123,6 @@ const routeHandling = {
             [appState.waypoints[waypointIndex], appState.waypoints[waypointIndex + 1]] = 
                 [appState.waypoints[waypointIndex + 1], appState.waypoints[waypointIndex]];
     
-            // Update the routes and redraw the map
             routeHandling.updateRoutesArray();
         }
     },
@@ -151,18 +150,18 @@ const routeHandling = {
     getRouteIdFromDiv: function (routeDiv) {
         const inputs = routeDiv.querySelectorAll('input[type="text"]');
         if (inputs.length === 2) {
-            const originIata = inputs[0].value; // IATA code of the origin
-            const destinationIata = inputs[1].value; // IATA code of the destination
-            return `${originIata}-${destinationIata}`; // Concatenate to form the route ID
+            const originIata = inputs[0].value;
+            const destinationIata = inputs[1].value;
+            return `${originIata}-${destinationIata}`;
         }
-        return null; // Return null if the route ID cannot be determined
+        return null;
     },
 
     showWaypointTooltip: function (element, text) {
         const tooltip = document.createElement('div');
         tooltip.className = 'waypointTooltip';
         tooltip.textContent = text;
-        document.querySelector('.container').appendChild(tooltip); // Append to the .container for global positioning
+        document.querySelector('.container').appendChild(tooltip);
     
         // Calculate the position of the element
         const rect = element.getBoundingClientRect();
@@ -170,8 +169,8 @@ const routeHandling = {
     
         // Position the tooltip relative to the element and the container
         tooltip.style.position = 'absolute';
-        tooltip.style.left = `${rect.left - containerRect.left}px`; // Adjust based on actual layout
-        tooltip.style.top = `${rect.bottom - containerRect.top}px`; // Position below the element
+        tooltip.style.left = `${rect.left - containerRect.left}px`;
+        tooltip.style.top = `${rect.bottom - containerRect.top}px`;
     },    
     
     hideWaypointTooltip: function() {
