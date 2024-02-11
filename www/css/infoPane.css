@@ -51,9 +51,12 @@
 
 
 #infoPaneContent {
-  overflow-y: auto !important;
-  box-sizing: border-box;
-  height: 140px; /* Adjust height to account for top-bar */
+  position: absolute;
+  top: 28px; /* Adjust this value to account for any header or top bar inside infoPane */
+  left: 0;
+  right: 0;
+  bottom: 0; /* This makes infoPaneContent stretch to the bottom of infoPane */
+  overflow-y: auto; /* Keep the scrollbar if content overflows */
 }
 
 table {
