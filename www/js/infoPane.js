@@ -115,6 +115,9 @@ const infoPane = {
                   const pathLines = pathDrawing.routePathCache[routeId] || [];
                   pathLines.forEach(path => path.setStyle({ color: pathDrawing.getColorBasedOnPrice(route.price) }));
                 });
+                console.log('mouseout');
+                pathDrawing.clearLines();
+                pathDrawing.drawLines();
               });
 
               row.addEventListener('click', () => {
