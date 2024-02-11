@@ -22,9 +22,12 @@
   flex-grow: 1; /* Allows the menu bar to take up remaining space */
 }
 
-.map-icon-button {
+.list-icon-button {
   height: 24px;
-  margin-right: 10px;
+  width: 28px;
+  margin-right: 5px;
+  border: none;
+  background-color: #333;
   cursor: pointer;
   padding: 0;
   display: flex;
@@ -32,13 +35,15 @@
   justify-content: center;
 }
 
-.map-icon-button img {
-  width: 16px;
-  height: 16px;
+.list-icon-button img {
+  width: 20px;
+  height: 20px;
+  border: 1px solid #525252;
+  background-color: #222;
 }
 
-.map-icon-button:hover {
-  background-color: #3b7897;
+.list-icon-button:hover {
+  background-color: #525252;
 }
 
 .route-info-button {
