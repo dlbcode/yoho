@@ -123,24 +123,28 @@ const infoPane = {
               row.addEventListener('click', () => {
                 const intermediaryIatas = item.route;
                 const originIndex = appState.waypoints.findIndex(wp => wp.iata_code === selectedRoute.originAirport.iata_code);
-    
+            
+                // Calculate the index range to remove the existing indirect waypoints
+                const startIndex = originIndex + 1;
+                const endIndex = originIndex + 3; // Assuming indirect routes always have 2 waypoints
+            
+                // Remove the existing indirect waypoints
+                appState.waypoints.splice(startIndex, endIndex - startIndex);
+            
+                // Insert the new waypoints in the correct order
                 for (let i = 0; i < intermediaryIatas.length - 1; i++) {
                     const waypointOrigin = airports.find(airport => airport.iata_code === intermediaryIatas[i]);
                     const waypointDestination = airports.find(airport => airport.iata_code === intermediaryIatas[i + 1]);
-    
+            
                     if (waypointOrigin && waypointDestination) {
-
-                        if (i > 0) {
-                            appState.waypoints.splice(originIndex + 1 + (i * 2) - 1, 0, waypointOrigin);
-                        }
-
-                        if (i < intermediaryIatas.length - 2) {
-                            appState.waypoints.splice(originIndex + 1 + (i * 2), 0, waypointDestination);
-                        }
+                        appState.waypoints.splice(startIndex + (i * 2), 0, waypointOrigin);
+                        appState.waypoints.splice(startIndex + (i * 2) + 1, 0, waypointDestination);
                     }
                 }
+            
                 updateState('updateWaypoint', false);
-              });
+            });
+            
             });
             table.appendChild(tbody);
 
