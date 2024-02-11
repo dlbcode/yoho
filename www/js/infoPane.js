@@ -121,28 +121,42 @@ const infoPane = {
               });
 
               row.addEventListener('click', () => {
-                const intermediaryIatas = item.route;
-                const originIndex = appState.waypoints.findIndex(wp => wp.iata_code === selectedRoute.originAirport.iata_code);
+                const intermediaryIatas = item.route; // Assuming 'item.route' contains the IATA codes for the selected route, including origin and destination
+                const newWaypoints = [];
             
-                // Calculate the index range to remove the existing indirect waypoints
-                const startIndex = originIndex + 1;
-                const endIndex = originIndex + 3; // Assuming indirect routes always have 2 waypoints
+                // Find the origin in the current waypoints
+                const originIndex = appState.waypoints.findIndex(wp => wp.iata_code === intermediaryIatas[0]);
             
-                // Remove the existing indirect waypoints
-                appState.waypoints.splice(startIndex, endIndex - startIndex);
-            
-                // Insert the new waypoints in the correct order
-                for (let i = 0; i < intermediaryIatas.length - 1; i++) {
-                    const waypointOrigin = airports.find(airport => airport.iata_code === intermediaryIatas[i]);
-                    const waypointDestination = airports.find(airport => airport.iata_code === intermediaryIatas[i + 1]);
-            
-                    if (waypointOrigin && waypointDestination) {
-                        appState.waypoints.splice(startIndex + (i * 2), 0, waypointOrigin);
-                        appState.waypoints.splice(startIndex + (i * 2) + 1, 0, waypointDestination);
-                    }
+                // Add waypoints up to the origin of the selected route
+                for (let i = 0; i < originIndex; i++) { // Change here: exclude the origin from being added again
+                    newWaypoints.push(appState.waypoints[i]);
                 }
             
-                updateState('updateWaypoint', false);
+                // Process the new waypoints for the selected route, including intermediary stops
+                intermediaryIatas.forEach((iata, index) => {
+                    const waypoint = airports.find(airport => airport.iata_code === iata);
+                    if (waypoint) {
+                        // For the first (origin) and last (destination), add them without duplication
+                        if (index === 0 || index === intermediaryIatas.length - 1) {
+                            newWaypoints.push(waypoint);
+                        } else {
+                            // For intermediary stops, add the waypoint twice to represent both arrival and departure
+                            newWaypoints.push(waypoint, {...waypoint}); // Cloning to ensure distinct objects for arrival/departure
+                        }
+                    }
+                });
+            
+                // Find the destination in the current waypoints to determine where to start adding remaining waypoints
+                const destinationIndex = appState.waypoints.findIndex((wp, index) => index > originIndex && wp.iata_code === intermediaryIatas[intermediaryIatas.length - 1]);
+            
+                // Add remaining waypoints after the selected route's destination
+                for (let i = destinationIndex + 1; i < appState.waypoints.length; i++) {
+                    newWaypoints.push(appState.waypoints[i]);
+                }
+            
+                // Update the appState with the new waypoints array
+                appState.waypoints = newWaypoints;
+                updateState('updateWaypoint', false); // Assuming this function triggers the necessary updates in the UI
             });
             
             });
