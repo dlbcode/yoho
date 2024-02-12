@@ -77,11 +77,15 @@ function updateState(key, value) {
 function updateUrlWithWaypoints() {
     const waypointIatas = appState.waypoints.map(wp => wp.iata_code);
     const encodedUri = encodeURIComponent(waypointIatas.join(','));
-    const routeDirection = appState.routeDirection; // Get the routeDirection from appState
-    const encodedRouteDirection = encodeURIComponent(routeDirection); // Encode the routeDirection
-    const encodedoneWay = encodeURIComponent(appState.oneWay); // Use appState.oneWay
+    const routeDirection = appState.routeDirection;
+    const encodedRouteDirection = encodeURIComponent(routeDirection);
+    const encodedOneWay = encodeURIComponent(appState.oneWay);
 
-    window.history.pushState({}, '', `?oneWay=${encodedoneWay}&direction=${encodedRouteDirection}&waypoints=${encodedUri}`);
+    const newUrl = `?oneWay=${encodedOneWay}&direction=${encodedRouteDirection}&waypoints=${encodedUri}`;
+    if (window.location.search !== newUrl) {
+        console.log('window.history.pushState', newUrl);
+        window.history.pushState({}, '', newUrl);
+    }
 }
  
 export { appState, updateState };

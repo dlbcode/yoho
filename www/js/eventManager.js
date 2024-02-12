@@ -52,6 +52,9 @@ const eventManager = {
         this.setupUIEventListeners();
         this.setupAllPathsButtonEventListener();
         document.addEventListener('stateChange', handleStateChange);
+        window.onpopstate = function(event) {
+            window.location.reload();
+        };
         document.addEventListener('routeAdded', function(event) {
             routeHandling.buildRouteDivs(event.detail.newRoute);
         });
