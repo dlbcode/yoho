@@ -107,6 +107,7 @@ const routeHandling = {
             setupAutocompleteForField(`waypoint${index + 1}`);
         }
         uiHandling.setFocusToNextUnsetInput();
+        uiHandling.toggleTripButtonsVisibility();
     },
     
     handleSwapButtonClick: function(routeNumber) {

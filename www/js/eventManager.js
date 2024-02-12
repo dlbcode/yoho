@@ -23,15 +23,6 @@ function handleStateChange(event) {
 
         mapHandling.updateMarkerIcons();
         routeHandling.updateRoutesArray();
-        uiHandling.toggleTripButtonsVisibility();
-    }
-
-    if (key === 'addWaypoint' || 'updateWaypoint' && appState.waypoints.length % 2 === 0) {
-        const lastWaypointFieldId = `waypoint${appState.waypoints.length}`;
-        const lastWaypointField = document.getElementById(lastWaypointFieldId);
-        if (lastWaypointField && lastWaypointField.value) {
-                uiHandling.toggleTripButtonsVisibility(true);
-        }
     }
 
     if (key === 'routeAdded') {

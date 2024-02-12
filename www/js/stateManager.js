@@ -83,7 +83,6 @@ function updateUrlWithWaypoints() {
 
     const newUrl = `?oneWay=${encodedOneWay}&direction=${encodedRouteDirection}&waypoints=${encodedUri}`;
     if (window.location.search !== newUrl) {
-        console.log('window.history.pushState', newUrl);
         window.history.pushState({}, '', newUrl);
     }
 }
