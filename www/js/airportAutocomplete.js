@@ -38,13 +38,13 @@ function setupAutocompleteForField(fieldId) {
     inputField.addEventListener('focus', () => {
         inputField.removeAttribute('readonly');
         toggleSuggestionBox(true);
-        initialInputValue = inputField.value; // Store the initial value on focus
+        initialInputValue = inputField.value;
     });
 
     inputField.addEventListener('focus', async () => {
         inputField.removeAttribute('readonly');
         toggleSuggestionBox(true);
-        initialInputValue = inputField.value; // Store the initial value on focus
+        initialInputValue = inputField.value;
 
         // New functionality to center map on airport
         const iataCode = inputField.getAttribute('data-selected-iata') || getIataFromField(fieldId);
@@ -53,7 +53,7 @@ function setupAutocompleteForField(fieldId) {
             if (airport && airport.latitude && airport.longitude) {
                 map.flyTo([airport.latitude, airport.longitude], 6, {
                     animate: true,
-                    duration: 0.5 // Adjust duration as needed
+                    duration: 0.5
                 });
             }
         }
@@ -62,7 +62,8 @@ function setupAutocompleteForField(fieldId) {
     inputField.addEventListener('input', async () => {
         const airports = await fetchAirports(inputField.value);
         updateSuggestions(fieldId, airports, (value) => selectionMade = value);
-        selectionMade = false; // Reset selection flag on new input
+        selectionMade = false;
+        currentFocus = -1; // Reset the focus so item selection starts from the top
     });
 
     const toggleSuggestionBox = (display) => {
