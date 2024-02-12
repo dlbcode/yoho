@@ -50,6 +50,8 @@ const infoPane = {
 
   handleRouteInfoClick(routeIndex) {
     const selectedRoute = appState.routes[routeIndex];
+    console.log('Selected route:', selectedRoute);
+    console.log('Route index:', routeIndex);
     const infoPaneContent = document.getElementById('infoPaneContent');
     infoPaneContent.innerHTML = '';
 
@@ -109,7 +111,6 @@ const infoPane = {
                 });
               });
               row.addEventListener('mouseout', () => {
-
                 appState.routes.forEach(route => {
                   const routeId = `${route.originAirport.iata_code}-${route.destinationAirport.iata_code}`;
                   const pathLines = pathDrawing.routePathCache[routeId] || [];
@@ -121,47 +122,28 @@ const infoPane = {
               });
 
               row.addEventListener('click', () => {
-                const intermediaryIatas = item.route; // Assuming 'item.route' contains the IATA codes for the selected route, including origin and destination
-                const newWaypoints = [];
-            
-                // Find the origin in the current waypoints
-                const originIndex = appState.waypoints.findIndex(wp => wp.iata_code === intermediaryIatas[0]);
-            
-                // Add waypoints up to the origin of the selected route
-                for (let i = 0; i < originIndex; i++) { // Change here: exclude the origin from being added again
-                    newWaypoints.push(appState.waypoints[i]);
-                }
-            
-                // Process the new waypoints for the selected route, including intermediary stops
+                console.log('Route index:', routeIndex);
+                const intermediaryIatas = item.route; // e.g., ["DEN", "YYZ", "YHZ"] for routeIndex 1
+                let newWaypoints = [];
+                const startIndex = routeIndex * 2;
+                newWaypoints = appState.waypoints.slice(0, startIndex);
                 intermediaryIatas.forEach((iata, index) => {
                     const waypoint = airports.find(airport => airport.iata_code === iata);
                     if (waypoint) {
-                        // For the first (origin) and last (destination), add them without duplication
-                        if (index === 0 || index === intermediaryIatas.length - 1) {
-                            newWaypoints.push(waypoint);
-                        } else {
-                            // For intermediary stops, add the waypoint twice to represent both arrival and departure
-                            newWaypoints.push(waypoint, {...waypoint}); // Cloning to ensure distinct objects for arrival/departure
+                        newWaypoints.push(waypoint);
+                        if (index > 0 && index < intermediaryIatas.length - 1) {
+                            newWaypoints.push({...waypoint});
                         }
                     }
                 });
-            
-                // Find the destination in the current waypoints to determine where to start adding remaining waypoints
-                const destinationIndex = appState.waypoints.findIndex((wp, index) => index > originIndex && wp.iata_code === intermediaryIatas[intermediaryIatas.length - 1]);
-            
-                // Add remaining waypoints after the selected route's destination
-                for (let i = destinationIndex + 1; i < appState.waypoints.length; i++) {
-                    newWaypoints.push(appState.waypoints[i]);
-                }
-            
-                // Update the appState with the new waypoints array
+                const endIndex = startIndex + 2;
+                newWaypoints = newWaypoints.concat(appState.waypoints.slice(endIndex));
                 appState.waypoints = newWaypoints;
-                updateState('updateWaypoint', false); // Assuming this function triggers the necessary updates in the UI
-            });
+                updateState('updateWaypoint', false);
+              });                                                                                                                
             
             });
             table.appendChild(tbody);
-
             infoPaneContent.appendChild(table);
           });
       })
