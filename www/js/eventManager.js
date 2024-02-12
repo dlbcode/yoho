@@ -62,6 +62,13 @@ const eventManager = {
 
     // Use debounce for map 'moveend' and 'zoomend' events
     setupMapEventListeners: function() {
+        map.on('click', () => {
+            flightMap.selectedMarker = null;
+            appState.selectedAirport = null;
+            pathDrawing.clearLines();
+            pathDrawing.drawLines();
+        });
+
         map.on('moveend', this.debounce(() => {
             flightMap.redrawMarkers();
             flightMap.updateVisibleMarkers();

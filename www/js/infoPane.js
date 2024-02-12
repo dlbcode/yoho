@@ -50,8 +50,6 @@ const infoPane = {
 
   handleRouteInfoClick(routeIndex) {
     const selectedRoute = appState.routes[routeIndex];
-    console.log('Selected route:', selectedRoute);
-    console.log('Route index:', routeIndex);
     const infoPaneContent = document.getElementById('infoPaneContent');
     infoPaneContent.innerHTML = '';
 
@@ -116,13 +114,11 @@ const infoPane = {
                   const pathLines = pathDrawing.routePathCache[routeId] || [];
                   pathLines.forEach(path => path.setStyle({ color: pathDrawing.getColorBasedOnPrice(route.price) }));
                 });
-                console.log('mouseout');
                 pathDrawing.clearLines();
                 pathDrawing.drawLines();
               });
 
               row.addEventListener('click', () => {
-                console.log('Route index:', routeIndex);
                 const intermediaryIatas = item.route; // e.g., ["DEN", "YYZ", "YHZ"] for routeIndex 1
                 let newWaypoints = [];
                 const startIndex = routeIndex * 2;
