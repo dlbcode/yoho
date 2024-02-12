@@ -51,22 +51,25 @@ const eventManager = {
         });
     },
 
-    setupMapEventListeners: function () {
-        map.on('click', () => {
-            flightMap.selectedMarker = null;
-            appState.selectedAirport = null;
-            pathDrawing.clearLines();
-            pathDrawing.drawLines();
-        });
+    debounce: function(func, wait) {
+        let timeout;
+        return function() {
+            const context = this, args = arguments;
+            clearTimeout(timeout);
+            timeout = setTimeout(() => func.apply(context, args), wait);
+        };
+    },
 
-        map.on('moveend', () => {
+    // Use debounce for map 'moveend' and 'zoomend' events
+    setupMapEventListeners: function() {
+        map.on('moveend', this.debounce(() => {
             flightMap.redrawMarkers();
             flightMap.updateVisibleMarkers();
-        });
+        }, 250));
 
-        map.on('zoomend', () => {
+        map.on('zoomend', this.debounce(() => {
             flightMap.updateVisibleMarkers();
-        });
+        }, 250));
     },
 
     setupUIEventListeners: function () {

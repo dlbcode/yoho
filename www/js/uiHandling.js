@@ -4,6 +4,9 @@ import { adjustMapSize } from "./map.js";
 const uiHandling = {
 
   initTravelersDropdown: function() {
+    if (this.travelersDropdownInitialized) return; // Prevent multiple initializations
+    this.travelersDropdownInitialized = true;
+
     const dropdownBtn = document.getElementById('travelersDropdownBtn');
     const dropdown = document.getElementById('travelersDropdown');
 
@@ -54,25 +57,19 @@ const uiHandling = {
     });
   },
 
-  hideDropdowns: function(dropdown) {
+  // uiHandling.js - Optimized hideDropdowns function
+  hideDropdowns: function() {
     document.addEventListener('click', function(event) {
-      const travelersDropdown = document.getElementById('travelersDropdown');
-      const tripTypeDropdown = document.getElementById('tripTypeDropdown');
-      const travelersBtn = document.getElementById('travelersDropdownBtn');
-      const tripTypeBtn = document.getElementById('tripTypeDropdownBtn');
-  
-      // Check if the click is outside the travelers dropdown and button
-      if (!travelersDropdown.contains(event.target) && !travelersBtn.contains(event.target)) {
-          travelersDropdown.classList.add('hidden');
-      }
-  
-      // Check if the click is outside the trip type dropdown and button
-      if (!tripTypeDropdown.contains(event.target) && !tripTypeBtn.contains(event.target)) {
-          tripTypeDropdown.classList.add('hidden');
-      }
+        const dropdownSelectors = ['#travelersDropdown', '#tripTypeDropdown'];
+        dropdownSelectors.forEach(selector => {
+            const dropdown = document.getElementById(selector.substring(1));
+            const dropdownBtn = document.querySelector(`${selector}Btn`);
+            if (dropdown && !dropdown.contains(event.target) && !dropdownBtn.contains(event.target)) {
+                dropdown.classList.add('hidden');
+            }
+        });
     });
   },
-
 
   handleStateChange: function(event) {
         this.updateTripTypeContainerVisibility();
