@@ -216,31 +216,32 @@ const infoPane = {
     table.appendChild(thead);
 
     const tbody = document.createElement('tbody');
+    let totalPrice = 0; // Initialize total price
     routes.forEach(route => {
-      let row = document.createElement('tr');
-      let formattedPrice = `$${parseFloat(route.price).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-      row.innerHTML = `<td>${route.originAirport.city} (${route.originAirport.iata_code})</td>
-                       <td>${route.destinationAirport.city} (${route.destinationAirport.iata_code})</td>
-                       <td>${formattedPrice}</td>
-                       <td><button class='update-price-btn'>Update Price</button></td>`;
-      tbody.appendChild(row);
-
-      row.addEventListener('mouseover', () => {
-          const routeId = `${route.originAirport.iata_code}-${route.destinationAirport.iata_code}`;
-          const pathLines = pathDrawing.routePathCache[routeId] || [];
-          pathLines.forEach(path => path.setStyle({ color: 'white' }));
-      });
-
-      row.addEventListener('mouseout', () => {
-          const routeId = `${route.originAirport.iata_code}-${route.destinationAirport.iata_code}`;
-          const pathLines = pathDrawing.routePathCache[routeId] || [];
-          pathLines.forEach(path => path.setStyle({ color: pathDrawing.getColorBasedOnPrice(route.price) }));
-      });
+        let row = document.createElement('tr');
+        let price = parseFloat(route.price); // Parse the price to a number
+        totalPrice += price; // Add to total price
+        let formattedPrice = `$${price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+        row.innerHTML = `<td>${route.originAirport.city} (${route.originAirport.iata_code})</td>
+                           <td>${route.destinationAirport.city} (${route.destinationAirport.iata_code})</td>
+                           <td>${formattedPrice}</td>
+                           <td><button class='update-price-btn'>Update Price</button></td>`;
+        tbody.appendChild(row);
     });
-    table.appendChild(tbody);
 
+    // Create and append the total price row
+    let totalRow = document.createElement('tr');
+    let formattedTotalPrice = `$${totalPrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    totalRow.innerHTML = `<td></td>
+                           <td style="text-align: right; color: white;">Total Estimated Price:</td>
+                           <td style="color: white;">${formattedTotalPrice}</td>
+                           <td></td>`;
+    tbody.appendChild(totalRow);
+
+    table.appendChild(tbody);
     infoPaneContent.appendChild(table);
 },
+
 };
 
 export { infoPane };
