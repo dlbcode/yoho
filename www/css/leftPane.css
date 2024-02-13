@@ -287,3 +287,26 @@
   font-weight: 500; /* Makes the text bold */
   color: #fff; /* Sets the text color to white */
 }
+
+#legalLinks {
+  position: absolute;
+  bottom: 2px;
+  left: 0;
+  width: 160px;
+  display: flex;
+  justify-content: space-between; /* Adjusted from space-between to space-around for better spacing */
+  font-size: 10px;
+  color: #525252;
+  padding-left: 5px;
+  white-space: nowrap; /* Prevent wrapping of text */
+}
+
+#legalLinks a {
+  color: #777;
+  text-decoration: none; /* Add this line to remove underline */
+}
+
+#legalLinks a:hover {
+  color: #999;
+  text-decoration: underline; /* Optionally add underline on hover if desired */
+}

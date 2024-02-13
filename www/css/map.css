@@ -53,3 +53,10 @@
   padding: 2px !important; /* Adjust padding */
 }
 
+.leaflet-control-attribution.leaflet-control a {
+  color: #999 !important; /* Ensures light text color */
+}
+
+.leaflet-control-attribution.leaflet-control a:hover {
+  color: #ccc !important; /* Ensures light text color */
+}
