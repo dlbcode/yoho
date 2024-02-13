@@ -24,6 +24,29 @@
   width: 5px;
 }
 
+#leftPaneHeader {
+  display: flex;
+  margin-bottom: 3px;
+  height: 30px;
+}
+
+#yonderHopLogo {
+  width: 30px;
+  height: 30px;
+  margin-right: 5px;
+  z-index: 5000;
+}
+
+#leftPaneTitle {
+  position: relative;
+  font-size: 1rem;
+  font-weight: 500;
+  color: #ccc;
+  line-height: 28px;
+  padding-bottom: 5px;
+  margin: 0px;
+}
+
 .toggle-pane-button {
   position: absolute;
   height: 70px;
