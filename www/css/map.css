@@ -45,3 +45,11 @@
 .leaflet-control-zoom a.leaflet-control-zoom-out {
   font-size: 22px !important;
 }
+
+.leaflet-control-attribution.leaflet-control {
+  color: #999 !important; /* Ensures light text color */
+  background: rgba(0, 0, 0, 0.2) !important; /* Ensures semi-transparent dark background */
+  font-size: 10px !important; /* Adjust as needed */
+  padding: 2px !important; /* Adjust padding */
+}
+
