@@ -38,7 +38,6 @@ function drawRoutesAsync(routes) {
         }
     });
     console.info('All routes drawn');
-    allPathsDrawn = true;
 }
 
 // Adjust the isValidRoute function if necessary

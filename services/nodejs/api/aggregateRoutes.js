@@ -1,69 +1,34 @@
-import { map } from './map.js';
-import { flightMap } from './flightMap.js';
-import { pathDrawing } from './pathDrawing.js';
+module.exports = function(app, airportsCollection, routesCollection) {
+  app.get('/aggregateRoutes', async (req, res) => {
+      try {
+          // Fetch all airports and create a map for quick lookup
+          const airports = await airportsCollection.find({}).toArray();
+          const airportMap = airports.reduce((map, airport) => {
+              map[airport.iata_code] = {
+                  iata_code: airport.iata_code,
+                  latitude: airport.latitude,
+                  longitude: airport.longitude
+              };
+              return map;
+          }, {});
 
-let allPathsDrawn = false;
-let routeDataCache = null;
+          // Fetch all routes
+          const routes = await routesCollection.find({}).toArray();
 
-// Function to draw all route paths
-function drawAllRoutePaths() {
-    if (allPathsDrawn) {
-        pathDrawing.clearLines();
-        allPathsDrawn = false;
-    } else {
-        // Check if data is already cached
-        if (routeDataCache) {
-            drawRoutesFromCache();
-            console.info('Route data loaded from cache');
-        } else {
-            fetchRoutesFromAPI();
-        }
-    }
-}
+          // Enrich routes with the necessary airport details
+          const enrichedRoutes = routes.map(route => ({
+              origin_iata_code: route.origin,
+              destination_iata_code: route.destination,
+              price: route.price,
+              origin: airportMap[route.origin],
+              destination: airportMap[route.destination]
+          }));
 
-function drawRoutesFromCache() {
-    drawRoutesAsync(routeDataCache);
-}
-
-async function fetchRoutesFromAPI() {
-    try {
-        const response = await fetch('https://yonderhop.com/api/aggregateRoutes');
-        const routes = await response.json();
-        routeDataCache = routes; // Cache the fetched data for future use
-        drawRoutesAsync(routes);
-    } catch (error) {
-        console.error('Error fetching aggregated routes:', error);
-    }
-}
-
-function drawRoutesAsync(routes) {
-    routes.forEach(route => {
-        if (isValidRoute(route)) {
-            drawRoutePath(route);
-        }
-    });
-    console.info('All routes drawn');
-    allPathsDrawn = true;
-}
-
-// Function to check if a route is valid
-function isValidRoute(route) {
-    return route.origin && route.destination;
-}
-
-// Function to draw a single route path
-function drawRoutePath(route) {
-    const origin = [route.origin.latitude, route.origin.longitude];
-    const destination = [route.destination.latitude, route.destination.longitude];
-
-    const geodesicLine = new L.Geodesic([origin, destination], {
-        weight: 1,
-        opacity: 0.7,
-        color: flightMap.getColorBasedOnPrice(route.price),
-        wrap: false
-    }).addTo(map);
-
-    // Optionally, you might want to store the geodesicLine or route information for further use
-}
-
-export { drawAllRoutePaths };
+          // Respond with the enriched routes
+          res.status(200).json(enrichedRoutes);
+      } catch (error) {
+          console.error('Failed to fetch aggregate routes:', error);
+          res.status(500).send('Internal Server Error');
+      }
+  });
+};
