@@ -2,30 +2,35 @@ import { map } from './map.js';
 import { flightMap } from './flightMap.js';
 import { pathDrawing } from './pathDrawing.js';
 
+let allPathsDrawn = false;
 let routeDataCache = null;
 
 // Function to draw all route paths
 function drawAllRoutePaths() {
-    pathDrawing.clearLines();
-    // Check if data is already cached
-    if (routeDataCache) {
-        drawRoutesFromCache();
-        console.info('Route data loaded from cache');
+    if (allPathsDrawn) {
+        pathDrawing.clearLines();
+        allPathsDrawn = false;
     } else {
-        fetchRoutesFromAPI();
+        // Check if data is already cached
+        if (routeDataCache) {
+            drawRoutesFromCache();
+            console.info('Route data loaded from cache');
+        } else {
+            fetchRoutesFromAPI();
+        }
     }
 }
 
 function drawRoutesFromCache() {
-  drawRoutesAsync(routeDataCache);
+    drawRoutesAsync(routeDataCache);
 }
 
 async function fetchRoutesFromAPI() {
     try {
         const response = await fetch('https://yonderhop.com/api/aggregateRoutes');
-        const routes = await response.json(); // This is now an array of route objects
+        const routes = await response.json();
         routeDataCache = routes; // Cache the fetched data for future use
-        drawRoutesAsync(routes); // Directly pass the array of routes
+        drawRoutesAsync(routes);
     } catch (error) {
         console.error('Error fetching aggregated routes:', error);
     }
@@ -41,19 +46,13 @@ function drawRoutesAsync(routes) {
     allPathsDrawn = true;
 }
 
-// Adjust the isValidRoute function if necessary
+// Function to check if a route is valid
 function isValidRoute(route) {
-    // Check for the existence of necessary properties in both origin and destination
-    return route.origin && route.destination && 
-           typeof route.origin.latitude === 'number' && typeof route.origin.longitude === 'number' &&
-           typeof route.destination.latitude === 'number' && typeof route.destination.longitude === 'number';
+    return route.origin && route.destination;
 }
 
 // Function to draw a single route path
 function drawRoutePath(route) {
-    // Use origin_iata_code and destination_iata_code to construct routeId
-    const routeId = `${route.origin_iata_code}-${route.destination_iata_code}`;
-
     const origin = [route.origin.latitude, route.origin.longitude];
     const destination = [route.destination.latitude, route.destination.longitude];
 
@@ -64,9 +63,7 @@ function drawRoutePath(route) {
         wrap: false
     }).addTo(map);
 
-    // Assign routeId to the geodesicLine for potential future reference
-    geodesicLine.routeId = routeId;
-    pathDrawing.currentLines.push(geodesicLine);
+    // Optionally, you might want to store the geodesicLine or route information for further use
 }
 
 export { drawAllRoutePaths };
