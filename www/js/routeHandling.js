@@ -108,6 +108,7 @@ const routeHandling = {
         }
         uiHandling.setFocusToNextUnsetInput();
         uiHandling.toggleTripButtonsVisibility();
+        uiHandling.getPriceButton();
     },
     
     handleSwapButtonClick: function(routeNumber) {

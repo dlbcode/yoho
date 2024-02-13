@@ -182,6 +182,15 @@ const uiHandling = {
     // Attach the startDrag function to both mousedown and touchstart events
     resizeHandle.addEventListener('mousedown', startDrag, false);
     resizeHandle.addEventListener('touchstart', startDrag, { passive: false });
+  },
+
+  getPriceButton: function () {
+    console.log('getPriceButton: ',appState.waypoints);
+    if (appState.waypoints.length < 2) {
+        document.getElementById('getPriceBtn').classList.add('hidden');
+    } else {
+        document.getElementById('getPriceBtn').classList.remove('hidden');
+    }
   }
 }
 
