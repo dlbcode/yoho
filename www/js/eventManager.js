@@ -7,6 +7,8 @@ import { appState, updateState } from './stateManager.js';
 import { routeHandling } from './routeHandling.js';
 import { uiHandling } from './uiHandling.js';
 import { mapHandling } from './mapHandling.js';
+import { get } from 'http';
+import { getPrice } from './getPrice.js';
 
 function handleStateChange(event) {
     const { key, value } = event.detail;
@@ -23,11 +25,12 @@ function handleStateChange(event) {
 
         mapHandling.updateMarkerIcons();
         routeHandling.updateRoutesArray();
+        getPriceButton();
     }
 
-    if (key === 'routeAdded') {
-        routeHandling.buildRouteDivs(value.newRoute);
-    }
+    //if (key === 'routeAdded') {
+    //    routeHandling.buildRouteDivs(value.newRoute);
+    //}
 
     if (key === 'clearData') {
         const container = document.querySelector('.airport-selection');
@@ -125,6 +128,14 @@ const eventManager = {
             case 'markerCreated':
                 this.attachMarkerEventListeners(data.iata, data.marker, data.airport);
                 break;
+        }
+    },
+
+    getPriceButton: function () {
+        if (appState.routes.length < 1) {
+            document.getElementById('getPriceBtn').classList.add('hidden');
+        } else {
+            document.getElementById('getPriceBtn').classList.remove('hidden');
         }
     },
 };
