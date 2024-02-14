@@ -186,10 +186,10 @@ const uiHandling = {
 
   getPriceButton: function () {
     console.log('getPriceButton: ',appState.waypoints);
-    if (appState.waypoints.length < 2) {
-        document.getElementById('getPriceBtn').classList.add('hidden');
-    } else {
+    if (appState.waypoints.length === 2) {
         document.getElementById('getPriceBtn').classList.remove('hidden');
+    } else {
+        document.getElementById('getPriceBtn').classList.add('hidden');
     }
   }
 }

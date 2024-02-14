@@ -1,4 +1,5 @@
 import { map } from './map.js';
+import { routeHandling } from './routeHandling.js';
 import { appState, updateState } from './stateManager.js';
 
 const pathDrawing = {
@@ -105,9 +106,10 @@ const pathDrawing = {
                 // Function to handle mouseover event
                 const onMouseOver = (e) => {
                     geodesicLine.setStyle({ color: 'white' });
+                    route.price = Math.round(route.price);
                     L.popup()
                         .setLatLng(e.latlng)
-                        .setContent(`${destination.city}<br><strong>Price: $${route.price}</strong>`)
+                        .setContent(`${destination.city}<br><strong><span style="color: #ccc; font-size: 14px">$${route.price}</span></strong>`)
                         .openOn(map);
                 };
 
