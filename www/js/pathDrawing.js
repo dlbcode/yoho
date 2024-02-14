@@ -1,5 +1,4 @@
 import { map } from './map.js';
-import { routeHandling } from './routeHandling.js';
 import { appState, updateState } from './stateManager.js';
 
 const pathDrawing = {
