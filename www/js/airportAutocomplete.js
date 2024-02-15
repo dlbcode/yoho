@@ -186,11 +186,11 @@ function updateSuggestions(inputId, airports, setSelectionMade) {
         
         div.addEventListener('touchstart', (e) => {
             touchStartY = e.touches[0].clientY;
-        });
-
+        }, { passive: true });
+        
         div.addEventListener('touchmove', (e) => {
             touchEndY = e.touches[0].clientY;
-        });
+        }, { passive: true });
 
         div.addEventListener('touchend', handleSelection);
         div.addEventListener('click', handleSelection);
