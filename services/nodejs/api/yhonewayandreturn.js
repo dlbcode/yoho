@@ -1,5 +1,3 @@
-const axios = require('axios');
-
 module.exports = function(app) {
   // Endpoint for searching one-way flights
   app.get('/api/yhoneway', async (req, res) => {

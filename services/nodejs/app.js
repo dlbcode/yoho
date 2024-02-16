@@ -1,5 +1,6 @@
 const express = require('express');
 const Amadeus = require('amadeus');
+const axios = require('axios');
 const MongoClient = require('mongodb').MongoClient;
 const app = express();
 const port = 3000;
@@ -73,7 +74,7 @@ MongoClient.connect(mongoUrl, { useNewUrlParser: true, useUnifiedTopology: true 
   aggregateRoutes(app, airportsCollection, routesCollection);
 
   const yhonewayandreturn = require('./api/yhonewayandreturn');
-  yhonewayandreturn(app, tequila);
+  yhonewayandreturn(app, axios, tequila);
   
 }); 
 
