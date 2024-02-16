@@ -2,7 +2,7 @@ const axios = require('axios');
 
 module.exports = function(app) {
   // Endpoint for searching one-way flights
-  app.get('/api/search-one-way', async (req, res) => {
+  app.get('/api/yhonewayandreturn', async (req, res) => {
     const { origin, destination, date } = req.query;
 
     if (!origin || !destination || !date) {

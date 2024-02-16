@@ -8,7 +8,7 @@ const mongodbPassword = process.env.MONGO_RSUSER_PASSWORD;
 
 const TEQUILA_API_KEY = process.env.TEQUILA_API_KEY || 'your_default_api_key';
 
-const config = {
+const tequila = {
   method: 'get',
   url: 'https://api.tequila.kiwi.com/search',
   headers: {
@@ -71,6 +71,9 @@ MongoClient.connect(mongoUrl, { useNewUrlParser: true, useUnifiedTopology: true 
 
   const aggregateRoutes = require('./api/aggregateRoutes');
   aggregateRoutes(app, airportsCollection, routesCollection);
+
+  const yhonewayandreturn = require('./api/yhonewayandreturn');
+  yhonewayandreturn(app, tequila);
   
 }); 
 
