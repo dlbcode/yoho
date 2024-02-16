@@ -53,95 +53,46 @@ const infoPane = {
     const infoPaneContent = document.getElementById('infoPaneContent');
     infoPaneContent.innerHTML = '';
 
-    fetch('https://yonderhop.com/api/airports')
+    const origin = selectedRoute.originAirport.iata_code;
+    const destination = selectedRoute.destinationAirport.iata_code;
+    const date = "2024-03-15"; // Example date, you might want to dynamically set this
+
+    fetch(`https://yonderhop.com/api/yhoneway?origin=${origin}&destination=${destination}&date=${date}`)
       .then(response => {
         if (!response.ok) {
-          throw new Error('Failed to fetch airports data');
+          throw new Error('Failed to fetch route data');
         }
         return response.json();
       })
-      .then(airports => {
+      .then(data => {
+        const table = document.createElement('table');
+        table.className = 'route-info-table';
+        table.style.width = '100%';
+        table.setAttribute('border', '1');
 
-        return fetch(`https://yonderhop.com/api/cheapestRoutes?origin=${selectedRoute.originAirport.iata_code}&destination=${selectedRoute.destinationAirport.iata_code}`)
-          .then(response => {
-            if (!response.ok) {
-              throw new Error('Failed to fetch cheapest route data');
-            }
-            return response.json();
-          })
-          .then(data => {
-            const table = document.createElement('table');
-            table.className = 'sortable-table';
-            table.style.width = '100%';
-            table.setAttribute('border', '1');
+        const thead = document.createElement('thead');
+        let headerRow = `<tr>
+                            <th>Origin</th>
+                            <th>Destination</th>
+                            <th>Departure</th>
+                            <th>Arrival</th>
+                            <th>Price</th>
+                         </tr>`;
+        thead.innerHTML = headerRow;
+        table.appendChild(thead);
 
-            const thead = document.createElement('thead');
-            let headerRow = `<tr>
-                              <th>Route</th>
-                              <th>Estimated Price</th>
-                            </tr>`;
-            thead.innerHTML = headerRow;
-            table.appendChild(thead);
-
-            const tbody = document.createElement('tbody');
-            data.forEach(item => {
-              let row = document.createElement('tr');
-              // Format totalCost as currency
-              let formattedTotalCost = `$${parseFloat(item.totalCost).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-              row.innerHTML = `<td>${item.route.join(' -> ')}</td>
-                               <td>${formattedTotalCost}</td>`;
-              tbody.appendChild(row);
-
-              row.addEventListener('mouseover', () => {
-                item.route.forEach((iataCode, index) => {
-                  if (index < item.route.length - 1) {
-                    const origin = airports.find(airport => airport.iata_code === iataCode);
-                    const destination = airports.find(airport => airport.iata_code === item.route[index + 1]);
-                    if (origin && destination) {
-
-                      pathDrawing.createRoutePath(origin, destination, { originAirport: origin, destinationAirport: destination, price: item.totalCost });
-
-                      const routeId = `${origin.iata_code}-${destination.iata_code}`;
-                      const pathLines = pathDrawing.routePathCache[routeId] || [];
-                      pathLines.forEach(path => path.setStyle({ color: 'white' }));
-                    }
-                  }
-                });
-              });
-              row.addEventListener('mouseout', () => {
-                appState.routes.forEach(route => {
-                  const routeId = `${route.originAirport.iata_code}-${route.destinationAirport.iata_code}`;
-                  const pathLines = pathDrawing.routePathCache[routeId] || [];
-                  pathLines.forEach(path => path.setStyle({ color: pathDrawing.getColorBasedOnPrice(route.price) }));
-                });
-                pathDrawing.clearLines();
-                pathDrawing.drawLines();
-              });
-
-              row.addEventListener('click', () => {
-                const intermediaryIatas = item.route; // e.g., ["DEN", "YYZ", "YHZ"] for routeIndex 1
-                let newWaypoints = [];
-                const startIndex = routeIndex * 2;
-                newWaypoints = appState.waypoints.slice(0, startIndex);
-                intermediaryIatas.forEach((iata, index) => {
-                    const waypoint = airports.find(airport => airport.iata_code === iata);
-                    if (waypoint) {
-                        newWaypoints.push(waypoint);
-                        if (index > 0 && index < intermediaryIatas.length - 1) {
-                            newWaypoints.push({...waypoint});
-                        }
-                    }
-                });
-                const endIndex = startIndex + 2;
-                newWaypoints = newWaypoints.concat(appState.waypoints.slice(endIndex));
-                appState.waypoints = newWaypoints;
-                updateState('updateWaypoint', false);
-              });                                                                                                                
-            
-            });
-            table.appendChild(tbody);
-            infoPaneContent.appendChild(table);
-          });
+        const tbody = document.createElement('tbody');
+        data.forEach(flight => {
+          let row = document.createElement('tr');
+          row.innerHTML = `<td>${flight.cityFrom} (${flight.flyFrom})</td>
+                           <td>${flight.cityTo} (${flight.flyTo})</td>
+                           <td>${new Date(flight.local_departure).toLocaleString()}</td>
+                           <td>${new Date(flight.local_arrival).toLocaleString()}</td>
+                           <td>$${flight.price}</td>`;
+          tbody.appendChild(row);
+        });
+        table.appendChild(tbody);
+        infoPaneContent.appendChild(table);
       })
       .catch(error => {
         console.error('Error:', error);
