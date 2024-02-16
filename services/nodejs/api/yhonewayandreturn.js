@@ -1,6 +1,6 @@
 module.exports = function(app) {
   // Endpoint for searching one-way flights
-  app.get('/api/yhoneway', async (req, res) => {
+  app.get('/yhoneway', async (req, res) => {
     const { origin, destination, date } = req.query;
 
     if (!origin || !destination || !date) {
@@ -25,7 +25,7 @@ module.exports = function(app) {
   });
 
   // Endpoint for searching return flights
-  app.get('/api/yhreturn', async (req, res) => {
+  app.get('/yhreturn', async (req, res) => {
     const { origin, destination, departureDate, returnDate } = req.query;
 
     if (!origin || !destination || !departureDate || !returnDate) {
