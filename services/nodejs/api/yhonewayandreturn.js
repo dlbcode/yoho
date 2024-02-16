@@ -1,4 +1,4 @@
-module.exports = function(app, axios) {
+module.exports = function(app, axios, db) { // Assuming db is passed as an argument
   app.get('/yhoneway', async (req, res) => {
     const { origin, destination, date } = req.query;
 
@@ -6,6 +6,7 @@ module.exports = function(app, axios) {
       return res.status(400).send('Origin, destination, and date are required');
     }
 
+    const flightKey = `${origin}-${destination}`;
     const config = {
       method: 'get',
       url: `https://tequila-api.kiwi.com/v2/search?fly_from=${origin}&fly_to=${destination}&date_from=${date}&date_to=${date}&flight_type=oneway&partner=picky&curr=USD`,
@@ -18,6 +19,15 @@ module.exports = function(app, axios) {
       const response = await axios(config);
       if (response.data && response.data.data) {
         const sortedFlights = response.data.data.sort((a, b) => a.price.total - b.price.total);
+
+        // Store the results in MongoDB
+        const cacheCollection = db.collection('cache');
+        await cacheCollection.insertOne({
+          flight: flightKey,
+          data: sortedFlights,
+          queriedAt: new Date() // Storing the query time for potential cache invalidation strategies
+        });
+
         res.json(sortedFlights);
       } else {
         res.status(500).send("No flight data found");

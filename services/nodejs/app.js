@@ -74,7 +74,7 @@ MongoClient.connect(mongoUrl, { useNewUrlParser: true, useUnifiedTopology: true 
   aggregateRoutes(app, airportsCollection, routesCollection);
 
   const yhonewayandreturn = require('./api/yhonewayandreturn');
-  yhonewayandreturn(app, axios, tequila);
+  yhonewayandreturn(app, axios, db, tequila);
   
 }); 
 
