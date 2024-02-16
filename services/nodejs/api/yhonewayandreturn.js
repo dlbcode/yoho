@@ -2,7 +2,7 @@ const axios = require('axios');
 
 module.exports = function(app) {
   // Endpoint for searching one-way flights
-  app.get('/api/yhonewayandreturn', async (req, res) => {
+  app.get('/api/yhoneway', async (req, res) => {
     const { origin, destination, date } = req.query;
 
     if (!origin || !destination || !date) {
@@ -27,7 +27,7 @@ module.exports = function(app) {
   });
 
   // Endpoint for searching return flights
-  app.get('/api/search-return', async (req, res) => {
+  app.get('/api/yhreturn', async (req, res) => {
     const { origin, destination, departureDate, returnDate } = req.query;
 
     if (!origin || !destination || !departureDate || !returnDate) {
