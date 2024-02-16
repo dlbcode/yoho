@@ -1,5 +1,4 @@
-module.exports = function(app) {
-  // Endpoint for searching one-way flights
+module.exports = function(app, axios) {
   app.get('/yhoneway', async (req, res) => {
     const { origin, destination, date } = req.query;
 
@@ -9,7 +8,7 @@ module.exports = function(app) {
 
     const config = {
       method: 'get',
-      url: `https://tequila-api.kiwi.com/v2/search?fly_from=${origin}&fly_to=${destination}&date_from=${date}&date_to=${date}&flight_type=oneway&partner=picky`,
+      url: `https://tequila-api.kiwi.com/v2/search?fly_from=${origin}&fly_to=${destination}&date_from=${date}&date_to=${date}&flight_type=oneway&partner=picky&curr=USD`,
       headers: { 
         'apikey': process.env.TEQUILA_API_KEY
       }
@@ -17,9 +16,14 @@ module.exports = function(app) {
 
     try {
       const response = await axios(config);
-      res.json(response.data);
+      if (response.data && response.data.data) {
+        const sortedFlights = response.data.data.sort((a, b) => a.price.total - b.price.total);
+        res.json(sortedFlights);
+      } else {
+        res.status(500).send("No flight data found");
+      }
     } catch (error) {
-      console.error(error);
+      console.error("Error fetching one-way flights data:", error.response ? error.response.data : error.message);
       res.status(500).send("Error fetching one-way flights data");
     }
   });
@@ -44,7 +48,7 @@ module.exports = function(app) {
       const response = await axios(config);
       res.json(response.data);
     } catch (error) {
-      console.error(error);
+      console.error("Error fetching return flights data:", error.response ? error.response.data : error.message); // More detailed error logging
       res.status(500).send("Error fetching return flights data");
     }
   });
