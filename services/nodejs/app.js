@@ -6,6 +6,16 @@ const port = 3000;
 const cors = require('cors');
 const mongodbPassword = process.env.MONGO_RSUSER_PASSWORD;
 
+const TEQUILA_API_KEY = process.env.TEQUILA_API_KEY || 'your_default_api_key';
+
+const config = {
+  method: 'get',
+  url: 'https://api.tequila.kiwi.com/search',
+  headers: {
+    'apikey': TEQUILA_API_KEY, // Use the environment variable here
+  },
+};
+
 // Amadeus client setup
 const amadeus = new Amadeus({
   clientId: process.env.AMADEUS_TEST_API_KEY,
