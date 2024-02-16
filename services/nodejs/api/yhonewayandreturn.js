@@ -1,4 +1,4 @@
-module.exports = function(app, axios, db) { // Assuming db is passed as an argument
+module.exports = function(app, axios, db) {
   app.get('/yhoneway', async (req, res) => {
     const { origin, destination, date } = req.query;
 
@@ -7,6 +7,26 @@ module.exports = function(app, axios, db) { // Assuming db is passed as an argum
     }
 
     const flightKey = `${origin}-${destination}`;
+    const cacheCollection = db.collection('cache');
+
+    // Check cache first
+    try {
+      const cachedData = await cacheCollection.findOne({ flight: flightKey });
+      if (cachedData && cachedData.queriedAt) {
+        const hoursDiff = (new Date() - new Date(cachedData.queriedAt)) / (1000 * 60 * 60);
+        if (hoursDiff <= 24) {
+          // Data is fresh, return cached data
+          return res.json(cachedData.data);
+        }
+        // Data is older than 24 hours, proceed to fetch new data
+      }
+    } catch (error) {
+      console.error("Error accessing cache:", error);
+      // Optionally handle error, e.g., by logging or returning an error response
+      // For this example, we'll proceed to fetch new data even if cache access fails
+    }
+
+    // Proceed with Tequila API request if no valid cache found
     const config = {
       method: 'get',
       url: `https://tequila-api.kiwi.com/v2/search?fly_from=${origin}&fly_to=${destination}&date_from=${date}&date_to=${date}&flight_type=oneway&partner=picky&curr=USD`,
@@ -20,13 +40,12 @@ module.exports = function(app, axios, db) { // Assuming db is passed as an argum
       if (response.data && response.data.data) {
         const sortedFlights = response.data.data.sort((a, b) => a.price.total - b.price.total);
 
-        // Store the results in MongoDB
-        const cacheCollection = db.collection('cache');
-        await cacheCollection.insertOne({
-          flight: flightKey,
-          data: sortedFlights,
-          queriedAt: new Date() // Storing the query time for potential cache invalidation strategies
-        });
+        // Update cache with new data
+        await cacheCollection.updateOne(
+          { flight: flightKey },
+          { $set: { data: sortedFlights, queriedAt: new Date() } },
+          { upsert: true }
+        );
 
         res.json(sortedFlights);
       } else {
