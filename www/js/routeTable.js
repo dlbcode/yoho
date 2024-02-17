@@ -58,13 +58,78 @@ function buildRouteTable(routeIndex) {
                          <td>${routeIATAs}</td>`; // Adding the new Route IATAs column
         tbody.appendChild(row);
       });
+      const headers = table.querySelectorAll("th");
+      headers.forEach((header, index) => {
+        if (header.textContent.trim().toLowerCase() !== 'route') { // Exclude 'Route' column from sorting
+          header.addEventListener('click', () => {
+            const currentIsAscending = header.classList.contains("th-sort-asc");
+            sortTableByColumn(table, index, !currentIsAscending);
+          });
+        }
+      });
       table.appendChild(tbody);
       infoPaneContent.appendChild(table);
     })
+    
     .catch(error => {
       console.error('Error:', error);
       infoPaneContent.textContent = 'Error loading data.';
     });
+}
+
+function sortTableByColumn(table, column, asc = true) {
+  const dirModifier = asc ? 1 : -1;
+  const tBody = table.tBodies[0];
+  const rows = Array.from(tBody.querySelectorAll("tr"));
+
+  // Adjust column indexes based on your table's structure if necessary
+  const isDateColumn = column === 0 || column === 1; // Departure and Arrival columns
+  const isPriceColumn = column === 2; // Price column
+  const isDurationColumn = column === 7; // Duration column, adjust if your table structure is different
+
+  const sortedRows = rows.sort((a, b) => {
+    let aColText = a.querySelector(`td:nth-child(${column + 1})`).textContent.trim();
+    let bColText = b.querySelector(`td:nth-child(${column + 1})`).textContent.trim();
+
+    if (isDateColumn) {
+      return (new Date(aColText) - new Date(bColText)) * dirModifier;
+    } else if (isPriceColumn) {
+      aColText = parseFloat(aColText.replace('$', ''));
+      bColText = parseFloat(bColText.replace('$', ''));
+      return (aColText - bColText) * dirModifier;
+    } else if (isDurationColumn) {
+      // Convert "XXh YYm" format into total minutes for comparison
+      const durationToMinutes = duration => {
+        const parts = duration.match(/(\d+)h (\d+)m/);
+        if (parts) {
+          const hours = parseInt(parts[1], 10);
+          const minutes = parseInt(parts[2], 10);
+          return hours * 60 + minutes;
+        }
+        return 0; // Default to 0 if the format doesn't match
+      };
+      aColText = durationToMinutes(aColText);
+      bColText = durationToMinutes(bColText);
+    } else if (!isNaN(parseFloat(aColText)) && !isNaN(parseFloat(bColText))) {
+      aColText = parseFloat(aColText);
+      bColText = parseFloat(bColText);
+    } else {
+      return aColText.localeCompare(bColText, undefined, { numeric: true, sensitivity: 'base' }) * dirModifier;
+    }
+
+    return (aColText - bColText) * dirModifier;
+  });
+
+  // Re-append sorted rows to tbody
+  while (tBody.firstChild) {
+    tBody.removeChild(tBody.firstChild);
+  }
+  tBody.append(...sortedRows);
+
+  // Update header classes for visual indication of sort direction
+  table.querySelectorAll("th").forEach(th => th.classList.remove("th-sort-asc", "th-sort-desc"));
+  table.querySelector(`th:nth-child(${column + 1})`).classList.toggle("th-sort-asc", asc);
+  table.querySelector(`th:nth-child(${column + 1})`).classList.toggle("th-sort-desc", !asc);
 }
 
 export { buildRouteTable };

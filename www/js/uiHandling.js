@@ -185,7 +185,6 @@ const uiHandling = {
   },
 
   getPriceButton: function () {
-    console.log('getPriceButton: ',appState.waypoints);
     if (appState.waypoints.length === 2) {
         document.getElementById('getPriceBtn').classList.remove('hidden');
     } else {
