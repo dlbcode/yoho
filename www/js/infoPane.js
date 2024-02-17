@@ -72,11 +72,14 @@ const infoPane = {
 
         const thead = document.createElement('thead');
         let headerRow = `<tr>
-                            <th>Origin</th>
-                            <th>Destination</th>
                             <th>Departure</th>
                             <th>Arrival</th>
                             <th>Price</th>
+                            <th>Airlines</th>
+                            <th>Direct</th>
+                            <th>Stops</th>
+                            <th>Layovers</th>
+                            <th>Duration</th>
                          </tr>`;
         thead.innerHTML = headerRow;
         table.appendChild(thead);
@@ -84,11 +87,19 @@ const infoPane = {
         const tbody = document.createElement('tbody');
         data.forEach(flight => {
           let row = document.createElement('tr');
-          row.innerHTML = `<td>${flight.cityFrom} (${flight.flyFrom})</td>
-                           <td>${flight.cityTo} (${flight.flyTo})</td>
-                           <td>${new Date(flight.local_departure).toLocaleString()}</td>
+          const directFlight = flight.route.length === 1;
+          const stops = flight.route.length - 1;
+          const layovers = flight.route.slice(1, -1).map(r => r.flyTo).join(", ");
+          const durationHours = Math.floor(flight.duration.total / 3600);
+          const durationMinutes = Math.floor((flight.duration.total % 3600) / 60);
+          row.innerHTML = `<td>${new Date(flight.local_departure).toLocaleString()}</td>
                            <td>${new Date(flight.local_arrival).toLocaleString()}</td>
-                           <td>$${flight.price}</td>`;
+                           <td>$${flight.price}</td>
+                           <td>${flight.airlines.join(", ")}</td>
+                           <td>${directFlight ? '✓' : ''}</td>
+                           <td>${stops}</td>
+                           <td>${layovers}</td>
+                           <td>${durationHours}h ${durationMinutes}m</td>`;
           tbody.appendChild(row);
         });
         table.appendChild(tbody);
