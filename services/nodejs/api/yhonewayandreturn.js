@@ -47,22 +47,34 @@ module.exports = function(app, axios, db) {
         );
 
         // Check for direct flights and compare prices with directRoutes collection
+        // Inside the try block after fetching data from the Tequila API
         const directFlights = sortedFlights.filter(flight => flight.route.length === 1);
-        directFlights.forEach(async (flight) => {
+        for (const flight of directFlights) {
+          const apiPrice = parseFloat(flight.price.total); // Ensure the price is a number
           const existingDirectRoute = await directRoutesCollection.findOne({ origin: origin, destination: destination });
-          if (existingDirectRoute && existingDirectRoute.price > flight.price.total) {
-            // Update the directRoutes collection with the new lower price
-            await directRoutesCollection.updateOne(
-              { _id: existingDirectRoute._id },
+
+          // If there's an existing direct route and the API price is lower, update it.
+          // If there's no existing direct route, insert a new one.
+          if (!existingDirectRoute || (existingDirectRoute && existingDirectRoute.price > apiPrice)) {
+            console.log(`Updating or inserting direct route from ${origin} to ${destination} with price: ${apiPrice}`);
+            
+            const updateResult = await directRoutesCollection.updateOne(
+              { origin: origin, destination: destination },
               { $set: { 
-                  price: flight.price.total, 
+                  origin: origin,
+                  destination: destination,
+                  price: apiPrice, 
                   timestamp: new Date().toISOString().replace(/[-:T]/g, '').slice(0, 14),
                   source: 'tequila'
                 } 
-              }
+              },
+              { upsert: true } // This option creates a new document if no document matches the query
             );
+            
+            console.log('Update or insert result:', updateResult);
           }
-        });
+        }
+
 
         res.json(sortedFlights);
       } else {
