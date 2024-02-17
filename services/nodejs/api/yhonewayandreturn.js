@@ -8,7 +8,8 @@ module.exports = function(app, axios, db) {
 
     const flightKey = `${origin}-${destination}`;
     const cacheCollection = db.collection('cache');
-
+    const directRoutesCollection = db.collection('directRoutes');
+    
     // Check cache first
     try {
       const cachedData = await cacheCollection.findOne({ flight: flightKey });
@@ -22,11 +23,9 @@ module.exports = function(app, axios, db) {
       }
     } catch (error) {
       console.error("Error accessing cache:", error);
-      // Optionally handle error, e.g., by logging or returning an error response
-      // For this example, we'll proceed to fetch new data even if cache access fails
     }
 
-    // Proceed with Tequila API request if no valid cache found
+    // Proceed with Tequila API request
     const config = {
       method: 'get',
       url: `https://tequila-api.kiwi.com/v2/search?fly_from=${origin}&fly_to=${destination}&date_from=${date}&date_to=${date}&flight_type=oneway&partner=picky&curr=USD`,
@@ -46,6 +45,24 @@ module.exports = function(app, axios, db) {
           { $set: { data: sortedFlights, queriedAt: new Date() } },
           { upsert: true }
         );
+
+        // Check for direct flights and compare prices with directRoutes collection
+        const directFlights = sortedFlights.filter(flight => flight.route.length === 1);
+        directFlights.forEach(async (flight) => {
+          const existingDirectRoute = await directRoutesCollection.findOne({ origin: origin, destination: destination });
+          if (existingDirectRoute && existingDirectRoute.price > flight.price.total) {
+            // Update the directRoutes collection with the new lower price
+            await directRoutesCollection.updateOne(
+              { _id: existingDirectRoute._id },
+              { $set: { 
+                  price: flight.price.total, 
+                  timestamp: new Date().toISOString().replace(/[-:T]/g, '').slice(0, 14),
+                  source: 'tequila'
+                } 
+              }
+            );
+          }
+        });
 
         res.json(sortedFlights);
       } else {
