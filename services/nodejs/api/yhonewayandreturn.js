@@ -40,6 +40,7 @@ module.exports = function(app, axios, db) {
         const sortedFlights = response.data.data.sort((a, b) => a.price.total - b.price.total);
 
         // Update cache with new data
+        console.log(`Updating cache for flight ${flightKey}`);
         await cacheCollection.updateOne(
           { flight: flightKey },
           { $set: { data: sortedFlights, queriedAt: new Date() } },
@@ -48,11 +49,13 @@ module.exports = function(app, axios, db) {
 
         // Check for direct flights and compare prices with directRoutes collection
         // Inside the try block after fetching data from the Tequila API
+        console.log('Checking direct flights');
         const directFlights = sortedFlights.filter(flight => flight.route.length === 1);
+        const existingDirectRoute = await directRoutesCollection.findOne({ origin: origin, destination: destination });
+        console.log('Existing direct route for origin:', origin, 'and destination:', destination, 'is:', existingDirectRoute.price);
         for (const flight of directFlights) {
           const apiPrice = parseFloat(flight.price.total); // Ensure the price is a number
-          const existingDirectRoute = await directRoutesCollection.findOne({ origin: origin, destination: destination });
-
+          console.log('API price for direct flight:', flight.price.total);
           // If there's an existing direct route and the API price is lower, update it.
           // If there's no existing direct route, insert a new one.
           if (!existingDirectRoute || (existingDirectRoute && existingDirectRoute.price > apiPrice)) {
@@ -72,6 +75,8 @@ module.exports = function(app, axios, db) {
             );
             
             console.log('Update or insert result:', updateResult);
+          } else {
+            console.log(`No direct route found or API price for direct flight from ${origin} to ${destination} is higher than existing price`);
           }
         }
 
