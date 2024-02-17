@@ -1,6 +1,7 @@
 import { appState, updateState } from './stateManager.js';
 import { pathDrawing } from './pathDrawing.js';
 import { findCheapestRoutes } from './findCheapestRoutes.js';
+import { buildRouteTable } from './routeTable.js';
 
 const infoPane = {
   init() {
@@ -28,7 +29,7 @@ const infoPane = {
       let button = document.createElement('button');
       button.textContent = `${route.originAirport.iata_code}-${route.destinationAirport.iata_code}`;
       button.className = 'route-info-button';
-      button.onclick = () => this.handleRouteInfoClick(index);
+      button.onclick = () => buildRouteTable(index);
       menuBar.appendChild(button);
 
       button.addEventListener('mouseover', () => {
@@ -46,115 +47,6 @@ const infoPane = {
           });
       });    
     });
-  },
-
-  handleRouteInfoClick(routeIndex) {
-    const selectedRoute = appState.routes[routeIndex];
-    const infoPaneContent = document.getElementById('infoPaneContent');
-    infoPaneContent.innerHTML = '';
-
-    const origin = selectedRoute.originAirport.iata_code;
-    const destination = selectedRoute.destinationAirport.iata_code;
-    const date = "2024-03-15"; // Example date, you might want to dynamically set this
-
-    fetch(`https://yonderhop.com/api/yhoneway?origin=${origin}&destination=${destination}&date=${date}`)
-      .then(response => {
-        if (!response.ok) {
-          throw new Error('Failed to fetch route data');
-        }
-        return response.json();
-      })
-      .then(data => {
-        const table = document.createElement('table');
-        table.className = 'route-info-table';
-        table.style.width = '100%';
-        table.setAttribute('border', '1');
-
-        const thead = document.createElement('thead');
-        let headerRow = `<tr>
-                            <th>Departure</th>
-                            <th>Arrival</th>
-                            <th>Price</th>
-                            <th>Airlines</th>
-                            <th>Direct</th>
-                            <th>Stops</th>
-                            <th>Layovers</th>
-                            <th>Duration</th>
-                            <th>Route</th> <!-- New Column for Route IATAs -->
-                         </tr>`;
-        thead.innerHTML = headerRow;
-        table.appendChild(thead);
-
-        const tbody = document.createElement('tbody');
-        data.forEach(flight => {
-          let row = document.createElement('tr');
-          const directFlight = flight.route.length === 1;
-          const stops = flight.route.length - 1;
-          const layovers = flight.route.slice(1, -1).map(r => r.flyTo).join(", ");
-          const durationHours = Math.floor(flight.duration.total / 3600);
-          const durationMinutes = Math.floor((flight.duration.total % 3600) / 60);
-          const routeIATAs = flight.route.map(r => r.flyFrom).concat(flight.route[flight.route.length - 1].flyTo).join(" > "); // Concatenating all IATAs
-          row.innerHTML = `<td>${new Date(flight.local_departure).toLocaleString()}</td>
-                           <td>${new Date(flight.local_arrival).toLocaleString()}</td>
-                           <td>$${flight.price}</td>
-                           <td>${flight.airlines.join(", ")}</td>
-                           <td>${directFlight ? '✓' : ''}</td>
-                           <td>${stops}</td>
-                           <td>${layovers}</td>
-                           <td>${durationHours}h ${durationMinutes}m</td>
-                           <td>${routeIATAs}</td>`; // Adding the new Route IATAs column
-          tbody.appendChild(row);
-        });
-        table.appendChild(tbody);
-        infoPaneContent.appendChild(table);
-      })
-      .catch(error => {
-        console.error('Error:', error);
-        infoPaneContent.textContent = 'Error loading data.';
-      });
-  },
-
-  attachSortingEventListeners(table) {
-    table.querySelectorAll(".sort-header").forEach(headerButton => {
-      headerButton.addEventListener("click", () => {
-        const headerCell = headerButton.parentElement;
-        const tableElement = headerCell.parentElement.parentElement.parentElement;
-        const headerIndex = Array.prototype.indexOf.call(headerCell.parentNode.children, headerCell);
-        const currentIsAscending = headerCell.classList.contains("th-sort-asc");
-
-        this.sortTableByColumn(tableElement, headerIndex, !currentIsAscending);
-      });
-    });
-  },
-
-  sortTableByColumn(table, column, asc = true) {
-    const dirModifier = asc ? 1 : -1;
-    const tBody = table.tBodies[0];
-    const rows = Array.from(tBody.querySelectorAll("tr"));
-
-    const sortedRows = rows.sort((a, b) => {
-      const aColText = a.querySelector(`td:nth-child(${column + 1})`).textContent.trim();
-      const bColText = b.querySelector(`td:nth-child(${column + 1})`).textContent.trim();
-
-      // Check if the column is a date
-      if (aColText.match(/^\d{4}-\d{2}-\d{2}$/)) {
-        return (new Date(aColText) - new Date(bColText)) * dirModifier;
-      } else if (!isNaN(parseFloat(aColText)) && !isNaN(parseFloat(bColText))) {
-        return (parseFloat(aColText) - parseFloat(bColText)) * dirModifier;
-      } else {
-        return aColText.localeCompare(bColText, undefined, { numeric: true, sensitivity: 'base' }) * dirModifier;
-      }
-    });
-
-    while (tBody.firstChild) {
-      tBody.removeChild(tBody.firstChild);
-    }
-
-    tBody.append(...sortedRows);
-
-    table.querySelectorAll("th").forEach(th => th.classList.remove("th-sort-asc", "th-sort-desc"));
-    table.querySelector(`th:nth-child(${column + 1})`).classList.toggle("th-sort-asc", asc);
-    table.querySelector(`th:nth-child(${column + 1})`).classList.toggle("th-sort-desc", !asc);
   },
 
   updateRouteInfoPane: function(routes) {
@@ -201,8 +93,7 @@ const infoPane = {
 
     table.appendChild(tbody);
     infoPaneContent.appendChild(table);
-},
-
-};
+  },
+}
 
 export { infoPane };
