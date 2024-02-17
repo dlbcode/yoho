@@ -80,6 +80,7 @@ const infoPane = {
                             <th>Stops</th>
                             <th>Layovers</th>
                             <th>Duration</th>
+                            <th>Route</th> <!-- New Column for Route IATAs -->
                          </tr>`;
         thead.innerHTML = headerRow;
         table.appendChild(thead);
@@ -92,6 +93,7 @@ const infoPane = {
           const layovers = flight.route.slice(1, -1).map(r => r.flyTo).join(", ");
           const durationHours = Math.floor(flight.duration.total / 3600);
           const durationMinutes = Math.floor((flight.duration.total % 3600) / 60);
+          const routeIATAs = flight.route.map(r => r.flyFrom).concat(flight.route[flight.route.length - 1].flyTo).join(" > "); // Concatenating all IATAs
           row.innerHTML = `<td>${new Date(flight.local_departure).toLocaleString()}</td>
                            <td>${new Date(flight.local_arrival).toLocaleString()}</td>
                            <td>$${flight.price}</td>
@@ -99,7 +101,8 @@ const infoPane = {
                            <td>${directFlight ? '✓' : ''}</td>
                            <td>${stops}</td>
                            <td>${layovers}</td>
-                           <td>${durationHours}h ${durationMinutes}m</td>`;
+                           <td>${durationHours}h ${durationMinutes}m</td>
+                           <td>${routeIATAs}</td>`; // Adding the new Route IATAs column
           tbody.appendChild(row);
         });
         table.appendChild(tbody);
