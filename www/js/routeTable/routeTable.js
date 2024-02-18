@@ -43,15 +43,15 @@ function buildRouteTable(routeIndex) {
 
       const thead = document.createElement('thead');
       let headerRow = `<tr>
-                          <th>Departure <span class="sortIcon" data-column="departure">&#x21C5;</span></th>
-                          <th>Arrival <span class="sortIcon" data-column="arrival">&#x21C5;</span></th>
-                          <th>Price <span class="sortIcon" data-column="price">&#x21C5;</span><img id=priceFilter class="filterIcon" src="/assets/filter-icon.svg" alt="Filter"></th>
-                          <th>Airlines <span class="sortIcon" data-column="airlines">&#x21C5;</span></th>
-                          <th>Direct <span class="sortIcon" data-column="direct">&#x21C5;</span></th>
-                          <th>Stops <span class="sortIcon" data-column="stops">&#x21C5;</span></th>
-                          <th>Layovers <span class="sortIcon" data-column="layovers">&#x21C5;</span></th>
-                          <th>Duration <span class="sortIcon" data-column="duration">&#x21C5;</span></th>
-                          <th>Route <span class="sortIcon" data-column="route">&#x21C5;</span></th>
+                          <th>Departure <span class="sortIcon" data-column="departure"></span></th>
+                          <th>Arrival <span class="sortIcon" data-column="arrival"></span></th>
+                          <th>Price <span class="sortIcon" data-column="price"></span><img id=priceFilter class="filterIcon" src="/assets/filter-icon.svg" alt="Filter"></th>
+                          <th>Airlines <span class="sortIcon" data-column="airlines"></span></th>
+                          <th>Direct <span class="sortIcon" data-column="direct"></span></th>
+                          <th>Stops <span class="sortIcon" data-column="stops"></span></th>
+                          <th>Layovers <span class="sortIcon" data-column="layovers"></span></th>
+                          <th>Duration <span class="sortIcon" data-column="duration"></span></th>
+                          <th>Route <span class="sortIcon" data-column="route"></span></th>
                        </tr>`;
       thead.innerHTML = headerRow;
       table.appendChild(thead);
@@ -95,7 +95,10 @@ function attachEventListenersToIcons(table, data) {
       const columnIndex = getColumnIndex(columnIdentifier);
       const isAscending = this.getAttribute('data-sort') !== 'asc';
       sortTableByColumn(table, columnIndex, isAscending);
-      resetSortIcons(sortIcons, this, isAscending ? 'asc' : 'desc');
+      resetSortIcons(sortIcons);
+      this.classList.toggle('asc', isAscending);
+      this.classList.toggle('desc', !isAscending);
+      this.setAttribute('data-sort', isAscending ? 'asc' : 'desc');
     });
   });
 
@@ -104,22 +107,20 @@ function attachEventListenersToIcons(table, data) {
     event.stopPropagation();
     const priceSliderPopup = document.getElementById('priceSliderPopup');
     if (priceSliderPopup) {
+      // Toggle the popup's visibility
       priceSliderPopup.classList.toggle('hidden');
     } else {
+      // If the popup doesn't exist, show it for the first time
       showPriceFilterPopup(event, data);
     }
   });
 }
 
-function resetSortIcons(sortIcons, currentIcon, newSortState) {
+function resetSortIcons(sortIcons) {
   sortIcons.forEach(icon => {
-    if (icon !== currentIcon) {
-      icon.innerHTML = '&#x21C5;'; // Reset to double arrow
-      icon.removeAttribute('data-sort');
-    } else {
-      icon.innerHTML = newSortState === 'asc' ? '&#x25B2;' : '&#x25BC;';
-      icon.setAttribute('data-sort', newSortState);
-    }
+    // Remove sort state classes from all icons except the one being activated
+    icon.classList.remove('asc', 'desc');
+    icon.removeAttribute('data-sort');
   });
 }
 
