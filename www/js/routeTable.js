@@ -166,6 +166,13 @@ function createSliderPopup() {
   `;
   document.body.appendChild(sliderPopup);
 
+  // Hide the slider popup when clicking outside of it
+  document.addEventListener('click', function(event) {
+    if (!sliderPopup.contains(event.target) && event.target.id !== 'priceFilterIcon') {
+      sliderPopup.style.display = 'none';
+    }
+  });
+
   // Add event listener for the slider input
   document.getElementById('priceSlider').addEventListener('input', function() {
     filterTableByPrice(this.value);
