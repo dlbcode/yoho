@@ -5,6 +5,9 @@ function buildRouteTable(routeIndex) {
   const infoPaneContent = document.getElementById('infoPaneContent');
   infoPaneContent.innerHTML = '';
 
+  // Load routeTable.css
+  document.head.appendChild(Object.assign(document.createElement('link'), {rel: 'stylesheet', type: 'text/css', href: '../css/routeTable.css'}));
+
   const origin = selectedRoute.originAirport.iata_code;
   const destination = selectedRoute.destinationAirport.iata_code;
   const date = "2024-03-15"; // Example date, you might want to dynamically set this
@@ -159,7 +162,7 @@ function createSliderPopup() {
   const sliderPopup = document.createElement('div');
   sliderPopup.id = 'priceSliderPopup';
   sliderPopup.innerHTML = `
-    <input type="range" min="0" max="100" value="50" class="slider" id="priceSlider">
+    <input type="range" min="0" max="100" value="50" class="price-slider" id="priceSlider">
   `;
   document.body.appendChild(sliderPopup);
 
