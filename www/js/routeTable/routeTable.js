@@ -99,9 +99,17 @@ function attachEventListenersToIcons(table, data) {
     });
   });
 
-  document.getElementById('priceFilter').addEventListener('click', function(event) {
+  const priceFilterIcon = document.getElementById('priceFilter');
+  priceFilterIcon.addEventListener('click', function(event) {
     event.stopPropagation();
-    showPriceFilterPopup(event, data);
+    const priceSliderPopup = document.getElementById('priceSliderPopup');
+    if (priceSliderPopup) {
+      // Toggle visibility based on the current state
+      priceSliderPopup.classList.toggle('hidden');
+    } else {
+      // If the popup doesn't exist yet, show it for the first time
+      showPriceFilterPopup(event, data);
+    }
   });
 }
 
