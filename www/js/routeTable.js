@@ -162,20 +162,28 @@ function createSliderPopup() {
   const sliderPopup = document.createElement('div');
   sliderPopup.id = 'priceSliderPopup';
   sliderPopup.innerHTML = `
+    <div id="sliderValueDisplay" style="text-align: center; margin-bottom: 10px;">$50</div>
     <input type="range" min="0" max="100" value="50" class="price-slider" id="priceSlider">
   `;
   document.body.appendChild(sliderPopup);
+
+  const slider = document.getElementById('priceSlider');
+  const valueDisplay = document.getElementById('sliderValueDisplay');
+
+  // Initialize display with current slider value
+  valueDisplay.textContent = `$${slider.value}`;
+
+  // Update the display when the slider value changes
+  slider.addEventListener('input', function() {
+    valueDisplay.textContent = `$${this.value}`;
+    filterTableByPrice(this.value);
+  });
 
   // Hide the slider popup when clicking outside of it
   document.addEventListener('click', function(event) {
     if (!sliderPopup.contains(event.target) && event.target.id !== 'priceFilterIcon') {
       sliderPopup.style.display = 'none';
     }
-  });
-
-  // Add event listener for the slider input
-  document.getElementById('priceSlider').addEventListener('input', function() {
-    filterTableByPrice(this.value);
   });
 
   return sliderPopup;
