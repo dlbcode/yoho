@@ -48,7 +48,6 @@ module.exports = function(app, axios, db) {
         );
 
         // Check for direct flights and compare prices with directRoutes collection
-        // Inside the try block after fetching data from the Tequila API
         console.log('Checking direct flights');
         const directFlights = sortedFlights.filter(flight => flight.route.length === 1);
         const existingDirectRoute = await directRoutesCollection.findOne({ origin: origin, destination: destination });
