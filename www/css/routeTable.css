@@ -17,13 +17,13 @@
   width: 200px;
 }
 
-#priceFilterIcon {
+.filterIcon {
   width: 16px;
   height: 16px;
   cursor: pointer;
 }
 
-#sortIcon, #priceFilterIcon {
+#sortIcon, #filterIcon {
   cursor: pointer;
   margin-left: 5px;
 }

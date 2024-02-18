@@ -54,4 +54,4 @@ function filterTableByPrice(threshold) {
   });
 }
 
-export { showPriceFilterPopup, filterTableByPrice };
+export { showPriceFilterPopup };

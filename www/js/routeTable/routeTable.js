@@ -1,5 +1,20 @@
 import { appState } from '../stateManager.js';
-import { showPriceFilterPopup, filterTableByPrice } from './priceFilter.js';
+import { showPriceFilterPopup } from './priceFilter.js';
+
+function getColumnIndex(columnIdentifier) {
+  const columnMap = {
+    'departure': 1,
+    'arrival': 2,
+    'price': 3,
+    'airlines': 4,
+    'direct': 5,
+    'stops': 6,
+    'layovers': 7,
+    'duration': 8,
+    'route': 9
+  };
+  return columnMap[columnIdentifier] || -1; // Default to -1 if identifier not found
+}
 
 function buildRouteTable(routeIndex) {
   const selectedRoute = appState.routes[routeIndex];
@@ -11,7 +26,7 @@ function buildRouteTable(routeIndex) {
 
   const origin = selectedRoute.originAirport.iata_code;
   const destination = selectedRoute.destinationAirport.iata_code;
-  const date = "2024-03-15"; // Example date, you might want to dynamically set this
+  const date = "2024-03-15";
 
   fetch(`https://yonderhop.com/api/yhoneway?origin=${origin}&destination=${destination}&date=${date}`)
     .then(response => {
@@ -28,16 +43,16 @@ function buildRouteTable(routeIndex) {
 
       const thead = document.createElement('thead');
       let headerRow = `<tr>
-                    <th>Departure <span class="sortIcon">&#x25B2;</span></th>
-                    <th>Arrival <span class="sortIcon">&#x25B2;</span></th>
-                    <th>Price <span class="sortIcon" data-column="price">&#x25B2;</span><img id="priceFilterIcon" src="/assets/filter-icon.svg" alt="Filter"></th>
-                    <th>Airlines <span class="sortIcon">&#x25B2;</span></th>
-                    <th>Direct <span class="sortIcon">&#x25B2;</span></th>
-                    <th>Stops <span class="sortIcon">&#x25B2;</span></th>
-                    <th>Layovers <span class="sortIcon">&#x25B2;</span></th>
-                    <th>Duration <span class="sortIcon">&#x25B2;</span></th>
-                    <th>Route <span class="sortIcon">&#x25B2;</span></th>
-                 </tr>`;
+                          <th>Departure <span class="sortIcon" data-column="departure">&#x21C5;</span></th>
+                          <th>Arrival <span class="sortIcon" data-column="arrival">&#x21C5;</span></th>
+                          <th>Price <span class="sortIcon" data-column="price">&#x21C5;</span><img id=priceFilter class="filterIcon" src="/assets/filter-icon.svg" alt="Filter"></th>
+                          <th>Airlines <span class="sortIcon" data-column="airlines">&#x21C5;</span></th>
+                          <th>Direct <span class="sortIcon" data-column="direct">&#x21C5;</span></th>
+                          <th>Stops <span class="sortIcon" data-column="stops">&#x21C5;</span></th>
+                          <th>Layovers <span class="sortIcon" data-column="layovers">&#x21C5;</span></th>
+                          <th>Duration <span class="sortIcon" data-column="duration">&#x21C5;</span></th>
+                          <th>Route <span class="sortIcon" data-column="route">&#x21C5;</span></th>
+                       </tr>`;
       thead.innerHTML = headerRow;
       table.appendChild(thead);
 
@@ -74,65 +89,50 @@ function buildRouteTable(routeIndex) {
 
 function attachEventListenersToIcons(table, data) {
   const sortIcons = document.querySelectorAll('.sortIcon');
-  sortIcons.forEach((icon, index) => {
+  sortIcons.forEach(icon => {
     icon.addEventListener('click', function() {
-      const isAscending = icon.classList.contains("th-sort-asc");
-      sortTableByColumn(table, index, !isAscending);
-      // Toggle classes for visual feedback
-      icon.classList.toggle("th-sort-asc", !isAscending);
-      icon.classList.toggle("th-sort-desc", isAscending);
+      const columnIdentifier = this.getAttribute('data-column');
+      const columnIndex = getColumnIndex(columnIdentifier);
+      const isAscending = this.getAttribute('data-sort') !== 'asc';
+      sortTableByColumn(table, columnIndex, isAscending);
+      resetSortIcons(sortIcons, this, isAscending ? 'asc' : 'desc');
     });
   });
 
-  const priceFilterIcon = document.getElementById('priceFilterIcon');
-  priceFilterIcon.addEventListener('click', function(event) {
+  document.getElementById('priceFilter').addEventListener('click', function(event) {
     event.stopPropagation();
     showPriceFilterPopup(event, data);
   });
 }
 
-function sortTableByColumn(table, column, asc = true) {
+function resetSortIcons(sortIcons, currentIcon, newSortState) {
+  sortIcons.forEach(icon => {
+    if (icon !== currentIcon) {
+      icon.innerHTML = '&#x21C5;'; // Reset to double arrow
+      icon.removeAttribute('data-sort');
+    } else {
+      icon.innerHTML = newSortState === 'asc' ? '&#x25B2;' : '&#x25BC;';
+      icon.setAttribute('data-sort', newSortState);
+    }
+  });
+}
+
+function sortTableByColumn(table, columnIndex, asc = true) {
   const dirModifier = asc ? 1 : -1;
   const tBody = table.tBodies[0];
   const rows = Array.from(tBody.querySelectorAll("tr"));
-  const isDateColumn = column === 0 || column === 1; // Departure and Arrival columns
-  const isPriceColumn = column === 2; // Price column
-  const isDurationColumn = column === 7; // Duration column, adjust if your table structure is different
 
   const sortedRows = rows.sort((a, b) => {
-    let aColText = a.querySelector(`td:nth-child(${column + 1})`).textContent.trim();
-    let bColText = b.querySelector(`td:nth-child(${column + 1})`).textContent.trim();
+    let aColText = a.cells[columnIndex - 1].textContent.trim();
+    let bColText = b.cells[columnIndex - 1].textContent.trim();
 
-    if (isDateColumn) {
-      return (new Date(aColText) - new Date(bColText)) * dirModifier;
-    } else if (isPriceColumn) {
-      aColText = parseFloat(aColText.replace('$', ''));
-      bColText = parseFloat(bColText.replace('$', ''));
-      return (aColText - bColText) * dirModifier;
-    } else if (isDurationColumn) {
-      // Convert "XXh YYm" format into total minutes for comparison
-      const durationToMinutes = duration => {
-        const parts = duration.match(/(\d+)h (\d+)m/);
-        if (parts) {
-          const hours = parseInt(parts[1], 10);
-          const minutes = parseInt(parts[2], 10);
-          return hours * 60 + minutes;
-        }
-        return 0; // Default to 0 if the format doesn't match
-      };
-      aColText = durationToMinutes(aColText);
-      bColText = durationToMinutes(bColText);
-    } else if (!isNaN(parseFloat(aColText)) && !isNaN(parseFloat(bColText))) {
-      aColText = parseFloat(aColText);
-      bColText = parseFloat(bColText);
-    } else {
-      return aColText.localeCompare(bColText, undefined, { numeric: true, sensitivity: 'base' }) * dirModifier;
+    if (!isNaN(parseFloat(aColText)) && !isNaN(parseFloat(bColText))) {
+      return (parseFloat(aColText) - parseFloat(bColText)) * dirModifier;
     }
-
-    return (aColText - bColText) * dirModifier;
+    // Default to string comparison
+    return aColText.localeCompare(bColText, undefined, { numeric: true }) * dirModifier;
   });
 
-  // Re-append sorted rows to tbody
   while (tBody.firstChild) {
     tBody.removeChild(tBody.firstChild);
   }
@@ -140,9 +140,11 @@ function sortTableByColumn(table, column, asc = true) {
 
   // Update header classes for visual indication of sort direction
   table.querySelectorAll("th").forEach(th => th.classList.remove("th-sort-asc", "th-sort-desc"));
-  table.querySelector(`th:nth-child(${column + 1})`).classList.toggle("th-sort-asc", asc);
-  table.querySelector(`th:nth-child(${column + 1})`).classList.toggle("th-sort-desc", !asc);
+  if (asc) {
+    table.querySelector(`th:nth-child(${columnIndex})`).classList.add("th-sort-asc");
+  } else {
+    table.querySelector(`th:nth-child(${columnIndex})`).classList.add("th-sort-desc");
+  }
 }
-
 
 export { buildRouteTable };
