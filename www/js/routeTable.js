@@ -1,6 +1,5 @@
 import { appState } from './stateManager.js';
 
-
 function buildRouteTable(routeIndex) {
   const selectedRoute = appState.routes[routeIndex];
   const infoPaneContent = document.getElementById('infoPaneContent');
@@ -27,13 +26,13 @@ function buildRouteTable(routeIndex) {
       let headerRow = `<tr>
                           <th>Departure</th>
                           <th>Arrival</th>
-                          <th>Price</th>
+                          <th>Price <span id="priceFilterIcon">&#x1F50D;</span></th>
                           <th>Airlines</th>
                           <th>Direct</th>
                           <th>Stops</th>
                           <th>Layovers</th>
                           <th>Duration</th>
-                          <th>Route</th> <!-- New Column for Route IATAs -->
+                          <th>Route</th>
                        </tr>`;
       thead.innerHTML = headerRow;
       table.appendChild(thead);
@@ -46,7 +45,7 @@ function buildRouteTable(routeIndex) {
         const layovers = flight.route.slice(1, -1).map(r => r.flyTo).join(", ");
         const durationHours = Math.floor(flight.duration.total / 3600);
         const durationMinutes = Math.floor((flight.duration.total % 3600) / 60);
-        const routeIATAs = flight.route.map(r => r.flyFrom).concat(flight.route[flight.route.length - 1].flyTo).join(" > "); // Concatenating all IATAs
+        const routeIATAs = flight.route.map(r => r.flyFrom).concat(flight.route[flight.route.length - 1].flyTo).join(" > ");
         row.innerHTML = `<td>${new Date(flight.local_departure).toLocaleString()}</td>
                          <td>${new Date(flight.local_arrival).toLocaleString()}</td>
                          <td>$${flight.price}</td>
@@ -55,22 +54,28 @@ function buildRouteTable(routeIndex) {
                          <td>${stops}</td>
                          <td>${layovers}</td>
                          <td>${durationHours}h ${durationMinutes}m</td>
-                         <td>${routeIATAs}</td>`; // Adding the new Route IATAs column
+                         <td>${routeIATAs}</td>`;
         tbody.appendChild(row);
       });
+      table.appendChild(tbody);
+      infoPaneContent.appendChild(table);
+
+      // Add sorting functionality to headers
       const headers = table.querySelectorAll("th");
       headers.forEach((header, index) => {
-        if (header.textContent.trim().toLowerCase() !== 'route') { // Exclude 'Route' column from sorting
+        if (header.textContent.trim().toLowerCase() !== 'route') {
           header.addEventListener('click', () => {
             const currentIsAscending = header.classList.contains("th-sort-asc");
             sortTableByColumn(table, index, !currentIsAscending);
           });
         }
       });
-      table.appendChild(tbody);
-      infoPaneContent.appendChild(table);
+
+      // Add filter icon functionality
+      document.getElementById('priceFilterIcon').addEventListener('click', function(event) {
+        showPriceFilterPopup(event, data);
+      });
     })
-    
     .catch(error => {
       console.error('Error:', error);
       infoPaneContent.textContent = 'Error loading data.';
@@ -130,6 +135,49 @@ function sortTableByColumn(table, column, asc = true) {
   table.querySelectorAll("th").forEach(th => th.classList.remove("th-sort-asc", "th-sort-desc"));
   table.querySelector(`th:nth-child(${column + 1})`).classList.toggle("th-sort-asc", asc);
   table.querySelector(`th:nth-child(${column + 1})`).classList.toggle("th-sort-desc", !asc);
+}
+
+function showPriceFilterPopup(event, data) {
+  // Assuming the sliderPopup and its child elements are already created and styled
+  const prices = data.map(flight => flight.price);
+  const minPrice = Math.min(...prices);
+  const maxPrice = Math.max(...prices);
+
+  const sliderPopup = document.getElementById('priceSliderPopup') || createSliderPopup();
+  const slider = sliderPopup.querySelector('#priceSlider');
+  slider.min = minPrice;
+  slider.max = maxPrice;
+  slider.value = minPrice; // Reset slider value or set to a previously saved value
+
+  // Position and show the slider popup
+  sliderPopup.style.display = 'block';
+  sliderPopup.style.left = `${event.clientX}px`;
+  sliderPopup.style.top = `${event.clientY + 20}px`; // Adjust as needed
+}
+
+function createSliderPopup() {
+  const sliderPopup = document.createElement('div');
+  sliderPopup.id = 'priceSliderPopup';
+  sliderPopup.innerHTML = `
+    <input type="range" min="0" max="100" value="50" class="slider" id="priceSlider">
+  `;
+  document.body.appendChild(sliderPopup);
+
+  // Add event listener for the slider input
+  document.getElementById('priceSlider').addEventListener('input', function() {
+    filterTableByPrice(this.value);
+  });
+
+  return sliderPopup;
+}
+
+function filterTableByPrice(threshold) {
+  const table = document.querySelector('.route-info-table');
+  const rows = table.querySelectorAll('tbody tr');
+  rows.forEach(row => {
+    const price = parseFloat(row.cells[2].textContent.replace('$', ''));
+    row.style.display = price > threshold ? 'none' : '';
+  });
 }
 
 export { buildRouteTable };
