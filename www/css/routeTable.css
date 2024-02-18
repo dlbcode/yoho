@@ -1,3 +1,4 @@
+
 #priceSliderPopup {
   position: absolute;
   z-index: 1000;
@@ -29,4 +30,22 @@
 
 #sortIcon:hover, #priceFilterIcon:hover {
   color: #007bff; /* Example hover color, adjust as needed */
+}
+
+/* Targeting th elements within a specific table class for content alignment */
+.route-info-table th {
+  position: relative; /* Establishes a positioning context for absolute positioning */
+  text-align: left; /* Ensures text aligns to the left */
+  padding-right: 25px; /* Provides space for the filter icon */
+}
+
+/* Positioning the filter icon to the right within the th element */
+.route-info-table th .filterIcon {
+  position: absolute;
+  right: 5px; /* Adjust based on desired spacing from the right edge */
+  top: 50%;
+  transform: translateY(-50%); /* Centers the icon vertically */
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
 }

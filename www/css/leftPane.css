@@ -309,9 +309,3 @@
   color: #999;
   text-decoration: underline; /* Optionally add underline on hover if desired */
 }
-
-/* Targeting all <th> elements within tables with the class 'route-info-table' */
-.route-info-table th {
-  cursor: pointer;
-}
-
