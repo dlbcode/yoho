@@ -32,9 +32,14 @@ function showPriceFilterPopup(event, data) {
 
   const sliderPopup = document.getElementById('priceSliderPopup') || createSliderPopup();
   const slider = sliderPopup.querySelector('#priceSlider');
+  const valueDisplay = sliderPopup.querySelector('#sliderValueDisplay');
+
   slider.min = minPrice;
   slider.max = maxPrice;
-  slider.value = minPrice;
+  slider.value = maxPrice; // Set the slider to default to the maximum value
+
+  // Also set the displayed value to the maximum value
+  valueDisplay.textContent = `$${maxPrice}`;
 
   sliderPopup.classList.toggle('hidden', false);
 
