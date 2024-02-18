@@ -1,5 +1,6 @@
 import { appState } from '../stateManager.js';
 import { showPriceFilterPopup } from './priceFilter.js';
+import { showDateFilterPopup } from './dateFilters.js';
 
 function getColumnIndex(columnIdentifier) {
   const columnMap = {
@@ -98,6 +99,17 @@ function attachEventListenersToIcons(table, data) {
       const isAscending = sortIcon.getAttribute('data-sort') !== 'asc';
       sortTableByColumn(table, columnIndex, isAscending);
       resetSortIcons(headers, sortIcon, isAscending ? 'asc' : 'desc');
+    });
+    
+    const departureHeader = document.querySelector('th[data-column="departure"]');
+    const arrivalHeader = document.querySelector('th[data-column="arrival"]');
+    
+    departureHeader.addEventListener('click', function(event) {
+      showDateFilterPopup(event, 'departure', appState.routes);
+    });
+    
+    arrivalHeader.addEventListener('click', function(event) {
+      showDateFilterPopup(event, 'arrival', appState.routes);
     });
   });
 
