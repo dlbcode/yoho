@@ -151,9 +151,16 @@ function showPriceFilterPopup(event, data) {
   slider.max = maxPrice;
   slider.value = minPrice; // Reset slider value or set to a previously saved value
 
-  sliderPopup.style.display = 'block';
-  sliderPopup.style.left = `${event.clientX}px`;
-  sliderPopup.style.top = `${event.clientY}px`;
+  // Find the 'Price' column header to position the popup above it
+  const priceHeader = document.querySelector('th:nth-child(3)'); // Assuming 'Price' is the third column
+  const rect = priceHeader.getBoundingClientRect();
+
+  // Use class to control visibility instead of inline style
+  sliderPopup.classList.remove('hidden');
+  
+  // Position above the 'Price' column header
+  sliderPopup.style.left = `${rect.left + window.scrollX}px`;
+  sliderPopup.style.top = `${rect.top + window.scrollY - sliderPopup.offsetHeight}px`;
 }
 
 function createSliderPopup() {
