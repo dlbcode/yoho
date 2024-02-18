@@ -104,10 +104,8 @@ function attachEventListenersToIcons(table, data) {
     event.stopPropagation();
     const priceSliderPopup = document.getElementById('priceSliderPopup');
     if (priceSliderPopup) {
-      // Toggle visibility based on the current state
       priceSliderPopup.classList.toggle('hidden');
     } else {
-      // If the popup doesn't exist yet, show it for the first time
       showPriceFilterPopup(event, data);
     }
   });
