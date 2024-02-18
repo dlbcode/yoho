@@ -34,17 +34,16 @@
 
 /* Targeting th elements within a specific table class for content alignment */
 .route-info-table th {
-  position: relative; /* Establishes a positioning context for absolute positioning */
-  text-align: left; /* Ensures text aligns to the left */
-  padding-right: 25px; /* Provides space for the filter icon */
+  position: relative;
+  text-align: left;
 }
 
 /* Positioning the filter icon to the right within the th element */
 .route-info-table th .filterIcon {
   position: absolute;
-  right: 5px; /* Adjust based on desired spacing from the right edge */
+  right: 10px;
   top: 50%;
-  transform: translateY(-50%); /* Centers the icon vertically */
+  transform: translateY(-50%);
   width: 16px;
   height: 16px;
   cursor: pointer;
