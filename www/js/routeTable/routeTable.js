@@ -28,15 +28,15 @@ function buildRouteTable(routeIndex) {
 
       const thead = document.createElement('thead');
       let headerRow = `<tr>
-                    <th>Departure</th>
-                    <th>Arrival</th>
-                    <th>Price <span id="sortIcon">&#x25B2;</span><img id="priceFilterIcon" src="/assets/filter-icon.svg" alt="Filter"></th>
-                    <th>Airlines</th>
-                    <th>Direct</th>
-                    <th>Stops</th>
-                    <th>Layovers</th>
-                    <th>Duration</th>
-                    <th>Route</th>
+                    <th>Departure <span class="sortIcon">&#x25B2;</span></th>
+                    <th>Arrival <span class="sortIcon">&#x25B2;</span></th>
+                    <th>Price <span class="sortIcon" data-column="price">&#x25B2;</span><img id="priceFilterIcon" src="/assets/filter-icon.svg" alt="Filter"></th>
+                    <th>Airlines <span class="sortIcon">&#x25B2;</span></th>
+                    <th>Direct <span class="sortIcon">&#x25B2;</span></th>
+                    <th>Stops <span class="sortIcon">&#x25B2;</span></th>
+                    <th>Layovers <span class="sortIcon">&#x25B2;</span></th>
+                    <th>Duration <span class="sortIcon">&#x25B2;</span></th>
+                    <th>Route <span class="sortIcon">&#x25B2;</span></th>
                  </tr>`;
       thead.innerHTML = headerRow;
       table.appendChild(thead);
@@ -73,21 +73,18 @@ function buildRouteTable(routeIndex) {
 }
 
 function attachEventListenersToIcons(table, data) {
-  const sortIcon = document.getElementById('sortIcon');
-  const priceFilterIcon = document.getElementById('priceFilterIcon');
-
-  sortIcon.addEventListener('click', function() {
-    // Find the parent <th> element
-    const header = this.closest('th');
-    const currentIsAscending = header.classList.contains("th-sort-asc");
-    sortTableByColumn(table, 2, !currentIsAscending); // Assuming 'Price' is the third column
-  
-    // Toggle sort direction classes on the header, not the icon
-    header.classList.toggle("th-sort-asc", !currentIsAscending);
-    header.classList.toggle("th-sort-desc", currentIsAscending);
+  const sortIcons = document.querySelectorAll('.sortIcon');
+  sortIcons.forEach((icon, index) => {
+    icon.addEventListener('click', function() {
+      const isAscending = icon.classList.contains("th-sort-asc");
+      sortTableByColumn(table, index, !isAscending);
+      // Toggle classes for visual feedback
+      icon.classList.toggle("th-sort-asc", !isAscending);
+      icon.classList.toggle("th-sort-desc", isAscending);
+    });
   });
-  
 
+  const priceFilterIcon = document.getElementById('priceFilterIcon');
   priceFilterIcon.addEventListener('click', function(event) {
     event.stopPropagation();
     showPriceFilterPopup(event, data);
