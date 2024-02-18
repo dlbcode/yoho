@@ -1,0 +1,21 @@
+
+#priceSliderPopup {
+  position: absolute;
+  z-index: 1000; /* Ensure it appears above other content */
+  background-color: #333; /* Background color for the popup */
+  border: 1px solid #525252; /* Border for the popup */
+  padding: 5px; /* Padding around the slider */
+  border-radius: 5px; /* Optional: rounded corners for the popup */
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2); /* Optional: shadow for the popup */
+  display: none; /* Initially hidden */
+}
+
+/* Style for the price slider itself */
+.price-slider {
+  width: 200px; /* Width of the slider */
+}
+
+/* Additional styling for the filter icon to change cursor on hover */
+#priceFilterIcon {
+  cursor: pointer;
+}
