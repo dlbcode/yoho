@@ -44,16 +44,16 @@ function buildRouteTable(routeIndex) {
 
       const thead = document.createElement('thead');
       let headerRow = `<tr>
-                          <th>Departure <span class="sortIcon" data-column="departure">&#x21C5;</span></th>
-                          <th>Arrival <span class="sortIcon" data-column="arrival">&#x21C5;</span></th>
-                          <th>Price <span class="sortIcon" data-column="price">&#x21C5;</span><img id=priceFilter class="filterIcon" src="/assets/filter-icon.svg" alt="Filter"></th>
-                          <th>Airlines <span class="sortIcon" data-column="airlines">&#x21C5;</span></th>
-                          <th>Direct <span class="sortIcon" data-column="direct">&#x21C5;</span></th>
-                          <th>Stops <span class="sortIcon" data-column="stops">&#x21C5;</span></th>
-                          <th>Layovers <span class="sortIcon" data-column="layovers">&#x21C5;</span></th>
-                          <th>Duration <span class="sortIcon" data-column="duration">&#x21C5;</span></th>
-                          <th>Route <span class="sortIcon" data-column="route">&#x21C5;</span></th>
-                       </tr>`;
+                    <th>Departure <span class="sortIcon" data-column="departure">&#x21C5;</span><img class="filterIcon" data-column="departure" src="/assets/filter-icon.svg" alt="Filter"></th>
+                    <th>Arrival <span class="sortIcon" data-column="arrival">&#x21C5;</span><img class="filterIcon" data-column="arrival" src="/assets/filter-icon.svg" alt="Filter"></th>
+                    <th>Price <span class="sortIcon" data-column="price">&#x21C5;</span><img id="priceFilter" class="filterIcon" src="/assets/filter-icon.svg" alt="Filter"></th>
+                    <th>Airlines <span class="sortIcon" data-column="airlines">&#x21C5;</span></th>
+                    <th>Direct <span class="sortIcon" data-column="direct">&#x21C5;</span></th>
+                    <th>Stops <span class="sortIcon" data-column="stops">&#x21C5;</span></th>
+                    <th>Layovers <span class="sortIcon" data-column="layovers">&#x21C5;</span></th>
+                    <th>Duration <span class="sortIcon" data-column="duration">&#x21C5;</span></th>
+                    <th>Route <span class="sortIcon" data-column="route">&#x21C5;</span></th>
+                 </tr>`;
       thead.innerHTML = headerRow;
       table.appendChild(thead);
 
@@ -100,18 +100,23 @@ function attachEventListenersToIcons(table, data) {
       sortTableByColumn(table, columnIndex, isAscending);
       resetSortIcons(headers, sortIcon, isAscending ? 'asc' : 'desc');
     });
-    
-    const departureHeader = document.querySelector('th[data-column="departure"]');
-    const arrivalHeader = document.querySelector('th[data-column="arrival"]');
-    
+  });
+
+  // Attach event listeners for departure and arrival filters outside the forEach loop
+  const departureHeader = document.querySelector('th[data-column="departure"]');
+  const arrivalHeader = document.querySelector('th[data-column="arrival"]');
+
+  if (departureHeader) {
     departureHeader.addEventListener('click', function(event) {
       showDateFilterPopup(event, 'departure', appState.routes);
     });
-    
+  }
+
+  if (arrivalHeader) {
     arrivalHeader.addEventListener('click', function(event) {
       showDateFilterPopup(event, 'arrival', appState.routes);
     });
-  });
+  }
 
   const priceFilterIcon = document.getElementById('priceFilter');
   priceFilterIcon.addEventListener('click', function(event) {
