@@ -141,7 +141,6 @@ function sortTableByColumn(table, column, asc = true) {
 }
 
 function showPriceFilterPopup(event, data) {
-  // Assuming the sliderPopup and its child elements are already created and styled
   const prices = data.map(flight => flight.price);
   const minPrice = Math.min(...prices);
   const maxPrice = Math.max(...prices);
@@ -152,10 +151,9 @@ function showPriceFilterPopup(event, data) {
   slider.max = maxPrice;
   slider.value = minPrice; // Reset slider value or set to a previously saved value
 
-  // Position and show the slider popup
   sliderPopup.style.display = 'block';
   sliderPopup.style.left = `${event.clientX}px`;
-  sliderPopup.style.top = `${event.clientY + 20}px`; // Adjust as needed
+  sliderPopup.style.top = `${event.clientY}px`;
 }
 
 function createSliderPopup() {
