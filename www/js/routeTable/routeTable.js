@@ -88,14 +88,16 @@ function buildRouteTable(routeIndex) {
 }
 
 function attachEventListenersToIcons(table, data) {
-  const sortIcons = document.querySelectorAll('.sortIcon');
-  sortIcons.forEach(icon => {
-    icon.addEventListener('click', function() {
-      const columnIdentifier = this.getAttribute('data-column');
+  const headers = table.querySelectorAll('th');
+  headers.forEach(header => {
+    header.style.cursor = 'pointer'; // Ensure the cursor indicates clickable headers
+    header.addEventListener('click', function() {
+      const sortIcon = this.querySelector('.sortIcon');
+      const columnIdentifier = sortIcon.getAttribute('data-column');
       const columnIndex = getColumnIndex(columnIdentifier);
-      const isAscending = this.getAttribute('data-sort') !== 'asc';
+      const isAscending = sortIcon.getAttribute('data-sort') !== 'asc';
       sortTableByColumn(table, columnIndex, isAscending);
-      resetSortIcons(sortIcons, this, isAscending ? 'asc' : 'desc');
+      resetSortIcons(headers, sortIcon, isAscending ? 'asc' : 'desc');
     });
   });
 
@@ -111,8 +113,9 @@ function attachEventListenersToIcons(table, data) {
   });
 }
 
-function resetSortIcons(sortIcons, currentIcon, newSortState) {
-  sortIcons.forEach(icon => {
+function resetSortIcons(headers, currentIcon, newSortState) {
+  headers.forEach(header => {
+    const icon = header.querySelector('.sortIcon');
     if (icon !== currentIcon) {
       icon.innerHTML = '&#x21C5;'; // Reset to double arrow
       icon.removeAttribute('data-sort');
