@@ -78,7 +78,7 @@ th {
   background-color: #222; /* Very light grey background */
   color: #ccc;
   text-align: left;
-  padding: 8px; /* Padding for table cells */
+  padding: 5px; /* Padding for table cells */
   /*border: 1px solid #555; /* Subtle bottom border */
 }
 

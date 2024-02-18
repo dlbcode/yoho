@@ -1,4 +1,5 @@
-import { appState } from './stateManager.js';
+import { appState } from '../stateManager.js';
+import { showPriceFilterPopup, filterTableByPrice } from './priceFilter.js';
 
 function buildRouteTable(routeIndex) {
   const selectedRoute = appState.routes[routeIndex];
@@ -27,16 +28,16 @@ function buildRouteTable(routeIndex) {
 
       const thead = document.createElement('thead');
       let headerRow = `<tr>
-                          <th>Departure</th>
-                          <th>Arrival</th>
-                          <th>Price <span id="priceFilterIcon">&#x1F50D;</span></th>
-                          <th>Airlines</th>
-                          <th>Direct</th>
-                          <th>Stops</th>
-                          <th>Layovers</th>
-                          <th>Duration</th>
-                          <th>Route</th>
-                       </tr>`;
+                    <th>Departure</th>
+                    <th>Arrival</th>
+                    <th>Price <span id="sortIcon">&#x25B2;</span><img id="priceFilterIcon" src="/assets/filter-icon.svg" alt="Filter"></th>
+                    <th>Airlines</th>
+                    <th>Direct</th>
+                    <th>Stops</th>
+                    <th>Layovers</th>
+                    <th>Duration</th>
+                    <th>Route</th>
+                 </tr>`;
       thead.innerHTML = headerRow;
       table.appendChild(thead);
 
@@ -63,21 +64,7 @@ function buildRouteTable(routeIndex) {
       table.appendChild(tbody);
       infoPaneContent.appendChild(table);
 
-      // Add sorting functionality to headers
-      const headers = table.querySelectorAll("th");
-      headers.forEach((header, index) => {
-        if (header.textContent.trim().toLowerCase() !== 'route') {
-          header.addEventListener('click', () => {
-            const currentIsAscending = header.classList.contains("th-sort-asc");
-            sortTableByColumn(table, index, !currentIsAscending);
-          });
-        }
-      });
-
-      // Add filter icon functionality
-      document.getElementById('priceFilterIcon').addEventListener('click', function(event) {
-        showPriceFilterPopup(event, data);
-      });
+      attachEventListenersToIcons(table, data);
     })
     .catch(error => {
       console.error('Error:', error);
@@ -85,12 +72,32 @@ function buildRouteTable(routeIndex) {
     });
 }
 
+function attachEventListenersToIcons(table, data) {
+  const sortIcon = document.getElementById('sortIcon');
+  const priceFilterIcon = document.getElementById('priceFilterIcon');
+
+  sortIcon.addEventListener('click', function() {
+    // Find the parent <th> element
+    const header = this.closest('th');
+    const currentIsAscending = header.classList.contains("th-sort-asc");
+    sortTableByColumn(table, 2, !currentIsAscending); // Assuming 'Price' is the third column
+  
+    // Toggle sort direction classes on the header, not the icon
+    header.classList.toggle("th-sort-asc", !currentIsAscending);
+    header.classList.toggle("th-sort-desc", currentIsAscending);
+  });
+  
+
+  priceFilterIcon.addEventListener('click', function(event) {
+    event.stopPropagation();
+    showPriceFilterPopup(event, data);
+  });
+}
+
 function sortTableByColumn(table, column, asc = true) {
   const dirModifier = asc ? 1 : -1;
   const tBody = table.tBodies[0];
   const rows = Array.from(tBody.querySelectorAll("tr"));
-
-  // Adjust column indexes based on your table's structure if necessary
   const isDateColumn = column === 0 || column === 1; // Departure and Arrival columns
   const isPriceColumn = column === 2; // Price column
   const isDurationColumn = column === 7; // Duration column, adjust if your table structure is different
@@ -140,66 +147,5 @@ function sortTableByColumn(table, column, asc = true) {
   table.querySelector(`th:nth-child(${column + 1})`).classList.toggle("th-sort-desc", !asc);
 }
 
-function showPriceFilterPopup(event, data) {
-  const prices = data.map(flight => flight.price);
-  const minPrice = Math.min(...prices);
-  const maxPrice = Math.max(...prices);
-
-  const sliderPopup = document.getElementById('priceSliderPopup') || createSliderPopup();
-  const slider = sliderPopup.querySelector('#priceSlider');
-  slider.min = minPrice;
-  slider.max = maxPrice;
-  slider.value = minPrice; // Reset slider value or set to a previously saved value
-
-  sliderPopup.classList.toggle('hidden', false);
-
-  // Find the 'Price' column header to position the popup above it
-  const priceHeader = document.querySelector('th:nth-child(3)'); // Assuming 'Price' is the third column
-  const rect = priceHeader.getBoundingClientRect();
-
-  // Position above the 'Price' column header
-  sliderPopup.style.left = `${rect.left + window.scrollX}px`;
-  sliderPopup.style.top = `${rect.top + window.scrollY - sliderPopup.offsetHeight}px`;
-}
-
-function createSliderPopup() {
-  const sliderPopup = document.createElement('div');
-  sliderPopup.id = 'priceSliderPopup';
-  sliderPopup.innerHTML = `
-    <div id="sliderValueDisplay" style="text-align: center; margin-bottom: 10px;">$50</div>
-    <input type="range" min="0" max="100" value="50" class="price-slider" id="priceSlider">
-  `;
-  document.body.appendChild(sliderPopup);
-
-  const slider = document.getElementById('priceSlider');
-  const valueDisplay = document.getElementById('sliderValueDisplay');
-
-  // Initialize display with current slider value
-  valueDisplay.textContent = `$${slider.value}`;
-
-  // Update the display when the slider value changes
-  slider.addEventListener('input', function() {
-    valueDisplay.textContent = `$${this.value}`;
-    filterTableByPrice(this.value);
-  });
-
-  // Hide the slider popup when clicking outside of it
-  document.addEventListener('click', function(event) {
-    if (!sliderPopup.contains(event.target) && event.target.id !== 'priceFilterIcon') {
-      sliderPopup.classList.add('hidden'); // Use class to hide
-    }
-  });
-
-  return sliderPopup;
-}
-
-function filterTableByPrice(threshold) {
-  const table = document.querySelector('.route-info-table');
-  const rows = table.querySelectorAll('tbody tr');
-  rows.forEach(row => {
-    const price = parseFloat(row.cells[2].textContent.replace('$', ''));
-    row.style.display = price > threshold ? 'none' : '';
-  });
-}
 
 export { buildRouteTable };

@@ -18,5 +18,16 @@
 }
 
 #priceFilterIcon {
+  width: 16px;
+  height: 16px;
   cursor: pointer;
+}
+
+#sortIcon, #priceFilterIcon {
+  cursor: pointer;
+  margin-left: 5px;
+}
+
+#sortIcon:hover, #priceFilterIcon:hover {
+  color: #007bff; /* Example hover color, adjust as needed */
 }
