@@ -151,11 +151,6 @@ function sortTableByColumn(table, columnIndex, asc = true) {
   const sortedRows = rows.sort((a, b) => {
     let aColText = a.cells[columnIndex - 1].textContent.trim();
     let bColText = b.cells[columnIndex - 1].textContent.trim();
-
-    if (!isNaN(parseFloat(aColText)) && !isNaN(parseFloat(bColText))) {
-      return (parseFloat(aColText) - parseFloat(bColText)) * dirModifier;
-    }
-    // Default to string comparison
     return aColText.localeCompare(bColText, undefined, { numeric: true }) * dirModifier;
   });
 
