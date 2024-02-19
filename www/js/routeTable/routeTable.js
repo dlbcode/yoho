@@ -92,35 +92,33 @@ function attachEventListenersToIcons(table, data) {
   const headers = table.querySelectorAll('th');
   headers.forEach(header => {
     header.style.cursor = 'pointer'; // Ensure the cursor indicates clickable headers
-    header.addEventListener('click', function() {
-      const sortIcon = this.querySelector('.sortIcon');
-      const columnIdentifier = sortIcon.getAttribute('data-column');
-      const columnIndex = getColumnIndex(columnIdentifier);
-      const isAscending = sortIcon.getAttribute('data-sort') !== 'asc';
-      sortTableByColumn(table, columnIndex, isAscending);
-      resetSortIcons(headers, sortIcon, isAscending ? 'asc' : 'desc');
+    header.addEventListener('click', function(event) {
+      // Check if the click is on the filter icon or a child of it
+      if (!event.target.closest('.filterIcon')) {
+        const sortIcon = this.querySelector('.sortIcon');
+        const columnIdentifier = sortIcon.getAttribute('data-column');
+        const columnIndex = getColumnIndex(columnIdentifier);
+        const isAscending = sortIcon.getAttribute('data-sort') !== 'asc';
+        sortTableByColumn(table, columnIndex, isAscending);
+        resetSortIcons(headers, sortIcon, isAscending ? 'asc' : 'desc');
+      }
     });
   });
 
-  // Attach event listeners for departure and arrival filters outside the forEach loop
-  const departureHeader = document.querySelector('th[data-column="departure"]');
-  const arrivalHeader = document.querySelector('th[data-column="arrival"]');
-
-  if (departureHeader) {
-    departureHeader.addEventListener('click', function(event) {
-      showDateFilterPopup(event, 'departure', appState.routes);
+  // Attach event listeners specifically for filter icons
+  document.querySelectorAll('.filterIcon').forEach(icon => {
+    icon.addEventListener('click', function(event) {
+      event.stopPropagation(); // Prevent the event from bubbling up to the header
+      const column = this.getAttribute('data-column');
+      if (column === 'departure' || column === 'arrival') {
+        showDateFilterPopup(event, column, appState.routes);
+      }
     });
-  }
-
-  if (arrivalHeader) {
-    arrivalHeader.addEventListener('click', function(event) {
-      showDateFilterPopup(event, 'arrival', appState.routes);
-    });
-  }
+  });
 
   const priceFilterIcon = document.getElementById('priceFilter');
   priceFilterIcon.addEventListener('click', function(event) {
-    event.stopPropagation();
+    event.stopPropagation(); // Prevent the event from affecting other elements
     const priceSliderPopup = document.getElementById('priceSliderPopup');
     if (priceSliderPopup) {
       priceSliderPopup.classList.toggle('hidden');
