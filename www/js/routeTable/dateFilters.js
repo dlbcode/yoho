@@ -59,10 +59,32 @@ function getColumnIndex(columnIdentifier) {
 function showDateFilterPopup(event, column) {
   let existingPopup = document.getElementById(`${column}DateFilterPopup`);
   if (!existingPopup) {
-    createDateFilterPopup(column);
+    existingPopup = createDateFilterPopup(column);
   } else {
-    existingPopup.classList.toggle('hidden');
+    // If the popup is visible, hide it and exit
+    if (!existingPopup.classList.contains('hidden')) {
+      existingPopup.classList.add('hidden');
+      return;
+    }
   }
+
+  // Remove 'hidden' class but set visibility to hidden temporarily
+  existingPopup.classList.remove('hidden');
+  existingPopup.style.visibility = 'hidden';
+
+  // Use requestAnimationFrame to ensure the popup is rendered before positioning
+  requestAnimationFrame(() => {
+    const header = event.target.closest('th');
+    const rect = header.getBoundingClientRect();
+
+    // Now calculate and set the position
+    existingPopup.style.left = `${rect.left + window.pageXOffset}px`;
+    existingPopup.style.top = `${rect.bottom + window.pageYOffset}px`;
+
+    // Make the popup visible
+    existingPopup.style.visibility = 'visible';
+  });
 }
+
 
 export { showDateFilterPopup };

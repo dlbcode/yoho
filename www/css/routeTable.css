@@ -52,9 +52,9 @@
 .date-filter-popup {
   position: absolute;
   z-index: 1000;
-  background-color: #fff; /* Adjusted for visibility */
-  border: 1px solid #ccc; /* Lighter border for a modern look */
-  padding: 10px;
+  background-color: #333;
+  border: 1px solid #525252;
+  padding: 5px;
   border-radius: 5px;
   box-shadow: 0 2px 5px rgba(0,0,0,0.2);
 }
