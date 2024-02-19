@@ -12,6 +12,7 @@ function createDateFilterPopup(column) {
   document.body.appendChild(filterPopup);
 
   populateDateDropdowns(column);
+  return filterPopup;
 }
 
 function populateDateDropdowns(column) {
@@ -58,33 +59,25 @@ function getColumnIndex(columnIdentifier) {
 
 function showDateFilterPopup(event, column) {
   let existingPopup = document.getElementById(`${column}DateFilterPopup`);
+  
   if (!existingPopup) {
-    existingPopup = createDateFilterPopup(column);
+    existingPopup = createDateFilterPopup(column); // Ensure this call returns a DOM element
+    document.body.appendChild(existingPopup); // AppendChild error points to this line
   } else {
-    // If the popup is visible, hide it and exit
-    if (!existingPopup.classList.contains('hidden')) {
-      existingPopup.classList.add('hidden');
-      return;
-    }
+    existingPopup.classList.toggle('hidden');
   }
-
-  // Remove 'hidden' class but set visibility to hidden temporarily
-  existingPopup.classList.remove('hidden');
-  existingPopup.style.visibility = 'hidden';
-
-  // Use requestAnimationFrame to ensure the popup is rendered before positioning
-  requestAnimationFrame(() => {
-    const header = event.target.closest('th');
-    const rect = header.getBoundingClientRect();
-
-    // Now calculate and set the position
-    existingPopup.style.left = `${rect.left + window.pageXOffset}px`;
-    existingPopup.style.top = `${rect.bottom + window.pageYOffset}px`;
-
-    // Make the popup visible
-    existingPopup.style.visibility = 'visible';
-  });
+  
+  // Proceed with positioning the popup only if it's meant to be shown
+  if (!existingPopup.classList.contains('hidden')) {
+    requestAnimationFrame(() => {
+      const header = event.target.closest('th');
+      if (header) {
+        const rect = header.getBoundingClientRect();
+        existingPopup.style.left = `${rect.left + window.scrollX}px`;
+        existingPopup.style.top = `${rect.top + window.scrollY - existingPopup.offsetHeight}px`;
+      }
+    });
+  }
 }
-
 
 export { showDateFilterPopup };
