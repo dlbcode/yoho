@@ -17,22 +17,21 @@ function createDateFilterPopup(column) {
 function populateDateDropdowns(column) {
   const table = document.querySelector('.route-info-table');
   const columnIndex = getColumnIndex(column) - 1;
-  // Extract dates, convert to ISO date strings, and remove duplicates
-  const dates = Array.from(new Set(Array.from(table.querySelectorAll('tbody tr'))
-    .map(row => new Date(row.cells[columnIndex]?.textContent.split(' ')[0]).toISOString().split('T')[0])))
-    .sort();
+  const dateStrings = Array.from(table.querySelectorAll('tbody tr'))
+    .map(row => row.cells[columnIndex]?.textContent.split(',')[0]); // Extract just the date part
+
+  const uniqueDates = Array.from(new Set(dateStrings)).sort();
 
   const startDateSelect = document.getElementById(`${column}StartDate`);
   const endDateSelect = document.getElementById(`${column}EndDate`);
 
-  dates.forEach(date => {
-    const formattedDate = formatDate(date); // Assuming formatDate formats ISO string to desired format
-    startDateSelect.add(new Option(formattedDate, date));
-    endDateSelect.add(new Option(formattedDate, date));
+  uniqueDates.forEach(dateStr => {
+    startDateSelect.add(new Option(dateStr, dateStr));
+    endDateSelect.add(new Option(dateStr, dateStr));
   });
 
-  startDateSelect.addEventListener('change', () => filterDates(endDateSelect, dates, startDateSelect.value));
-  endDateSelect.addEventListener('change', () => filterDates(startDateSelect, dates, null, endDateSelect.value));
+  startDateSelect.addEventListener('change', () => filterDates(endDateSelect, uniqueDates, startDateSelect.value));
+  endDateSelect.addEventListener('change', () => filterDates(startDateSelect, uniqueDates, null, endDateSelect.value));
 }
 
 function filterDates(dropdown, dates, minDate, maxDate = '9999-12-31') {
@@ -41,8 +40,7 @@ function filterDates(dropdown, dates, minDate, maxDate = '9999-12-31') {
 
   dates.forEach(date => {
     if ((minDate === null || date >= minDate) && date <= maxDate) {
-      const formattedDate = formatDate(date); // Use the same date formatting as when populating
-      dropdown.add(new Option(formattedDate, date, false, date === currentSelection));
+      dropdown.add(new Option(date, date, false, date === currentSelection));
     }
   });
   if (!dropdown.querySelector(`option[value="${currentSelection}"]`)) {
@@ -54,17 +52,8 @@ function getColumnIndex(columnIdentifier) {
   const columnMap = {
     'departure': 1,
     'arrival': 2,
-    // Add other columns as necessary
   };
-  return columnMap[columnIdentifier] || -1; // Default to -1 if identifier not found
-}
-
-function formatDate(isoDateString) {
-  // Placeholder for date formatting, adjust as needed
-  // This function assumes dates are in ISO format ('YYYY-MM-DD') and converts them to a more user-friendly format
-  // Example: '2023-01-01' -> 'Jan 01, 2023'
-  const date = new Date(isoDateString);
-  return date.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+  return columnMap[columnIdentifier] || -1;
 }
 
 function showDateFilterPopup(event, column) {
@@ -72,11 +61,8 @@ function showDateFilterPopup(event, column) {
   if (!existingPopup) {
     createDateFilterPopup(column);
   } else {
-    // If the popup already exists, simply toggle its visibility
     existingPopup.classList.toggle('hidden');
   }
-  
-  // Adjust positioning if necessary here
 }
 
 export { showDateFilterPopup };
