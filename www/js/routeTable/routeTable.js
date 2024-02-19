@@ -105,29 +105,40 @@ function attachEventListenersToIcons(table, data) {
     });
   });
 
-  // Attach event listeners specifically for filter icons
+  // Attach event listeners specifically for date filter icons
   document.querySelectorAll('.filterIcon').forEach(icon => {
     icon.addEventListener('click', function(event) {
       event.stopPropagation(); // Prevent the event from bubbling up to the header
       const column = this.getAttribute('data-column');
       if (column === 'departure' || column === 'arrival') {
-        showDateFilterPopup(event, column); // Updated to use the new showDateFilterPopup function
-      } else if (column === 'price') {
-        showPriceFilterPopup(event, data); // No changes here
+        const dateFilterPopup = document.getElementById(`${column}DateFilterPopup`);
+        if (dateFilterPopup) {
+          // Toggle visibility of the date filter popup
+          dateFilterPopup.classList.toggle('hidden');
+        } else {
+          // Show the date filter popup if it doesn't exist yet
+          showDateFilterPopup(event, column);
+        }
       }
     });
   });
 
+  // Separate handling for the price filter icon
   const priceFilterIcon = document.getElementById('priceFilter');
-  priceFilterIcon.addEventListener('click', function(event) {
-    event.stopPropagation(); // Prevent the event from affecting other elements
-    const priceSliderPopup = document.getElementById('priceSliderPopup');
-    if (priceSliderPopup) {
-      priceSliderPopup.classList.toggle('hidden');
-    } else {
-      showPriceFilterPopup(event, data);
-    }
-  });
+  if (priceFilterIcon) {
+    priceFilterIcon.addEventListener('click', function(event) {
+      event.stopPropagation(); // Prevent the event from affecting other elements
+      const priceSliderPopup = document.getElementById('priceSliderPopup');
+      if (priceSliderPopup) {
+        // Correctly toggle the 'hidden' class to show/hide the price filter popup
+        priceSliderPopup.classList.toggle('hidden');
+      } else {
+        // Invoke the function to show the price filter popup if it's not already created
+        // Ensure that `data` or any required parameter is correctly passed to `showPriceFilterPopup`
+        showPriceFilterPopup(event, data); // Make sure `data` is defined and accessible in this scope
+      }
+    });
+  }
 }
 
 function resetSortIcons(headers, currentIcon, newSortState) {
