@@ -33,6 +33,13 @@ function populateDateDropdowns(column) {
 
   startDateSelect.addEventListener('change', () => filterDates(endDateSelect, uniqueDates, startDateSelect.value));
   endDateSelect.addEventListener('change', () => filterDates(startDateSelect, uniqueDates, null, endDateSelect.value));
+
+  startDateSelect.addEventListener('change', () => {
+    filterTableByDates(column, startDateSelect.value, endDateSelect.value);
+  });
+  endDateSelect.addEventListener('change', () => {
+    filterTableByDates(column, startDateSelect.value, endDateSelect.value);
+  });
 }
 
 function filterDates(dropdown, dates, minDate, maxDate = '9999-12-31') {
@@ -77,6 +84,24 @@ function showDateFilterPopup(event, column) {
       }
     });
   }
+}
+
+function filterTableByDates(column, minDate, maxDate) {
+  const table = document.querySelector('.route-info-table');
+  const columnIndex = getColumnIndex(column) - 1; // Adjust based on your column indexing
+  const rows = table.querySelectorAll('tbody tr');
+
+  rows.forEach(row => {
+    const dateText = row.cells[columnIndex]?.textContent.split(',')[0];
+    const date = new Date(dateText);
+
+    // Hide rows that don't meet the date criteria
+    if ((minDate && date < new Date(minDate)) || (maxDate && date > new Date(maxDate))) {
+      row.style.display = 'none';
+    } else {
+      row.style.display = ''; // Show rows that meet the criteria
+    }
+  });
 }
 
 // Global click listener to hide popup if click occurred outside
