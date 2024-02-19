@@ -48,3 +48,38 @@
   height: 16px;
   cursor: pointer;
 }
+
+.date-filter-popup {
+  position: absolute;
+  z-index: 1000;
+  background-color: #fff; /* Adjusted for visibility */
+  border: 1px solid #ccc; /* Lighter border for a modern look */
+  padding: 10px;
+  border-radius: 5px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  display: none; /* Ensure it's not visible by default */
+}
+
+.date-filter {
+  width: 100%; /* Full width within the popup */
+  padding: 5px;
+  margin-bottom: 10px; /* Space between the inputs */
+}
+
+/* Additional styling for labels for clarity */
+.date-filter-popup label {
+  display: block;
+  margin-bottom: 5px;
+  font-size: 14px;
+  color: #333;
+}
+
+/* Ensure the filter icon is correctly positioned within the table header */
+.filterIcon {
+  cursor: pointer;
+  position: absolute;
+  right: 5px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+

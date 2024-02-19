@@ -111,7 +111,9 @@ function attachEventListenersToIcons(table, data) {
       event.stopPropagation(); // Prevent the event from bubbling up to the header
       const column = this.getAttribute('data-column');
       if (column === 'departure' || column === 'arrival') {
-        showDateFilterPopup(event, column, appState.routes);
+        showDateFilterPopup(event, column); // Updated to use the new showDateFilterPopup function
+      } else if (column === 'price') {
+        showPriceFilterPopup(event, data); // No changes here
       }
     });
   });
