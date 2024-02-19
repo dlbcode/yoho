@@ -61,13 +61,12 @@ function showDateFilterPopup(event, column) {
   let existingPopup = document.getElementById(`${column}DateFilterPopup`);
   
   if (!existingPopup) {
-    existingPopup = createDateFilterPopup(column); // Ensure this call returns a DOM element
-    document.body.appendChild(existingPopup); // AppendChild error points to this line
+    existingPopup = createDateFilterPopup(column);
+    document.body.appendChild(existingPopup);
   } else {
     existingPopup.classList.toggle('hidden');
   }
   
-  // Proceed with positioning the popup only if it's meant to be shown
   if (!existingPopup.classList.contains('hidden')) {
     requestAnimationFrame(() => {
       const header = event.target.closest('th');
@@ -79,5 +78,15 @@ function showDateFilterPopup(event, column) {
     });
   }
 }
+
+// Global click listener to hide popup if click occurred outside
+document.addEventListener('click', function(event) {
+  const datePopups = document.querySelectorAll('.date-filter-popup');
+  datePopups.forEach(popup => {
+    if (!popup.contains(event.target) && !event.target.closest('.filterIcon')) {
+      popup.classList.add('hidden');
+    }
+  });
+});
 
 export { showDateFilterPopup };
