@@ -1,6 +1,8 @@
 import { appState } from '../stateManager.js';
 import { showPriceFilterPopup } from './priceFilter.js';
 import { showDateFilterPopup } from './dateFilters.js';
+import { pathDrawing } from '../pathDrawing.js';
+import { flightMap } from '../flightMap.js';
 
 function getColumnIndex(columnIdentifier) {
   const columnMap = {
@@ -88,6 +90,25 @@ function buildRouteTable(routeIndex) {
     });
 }
 
+async function drawPathBetweenAirports(originIata, destinationIata) {
+  try {
+    const originAirportData = await flightMap.getAirportDataByIata(originIata);
+    const destinationAirportData = await flightMap.getAirportDataByIata(destinationIata);
+
+    if (!originAirportData || !destinationAirportData) {
+      console.error('Airport data not found for one or both IATAs:', originIata, destinationIata);
+      return;
+    }
+
+    pathDrawing.createRoutePath(originAirportData, destinationAirportData, {
+      originAirport: originAirportData,
+      destinationAirport: destinationAirportData,
+    });
+  } catch (error) {
+    console.error('Error drawing path between airports:', error);
+  }
+}
+
 function attachEventListenersToIcons(table, data) {
   const headers = table.querySelectorAll('th');
   headers.forEach(header => {
@@ -120,6 +141,25 @@ function attachEventListenersToIcons(table, data) {
           showDateFilterPopup(event, column);
         }
       }
+    });
+  });
+
+  document.querySelectorAll('.route-info-table tbody tr').forEach(row => {
+    row.addEventListener('mouseover', function() {
+      pathDrawing.clearLines();
+      const routeString = this.cells[8].textContent.trim();
+      const iataCodes = routeString.split(' > ');
+
+      for (let i = 0; i < iataCodes.length - 1; i++) {
+          const originIata = iataCodes[i];
+          const destinationIata = iataCodes[i + 1];
+          drawPathBetweenAirports(originIata, destinationIata);
+      }
+    });
+
+    row.addEventListener('mouseout', function() {
+        pathDrawing.clearLines();
+        pathDrawing.drawLines();
     });
   });
 

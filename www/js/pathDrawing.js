@@ -26,24 +26,6 @@ const pathDrawing = {
             this.drawPaths(route);
         });
     },    
-    
-    async drawRoutePathBetweenAirports(route) {
-        if (!route || !Array.isArray(route.segmentCosts)) {
-            console.error('Invalid route data:', route);
-            return;
-        }
-    
-        try {
-            for (const segment of route.segmentCosts) {
-                const [originAirport, destinationAirport] = await Promise.all([
-                    getAirportDataByIata(segment.from), getAirportDataByIata(segment.to)
-                ]);
-            }
-
-        } catch (error) {
-            console.error('Error in drawRoutePathBetweenAirports:', error);
-        }
-    },
 
     drawDashedLine(originAirport, destinationAirport) {
         const worldCopies = [-720, -360, 0, 360, 720]; // Define world copies
