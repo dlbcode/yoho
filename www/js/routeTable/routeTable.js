@@ -103,7 +103,7 @@ async function drawPathBetweenAirports(originIata, destinationIata) {
     pathDrawing.createRoutePath(originAirportData, destinationAirportData, {
       originAirport: originAirportData,
       destinationAirport: destinationAirportData,
-    });
+    }, 'white');
   } catch (error) {
     console.error('Error drawing path between airports:', error);
   }

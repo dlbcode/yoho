@@ -52,7 +52,7 @@ const pathDrawing = {
         return L.latLng(latLng.lat, newLng);
     },
     
-    createRoutePath(origin, destination, route) {
+    createRoutePath(origin, destination, route, lineColor = null) {
         let routeId = `${route.originAirport.iata_code}-${route.destinationAirport.iata_code}`;
         let newPaths = [];
     
@@ -72,7 +72,7 @@ const pathDrawing = {
                 var geodesicLine = new L.Geodesic([adjustedOrigin, adjustedDestination], {
                     weight: 1,
                     opacity: 1,
-                    color: this.getColorBasedOnPrice(route.price),
+                    color: lineColor || this.getColorBasedOnPrice(route.price),
                     wrap: false,
                     zIndex: -1
                 }).addTo(map);
