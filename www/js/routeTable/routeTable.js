@@ -20,7 +20,6 @@ function getColumnIndex(columnIdentifier) {
 }
 
 function buildRouteTable(routeIndex) {
-  console.log('Building route table for index:', routeIndex);
   const selectedRoute = appState.routes[routeIndex];
   const infoPaneContent = document.getElementById('infoPaneContent');
   infoPaneContent.innerHTML = '';
@@ -165,8 +164,6 @@ function attachEventListeners(table, data, routeIndex) {
     row.addEventListener('click', function() {
         const routeString = this.cells[8].textContent.trim(); // Assuming the IATA codes are in the 9th column
         const iataCodes = routeString.split(' > ');
-        console.table(appState.waypoints);
-        console.log('Replacing waypoints for route:', iataCodes);
         replaceWaypointsForCurrentRoute(iataCodes, routeIndex);
     });
   });
@@ -215,7 +212,6 @@ function replaceWaypointsForCurrentRoute(intermediaryIatas, routeIndex) {
 
   // Notify the application of the waypoints update
   updateState('updateWaypoint', appState.waypoints);
-  console.table(appState.waypoints);
 }
 
 function resetSortIcons(headers, currentIcon, newSortState) {
