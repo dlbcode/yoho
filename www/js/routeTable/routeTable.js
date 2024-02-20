@@ -112,9 +112,8 @@ async function drawPathBetweenAirports(originIata, destinationIata) {
 function attachEventListenersToIcons(table, data) {
   const headers = table.querySelectorAll('th');
   headers.forEach(header => {
-    header.style.cursor = 'pointer'; // Ensure the cursor indicates clickable headers
+    header.style.cursor = 'pointer';
     header.addEventListener('click', function(event) {
-      // Check if the click is on the filter icon or a child of it
       if (!event.target.closest('.filterIcon')) {
         const sortIcon = this.querySelector('.sortIcon');
         const columnIdentifier = sortIcon.getAttribute('data-column');
@@ -134,10 +133,8 @@ function attachEventListenersToIcons(table, data) {
       if (column === 'departure' || column === 'arrival') {
         const dateFilterPopup = document.getElementById(`${column}DateFilterPopup`);
         if (dateFilterPopup) {
-          // Toggle visibility of the date filter popup
           dateFilterPopup.classList.toggle('hidden');
         } else {
-          // Show the date filter popup if it doesn't exist yet
           showDateFilterPopup(event, column);
         }
       }
@@ -170,12 +167,9 @@ function attachEventListenersToIcons(table, data) {
       event.stopPropagation(); // Prevent the event from affecting other elements
       const priceSliderPopup = document.getElementById('priceSliderPopup');
       if (priceSliderPopup) {
-        // Correctly toggle the 'hidden' class to show/hide the price filter popup
         priceSliderPopup.classList.toggle('hidden');
       } else {
-        // Invoke the function to show the price filter popup if it's not already created
-        // Ensure that `data` or any required parameter is correctly passed to `showPriceFilterPopup`
-        showPriceFilterPopup(event, data); // Make sure `data` is defined and accessible in this scope
+        showPriceFilterPopup(event, data);
       }
     });
   }
