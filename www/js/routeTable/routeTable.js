@@ -1,4 +1,4 @@
-import { appState } from '../stateManager.js';
+import { appState, updateState } from '../stateManager.js';
 import { showPriceFilterPopup } from './priceFilter.js';
 import { showDateFilterPopup } from './dateFilters.js';
 import { pathDrawing } from '../pathDrawing.js';
@@ -20,6 +20,7 @@ function getColumnIndex(columnIdentifier) {
 }
 
 function buildRouteTable(routeIndex) {
+  console.log('Building route table for index:', routeIndex);
   const selectedRoute = appState.routes[routeIndex];
   const infoPaneContent = document.getElementById('infoPaneContent');
   infoPaneContent.innerHTML = '';
@@ -82,7 +83,7 @@ function buildRouteTable(routeIndex) {
       table.appendChild(tbody);
       infoPaneContent.appendChild(table);
 
-      attachEventListenersToIcons(table, data);
+      attachEventListeners(table, data, routeIndex);
     })
     .catch(error => {
       console.error('Error:', error);
@@ -109,7 +110,7 @@ async function drawPathBetweenAirports(originIata, destinationIata) {
   }
 }
 
-function attachEventListenersToIcons(table, data) {
+function attachEventListeners(table, data, routeIndex) {
   const headers = table.querySelectorAll('th');
   headers.forEach(header => {
     header.style.cursor = 'pointer';
@@ -160,6 +161,16 @@ function attachEventListenersToIcons(table, data) {
     });
   });
 
+  document.querySelectorAll('.route-info-table tbody tr').forEach((row) => {
+    row.addEventListener('click', function() {
+        const routeString = this.cells[8].textContent.trim(); // Assuming the IATA codes are in the 9th column
+        const iataCodes = routeString.split(' > ');
+        console.table(appState.waypoints);
+        console.log('Replacing waypoints for route:', iataCodes);
+        replaceWaypointsForCurrentRoute(iataCodes, routeIndex);
+    });
+  });
+
   // Separate handling for the price filter icon
   const priceFilterIcon = document.getElementById('priceFilter');
   if (priceFilterIcon) {
@@ -173,6 +184,38 @@ function attachEventListenersToIcons(table, data) {
       }
     });
   }
+}
+
+function replaceWaypointsForCurrentRoute(intermediaryIatas, routeIndex) {
+  const startIndex = routeIndex * 2;
+  let before = appState.waypoints.slice(0, startIndex);
+  let after = appState.waypoints.slice((routeIndex + 1) * 2);
+
+  // Initialize the updated segment with the first intermediary waypoint as the starting point
+  let updatedSegment = [flightMap.airportDataCache[intermediaryIatas[0]]];
+
+  // Add each intermediary waypoint as the destination, and then as the origin of the next leg
+  for (let i = 1; i < intermediaryIatas.length; i++) {
+      let airportData = flightMap.airportDataCache[intermediaryIatas[i]];
+      updatedSegment.push(airportData); // Add as destination of the current leg
+      if (i < intermediaryIatas.length - 1) {
+          // If not the last intermediary, also add as origin of the next leg
+          updatedSegment.push(airportData);
+      }
+  }
+
+  // Ensure the final destination is added if it's not already the last item in the updated segment
+  const finalDestinationIata = intermediaryIatas[intermediaryIatas.length - 1];
+  if (updatedSegment[updatedSegment.length - 1].iata_code !== finalDestinationIata) {
+      updatedSegment.push(flightMap.airportDataCache[finalDestinationIata]);
+  }
+
+  // Reassemble the waypoints array
+  appState.waypoints = [...before, ...updatedSegment, ...after];
+
+  // Notify the application of the waypoints update
+  updateState('updateWaypoint', appState.waypoints);
+  console.table(appState.waypoints);
 }
 
 function resetSortIcons(headers, currentIcon, newSortState) {
