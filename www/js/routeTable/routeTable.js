@@ -62,7 +62,7 @@ function buildRouteTable(routeIndex) {
         let row = document.createElement('tr');
         const directFlight = flight.route.length === 1;
         const stops = flight.route.length - 1;
-        const layovers = flight.route.slice(1, -1).map(r => r.flyTo).join(", ");
+        const layovers = flight.route.slice(0, -1).map(r => r.flyTo).join(", ");
         const durationHours = Math.floor(flight.duration.total / 3600);
         const durationMinutes = Math.floor((flight.duration.total % 3600) / 60);
         const routeIATAs = flight.route.map(r => r.flyFrom).concat(flight.route[flight.route.length - 1].flyTo).join(" > ");
