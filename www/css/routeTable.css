@@ -57,20 +57,23 @@
   padding: 5px;
   border-radius: 5px;
   box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-  display: flex; /* Use flexbox to align child elements inline */
-  flex-wrap: wrap; /* Allow items to wrap as needed */
-  justify-content: space-between; /* Distribute space between items */
+  display: flex;
+  flex-direction: row; /* Adjusts direction to row for container alignment */
+  flex-wrap: wrap;
+  justify-content: space-between;
 }
 
-.date-filter-popup label, .date-filter-popup .date-filter {
-  flex: 1 1 auto; /* Allow labels and selects to grow and shrink */
-  margin: 0 5px; /* Add some spacing between labels and selects */
+.date-filter-container {
+  display: flex;
+  flex-direction: column; /* Stacks label and select vertically */
+  align-items: flex-start; /* Aligns items to the start of the container */
 }
 
 .date-filter {
-  width: auto; /* Override the width to fit flex container */
+  width: auto;
   padding: 5px;
-  margin-bottom: 0; /* Adjust or remove margin-bottom as needed */
+  margin-top: 5px;
+  margin-right: 5px;
 }
 
 /* Ensure the filter icon is correctly positioned within the table header */
@@ -80,5 +83,9 @@
   right: 5px;
   top: 50%;
   transform: translateY(-50%);
+}
+
+.date-filter-popup .date-filter-container label {
+  font-size: 12px;
 }
 

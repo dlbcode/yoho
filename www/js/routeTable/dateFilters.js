@@ -3,11 +3,14 @@ function createDateFilterPopup(column) {
   filterPopup.id = `${column}DateFilterPopup`;
   filterPopup.classList.add('date-filter-popup');
   filterPopup.innerHTML = `
-    <div id="${column}FilterValueDisplay" style="text-align: center; margin-bottom: 10px;"></div>
-    <label for="${column}StartDate">Start Date:</label>
-    <select id="${column}StartDate" class="date-filter"></select>
-    <label for="${column}EndDate">End Date:</label>
-    <select id="${column}EndDate" class="date-filter"></select>
+    <div class="date-filter-container">
+      <label for="${column}StartDate">From:</label>
+      <select id="${column}StartDate" class="date-filter"></select>
+    </div>
+    <div class="date-filter-container">
+      <label for="${column}EndDate">To:</label>
+      <select id="${column}EndDate" class="date-filter"></select>
+    </div>
   `;
   document.body.appendChild(filterPopup);
 
