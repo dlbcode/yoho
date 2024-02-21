@@ -144,28 +144,20 @@ function attachEventListeners(table, data, routeIndex) {
    
     document.querySelectorAll('.route-info-table tbody tr').forEach((row, index) => {
       row.addEventListener('click', function() {
-        document.querySelectorAll('.route-info-table tbody tr').forEach(r => r.classList.remove('selected'));
-          this.classList.add('selected');
+        this.classList.add('selected'); // Highlight the selected row
 
-          // Assuming the data structure matches the columns
-          const routeData = {
-              departure: data[index].local_departure, // Format as needed
-              arrival: data[index].local_arrival, // Format as needed
-              price: data[index].price,
-              airline: data[index].airlines.join(", "), // Assuming airlines is an array
-              stops: data[index].route.length - 1,
-              route: data[index].route.map(r => `${r.flyFrom} > ${r.flyTo}`).join(", ")
-          };
+        const routeData = {
+            departure: new Date(data[index].local_departure).toLocaleString(),
+            arrival: new Date(data[index].local_arrival).toLocaleString(),
+            price: `$${data[index].price}`,
+            airline: data[index].airlines.join(", "),
+            stops: data[index].route.length - 1,
+            route: data[index].route.map(segment => `${segment.flyFrom} > ${segment.flyTo}`).join(", "),
+            deep_link: data[index].deep_link
+        };
 
-          // Save the selected route ID and index to the state
-          const selectedRouteId = data[index].id; // Assuming each route has a unique 'id' property
-          console.log('Selected route ID:', selectedRouteId, 'Index:', routeIndex);
-          updateState('selectRoute', { id: selectedRouteId, index: routeIndex }); // Pass both ID and index
-
-
-          // Call a function to update the route info pane with this route data
-          infoPane.updateTripTable(routeData);
-      });
+        infoPane.updateTripTable(routeData);
+    });
   });
 
   document.querySelectorAll('.route-info-table tbody tr').forEach(row => {

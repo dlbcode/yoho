@@ -11,7 +11,6 @@ const infoPane = {
 
   handleStateChange(event) {
     this.updateRouteButtons();
-    this.updateTripTable(appState.routes);
   },
 
   updateRouteButtons() {
@@ -43,9 +42,8 @@ const infoPane = {
   },
 
   updateTripTable: function(routeData) {
-    console.log('updateTripTable', routeData);
     const infoPaneContent = document.getElementById('infoPaneContent');
-    infoPaneContent.innerHTML = ''; // Clear existing content or adjust as needed
+    infoPaneContent.innerHTML = ''; // Clear existing content
 
     const table = document.createElement('table');
     table.className = 'route-info-table';
@@ -59,6 +57,7 @@ const infoPane = {
         <th>Airline</th>
         <th>Stops</th>
         <th>Route</th>
+        <th>Action</th> <!-- New column for the action button -->
     </tr>`;
     table.appendChild(thead);
 
@@ -69,7 +68,8 @@ const infoPane = {
         <td>${routeData.price}</td>
         <td>${routeData.airline}</td>
         <td>${routeData.stops}</td>
-        <td>${routeData.route}</td>`;
+        <td>${routeData.route}</td>
+        <td><a href="${routeData.deep_link}" target="_blank"><button>Book Flight</button></a></td>`; // Adding the Book Flight button
     tbody.appendChild(row);
 
     table.appendChild(tbody);
