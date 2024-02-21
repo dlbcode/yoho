@@ -49,38 +49,37 @@ module.exports = function(app, axios, db) {
 
         // Check for direct flights and compare prices with directRoutes collection
         console.log('Checking direct flights');
-        const directFlights = sortedFlights.filter(flight => flight.route.length === 1);
-        const existingDirectRoute = await directRoutesCollection.findOne({ origin: origin, destination: destination });
-        console.log('Existing direct route for origin:', origin, 'and destination:', destination, 'is:', existingDirectRoute.price);
-        for (const flight of directFlights) {
-          // Check if the flight is direct by examining the length of the route array
-          const isDirectFlight = flight.route.length === 1;
-          const apiPrice = parseFloat(flight.price); // Assuming flight.price is the correct path to the price
-        
-          console.log(`API price for direct flight: ${apiPrice}`);
-        
-          if (isDirectFlight) {
-            const existingDirectRoute = await directRoutesCollection.findOne({ origin: origin, destination: destination });
-        
-            if (!existingDirectRoute || (existingDirectRoute && existingDirectRoute.price > apiPrice)) {
-              console.log(`Updating or inserting direct route from ${origin} to ${destination} with price: ${apiPrice}`);
-              
-              const updateResult = await directRoutesCollection.updateOne(
-                { origin: origin, destination: destination },
-                { $set: { 
-                    origin: origin,
-                    destination: destination,
-                    price: apiPrice, 
-                    timestamp: new Date().toISOString().replace(/[-:T]/g, '').slice(0, 14),
-                    source: 'tequila'
-                  } 
-                },
-                { upsert: true } // This option creates a new document if no document matches the query
-              );
-              
-              console.log('Update or insert result:', updateResult);
+        for (const flight of sortedFlights) {
+          for (const route of flight.route) {
+            const existingDirectRoute = await db.collection('directRoutes').findOne({
+              origin: route.flyFrom,
+              destination: route.flyTo
+            });
+
+            if (existingDirectRoute) {
+              if (existingDirectRoute.price > flight.price) {
+                console.log(`Updating direct route from ${route.flyFrom} to ${route.flyTo} with lower price: ${flight.price}`);
+                await db.collection('directRoutes').updateOne(
+                  { _id: existingDirectRoute._id },
+                  { $set: {
+                      price: flight.price,
+                      timestamp: new Date().toISOString().replace(/[-:T]/g, '').slice(0, 14),
+                      source: 'tequila'
+                    }
+                  }
+                );
+              } else {
+                console.log(`Existing price for direct route from ${route.flyFrom} to ${route.flyTo} is lower or equal; no update needed.`);
+              }
             } else {
-              console.log(`No direct route found or API price for direct flight from ${origin} to ${destination} is higher than existing price`);
+              console.log(`No existing direct route found for ${route.flyFrom} to ${route.flyTo}; inserting new.`);
+              await db.collection('directRoutes').insertOne({
+                origin: route.flyFrom,
+                destination: route.flyTo,
+                price: flight.price,
+                timestamp: new Date().toISOString().replace(/[-:T]/g, '').slice(0, 14),
+                source: 'tequila'
+              });
             }
           }
         }
