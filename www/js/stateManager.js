@@ -12,6 +12,9 @@ const appState = {
     directRoutes: [],
     selectedRouteId: null,
     selectedRouteIndex: null,
+    tripTableData: null,
+    routeTablesData: {},
+    currentView: 'trip'
 };
   
 function updateState(key, value) {

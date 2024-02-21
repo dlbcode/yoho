@@ -5,12 +5,30 @@ import { buildRouteTable } from './routeTable/routeTable.js';
 const infoPane = {
   init() {
     const infoPaneContent = document.getElementById('infoPaneContent');
-    const mapButton = document.getElementById('mapButton');
+    const tripButton = document.getElementById('tripButton');
     document.addEventListener('stateChange', this.handleStateChange.bind(this));
+
+    tripButton.addEventListener('click', () => {
+      appState.currentView = 'trip';
+      infoPane.displayContent();
+    });
   },
 
   handleStateChange(event) {
     this.updateRouteButtons();
+  },
+
+  displayContent() {
+    const infoPaneContent = document.getElementById('infoPaneContent');
+    infoPaneContent.innerHTML = ''; // Clear current content
+
+    if (appState.currentView === 'trip' && appState.tripTableData) {
+        // Display trip table from appState.tripTableData
+        this.updateTripTable(appState.tripTableData);
+    } else if (appState.routeTablesData[appState.currentView]) {
+        // Display route table from appState.routeTablesData
+        this.updateRouteInfoPane(appState.routeTablesData[appState.currentView]);
+    }
   },
 
   updateRouteButtons() {
@@ -44,6 +62,8 @@ const infoPane = {
   updateTripTable: function(routeData) {
     const infoPaneContent = document.getElementById('infoPaneContent');
     infoPaneContent.innerHTML = ''; // Clear existing content
+
+    appState.tripTableData = routeData;
 
     const table = document.createElement('table');
     table.className = 'route-info-table';

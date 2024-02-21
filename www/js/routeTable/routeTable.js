@@ -156,7 +156,9 @@ function attachEventListeners(table, data, routeIndex) {
             deep_link: data[index].deep_link
         };
 
+        appState.routeTablesData[routeIndex] = routeData;
         infoPane.updateTripTable(routeData);
+        infoPane.displayContent();
     });
   });
 
