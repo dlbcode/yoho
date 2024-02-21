@@ -34,7 +34,7 @@ function buildRouteTable(routeIndex) {
   fetch(`https://yonderhop.com/api/yhoneway?origin=${origin}&destination=${destination}&date=${date}`)
     .then(response => {
       if (!response.ok) {
-        throw new Error('Failed to fetch route data');
+        throw new Error(`Failed to fetch route data: ${response.statusText}`);
       }
       return response.json();
     })
@@ -85,8 +85,8 @@ function buildRouteTable(routeIndex) {
       attachEventListeners(table, data, routeIndex);
     })
     .catch(error => {
-      console.error('Error:', error);
-      infoPaneContent.textContent = 'Error loading data.';
+      console.error('API Request Failed:', error);
+      infoPaneContent.textContent = 'Error loading data: ' + error.message;
     });
 }
 
