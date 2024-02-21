@@ -75,6 +75,9 @@ MongoClient.connect(mongoUrl, { useNewUrlParser: true, useUnifiedTopology: true 
 
   const yhonewayandreturn = require('./api/yhonewayandreturn');
   yhonewayandreturn(app, axios, db, tequila);
+
+  const yhairports = require('./api/yhairports');
+  yhairports(app, axios, db, tequila);
   
 }); 
 
