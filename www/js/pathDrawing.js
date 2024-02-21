@@ -53,6 +53,12 @@ const pathDrawing = {
     },
     
     createRoutePath(origin, destination, route, lineColor = null) {
+        if (!route || !route.originAirport || !route.destinationAirport || 
+            typeof route.originAirport.iata_code === 'undefined' || 
+            typeof route.destinationAirport.iata_code === 'undefined') {
+            console.error('Invalid route data:', route);
+            return route; // Return route data early in case of error
+        }      
         let routeId = `${route.originAirport.iata_code}-${route.destinationAirport.iata_code}`;
         let newPaths = [];
     

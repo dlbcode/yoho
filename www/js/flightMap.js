@@ -81,15 +81,19 @@ const flightMap = {
     },        
 
     findRoute(fromIata, toIata) {
-        for (const routes of Object.values(appState.directRoutes)) {
-            for (const route of routes) {
-                if (route.originAirport.iata_code === fromIata && route.destinationAirport.iata_code === toIata) {
-                    return route;
+        try {
+            for (const routes of Object.values(appState.directRoutes)) {
+                for (const route of routes) {
+                    if (route.originAirport.iata_code === fromIata && route.destinationAirport.iata_code === toIata) {
+                        return route;
+                    }
                 }
             }
+        } catch (error) {
+            console.error(`Error finding route from ${fromIata} to ${toIata}:`, error);
         }
         return null;
-    },
+    },    
 
     async fetchAndDisplayAirports() {
         try {
