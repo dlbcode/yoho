@@ -3,6 +3,7 @@ import { showPriceFilterPopup } from './priceFilter.js';
 import { showDateFilterPopup } from './dateFilters.js';
 import { pathDrawing } from '../pathDrawing.js';
 import { flightMap } from '../flightMap.js';
+import { infoPane } from '../infoPane.js';
 
 function getColumnIndex(columnIdentifier) {
   const columnMap = {
@@ -139,6 +140,32 @@ function attachEventListeners(table, data, routeIndex) {
         }
       }
     });
+  });
+   
+    document.querySelectorAll('.route-info-table tbody tr').forEach((row, index) => {
+      row.addEventListener('click', function() {
+        document.querySelectorAll('.route-info-table tbody tr').forEach(r => r.classList.remove('selected'));
+          this.classList.add('selected');
+
+          // Assuming the data structure matches the columns
+          const routeData = {
+              departure: data[index].local_departure, // Format as needed
+              arrival: data[index].local_arrival, // Format as needed
+              price: data[index].price,
+              airline: data[index].airlines.join(", "), // Assuming airlines is an array
+              stops: data[index].route.length - 1,
+              route: data[index].route.map(r => `${r.flyFrom} > ${r.flyTo}`).join(", ")
+          };
+
+          // Save the selected route ID and index to the state
+          const selectedRouteId = data[index].id; // Assuming each route has a unique 'id' property
+          console.log('Selected route ID:', selectedRouteId, 'Index:', routeIndex);
+          updateState('selectRoute', { id: selectedRouteId, index: routeIndex }); // Pass both ID and index
+
+
+          // Call a function to update the route info pane with this route data
+          infoPane.updateTripTable(routeData);
+      });
   });
 
   document.querySelectorAll('.route-info-table tbody tr').forEach(row => {

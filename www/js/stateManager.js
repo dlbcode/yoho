@@ -10,6 +10,8 @@ const appState = {
     routes: [],
     startDate: null,
     directRoutes: [],
+    selectedRouteId: null,
+    selectedRouteIndex: null,
 };
   
 function updateState(key, value) {
@@ -65,6 +67,11 @@ function updateState(key, value) {
             appState.waypoints = [];
             appState.routes = [];
             updateUrlWithWaypoints();
+            break;
+        
+        case 'selectRoute':
+            appState.selectedRouteId = value.id;
+            appState.selectedRouteIndex = value.index; // Update the index
             break;
     
         default:

@@ -1,24 +1,17 @@
 import { appState, updateState } from './stateManager.js';
 import { pathDrawing } from './pathDrawing.js';
-import { findCheapestRoutes } from './findCheapestRoutes.js';
 import { buildRouteTable } from './routeTable/routeTable.js';
 
 const infoPane = {
   init() {
     const infoPaneContent = document.getElementById('infoPaneContent');
     const mapButton = document.getElementById('mapButton');
-    mapButton.addEventListener('click', this.displayAllRoutesSummary.bind(this));
     document.addEventListener('stateChange', this.handleStateChange.bind(this));
-  },
-
-  displayAllRoutesSummary() {
-    this.updateRouteInfoPane(appState.routes);
   },
 
   handleStateChange(event) {
     this.updateRouteButtons();
-    this.updateRouteInfoPane(appState.routes);
-    findCheapestRoutes.findCheapestRouteAndAddWaypoints();
+    this.updateTripTable(appState.routes);
   },
 
   updateRouteButtons() {
@@ -49,51 +42,39 @@ const infoPane = {
     });
   },
 
-  updateRouteInfoPane: function(routes) {
+  updateTripTable: function(routeData) {
+    console.log('updateTripTable', routeData);
     const infoPaneContent = document.getElementById('infoPaneContent');
-    infoPaneContent.innerHTML = '';
+    infoPaneContent.innerHTML = ''; // Clear existing content or adjust as needed
 
     const table = document.createElement('table');
-    table.className = 'sortable-table';
-    table.style.width = '100%';
-    table.setAttribute('border', '1');
+    table.className = 'route-info-table';
+    // Add more styling as needed
 
     const thead = document.createElement('thead');
-    let headerRow = `<tr>
-                        <th>Origin</th>
-                        <th>Destination</th>
-                        <th>Price</th>
-                        <th>Action</th>
-                     </tr>`;
-    thead.innerHTML = headerRow;
+    thead.innerHTML = `<tr>
+        <th>Departure</th>
+        <th>Arrival</th>
+        <th>Price</th>
+        <th>Airline</th>
+        <th>Stops</th>
+        <th>Route</th>
+    </tr>`;
     table.appendChild(thead);
 
     const tbody = document.createElement('tbody');
-    let totalPrice = 0; // Initialize total price
-    routes.forEach(route => {
-        let row = document.createElement('tr');
-        let price = parseFloat(route.price); // Parse the price to a number
-        totalPrice += price; // Add to total price
-        let formattedPrice = `$${price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-        row.innerHTML = `<td>${route.originAirport.city} (${route.originAirport.iata_code})</td>
-                           <td>${route.destinationAirport.city} (${route.destinationAirport.iata_code})</td>
-                           <td>${formattedPrice}</td>
-                           <td><button class='update-price-btn'>Update Price</button></td>`;
-        tbody.appendChild(row);
-    });
-
-    // Create and append the total price row
-    let totalRow = document.createElement('tr');
-    let formattedTotalPrice = `$${totalPrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-    totalRow.innerHTML = `<td></td>
-                           <td style="text-align: right; color: white;">Total Estimated Price:</td>
-                           <td style="color: white;">${formattedTotalPrice}</td>
-                           <td></td>`;
-    tbody.appendChild(totalRow);
+    const row = document.createElement('tr');
+    row.innerHTML = `<td>${routeData.departure}</td>
+        <td>${routeData.arrival}</td>
+        <td>${routeData.price}</td>
+        <td>${routeData.airline}</td>
+        <td>${routeData.stops}</td>
+        <td>${routeData.route}</td>`;
+    tbody.appendChild(row);
 
     table.appendChild(tbody);
     infoPaneContent.appendChild(table);
-  },
+  }
 }
 
 export { infoPane };
