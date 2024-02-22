@@ -169,10 +169,8 @@ function attachEventListeners(table, data, routeIndex) {
           }
         });
 
-        // Highlight the selected row for this route index
         highlightSelectedRowForRouteIndex(routeIndex);
-        infoPane.updateTripTable(routeData);
-        infoPane.displayContent();
+        
     });
   });
 

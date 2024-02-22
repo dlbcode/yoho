@@ -11,23 +11,28 @@ const infoPane = {
     tripButton.addEventListener('click', () => {
       appState.currentView = 'trip';
       infoPane.displayContent();
-      console.log('appState.selectedRoutes', appState.selectedRoutes);
     });
   },
 
   handleStateChange(event) {
+    // Existing logic to update route buttons or other UI elements
     this.updateRouteButtons();
+
+    // Check if the change is related to selectedRoutes
+    if (event.detail.key === 'updateSelectedRoute' || event.detail.key === 'removeSelectedRoute') {
+        const selectedRoutesArray = Object.values(appState.selectedRoutes);
+        this.displayContent();
+    }
   },
 
   displayContent() {
     const infoPaneContent = document.getElementById('infoPaneContent');
     infoPaneContent.innerHTML = ''; // Clear current content
 
-    if (appState.currentView === 'trip' && appState.tripTableData) {
-        // Display trip table from appState.tripTableData
-        this.updateTripTable(appState.tripTableData);
+    if (appState.currentView === 'trip' && appState.selectedRoutes) {
+        const selectedRoutesArray = Object.values(appState.selectedRoutes);
+        this.updateTripTable(selectedRoutesArray);
     } else if (appState.routeTablesData[appState.currentView]) {
-        // Display route table from appState.routeTablesData
         this.updateRouteInfoPane(appState.routeTablesData[appState.currentView]);
     }
   },
@@ -74,15 +79,12 @@ const infoPane = {
     });
   },
 
-  updateTripTable: function(routeData) {
+  updateTripTable: function(selectedRoutesArray) {
     const infoPaneContent = document.getElementById('infoPaneContent');
     infoPaneContent.innerHTML = ''; // Clear existing content
 
-    appState.tripTableData = routeData;
-
     const table = document.createElement('table');
     table.className = 'route-info-table';
-    // Add more styling as needed
 
     const thead = document.createElement('thead');
     thead.innerHTML = `<tr>
@@ -92,20 +94,23 @@ const infoPane = {
         <th>Airline</th>
         <th>Stops</th>
         <th>Route</th>
-        <th>Action</th> <!-- New column for the action button -->
+        <th>Action</th>
     </tr>`;
     table.appendChild(thead);
 
     const tbody = document.createElement('tbody');
-    const row = document.createElement('tr');
-    row.innerHTML = `<td>${routeData.departure}</td>
-        <td>${routeData.arrival}</td>
-        <td>${routeData.price}</td>
-        <td>${routeData.airline}</td>
-        <td>${routeData.stops}</td>
-        <td>${routeData.route}</td>
-        <td><a href="${routeData.deep_link}" target="_blank"><button>Book Flight</button></a></td>`; // Adding the Book Flight button
-    tbody.appendChild(row);
+    
+    selectedRoutesArray.forEach(routeData => {
+        const row = document.createElement('tr');
+        row.innerHTML = `<td>${routeData.departure}</td>
+            <td>${routeData.arrival}</td>
+            <td>${routeData.price}</td>
+            <td>${routeData.airline}</td>
+            <td>${routeData.stops}</td>
+            <td>${routeData.route}</td>
+            <td><a href="${routeData.deep_link}" target="_blank"><button>Book Flight</button></a></td>`;
+        tbody.appendChild(row);
+    });
 
     table.appendChild(tbody);
     infoPaneContent.appendChild(table);
