@@ -42,6 +42,20 @@ const infoPane = {
       button.onclick = () => buildRouteTable(index);
       menuBar.appendChild(button);
 
+      // Create the checkmark span and add the base class
+      const checkmark = document.createElement('span');
+      checkmark.innerHTML = '✓'; // Checkmark icon
+      checkmark.classList.add('route-checkmark');
+
+      // Conditionally add the selected or unselected class
+      if (appState.selectedRoutes.hasOwnProperty(index)) {
+        checkmark.classList.add('selected'); // Green checkmark for selected routes
+      } else {
+        checkmark.classList.add('unselected'); // Grey checkmark for unselected routes
+      }
+
+      button.appendChild(checkmark);
+
       button.addEventListener('mouseover', () => {
         const routeId = `${route.originAirport.iata_code}-${route.destinationAirport.iata_code}`;
         const pathLines = pathDrawing.routePathCache[routeId] || pathDrawing.dashedRoutePathCache[routeId] || [];

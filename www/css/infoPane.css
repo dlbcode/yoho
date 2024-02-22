@@ -54,6 +54,17 @@
   background-color: #3b7897;
 }
 
+.route-checkmark {
+  float: right;
+}
+
+.route-checkmark.selected {
+  color: green;
+}
+
+.route-checkmark.unselected {
+  color: grey;
+}
 
 #infoPaneContent {
   position: absolute;
