@@ -71,6 +71,15 @@ function updateState(key, value) {
             updateUrlWithWaypoints();
             break;
 
+        case 'updateSelectedRoute':
+            const { routeIndex, routeDetails } = value;
+            appState.selectedRoutes[routeIndex] = routeDetails;
+            break;
+
+        case 'removeSelectedRoute':
+            delete appState.selectedRoutes[value];
+            break;
+
         default:
             appState[key] = value;
             break;

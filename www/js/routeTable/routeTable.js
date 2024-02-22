@@ -161,10 +161,13 @@ function attachEventListeners(table, data, routeIndex) {
 
         const selectedRouteId = this.getAttribute('data-route-id');
             
-        appState.selectedRoutes[routeIndex] = {
-          id: this.getAttribute('data-route-id'), // Keep the ID for compatibility
-          ...routeData // Spread the routeData object to include all details
-        };
+        updateState('updateSelectedRoute', {
+          routeIndex: routeIndex,
+          routeDetails: {
+              id: this.getAttribute('data-route-id'),
+              ...routeData
+          }
+        });
 
         // Highlight the selected row for this route index
         highlightSelectedRowForRouteIndex(routeIndex);
@@ -222,10 +225,10 @@ function highlightSelectedRowForRouteIndex(routeIndex) {
   });
 
   // Get the selected route ID for this route index
-  const selectedRouteId = appState.selectedRoutes[routeIndex];
-  if (selectedRouteId) {
+  const selectedRouteDetails = appState.selectedRoutes[routeIndex];
+  if (selectedRouteDetails && selectedRouteDetails.id) { // Corrected this line
       // Find and highlight the row with the matching route ID within this route index
-      const selectedRow = document.querySelector(`.route-info-table[data-route-index="${routeIndex}"] tbody tr[data-route-id="${selectedRouteId}"]`);
+      const selectedRow = document.querySelector(`.route-info-table[data-route-index="${routeIndex}"] tbody tr[data-route-id="${selectedRouteDetails.id}"]`);
       if (selectedRow) {
           selectedRow.classList.add('selected');
       }
