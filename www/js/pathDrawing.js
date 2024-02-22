@@ -27,22 +27,22 @@ const pathDrawing = {
         });
     },
     
-    drawPathBetweenAirports: async function(originIata, destinationIata) {
+    drawPathBetweenAirports: async function(originIata, destinationIata, getAirportDataByIata) {
         try {
-          const originAirportData = await flightMap.getAirportDataByIata(originIata);
-          const destinationAirportData = await flightMap.getAirportDataByIata(destinationIata);
-      
-          if (!originAirportData || !destinationAirportData) {
-            console.error('Airport data not found for one or both IATAs:', originIata, destinationIata);
-            return;
-          }
-      
-          this.createRoutePath(originAirportData, destinationAirportData, {
-            originAirport: originAirportData,
-            destinationAirport: destinationAirportData,
-          }, 'white');
+            const originAirportData = await getAirportDataByIata(originIata);
+            const destinationAirportData = await getAirportDataByIata(destinationIata);
+    
+            if (!originAirportData || !destinationAirportData) {
+                console.error('Airport data not found for one or both IATAs:', originIata, destinationIata);
+                return;
+            }
+    
+            this.createRoutePath(originAirportData, destinationAirportData, {
+                originAirport: originAirportData,
+                destinationAirport: destinationAirportData,
+            }, 'white');
         } catch (error) {
-          console.error('Error drawing path between airports:', error);
+            console.error('Error drawing path between airports:', error);
         }
     },
 

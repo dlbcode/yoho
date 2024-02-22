@@ -173,7 +173,7 @@ function attachEventListeners(table, data, routeIndex) {
       for (let i = 0; i < iataCodes.length - 1; i++) {
           const originIata = iataCodes[i];
           const destinationIata = iataCodes[i + 1];
-          pathDrawing.drawPathBetweenAirports(originIata, destinationIata);
+          pathDrawing.drawPathBetweenAirports(originIata, destinationIata, flightMap.getAirportDataByIata);
       }
     });
 

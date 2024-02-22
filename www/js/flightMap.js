@@ -12,7 +12,11 @@ const flightMap = {
     clearMultiHopPaths: true,
     cachedRoutes: [],
     lastFetchTime: null,
-    cacheDuration: 600000, // 10 minutes in milliseconds   
+    cacheDuration: 600000, // 10 minutes in milliseconds 
+    
+    init: function() {
+        this.getAirportDataByIata = this.getAirportDataByIata.bind(this);
+    },
 
     addMarker(airport) {
         if (!airport || !airport.iata_code || !airport.weight) {
@@ -218,5 +222,7 @@ const flightMap = {
         });
     },                      
 };
+
+flightMap.init();
 
 export { flightMap };
