@@ -84,6 +84,8 @@ function buildRouteTable(routeIndex) {
       table.appendChild(tbody);
       infoPaneContent.appendChild(table);
 
+      highlightSelectedRowForRouteIndex(routeIndex);
+
       attachEventListeners(table, data, routeIndex);
     })
     .catch(error => {

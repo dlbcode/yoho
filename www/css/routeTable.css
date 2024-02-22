@@ -38,8 +38,8 @@
   text-align: left;
 }
 
-.route-info-table tr.selected {
-  background-color: #f0f0f0; /* Light grey, adjust as needed */
+.route-info-table tbody tr.selected {
+  background-color: #444;
 }
 
 /* Positioning the filter icon to the right within the th element */
