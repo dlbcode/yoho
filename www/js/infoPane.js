@@ -47,13 +47,14 @@ const infoPane = {
       button.textContent = `${route.originAirport.iata_code}-${route.destinationAirport.iata_code}`;
       button.className = 'route-info-button';
       button.onclick = () => {
-        // Check if there's a selected route for this index
         if (appState.selectedRoutes.hasOwnProperty(index)) {
-          // Display selected route information
-          selectedRoute.displaySelectedRouteInfo(index);
+          appState.currentView = 'selectedRoute';
+          appState.currentRouteIndex = index;
+          this.displayContent();
         } else {
-          // Display route table
-          buildRouteTable(index);
+          appState.currentView = 'routeTable';
+          appState.currentRouteIndex = index;
+          this.displayContent();
         }
       };
       menuBar.appendChild(button);
