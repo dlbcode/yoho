@@ -3,7 +3,6 @@ import { showPriceFilterPopup } from './priceFilter.js';
 import { showDateFilterPopup } from './dateFilters.js';
 import { pathDrawing } from '../pathDrawing.js';
 import { flightMap } from '../flightMap.js';
-import { infoPane } from '../infoPane.js';
 
 function getColumnIndex(columnIdentifier) {
   const columnMap = {
@@ -94,25 +93,6 @@ function buildRouteTable(routeIndex) {
     });
 }
 
-async function drawPathBetweenAirports(originIata, destinationIata) {
-  try {
-    const originAirportData = await flightMap.getAirportDataByIata(originIata);
-    const destinationAirportData = await flightMap.getAirportDataByIata(destinationIata);
-
-    if (!originAirportData || !destinationAirportData) {
-      console.error('Airport data not found for one or both IATAs:', originIata, destinationIata);
-      return;
-    }
-
-    pathDrawing.createRoutePath(originAirportData, destinationAirportData, {
-      originAirport: originAirportData,
-      destinationAirport: destinationAirportData,
-    }, 'white');
-  } catch (error) {
-    console.error('Error drawing path between airports:', error);
-  }
-}
-
 function attachEventListeners(table, data, routeIndex) {
   const headers = table.querySelectorAll('th');
   headers.forEach(header => {
@@ -193,7 +173,7 @@ function attachEventListeners(table, data, routeIndex) {
       for (let i = 0; i < iataCodes.length - 1; i++) {
           const originIata = iataCodes[i];
           const destinationIata = iataCodes[i + 1];
-          drawPathBetweenAirports(originIata, destinationIata);
+          pathDrawing.drawPathBetweenAirports(originIata, destinationIata);
       }
     });
 

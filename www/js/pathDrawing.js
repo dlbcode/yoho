@@ -25,7 +25,26 @@ const pathDrawing = {
         routes.forEach(route => {
             this.drawPaths(route);
         });
-    },    
+    },
+    
+    drawPathBetweenAirports: async function(originIata, destinationIata) {
+        try {
+          const originAirportData = await flightMap.getAirportDataByIata(originIata);
+          const destinationAirportData = await flightMap.getAirportDataByIata(destinationIata);
+      
+          if (!originAirportData || !destinationAirportData) {
+            console.error('Airport data not found for one or both IATAs:', originIata, destinationIata);
+            return;
+          }
+      
+          this.createRoutePath(originAirportData, destinationAirportData, {
+            originAirport: originAirportData,
+            destinationAirport: destinationAirportData,
+          }, 'white');
+        } catch (error) {
+          console.error('Error drawing path between airports:', error);
+        }
+    },
 
     drawDashedLine(originAirport, destinationAirport) {
         const worldCopies = [-720, -360, 0, 360, 720]; // Define world copies
