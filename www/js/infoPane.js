@@ -1,6 +1,7 @@
 import { appState, updateState } from './stateManager.js';
 import { pathDrawing } from './pathDrawing.js';
 import { buildRouteTable } from './routeTable/routeTable.js';
+import { selectedRoute } from './routeTable/selectedRoute.js';
 
 const infoPane = {
   init() {
@@ -99,7 +100,7 @@ const infoPane = {
     table.appendChild(thead);
 
     const tbody = document.createElement('tbody');
-    
+
     selectedRoutesArray.forEach(routeData => {
         const row = document.createElement('tr');
         row.innerHTML = `<td>${routeData.departure}</td>
