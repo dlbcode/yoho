@@ -17,10 +17,10 @@ const infoPane = {
 
   handleStateChange(event) {
     this.updateRouteButtons();
-    if (event.detail.key === 'updateSelectedRoute' || event.detail.key === 'removeSelectedRoute') {
+    if (event.detail.key === 'updateSelectedRoute' || event.detail.key === 'removeSelectedRoute' || event.detail.key === 'changeView') {
       this.displayContent();
     }
-  },
+  },  
 
   displayContent() {
     const infoPaneContent = document.getElementById('infoPaneContent');
