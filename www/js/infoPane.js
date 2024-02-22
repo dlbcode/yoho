@@ -37,7 +37,7 @@ const infoPane = {
       selectedRoute.displaySelectedRouteInfo(routeIndex);
     }
   },
-  
+
   updateRouteButtons() {
     const menuBar = document.getElementById('menu-bar');
     menuBar.innerHTML = '';
@@ -46,7 +46,16 @@ const infoPane = {
       let button = document.createElement('button');
       button.textContent = `${route.originAirport.iata_code}-${route.destinationAirport.iata_code}`;
       button.className = 'route-info-button';
-      button.onclick = () => buildRouteTable(index);
+      button.onclick = () => {
+        // Check if there's a selected route for this index
+        if (appState.selectedRoutes.hasOwnProperty(index)) {
+          // Display selected route information
+          selectedRoute.displaySelectedRouteInfo(index);
+        } else {
+          // Display route table
+          buildRouteTable(index);
+        }
+      };
       menuBar.appendChild(button);
 
       // Create the checkmark span and add the base class

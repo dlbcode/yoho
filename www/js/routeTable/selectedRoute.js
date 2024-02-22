@@ -14,7 +14,6 @@ const selectedRoute = {
     const changeRouteButton = document.createElement('button');
     changeRouteButton.textContent = 'Change Route';
     changeRouteButton.onclick = () => {
-      updateState('removeSelectedRoute', routeIndex);
       appState.currentView = 'routeTable'; // Set the view to routeTable
       appState.currentRouteIndex = routeIndex; // Ensure the correct route index is set
       document.dispatchEvent(new CustomEvent('stateChange', { detail: { key: 'changeView', value: 'routeTable' } }));
