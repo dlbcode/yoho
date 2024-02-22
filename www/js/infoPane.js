@@ -11,33 +11,33 @@ const infoPane = {
 
     tripButton.addEventListener('click', () => {
       appState.currentView = 'trip';
-      infoPane.displayContent();
+      this.displayContent();
     });
   },
 
   handleStateChange(event) {
-    // Existing logic to update route buttons or other UI elements
     this.updateRouteButtons();
-
-    // Check if the change is related to selectedRoutes
     if (event.detail.key === 'updateSelectedRoute' || event.detail.key === 'removeSelectedRoute') {
-        const selectedRoutesArray = Object.values(appState.selectedRoutes);
-        this.displayContent();
+      this.displayContent();
     }
   },
 
   displayContent() {
     const infoPaneContent = document.getElementById('infoPaneContent');
-    infoPaneContent.innerHTML = ''; // Clear current content
+    infoPaneContent.innerHTML = '';
 
-    if (appState.currentView === 'trip' && appState.selectedRoutes) {
-        const selectedRoutesArray = Object.values(appState.selectedRoutes);
-        this.updateTripTable(selectedRoutesArray);
-    } else if (appState.routeTablesData[appState.currentView]) {
-        this.updateRouteInfoPane(appState.routeTablesData[appState.currentView]);
+    if (appState.currentView === 'trip') {
+      const selectedRoutesArray = Object.values(appState.selectedRoutes);
+      this.updateTripTable(selectedRoutesArray);
+    } else if (appState.currentView === 'routeTable') {
+      const routeIndex = appState.currentRouteIndex;
+      buildRouteTable(routeIndex);
+    } else if (appState.currentView === 'selectedRoute') {
+      const routeIndex = appState.currentRouteIndex;
+      selectedRoute.displaySelectedRouteInfo(routeIndex);
     }
   },
-
+  
   updateRouteButtons() {
     const menuBar = document.getElementById('menu-bar');
     menuBar.innerHTML = '';
