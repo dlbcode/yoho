@@ -10,8 +10,7 @@ const appState = {
     routes: [],
     startDate: null,
     directRoutes: [],
-    selectedRouteId: null,
-    selectedRouteIndex: null,
+    selectedRoutes: {},
     tripTableData: null,
     routeTablesData: {},
     currentView: 'trip'
@@ -71,12 +70,7 @@ function updateState(key, value) {
             appState.routes = [];
             updateUrlWithWaypoints();
             break;
-        
-        case 'selectRoute':
-            appState.selectedRouteId = value.id;
-            appState.selectedRouteIndex = value.index; // Update the index
-            break;
-    
+
         default:
             appState[key] = value;
             break;

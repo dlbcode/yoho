@@ -63,6 +63,7 @@ function buildRouteTable(routeIndex) {
       const tbody = document.createElement('tbody');
       data.forEach(flight => {
         let row = document.createElement('tr');
+        row.setAttribute('data-route-id', flight.id);
         const directFlight = flight.route.length === 1;
         const stops = flight.route.length - 1;
         const layovers = flight.route.slice(0, -1).map(r => r.flyTo).join(", ");
@@ -156,7 +157,16 @@ function attachEventListeners(table, data, routeIndex) {
             deep_link: data[index].deep_link
         };
 
-        appState.routeTablesData[routeIndex] = routeData;
+        console.log('Selected route ID:', data[index].id, 'Route index:', index);
+        //console.log('Route data:', routeData, 'Route index:', routeIndex);
+
+        const selectedRouteId = this.getAttribute('data-route-id');
+            
+        // Update the selectedRoutes object with the selected route ID for this route index
+        appState.selectedRoutes[routeIndex] = selectedRouteId;
+
+        // Highlight the selected row for this route index
+        highlightSelectedRowForRouteIndex(routeIndex);
         infoPane.updateTripTable(routeData);
         infoPane.displayContent();
     });
@@ -201,6 +211,28 @@ function attachEventListeners(table, data, routeIndex) {
         showPriceFilterPopup(event, data);
       }
     });
+  }
+}
+
+function highlightSelectedRowForRouteIndex(routeIndex) {
+  // First, clear any previous selection for this route index
+  console.log('Clearing previous selection for route index:', routeIndex);
+  document.querySelectorAll(`.route-info-table[data-route-index="${routeIndex}"] tbody tr.selected`).forEach(row => {
+      row.classList.remove('selected');
+  });
+
+  // Get the selected route ID for this route index
+  const selectedRouteId = appState.selectedRoutes[routeIndex];
+  console.log('Selected route ID:', selectedRouteId);
+  console.log('Route index:', routeIndex);
+  if (selectedRouteId) {
+      // Find and highlight the row with the matching route ID within this route index
+      console.log('Highlighting selected row:', selectedRouteId, ' for the route index:', routeIndex);
+      const selectedRow = document.querySelector(`.route-info-table[data-route-index="${routeIndex}"] tbody tr[data-route-id="${selectedRouteId}"]`);
+      if (selectedRow) {
+          console.log('adding selected class to row:', selectedRow);
+          selectedRow.classList.add('selected');
+      }
   }
 }
 
