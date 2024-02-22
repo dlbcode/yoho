@@ -11,6 +11,7 @@ const infoPane = {
     tripButton.addEventListener('click', () => {
       appState.currentView = 'trip';
       infoPane.displayContent();
+      console.log('appState.selectedRoutes', appState.selectedRoutes);
     });
   },
 

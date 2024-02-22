@@ -161,8 +161,10 @@ function attachEventListeners(table, data, routeIndex) {
 
         const selectedRouteId = this.getAttribute('data-route-id');
             
-        // Update the selectedRoutes object with the selected route ID for this route index
-        appState.selectedRoutes[routeIndex] = selectedRouteId;
+        appState.selectedRoutes[routeIndex] = {
+          id: this.getAttribute('data-route-id'), // Keep the ID for compatibility
+          ...routeData // Spread the routeData object to include all details
+        };
 
         // Highlight the selected row for this route index
         highlightSelectedRowForRouteIndex(routeIndex);
