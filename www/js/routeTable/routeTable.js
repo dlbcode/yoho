@@ -145,10 +145,9 @@ function attachEventListeners(table, data, routeIndex) {
     });
   });
    
-    document.querySelectorAll('.route-info-table tbody tr').forEach((row, index) => {
-      row.addEventListener('click', function() {
-        this.classList.add('selected'); // Highlight the selected row
-
+  document.querySelectorAll('.route-info-table tbody tr').forEach((row, index) => {
+    row.addEventListener('click', function() {
+        const selectedRouteId = this.getAttribute('data-route-id');
         const routeData = {
             departure: new Date(data[index].local_departure).toLocaleString(),
             arrival: new Date(data[index].local_arrival).toLocaleString(),
@@ -159,18 +158,23 @@ function attachEventListeners(table, data, routeIndex) {
             deep_link: data[index].deep_link
         };
 
-        const selectedRouteId = this.getAttribute('data-route-id');
-            
-        updateState('updateSelectedRoute', {
-          routeIndex: routeIndex,
-          routeDetails: {
-              id: this.getAttribute('data-route-id'),
-              ...routeData
-          }
-        });
+        // Check if the route is already selected
+        if (appState.selectedRoutes[routeIndex] && appState.selectedRoutes[routeIndex].id === selectedRouteId) {
+            // If the selected route ID matches the clicked row's data-route-id, remove the selection
+            updateState('removeSelectedRoute', routeIndex);
+        } else {
+            // Otherwise, update the selected route with the new data
+            updateState('updateSelectedRoute', {
+                routeIndex: routeIndex,
+                routeDetails: {
+                    id: selectedRouteId,
+                    ...routeData
+                }
+            });
+        }
 
+        // Since the state has changed, trigger an update to reflect these changes in the UI
         highlightSelectedRowForRouteIndex(routeIndex);
-        
     });
   });
 
