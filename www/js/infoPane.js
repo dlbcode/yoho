@@ -111,16 +111,20 @@ const infoPane = {
 
     const tbody = document.createElement('tbody');
 
-    selectedRoutesArray.forEach(routeData => {
-        const row = document.createElement('tr');
-        row.innerHTML = `<td>${routeData.departure}</td>
-            <td>${routeData.arrival}</td>
-            <td>${routeData.price}</td>
-            <td>${routeData.airline}</td>
-            <td>${routeData.stops}</td>
-            <td>${routeData.route}</td>
-            <td><a href="${routeData.deep_link}" target="_blank"><button>Book Flight</button></a></td>`;
-        tbody.appendChild(row);
+    selectedRoutesArray.forEach(routeDetails => {
+        // Check if displayData exists before trying to access it
+        if (routeDetails.routeDetails && routeDetails.routeDetails.displayData) {
+            const displayData = routeDetails.routeDetails.displayData;
+            const row = document.createElement('tr');
+            row.innerHTML = `<td>${displayData.departure}</td>
+                <td>${displayData.arrival}</td>
+                <td>${displayData.price}</td>
+                <td>${displayData.airline}</td>
+                <td>${displayData.stops}</td>
+                <td>${displayData.route}</td>
+                <td><a href="${displayData.deep_link}" target="_blank"><button>Book Flight</button></a></td>`;
+            tbody.appendChild(row);
+        }
     });
 
     table.appendChild(tbody);

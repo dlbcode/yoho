@@ -11,6 +11,7 @@ const selectedRoute = {
     const infoPaneContent = document.getElementById('infoPaneContent');
     infoPaneContent.innerHTML = '';
 
+    // Create and append the 'Change Route' button
     const changeRouteButton = document.createElement('button');
     changeRouteButton.textContent = 'Change Route';
     changeRouteButton.onclick = () => {
@@ -20,9 +21,17 @@ const selectedRoute = {
     };
     infoPaneContent.appendChild(changeRouteButton);
 
+    // Display all details of the selected route
     const detailsList = document.createElement('ul');
     Object.entries(selectedRouteDetails).forEach(([key, value]) => {
-      if (key !== 'deep_link') {
+      // For nested objects like countryFrom, countryTo, duration, etc., handle them separately
+      if (typeof value === 'object' && value !== null) {
+        Object.entries(value).forEach(([nestedKey, nestedValue]) => {
+          const listItem = document.createElement('li');
+          listItem.textContent = `${key} ${nestedKey}: ${nestedValue}`;
+          detailsList.appendChild(listItem);
+        });
+      } else {
         const listItem = document.createElement('li');
         listItem.textContent = `${key}: ${value}`;
         detailsList.appendChild(listItem);
