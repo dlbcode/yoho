@@ -43,7 +43,7 @@ function buildRouteTable(routeIndex) {
       const table = document.createElement('table');
       table.className = 'route-info-table';
       table.style.width = '100%';
-      table.setAttribute('border', '1');
+      table.setAttribute('data-route-index', routeIndex, 'border', '1');
 
       const thead = document.createElement('thead');
       let headerRow = `<tr>
