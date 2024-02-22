@@ -111,10 +111,10 @@ const infoPane = {
 
     const tbody = document.createElement('tbody');
 
-    selectedRoutesArray.forEach(routeDetails => {
-        // Check if displayData exists before trying to access it
-        if (routeDetails.routeDetails && routeDetails.routeDetails.displayData) {
-            const displayData = routeDetails.routeDetails.displayData;
+    selectedRoutesArray.forEach(item => {
+        // Directly access displayData from each item
+        const { displayData } = item;
+        if (displayData) { // Ensure displayData exists
             const row = document.createElement('tr');
             row.innerHTML = `<td>${displayData.departure}</td>
                 <td>${displayData.arrival}</td>

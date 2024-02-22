@@ -154,6 +154,8 @@ function attachEventListeners(table, data, routeIndex) {
             });
         }
 
+        console.log("Updated appState.selectedRoutes:", appState.selectedRoutes);
+
         // Highlight the selected row for visual feedback
         highlightSelectedRowForRouteIndex(routeIndex);
     });
