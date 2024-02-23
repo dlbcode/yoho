@@ -131,6 +131,12 @@ function attachEventListeners(table, data, routeIndex) {
         const routeIds = routeIdString.split('|'); // Splitting the route IDs
         const fullFlightData = data[index]; // Assuming data[index] contains the full data for this route
 
+        if (!appState.trips.includes(routeIds)) {
+          appState.trips.push(routeIds);
+        } else {
+          appState.trips = appState.trips.filter(trip => trip !== routeIds);
+        }
+
         // Iterate over each route ID
         routeIds.forEach((id, idx) => {
             const currentRouteIndex = routeIndex + idx; // Calculate the current route index for each ID

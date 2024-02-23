@@ -8,6 +8,7 @@ const appState = {
     routeDirection: defaultDirection,
     waypoints: [],
     routes: [],
+    trips: [],
     startDate: null,
     directRoutes: [],
     selectedRoutes: {},
