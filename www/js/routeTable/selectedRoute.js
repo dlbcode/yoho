@@ -1,4 +1,4 @@
-import { appState } from '../stateManager.js';
+import { appState, updateState } from '../stateManager.js';
 
 const selectedRoute = {
   displaySelectedRouteInfo(routeIndex) {
@@ -15,7 +15,9 @@ const selectedRoute = {
     const changeRouteButton = document.createElement('button');
     changeRouteButton.textContent = 'Change Route';
     changeRouteButton.onclick = () => {
-      // Logic to switch back to the route table view
+      appState.currentView = 'routeTable';
+      appState.currentRouteIndex = routeIndex;
+      document.dispatchEvent(new CustomEvent('stateChange', { detail: { key: 'changeView', value: 'routeTable' } }));
     };
     infoPaneContent.appendChild(changeRouteButton);
 
