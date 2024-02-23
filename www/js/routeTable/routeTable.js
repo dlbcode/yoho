@@ -127,36 +127,39 @@ function attachEventListeners(table, data, routeIndex) {
    
   document.querySelectorAll('.route-info-table tbody tr').forEach((row, index) => {
     row.addEventListener('click', function() {
-        const fullFlightData = data[index]; // The full flight data object
+        const routeIdString = this.getAttribute('data-route-id');
+        const routeIds = routeIdString.split('|'); // Splitting the route IDs
+        const fullFlightData = data[index]; // Assuming data[index] contains the full data for this route
 
-        // Mapped data for display
-        const displayData = {
-            departure: new Date(fullFlightData.local_departure).toLocaleString(),
-            arrival: new Date(fullFlightData.local_arrival).toLocaleString(),
-            price: `$${fullFlightData.price}`,
-            airline: fullFlightData.airlines.join(", "),
-            stops: fullFlightData.route.length - 1,
-            route: fullFlightData.route.map(segment => `${segment.flyFrom} > ${segment.flyTo}`).join(", "),
-            deep_link: fullFlightData.deep_link
-        };
+        // Iterate over each route ID
+        routeIds.forEach((id, idx) => {
+            const currentRouteIndex = routeIndex + idx; // Calculate the current route index for each ID
+            const displayData = {
+                departure: new Date(fullFlightData.local_departure).toLocaleString(),
+                arrival: new Date(fullFlightData.local_arrival).toLocaleString(),
+                price: `$${fullFlightData.price}`,
+                airline: fullFlightData.airlines.join(", "),
+                stops: fullFlightData.route.length - 1,
+                route: fullFlightData.route.map(segment => `${segment.flyFrom} > ${segment.flyTo}`).join(", "),
+                deep_link: fullFlightData.deep_link
+            };
 
-        // Check if this route is already selected, if so, remove it, otherwise, update the selected route
-        if (appState.selectedRoutes[routeIndex] && appState.selectedRoutes[routeIndex].id === fullFlightData.id) {
-            updateState('removeSelectedRoute', routeIndex);
-        } else {
-            updateState('updateSelectedRoute', {
-                routeIndex: routeIndex,
-                routeDetails: {
-                    id: fullFlightData.id,
-                    fullData: fullFlightData, // Store the full flight data for potential future use
-                    displayData: displayData // Store the mapped data for immediate display
-                }
-            });
-        }
+            // Check if this specific route ID is already selected
+            if (appState.selectedRoutes[currentRouteIndex] && appState.selectedRoutes[currentRouteIndex].id === id) {
+                updateState('removeSelectedRoute', currentRouteIndex);
+            } else {
+                updateState('updateSelectedRoute', {
+                    routeIndex: currentRouteIndex,
+                    routeDetails: {
+                        id: id,
+                        fullData: fullFlightData, // Store the full flight data
+                        displayData: displayData // Store the mapped data for display
+                    }
+                });
+            }
+        });
 
         console.log("Updated appState.selectedRoutes:", appState.selectedRoutes);
-
-        // Highlight the selected row for visual feedback
         highlightSelectedRowForRouteIndex(routeIndex);
     });
   });
