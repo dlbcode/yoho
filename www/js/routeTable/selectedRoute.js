@@ -1,4 +1,4 @@
-import { appState, updateState } from '../stateManager.js';
+import { appState } from '../stateManager.js';
 
 const selectedRoute = {
   displaySelectedRouteInfo(routeIndex) {
@@ -15,27 +15,23 @@ const selectedRoute = {
     const changeRouteButton = document.createElement('button');
     changeRouteButton.textContent = 'Change Route';
     changeRouteButton.onclick = () => {
-      appState.currentView = 'routeTable';
-      appState.currentRouteIndex = routeIndex;
-      document.dispatchEvent(new CustomEvent('stateChange', { detail: { key: 'changeView', value: 'routeTable' } }));
+      // Logic to switch back to the route table view
     };
     infoPaneContent.appendChild(changeRouteButton);
 
-    // Display all details of the selected route
+    // Find the route segment in fullData.route that matches the selected route ID
+    const routeSegment = selectedRouteDetails.fullData.route.find(segment => segment.id === selectedRouteDetails.id);
+    if (!routeSegment) {
+      console.error('Matching route segment not found');
+      return;
+    }
+
+    // Display details for the matching route segment
     const detailsList = document.createElement('ul');
-    Object.entries(selectedRouteDetails).forEach(([key, value]) => {
-      // For nested objects like countryFrom, countryTo, duration, etc., handle them separately
-      if (typeof value === 'object' && value !== null) {
-        Object.entries(value).forEach(([nestedKey, nestedValue]) => {
-          const listItem = document.createElement('li');
-          listItem.textContent = `${key} ${nestedKey}: ${nestedValue}`;
-          detailsList.appendChild(listItem);
-        });
-      } else {
-        const listItem = document.createElement('li');
-        listItem.textContent = `${key}: ${value}`;
-        detailsList.appendChild(listItem);
-      }
+    Object.entries(routeSegment).forEach(([key, value]) => {
+      const listItem = document.createElement('li');
+      listItem.textContent = `${key}: ${value}`;
+      detailsList.appendChild(listItem);
     });
     infoPaneContent.appendChild(detailsList);
   }
