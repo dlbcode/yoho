@@ -2,6 +2,7 @@ import { appState, updateState } from './stateManager.js';
 import { pathDrawing } from './pathDrawing.js';
 import { buildRouteTable } from './routeTable/routeTable.js';
 import { selectedRoute } from './routeTable/selectedRoute.js';
+import { flightMap } from './flightMap.js';
 
 const infoPane = {
   init() {
@@ -111,7 +112,7 @@ const infoPane = {
 
     const tbody = document.createElement('tbody');
 
-    // Track the first route of each group
+    // Track the first route of each group to include in the trip table
     let includedGroups = {};
 
     selectedRoutesArray.forEach(item => {
@@ -120,8 +121,8 @@ const infoPane = {
             // Mark this group as included
             includedGroups[item.group] = true;
 
-            const { displayData } = item;
-            if (displayData) { // Ensure displayData exists
+            const { displayData, fullData } = item; // Assuming fullData contains route information
+            if (displayData && fullData) {
                 const row = document.createElement('tr');
                 row.innerHTML = `<td>${displayData.departure}</td>
                     <td>${displayData.arrival}</td>
@@ -130,6 +131,27 @@ const infoPane = {
                     <td>${displayData.stops}</td>
                     <td>${displayData.route}</td>
                     <td><a href="${displayData.deep_link}" target="_blank"><button>Book Flight</button></a></td>`;
+
+                // Add event listeners for mouseover and mouseout
+                row.addEventListener('mouseover', function() {
+                  pathDrawing.clearLines();
+                  // Directly use displayData.route and replace the pattern ", " with " > " to unify the format
+                  const routeString = displayData.route.replace(/, /g, ' > ').trim();
+                  const iataCodes = routeString.split(' > ');
+
+                  for (let i = 0; i < iataCodes.length - 1; i++) {
+                      const originIata = iataCodes[i];
+                      const destinationIata = iataCodes[i + 1];
+                      pathDrawing.drawPathBetweenAirports(originIata, destinationIata, flightMap.getAirportDataByIata);
+                  }
+                });
+
+            
+                row.addEventListener('mouseout', function() {
+                    pathDrawing.clearLines();
+                    pathDrawing.drawLines();
+                });
+
                 tbody.appendChild(row);
             }
         }
