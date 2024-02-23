@@ -14,7 +14,8 @@ const appState = {
     selectedRoutes: {},
     tripTableData: null,
     routeTablesData: {},
-    currentView: 'trip'
+    currentView: 'trip',
+    currentGroupID: 0
 };
   
 function updateState(key, value) {

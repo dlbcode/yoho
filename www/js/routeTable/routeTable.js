@@ -128,18 +128,11 @@ function attachEventListeners(table, data, routeIndex) {
   document.querySelectorAll('.route-info-table tbody tr').forEach((row, index) => {
     row.addEventListener('click', function() {
         const routeIdString = this.getAttribute('data-route-id');
-        const routeIds = routeIdString.split('|'); // Splitting the route IDs
+        const routeIds = routeIdString.split('|'); // Assuming multiple IDs are separated by '|'
         const fullFlightData = data[index]; // Assuming data[index] contains the full data for this route
 
-        if (!appState.trips.includes(routeIds)) {
-          appState.trips.push(routeIds);
-        } else {
-          appState.trips = appState.trips.filter(trip => trip !== routeIds);
-        }
-
-        // Iterate over each route ID
         routeIds.forEach((id, idx) => {
-            const currentRouteIndex = routeIndex + idx; // Calculate the current route index for each ID
+            const currentRouteIndex = routeIndex + idx;
             const displayData = {
                 departure: new Date(fullFlightData.local_departure).toLocaleString(),
                 arrival: new Date(fullFlightData.local_arrival).toLocaleString(),
@@ -152,16 +145,17 @@ function attachEventListeners(table, data, routeIndex) {
 
             // Check if this specific route ID is already selected
             if (appState.selectedRoutes[currentRouteIndex] && appState.selectedRoutes[currentRouteIndex].id === id) {
-                updateState('removeSelectedRoute', currentRouteIndex);
+              updateState('removeSelectedRoute', currentRouteIndex);
             } else {
-                updateState('updateSelectedRoute', {
-                    routeIndex: currentRouteIndex,
-                    routeDetails: {
-                        id: id,
-                        fullData: fullFlightData, // Store the full flight data
-                        displayData: displayData // Store the mapped data for display
-                    }
-                });
+              updateState('updateSelectedRoute', {
+                routeIndex: currentRouteIndex,
+                routeDetails: {
+                    id: id,
+                    fullData: fullFlightData,
+                    displayData: displayData,
+                    group: routeIndex // Use the routeIndex as the group identifier
+                }
+              });
             }
         });
 
