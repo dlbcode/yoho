@@ -111,19 +111,27 @@ const infoPane = {
 
     const tbody = document.createElement('tbody');
 
+    // Track the first route of each group
+    let includedGroups = {};
+
     selectedRoutesArray.forEach(item => {
-        // Directly access displayData from each item
-        const { displayData } = item;
-        if (displayData) { // Ensure displayData exists
-            const row = document.createElement('tr');
-            row.innerHTML = `<td>${displayData.departure}</td>
-                <td>${displayData.arrival}</td>
-                <td>${displayData.price}</td>
-                <td>${displayData.airline}</td>
-                <td>${displayData.stops}</td>
-                <td>${displayData.route}</td>
-                <td><a href="${displayData.deep_link}" target="_blank"><button>Book Flight</button></a></td>`;
-            tbody.appendChild(row);
+        // Check if the group of this item has already been included
+        if (!includedGroups[item.group]) {
+            // Mark this group as included
+            includedGroups[item.group] = true;
+
+            const { displayData } = item;
+            if (displayData) { // Ensure displayData exists
+                const row = document.createElement('tr');
+                row.innerHTML = `<td>${displayData.departure}</td>
+                    <td>${displayData.arrival}</td>
+                    <td>${displayData.price}</td>
+                    <td>${displayData.airline}</td>
+                    <td>${displayData.stops}</td>
+                    <td>${displayData.route}</td>
+                    <td><a href="${displayData.deep_link}" target="_blank"><button>Book Flight</button></a></td>`;
+                tbody.appendChild(row);
+            }
         }
     });
 
