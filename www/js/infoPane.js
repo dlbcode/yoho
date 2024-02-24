@@ -132,19 +132,17 @@ const infoPane = {
                     <td>${displayData.route}</td>
                     <td><a href="${displayData.deep_link}" target="_blank"><button>Book Flight</button></a></td>`;
 
-                // Add event listeners for mouseover and mouseout
-                row.addEventListener('mouseover', function() {
-                  pathDrawing.clearLines();
-                  // Directly use displayData.route and replace the pattern ", " with " > " to unify the format
-                  const routeString = displayData.route.replace(/, /g, ' > ').trim();
-                  const iataCodes = routeString.split(' > ');
-
-                  for (let i = 0; i < iataCodes.length - 1; i++) {
-                      const originIata = iataCodes[i];
-                      const destinationIata = iataCodes[i + 1];
-                      pathDrawing.drawPathBetweenAirports(originIata, destinationIata, flightMap.getAirportDataByIata);
-                  }
-                });
+                  row.addEventListener('mouseover', function() {
+                    const segments = displayData.route.split(', ');
+                    segments.forEach(segment => {
+                        const [originIata, destinationIata] = segment.split(' > ');
+                        const routeId = `${originIata}-${destinationIata}`;
+                        const pathLines = pathDrawing.routePathCache[routeId];
+                        if (pathLines) {
+                            pathLines.forEach(path => path.setStyle({ color: 'white' }));
+                        }
+                    });
+                  });                                   
             
                 row.addEventListener('mouseout', function() {
                     pathDrawing.clearLines();
