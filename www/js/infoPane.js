@@ -145,7 +145,6 @@ const infoPane = {
                       pathDrawing.drawPathBetweenAirports(originIata, destinationIata, flightMap.getAirportDataByIata);
                   }
                 });
-
             
                 row.addEventListener('mouseout', function() {
                     pathDrawing.clearLines();
