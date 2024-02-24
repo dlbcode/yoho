@@ -70,6 +70,8 @@ function updateState(key, value) {
         case 'clearData':
             appState.waypoints = [];
             appState.routes = [];
+            appState.trips = [];
+            appState.selectedRoutes = {};
             updateUrlWithWaypoints();
             break;
 
