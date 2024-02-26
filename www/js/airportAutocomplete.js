@@ -232,6 +232,21 @@ document.addEventListener('DOMContentLoaded', () => {
             updateState('addWaypoint', airport);
         }
         appState.selectedAirport = airport;
+
+        const routeNumber = Math.floor(waypointIndex / 2);
+
+        // Calculate the index for selectedRoutes based on the routeNumber
+        let selectedRouteIndex = routeNumber;
+        console.log('selectedRouteIndex', selectedRouteIndex);
+        let groupNumber = appState.selectedRoutes[selectedRouteIndex]?.group;
+        console.log('groupNumber', groupNumber);
+    
+        // Remove all selectedRoutes with the same group number
+        Object.keys(appState.selectedRoutes).forEach(key => {
+            if (appState.selectedRoutes[key].group === groupNumber) {
+                updateState('removeSelectedRoute', parseInt(key));
+            }
+        });
         
         // Move map view to include the selected airport marker
         if (airport && airport.latitude && airport.longitude) {
