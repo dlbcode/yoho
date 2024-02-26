@@ -313,8 +313,3 @@
 .hidden {
   display: none;
 }
-.travel-date-display {
-  padding: 5px;
-  cursor: pointer;
-  /* Add more styling as needed */
-}

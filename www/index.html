@@ -12,7 +12,10 @@
     <link rel="stylesheet" type="text/css" href="css/leftPane.css">
     <link rel="stylesheet" type="text/css" href="css/map.css" />
     <link rel="stylesheet" type="text/css" href="css/infoPane.css" />
-    
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
 </head>
 <body>
     <div class="container">
@@ -45,12 +48,7 @@
                     </ul>
                 </div>
             </div>
-            <div class="travel-date-container">
-                <div id="formattedDateDisplay" class="travel-date-display">
-                    Select Date
-                </div>
-                <input type="date" id="travelDate" class="travel-date-picker hidden" placeholder="Select Date">
-            </div>                                                                                          
+            <div id="datePickerContainer"></div>                                                                                                   
             <div class="airport-selection">
                 <div id="route1" class="route-container" data-route-number="1">
                     <input type="text" id="waypoint1" placeholder="From">
