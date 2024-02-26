@@ -135,8 +135,25 @@ const routeHandling = {
             routeDiv.remove();
         }
     
-        updateState('removeWaypoints', { routeNumber: routeNumber });
+        // Calculate the index for selectedRoutes based on the routeNumber
+        let selectedRouteIndex = routeNumber - 1;
+        let groupNumber = appState.selectedRoutes[selectedRouteIndex]?.group;
     
+        // Remove all selectedRoutes with the same group number
+        Object.keys(appState.selectedRoutes).forEach(key => {
+            if (appState.selectedRoutes[key].group === groupNumber) {
+                updateState('removeSelectedRoute', parseInt(key));
+            }
+        });
+    
+        // Remove the waypoints for the route being removed
+        let waypointsIndex = (routeNumber - 1) * 2;
+        if (appState.waypoints.length > waypointsIndex) {
+            appState.waypoints.splice(waypointsIndex, 2); // Remove 2 waypoints starting from the calculated index
+            updateState('updateWaypoints', appState.waypoints); // Update the state to reflect the change
+        }
+    
+        // Additional logic to update the UI and application state as needed
         pathDrawing.clearLines();
         pathDrawing.drawLines();
         mapHandling.updateMarkerIcons();
