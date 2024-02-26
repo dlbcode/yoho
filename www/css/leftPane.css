@@ -310,7 +310,11 @@
   text-decoration: underline; /* Optionally add underline on hover if desired */
 }
 
-.date-picker-container {
-  width: 100%;
-  margin-bottom: 10px 0;
+.hidden {
+  display: none;
+}
+.travel-date-display {
+  padding: 5px;
+  cursor: pointer;
+  /* Add more styling as needed */
 }
