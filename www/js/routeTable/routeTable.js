@@ -20,15 +20,15 @@ function getColumnIndex(columnIdentifier) {
 }
 
 function buildRouteTable(routeIndex) {
-  const selectedRoute = appState.routes[routeIndex];
+  const currentRoute = appState.routes[routeIndex];
   const infoPaneContent = document.getElementById('infoPaneContent');
   infoPaneContent.innerHTML = '';
 
   // Load routeTable.css
   document.head.appendChild(Object.assign(document.createElement('link'), {rel: 'stylesheet', type: 'text/css', href: '../css/routeTable.css'}));
 
-  const origin = selectedRoute.originAirport.iata_code;
-  const destination = selectedRoute.destinationAirport.iata_code;
+  const origin = currentRoute.originAirport.iata_code;
+  const destination = currentRoute.destinationAirport.iata_code;
   const date = "2024-03-15";
 
   fetch(`https://yonderhop.com/api/yhoneway?origin=${origin}&destination=${destination}&date=${date}`)
