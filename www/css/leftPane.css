@@ -309,3 +309,8 @@
   color: #999;
   text-decoration: underline; /* Optionally add underline on hover if desired */
 }
+
+.date-picker-container {
+  width: 100%;
+  margin-bottom: 10px 0;
+}
