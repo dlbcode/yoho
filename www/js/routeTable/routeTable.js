@@ -159,7 +159,6 @@ function attachEventListeners(table, data, routeIndex) {
             }
         });
 
-        console.log("Updated appState.selectedRoutes:", appState.selectedRoutes);
         highlightSelectedRowForRouteIndex(routeIndex);
     });
   });
