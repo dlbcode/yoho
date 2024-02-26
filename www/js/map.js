@@ -1,6 +1,7 @@
 import { flightMap } from './flightMap.js';
 import { updateState } from './stateManager.js';
 import { getPrice } from './getPrice.js';
+import { leftPane } from './leftPane.js';
 import { infoPane } from './infoPane.js';
 
 async function initMapFunctions() {
@@ -64,6 +65,7 @@ document.getElementById('map').style.height = window.innerHeight + 'px'; // Init
 document.addEventListener('DOMContentLoaded', () => {
     initMapFunctions();
     getPrice.init();
+    leftPane.init();
     infoPane.init();
     adjustMapSize();
 });
