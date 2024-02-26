@@ -237,10 +237,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Calculate the index for selectedRoutes based on the routeNumber
         let selectedRouteIndex = routeNumber;
-        console.log('selectedRouteIndex', selectedRouteIndex);
         let groupNumber = appState.selectedRoutes[selectedRouteIndex]?.group;
-        console.log('groupNumber', groupNumber);
-    
+
         // Remove all selectedRoutes with the same group number
         Object.keys(appState.selectedRoutes).forEach(key => {
             if (appState.selectedRoutes[key].group === groupNumber) {
