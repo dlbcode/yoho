@@ -2,52 +2,67 @@ import { routeList } from './routeList.js';
 import { appState } from './stateManager.js';
 
 const leftPane = {
-    flatpickrInstance: null, // Store the Flatpickr instance
+    flatpickrInstances: [], // Array to store Flatpickr instances
 
     init() {
         routeList.init();
         this.initDatePicker();
-    },
 
-    initDatePicker() {
-        // Check if the input already exists to avoid creating a new one
-        let dateInput = document.getElementById('flatpickrInput');
-        if (!dateInput) {
-            dateInput = document.createElement('input');
-            dateInput.setAttribute('type', 'text');
-            dateInput.setAttribute('id', 'flatpickrInput');
-            dateInput.setAttribute('placeholder', 'Select date');
-            document.getElementById('datePickerContainer').appendChild(dateInput);
-        }
-
-        this.updateDatePicker();
-        
         // Listen for state changes to update the date picker accordingly
         document.addEventListener('stateChange', (event) => {
             if (event.detail.key === 'oneWay') {
-                this.updateDatePicker();
+                this.initDatePicker();
             }
         });
     },
 
-    updateDatePicker() {
-        // Destroy the previous instance if it exists
-        if (this.flatpickrInstance) {
-            this.flatpickrInstance.destroy();
+    initDatePicker() {
+        // Clear existing date pickers
+        this.destroyFlatpickrInstances();
+        document.getElementById('datePickerContainer').innerHTML = ''; // Reset the container
+
+        if (appState.oneWay) {
+            // If oneWay is true, only create one input field
+            this.createDateInput('flatpickrInput', 'Select date');
+            this.initializeFlatpickr(document.getElementById('flatpickrInput'), 'single');
+        } else {
+            // If oneWay is false, create two input fields for start and end dates
+            this.createDateInput('startDateInput', 'Start date');
+            this.createDateInput('endDateInput', 'End date');
+            this.initializeFlatpickr(document.getElementById('startDateInput'), 'range');
+            this.initializeFlatpickr(document.getElementById('endDateInput'), 'range');
         }
-    
-        const dateInput = document.getElementById('flatpickrInput');
-        // Initialize Flatpickr based on the appState.oneWay
-        this.flatpickrInstance = flatpickr(dateInput, {
-            mode: appState.oneWay ? 'single' : 'range',
+    },
+
+    createDateInput(id, placeholder) {
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.id = id;
+        input.placeholder = placeholder;
+        document.getElementById('datePickerContainer').appendChild(input);
+    },
+
+    initializeFlatpickr(inputElement, mode) {
+        const instance = flatpickr(inputElement, {
+            mode: mode,
             enableTime: false,
-            dateFormat: "D, M d Y", // Updated date format to "Mon, Feb 21 2024"
+            dateFormat: "D, M d Y",
             onChange: function(selectedDates, dateStr, instance) {
-                // Handle the date or date range selection
-                console.log(dateStr);
+                if (mode === 'range' && selectedDates.length === 2) {
+                    // Update the start and end date inputs separately
+                    const [start, end] = selectedDates;
+                    document.getElementById('startDateInput').value = instance.formatDate(start, "D, M d Y");
+                    document.getElementById('endDateInput').value = instance.formatDate(end, "D, M d Y");
+                }
             },
         });
-    },          
+        this.flatpickrInstances.push(instance);
+    },
+
+    destroyFlatpickrInstances() {
+        this.flatpickrInstances.forEach(instance => instance.destroy());
+        this.flatpickrInstances = [];
+    },
 };
 
 document.addEventListener('DOMContentLoaded', function() {
