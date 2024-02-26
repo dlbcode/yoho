@@ -4,7 +4,6 @@ const selectedRoute = {
   displaySelectedRouteInfo(routeIndex) {
     const selectedRouteDetails = appState.selectedRoutes[routeIndex];
     if (!selectedRouteDetails) {
-      console.error('Selected route details are undefined or null');
       return;
     }
 
