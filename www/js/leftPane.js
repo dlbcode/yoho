@@ -42,38 +42,47 @@ const leftPane = {
         document.getElementById('datePickerContainer').appendChild(input);
     },
 
-    initializeFlatpickr(inputElement, mode) {
-        const startDate = new Date(appState.startDate);
-        const instance = flatpickr(inputElement, {
-            mode: mode,
-            enableTime: false,
-            dateFormat: "D, M d Y",
-            defaultDate: startDate,
-            minDate: startDate,
-            onChange: function(selectedDates, dateStr, instance) {
-                if (selectedDates.length > 0) {
-                    updateState('startDate', instance.formatDate(selectedDates[0], "Y-m-d"));
-                    if (mode === 'range' && selectedDates.length === 2) {
-                        const [start, end] = selectedDates;
-                        document.getElementById('startDateInput').value = instance.formatDate(start, "D, M d Y");
-                        document.getElementById('endDateInput').value = instance.formatDate(end, "D, M d Y");
-                        updateState('startDate', instance.formatDate(selectedDates[0], "Y-m-d"));
-                        if (!appState.oneWay && selectedDates.length === 2) {
-                            updateState('endDate', instance.formatDate(selectedDates[1], "Y-m-d"));
-                        } else if (!appState.oneWay) {
-                            updateState('endDate', null);
+    initializeFlatpickr() {
+        this.destroyFlatpickrInstances();
+        document.getElementById('datePickerContainer').innerHTML = '';
+    
+        if (!appState.oneWay) {
+            ['startDateInput', 'endDateInput'].forEach((id, index) => {
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.id = id;
+                input.placeholder = index === 0 ? 'Start date' : 'End date';
+                document.getElementById('datePickerContainer').appendChild(input);
+    
+                const fpInstance = flatpickr(input, {
+                    enableTime: false,
+                    dateFormat: "Y-m-d", // Internal format used for date handling
+                    altInput: true, // Enable an alternative input that displays the date to the user
+                    altFormat: "D, M d Y", // Format for the alternative input (display format)
+                    defaultDate: index === 0 ? appState.startDate : appState.endDate || appState.startDate,
+                    minDate: "today",
+                    onChange: (selectedDates) => {
+                        const dateKey = index === 0 ? 'startDate' : 'endDate';
+                        // Update the app state with the selected date in "Y-m-d" format
+                        updateState(dateKey, selectedDates[0].toISOString().split('T')[0]);
+                        if (index === 0 && !appState.endDate) {
+                            // Ensure the endDate picker's minDate is updated based on the startDate selection
+                            const endDatePicker = document.getElementById('endDateInput')._flatpickr;
+                            if (endDatePicker) {
+                                endDatePicker.set('minDate', selectedDates[0]);
+                            }
                         }
                     }
-                }
-            },
-        });
-        this.flatpickrInstances.push(instance);
-    },    
-
+                });
+                this.flatpickrInstances.push(fpInstance);
+            });
+        }
+    },
+    
     destroyFlatpickrInstances() {
         this.flatpickrInstances.forEach(instance => instance.destroy());
         this.flatpickrInstances = [];
-    },
+    },        
 };
 
 document.addEventListener('DOMContentLoaded', function() {

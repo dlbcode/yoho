@@ -16,10 +16,7 @@ const routeHandling = {
         routeDiv.className = 'route-container';
         routeDiv.setAttribute('data-route-number', routeNumber.toString());
     
-        // Define placeholders independently from the waypointsOrder
         let placeholders = ['From', 'To'];
-    
-        // Determine the order of waypoints based on routeDirection
         let waypointsOrder = appState.routeDirection === 'to' ? [1, 0] : [0, 1];
     
         for (let i = 0; i < 2; i++) {
@@ -28,24 +25,8 @@ const routeHandling = {
             let input = document.createElement('input');
             input.type = 'text';
             input.id = `waypoint${index + 1}`;
-            // Assign placeholders based on the original order, not waypointsOrder
             input.placeholder = placeholders[i];
             input.value = waypoint ? waypoint.iata_code : '';
-    
-            input.addEventListener('mouseover', async function() {
-                const iataCode = this.value.match(/\b([A-Z]{3})\b/); // Extract IATA code using regex
-                if (iataCode) {
-                    const airportInfo = await fetchAirportByIata(iataCode[1]);
-                    if (airportInfo) {
-                        routeHandling.showWaypointTooltip(this, `${airportInfo.name} (${airportInfo.iata_code}) ${airportInfo.city}, ${airportInfo.country}`);
-                    }
-                }
-            });
-    
-            input.addEventListener('mouseout', function() {
-                routeHandling.hideWaypointTooltip();
-            });
-    
             routeDiv.appendChild(input);
     
             const suggestionsDiv = document.createElement('div');
@@ -53,88 +34,32 @@ const routeHandling = {
             suggestionsDiv.className = 'suggestions';
             routeDiv.appendChild(suggestionsDiv);
         }
-
-        // Create a date selection button
-        let dateButton = document.createElement('button');
-        dateButton.className = 'date-select-button';
-        dateButton.textContent = routeNumber === 1 ? new Date(appState.startDate).getDate().toString() : 'Set Date';
-
-        // Attach the event listener directly to the button
-        dateButton.addEventListener('click', function() {
-            // Check if flatpickr is already initialized to avoid re-initialization
-            if (!this._flatpickr) {
-                let fp = flatpickr(this, {
-                    enableTime: false,
-                    dateFormat: "Y-m-d",
-                    defaultDate: routeNumber === 1 ? appState.startDate : new Date(),
-                    minDate: "today",
-                    onChange: (selectedDates) => {
-                        // Update the button text to the selected day
-                        this.textContent = new Date(selectedDates[0]).getDate().toString();
-                        // Update appState.startDate for the first route
-                        if (routeNumber === 1) {
+    
+        // Add a date picker button for the first route when appState.oneWay is true
+        if (appState.oneWay && routeNumber === 1) {
+            let dateButton = document.createElement('button');
+            dateButton.className = 'date-select-button';
+            dateButton.textContent = new Date(appState.startDate).getDate().toString();
+    
+            dateButton.addEventListener('click', function() {
+                if (!this._flatpickr) {
+                    flatpickr(this, {
+                        enableTime: false,
+                        dateFormat: "Y-m-d",
+                        defaultDate: appState.startDate,
+                        minDate: "today",
+                        onChange: (selectedDates) => {
+                            this.textContent = new Date(selectedDates[0]).getDate().toString();
                             updateState('startDate', selectedDates[0].toISOString().split('T')[0]);
                         }
-                        // Additional logic to handle date changes for routes other than the first one
-                    }
-                });
-                // Open the flatpickr calendar immediately after initialization
-                fp.open();
-            } else {
-                // If flatpickr is already initialized, just open it
-                this._flatpickr.open();
-            }
-        }, {once: true}); // Use the {once: true} option to ensure this setup runs only once per button
-
-    routeDiv.insertBefore(dateButton, routeDiv.firstChild);
-
-         // Create a swap button with a symbol
-        let swapButton = document.createElement('button');
-        swapButton.innerHTML = '&#8646;'; // Double-headed arrow symbol
-        swapButton.className = 'swap-route-button';
-        swapButton.onclick = () => this.handleSwapButtonClick(routeNumber);
-        swapButton.title = 'Swap waypoints'; // Tooltip for accessibility
-
-        // Insert the swap button between the waypoint input fields
-        let firstInput = routeDiv.querySelector('input[type="text"]');
-        routeDiv.insertBefore(swapButton, firstInput.nextSibling);
+                    }).open();
+                }
+            });
     
-        // Add a minus button for each route div
-        if (routeNumber > 1) {
-            let minusButton = document.createElement('button');
-            minusButton.textContent = '-';
-            minusButton.className = 'remove-route-button';
-            minusButton.onclick = () => this.removeRouteDiv(routeNumber);
-            routeDiv.appendChild(minusButton);
+            routeDiv.insertBefore(dateButton, routeDiv.firstChild);
         }
     
-        // Add event listeners to change the route line color on mouseover
-        routeDiv.addEventListener('mouseover', () => {
-            const routeId = this.getRouteIdFromDiv(routeDiv);
-            const pathLines = pathDrawing.routePathCache[routeId] || pathDrawing.dashedRoutePathCache[routeId];
-            if (pathLines && pathLines.length > 0) {
-                routeDiv.dataset.originalColor = pathLines[0].options.color;
-                pathLines.forEach(path => path.setStyle({ color: 'white'}));
-            }
-        });
-    
-        routeDiv.addEventListener('mouseout', () => {
-            const routeId = this.getRouteIdFromDiv(routeDiv);
-            const pathLines = pathDrawing.routePathCache[routeId] || pathDrawing.dashedRoutePathCache[routeId];
-            if (pathLines && pathLines.length > 0) {
-                const originalColor = routeDiv.dataset.originalColor;
-                pathLines.forEach(path => path.setStyle({ color: originalColor }));
-            }
-            pathDrawing.clearLines();
-            pathDrawing.drawLines();
-        });
-    
-        // Prepend the new route div so it appears above the last one if routeDirection is 'to'
-        if (appState.routeDirection === 'to') {
-            container.prepend(routeDiv);
-        } else {
-            container.appendChild(routeDiv);
-        }
+        container.appendChild(routeDiv);
     
         for (let i = 0; i < 2; i++) {
             let index = (routeNumber - 1) * 2 + i;
