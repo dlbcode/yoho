@@ -16,7 +16,7 @@ const appState = {
     routeTablesData: {},
     currentView: 'trip',
     currentGroupID: 0,
-    startDate: null,
+    startDate: new Date().toISOString().split('T')[0], // Sets the current date
     endDate: null,
 };
   

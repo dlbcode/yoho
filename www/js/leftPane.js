@@ -43,10 +43,13 @@ const leftPane = {
     },
 
     initializeFlatpickr(inputElement, mode) {
+        const startDate = new Date(appState.startDate);
         const instance = flatpickr(inputElement, {
             mode: mode,
             enableTime: false,
             dateFormat: "D, M d Y",
+            defaultDate: startDate,
+            minDate: startDate,
             onChange: function(selectedDates, dateStr, instance) {
                 if (selectedDates.length > 0) {
                     updateState('startDate', instance.formatDate(selectedDates[0], "Y-m-d"));
@@ -65,7 +68,7 @@ const leftPane = {
             },
         });
         this.flatpickrInstances.push(instance);
-    },       
+    },    
 
     destroyFlatpickrInstances() {
         this.flatpickrInstances.forEach(instance => instance.destroy());
