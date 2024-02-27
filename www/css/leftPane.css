@@ -328,132 +328,34 @@
 }
 
 /* Base Flatpickr styling for a dark theme */
-.flatpickr-calendar {
-  background: #333; /* Dark background */
-  color: #ccc; /* Light text */
-  border-color: #444; /* Darker border for contrast */
-}
-
-/* Days */
-.flatpickr-day {
-  background: #444; /* Dark background for days */
-  color: #fff; /* White text for days */
-}
-.flatpickr-day:hover,
-.flatpickr-day:focus {
-  background: #777; /* Lighter background on hover/focus */
-  cursor: pointer;
-}
-
-/* Weekdays (the row at the top) */
-.flatpickr-weekdays {
-  background: #333 !important; /* Darker background for the weekdays row */
-  color: #ccc !important; /* Light text for weekdays */
-}
-
-.flatpickr-weekdaycontainer {
-  background: #333; /* Light text for weekdays */
-}
-
-.flatpickr-weekday {
-  background: #333 !important;
-}
-
-/* Week numbers */
-.flatpickr-weekwrapper {
-  background: #222; /* Dark background for week number column */
-  color: #ccc; /* Light text for week numbers */
-}
-
-/* Current and selected days */
-.flatpickr-day.today {
-  background: #555; /* Dark background for today */
-  color: #fff; /* White text for today */
-}
-.flatpickr-day.selected,
-.flatpickr-day.startRange,
-.flatpickr-day.endRange,
-.flatpickr-day.selected.inRange,
-.flatpickr-day.startRange.inRange,
-.flatpickr-day.endRange.inRange {
-  background: #3b74d5; /* Highlight color for selected days */
-  color: #fff; /* White text for selected days */
-  border: none;
-}
-
-.flatpickr-day.inRange {
-  background: #646c8c; /* Dark background for days in the range */
-  color: #fff; /* White text for days in the range */
-}
-
-/* Navigation buttons */
-.flatpickr-prev-month,
-.flatpickr-next-month {
-  background: #333;
-  color: #ccc; /* Light text for buttons */
-}
-.flatpickr-prev-month:hover,
-.flatpickr-next-month:hover {
-  background: #555; /* Dark background on hover */
-  color: #fff; /* White text on hover */
-}
-
-/* Month and year dropdowns */
-.flatpickr-month, .flatpickr-months {
-  background: #333 !important; /* Dark background for the month/year dropdown */
-  color: #ccc; /* Light text */
-}
-.flatpickr-monthDropdown-months,
-.flatpickr-year {
-  background: #333 !important; /* Dark background for dropdowns */
-  color: #ccc; /* Light text */
-}
-
-.flatpickr-current-month, .flathpickr-monthDropdown-months, .flatpickr-year {
-  background: #333 !important; /* Dark background for the current month */
-  color: #fff; /* White text for the current month */
-}
-
-/* Targeting the select element for month dropdown */
-.flatpickr-monthDropdown-months {
+.flatpickr-calendar, .flatpickr-weekdays, .flatpickr-weekday, .flatpickr-month, .flatpickr-months, .flatpickr-monthDropdown-months, .flatpickr-year, .flatpickr-current-month, .flathpickr-monthDropdown-months {
   background: #333 !important; /* Dark background */
   color: #ccc !important; /* Light text */
 }
 
-/* Attempt to style option elements - limited support */
-.flatpickr-monthDropdown-months option {
-  background: #2f2f2f !important; /* Dark background */
-  color: #ccc !important; /* Light text */
+/* Days */
+.flatpickr-day, .flatpickr-day.today {
+  background: #444; /* Dark background for days */
+  color: #fff; /* White text for days */
 }
 
-.flatpickr-day.selected {
-  background: #135dbe !important; /* Example: Green background for selected days */
-  color: #fff !important; /* White text for better contrast */
+/* Hover and Focus Styles for Days */
+.flatpickr-day:hover, .flatpickr-day:focus, .flatpickr-day:not(.selected):hover, .flatpickr-day.inRange:hover {
+  background: #3b74d5 !important; /* Consistent hover background */
+  color: #ffffff !important; /* White text on hover */
 }
 
-/* Optionally, customize the start and end days of a range */
-.flatpickr-day.startRange,
-.flatpickr-day.endRange,
-.flatpickr-day.inRange {
-  background: #135dbe !important; /* Matching green background for consistency */
-  color: #fff !important;
+/* Selected and Range Days */
+.flatpickr-day.selected, .flatpickr-day.startRange, .flatpickr-day.endRange, .flatpickr-day.selected.inRange, .flatpickr-day.startRange.inRange, .flatpickr-day.endRange.inRange, .flatpickr-day.inRange {
+  background: #135dbe !important; /* Highlight color for selected and range days */
+  color: #fff !important; /* White text for selected and range days */
+  border: none;
 }
 
-.flatpickr-day:hover {
-  background: #3b74d5 !important; /* Light gray */
-  color: #000000 !important; /* Black text */
-}
-
-/* Hover color for days within the selected range */
-.flatpickr-day.inRange:hover {
-  background: #3b74d5 !important; /* Darker blue */
-  color: #ffffff !important; /* White text */
-}
-
-/* Hover color for days that are potential end dates but not yet selected */
-.flatpickr-day:not(.selected):hover {
-  background: #3b74d5 !important; /* Lime green */
-  color: #ffffff !important; /* White text */
+/* Navigation buttons */
+.flatpickr-prev-month, .flatpickr-next-month, .flatpickr-prev-month:hover, .flatpickr-next-month:hover {
+  background: #333; /* Dark background for buttons */
+  color: #ccc; /* Light text for buttons */
 }
 
 /* Extend the background color of days in the range to cover gaps */
@@ -464,11 +366,23 @@
   left: -8px; /* Extend to the left to cover the gap */
   height: 100%;
   width: calc(100% + 16px); /* Original width plus gap on both sides */
-  background-color: #3b74d5; /* Match the day range highlight color */
+  background-color: #135dbe; /* Match the day range highlight color */
   z-index: -1;
 }
 
 .flatpickr-day.inRange {
   position: relative; /* Ensure the pseudo-element is positioned relative to the day cell */
   z-index: 1; /* Make sure the day cell text appears above the extended background */
+}
+
+/* Week numbers */
+.flatpickr-weekwrapper {
+  background: #222; /* Dark background for week number column */
+  color: #ccc; /* Light text for week numbers */
+}
+
+/* Option elements - limited support */
+.flatpickr-monthDropdown-months option {
+  background: #2f2f2f !important; /* Dark background */
+  color: #ccc !important; /* Light text */
 }
