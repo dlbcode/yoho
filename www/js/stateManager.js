@@ -15,7 +15,9 @@ const appState = {
     tripTableData: null,
     routeTablesData: {},
     currentView: 'trip',
-    currentGroupID: 0
+    currentGroupID: 0,
+    startDate: null,
+    endDate: null,
 };
   
 function updateState(key, value) {
@@ -86,6 +88,14 @@ function updateState(key, value) {
 
         default:
             appState[key] = value;
+            break;
+        
+        case 'startDate':
+            appState.startDate = value;
+            break;
+
+        case 'endDate':
+            appState.endDate = value;
             break;
     }
     document.dispatchEvent(new CustomEvent('stateChange', { detail: { key, value } }));

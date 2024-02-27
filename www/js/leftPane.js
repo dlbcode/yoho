@@ -1,5 +1,5 @@
 import { routeList } from './routeList.js';
-import { appState } from './stateManager.js';
+import { appState, updateState } from './stateManager.js';
 
 const leftPane = {
     flatpickrInstances: [], // Array to store Flatpickr instances
@@ -48,16 +48,24 @@ const leftPane = {
             enableTime: false,
             dateFormat: "D, M d Y",
             onChange: function(selectedDates, dateStr, instance) {
-                if (mode === 'range' && selectedDates.length === 2) {
-                    // Update the start and end date inputs separately
-                    const [start, end] = selectedDates;
-                    document.getElementById('startDateInput').value = instance.formatDate(start, "D, M d Y");
-                    document.getElementById('endDateInput').value = instance.formatDate(end, "D, M d Y");
+                if (selectedDates.length > 0) {
+                    updateState('startDate', instance.formatDate(selectedDates[0], "Y-m-d"));
+                    if (mode === 'range' && selectedDates.length === 2) {
+                        const [start, end] = selectedDates;
+                        document.getElementById('startDateInput').value = instance.formatDate(start, "D, M d Y");
+                        document.getElementById('endDateInput').value = instance.formatDate(end, "D, M d Y");
+                        updateState('startDate', instance.formatDate(selectedDates[0], "Y-m-d"));
+                        if (!appState.oneWay && selectedDates.length === 2) {
+                            updateState('endDate', instance.formatDate(selectedDates[1], "Y-m-d"));
+                        } else if (!appState.oneWay) {
+                            updateState('endDate', null);
+                        }
+                    }
                 }
             },
         });
         this.flatpickrInstances.push(instance);
-    },
+    },       
 
     destroyFlatpickrInstances() {
         this.flatpickrInstances.forEach(instance => instance.destroy());
@@ -67,6 +75,14 @@ const leftPane = {
 
 document.addEventListener('DOMContentLoaded', function() {
     leftPane.init();
+});
+
+document.addEventListener('appStateChange', function(event) {
+    const { startDate, endDate } = event.detail;
+    updateState('startDate', startDate);
+    if (endDate !== undefined) { // Check for undefined because null is a valid reset value
+        updateState('endDate', endDate);
+    }
 });
 
 export { leftPane };
