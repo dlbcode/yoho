@@ -310,9 +310,7 @@ const routeHandling = {
 }
 
 document.addEventListener('stateChange', function(event) {
-    if (event.detail.key === 'oneWay' && event.detail.value === true) {
-        buildRouteDivs(1);
-    } else if (event.detail.value === false) {
+    if (event.detail.key === 'oneWay' && event.detail.value === false) {
         // Remove all waypoints except the first two
         appState.waypoints.splice(2);
         updateState('updateWaypoints', appState.waypoints);
@@ -321,7 +319,6 @@ document.addEventListener('stateChange', function(event) {
         for (let i = 1; i < routeDivs.length; i++) {
             routeDivs[i].remove();
         }
-        buildRouteDivs();
     }
 });
 
