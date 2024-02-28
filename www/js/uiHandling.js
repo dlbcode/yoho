@@ -14,15 +14,15 @@ const uiHandling = {
         dropdown.classList.toggle('hidden');
     });
 
-    dropdown.querySelectorAll('li').forEach(item => {
-        item.addEventListener('click', function() {
-            const numTravelersText = this.textContent.match(/\d+/)[0]; // Extracts the number
+    dropdown.addEventListener('click', function(event) {
+        const item = event.target.closest('li');
+        if (item) {
+            const numTravelersText = item.textContent.match(/\d+/)[0];
             const numTravelers = parseInt(numTravelersText, 10);
-            dropdownBtn.innerHTML = `<img src="assets/person.svg" alt="" class="icon-person"> ${numTravelersText} <span class="icon-dropdown"></span>`;
+            document.getElementById('travelersDropdownBtn').innerHTML = `<img src="assets/person.svg" alt="" class="icon-person"> ${numTravelersText} <span class="icon-dropdown"></span>`;
             dropdown.classList.add('hidden');
             updateState('numTravelers', numTravelers);
-
-        });
+        }
     });
   },  
 
@@ -30,29 +30,20 @@ const uiHandling = {
     console.log('iniTripTypeDropdown - oneWay:', appState.oneWay);
     const dropdownBtn = document.getElementById('tripTypeDropdownBtn');
     const dropdown = document.getElementById('tripTypeDropdown');
-
-    // Set initial dropdown button text based on appState.oneWay
     dropdownBtn.innerHTML = appState.oneWay ? 'One way <span class="icon-dropdown"></span>' : 'Round trip <span class="icon-dropdown"></span>';
-
+    
     document.addEventListener('routesArrayUpdated', this.handleStateChange.bind(this));
-
     dropdownBtn.addEventListener('click', function() {
-        // Clear existing dropdown items
         dropdown.innerHTML = '';
-        // Determine which option to display based on the current button text
         const optionToShow = dropdownBtn.textContent.trim() === 'One way' ? 'Round trip' : 'One way';
-        // Create and append the non-selected option
         const li = document.createElement('li');
         li.textContent = optionToShow;
         dropdown.appendChild(li);
-        // Toggle dropdown visibility
         dropdown.classList.toggle('hidden');
     });
 
-    // Handle selection of the dropdown option
     dropdown.addEventListener('click', function(event) {
         if (event.target.tagName === 'LI') {
-            // Update button text and appState
             dropdownBtn.innerHTML = `${event.target.textContent} <span class="icon-dropdown"></span>`;
             const isOneWay = event.target.textContent === 'One way';
             updateState('oneWay', isOneWay);
@@ -61,7 +52,6 @@ const uiHandling = {
     });
   },
 
-  // uiHandling.js - Optimized hideDropdowns function
   hideDropdowns: function() {
     document.addEventListener('click', function(event) {
         const dropdownSelectors = ['#travelersDropdown', '#tripTypeDropdown'];
@@ -226,7 +216,6 @@ document.addEventListener('stateChange', function(event) {
 document.addEventListener('DOMContentLoaded', () => {
   uiHandling.initTravelersDropdown();
   uiHandling.initTripTypeDropdown();
-  uiHandling.updateTripTypeDropdownBasedOnAppState();
   uiHandling.initTogglePaneButton();
   uiHandling.initInfoPaneDragButton();
   uiHandling.hideDropdowns();
