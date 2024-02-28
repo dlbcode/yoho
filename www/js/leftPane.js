@@ -22,53 +22,54 @@ const leftPane = {
         document.getElementById('datePickerContainer').innerHTML = ''; // Reset the container
     
         if (appState.oneWay) {
-            // If oneWay is true, do not display the datePickerContainer at all
             document.getElementById('datePickerContainer').style.display = 'none';
         } else {
-            // If oneWay is false, proceed as before
-            document.getElementById('datePickerContainer').style.display = ''; // Make sure to reset display property
-            this.createDateInput('startDateInput', 'Start date');
-            this.createDateInput('endDateInput', 'End date');
-            this.initializeFlatpickr(document.getElementById('startDateInput'), 'range');
-            this.initializeFlatpickr(document.getElementById('endDateInput'), 'range');
+            document.getElementById('datePickerContainer').style.display = '';
+            this.createDateInput('startDateInput', 'Start date', new Date().toISOString().split('T')[0]); // Use today's date as default
+            this.createDateInput('endDateInput', 'End date'); // Placeholder "End date" is set in createDateInput function
+    
+            // Initialize flatpickr for startDateInput
+            this.initializeFlatpickr(document.getElementById('startDateInput'), 'single', (date) => {
+                updateState('startDate', date);
+            });
+    
+            // Initialize flatpickr for endDateInput without a default date
+            this.initializeFlatpickr(document.getElementById('endDateInput'), 'single', (date) => {
+                updateState('endDate', date);
+            }, true); // The last parameter indicates that this is for the end date
         }
-    },    
-
-    createDateInput(id, placeholder) {
+    },
+    
+    createDateInput(id, placeholder, defaultValue = '') {
         const input = document.createElement('input');
         input.type = 'text';
         input.id = id;
         input.placeholder = placeholder;
+        if (defaultValue) input.value = defaultValue; // Set default value if provided
         document.getElementById('datePickerContainer').appendChild(input);
     },
-
-    initializeFlatpickr(inputElement, mode) {
-        const startDate = new Date(appState.startDate);
-        const instance = flatpickr(inputElement, {
-            mode: mode,
+    
+    initializeFlatpickr(inputElement, mode, onChangeCallback, isEndDate = false) {
+        const config = {
             enableTime: false,
-            dateFormat: "D, M d Y",
-            defaultDate: startDate,
-            minDate: startDate,
-            onChange: function(selectedDates, dateStr, instance) {
+            dateFormat: "Y-m-d",
+            defaultDate: isEndDate ? null : new Date(appState.startDate), // Only set defaultDate for startDateInput
+            minDate: "today",
+            onChange: function(selectedDates) {
                 if (selectedDates.length > 0) {
-                    updateState('startDate', instance.formatDate(selectedDates[0], "Y-m-d"));
-                    if (mode === 'range' && selectedDates.length === 2) {
-                        const [start, end] = selectedDates;
-                        document.getElementById('startDateInput').value = instance.formatDate(start, "D, M d Y");
-                        document.getElementById('endDateInput').value = instance.formatDate(end, "D, M d Y");
-                        updateState('startDate', instance.formatDate(selectedDates[0], "Y-m-d"));
-                        if (!appState.oneWay && selectedDates.length === 2) {
-                            updateState('endDate', instance.formatDate(selectedDates[1], "Y-m-d"));
-                        } else if (!appState.oneWay) {
-                            updateState('endDate', null);
-                        }
-                    }
+                    const formattedDate = this.formatDate(selectedDates[0], "Y-m-d");
+                    onChangeCallback(formattedDate);
                 }
             },
-        });
+        };
+    
+        if (mode === 'range') {
+            config.mode = 'range';
+        }
+    
+        const instance = flatpickr(inputElement, config);
         this.flatpickrInstances.push(instance);
-    },    
+    },       
 
     destroyFlatpickrInstances() {
         this.flatpickrInstances.forEach(instance => instance.destroy());
