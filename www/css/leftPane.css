@@ -130,26 +130,6 @@
   }
 }
 
-/*
-
-#startDate {
-  width: 100%;
-}
-
-.date-picker-container input[type="date"] {
-  background-color: #333;
-  color: #6c6a6a;
-  border: 1px solid #555;
-  padding: 5px;
-  border-radius: 4px;
-}
-
-.date-picker-container input[type="date"]:focus {
-  outline: none;
-  border-color: #777;
-}
-*/
-
 .travelers-icon-label {
   background: url('../assets/person.svg') no-repeat center;
   width: 16px;
