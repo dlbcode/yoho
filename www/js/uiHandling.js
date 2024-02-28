@@ -91,8 +91,8 @@ const uiHandling = {
   },  
 
   initTripButtons: function() {
-    const addButton = document.getElementById('addBtn'); 
-    addButton.addEventListener('click', this.handleAddButtonClick.bind(this));
+    const addButton = document.getElementById('addBtn');
+    addButton.addEventListener('click', () => this.handleAddButtonClick());
     this.toggleTripButtonsVisibility(false);
   },
 
@@ -100,6 +100,24 @@ const uiHandling = {
     document.getElementById('tripButtons').style.display =
       appState.waypoints.length > 1 && appState.oneWay ? 'flex' : 'none';
       addBtn.focus();
+  },
+
+  handleAddButtonClick: function() {
+    const lastWaypoint = appState.waypoints[appState.waypoints.length - 1];
+    updateState('addWaypoint', lastWaypoint);
+    const newRouteNumber = Math.ceil(appState.waypoints.length / 2);
+  },
+
+  setFocusToNextUnsetInput: function() {
+    const waypointInputs = document.querySelectorAll('.airport-selection input[type="text"]');
+    requestAnimationFrame(() => {
+        for (let input of waypointInputs) {
+            if (!input.value) {
+                input.focus();
+                break;
+            }
+        }
+    });
   },
 
   updateTripTypeDropdownBasedOnAppState: function() {
