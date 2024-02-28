@@ -317,11 +317,11 @@ document.addEventListener('stateChange', function(event) {
         appState.waypoints.splice(2);
         updateState('updateWaypoints', appState.waypoints);
         // Remove all route divs except the first one
-        const routeDivs = document.querySelectorAll('.route-container');
+        let routeDivs = document.querySelectorAll('.route-container');
         for (let i = 1; i < routeDivs.length; i++) {
             routeDivs[i].remove();
         }
-        buildRouteDivs(1);
+        buildRouteDivs();
     }
 });
 
