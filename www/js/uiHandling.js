@@ -221,6 +221,10 @@ document.addEventListener('stateChange', function(event) {
     console.log('oneWay stateChange:', event.detail.value);
       uiHandling.updateTripTypeDropdownBasedOnAppState();
   }
+
+  if (event.detail.key === 'oneWay') {
+    uiHandling.toggleTripButtonsVisibility();
+  }
 });
 
 document.addEventListener('DOMContentLoaded', () => {
