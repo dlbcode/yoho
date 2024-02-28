@@ -309,4 +309,20 @@ const routeHandling = {
     },
 }
 
+document.addEventListener('stateChange', function(event) {
+    if (event.detail.key === 'oneWay' && event.detail.value === true) {
+        buildRouteDivs(1);
+    } else if (event.detail.value === false) {
+        // Remove all waypoints except the first two
+        appState.waypoints.splice(2);
+        updateState('updateWaypoints', appState.waypoints);
+        // Remove all route divs except the first one
+        const routeDivs = document.querySelectorAll('.route-container');
+        for (let i = 1; i < routeDivs.length; i++) {
+            routeDivs[i].remove();
+        }
+        buildRouteDivs(1);
+    }
+});
+
 export { routeHandling }
