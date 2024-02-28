@@ -27,7 +27,7 @@ const uiHandling = {
   },  
 
   initTripTypeDropdown: function() {
-    console.log('oneWay:', appState.oneWay);
+    console.log('iniTripTypeDropdown - oneWay:', appState.oneWay);
     const dropdownBtn = document.getElementById('tripTypeDropdownBtn');
     const dropdown = document.getElementById('tripTypeDropdown');
 
@@ -124,7 +124,10 @@ const uiHandling = {
     const tripTypeDropdownBtn = document.getElementById('tripTypeDropdownBtn');
     const tripTypeDropdown = document.getElementById('tripTypeDropdown');
 
+    document.addEventListener('routesArrayUpdated', this.handleStateChange.bind(this));
+
     // Update button text based on appState.oneWay
+    console.log('updateTripTypeDropdownBasedOnAppState - oneWay:', appState.oneWay);
     tripTypeDropdownBtn.innerHTML = appState.oneWay ? 'One way <span class="icon-dropdown"></span>' : 'Round trip <span class="icon-dropdown"></span>';
 
     // Ensure the dropdown reflects the opposite option to allow toggling
@@ -218,12 +221,9 @@ const uiHandling = {
 
 document.addEventListener('stateChange', function(event) {
   if (event.detail.key === 'oneWay') {
-    console.log('oneWay stateChange:', event.detail.value);
-      uiHandling.updateTripTypeDropdownBasedOnAppState();
-  }
-
-  if (event.detail.key === 'oneWay') {
+    uiHandling.updateTripTypeDropdownBasedOnAppState();
     uiHandling.toggleTripButtonsVisibility();
+    
   }
 });
 
