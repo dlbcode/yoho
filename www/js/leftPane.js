@@ -20,19 +20,19 @@ const leftPane = {
         // Clear existing date pickers
         this.destroyFlatpickrInstances();
         document.getElementById('datePickerContainer').innerHTML = ''; // Reset the container
-
+    
         if (appState.oneWay) {
-            // If oneWay is true, only create one input field
-            this.createDateInput('flatpickrInput', 'Select date');
-            this.initializeFlatpickr(document.getElementById('flatpickrInput'), 'single');
+            // If oneWay is true, do not display the datePickerContainer at all
+            document.getElementById('datePickerContainer').style.display = 'none';
         } else {
-            // If oneWay is false, create two input fields for start and end dates
+            // If oneWay is false, proceed as before
+            document.getElementById('datePickerContainer').style.display = ''; // Make sure to reset display property
             this.createDateInput('startDateInput', 'Start date');
             this.createDateInput('endDateInput', 'End date');
             this.initializeFlatpickr(document.getElementById('startDateInput'), 'range');
             this.initializeFlatpickr(document.getElementById('endDateInput'), 'range');
         }
-    },
+    },    
 
     createDateInput(id, placeholder) {
         const input = document.createElement('input');
