@@ -61,36 +61,36 @@ const routeHandling = {
         if (appState.oneWay) {
             let dateButton = document.createElement('button');
             dateButton.className = 'date-select-button';
-            dateButton.textContent = routeNumber === 1 ? new Date(appState.startDate).getDate().toString() : 'Set Date';
-    
+            if (routeNumber === 1) {
+                const startDay = appState.startDate.split('-')[2];
+                dateButton.textContent = parseInt(startDay).toString();
+                appState.routeDates[routeNumber] = appState.startDate;
+            } else {
+                if (!appState.routeDates[routeNumber]) {
+                    appState.routeDates[routeNumber] = appState.routeDates[routeNumber - 1];
+                }
+                dateButton.textContent = parseInt(appState.routeDates[routeNumber].split('-')[2]).toString();
+            }
+
             dateButton.addEventListener('click', function() {
-                // Check if flatpickr is already initialized to avoid re-initialization
                 if (!this._flatpickr) {
                     let fp = flatpickr(this, {
                         enableTime: false,
                         dateFormat: "Y-m-d",
-                        defaultDate: routeNumber === 1 ? appState.startDate : new Date(),
+                        defaultDate: appState.routeDates[routeNumber],
                         minDate: "today",
                         onChange: (selectedDates) => {
-                            // Update the button text to the selected day
                             this.textContent = new Date(selectedDates[0]).getDate().toString();
-                            // Update appState.startDate for the first route
-                            if (routeNumber === 1) {
-                                updateState('startDate', selectedDates[0].toISOString().split('T')[0]);
-                            }
-                            // Additional logic to handle date changes for routes other than the first one
+                            updateState('updateRouteDate', { routeNumber: routeNumber, date: selectedDates[0].toISOString().split('T')[0] });
                         }
                     });
-                    // Open the flatpickr calendar immediately after initialization
                     fp.open();
                 } else {
-                    // If flatpickr is already initialized, just open it
                     this._flatpickr.open();
                 }
-            }, {once: true}); // Use the {once: true} option to ensure this setup runs only once per button
+            }, {once: true});
 
             routeDiv.insertBefore(dateButton, routeDiv.firstChild);
-        
         }
 
          // Create a swap button with a symbol

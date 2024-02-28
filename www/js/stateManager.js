@@ -18,6 +18,9 @@ const appState = {
     currentGroupID: 0,
     startDate: new Date().toISOString().split('T')[0], // Sets the current date
     endDate: null,
+    routeDates: {
+        1: new Date().toISOString().split('T')[0], // Set today's date for route number 1
+    },
 };
   
 function updateState(key, value) {
@@ -25,6 +28,12 @@ function updateState(key, value) {
         case 'routeDirection':
             appState.routeDirection = value;
             updateUrlWithWaypoints();
+            break;
+
+        case 'updateRouteDate':
+            const { routeNumber, date } = value;
+            appState.routeDates[routeNumber] = date;
+            console.table(appState.routeDates);
             break;
             
         case 'updateWaypoint':
