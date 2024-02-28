@@ -27,7 +27,6 @@ const uiHandling = {
   },  
 
   initTripTypeDropdown: function() {
-    console.log('iniTripTypeDropdown - oneWay:', appState.oneWay);
     const dropdownBtn = document.getElementById('tripTypeDropdownBtn');
     const dropdown = document.getElementById('tripTypeDropdown');
     dropdownBtn.innerHTML = appState.oneWay ? 'One way <span class="icon-dropdown"></span>' : 'Round trip <span class="icon-dropdown"></span>';
@@ -114,10 +113,7 @@ const uiHandling = {
     const tripTypeDropdownBtn = document.getElementById('tripTypeDropdownBtn');
     const tripTypeDropdown = document.getElementById('tripTypeDropdown');
 
-    // Update button text based on appState.oneWay
     tripTypeDropdownBtn.innerHTML = appState.oneWay ? 'One way <span class="icon-dropdown"></span>' : 'Round trip <span class="icon-dropdown"></span>';
-    console.log ('tripTypeDropdownBtn should say: ', tripTypeDropdownBtn.innerHTML);
-    // Ensure the dropdown reflects the opposite option to allow toggling
     tripTypeDropdown.innerHTML = '';
     const oppositeOption = document.createElement('li');
     oppositeOption.textContent = appState.oneWay ? 'Round trip' : 'One way';
@@ -138,13 +134,12 @@ const uiHandling = {
         mapPane.classList.toggle('mapPane-expanded');
         adjustMapSize();
 
-        // Check if leftPane is hidden and adjust toggle button position and text accordingly
         if (leftPane.classList.contains('leftPane-hidden')) {
-            toggleBtn.style.left = '0px'; // Move button to the edge when leftPane is hidden
-            toggleBtn.textContent = '❯'; // Right arrow when leftPane is hidden
+            toggleBtn.style.left = '0px';
+            toggleBtn.textContent = '❯';
         } else {
-            toggleBtn.style.left = '170px'; // Original position when leftPane is visible
-            toggleBtn.textContent = '❮';  // Left arrow when leftPane is visible
+            toggleBtn.style.left = '170px';
+            toggleBtn.textContent = '❮';
         }
     });
   },
@@ -191,7 +186,6 @@ const uiHandling = {
         document.documentElement.removeEventListener('touchend', stopDrag, false);
     };
 
-    // Attach the startDrag function to both mousedown and touchstart events
     resizeHandle.addEventListener('mousedown', startDrag, false);
     resizeHandle.addEventListener('touchstart', startDrag, { passive: false });
   },
