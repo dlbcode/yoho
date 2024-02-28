@@ -8,6 +8,7 @@ async function initMapFunctions() {
     const params = new URLSearchParams(window.location.search);
     const oneWayParam = params.get('oneWay');
     if (oneWayParam === 'false') {
+        console.log('map.js oneWayParam:', oneWayParam);
         updateState('oneWay', 'false');
     }
     const waypointParam = params.get('waypoints');

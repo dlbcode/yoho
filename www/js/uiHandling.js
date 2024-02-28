@@ -27,8 +27,12 @@ const uiHandling = {
   },  
 
   initTripTypeDropdown: function() {
+    console.log('oneWay:', appState.oneWay);
     const dropdownBtn = document.getElementById('tripTypeDropdownBtn');
     const dropdown = document.getElementById('tripTypeDropdown');
+
+    // Set initial dropdown button text based on appState.oneWay
+    dropdownBtn.innerHTML = appState.oneWay ? 'One way <span class="icon-dropdown"></span>' : 'Round trip <span class="icon-dropdown"></span>';
 
     document.addEventListener('routesArrayUpdated', this.handleStateChange.bind(this));
 
@@ -98,21 +102,22 @@ const uiHandling = {
       addBtn.focus();
   },
 
-  handleAddButtonClick: function() {
-    const lastWaypoint = appState.waypoints[appState.waypoints.length - 1];
-    updateState('addWaypoint', lastWaypoint);
-    const newRouteNumber = Math.ceil(appState.waypoints.length / 2);
-  },
+  updateTripTypeDropdownBasedOnAppState: function() {
+    const tripTypeDropdownBtn = document.getElementById('tripTypeDropdownBtn');
+    const tripTypeDropdown = document.getElementById('tripTypeDropdown');
 
-  setFocusToNextUnsetInput: function() {
-    const waypointInputs = document.querySelectorAll('.airport-selection input[type="text"]');
-    requestAnimationFrame(() => {
-        for (let input of waypointInputs) {
-            if (!input.value) {
-                input.focus();
-                break;
-            }
-        }
+    // Update button text based on appState.oneWay
+    tripTypeDropdownBtn.innerHTML = appState.oneWay ? 'One way <span class="icon-dropdown"></span>' : 'Round trip <span class="icon-dropdown"></span>';
+
+    // Ensure the dropdown reflects the opposite option to allow toggling
+    tripTypeDropdown.innerHTML = '';
+    const oppositeOption = document.createElement('li');
+    oppositeOption.textContent = appState.oneWay ? 'Round trip' : 'One way';
+    tripTypeDropdown.appendChild(oppositeOption);
+
+    // Add click event listener to the newly added dropdown option
+    oppositeOption.addEventListener('click', function() {
+        updateState('oneWay', !appState.oneWay);
     });
   },
   
@@ -193,9 +198,17 @@ const uiHandling = {
   }
 }
 
+document.addEventListener('stateChange', function(event) {
+  if (event.detail.key === 'oneWay') {
+    console.log('oneWay stateChange:', event.detail.value);
+      uiHandling.updateTripTypeDropdownBasedOnAppState();
+  }
+});
+
 document.addEventListener('DOMContentLoaded', () => {
   uiHandling.initTravelersDropdown();
   uiHandling.initTripTypeDropdown();
+  uiHandling.updateTripTypeDropdownBasedOnAppState();
   uiHandling.initTogglePaneButton();
   uiHandling.initInfoPaneDragButton();
   uiHandling.hideDropdowns();
