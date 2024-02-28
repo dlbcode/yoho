@@ -3,13 +3,12 @@ import { updateState } from './stateManager.js';
 import { getPrice } from './getPrice.js';
 import { leftPane } from './leftPane.js';
 import { infoPane } from './infoPane.js';
+import { routeHandling } from './routeHandling.js';
 
 async function initMapFunctions() {
     const params = new URLSearchParams(window.location.search);
     const oneWayParam = params.get('oneWay');
-    if (oneWayParam === 'false') {
-        updateState('oneWay', oneWayParam === 'true');
-    }
+    updateState('oneWay', oneWayParam === 'true');
     const waypointParam = params.get('waypoints');
     if (waypointParam) {
         const waypointIatas = waypointParam.split(',').map(decodeURIComponent);
@@ -67,6 +66,7 @@ document.addEventListener('DOMContentLoaded', () => {
     getPrice.init();
     leftPane.init();
     infoPane.init();
+    routeHandling.init();
     adjustMapSize();
 });
 

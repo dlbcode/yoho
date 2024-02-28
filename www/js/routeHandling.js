@@ -295,7 +295,11 @@ const routeHandling = {
         pathDrawing.drawLines();
         routeList.updateEstPrice();
         document.dispatchEvent(new CustomEvent('routesArrayUpdated'));
-    }
+    },
+    
+    init: function() {
+        this.buildRouteDivs(1); // Dynamically create the first route div
+    },
 }
 
 export { routeHandling }
