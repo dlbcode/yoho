@@ -9,6 +9,9 @@ import { mapHandling } from './mapHandling.js';
 const routeHandling = {
 
     buildRouteDivs: function(routeNumber) {
+        if (!appState.oneWay && document.querySelectorAll('.route-container').length >= 1) {
+            return; // Exit the function if oneWay is false and a route div already exists
+        }
         const container = document.querySelector('.airport-selection');
         const routeDivId = `route${routeNumber}`;
         let routeDiv = document.createElement('div');
@@ -55,38 +58,40 @@ const routeHandling = {
         }
 
         // Create a date selection button
-        let dateButton = document.createElement('button');
-        dateButton.className = 'date-select-button';
-        dateButton.textContent = routeNumber === 1 ? new Date(appState.startDate).getDate().toString() : 'Set Date';
-
-        // Attach the event listener directly to the button
-        dateButton.addEventListener('click', function() {
-            // Check if flatpickr is already initialized to avoid re-initialization
-            if (!this._flatpickr) {
-                let fp = flatpickr(this, {
-                    enableTime: false,
-                    dateFormat: "Y-m-d",
-                    defaultDate: routeNumber === 1 ? appState.startDate : new Date(),
-                    minDate: "today",
-                    onChange: (selectedDates) => {
-                        // Update the button text to the selected day
-                        this.textContent = new Date(selectedDates[0]).getDate().toString();
-                        // Update appState.startDate for the first route
-                        if (routeNumber === 1) {
-                            updateState('startDate', selectedDates[0].toISOString().split('T')[0]);
+        if (appState.oneWay) {
+            let dateButton = document.createElement('button');
+            dateButton.className = 'date-select-button';
+            dateButton.textContent = routeNumber === 1 ? new Date(appState.startDate).getDate().toString() : 'Set Date';
+    
+            dateButton.addEventListener('click', function() {
+                // Check if flatpickr is already initialized to avoid re-initialization
+                if (!this._flatpickr) {
+                    let fp = flatpickr(this, {
+                        enableTime: false,
+                        dateFormat: "Y-m-d",
+                        defaultDate: routeNumber === 1 ? appState.startDate : new Date(),
+                        minDate: "today",
+                        onChange: (selectedDates) => {
+                            // Update the button text to the selected day
+                            this.textContent = new Date(selectedDates[0]).getDate().toString();
+                            // Update appState.startDate for the first route
+                            if (routeNumber === 1) {
+                                updateState('startDate', selectedDates[0].toISOString().split('T')[0]);
+                            }
+                            // Additional logic to handle date changes for routes other than the first one
                         }
-                        // Additional logic to handle date changes for routes other than the first one
-                    }
-                });
-                // Open the flatpickr calendar immediately after initialization
-                fp.open();
-            } else {
-                // If flatpickr is already initialized, just open it
-                this._flatpickr.open();
-            }
-        }, {once: true}); // Use the {once: true} option to ensure this setup runs only once per button
+                    });
+                    // Open the flatpickr calendar immediately after initialization
+                    fp.open();
+                } else {
+                    // If flatpickr is already initialized, just open it
+                    this._flatpickr.open();
+                }
+            }, {once: true}); // Use the {once: true} option to ensure this setup runs only once per button
 
-    routeDiv.insertBefore(dateButton, routeDiv.firstChild);
+            routeDiv.insertBefore(dateButton, routeDiv.firstChild);
+        
+        }
 
          // Create a swap button with a symbol
         let swapButton = document.createElement('button');
