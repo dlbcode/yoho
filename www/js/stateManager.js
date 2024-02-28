@@ -6,18 +6,17 @@ const appState = {
     oneWay: true,
     numTravelers: 1,
     routeDirection: defaultDirection,
+    startDate: null,
+    endDate: null,
     waypoints: [],
     routes: [],
     trips: [],
-    startDate: null,
     directRoutes: [],
     selectedRoutes: {},
     tripTableData: null,
     routeTablesData: {},
     currentView: 'trip',
     currentGroupID: 0,
-    startDate: new Date().toISOString().split('T')[0], // Sets the current date
-    endDate: null,
     routeDates: {
         1: new Date().toISOString().split('T')[0], // Set today's date for route number 1
     },
@@ -33,6 +32,7 @@ function updateState(key, value) {
         case 'updateRouteDate':
             const { routeNumber, date } = value;
             appState.routeDates[routeNumber] = date;
+            appState.startDate = appState.routeDates[1];
             console.table(appState.routeDates);
             break;
             

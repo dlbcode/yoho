@@ -61,26 +61,33 @@ const routeHandling = {
         if (appState.oneWay) {
             let dateButton = document.createElement('button');
             dateButton.className = 'date-select-button';
-            if (routeNumber === 1) {
-                const startDay = appState.startDate.split('-')[2];
-                dateButton.textContent = parseInt(startDay).toString();
-                appState.routeDates[routeNumber] = appState.startDate;
-            } else {
-                if (!appState.routeDates[routeNumber]) {
+
+            // Check if the date for the current route is defined; if not, use the previous route's date or today's date for route 1
+            if (!appState.routeDates[routeNumber]) {
+                if (routeNumber === 1) {
+                    // If it's the first route and not defined, initialize it with today's date
+                    appState.routeDates[routeNumber] = new Date().toISOString().split('T')[0];
+                } else {
+                    // For subsequent routes, default to the previous route's date
+                    // This assumes that the previous route's date is always set
                     appState.routeDates[routeNumber] = appState.routeDates[routeNumber - 1];
                 }
-                dateButton.textContent = parseInt(appState.routeDates[routeNumber].split('-')[2]).toString();
             }
+
+            // Now that we've ensured appState.routeDates[routeNumber] is defined, we can safely use it
+            dateButton.textContent = parseInt(appState.routeDates[routeNumber].split('-')[2]).toString();
 
             dateButton.addEventListener('click', function() {
                 if (!this._flatpickr) {
                     let fp = flatpickr(this, {
                         enableTime: false,
                         dateFormat: "Y-m-d",
-                        defaultDate: appState.routeDates[routeNumber],
+                        defaultDate: appState.routeDates[routeNumber], // Safely use the date from appState.routeDates
                         minDate: "today",
                         onChange: (selectedDates) => {
+                            // Update the button text to reflect the selected date
                             this.textContent = new Date(selectedDates[0]).getDate().toString();
+                            // Update the route date in appState
                             updateState('updateRouteDate', { routeNumber: routeNumber, date: selectedDates[0].toISOString().split('T')[0] });
                         }
                     });
