@@ -200,14 +200,6 @@ function updateSuggestions(inputId, airports, setSelectionMade) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    setupAutocompleteForField('waypoint1');
-    setupAutocompleteForField('waypoint2');
-
-    document.addEventListener('newWaypointField', (event) => {
-        setupAutocompleteForField(event.detail.fieldId);
-        document.getElementById(event.detail.fieldId).focus();
-    });
-
     document.addEventListener('airportSelected', (event) => {
         const { airport, fieldId } = event.detail;
         const waypointIndex = parseInt(fieldId.replace('waypoint', '')) - 1;
