@@ -124,22 +124,18 @@ const uiHandling = {
     const tripTypeDropdownBtn = document.getElementById('tripTypeDropdownBtn');
     const tripTypeDropdown = document.getElementById('tripTypeDropdown');
 
-    document.addEventListener('routesArrayUpdated', this.handleStateChange.bind(this));
-
     // Update button text based on appState.oneWay
-    console.log('updateTripTypeDropdownBasedOnAppState - oneWay:', appState.oneWay);
     tripTypeDropdownBtn.innerHTML = appState.oneWay ? 'One way <span class="icon-dropdown"></span>' : 'Round trip <span class="icon-dropdown"></span>';
-
+    console.log ('tripTypeDropdownBtn should say: ', tripTypeDropdownBtn.innerHTML);
     // Ensure the dropdown reflects the opposite option to allow toggling
     tripTypeDropdown.innerHTML = '';
     const oppositeOption = document.createElement('li');
     oppositeOption.textContent = appState.oneWay ? 'Round trip' : 'One way';
-    tripTypeDropdown.appendChild(oppositeOption);
 
-    // Add click event listener to the newly added dropdown option
-    oppositeOption.addEventListener('click', function() {
+    tripTypeDropdown.appendChild(oppositeOption);
+    oppositeOption.onclick = () => {
         updateState('oneWay', !appState.oneWay);
-    });
+    };
   },
   
   initTogglePaneButton: function() {
