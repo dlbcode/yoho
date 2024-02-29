@@ -110,6 +110,10 @@ function updateState(key, value) {
         case 'updateRouteDates':
             appState.routeDates = value;
             break;
+        
+        case 'changeView':
+            appState.currentView = value;
+            break;
     }
     document.dispatchEvent(new CustomEvent('stateChange', { detail: { key, value } }));
 }

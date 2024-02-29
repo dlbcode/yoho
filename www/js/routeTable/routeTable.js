@@ -172,6 +172,7 @@ function attachEventListeners(table, data, routeIndex) {
                     group: routeIndex // Assuming the routeIndex is used as the group identifier
                 }
             });
+            updateState('changeView', 'selectedRoute');
         });
 
         highlightSelectedRowForRouteIndex(routeIndex);
