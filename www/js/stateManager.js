@@ -130,6 +130,34 @@ function updateUrlWithWaypoints() {
         window.history.pushState({}, '', newUrl);
     }
 }
+
+function updateUrlWithRouteDates() {
+    const routeDates = Object.entries(appState.routeDates).map(([key, value]) => `${key}:${value}`).join(',');
+    const encodedRouteDates = encodeURIComponent(routeDates);
+
+    // Extract the current URL parameters except for routeDates
+    const params = new URLSearchParams(window.location.search);
+    params.delete('routeDates'); // Remove existing routeDates to replace with the updated ones
+    params.set('routeDates', encodedRouteDates); // Set updated routeDates
+
+    // Construct the new URL
+    const newUrl = `${window.location.pathname}?${params.toString()}`;
+    if (window.location.search !== newUrl) {
+        window.history.pushState({}, '', newUrl);
+    }
+}
+
+function parseRouteDatesFromUrl() {
+    const params = new URLSearchParams(window.location.search);
+    const routeDatesParam = params.get('routeDates');
+    if (routeDatesParam) {
+        const routeDatesPairs = routeDatesParam.split(',');
+        routeDatesPairs.forEach(pair => {
+            const [key, value] = pair.split(':');
+            appState.routeDates[key] = value;
+        });
+    }
+}
  
 export { appState, updateState };
   
