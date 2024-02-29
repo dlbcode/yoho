@@ -106,6 +106,10 @@ function updateState(key, value) {
         case 'endDate':
             appState.endDate = value;
             break;
+        
+        case 'updateRouteDates':
+            appState.routeDates = value;
+            break;
     }
     document.dispatchEvent(new CustomEvent('stateChange', { detail: { key, value } }));
 }

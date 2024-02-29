@@ -9,6 +9,11 @@ import { mapHandling } from './mapHandling.js';
 const routeHandling = {
 
     buildRouteDivs: function(routeNumber) {
+        console.log('appState.waypoints:', appState.waypoints);
+        console.log('appState.routes:', appState.routes);
+        console.log('appState.routeDates:', appState.routeDates);
+        console.log('appState.selectedRoutes:', appState.selectedRoutes);
+
         if (!appState.oneWay && document.querySelectorAll('.route-container').length >= 1) {
             return; // Exit the function if oneWay is false and a route div already exists
         }
@@ -191,6 +196,17 @@ const routeHandling = {
             appState.waypoints.splice(waypointsIndex, 2); // Remove 2 waypoints starting from the calculated index
             updateState('updateWaypoint', appState.waypoints); // Update the state to reflect the change
         }
+
+        // Remove the route date for the removed route
+        delete appState.routeDates[routeNumber];
+    
+        // Re-index routeDates to fill the gap left by the removed route
+        const newRouteDates = {};
+        Object.keys(appState.routeDates).forEach((key, index) => {
+            newRouteDates[index + 1] = appState.routeDates[key];
+        });
+        updateState('updateRouteDates', newRouteDates);
+
     
         // Additional logic to update the UI and application state as needed
         pathDrawing.clearLines();
@@ -312,13 +328,6 @@ document.addEventListener('stateChange', function(event) {
         for (let i = 1; i < routeDivs.length; i++) {
             routeDivs[i].remove();
         }
-    } else if (event.detail.key === 'oneWay' && event.detail.value === true) {
-        // remove and rebuild all route divs
-        let routeDivs = document.querySelectorAll('.route-container');
-        for (let i = 0; i < routeDivs.length; i++) {
-            routeDivs[i].remove();
-        }
-        routeHandling.buildRouteDivs(1);
     }
 });
 
