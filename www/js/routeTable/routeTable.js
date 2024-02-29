@@ -31,7 +31,6 @@ function buildRouteTable(routeIndex) {
   const destination = currentRoute.destinationAirport.iata_code;
   const routeNumber = (routeIndex + 1);
   const currentRouteDate = appState.routeDates[routeNumber];
-  console.log('currentRouteDate for routeNumber ' + routeNumber, currentRouteDate);
   const date = currentRouteDate ? currentRouteDate : appState.startDate;
 
 
@@ -135,6 +134,25 @@ function attachEventListeners(table, data, routeIndex) {
         const routeIds = routeIdString.split('|'); // Assuming multiple IDs are separated by '|'
         const fullFlightData = data[index]; // Assuming data[index] contains the full data for this route
 
+        // Determine if any route in the group is already selected and capture the group ID
+        let groupIdToRemove = null;
+        Object.keys(appState.selectedRoutes).forEach(key => {
+            const routeDetails = appState.selectedRoutes[key];
+            if (routeDetails.group === routeIndex) { // Check if the route belongs to the same group
+                groupIdToRemove = routeDetails.group;
+            }
+        });
+
+        // Remove all selected routes with that group ID before adding new ones
+        if (groupIdToRemove !== null) {
+            Object.keys(appState.selectedRoutes).forEach(key => {
+                if (appState.selectedRoutes[key].group === groupIdToRemove) {
+                    updateState('removeSelectedRoute', parseInt(key));
+                }
+            });
+        }
+
+        // Add the new selected route after removing the old ones
         routeIds.forEach((id, idx) => {
             const currentRouteIndex = routeIndex + idx;
             const displayData = {
@@ -147,11 +165,7 @@ function attachEventListeners(table, data, routeIndex) {
                 deep_link: fullFlightData.deep_link
             };
 
-            // Check if this specific route ID is already selected
-            if (appState.selectedRoutes[currentRouteIndex] && appState.selectedRoutes[currentRouteIndex].id === id) {
-              updateState('removeSelectedRoute', currentRouteIndex);
-            } else {
-              updateState('updateSelectedRoute', {
+            updateState('updateSelectedRoute', {
                 routeIndex: currentRouteIndex,
                 routeDetails: {
                     id: id,
@@ -159,10 +173,10 @@ function attachEventListeners(table, data, routeIndex) {
                     displayData: displayData,
                     group: routeIndex // Use the routeIndex as the group identifier
                 }
-              });
-            }
+            });
         });
 
+        console.log("AFTER: appState.selectedRoutes", appState.selectedRoutes);
         highlightSelectedRowForRouteIndex(routeIndex);
     });
   });

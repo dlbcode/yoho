@@ -19,7 +19,7 @@ const infoPane = {
   handleStateChange(event) {
     this.updateRouteButtons();
     if (event.detail.key === 'updateSelectedRoute' || event.detail.key === 'removeSelectedRoute' || event.detail.key === 'changeView' || event.detail.key === 'updateRoutes' || event.detail.key === 'updateRoutes') {
-      appState.currentView = 'trip';
+      //appState.currentView = 'trip';
       this.displayContent();
     }
   },  
@@ -27,7 +27,7 @@ const infoPane = {
   displayContent() {
     const infoPaneContent = document.getElementById('infoPaneContent');
     infoPaneContent.innerHTML = '';
-
+    
     if (appState.currentView === 'trip') {
       const selectedRoutesArray = Object.values(appState.selectedRoutes);
       this.updateTripTable(selectedRoutesArray);
