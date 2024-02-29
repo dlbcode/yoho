@@ -61,17 +61,18 @@ const routeHandling = {
         if (appState.oneWay) {
             let dateButton = document.createElement('button');
             dateButton.className = 'date-select-button';
-        
+
             if (!appState.routeDates[routeNumber]) {
                 if (routeNumber === 1) {
                     appState.routeDates[routeNumber] = new Date().toISOString().split('T')[0];
                 } else {
+                    // Ensure the date for the new route is at least the date of the previous route
                     appState.routeDates[routeNumber] = appState.routeDates[routeNumber - 1];
                 }
             }
-        
+
             dateButton.textContent = parseInt(appState.routeDates[routeNumber].split('-')[2]).toString();
-        
+
             dateButton.addEventListener('click', function() {
                 if (!this._flatpickr) {
                     let fp = flatpickr(this, {
@@ -89,6 +90,7 @@ const routeHandling = {
                     this._flatpickr.open();
                 }
             }, {once: true});
+
         
             routeDiv.insertBefore(dateButton, routeDiv.firstChild);
         }        
