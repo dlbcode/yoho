@@ -9,11 +9,6 @@ import { mapHandling } from './mapHandling.js';
 const routeHandling = {
 
     buildRouteDivs: function(routeNumber) {
-        console.log('appState.waypoints:', appState.waypoints);
-        console.log('appState.routes:', appState.routes);
-        console.log('appState.routeDates:', appState.routeDates);
-        console.log('appState.selectedRoutes:', appState.selectedRoutes);
-
         if (!appState.oneWay && document.querySelectorAll('.route-container').length >= 1) {
             return; // Exit the function if oneWay is false and a route div already exists
         }
