@@ -26,26 +26,26 @@ function updateState(key, value) {
     switch (key) {
         case 'routeDirection':
             appState.routeDirection = value;
-            updateUrlWithWaypoints();
+            updateUrl();
             break;
 
         case 'updateRouteDate':
             const { routeNumber, date } = value;
             appState.routeDates[routeNumber] = date;
             appState.startDate = appState.routeDates[1];
-            updateUrlWithRouteDates();
+            updateUrl();
             break;
             
         case 'updateWaypoint':
             if (value.index >= 0 && value.index < appState.waypoints.length) {
             appState.waypoints[value.index] = {...appState.waypoints[value.index], ...value.data};
             }
-            updateUrlWithWaypoints();
+            updateUrl();
             break;
 
         case 'oneWay':
             appState.oneWay = value;
-            updateUrlWithWaypoints();
+            updateUrl();
             break;
   
         case 'addWaypoint':
@@ -54,18 +54,18 @@ function updateState(key, value) {
             } else {
             appState.waypoints.push(value);
             }
-            updateUrlWithWaypoints();
+            updateUrl();
             break;
     
         case 'removeWaypoint':
             appState.waypoints.splice(value, 1);
-            updateUrlWithWaypoints();
+            updateUrl();
             break;
 
         case 'removeWaypoints':
             let startIndex = (value.routeNumber - 1) * 2;
             appState.waypoints.splice(startIndex, 2);
-            updateUrlWithWaypoints();
+            updateUrl();
             break;
     
         case 'addRoute':
@@ -83,7 +83,8 @@ function updateState(key, value) {
             appState.routes = [];
             appState.trips = [];
             appState.selectedRoutes = {};
-            updateUrlWithWaypoints();
+            appState.routeDates = {};
+            updateUrl();
             break;
 
         case 'updateSelectedRoute':
@@ -93,6 +94,8 @@ function updateState(key, value) {
 
         case 'removeSelectedRoute':
             delete appState.selectedRoutes[value];
+            delete appState.routeDates[value];
+            updateUrl();
             break;
 
         default:
@@ -109,6 +112,7 @@ function updateState(key, value) {
         
         case 'updateRouteDates':
             appState.routeDates = value;
+            updateUrl();
             break;
         
         case 'changeView':
@@ -118,26 +122,30 @@ function updateState(key, value) {
     document.dispatchEvent(new CustomEvent('stateChange', { detail: { key, value } }));
 }
   
-function updateUrlWithWaypoints() {
-    const waypointIatas = appState.waypoints.map(wp => wp.iata_code);
-    const encodedUri = encodeURIComponent(waypointIatas.join(','));
-    const routeDirection = appState.routeDirection;
-    const encodedRouteDirection = encodeURIComponent(routeDirection);
-    const encodedOneWay = encodeURIComponent(appState.oneWay);
-
-    const newUrl = `?oneWay=${encodedOneWay}&direction=${encodedRouteDirection}&waypoints=${encodedUri}`;
-    if (window.location.search !== newUrl) {
-        window.history.pushState({}, '', newUrl);
-    }
-}
-
-function updateUrlWithRouteDates() {
-    const routeDates = Object.entries(appState.routeDates).map(([key, value]) => `${key}:${value}`).join(',');
-    // Directly set the routeDates parameter without manually encoding it
+function updateUrl() {
     const params = new URLSearchParams(window.location.search);
-    params.set('dates', routeDates); // URLSearchParams handles encoding
 
-    // Construct the new URL with properly encoded parameters
+    // Update waypoints
+    const waypointIatas = appState.waypoints.map(wp => wp.iata_code);
+    if (waypointIatas.length > 0) {
+        params.set('waypoints', waypointIatas.join(','));
+    } else {
+        params.delete('waypoints');
+    }
+
+    // Update route dates
+    const dates = Object.entries(appState.routeDates).map(([key, value]) => `${key}:${value}`).join(',');
+    if (dates.length > 0) {
+        params.set('dates', dates);
+    } else {
+        params.delete('dates');
+    }
+
+    // Update other parameters as needed
+    params.set('oneWay', appState.oneWay);
+    params.set('direction', appState.routeDirection);
+
+    // Construct the new URL
     const newUrl = `${window.location.pathname}?${params.toString()}`;
     if (window.location.search !== newUrl) {
         window.history.pushState({}, '', newUrl);
