@@ -75,6 +75,14 @@ const leftPane = {
         this.flatpickrInstances.forEach(instance => instance.destroy());
         this.flatpickrInstances = [];
     },
+
+    refreshFlatpickrInstances: function() {
+        leftPane.flatpickrInstances.forEach((instance, index) => {
+            const routeNumber = index + 1; // Assuming routeNumber corresponds to index + 1
+            const newMinDate = routeNumber === 1 ? "today" : appState.routeDates[routeNumber - 1];
+            instance.set('minDate', newMinDate);
+        });
+    }    
 };
 
 document.addEventListener('DOMContentLoaded', function() {

@@ -5,6 +5,7 @@ import { flightMap } from './flightMap.js';
 import { pathDrawing } from './pathDrawing.js';
 import { routeList } from './routeList.js';
 import { mapHandling } from './mapHandling.js';
+import { leftPane } from './leftPane.js';
 
 const routeHandling = {
 
@@ -99,6 +100,8 @@ const routeHandling = {
                                     routeHandling.updateDateButtonsDisplay();
                                 }
                             }
+                            updateState('updateRouteDate', { routeNumber: routeNumber, date: newDate.toISOString().split('T')[0] });
+                            leftPane.refreshFlatpickrInstances();
                         }
                     });
                     fp.open();
