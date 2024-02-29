@@ -131,8 +131,8 @@ function attachEventListeners(table, data, routeIndex) {
   document.querySelectorAll('.route-info-table tbody tr').forEach((row, index) => {
     row.addEventListener('click', function() {
         const routeIdString = this.getAttribute('data-route-id');
-        const routeIds = routeIdString.split('|'); // Assuming multiple IDs are separated by '|'
-        const fullFlightData = data[index]; // Assuming data[index] contains the full data for this route
+        const routeIds = routeIdString.split('|');
+        const fullFlightData = data[index];
 
         // Determine the group ID of the newly selected route
         let newRouteGroupId = null;
