@@ -61,33 +61,26 @@ const routeHandling = {
         if (appState.oneWay) {
             let dateButton = document.createElement('button');
             dateButton.className = 'date-select-button';
-
-            // Check if the date for the current route is defined; if not, use the previous route's date or today's date for route 1
+        
             if (!appState.routeDates[routeNumber]) {
                 if (routeNumber === 1) {
-                    // If it's the first route and not defined, initialize it with today's date
                     appState.routeDates[routeNumber] = new Date().toISOString().split('T')[0];
                 } else {
-                    // For subsequent routes, default to the previous route's date
-                    // This assumes that the previous route's date is always set
                     appState.routeDates[routeNumber] = appState.routeDates[routeNumber - 1];
                 }
             }
-
-            // Now that we've ensured appState.routeDates[routeNumber] is defined, we can safely use it
+        
             dateButton.textContent = parseInt(appState.routeDates[routeNumber].split('-')[2]).toString();
-
+        
             dateButton.addEventListener('click', function() {
                 if (!this._flatpickr) {
                     let fp = flatpickr(this, {
                         enableTime: false,
                         dateFormat: "Y-m-d",
-                        defaultDate: appState.routeDates[routeNumber], // Safely use the date from appState.routeDates
-                        minDate: "today",
+                        defaultDate: appState.routeDates[routeNumber], // Use the date from appState.routeDates
+                        minDate: routeNumber === 1 ? "today" : appState.routeDates[routeNumber - 1], // Set minDate to previous route's date
                         onChange: (selectedDates) => {
-                            // Update the button text to reflect the selected date
                             this.textContent = new Date(selectedDates[0]).getDate().toString();
-                            // Update the route date in appState
                             updateState('updateRouteDate', { routeNumber: routeNumber, date: selectedDates[0].toISOString().split('T')[0] });
                         }
                     });
@@ -96,9 +89,9 @@ const routeHandling = {
                     this._flatpickr.open();
                 }
             }, {once: true});
-
+        
             routeDiv.insertBefore(dateButton, routeDiv.firstChild);
-        }
+        }        
 
          // Create a swap button with a symbol
         let swapButton = document.createElement('button');
