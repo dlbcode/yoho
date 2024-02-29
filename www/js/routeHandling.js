@@ -196,7 +196,7 @@ const routeHandling = {
         let waypointsIndex = (routeNumber - 1) * 2;
         if (appState.waypoints.length > waypointsIndex) {
             appState.waypoints.splice(waypointsIndex, 2); // Remove 2 waypoints starting from the calculated index
-            updateState('updateWaypoints', appState.waypoints); // Update the state to reflect the change
+            updateState('updateWaypoint', appState.waypoints); // Update the state to reflect the change
         }
     
         // Additional logic to update the UI and application state as needed
@@ -313,12 +313,19 @@ document.addEventListener('stateChange', function(event) {
     if (event.detail.key === 'oneWay' && event.detail.value === false) {
         // Remove all waypoints except the first two
         appState.waypoints.splice(2);
-        updateState('updateWaypoints', appState.waypoints);
+        updateState('updateWaypoint', appState.waypoints);
         // Remove all route divs except the first one
         let routeDivs = document.querySelectorAll('.route-container');
         for (let i = 1; i < routeDivs.length; i++) {
             routeDivs[i].remove();
         }
+    } else if (event.detail.key === 'oneWay' && event.detail.value === true) {
+        // remove and rebuild all route divs
+        let routeDivs = document.querySelectorAll('.route-container');
+        for (let i = 0; i < routeDivs.length; i++) {
+            routeDivs[i].remove();
+        }
+        routeHandling.buildRouteDivs(1);
     }
 });
 

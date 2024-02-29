@@ -70,7 +70,7 @@ const uiHandling = {
 
   updateTripTypeContainerVisibility: function() {
     const tripTypeDropdownBtn = document.getElementById('tripTypeDropdownBtn');
-    if (appState.routes.length > 1) {
+    if (appState.routes.length > 1 && (!appState.oneWay)) {
       updateState('oneWay', true);
       tripTypeDropdownBtn.disabled = true;
       tripTypeDropdownBtn.innerHTML = "One way <span class='icon-dropdown'></span";
