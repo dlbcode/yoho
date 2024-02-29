@@ -150,6 +150,8 @@ function updateUrl() {
     if (window.location.search !== newUrl) {
         window.history.pushState({}, '', newUrl);
     }
+    // In stateManager.js, after updating routeDates from URL
+    document.dispatchEvent(new CustomEvent('routeDatesUpdated'));
 }
 
 export { appState, updateState };

@@ -355,4 +355,8 @@ document.addEventListener('stateChange', function(event) {
     }
 });
 
+document.addEventListener('routeDatesUpdated', function() {
+    routeHandling.updateDateButtonsDisplay();
+});
+
 export { routeHandling }
