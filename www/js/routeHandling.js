@@ -81,16 +81,31 @@ const routeHandling = {
                         defaultDate: appState.routeDates[routeNumber], // Use the date from appState.routeDates
                         minDate: routeNumber === 1 ? "today" : appState.routeDates[routeNumber - 1], // Set minDate to previous route's date
                         onChange: (selectedDates) => {
-                            this.textContent = new Date(selectedDates[0]).getDate().toString();
-                            updateState('updateRouteDate', { routeNumber: routeNumber, date: selectedDates[0].toISOString().split('T')[0] });
+                            const newDate = selectedDates[0];
+                            this.textContent = new Date(newDate).getDate().toString();
+                            const oldDate = appState.routeDates[routeNumber] ? new Date(appState.routeDates[routeNumber]) : new Date();
+                            const dayDifference = (newDate - oldDate) / (1000 * 3600 * 24);
+            
+                            // Update the date for the current route
+                            updateState('updateRouteDate', { routeNumber: routeNumber, date: newDate.toISOString().split('T')[0] });
+            
+                            // Adjust dates for subsequent routes
+                            for (let i = routeNumber + 1; i <= Object.keys(appState.routeDates).length; i++) {
+                                console.log(appState.routeDates[i]);
+                                if (appState.routeDates[i]) {
+                                    let subsequentDate = new Date(appState.routeDates[i]);
+                                    subsequentDate.setDate(subsequentDate.getDate() + dayDifference);
+                                    updateState('updateRouteDate', { routeNumber: i, date: subsequentDate.toISOString().split('T')[0] });
+                                    routeHandling.updateDateButtonsDisplay();
+                                }
+                            }
                         }
                     });
                     fp.open();
                 } else {
                     this._flatpickr.open();
                 }
-            }, {once: true});
-
+            }, {once: true});            
         
             routeDiv.insertBefore(dateButton, routeDiv.firstChild);
         }        
@@ -151,6 +166,19 @@ const routeHandling = {
         uiHandling.toggleTripButtonsVisibility();
         uiHandling.getPriceButton();
     },
+
+    updateDateButtonsDisplay: function() {
+        document.querySelectorAll('.date-select-button').forEach((button, index) => {
+            const routeNumber = index + 1;
+            if (appState.routeDates[routeNumber]) {
+                console.log('setting date button text');
+                const date = appState.routeDates[routeNumber];
+                console.log('date: ',date);
+                button.textContent = parseInt(date.split('-')[2]).toString();
+                console.log('button text: ',button.textContent);
+            }
+        });
+    },    
     
     handleSwapButtonClick: function(routeNumber) {
         let routeDiv = document.getElementById(`route${routeNumber}`);
