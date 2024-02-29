@@ -134,25 +134,23 @@ function attachEventListeners(table, data, routeIndex) {
         const routeIds = routeIdString.split('|'); // Assuming multiple IDs are separated by '|'
         const fullFlightData = data[index]; // Assuming data[index] contains the full data for this route
 
-        // Determine if any route in the group is already selected and capture the group ID
-        let groupIdToRemove = null;
-        Object.keys(appState.selectedRoutes).forEach(key => {
-            const routeDetails = appState.selectedRoutes[key];
-            if (routeDetails.group === routeIndex) { // Check if the route belongs to the same group
-                groupIdToRemove = routeDetails.group;
-            }
-        });
+        // Determine the group ID of the newly selected route
+        let newRouteGroupId = null;
+        const routeDetails = appState.selectedRoutes[routeIndex];
+        if (routeDetails) {
+            newRouteGroupId = routeDetails.group;
+        }
 
-        // Remove all selected routes with that group ID before adding new ones
-        if (groupIdToRemove !== null) {
+        // Remove all selected routes that have the same group ID
+        if (newRouteGroupId !== null) {
             Object.keys(appState.selectedRoutes).forEach(key => {
-                if (appState.selectedRoutes[key].group === groupIdToRemove) {
+                if (appState.selectedRoutes[key].group === newRouteGroupId) {
                     updateState('removeSelectedRoute', parseInt(key));
                 }
             });
         }
 
-        // Add the new selected route after removing the old ones
+        // Add the new selected route(s)
         routeIds.forEach((id, idx) => {
             const currentRouteIndex = routeIndex + idx;
             const displayData = {
@@ -171,12 +169,11 @@ function attachEventListeners(table, data, routeIndex) {
                     id: id,
                     fullData: fullFlightData,
                     displayData: displayData,
-                    group: routeIndex // Use the routeIndex as the group identifier
+                    group: routeIndex // Assuming the routeIndex is used as the group identifier
                 }
             });
         });
 
-        console.log("AFTER: appState.selectedRoutes", appState.selectedRoutes);
         highlightSelectedRowForRouteIndex(routeIndex);
     });
   });
