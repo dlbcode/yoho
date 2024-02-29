@@ -29,7 +29,11 @@ function buildRouteTable(routeIndex) {
 
   const origin = currentRoute.originAirport.iata_code;
   const destination = currentRoute.destinationAirport.iata_code;
-  const date = "2024-03-15";
+  const routeNumber = (routeIndex + 1);
+  const currentRouteDate = appState.routeDates[routeNumber];
+  console.log('currentRouteDate for routeNumber ' + routeNumber, currentRouteDate);
+  const date = currentRouteDate ? currentRouteDate : appState.startDate;
+
 
   fetch(`https://yonderhop.com/api/yhoneway?origin=${origin}&destination=${destination}&date=${date}`)
     .then(response => {

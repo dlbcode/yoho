@@ -8,18 +8,22 @@ module.exports = function(app, axios, db) {
 
     const flightKey = `${origin}-${destination}`;
     const cacheCollection = db.collection('cache');
-    const directRoutesCollection = db.collection('directRoutes');
     
     // Check cache first
     try {
       const cachedData = await cacheCollection.findOne({ flight: flightKey });
       if (cachedData && cachedData.queriedAt) {
-        const hoursDiff = (new Date() - new Date(cachedData.queriedAt)) / (1000 * 60 * 60);
-        if (hoursDiff <= 24) {
-          // Data is fresh, return cached data
-          return res.json(cachedData.data);
+        // Convert queriedAt to 'yyyy-mm-dd' format for comparison
+        const cachedDate = cachedData.queriedAt.toISOString().split('T')[0];
+        
+        if (cachedDate === date) {
+          const hoursDiff = (new Date() - cachedData.queriedAt) / (1000 * 60 * 60);
+          if (hoursDiff <= 24) {
+            // Data is fresh and for the correct date, return cached data
+            return res.json(cachedData.data);
+          }
+          // Data is older than 24 hours or not for the requested date, proceed to fetch new data
         }
-        // Data is older than 24 hours, proceed to fetch new data
       }
     } catch (error) {
       console.error("Error accessing cache:", error);
