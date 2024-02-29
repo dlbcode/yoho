@@ -33,7 +33,7 @@ function updateState(key, value) {
             const { routeNumber, date } = value;
             appState.routeDates[routeNumber] = date;
             appState.startDate = appState.routeDates[1];
-            console.table(appState.routeDates);
+            updateUrlWithRouteDates();
             break;
             
         case 'updateWaypoint':
@@ -133,31 +133,16 @@ function updateUrlWithWaypoints() {
 
 function updateUrlWithRouteDates() {
     const routeDates = Object.entries(appState.routeDates).map(([key, value]) => `${key}:${value}`).join(',');
-    const encodedRouteDates = encodeURIComponent(routeDates);
-
-    // Extract the current URL parameters except for routeDates
+    // Directly set the routeDates parameter without manually encoding it
     const params = new URLSearchParams(window.location.search);
-    params.delete('routeDates'); // Remove existing routeDates to replace with the updated ones
-    params.set('routeDates', encodedRouteDates); // Set updated routeDates
+    params.set('dates', routeDates); // URLSearchParams handles encoding
 
-    // Construct the new URL
+    // Construct the new URL with properly encoded parameters
     const newUrl = `${window.location.pathname}?${params.toString()}`;
     if (window.location.search !== newUrl) {
         window.history.pushState({}, '', newUrl);
     }
 }
 
-function parseRouteDatesFromUrl() {
-    const params = new URLSearchParams(window.location.search);
-    const routeDatesParam = params.get('routeDates');
-    if (routeDatesParam) {
-        const routeDatesPairs = routeDatesParam.split(',');
-        routeDatesPairs.forEach(pair => {
-            const [key, value] = pair.split(':');
-            appState.routeDates[key] = value;
-        });
-    }
-}
- 
 export { appState, updateState };
   
