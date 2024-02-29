@@ -30,13 +30,10 @@ async function initMapFunctions() {
     const routeDatesParam = params.get('dates');
     if (routeDatesParam) {
         const datePairs = routeDatesParam.split(',');
-        console.log('datePairs:', datePairs);
         datePairs.forEach(pair => {
             const [key, value] = pair.split(':');
             const routeNumber = parseInt(key, 10);
             const date = value;
-            console.log('routeNumber:', routeNumber, 'date:', date);
-            // Use updateState to ensure all changes go through the same logic
             updateState('updateRouteDate', { routeNumber: routeNumber, date: date });
         });
     }

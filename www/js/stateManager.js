@@ -29,12 +29,23 @@ function updateState(key, value) {
             updateUrl();
             break;
 
-        case 'updateRouteDate':
+            case 'updateRouteDate':
             const { routeNumber, date } = value;
             appState.routeDates[routeNumber] = date;
-            appState.startDate = appState.routeDates[1];
+            let groupToRemove = appState.selectedRoutes[routeNumber - 1]?.group;
+            let keysToDelete = [];
+            if (groupToRemove !== null) {
+                for (let route in appState.selectedRoutes) {
+                    if (appState.selectedRoutes[route].group === groupToRemove) {
+                        keysToDelete.push(route);
+                    }
+                }
+            }
+            keysToDelete.forEach(key => {
+                delete appState.selectedRoutes[key];
+            });
             updateUrl();
-            break;
+            break;   
             
         case 'updateWaypoint':
             if (value.index >= 0 && value.index < appState.waypoints.length) {
