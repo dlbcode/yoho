@@ -92,7 +92,6 @@ const routeHandling = {
             
                             // Adjust dates for subsequent routes
                             for (let i = routeNumber + 1; i <= Object.keys(appState.routeDates).length; i++) {
-                                console.log(appState.routeDates[i]);
                                 if (appState.routeDates[i]) {
                                     let subsequentDate = new Date(appState.routeDates[i]);
                                     subsequentDate.setDate(subsequentDate.getDate() + dayDifference);
@@ -174,11 +173,8 @@ const routeHandling = {
         document.querySelectorAll('.date-select-button').forEach((button, index) => {
             const routeNumber = index + 1;
             if (appState.routeDates[routeNumber]) {
-                console.log('setting date button text');
                 const date = appState.routeDates[routeNumber];
-                console.log('date: ',date);
                 button.textContent = parseInt(date.split('-')[2]).toString();
-                console.log('button text: ',button.textContent);
             }
         });
     },    
