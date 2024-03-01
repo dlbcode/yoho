@@ -56,6 +56,11 @@ function updateState(key, value) {
 
         case 'oneWay':
             appState.oneWay = value;
+            if (value) {
+                appState.waypoints = appState.waypoints.slice(0, 2);
+                appState.selectedRoutes = {};
+                appState.routeDates = {};
+            }
             updateUrl();
             break;
   

@@ -120,7 +120,7 @@ const uiHandling = {
 
     tripTypeDropdown.appendChild(oppositeOption);
     oppositeOption.onclick = () => {
-        updateState('oneWay', !appState.oneWay);
+        updateState('oneWay', false);
     };
   },
   
