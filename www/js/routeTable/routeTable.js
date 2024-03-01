@@ -32,12 +32,18 @@ function buildRouteTable(routeIndex) {
 
   const origin = currentRoute.originAirport.iata_code;
   const destination = currentRoute.destinationAirport.iata_code;
+  const returnDate = appState.endDate || appState.startDate;
   const routeNumber = (routeIndex + 1);
   const currentRouteDate = appState.routeDates[routeNumber];
-  const date = currentRouteDate ? currentRouteDate : appState.startDate;
+  const departureDate = appState.oneWay ? currentRouteDate : appState.startDate;
+  
+  let apiUrl = `https://yonderhop.com/api/${appState.oneWay ? 'yhoneway' : 'yhreturn'}?origin=${origin}&destination=${destination}&departureDate=${departureDate}`;
+  
+  if (!appState.oneWay) {
+    apiUrl += `&returnDate=${returnDate}`;
+  }
 
-
-  fetch(`https://yonderhop.com/api/yhoneway?origin=${origin}&destination=${destination}&date=${date}`)
+  fetch(apiUrl)
     .then(response => {
       if (!response.ok) {
         throw new Error(`Failed to fetch route data: ${response.statusText}`);

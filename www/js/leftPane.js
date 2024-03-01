@@ -17,28 +17,21 @@ const leftPane = {
     },
 
     initDatePicker() {
-        // Clear existing date pickers
         this.destroyFlatpickrInstances();
-        document.getElementById('datePickerContainer').innerHTML = ''; // Reset the container
+        document.getElementById('datePickerContainer').innerHTML = '';
     
-        if (appState.oneWay) {
-            document.getElementById('datePickerContainer').style.display = 'none';
-        } else {
+        if (!appState.oneWay) {
             document.getElementById('datePickerContainer').style.display = '';
-            this.createDateInput('startDateInput', 'Start date', new Date().toISOString().split('T')[0]); // Use today's date as default
-            this.createDateInput('endDateInput', 'End date'); // Placeholder "End date" is set in createDateInput function
+            // Prepare inputs in the container
+            this.createDateInput('startDateInput', 'Start date');
+            this.createDateInput('endDateInput', 'End date');
     
-            // Initialize flatpickr in range mode for startDateInput
-            this.initializeFlatpickr(document.getElementById('startDateInput'), 'range', (date) => {
-                // Callback function to handle date range selection
-            });
-    
-            // Add click event listener to endDateInput to trigger startDateInput's Flatpickr
-            document.getElementById('endDateInput').addEventListener('click', () => {
-                document.getElementById('startDateInput')._flatpickr.open();
-            });
+            // Setup Flatpickr
+            this.initializeFlatpickr(document.getElementById('startDateInput'), 'range', () => {});
+        } else {
+            document.getElementById('datePickerContainer').style.display = 'none';
         }
-    },    
+    },   
     
     // Adjust the createDateInput function if necessary to accommodate the range selection
     createDateInput(id, placeholder, defaultValue = '') {
@@ -50,7 +43,7 @@ const leftPane = {
         document.getElementById('datePickerContainer').appendChild(input);
     },
     
-    initializeFlatpickr(inputElement, mode, onChangeCallback) {
+    initializeFlatpickr(inputElement, mode) {
         const config = {
             enableTime: false,
             dateFormat: "Y-m-d", // Format for the actual input value, used for appState
