@@ -64,58 +64,56 @@ const routeHandling = {
         }
 
         // Create a date selection button
-        if (appState.oneWay) {
-            let dateButton = document.createElement('button');
-            dateButton.className = 'date-select-button';
+        let dateButton = document.createElement('button');
+        dateButton.className = 'date-select-button';
 
-            if (!appState.routeDates[routeNumber]) {
-                if (routeNumber === 1) {
-                    appState.routeDates[routeNumber] = new Date().toISOString().split('T')[0];
-                } else {
-                    // Ensure the date for the new route is at least the date of the previous route
-                    appState.routeDates[routeNumber] = appState.routeDates[routeNumber - 1];
-                }
+        if (!appState.routeDates[routeNumber]) {
+            if (routeNumber === 1) {
+                appState.routeDates[routeNumber] = new Date().toISOString().split('T')[0];
+            } else {
+                // Ensure the date for the new route is at least the date of the previous route
+                appState.routeDates[routeNumber] = appState.routeDates[routeNumber - 1];
             }
+        }
 
-            dateButton.textContent = parseInt(appState.routeDates[routeNumber].split('-')[2]).toString();
+        dateButton.textContent = parseInt(appState.routeDates[routeNumber].split('-')[2]).toString();
 
-            dateButton.addEventListener('click', function() {
-                if (!this._flatpickr) {
-                    let fp = flatpickr(this, {
-                        enableTime: false,
-                        dateFormat: "Y-m-d",
-                        defaultDate: appState.routeDates[routeNumber], // Use the date from appState.routeDates
-                        minDate: routeNumber === 1 ? "today" : appState.routeDates[routeNumber - 1], // Set minDate to previous route's date
-                        onChange: (selectedDates) => {
-                            const newDate = selectedDates[0];
-                            this.textContent = new Date(newDate).getDate().toString();
-                            const oldDate = appState.routeDates[routeNumber] ? new Date(appState.routeDates[routeNumber]) : new Date();
-                            const dayDifference = (newDate - oldDate) / (1000 * 3600 * 24);
-            
-                            // Update the date for the current route
-                            updateState('updateRouteDate', { routeNumber: routeNumber, date: newDate.toISOString().split('T')[0] });
-            
-                            // Adjust dates for subsequent routes
-                            for (let i = routeNumber + 1; i <= Object.keys(appState.routeDates).length; i++) {
-                                if (appState.routeDates[i]) {
-                                    let subsequentDate = new Date(appState.routeDates[i]);
-                                    subsequentDate.setDate(subsequentDate.getDate() + dayDifference);
-                                    updateState('updateRouteDate', { routeNumber: i, date: subsequentDate.toISOString().split('T')[0] });
-                                    routeHandling.updateDateButtonsDisplay();
-                                }
-                            }
-                            updateState('updateRouteDate', { routeNumber: routeNumber, date: newDate.toISOString().split('T')[0] });
-                            leftPane.refreshFlatpickrInstances();
-                        }
-                    });
-                    fp.open();
-                } else {
-                    this._flatpickr.open();
-                }
-            }, {once: true});            
+        dateButton.addEventListener('click', function() {
+            if (!this._flatpickr) {
+                let fp = flatpickr(this, {
+                    enableTime: false,
+                    dateFormat: "Y-m-d",
+                    defaultDate: appState.routeDates[routeNumber], // Use the date from appState.routeDates
+                    minDate: routeNumber === 1 ? "today" : appState.routeDates[routeNumber - 1], // Set minDate to previous route's date
+                    onChange: (selectedDates) => {
+                        const newDate = selectedDates[0];
+                        this.textContent = new Date(newDate).getDate().toString();
+                        const oldDate = appState.routeDates[routeNumber] ? new Date(appState.routeDates[routeNumber]) : new Date();
+                        const dayDifference = (newDate - oldDate) / (1000 * 3600 * 24);
         
-            routeDiv.insertBefore(dateButton, routeDiv.firstChild);
-        }        
+                        // Update the date for the current route
+                        updateState('updateRouteDate', { routeNumber: routeNumber, date: newDate.toISOString().split('T')[0] });
+        
+                        // Adjust dates for subsequent routes
+                        for (let i = routeNumber + 1; i <= Object.keys(appState.routeDates).length; i++) {
+                            if (appState.routeDates[i]) {
+                                let subsequentDate = new Date(appState.routeDates[i]);
+                                subsequentDate.setDate(subsequentDate.getDate() + dayDifference);
+                                updateState('updateRouteDate', { routeNumber: i, date: subsequentDate.toISOString().split('T')[0] });
+                                routeHandling.updateDateButtonsDisplay();
+                            }
+                        }
+                        updateState('updateRouteDate', { routeNumber: routeNumber, date: newDate.toISOString().split('T')[0] });
+                        leftPane.refreshFlatpickrInstances();
+                    }
+                });
+                fp.open();
+            } else {
+                this._flatpickr.open();
+            }
+        }, {once: true});            
+    
+        routeDiv.insertBefore(dateButton, routeDiv.firstChild);   
 
          // Create a swap button with a symbol
         let swapButton = document.createElement('button');

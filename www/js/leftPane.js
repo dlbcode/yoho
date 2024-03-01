@@ -7,30 +7,11 @@ const leftPane = {
     init() {
         routeList.init();
         this.initDatePicker();
-
-        // Listen for state changes to update the date picker accordingly
-        document.addEventListener('stateChange', (event) => {
-            if (event.detail.key === 'oneWay') {
-                this.initDatePicker();
-            }
-        });
     },
 
     initDatePicker() {
         this.destroyFlatpickrInstances();
         document.getElementById('datePickerContainer').innerHTML = '';
-    
-        if (!appState.oneWay) {
-            document.getElementById('datePickerContainer').style.display = '';
-            // Prepare inputs in the container
-            this.createDateInput('startDateInput', 'Start date');
-            this.createDateInput('endDateInput', 'End date');
-    
-            // Setup Flatpickr
-            this.initializeFlatpickr(document.getElementById('startDateInput'), 'range', () => {});
-        } else {
-            document.getElementById('datePickerContainer').style.display = 'none';
-        }
     },   
     
     // Adjust the createDateInput function if necessary to accommodate the range selection
