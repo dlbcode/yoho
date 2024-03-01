@@ -5,25 +5,21 @@ module.exports = function(app, axios, db) {
     if (!origin || !destination || !date) {
       return res.status(400).send('Origin, destination, and date are required');
     }
-
-    const flightKey = `${origin}-${destination}`;
+  
+    // Updated cache key to include the requested date
+    const flightKey = `${origin}-${destination}-${date}`;
     const cacheCollection = db.collection('cache');
     
     // Check cache first
     try {
       const cachedData = await cacheCollection.findOne({ flight: flightKey });
       if (cachedData && cachedData.queriedAt) {
-        // Convert queriedAt to 'yyyy-mm-dd' format for comparison
-        const cachedDate = cachedData.queriedAt.toISOString().split('T')[0];
-        
-        if (cachedDate === date) {
-          const hoursDiff = (new Date() - cachedData.queriedAt) / (1000 * 60 * 60);
-          if (hoursDiff <= 24) {
-            // Data is fresh and for the correct date, return cached data
-            return res.json(cachedData.data);
-          }
-          // Data is older than 24 hours or not for the requested date, proceed to fetch new data
+        const hoursDiff = (new Date() - cachedData.queriedAt) / (1000 * 60 * 60);
+        if (hoursDiff <= 24) {
+          // Data is fresh, return cached data
+          return res.json(cachedData.data);
         }
+        // Data is older than 24 hours, proceed to fetch new data
       }
     } catch (error) {
       console.error("Error accessing cache:", error);
