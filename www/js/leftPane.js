@@ -28,18 +28,19 @@ const leftPane = {
             this.createDateInput('startDateInput', 'Start date', new Date().toISOString().split('T')[0]); // Use today's date as default
             this.createDateInput('endDateInput', 'End date'); // Placeholder "End date" is set in createDateInput function
     
-            // Initialize flatpickr for startDateInput
-            this.initializeFlatpickr(document.getElementById('startDateInput'), 'single', (date) => {
-                updateState('startDate', date);
+            // Initialize flatpickr in range mode for startDateInput
+            this.initializeFlatpickr(document.getElementById('startDateInput'), 'range', (date) => {
+                // Callback function to handle date range selection
             });
     
-            // Initialize flatpickr for endDateInput without a default date
-            this.initializeFlatpickr(document.getElementById('endDateInput'), 'single', (date) => {
-                updateState('endDate', date);
-            }, true); // The last parameter indicates that this is for the end date
+            // Add click event listener to endDateInput to trigger startDateInput's Flatpickr
+            document.getElementById('endDateInput').addEventListener('click', () => {
+                document.getElementById('startDateInput')._flatpickr.open();
+            });
         }
-    },
+    },    
     
+    // Adjust the createDateInput function if necessary to accommodate the range selection
     createDateInput(id, placeholder, defaultValue = '') {
         const input = document.createElement('input');
         input.type = 'text';
@@ -49,27 +50,30 @@ const leftPane = {
         document.getElementById('datePickerContainer').appendChild(input);
     },
     
-    initializeFlatpickr(inputElement, mode, onChangeCallback, isEndDate = false) {
+    initializeFlatpickr(inputElement, mode, onChangeCallback) {
         const config = {
             enableTime: false,
             dateFormat: "Y-m-d",
-            defaultDate: isEndDate ? null : new Date(appState.startDate), // Only set defaultDate for startDateInput
-            minDate: "today",
+            mode: mode, // Ensure this is 'range' for the startDateInput
             onChange: function(selectedDates) {
-                if (selectedDates.length > 0) {
-                    const formattedDate = this.formatDate(selectedDates[0], "Y-m-d");
-                    onChangeCallback(formattedDate);
+                if (selectedDates.length === 2) { // Check if a range is selected
+                    const startDate = this.formatDate(selectedDates[0], "D M d, Y");
+                    const endDate = this.formatDate(selectedDates[1], "D M d, Y");
+    
+                    // Update the input values
+                    document.getElementById('startDateInput').value = startDate;
+                    document.getElementById('endDateInput').value = endDate;
+    
+                    // Optionally, update appState or perform other actions
+                    updateState('startDate', startDate);
+                    updateState('endDate', endDate);
                 }
             },
         };
     
-        if (mode === 'range') {
-            config.mode = 'range';
-        }
-    
         const instance = flatpickr(inputElement, config);
         this.flatpickrInstances.push(instance);
-    },       
+    },           
 
     destroyFlatpickrInstances() {
         this.flatpickrInstances.forEach(instance => instance.destroy());
