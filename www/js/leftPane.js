@@ -53,27 +53,29 @@ const leftPane = {
     initializeFlatpickr(inputElement, mode, onChangeCallback) {
         const config = {
             enableTime: false,
-            dateFormat: "Y-m-d",
-            mode: mode, // Ensure this is 'range' for the startDateInput
-            onChange: function(selectedDates) {
+            dateFormat: "Y-m-d", // Format for the actual input value, used for appState
+            altInput: false, // Disable alternative input display
+            mode: mode, // 'range'
+            onChange: (selectedDates) => {
                 if (selectedDates.length === 2) { // Check if a range is selected
-                    const startDate = this.formatDate(selectedDates[0], "Y-m-d");
-                    const endDate = this.formatDate(selectedDates[1], "Y-m-d");
-            
-                    // Update the input values for display
-                    document.getElementById('startDateInput').value = startDate;
-                    document.getElementById('endDateInput').value = endDate;
-            
+                    // Format dates for appState
+                    const startDate = flatpickr.formatDate(selectedDates[0], "Y-m-d");
+                    const endDate = flatpickr.formatDate(selectedDates[1], "Y-m-d");
+    
                     // Update appState with the selected dates
                     updateState('startDate', startDate);
                     updateState('endDate', endDate);
+    
+                    // Manually update input fields for display in "D, M j Y" format
+                    document.getElementById('startDateInput').value = flatpickr.formatDate(selectedDates[0], "D, M j Y");
+                    document.getElementById('endDateInput').value = flatpickr.formatDate(selectedDates[1], "D, M j Y");
                 }
-            },            
+            },
         };
     
         const instance = flatpickr(inputElement, config);
         this.flatpickrInstances.push(instance);
-    },            
+    },  
 
     destroyFlatpickrInstances() {
         this.flatpickrInstances.forEach(instance => instance.destroy());
