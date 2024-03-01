@@ -57,8 +57,8 @@ const leftPane = {
             mode: mode, // Ensure this is 'range' for the startDateInput
             onChange: function(selectedDates) {
                 if (selectedDates.length === 2) { // Check if a range is selected
-                    const startDate = this.formatDate(selectedDates[0], "D M d, Y");
-                    const endDate = this.formatDate(selectedDates[1], "D M d, Y");
+                    const startDate = this.formatDate(selectedDates[0], "D, M d Y");
+                    const endDate = this.formatDate(selectedDates[1], "D, M d Y");
     
                     // Update the input values
                     document.getElementById('startDateInput').value = startDate;
