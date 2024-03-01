@@ -10,6 +10,11 @@ import { leftPane } from './leftPane.js';
 const routeHandling = {
 
     buildRouteDivs: function(routeNumber) {
+        // Add a check to ensure waypoints are defined or it's the initial state with no routes
+        if (appState.oneWay && appState.waypoints.length === 0 && document.querySelectorAll('.route-container').length >= 1) {
+            return; // Do not create a new route div if no waypoints are defined and a route div exists
+        }
+
         if (!appState.oneWay && document.querySelectorAll('.route-container').length >= 1) {
             return; // Exit the function if oneWay is false and a route div already exists
         }
@@ -343,22 +348,16 @@ const routeHandling = {
 }
 
 document.addEventListener('stateChange', function(event) {
-    if (event.detail.key === 'oneWay' && event.detail.value === false) {
-        // Remove all waypoints except the first two
-        appState.waypoints.splice(2);
-        updateState('updateWaypoint', appState.waypoints);
-        // Remove all route divs except the first one
-        let routeDivs = document.querySelectorAll('.route-container');
-        for (let i = 1; i < routeDivs.length; i++) {
-            routeDivs[i].remove();
-        }
-    } else if (event.detail.key === 'oneWay' && event.detail.value === true) {
-        // remove and rebuild all route divs
+    if (event.detail.key === 'oneWay') {
+        // remove all route divs
         let routeDivs = document.querySelectorAll('.route-container');
         for (let i = 0; i < routeDivs.length; i++) {
             routeDivs[i].remove();
         }
-        routeHandling.buildRouteDivs(1);
+        // Rebuild route divs only if there are waypoints defined or it's necessary to show an initial input form
+        if (appState.waypoints.length > 0 || event.detail.value === true) {
+            routeHandling.buildRouteDivs(1);
+        }
     }
 });
 
