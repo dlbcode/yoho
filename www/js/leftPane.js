@@ -57,23 +57,23 @@ const leftPane = {
             mode: mode, // Ensure this is 'range' for the startDateInput
             onChange: function(selectedDates) {
                 if (selectedDates.length === 2) { // Check if a range is selected
-                    const startDate = this.formatDate(selectedDates[0], "D, M d Y");
-                    const endDate = this.formatDate(selectedDates[1], "D, M d Y");
-    
-                    // Update the input values
+                    const startDate = this.formatDate(selectedDates[0], "Y-m-d");
+                    const endDate = this.formatDate(selectedDates[1], "Y-m-d");
+            
+                    // Update the input values for display
                     document.getElementById('startDateInput').value = startDate;
                     document.getElementById('endDateInput').value = endDate;
-    
-                    // Optionally, update appState or perform other actions
+            
+                    // Update appState with the selected dates
                     updateState('startDate', startDate);
                     updateState('endDate', endDate);
                 }
-            },
+            },            
         };
     
         const instance = flatpickr(inputElement, config);
         this.flatpickrInstances.push(instance);
-    },           
+    },            
 
     destroyFlatpickrInstances() {
         this.flatpickrInstances.forEach(instance => instance.destroy());
