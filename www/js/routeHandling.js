@@ -352,6 +352,13 @@ document.addEventListener('stateChange', function(event) {
         for (let i = 1; i < routeDivs.length; i++) {
             routeDivs[i].remove();
         }
+    } else if (event.detail.key === 'oneWay' && event.detail.value === true) {
+        // remove and rebuild all route divs
+        let routeDivs = document.querySelectorAll('.route-container');
+        for (let i = 0; i < routeDivs.length; i++) {
+            routeDivs[i].remove();
+        }
+        routeHandling.buildRouteDivs(1);
     }
 });
 
