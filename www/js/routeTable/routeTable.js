@@ -24,7 +24,12 @@ function buildRouteTable(routeIndex) {
   const infoPaneContent = document.getElementById('infoPaneContent');
   infoPaneContent.innerHTML = '';
 
-  // Load routeTable.css
+  if (!currentRoute) {
+      console.error('No route data available for routeIndex:', routeIndex);
+      infoPaneContent.textContent = 'No route data available.';
+      return;
+  }
+
   document.head.appendChild(Object.assign(document.createElement('link'), {rel: 'stylesheet', type: 'text/css', href: '../css/routeTable.css'}));
 
   const origin = currentRoute.originAirport.iata_code;
