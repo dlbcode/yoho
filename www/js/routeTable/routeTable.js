@@ -25,8 +25,6 @@ function buildRouteTable(routeIndex) {
   infoPaneContent.innerHTML = '';
 
   if (!currentRoute) {
-      console.error('No route data available for routeIndex:', routeIndex);
-      infoPaneContent.textContent = 'No route data available.';
       return;
   }
 
