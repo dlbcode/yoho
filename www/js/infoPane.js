@@ -44,27 +44,14 @@ const infoPane = {
     const menuBar = document.getElementById('menu-bar');
     menuBar.innerHTML = '';
 
-    // New logic to determine if it's a round trip and adjust button text
-    let isRoundTrip = false;
-    if (appState.waypoints.length >= 4) {
-        const firstWaypoint = appState.waypoints[0].iata_code;
-        const secondWaypoint = appState.waypoints[1].iata_code;
-        const thirdWaypoint = appState.waypoints[2].iata_code;
-        const fourthWaypoint = appState.waypoints[3].iata_code;
-
-        isRoundTrip = firstWaypoint === fourthWaypoint && secondWaypoint === thirdWaypoint;
-    }
-
-    appState.roundTrip = isRoundTrip;
-
     appState.routes.forEach((route, index) => {
         let button = document.createElement('button');
-        if (isRoundTrip && index === 0) {
+        if (appState.roundTrip && index === 0) {
             button.textContent = `${route.originAirport.iata_code}-${route.destinationAirport.iata_code} - ${route.originAirport.iata_code}-${route.destinationAirport.iata_code}`;
-        } else if (!isRoundTrip) {
+        } else if (!appState.roundTrip) {
             button.textContent = `${route.originAirport.iata_code}-${route.destinationAirport.iata_code}`;
         }
-        if (!isRoundTrip || (isRoundTrip && index === 0)) {
+        if (!appState.roundTrip || (appState.roundTrip && index === 0)) {
             button.className = 'route-info-button';
             button.onclick = () => {
                 if (appState.selectedRoutes.hasOwnProperty(index)) {

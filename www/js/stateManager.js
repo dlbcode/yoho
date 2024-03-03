@@ -52,6 +52,7 @@ function updateState(key, value) {
             appState.waypoints[value.index] = {...appState.waypoints[value.index], ...value.data};
             }
             updateUrl();
+            checkAndUpdateRoundTripStatus();
             break;
             
         case 'addWaypoint':
@@ -61,17 +62,20 @@ function updateState(key, value) {
             appState.waypoints.push(value);
             }
             updateUrl();
+            checkAndUpdateRoundTripStatus();
             break;
     
         case 'removeWaypoint':
             appState.waypoints.splice(value, 1);
             updateUrl();
+            checkAndUpdateRoundTripStatus();
             break;
 
         case 'removeWaypoints':
             let startIndex = (value.routeNumber - 1) * 2;
             appState.waypoints.splice(startIndex, 2);
             updateUrl();
+            checkAndUpdateRoundTripStatus();
             break;
     
         case 'addRoute':
@@ -156,6 +160,20 @@ function updateUrl() {
     }
     // In stateManager.js, after updating routeDates from URL
     document.dispatchEvent(new CustomEvent('routeDatesUpdated'));
+}
+
+function checkAndUpdateRoundTripStatus() {
+    console.log('checkAndUpdateRoundTripStatus');
+    if (appState.waypoints.length >= 4) {
+        const firstWaypoint = appState.waypoints[0].iata_code;
+        const secondWaypoint = appState.waypoints[1].iata_code;
+        const thirdWaypoint = appState.waypoints[2].iata_code;
+        const fourthWaypoint = appState.waypoints[3].iata_code;
+
+        appState.roundTrip = firstWaypoint === fourthWaypoint && secondWaypoint === thirdWaypoint;
+    } else {
+        appState.roundTrip = false;
+    }
 }
 
 export { appState, updateState };
