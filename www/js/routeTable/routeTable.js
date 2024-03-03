@@ -28,34 +28,26 @@ function buildRouteTable(routeIndex) {
       return;
   }
 
-  // New logic to check for round trip condition
-  if (appState.waypoints.length >= 4) {
-    const firstWaypoint = appState.waypoints[0].iata_code;
-    const secondWaypoint = appState.waypoints[1].iata_code;
-    const thirdWaypoint = appState.waypoints[2].iata_code;
-    const fourthWaypoint = appState.waypoints[3].iata_code;
-
-    if (firstWaypoint === fourthWaypoint && secondWaypoint === thirdWaypoint) {
-      appState.roundTrip = true;
-    } else {
-      appState.roundTrip = false; // Ensure roundTrip is false if condition is not met
-    }
-  }
-
   document.head.appendChild(Object.assign(document.createElement('link'), {rel: 'stylesheet', type: 'text/css', href: '../css/routeTable.css'}));
 
   const origin = currentRoute.originAirport.iata_code;
   const destination = currentRoute.destinationAirport.iata_code;
-  const returnDate = appState.endDate || appState.startDate;
+  const returnDate = appState.routeDates[2];
   const routeNumber = (routeIndex + 1);
   const currentRouteDate = appState.routeDates[routeNumber];
-  const departureDate = appState.roundTrip ? currentRouteDate : appState.startDate;
+  const departureDate = appState.roundTrip ? currentRouteDate : appState.routeDates[1];
+
+  console.log('roundTrip:', appState.roundTrip);
+  console.log('departureDate:', departureDate);
+  console.log('returnDate:', returnDate);
   
   let apiUrl = `https://yonderhop.com/api/${appState.roundTrip ? 'yhreturn' : 'yhoneway' }?origin=${origin}&destination=${destination}&departureDate=${departureDate}`;
   
   if (appState.roundTrip) {
     apiUrl += `&returnDate=${returnDate}`;
   }
+
+  console.log('API URL:', apiUrl);
 
   fetch(apiUrl)
     .then(response => {

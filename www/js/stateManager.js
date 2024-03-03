@@ -3,7 +3,7 @@ const defaultDirection = params.get('direction') || 'from';
 
 const appState = {
     selectedAirport: null,
-    oneWay: true,
+    roundTrip: false,
     numTravelers: 1,
     routeDirection: defaultDirection,
     startDate: null,
@@ -53,11 +53,7 @@ function updateState(key, value) {
             }
             updateUrl();
             break;
-
-        case 'oneWay':
-            appState.oneWay = value;
-            break;
-  
+            
         case 'addWaypoint':
             if (Array.isArray(value)) {
             value.forEach(waypoint => appState.waypoints.push(waypoint));
