@@ -26,31 +26,6 @@ const uiHandling = {
     });
   },  
 
-  initTripTypeDropdown: function() {
-    const dropdownBtn = document.getElementById('tripTypeDropdownBtn');
-    const dropdown = document.getElementById('tripTypeDropdown');
-    dropdownBtn.innerHTML = appState.oneWay ? 'One way <span class="icon-dropdown"></span>' : 'Round trip <span class="icon-dropdown"></span>';
-    
-    document.addEventListener('routesArrayUpdated', this.handleStateChange.bind(this));
-    dropdownBtn.addEventListener('click', function() {
-        dropdown.innerHTML = '';
-        const optionToShow = dropdownBtn.textContent.trim() === 'One way' ? 'Round trip' : 'One way';
-        const li = document.createElement('li');
-        li.textContent = optionToShow;
-        dropdown.appendChild(li);
-        dropdown.classList.toggle('hidden');
-    });
-
-    dropdown.addEventListener('click', function(event) {
-        if (event.target.tagName === 'LI') {
-            dropdownBtn.innerHTML = `${event.target.textContent} <span class="icon-dropdown"></span>`;
-            const isOneWay = event.target.textContent === 'One way';
-            updateState('oneWay', isOneWay);
-            dropdown.classList.add('hidden');
-        }
-    });
-  },
-
   hideDropdowns: function() {
     document.addEventListener('click', function(event) {
         const dropdownSelectors = ['#travelersDropdown', '#tripTypeDropdown'];
@@ -66,18 +41,7 @@ const uiHandling = {
 
   handleStateChange: function(event) {
         this.updateTripTypeContainerVisibility();
-  },
-
-  updateTripTypeContainerVisibility: function() {
-    const tripTypeDropdownBtn = document.getElementById('tripTypeDropdownBtn');
-    if (appState.routes.length > 1 && (!appState.oneWay)) {
-      updateState('oneWay', true);
-      tripTypeDropdownBtn.disabled = true;
-      tripTypeDropdownBtn.innerHTML = "One way <span class='icon-dropdown'></span";
-    } else {
-        tripTypeDropdownBtn.disabled = false;
-    }
-  },  
+  }, 
 
   initTripButtons: function() {
     const addButton = document.getElementById('addBtn');
@@ -87,7 +51,7 @@ const uiHandling = {
 
   toggleTripButtonsVisibility: function() {
     document.getElementById('tripButtons').style.display =
-      appState.waypoints.length > 1 && appState.oneWay ? 'flex' : 'none';
+      appState.waypoints.length > 1 ? 'flex' : 'none';
       addBtn.focus();
   },
 
@@ -107,21 +71,6 @@ const uiHandling = {
             }
         }
     });
-  },
-
-  updateTripTypeDropdownBasedOnAppState: function() {
-    const tripTypeDropdownBtn = document.getElementById('tripTypeDropdownBtn');
-    const tripTypeDropdown = document.getElementById('tripTypeDropdown');
-
-    tripTypeDropdownBtn.innerHTML = appState.oneWay ? 'One way <span class="icon-dropdown"></span>' : 'Round trip <span class="icon-dropdown"></span>';
-    tripTypeDropdown.innerHTML = '';
-    const oppositeOption = document.createElement('li');
-    oppositeOption.textContent = appState.oneWay ? 'Round trip' : 'One way';
-
-    tripTypeDropdown.appendChild(oppositeOption);
-    oppositeOption.onclick = () => {
-        updateState('oneWay', false);
-    };
   },
   
   initTogglePaneButton: function() {
@@ -199,17 +148,8 @@ const uiHandling = {
   }
 }
 
-document.addEventListener('stateChange', function(event) {
-  if (event.detail.key === 'oneWay') {
-    uiHandling.updateTripTypeDropdownBasedOnAppState();
-    uiHandling.toggleTripButtonsVisibility();
-    
-  }
-});
-
 document.addEventListener('DOMContentLoaded', () => {
   uiHandling.initTravelersDropdown();
-  uiHandling.initTripTypeDropdown();
   uiHandling.initTogglePaneButton();
   uiHandling.initInfoPaneDragButton();
   uiHandling.hideDropdowns();

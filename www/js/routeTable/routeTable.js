@@ -35,11 +35,11 @@ function buildRouteTable(routeIndex) {
   const returnDate = appState.endDate || appState.startDate;
   const routeNumber = (routeIndex + 1);
   const currentRouteDate = appState.routeDates[routeNumber];
-  const departureDate = appState.oneWay ? currentRouteDate : appState.startDate;
+  const departureDate = appState.roundTrip ? currentRouteDate : appState.startDate;
   
-  let apiUrl = `https://yonderhop.com/api/${appState.oneWay ? 'yhoneway' : 'yhreturn'}?origin=${origin}&destination=${destination}&departureDate=${departureDate}`;
+  let apiUrl = `https://yonderhop.com/api/${appState.roudTrip ? 'yhreturn' : 'yhoneway' }?origin=${origin}&destination=${destination}&departureDate=${departureDate}`;
   
-  if (!appState.oneWay) {
+  if (appState.roudTrip) {
     apiUrl += `&returnDate=${returnDate}`;
   }
 

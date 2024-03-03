@@ -7,10 +7,6 @@ import { routeHandling } from './routeHandling.js';
 
 async function initMapFunctions() {
     const params = new URLSearchParams(window.location.search);
-    const oneWayParam = params.get('oneWay');
-    if (oneWayParam !== null) {
-        updateState('oneWay', oneWayParam === 'true');
-    }
     const waypointParam = params.get('waypoints');
     if (waypointParam) {
         const waypointIatas = waypointParam.split(',').map(decodeURIComponent);

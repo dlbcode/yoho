@@ -11,13 +11,10 @@ const routeHandling = {
 
     buildRouteDivs: function(routeNumber) {
         // Add a check to ensure waypoints are defined or it's the initial state with no routes
-        if (appState.oneWay && appState.waypoints.length === 0 && document.querySelectorAll('.route-container').length >= 1) {
+        if (appState.waypoints.length === 0 && document.querySelectorAll('.route-container').length >= 1) {
             return; // Do not create a new route div if no waypoints are defined and a route div exists
         }
 
-        if (!appState.oneWay && document.querySelectorAll('.route-container').length >= 1) {
-            return; // Exit the function if oneWay is false and a route div already exists
-        }
         const container = document.querySelector('.airport-selection');
         const routeDivId = `route${routeNumber}`;
         let routeDiv = document.createElement('div');
@@ -344,20 +341,6 @@ const routeHandling = {
         this.buildRouteDivs(1); // Dynamically create the first route div
     },
 }
-
-document.addEventListener('stateChange', function(event) {
-    if (event.detail.key === 'oneWay') {
-        // remove all route divs
-        let routeDivs = document.querySelectorAll('.route-container');
-        for (let i = 0; i < routeDivs.length; i++) {
-            routeDivs[i].remove();
-        }
-        // Rebuild route divs only if there are waypoints defined or it's necessary to show an initial input form
-        if (appState.waypoints.length > 0 || event.detail.value === true) {
-            routeHandling.buildRouteDivs(1);
-        }
-    }
-});
 
 document.addEventListener('routeDatesUpdated', function() {
     routeHandling.updateDateButtonsDisplay();
