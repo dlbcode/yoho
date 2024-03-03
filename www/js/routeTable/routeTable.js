@@ -35,7 +35,7 @@ function buildRouteTable(routeIndex) {
   const returnDate = appState.routeDates[2];
   const routeNumber = (routeIndex + 1);
   const currentRouteDate = appState.routeDates[routeNumber];
-  const departureDate = appState.roundTrip ? currentRouteDate : appState.routeDates[1];
+  const departureDate = appState.routeDates[routeNumber];
 
   console.log('roundTrip:', appState.roundTrip);
   console.log('departureDate:', departureDate);
