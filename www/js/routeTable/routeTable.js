@@ -190,6 +190,8 @@ function attachEventListeners(table, data, routeIndex) {
             updateState('changeView', 'selectedRoute');
         });
 
+        console.log('routes:', appState.routes);
+
         highlightSelectedRowForRouteIndex(routeIndex);
     });
   });
