@@ -17,6 +17,7 @@ const selectedRoute = {
       appState.currentView = 'routeTable';
       appState.currentRouteIndex = routeIndex;
       document.dispatchEvent(new CustomEvent('stateChange', { detail: { key: 'changeView', value: 'routeTable' } }));
+      console.log('routes', appState.routes);
     };
     infoPaneContent.appendChild(changeRouteButton);
 
