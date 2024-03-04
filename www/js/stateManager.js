@@ -163,7 +163,6 @@ function updateUrl() {
 }
 
 function checkAndUpdateRoundTripStatus() {
-    console.log('checkAndUpdateRoundTripStatus');
     if (appState.waypoints.length >= 4) {
         const firstWaypoint = appState.waypoints[0].iata_code;
         const secondWaypoint = appState.waypoints[1].iata_code;

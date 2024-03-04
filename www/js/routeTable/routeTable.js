@@ -37,17 +37,11 @@ function buildRouteTable(routeIndex) {
   const currentRouteDate = appState.routeDates[routeNumber];
   const departureDate = appState.routeDates[routeNumber];
 
-  console.log('roundTrip:', appState.roundTrip);
-  console.log('departureDate:', departureDate);
-  console.log('returnDate:', returnDate);
-  
   let apiUrl = `https://yonderhop.com/api/${appState.roundTrip ? 'yhreturn' : 'yhoneway' }?origin=${origin}&destination=${destination}&departureDate=${departureDate}`;
   
   if (appState.roundTrip) {
     apiUrl += `&returnDate=${returnDate}`;
   }
-
-  console.log('API URL:', apiUrl);
 
   fetch(apiUrl)
     .then(response => {
@@ -106,7 +100,6 @@ function buildRouteTable(routeIndex) {
       attachEventListeners(table, data, routeIndex);
     })
     .catch(error => {
-      console.error('API Request Failed:', error);
       infoPaneContent.textContent = 'Error loading data: ' + error.message;
     });
 }
@@ -190,8 +183,6 @@ function attachEventListeners(table, data, routeIndex) {
             updateState('changeView', 'selectedRoute');
         });
 
-        console.log('routes:', appState.routes);
-
         highlightSelectedRowForRouteIndex(routeIndex);
     });
   });
@@ -255,49 +246,37 @@ function highlightSelectedRowForRouteIndex(routeIndex) {
 }
 
 function replaceWaypointsForCurrentRoute(intermediaryIatas, routeIndex) {
-  // Determine if we need to adjust the logic for round trips
-  const isRoundTrip = appState.roundTrip;
-  let startIndex, endIndex;
-
-  if (isRoundTrip) {
-      // For round trips, we might only need to update the waypoints once
-      startIndex = 1; // Assuming round trip starts with the first waypoint
-      endIndex = appState.waypoints.length; // And ends with the last waypoint in the array
-  } else {
-      // For non-round trips, calculate start and end indices as before
-      startIndex = routeIndex * 2;
-      endIndex = (routeIndex + 1) * 2;
-  }
-
+  // Adjust startIndex for round trips to ensure the entire waypoints array is considered
+  const startIndex = appState.roundTrip ? 0 : routeIndex * 2;
   let before = appState.waypoints.slice(0, startIndex);
-  let after = appState.waypoints.slice(endIndex);
+  let after = appState.roundTrip ? [] : appState.waypoints.slice((routeIndex + 1) * 2);
 
-  let updatedSegment = [];
+  let updatedSegment = [flightMap.airportDataCache[intermediaryIatas[0]]];
 
-  // For round trips, ensure we're not duplicating the return leg
-  if (isRoundTrip && intermediaryIatas.length > 2) {
-      // Assuming the first and last IATA codes are the origin and return, respectively
-      updatedSegment.push(flightMap.airportDataCache[intermediaryIatas[0]]); // Add origin
-
-      // Add intermediary waypoints (if any)
-      for (let i = 1; i < intermediaryIatas.length - 1; i++) {
-          let airportData = flightMap.airportDataCache[intermediaryIatas[i]];
+  for (let i = 1; i < intermediaryIatas.length; i++) {
+      let airportData = flightMap.airportDataCache[intermediaryIatas[i]];
+      updatedSegment.push(airportData);
+      if (i < intermediaryIatas.length - 1) {
           updatedSegment.push(airportData);
       }
-
-      updatedSegment.push(flightMap.airportDataCache[intermediaryIatas[intermediaryIatas.length - 1]]); // Add return
-  } else {
-      // For non-round trips or direct round trips, process all IATAs
-      intermediaryIatas.forEach(iata => {
-          let airportData = flightMap.airportDataCache[iata];
-          updatedSegment.push(airportData);
-      });
   }
 
-  // Update the waypoints array in the application state
+  // For round trips, ensure the return to the origin is explicitly handled
+  if (appState.roundTrip) {
+      const originIata = intermediaryIatas[0];
+      if (updatedSegment[updatedSegment.length - 1].iata_code !== originIata) {
+          updatedSegment.push(flightMap.airportDataCache[originIata]);
+      }
+  } else {
+      // For non-round trips, ensure the final destination is added if not already present
+      const finalDestinationIata = intermediaryIatas[intermediaryIatas.length - 1];
+      if (updatedSegment[updatedSegment.length - 1].iata_code !== finalDestinationIata) {
+          updatedSegment.push(flightMap.airportDataCache[finalDestinationIata]);
+      }
+  }
+
   appState.waypoints = [...before, ...updatedSegment, ...after];
   updateState('updateWaypoint', appState.waypoints);
-  console.log('waypoints:', appState.waypoints);
 }
 
 function resetSortIcons(headers, currentIcon, newSortState) {
