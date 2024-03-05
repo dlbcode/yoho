@@ -58,27 +58,22 @@ const routeHandling = {
             routeDiv.appendChild(suggestionsDiv);
         }
 
-        // Create a new div for the day name box
+        /// Create a new div for the day name box
         let dayNameBox = document.createElement('div');
         dayNameBox.className = 'day-name-box';
         dayNameBox.setAttribute('data-route-number', routeNumber); // Store the route number on the element for reference
 
-        // Initial day name setting based on the current date
-        let initialDayName = new Date(appState.routeDates[routeNumber]).toLocaleDateString('en-US', { weekday: 'long' })[0];
-        dayNameBox.textContent = initialDayName;
+        // Check if a date exists for the routeNumber
+        if (appState.routeDates[routeNumber]) {
+            let dateParts = appState.routeDates[routeNumber].split('-');
+            let initialDate = new Date(Date.UTC(dateParts[0], dateParts[1] - 1, dateParts[2]));
+            let initialDayName = initialDate.toLocaleDateString('en-US', { weekday: 'long', timeZone: 'UTC' })[0];
+            dayNameBox.textContent = initialDayName;
+        } else {
+            // Optional: Handle the case where no date is set for this routeNumber
+            dayNameBox.textContent = ''; // Set to empty or a placeholder value as needed
+        }
 
-        // Add an event listener for route date updates
-        dayNameBox.addEventListener('stateChange', function(event) {
-            console.log('dayNameBox stateChange event', event.detail);
-            // Check if the updated route number matches this day-name-box's route
-            if (event.detail.routeNumber === parseInt(this.getAttribute('data-route-number'))) {
-                // Update the day name based on the new date
-                let newDayName = new Date(event.detail.newDate).toLocaleDateString('en-US', { weekday: 'long' })[0];
-                this.textContent = newDayName;
-            }
-        });
-
-        // Style the day name box (ensure it's square and aligned with the date button)
         dayNameBox.style.width = '24px';
         dayNameBox.style.height = '36px';
         dayNameBox.style.display = 'flex';
@@ -363,6 +358,22 @@ const routeHandling = {
 
 document.addEventListener('routeDatesUpdated', function() {
     routeHandling.updateDateButtonsDisplay();
+});
+
+document.addEventListener('stateChange', function(event) {
+    if (event.detail.key === 'updateRouteDate') {
+        const updateDetails = event.detail.value;
+        // Find the dayNameBox with the matching route number
+        const dayNameBoxes = document.querySelectorAll('.day-name-box');
+        dayNameBoxes.forEach(box => {
+            if (parseInt(box.getAttribute('data-route-number')) === updateDetails.routeNumber) {
+                // Parse the date as UTC
+                const dateParts = updateDetails.date.split('-');
+                let newDayName = new Date(Date.UTC(dateParts[0], dateParts[1] - 1, dateParts[2])).toLocaleDateString('en-US', { weekday: 'long', timeZone: 'UTC' })[0];
+                box.textContent = newDayName;
+            }
+        });
+    }
 });
 
 export { routeHandling }

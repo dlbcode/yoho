@@ -95,6 +95,7 @@ function updateState(key, value) {
             appState.selectedRoutes = {};
             appState.routeDates = {};
             updateUrl();
+            updateState('updateRouteDate', { routeNumber: 1, date: new Date().toISOString().split('T')[0] });
             break;
 
         case 'updateSelectedRoute':
