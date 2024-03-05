@@ -129,6 +129,7 @@ function updateState(key, value) {
             appState.currentView = value;
             break;
     }
+    console.log('state change', key, value);
     document.dispatchEvent(new CustomEvent('stateChange', { detail: { key, value } }));
 }
   

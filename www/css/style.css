@@ -64,7 +64,7 @@ a {
 }
 
 a:hover, button:hover, input:hover, select:hover, textarea:hover {
-  background-color: #333;
+  background-color: #777;
   color: #fff;
 }
 

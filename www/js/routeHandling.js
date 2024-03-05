@@ -61,23 +61,29 @@ const routeHandling = {
         // Create a new div for the day name box
         let dayNameBox = document.createElement('div');
         dayNameBox.className = 'day-name-box';
+        dayNameBox.setAttribute('data-route-number', routeNumber); // Store the route number on the element for reference
 
-        // Get the first letter of the day name from the date
-        console.log(routeNumber);
-        console.log('routeDates', appState.routeDates);
-        console.log(appState.routeDates[routeNumber]);
-        console.log(new Date(appState.routeDates[routeNumber]).toLocaleDateString('en-US', { weekday: 'long' }));
-        let dayName = new Date(appState.routeDates[routeNumber]).toLocaleDateString('en-US', { weekday: 'long' })[0];
+        // Initial day name setting based on the current date
+        let initialDayName = new Date(appState.routeDates[routeNumber]).toLocaleDateString('en-US', { weekday: 'long' })[0];
+        dayNameBox.textContent = initialDayName;
 
-        // Set the content of the day name box
-        dayNameBox.textContent = dayName;
+        // Add an event listener for route date updates
+        dayNameBox.addEventListener('stateChange', function(event) {
+            console.log('dayNameBox stateChange event', event.detail);
+            // Check if the updated route number matches this day-name-box's route
+            if (event.detail.routeNumber === parseInt(this.getAttribute('data-route-number'))) {
+                // Update the day name based on the new date
+                let newDayName = new Date(event.detail.newDate).toLocaleDateString('en-US', { weekday: 'long' })[0];
+                this.textContent = newDayName;
+            }
+        });
 
         // Style the day name box (ensure it's square and aligned with the date button)
-        dayNameBox.style.width = '36px';
+        dayNameBox.style.width = '24px';
         dayNameBox.style.height = '36px';
         dayNameBox.style.display = 'flex';
         dayNameBox.style.alignItems = 'center';
-        dayNameBox.style.justifyContent = 'center';
+        dayNameBox.style.padding = '2px';
         
         // Insert the day name box before the date button
         routeDiv.insertBefore(dayNameBox, routeDiv.firstChild);
