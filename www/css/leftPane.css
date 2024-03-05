@@ -144,6 +144,27 @@
   margin-right: 5px;
 }
 
+.swap-route-button {
+  padding: 0px;
+  background-color: #1f1f1f;
+  margin: -5px;
+}
+
+.remove-route-button {
+  padding: 0px;
+  background-color: #1f1f1f;
+  margin: -5px;
+}
+
+.date-select-button {
+  width: 36px;
+  min-width: 36px;
+  max-width: 36px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .icon-dropdown {
   width: 0;
   height: 0;
