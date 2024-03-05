@@ -69,6 +69,15 @@ const routeHandling = {
             let initialDate = new Date(Date.UTC(dateParts[0], dateParts[1] - 1, dateParts[2]));
             let initialDayName = initialDate.toLocaleDateString('en-US', { weekday: 'long', timeZone: 'UTC' })[0];
             dayNameBox.textContent = initialDayName;
+        } else {
+            // set the day name bpx to the value of the previous route's day name box
+            let previousRouteNumber = routeNumber - 1;
+            if (previousRouteNumber > 0) {
+                let previousDayNameBox = document.querySelector(`.day-name-box[data-route-number="${previousRouteNumber}"]`);
+                if (previousDayNameBox) {
+                    dayNameBox.textContent = previousDayNameBox.textContent;
+                }
+            }
         }
 
         dayNameBox.style.width = '24px';
@@ -360,8 +369,7 @@ const routeHandling = {
                 const dateParts = appState.routeDates[routeNumber].split('-');
                 let newDayName = new Date(Date.UTC(dateParts[0], dateParts[1] - 1, dateParts[2])).toLocaleDateString('en-US', { weekday: 'long', timeZone: 'UTC' })[0];
                 box.textContent = newDayName;
-    
-                // Check if the newDayName indicates a weekend day (Saturday or Sunday)
+
                 if (newDayName === 'S') {
                     box.style.backgroundColor = '#01481a'; // Set background color to green for weekend days
                 } else {
