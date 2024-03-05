@@ -10,7 +10,7 @@ import { leftPane } from './leftPane.js';
 const routeHandling = {
 
     buildRouteDivs: function(routeNumber) {
-        // Add a check to ensure waypoints are defined or it's the initial state with no routes
+
         if (appState.waypoints.length === 0 && document.querySelectorAll('.route-container').length >= 1) {
             return; // Do not create a new route div if no waypoints are defined and a route div exists
         }
@@ -21,11 +21,9 @@ const routeHandling = {
         routeDiv.id = routeDivId;
         routeDiv.className = 'route-container';
         routeDiv.setAttribute('data-route-number', routeNumber.toString());
-    
-        // Define placeholders independently from the waypointsOrder
+
         let placeholders = ['From', 'To'];
-    
-        // Determine the order of waypoints based on routeDirection
+
         let waypointsOrder = appState.routeDirection === 'to' ? [1, 0] : [0, 1];
     
         for (let i = 0; i < 2; i++) {
@@ -34,7 +32,7 @@ const routeHandling = {
             let input = document.createElement('input');
             input.type = 'text';
             input.id = `waypoint${index + 1}`;
-            // Assign placeholders based on the original order, not waypointsOrder
+
             input.placeholder = placeholders[i];
             input.value = waypoint ? waypoint.iata_code : '';
     
@@ -60,7 +58,30 @@ const routeHandling = {
             routeDiv.appendChild(suggestionsDiv);
         }
 
-        // Create a date selection button
+        // Create a new div for the day name box
+        let dayNameBox = document.createElement('div');
+        dayNameBox.className = 'day-name-box';
+
+        // Get the first letter of the day name from the date
+        console.log(routeNumber);
+        console.log('routeDates', appState.routeDates);
+        console.log(appState.routeDates[routeNumber]);
+        console.log(new Date(appState.routeDates[routeNumber]).toLocaleDateString('en-US', { weekday: 'long' }));
+        let dayName = new Date(appState.routeDates[routeNumber]).toLocaleDateString('en-US', { weekday: 'long' })[0];
+
+        // Set the content of the day name box
+        dayNameBox.textContent = dayName;
+
+        // Style the day name box (ensure it's square and aligned with the date button)
+        dayNameBox.style.width = '36px';
+        dayNameBox.style.height = '36px';
+        dayNameBox.style.display = 'flex';
+        dayNameBox.style.alignItems = 'center';
+        dayNameBox.style.justifyContent = 'center';
+        
+        // Insert the day name box before the date button
+        routeDiv.insertBefore(dayNameBox, routeDiv.firstChild);
+
         let dateButton = document.createElement('button');
         dateButton.className = 'date-select-button';
 
@@ -68,7 +89,6 @@ const routeHandling = {
             if (routeNumber === 1) {
                 appState.routeDates[routeNumber] = new Date().toISOString().split('T')[0];
             } else {
-                // Ensure the date for the new route is at least the date of the previous route
                 appState.routeDates[routeNumber] = appState.routeDates[routeNumber - 1];
             }
         }
@@ -87,11 +107,9 @@ const routeHandling = {
                         this.textContent = new Date(newDate).getDate().toString();
                         const oldDate = appState.routeDates[routeNumber] ? new Date(appState.routeDates[routeNumber]) : new Date();
                         const dayDifference = (newDate - oldDate) / (1000 * 3600 * 24);
-        
-                        // Update the date for the current route
+
                         updateState('updateRouteDate', { routeNumber: routeNumber, date: newDate.toISOString().split('T')[0] });
-        
-                        // Adjust dates for subsequent routes
+
                         for (let i = routeNumber + 1; i <= Object.keys(appState.routeDates).length; i++) {
                             if (appState.routeDates[i]) {
                                 let subsequentDate = new Date(appState.routeDates[i]);
@@ -109,21 +127,18 @@ const routeHandling = {
                 this._flatpickr.open();
             }
         }, {once: true});            
-    
-        routeDiv.insertBefore(dateButton, routeDiv.firstChild);   
 
-         // Create a swap button with a symbol
+        routeDiv.insertBefore(dateButton, dayNameBox.nextSibling);
+
         let swapButton = document.createElement('button');
         swapButton.innerHTML = '&#8646;'; // Double-headed arrow symbol
         swapButton.className = 'swap-route-button';
         swapButton.onclick = () => this.handleSwapButtonClick(routeNumber);
         swapButton.title = 'Swap waypoints'; // Tooltip for accessibility
 
-        // Insert the swap button between the waypoint input fields
         let firstInput = routeDiv.querySelector('input[type="text"]');
         routeDiv.insertBefore(swapButton, firstInput.nextSibling);
-    
-        // Add a minus button for each route div
+
         if (routeNumber > 1) {
             let minusButton = document.createElement('button');
             minusButton.textContent = '-';
@@ -131,8 +146,7 @@ const routeHandling = {
             minusButton.onclick = () => this.removeRouteDiv(routeNumber);
             routeDiv.appendChild(minusButton);
         }
-    
-        // Add event listeners to change the route line color on mouseover
+
         routeDiv.addEventListener('mouseover', () => {
             const routeId = this.getRouteIdFromDiv(routeDiv);
             const pathLines = pathDrawing.routePathCache[routeId] || pathDrawing.dashedRoutePathCache[routeId];
@@ -141,7 +155,7 @@ const routeHandling = {
                 pathLines.forEach(path => path.setStyle({ color: 'white'}));
             }
         });
-    
+
         routeDiv.addEventListener('mouseout', () => {
             const routeId = this.getRouteIdFromDiv(routeDiv);
             const pathLines = pathDrawing.routePathCache[routeId] || pathDrawing.dashedRoutePathCache[routeId];
@@ -152,14 +166,13 @@ const routeHandling = {
             pathDrawing.clearLines();
             pathDrawing.drawLines();
         });
-    
-        // Prepend the new route div so it appears above the last one if routeDirection is 'to'
+
         if (appState.routeDirection === 'to') {
             container.prepend(routeDiv);
         } else {
             container.appendChild(routeDiv);
         }
-    
+
         for (let i = 0; i < 2; i++) {
             let index = (routeNumber - 1) * 2 + i;
             setupAutocompleteForField(`waypoint${index + 1}`);

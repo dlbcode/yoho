@@ -144,6 +144,12 @@
   margin-right: 5px;
 }
 
+.day-name-box {
+  background-color: #333; /* Match the button background or choose a different color */
+  color: #a9a9a9; /* Match the button text color */
+  margin-right: -10px;
+}
+
 .swap-route-button {
   padding: 0px;
   background-color: #1f1f1f;
