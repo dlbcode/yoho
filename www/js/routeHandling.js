@@ -360,10 +360,16 @@ const routeHandling = {
                 const dateParts = appState.routeDates[routeNumber].split('-');
                 let newDayName = new Date(Date.UTC(dateParts[0], dateParts[1] - 1, dateParts[2])).toLocaleDateString('en-US', { weekday: 'long', timeZone: 'UTC' })[0];
                 box.textContent = newDayName;
+    
+                // Check if the newDayName indicates a weekend day (Saturday or Sunday)
+                if (newDayName === 'S') {
+                    box.style.backgroundColor = '#01481a'; // Set background color to green for weekend days
+                } else {
+                    box.style.backgroundColor = ''; // Reset background color for non-weekend days
+                }
             }
         });
-    },
-    
+    }    
 }
 
 document.addEventListener('routeDatesUpdated', function() {
