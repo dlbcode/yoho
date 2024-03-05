@@ -9,6 +9,12 @@
   overflow-y: auto;
 }
 
+input[type="text"]:focus {
+  border: none; /* Removes the border */
+  background-color: #aaa; /* Changes the background color; adjust as needed */
+  outline: none; /* Optionally removes the outline to ensure no focus indicator is shown */
+}
+
 /* Scrollbar styles for leftPane and suggestions containers */
 .leftPane::-webkit-scrollbar-track, [id$='Suggestions']::-webkit-scrollbar-track {
   background-color: #222;
@@ -214,9 +220,8 @@
   justify-content: space-between;
   background-color: #333;
   color: white;
-  border-radius: 4px;
   cursor: pointer;
-  width: 100%;
+  width: 55px;
 }
 
 #tripTypeDropdownBtn:disabled {

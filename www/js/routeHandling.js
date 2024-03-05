@@ -354,6 +354,19 @@ const routeHandling = {
     init: function() {
         this.buildRouteDivs(1); // Dynamically create the first route div
     },
+
+    updateDayNameBoxes: function() {
+        const dayNameBoxes = document.querySelectorAll('.day-name-box');
+        dayNameBoxes.forEach(box => {
+            const routeNumber = parseInt(box.getAttribute('data-route-number'));
+            if (appState.routeDates[routeNumber]) {
+                const dateParts = appState.routeDates[routeNumber].split('-');
+                let newDayName = new Date(Date.UTC(dateParts[0], dateParts[1] - 1, dateParts[2])).toLocaleDateString('en-US', { weekday: 'long', timeZone: 'UTC' })[0];
+                box.textContent = newDayName;
+            }
+        });
+    },
+    
 }
 
 document.addEventListener('routeDatesUpdated', function() {
@@ -362,17 +375,7 @@ document.addEventListener('routeDatesUpdated', function() {
 
 document.addEventListener('stateChange', function(event) {
     if (event.detail.key === 'updateRouteDate') {
-        const updateDetails = event.detail.value;
-        // Find the dayNameBox with the matching route number
-        const dayNameBoxes = document.querySelectorAll('.day-name-box');
-        dayNameBoxes.forEach(box => {
-            if (parseInt(box.getAttribute('data-route-number')) === updateDetails.routeNumber) {
-                // Parse the date as UTC
-                const dateParts = updateDetails.date.split('-');
-                let newDayName = new Date(Date.UTC(dateParts[0], dateParts[1] - 1, dateParts[2])).toLocaleDateString('en-US', { weekday: 'long', timeZone: 'UTC' })[0];
-                box.textContent = newDayName;
-            }
-        });
+        routeHandling.updateDayNameBoxes();
     }
 });
 
