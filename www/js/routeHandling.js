@@ -69,9 +69,6 @@ const routeHandling = {
             let initialDate = new Date(Date.UTC(dateParts[0], dateParts[1] - 1, dateParts[2]));
             let initialDayName = initialDate.toLocaleDateString('en-US', { weekday: 'long', timeZone: 'UTC' })[0];
             dayNameBox.textContent = initialDayName;
-        } else {
-            // Optional: Handle the case where no date is set for this routeNumber
-            dayNameBox.textContent = ''; // Set to empty or a placeholder value as needed
         }
 
         dayNameBox.style.width = '24px';
