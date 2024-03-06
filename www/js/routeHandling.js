@@ -118,16 +118,46 @@ const routeHandling = {
                     dateFormat: "Y-m-d",
                     defaultDate: appState.routeDates[routeNumber],
                     minDate: routeNumber === 1 ? "today" : appState.routeDates[routeNumber - 1],
+                    mode: "single", // Default mode
+                    onChange: (selectedDates) => {
+                        const newDate = selectedDates[0];
+                        this.textContent = new Date(newDate).getDate().toString();
+                        const oldDate = appState.routeDates[routeNumber] ? new Date(appState.routeDates[routeNumber]) : new Date();
+                        const dayDifference = (newDate - oldDate) / (1000 * 3600 * 24);
+
+                        updateState('updateRouteDate', { routeNumber: routeNumber, date: newDate.toISOString().split('T')[0] });
+
+                        for (let i = routeNumber + 1; i <= Object.keys(appState.routeDates).length; i++) {
+                            if (appState.routeDates[i]) {
+                                let subsequentDate = new Date(appState.routeDates[i]);
+                                subsequentDate.setDate(subsequentDate.getDate() + dayDifference);
+                                updateState('updateRouteDate', { routeNumber: i, date: subsequentDate.toISOString().split('T')[0] });
+                                routeHandling.updateDateButtonsDisplay();
+                            }
+                        }
+                        updateState('updateRouteDate', { routeNumber: routeNumber, date: newDate.toISOString().split('T')[0] });
+                        leftPane.refreshFlatpickrInstances();
+                    },
                     onReady: (selectedDates, dateStr, instance) => {
-                        // Find the .flatpickr-prev-month button
                         let prevMonthButton = instance.calendarContainer.querySelector('.flatpickr-prev-month');
                         let flexibleButton = document.createElement('button');
                         flexibleButton.textContent = 'Flexible';
                         flexibleButton.className = 'flexible-button';
-                        flexibleButton.style.cssText = 'margin-right: 10px;'; // Adjust styling as needed
+                        flexibleButton.style.cssText = 'margin-right: 10px;';
+                        
                         prevMonthButton.parentNode.insertBefore(flexibleButton, prevMonthButton);
-                        // Define the click behavior for the "Flexible" button
+                        
                         flexibleButton.addEventListener('click', () => {
+                            // Toggle between "single" and "range" mode
+                            if (instance.config.mode === "single") {
+                                instance.set("mode", "range");
+                                flexibleButton.textContent = 'Single';
+                            } else {
+                                instance.set("mode", "single");
+                                flexibleButton.textContent = 'Flexible';
+                            }
+                            instance.clear(); // Optional: Clear selected dates when toggling
+                            instance.redraw(); // Redraw the calendar to apply changes
                         });
                     }
                 });
@@ -135,7 +165,7 @@ const routeHandling = {
             } else {
                 this._flatpickr.open();
             }
-        }, {once: true});
+        }, {once: true});        
         
         routeDiv.insertBefore(dateButton, dayNameBox.nextSibling);
 
