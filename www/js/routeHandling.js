@@ -179,16 +179,6 @@ const routeHandling = {
         } else {
             container.appendChild(routeDiv);
         }
-        
-        // Then, determine if we need to insert a month name box and insert it before the routeDiv
-        if (routeNumber === 1 || this.hasMonthChanged(routeNumber)) {
-            const monthNameBox = document.createElement('div');
-            monthNameBox.className = 'month-name-box';
-            const monthNameSpan = document.createElement('span');
-            monthNameSpan.textContent = this.getMonthNameFromDate(appState.routeDates[routeNumber]);
-            monthNameBox.appendChild(monthNameSpan);
-            container.insertBefore(monthNameBox, routeDiv); // Adjusted to insert before the routeDiv as needed
-        }
 
         for (let i = 0; i < 2; i++) {
             let index = (routeNumber - 1) * 2 + i;
@@ -197,6 +187,7 @@ const routeHandling = {
         uiHandling.setFocusToNextUnsetInput();
         uiHandling.toggleTripButtonsVisibility();
         uiHandling.getPriceButton();
+        routeHandling.updateMonthNameBoxes();
     },
 
     updateDateButtonsDisplay: function() {
@@ -389,21 +380,48 @@ const routeHandling = {
         });
     },
 
-    getMonthNameFromDate: function(dateString) {
-        const date = new Date(dateString);
-        return date.toLocaleDateString('en-US', { month: 'long' });
-    },
-
-    hasMonthChanged: function(routeNumber) {
-        if (routeNumber > 1 && appState.routeDates[routeNumber] && appState.routeDates[routeNumber - 1]) {
-            const currentMonth = new Date(appState.routeDates[routeNumber]).getMonth();
-            console.log('current month: ',currentMonth);
-            const previousMonth = new Date(appState.routeDates[routeNumber - 1]).getMonth();
-            console.log('previous month', previousMonth);
-            return currentMonth !== previousMonth;
-        }
-        return false;
-    }   
+    updateMonthNameBoxes: function() {
+        console.log('updateMonthNameBoxes');
+        const container = document.querySelector('.airport-selection');
+        let previousMonth = null;
+    
+        // Iterate through each route div
+        document.querySelectorAll('.route-container').forEach((routeDiv, index) => {
+            const routeNumber = parseInt(routeDiv.getAttribute('data-route-number'));
+            const routeDate = appState.routeDates[routeNumber];
+            console.log('routeNumber', routeNumber);
+            console.log('routeDate', routeDate);
+            if (routeDate) {
+                const dateParts = routeDate.split('-');
+                const currentMonth = new Date(Date.UTC(dateParts[0], dateParts[1] - 1, dateParts[2])).getMonth();
+    
+                // Check if the current route's month is different from the previous route's month
+                if (currentMonth !== previousMonth) {
+                    // Create or update the month name box
+                    let monthNameBox;
+                    if (routeDiv.previousElementSibling && routeDiv.previousElementSibling.classList.contains('month-name-box')) {
+                        monthNameBox = routeDiv.previousElementSibling;
+                    } else {
+                        monthNameBox = document.createElement('div');
+                        monthNameBox.className = 'month-name-box';
+                        container.insertBefore(monthNameBox, routeDiv);
+                    }
+    
+                    // Set the month name in the month name box
+                    const monthName = new Date(Date.UTC(dateParts[0], dateParts[1] - 1, dateParts[2])).toLocaleDateString('en-US', { month: 'long', timeZone: 'UTC' });
+                    monthNameBox.textContent = monthName;
+    
+                    // Update previousMonth
+                    previousMonth = currentMonth;
+                } else {
+                    // If the month hasn't changed and there's an unnecessary month name box, remove it
+                    if (routeDiv.previousElementSibling && routeDiv.previousElementSibling.classList.contains('month-name-box')) {
+                        container.removeChild(routeDiv.previousElementSibling);
+                    }
+                }
+            }
+        });
+    }        
 }
 
 document.addEventListener('routeDatesUpdated', function() {
@@ -413,6 +431,7 @@ document.addEventListener('routeDatesUpdated', function() {
 document.addEventListener('stateChange', function(event) {
     if (event.detail.key === 'updateRouteDate') {
         routeHandling.updateDayNameBoxes();
+        routeHandling.updateMonthNameBoxes();
     }
 });
 
