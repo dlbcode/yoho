@@ -76,6 +76,19 @@ input[type="text"]:focus {
   transition: flex 0.5s ease-in-out;
 }
 
+.month-name-box {
+    position: relative; /* Needed for absolute positioning of pseudo-elements */
+    text-align: center;
+    padding: 0 20px; /* Provides space around the text to cover the line */
+    line-height: 1px; /* Adjust the height of the element */
+    background-color: #444; /* Background color of the text area to cover the line */
+    font-size: 10px; /* Makes the text small */
+    text-transform: uppercase;
+    margin-top: 7px;
+    margin-bottom: 7px;
+    text-shadow: #222 5px 5px 5px; /* Adds a shadow to the text */
+}
+
 .options-container {
   display: flex;
   justify-content: space-between;

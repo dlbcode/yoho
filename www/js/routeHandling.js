@@ -58,7 +58,7 @@ const routeHandling = {
             routeDiv.appendChild(suggestionsDiv);
         }
 
-        /// Create a new div for the day name box
+        // Create a new div for the day name box
         let dayNameBox = document.createElement('div');
         dayNameBox.className = 'day-name-box';
         dayNameBox.setAttribute('data-route-number', routeNumber); // Store the route number on the element for reference
@@ -178,6 +178,16 @@ const routeHandling = {
             container.prepend(routeDiv);
         } else {
             container.appendChild(routeDiv);
+        }
+        
+        // Then, determine if we need to insert a month name box and insert it before the routeDiv
+        if (routeNumber === 1 || this.hasMonthChanged(routeNumber)) {
+            const monthNameBox = document.createElement('div');
+            monthNameBox.className = 'month-name-box';
+            const monthNameSpan = document.createElement('span');
+            monthNameSpan.textContent = this.getMonthNameFromDate(appState.routeDates[routeNumber]);
+            monthNameBox.appendChild(monthNameSpan);
+            container.insertBefore(monthNameBox, routeDiv); // Adjusted to insert before the routeDiv as needed
         }
 
         for (let i = 0; i < 2; i++) {
@@ -377,7 +387,23 @@ const routeHandling = {
                 }
             }
         });
-    }    
+    },
+
+    getMonthNameFromDate: function(dateString) {
+        const date = new Date(dateString);
+        return date.toLocaleDateString('en-US', { month: 'long' });
+    },
+
+    hasMonthChanged: function(routeNumber) {
+        if (routeNumber > 1 && appState.routeDates[routeNumber] && appState.routeDates[routeNumber - 1]) {
+            const currentMonth = new Date(appState.routeDates[routeNumber]).getMonth();
+            console.log('current month: ',currentMonth);
+            const previousMonth = new Date(appState.routeDates[routeNumber - 1]).getMonth();
+            console.log('previous month', previousMonth);
+            return currentMonth !== previousMonth;
+        }
+        return false;
+    }   
 }
 
 document.addEventListener('routeDatesUpdated', function() {
