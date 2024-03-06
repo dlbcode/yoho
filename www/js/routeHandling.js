@@ -118,7 +118,7 @@ const routeHandling = {
                     dateFormat: "Y-m-d",
                     defaultDate: appState.routeDates[routeNumber],
                     minDate: routeNumber === 1 ? "today" : appState.routeDates[routeNumber - 1],
-                    mode: "single", // Default mode
+                    mode: "single",
                     onChange: (selectedDates) => {
                         const newDate = selectedDates[0];
                         this.textContent = new Date(newDate).getDate().toString();
@@ -148,7 +148,6 @@ const routeHandling = {
                         prevMonthButton.parentNode.insertBefore(flexibleButton, prevMonthButton);
                         
                         flexibleButton.addEventListener('click', () => {
-                            // Toggle between "single" and "range" mode
                             if (instance.config.mode === "single") {
                                 instance.set("mode", "range");
                                 flexibleButton.textContent = 'Single';
@@ -156,8 +155,8 @@ const routeHandling = {
                                 instance.set("mode", "single");
                                 flexibleButton.textContent = 'Flexible';
                             }
-                            instance.clear(); // Optional: Clear selected dates when toggling
-                            instance.redraw(); // Redraw the calendar to apply changes
+                            instance.clear();
+                            instance.redraw();
                         });
                     }
                 });
