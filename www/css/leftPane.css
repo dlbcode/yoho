@@ -172,12 +172,14 @@ input[type="text"]:focus {
   padding: 2px;
   background-color: #1f1f1f;
   margin: -5px;
+  cursor: pointer;
 }
 
 .remove-route-button {
   padding: 2px;
   background-color: #1f1f1f;
   margin: -5px;
+  cursor: pointer;
 }
 
 .date-select-button {
@@ -187,6 +189,7 @@ input[type="text"]:focus {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  cursor: pointer;
 }
 
 .icon-dropdown {

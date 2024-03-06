@@ -85,6 +85,15 @@ const routeHandling = {
         dayNameBox.style.display = 'flex';
         dayNameBox.style.alignItems = 'center';
         dayNameBox.style.padding = '2px';
+        dayNameBox.style.cursor = 'pointer';
+        
+        dayNameBox.addEventListener('click', function() {
+            // Find the date-select-button within the same routeDiv
+            const dateSelectButton = routeDiv.querySelector('.date-select-button');
+            if (dateSelectButton) {
+                dateSelectButton.click(); // Programmatically trigger the click event on the button
+            }
+        });
         
         // Insert the day name box before the date button
         routeDiv.insertBefore(dayNameBox, routeDiv.firstChild);
