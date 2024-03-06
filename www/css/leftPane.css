@@ -381,6 +381,7 @@ input[type="text"]:focus {
 
 /* Navigation buttons */
 .flatpickr-prev-month, .flatpickr-next-month, .flatpickr-prev-month:hover, .flatpickr-next-month:hover {
+  position: static !important;
   background: #333; /* Dark background for buttons */
   color: #ccc; /* Light text for buttons */
 }

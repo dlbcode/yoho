@@ -116,34 +116,27 @@ const routeHandling = {
                 let fp = flatpickr(this, {
                     enableTime: false,
                     dateFormat: "Y-m-d",
-                    defaultDate: appState.routeDates[routeNumber], // Use the date from appState.routeDates
-                    minDate: routeNumber === 1 ? "today" : appState.routeDates[routeNumber - 1], // Set minDate to previous route's date
-                    onChange: (selectedDates) => {
-                        const newDate = selectedDates[0];
-                        this.textContent = new Date(newDate).getDate().toString();
-                        const oldDate = appState.routeDates[routeNumber] ? new Date(appState.routeDates[routeNumber]) : new Date();
-                        const dayDifference = (newDate - oldDate) / (1000 * 3600 * 24);
-
-                        updateState('updateRouteDate', { routeNumber: routeNumber, date: newDate.toISOString().split('T')[0] });
-
-                        for (let i = routeNumber + 1; i <= Object.keys(appState.routeDates).length; i++) {
-                            if (appState.routeDates[i]) {
-                                let subsequentDate = new Date(appState.routeDates[i]);
-                                subsequentDate.setDate(subsequentDate.getDate() + dayDifference);
-                                updateState('updateRouteDate', { routeNumber: i, date: subsequentDate.toISOString().split('T')[0] });
-                                routeHandling.updateDateButtonsDisplay();
-                            }
-                        }
-                        updateState('updateRouteDate', { routeNumber: routeNumber, date: newDate.toISOString().split('T')[0] });
-                        leftPane.refreshFlatpickrInstances();
+                    defaultDate: appState.routeDates[routeNumber],
+                    minDate: routeNumber === 1 ? "today" : appState.routeDates[routeNumber - 1],
+                    onReady: (selectedDates, dateStr, instance) => {
+                        // Find the .flatpickr-prev-month button
+                        let prevMonthButton = instance.calendarContainer.querySelector('.flatpickr-prev-month');
+                        let flexibleButton = document.createElement('button');
+                        flexibleButton.textContent = 'Flexible';
+                        flexibleButton.className = 'flexible-button';
+                        flexibleButton.style.cssText = 'margin-right: 10px;'; // Adjust styling as needed
+                        prevMonthButton.parentNode.insertBefore(flexibleButton, prevMonthButton);
+                        // Define the click behavior for the "Flexible" button
+                        flexibleButton.addEventListener('click', () => {
+                        });
                     }
                 });
                 fp.open();
             } else {
                 this._flatpickr.open();
             }
-        }, {once: true});            
-
+        }, {once: true});
+        
         routeDiv.insertBefore(dateButton, dayNameBox.nextSibling);
 
         let swapButton = document.createElement('button');
