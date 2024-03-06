@@ -390,7 +390,6 @@ const routeHandling = {
     },
 
     updateMonthNameBoxes: function() {
-        console.log('updateMonthNameBoxes');
         const container = document.querySelector('.airport-selection');
         let previousMonth = null;
     
@@ -398,8 +397,6 @@ const routeHandling = {
         document.querySelectorAll('.route-container').forEach((routeDiv, index) => {
             const routeNumber = parseInt(routeDiv.getAttribute('data-route-number'));
             const routeDate = appState.routeDates[routeNumber];
-            console.log('routeNumber', routeNumber);
-            console.log('routeDate', routeDate);
             if (routeDate) {
                 const dateParts = routeDate.split('-');
                 const currentMonth = new Date(Date.UTC(dateParts[0], dateParts[1] - 1, dateParts[2])).getMonth();
