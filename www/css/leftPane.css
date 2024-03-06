@@ -162,8 +162,8 @@ input[type="text"]:focus {
 }
 
 .day-name-box {
-  background-color: #555; /* Match the button background or choose a different color */
-  color: #a9a9a9; /* Match the button text color */
+  background-color: #555;
+  color: #a9a9a9;
   margin-right: -10px;
   padding: 2px;
 }
