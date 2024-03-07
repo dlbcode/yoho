@@ -75,6 +75,10 @@ MongoClient.connect(mongoUrl, { useNewUrlParser: true, useUnifiedTopology: true 
 
   const yhonewayandreturn = require('./api/yhonewayandreturn');
   yhonewayandreturn(app, axios, db, tequila);
+
+  const range = require('./api/range');
+  range(app, db, tequila);
+
 }); 
 
 app.listen(port, () => {
