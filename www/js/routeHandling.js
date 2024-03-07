@@ -103,7 +103,6 @@ const routeHandling = {
 
         // Initialize currentRouteDate, defaulting to today's date for the first route or the previous route's date otherwise
         const currentRouteDate = appState.routeDates[routeNumber] || (routeNumber === 1 ? new Date().toISOString().split('T')[0] : appState.routeDates[routeNumber - 1]);
-        console.log('appState.routeDates[routeNumber]:', appState.routeDates[routeNumber]);
         // Update appState.routeDates for the current route if it wasn't already set
         if (!appState.routeDates[routeNumber]) {
             appState.routeDates[routeNumber] = currentRouteDate;
@@ -116,6 +115,8 @@ const routeHandling = {
             if (!this._flatpickr) {
                 const currentRouteDate = appState.routeDates[routeNumber];
                 const isDateRange = currentRouteDate && currentRouteDate.includes(' to ');
+                const timeZone = 'UTC'; // Specify your desired time zone, e.g., 'UTC', 'America/New_York'
+                
                 let fp = flatpickr(this, {
                     enableTime: false,
                     dateFormat: "Y-m-d",
@@ -126,8 +127,11 @@ const routeHandling = {
                         if (selectedDates.length > 1) {
                             this.textContent = '[...]';
                         } else if (selectedDates.length === 1) {
-                            this.textContent = selectedDates[0].getDate().toString();
-                            console.log('onValueUpdate: this.textContent:', this.textContent);
+                            const formatter = new Intl.DateTimeFormat('en-US', {
+                                day: 'numeric',
+                                timeZone: timeZone
+                            });
+                            this.textContent = formatter.format(selectedDates[0]);
                         }
                         const dateValue = selectedDates.length > 1 
                             ? `${selectedDates[0].toISOString().split('T')[0]} to ${selectedDates[1].toISOString().split('T')[0]}` 
