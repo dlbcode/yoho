@@ -116,21 +116,24 @@ const routeHandling = {
             if (!this._flatpickr) {
                 const currentRouteDate = appState.routeDates[routeNumber];
                 const isDateRange = currentRouteDate && currentRouteDate.includes(' to ');
-                const defaultDate = currentRouteDate || new Date();
-                const minDate = routeNumber === 1 ? "today" : appState.routeDates[routeNumber - 1];
-        
                 let fp = flatpickr(this, {
                     enableTime: false,
                     dateFormat: "Y-m-d",
-                    defaultDate: isDateRange ? currentRouteDate.split(' to ')[0] : defaultDate,
-                    minDate: minDate,
+                    defaultDate: isDateRange ? currentRouteDate.split(' to ')[0] : currentRouteDate,
+                    minDate: routeNumber === 1 ? "today" : appState.routeDates[routeNumber - 1],
                     mode: isDateRange ? "range" : "single",
-                    onChange: (selectedDates) => {
-                        const dateText = selectedDates.length > 1 ? '[...]' : new Date(selectedDates[0]).getDate().toString();
-                        this.textContent = dateText;
-                        const dateValue = selectedDates.length > 1 ? `${selectedDates[0].toISOString().split('T')[0]} to ${selectedDates[1].toISOString().split('T')[0]}` : selectedDates[0].toISOString().split('T')[0];
+                    onValueUpdate: (selectedDates) => {
+                        if (selectedDates.length > 1) {
+                            this.textContent = '[...]';
+                        } else if (selectedDates.length === 1) {
+                            this.textContent = selectedDates[0].getDate().toString();
+                            console.log('onValueUpdate: this.textContent:', this.textContent);
+                        }
+                        const dateValue = selectedDates.length > 1 
+                            ? `${selectedDates[0].toISOString().split('T')[0]} to ${selectedDates[1].toISOString().split('T')[0]}` 
+                            : selectedDates[0].toISOString().split('T')[0];
                         updateState('updateRouteDate', { routeNumber: routeNumber, date: dateValue });
-                    },
+                    },               
                     onReady: (selectedDates, dateStr, instance) => {
                         let prevMonthButton = instance.calendarContainer.querySelector('.flatpickr-prev-month');
                         let flexibleButton = document.createElement('button');
@@ -158,7 +161,7 @@ const routeHandling = {
             } else {
                 this._flatpickr.open();
             }
-        }, {once: true});               
+        }, {once: true});           
         
         routeDiv.insertBefore(dateButton, dayNameBox.nextSibling);
 
@@ -217,23 +220,22 @@ const routeHandling = {
 
     updateDateButtonsDisplay: function() {
         document.querySelectorAll('.date-select-button').forEach(button => {
-            // Use the button's value attribute to check for a date range
             const dateValue = button.getAttribute('value');
+            const timeZone = 'UTC'; // Adjust this to the desired time zone
     
             if (dateValue) {
-                // Check if the value contains 'to', indicating a range
                 if (dateValue.includes(' to ')) {
-                    // Date range format detected
                     button.textContent = '[...]';
                 } else {
-                    // Single date format detected
-                    // Convert the single date value to a more readable format if desired
-                    const formattedDate = new Date(dateValue).toLocaleDateString();
-                    button.textContent = formattedDate;
+                    const dayNumber = new Date(dateValue).toLocaleDateString('en-US', {
+                        timeZone: timeZone,
+                        day: 'numeric'
+                    });
+                    button.textContent = dayNumber;
                 }
             }
         });
-    },          
+    },                  
     
     handleSwapButtonClick: function(routeNumber) {
         let routeDiv = document.getElementById(`route${routeNumber}`);
