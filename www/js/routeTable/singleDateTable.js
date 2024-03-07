@@ -220,21 +220,33 @@ function buildSingleDateTable(routeIndex) {
     }
     
     function highlightSelectedRowForRouteIndex(routeIndex) {
-      // First, clear any previous selection for this route index
+      // Clear previous selection
       document.querySelectorAll(`.route-info-table[data-route-index="${routeIndex}"] tbody tr.selected`).forEach(row => {
-          row.classList.remove('selected');
+        row.classList.remove('selected');
       });
     
-      // Get the selected route ID for this route index
       const selectedRouteDetails = appState.selectedRoutes[routeIndex];
-      if (selectedRouteDetails && selectedRouteDetails.id) { // Corrected this line
-          // Find and highlight the row with the matching route ID within this route index
-          const selectedRow = document.querySelector(`.route-info-table[data-route-index="${routeIndex}"] tbody tr[data-route-id="${selectedRouteDetails.id}"]`);
-          if (selectedRow) {
-              selectedRow.classList.add('selected');
-          }
+      if (selectedRouteDetails && selectedRouteDetails.id) {
+        console.log('selectedRouteDetails.id:', selectedRouteDetails.id);
+        // Attempt to find a row with an exact match for data-route-id
+        let selectedRow = document.querySelector('.route-info-table tbody tr');
+        console.log('Test selectedRow:', selectedRow);
+        // If no exact match is found, attempt to find a row that includes the selectedRouteDetails.id as part of its data-route-id
+        if (!selectedRow) {
+          document.querySelectorAll(`.route-info-table[data-route-index="${routeIndex}"] tbody tr`).forEach(row => {
+            const routeId = row.getAttribute('data-route-id');
+            if (routeId && routeId.split('|').includes(selectedRouteDetails.id)) {
+              selectedRow = row;
+            }
+          });
+        }
+    
+        // If a matching row is found, add the 'selected' class
+        if (selectedRow) {
+          selectedRow.classList.add('selected');
+        }
       }
-    }
+    }    
     
     function replaceWaypointsForCurrentRoute(intermediaryIatas, routeIndex) {
       // Adjust startIndex for round trips to ensure the entire waypoints array is considered
