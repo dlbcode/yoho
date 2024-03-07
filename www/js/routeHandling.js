@@ -149,14 +149,19 @@ const routeHandling = {
                         
                         flexibleButton.addEventListener('click', () => {
                             if (instance.config.mode === "single") {
+                                console.log('Switching to range mode')
                                 instance.set("mode", "range");
                                 flexibleButton.textContent = 'Single';
+                                dateButton.textContent = '[...]';
                             } else {
                                 instance.set("mode", "single");
                                 flexibleButton.textContent = 'Flexible';
+                                // Reset dateButton text to show the date or any other indicator
+                                const date = appState.routeDates[routeNumber];
+                                dateButton.textContent = date ? new Date(date).toLocaleDateString() : 'Select Date';
                             }
-                            instance.clear();
-                            instance.redraw();
+                            //instance.clear();
+                            //instance.redraw();
                         });
                     }
                 });
