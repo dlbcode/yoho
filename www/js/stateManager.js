@@ -18,7 +18,7 @@ const appState = {
     currentView: 'trip',
     currentGroupID: 0,
     routeDates: {
-        1: new Date().toISOString().split('T')[0], // Set today's date for route number 1
+        1: null, //new Date().toISOString().split('T')[0],
     },
 };
   
@@ -131,6 +131,8 @@ function updateState(key, value) {
             break;
     }
     document.dispatchEvent(new CustomEvent('stateChange', { detail: { key, value } }));
+    
+    //console.log('appState.routeDates:', appState.routeDates);
 }
   
 function updateUrl() {

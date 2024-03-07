@@ -101,75 +101,64 @@ const routeHandling = {
         let dateButton = document.createElement('button');
         dateButton.className = 'date-select-button';
 
+        // Initialize currentRouteDate, defaulting to today's date for the first route or the previous route's date otherwise
+        const currentRouteDate = appState.routeDates[routeNumber] || (routeNumber === 1 ? new Date().toISOString().split('T')[0] : appState.routeDates[routeNumber - 1]);
+        console.log('appState.routeDates[routeNumber]:', appState.routeDates[routeNumber]);
+        // Update appState.routeDates for the current route if it wasn't already set
         if (!appState.routeDates[routeNumber]) {
-            if (routeNumber === 1) {
-                appState.routeDates[routeNumber] = new Date().toISOString().split('T')[0];
-            } else {
-                appState.routeDates[routeNumber] = appState.routeDates[routeNumber - 1];
-            }
+            appState.routeDates[routeNumber] = currentRouteDate;
         }
 
-        dateButton.textContent = parseInt(appState.routeDates[routeNumber].split('-')[2]).toString();
+        // Set the button text based on whether it's a date range or a single date
+        dateButton.textContent = currentRouteDate.includes(' to ') ? '[...]' : new Date(currentRouteDate).getDate().toString();
 
         dateButton.addEventListener('click', function() {
             if (!this._flatpickr) {
+                const currentRouteDate = appState.routeDates[routeNumber];
+                const isDateRange = currentRouteDate && currentRouteDate.includes(' to ');
+                const defaultDate = currentRouteDate || new Date();
+                const minDate = routeNumber === 1 ? "today" : appState.routeDates[routeNumber - 1];
+        
                 let fp = flatpickr(this, {
                     enableTime: false,
                     dateFormat: "Y-m-d",
-                    defaultDate: appState.routeDates[routeNumber],
-                    minDate: routeNumber === 1 ? "today" : appState.routeDates[routeNumber - 1],
-                    mode: "single",
+                    defaultDate: isDateRange ? currentRouteDate.split(' to ')[0] : defaultDate,
+                    minDate: minDate,
+                    mode: isDateRange ? "range" : "single",
                     onChange: (selectedDates) => {
-                        const newDate = selectedDates[0];
-                        this.textContent = new Date(newDate).getDate().toString();
-                        const oldDate = appState.routeDates[routeNumber] ? new Date(appState.routeDates[routeNumber]) : new Date();
-                        const dayDifference = (newDate - oldDate) / (1000 * 3600 * 24);
-
-                        updateState('updateRouteDate', { routeNumber: routeNumber, date: newDate.toISOString().split('T')[0] });
-
-                        for (let i = routeNumber + 1; i <= Object.keys(appState.routeDates).length; i++) {
-                            if (appState.routeDates[i]) {
-                                let subsequentDate = new Date(appState.routeDates[i]);
-                                subsequentDate.setDate(subsequentDate.getDate() + dayDifference);
-                                updateState('updateRouteDate', { routeNumber: i, date: subsequentDate.toISOString().split('T')[0] });
-                                routeHandling.updateDateButtonsDisplay();
-                            }
-                        }
-                        updateState('updateRouteDate', { routeNumber: routeNumber, date: newDate.toISOString().split('T')[0] });
-                        leftPane.refreshFlatpickrInstances();
+                        const dateText = selectedDates.length > 1 ? '[...]' : new Date(selectedDates[0]).getDate().toString();
+                        this.textContent = dateText;
+                        const dateValue = selectedDates.length > 1 ? `${selectedDates[0].toISOString().split('T')[0]} to ${selectedDates[1].toISOString().split('T')[0]}` : selectedDates[0].toISOString().split('T')[0];
+                        updateState('updateRouteDate', { routeNumber: routeNumber, date: dateValue });
                     },
                     onReady: (selectedDates, dateStr, instance) => {
                         let prevMonthButton = instance.calendarContainer.querySelector('.flatpickr-prev-month');
                         let flexibleButton = document.createElement('button');
-                        flexibleButton.textContent = 'Flexible';
+                        flexibleButton.textContent = isDateRange ? 'Single' : 'Flexible';
                         flexibleButton.className = 'flexible-button';
-                        flexibleButton.style.cssText = 'margin-right: 10px;';
-                        
+                        flexibleButton.style.marginRight = '10px';
                         prevMonthButton.parentNode.insertBefore(flexibleButton, prevMonthButton);
-                        
+        
                         flexibleButton.addEventListener('click', () => {
-                            if (instance.config.mode === "single") {
-                                console.log('Switching to range mode')
-                                instance.set("mode", "range");
-                                flexibleButton.textContent = 'Single';
-                                dateButton.textContent = '[...]';
-                            } else {
-                                instance.set("mode", "single");
-                                flexibleButton.textContent = 'Flexible';
-                                // Reset dateButton text to show the date or any other indicator
-                                const date = appState.routeDates[routeNumber];
-                                dateButton.textContent = date ? new Date(date).toLocaleDateString() : 'Select Date';
-                            }
-                            //instance.clear();
-                            //instance.redraw();
+                            const newMode = instance.config.mode === "single" ? "range" : "single";
+                            instance.set("mode", newMode);
+                            flexibleButton.textContent = newMode === "single" ? 'Flexible' : 'Single';
+                            dateButton.textContent = newMode === "single" ? 'Select Date' : '[...]';
+                            instance.clear();
+                            instance.redraw();
                         });
+        
+                        if (isDateRange) {
+                            const dates = currentRouteDate.split(' to ').map(dateStr => new Date(dateStr));
+                            instance.setDate(dates, true);
+                        }
                     }
                 });
                 fp.open();
             } else {
                 this._flatpickr.open();
             }
-        }, {once: true});        
+        }, {once: true});               
         
         routeDiv.insertBefore(dateButton, dayNameBox.nextSibling);
 
@@ -227,14 +216,24 @@ const routeHandling = {
     },
 
     updateDateButtonsDisplay: function() {
-        document.querySelectorAll('.date-select-button').forEach((button, index) => {
-            const routeNumber = index + 1;
-            if (appState.routeDates[routeNumber]) {
-                const date = appState.routeDates[routeNumber];
-                button.textContent = parseInt(date.split('-')[2]).toString();
+        document.querySelectorAll('.date-select-button').forEach(button => {
+            // Use the button's value attribute to check for a date range
+            const dateValue = button.getAttribute('value');
+    
+            if (dateValue) {
+                // Check if the value contains 'to', indicating a range
+                if (dateValue.includes(' to ')) {
+                    // Date range format detected
+                    button.textContent = '[...]';
+                } else {
+                    // Single date format detected
+                    // Convert the single date value to a more readable format if desired
+                    const formattedDate = new Date(dateValue).toLocaleDateString();
+                    button.textContent = formattedDate;
+                }
             }
         });
-    },    
+    },          
     
     handleSwapButtonClick: function(routeNumber) {
         let routeDiv = document.getElementById(`route${routeNumber}`);
@@ -403,10 +402,12 @@ const routeHandling = {
         dayNameBoxes.forEach(box => {
             const routeNumber = parseInt(box.getAttribute('data-route-number'));
             if (appState.routeDates[routeNumber]) {
-                const dateParts = appState.routeDates[routeNumber].split('-');
+                // Check if the date is a range and split it if necessary
+                const effectiveDate = appState.routeDates[routeNumber].includes(' to ') ? appState.routeDates[routeNumber].split(' to ')[0] : appState.routeDates[routeNumber];
+                const dateParts = effectiveDate.split('-');
                 let newDayName = new Date(Date.UTC(dateParts[0], dateParts[1] - 1, dateParts[2])).toLocaleDateString('en-US', { weekday: 'long', timeZone: 'UTC' })[0];
                 box.textContent = newDayName;
-
+    
                 if (newDayName === 'S') {
                     box.style.backgroundColor = '#01481a'; // Set background color to green for weekend days
                 } else {
@@ -414,23 +415,22 @@ const routeHandling = {
                 }
             }
         });
-    },
+    },    
 
     updateMonthNameBoxes: function() {
         const container = document.querySelector('.airport-selection');
         let previousMonth = null;
     
-        // Iterate through each route div
         document.querySelectorAll('.route-container').forEach((routeDiv, index) => {
             const routeNumber = parseInt(routeDiv.getAttribute('data-route-number'));
             const routeDate = appState.routeDates[routeNumber];
             if (routeDate) {
-                const dateParts = routeDate.split('-');
+                // Check if the date is a range and split it if necessary
+                const effectiveDate = routeDate.includes(' to ') ? routeDate.split(' to ')[0] : routeDate;
+                const dateParts = effectiveDate.split('-');
                 const currentMonth = new Date(Date.UTC(dateParts[0], dateParts[1] - 1, dateParts[2])).getMonth();
     
-                // Check if the current route's month is different from the previous route's month
                 if (currentMonth !== previousMonth) {
-                    // Create or update the month name box
                     let monthNameBox;
                     if (routeDiv.previousElementSibling && routeDiv.previousElementSibling.classList.contains('month-name-box')) {
                         monthNameBox = routeDiv.previousElementSibling;
@@ -440,21 +440,18 @@ const routeHandling = {
                         container.insertBefore(monthNameBox, routeDiv);
                     }
     
-                    // Set the month name in the month name box
                     const monthName = new Date(Date.UTC(dateParts[0], dateParts[1] - 1, dateParts[2])).toLocaleDateString('en-US', { month: 'long', timeZone: 'UTC' });
                     monthNameBox.textContent = monthName;
     
-                    // Update previousMonth
                     previousMonth = currentMonth;
                 } else {
-                    // If the month hasn't changed and there's an unnecessary month name box, remove it
                     if (routeDiv.previousElementSibling && routeDiv.previousElementSibling.classList.contains('month-name-box')) {
                         container.removeChild(routeDiv.previousElementSibling);
                     }
                 }
             }
         });
-    }        
+    }    
 }
 
 document.addEventListener('routeDatesUpdated', function() {
