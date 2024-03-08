@@ -88,6 +88,8 @@ function buildSingleDateTable(routeIndex) {
       table.appendChild(tbody);
       infoPaneContent.appendChild(table);
 
+      highlightSelectedRowForRouteIndex(routeIndex);
+
       // Reuse existing event listeners or define new ones specific to single date table
       attachEventListeners(table, data, routeIndex);
     })
@@ -227,11 +229,7 @@ function buildSingleDateTable(routeIndex) {
     
       const selectedRouteDetails = appState.selectedRoutes[routeIndex];
       if (selectedRouteDetails && selectedRouteDetails.id) {
-        console.log('selectedRouteDetails.id:', selectedRouteDetails.id);
-        // Attempt to find a row with an exact match for data-route-id
         let selectedRow = document.querySelector('.route-info-table tbody tr');
-        console.log('Test selectedRow:', selectedRow);
-        // If no exact match is found, attempt to find a row that includes the selectedRouteDetails.id as part of its data-route-id
         if (!selectedRow) {
           document.querySelectorAll(`.route-info-table[data-route-index="${routeIndex}"] tbody tr`).forEach(row => {
             const routeId = row.getAttribute('data-route-id');
