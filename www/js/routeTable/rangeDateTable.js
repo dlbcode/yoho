@@ -80,8 +80,13 @@ function buildDateRangeTable(routeIndex, dateRange) {
         const durationHours = Math.floor(flight.duration.total / 3600);
         const durationMinutes = Math.floor((flight.duration.total % 3600) / 60);
         const routeIATAs = flight.route.map(r => r.flyFrom).concat(flight.route[flight.route.length - 1].flyTo).join(" > ");
-        row.innerHTML = `<td>${new Date(flight.local_departure).toLocaleString()}</td>
-                          <td>${new Date(flight.local_arrival).toLocaleString()}</td>
+      
+        // Correctly convert epoch time in seconds to milliseconds for JavaScript Date constructor
+        const departureDate = new Date(flight.dTime * 1000).toLocaleString();
+        const arrivalDate = new Date(flight.aTime * 1000).toLocaleString();
+      
+        row.innerHTML = `<td>${departureDate}</td>
+                          <td>${arrivalDate}</td>
                           <td>$${flight.price}</td>
                           <td>${flight.airlines.join(", ")}</td>
                           <td>${directFlight ? '✓' : ''}</td>
@@ -90,7 +95,7 @@ function buildDateRangeTable(routeIndex, dateRange) {
                           <td>${durationHours}h ${durationMinutes}m</td>
                           <td>${routeIATAs}</td>`;
         tbody.appendChild(row);
-      });
+      });      
     } else {
       console.error('data.data is not an array:', data.data);
       // Handle the case where data is not an array, e.g., display a message to the user
