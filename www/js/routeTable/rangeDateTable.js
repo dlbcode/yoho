@@ -147,9 +147,16 @@ function buildDateRangeTable(routeIndex, dateRange) {
       document.querySelectorAll('.route-info-table tbody tr').forEach((row, index) => {
         row.addEventListener('click', function() {
             const routeIdString = this.getAttribute('data-route-id');
-            const routeIds = routeIdString.split('|');
-            const fullFlightData = data[index];
+            // Assuming each row's data-route-id corresponds directly to an index in data.data
+            const fullFlightData = data.data.find(flight => flight.id === routeIdString);
     
+            if (!fullFlightData) {
+                console.error('No flight data found for route ID:', routeIdString);
+                return; // Exit if no matching flight data found
+            }
+    
+            const routeIds = routeIdString.split('|');
+
             // Determine the group ID of the newly selected route
             let newRouteGroupId = null;
             const routeDetails = appState.selectedRoutes[routeIndex];
@@ -165,13 +172,12 @@ function buildDateRangeTable(routeIndex, dateRange) {
                     }
                 });
             }
-    
-            // Add the new selected route(s)
             routeIds.forEach((id, idx) => {
+                console.log('id:', id);
                 const currentRouteIndex = routeIndex + idx;
                 const displayData = {
-                    departure: new Date(fullFlightData.local_departure).toLocaleString(),
-                    arrival: new Date(fullFlightData.local_arrival).toLocaleString(),
+                    departure: new Date(fullFlightData.dTime * 1000).toLocaleString(),
+                    arrival: new Date(fullFlightData.aTime * 1000).toLocaleString(),
                     price: `$${fullFlightData.price}`,
                     airline: fullFlightData.airlines.join(", "),
                     stops: fullFlightData.route.length - 1,
@@ -193,7 +199,7 @@ function buildDateRangeTable(routeIndex, dateRange) {
     
             highlightSelectedRowForRouteIndex(routeIndex);
         });
-      });
+    });    
     
       document.querySelectorAll('.route-info-table tbody tr').forEach(row => {
         row.addEventListener('mouseover', function() {
