@@ -22,7 +22,13 @@ module.exports = function(app, db, tequilaConfig) {
                 }
             });
 
-            res.json(response.data);
+            // Assuming the flights are in response.data.data
+            if (response.data && response.data.data) {
+                const sortedFlights = response.data.data.sort((a, b) => a.price - b.price);
+                res.json(sortedFlights); // Send sorted flights array directly
+            } else {
+                res.status(500).send("No flight data found");
+            }
         } catch (error) {
             console.error('Tequila API request failed:', error);
             res.status(500).send('Failed to fetch data from Tequila API.');
