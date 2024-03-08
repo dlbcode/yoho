@@ -36,8 +36,6 @@ function buildDateRangeTable(routeIndex, dateRange) {
 
   let apiUrl = `https://yonderhop.com/api/range?flyFrom=${origin}&flyTo=${destination}&dateFrom=${startDate}&dateTo=${endDate}`;
 
-  console.log('apiUrl:', apiUrl);
-
   fetch(apiUrl)
   .then(response => {
     if (!response.ok) {
@@ -46,7 +44,6 @@ function buildDateRangeTable(routeIndex, dateRange) {
     return response.json();
   })
   .then(data => {
-    console.log('data:', data);
     const table = document.createElement('table');
     table.className = 'route-info-table';
     table.style.width = '100%';
@@ -173,7 +170,6 @@ function buildDateRangeTable(routeIndex, dateRange) {
                 });
             }
             routeIds.forEach((id, idx) => {
-                console.log('id:', id);
                 const currentRouteIndex = routeIndex + idx;
                 const displayData = {
                     departure: new Date(fullFlightData.dTime * 1000).toLocaleString(),
