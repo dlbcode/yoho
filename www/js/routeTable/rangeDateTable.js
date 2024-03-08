@@ -46,28 +46,32 @@ function buildDateRangeTable(routeIndex, dateRange) {
     return response.json();
   })
   .then(data => {
-      const table = document.createElement('table');
-      table.className = 'route-info-table';
-      table.style.width = '100%';
-      table.setAttribute('data-route-index', routeIndex, 'border', '1');
+    console.log('data:', data);
+    const table = document.createElement('table');
+    table.className = 'route-info-table';
+    table.style.width = '100%';
+    table.setAttribute('data-route-index', routeIndex, 'border', '1');
 
-      const thead = document.createElement('thead');
-      let headerRow = `<tr>
-                        <th>Departure <span class="sortIcon" data-column="departure">&#x21C5;</span><img class="filterIcon" data-column="departure" src="/assets/filter-icon.svg" alt="Filter"></th>
-                        <th>Arrival <span class="sortIcon" data-column="arrival">&#x21C5;</span><img class="filterIcon" data-column="arrival" src="/assets/filter-icon.svg" alt="Filter"></th>
-                        <th>Price <span class="sortIcon" data-column="price">&#x21C5;</span><img id="priceFilter" class="filterIcon" src="/assets/filter-icon.svg" alt="Filter"></th>
-                        <th>Airlines <span class="sortIcon" data-column="airlines">&#x21C5;</span></th>
-                        <th>Direct <span class="sortIcon" data-column="direct">&#x21C5;</span></th>
-                        <th>Stops <span class="sortIcon" data-column="stops">&#x21C5;</span></th>
-                        <th>Layovers <span class="sortIcon" data-column="layovers">&#x21C5;</span></th>
-                        <th>Duration <span class="sortIcon" data-column="duration">&#x21C5;</span></th>
-                        <th>Route <span class="sortIcon" data-column="route">&#x21C5;</span></th>
-                     </tr>`;
-      thead.innerHTML = headerRow;
-      table.appendChild(thead);
+    const thead = document.createElement('thead');
+    let headerRow = `<tr>
+                      <th>Departure <span class="sortIcon" data-column="departure">&#x21C5;</span><img class="filterIcon" data-column="departure" src="/assets/filter-icon.svg" alt="Filter"></th>
+                      <th>Arrival <span class="sortIcon" data-column="arrival">&#x21C5;</span><img class="filterIcon" data-column="arrival" src="/assets/filter-icon.svg" alt="Filter"></th>
+                      <th>Price <span class="sortIcon" data-column="price">&#x21C5;</span><img id="priceFilter" class="filterIcon" src="/assets/filter-icon.svg" alt="Filter"></th>
+                      <th>Airlines <span class="sortIcon" data-column="airlines">&#x21C5;</span></th>
+                      <th>Direct <span class="sortIcon" data-column="direct">&#x21C5;</span></th>
+                      <th>Stops <span class="sortIcon" data-column="stops">&#x21C5;</span></th>
+                      <th>Layovers <span class="sortIcon" data-column="layovers">&#x21C5;</span></th>
+                      <th>Duration <span class="sortIcon" data-column="duration">&#x21C5;</span></th>
+                      <th>Route <span class="sortIcon" data-column="route">&#x21C5;</span></th>
+                    </tr>`;
+    thead.innerHTML = headerRow;
+    table.appendChild(thead);
 
-      const tbody = document.createElement('tbody');
-      data.forEach(flight => {
+    const tbody = document.createElement('tbody');
+
+    // Ensure data.data is an array before proceeding
+    if (Array.isArray(data.data)) {
+      data.data.forEach(flight => {
         let row = document.createElement('tr');
         row.setAttribute('data-route-id', flight.id);
         const directFlight = flight.route.length === 1;
@@ -77,27 +81,31 @@ function buildDateRangeTable(routeIndex, dateRange) {
         const durationMinutes = Math.floor((flight.duration.total % 3600) / 60);
         const routeIATAs = flight.route.map(r => r.flyFrom).concat(flight.route[flight.route.length - 1].flyTo).join(" > ");
         row.innerHTML = `<td>${new Date(flight.local_departure).toLocaleString()}</td>
-                         <td>${new Date(flight.local_arrival).toLocaleString()}</td>
-                         <td>$${flight.price}</td>
-                         <td>${flight.airlines.join(", ")}</td>
-                         <td>${directFlight ? '✓' : ''}</td>
-                         <td>${stops}</td>
-                         <td>${layovers}</td>
-                         <td>${durationHours}h ${durationMinutes}m</td>
-                         <td>${routeIATAs}</td>`;
+                          <td>${new Date(flight.local_arrival).toLocaleString()}</td>
+                          <td>$${flight.price}</td>
+                          <td>${flight.airlines.join(", ")}</td>
+                          <td>${directFlight ? '✓' : ''}</td>
+                          <td>${stops}</td>
+                          <td>${layovers}</td>
+                          <td>${durationHours}h ${durationMinutes}m</td>
+                          <td>${routeIATAs}</td>`;
         tbody.appendChild(row);
       });
-      table.appendChild(tbody);
-      infoPaneContent.appendChild(table);
+    } else {
+      console.error('data.data is not an array:', data.data);
+      // Handle the case where data is not an array, e.g., display a message to the user
+    }
+    table.appendChild(tbody);
+    infoPaneContent.appendChild(table);
 
-      highlightSelectedRowForRouteIndex(routeIndex);
+    highlightSelectedRowForRouteIndex(routeIndex);
 
-      // Reuse existing event listeners or define new ones specific to single date table
-      attachEventListeners(table, data, routeIndex);
-    })
-    .catch(error => {
-      infoPaneContent.textContent = 'Error loading data: ' + error.message;
-    });
+    // Reuse existing event listeners or define new ones specific to single date table
+    attachEventListeners(table, data, routeIndex);
+  })
+  .catch(error => {
+    infoPaneContent.textContent = 'Error loading data: ' + error.message;
+  });    
 
     function attachEventListeners(table, data, routeIndex) {
       const headers = table.querySelectorAll('th');
