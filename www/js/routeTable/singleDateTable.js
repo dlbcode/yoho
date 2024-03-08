@@ -222,7 +222,6 @@ function buildSingleDateTable(routeIndex) {
     }
     
     function highlightSelectedRowForRouteIndex(routeIndex) {
-      // Clear previous selection
       document.querySelectorAll(`.route-info-table[data-route-index="${routeIndex}"] tbody tr.selected`).forEach(row => {
         row.classList.remove('selected');
       });
@@ -238,8 +237,7 @@ function buildSingleDateTable(routeIndex) {
             }
           });
         }
-    
-        // If a matching row is found, add the 'selected' class
+        
         if (selectedRow) {
           selectedRow.classList.add('selected');
         }
