@@ -6,7 +6,7 @@ module.exports = function(app, axios, db) {
       return res.status(400).send('Origin, destination, and date are required');
     }
   
-    const flightKey = `${origin}-${destination}-${departureDate}`;
+    const flightKey = `${origin}-${destination}`;
     const cacheCollection = db.collection('cache');
     
     try {
@@ -35,7 +35,7 @@ module.exports = function(app, axios, db) {
         const sortedFlights = response.data.data.sort((a, b) => a.price - b.price);
         await cacheCollection.updateOne(
           { flight: flightKey },
-          { $set: { data: sortedFlights, queriedAt: new Date() } },
+          { $set: { data: sortedFlights, source: 'tequila', queriedAt: new Date() } },
           { upsert: true }
         );
 
