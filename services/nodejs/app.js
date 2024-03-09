@@ -73,8 +73,11 @@ MongoClient.connect(mongoUrl, { useNewUrlParser: true, useUnifiedTopology: true 
   const aggregateRoutes = require('./api/aggregateRoutes');
   aggregateRoutes(app, airportsCollection, routesCollection);
 
-  const yhonewayandreturn = require('./api/yhonewayandreturn');
-  yhonewayandreturn(app, axios, db, tequila);
+  const yhoneway = require('./api/oneway');
+  yhoneway(app, axios, db, tequila);
+
+  const yhreturn = require('./api/return');
+  yhreturn(app, axios, db, tequila);
 
   const range = require('./api/range');
   range(app, db, tequila);

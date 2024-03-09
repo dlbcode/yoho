@@ -15,7 +15,6 @@ function buildRouteTable(routeIndex) {
   }
 }
 
-// Common functions moved from singleDateTable.js and rangeDateTable.js
 function getColumnIndex(columnIdentifier) {
   const columnMap = {
     'departure': 1,
