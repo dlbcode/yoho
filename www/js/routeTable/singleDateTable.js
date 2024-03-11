@@ -63,8 +63,13 @@ function buildSingleDateTable(routeIndex) {
         const durationHours = Math.floor(flight.duration.total / 3600);
         const durationMinutes = Math.floor((flight.duration.total % 3600) / 60);
         const routeIATAs = flight.route.map(r => r.flyFrom).concat(flight.route[flight.route.length - 1].flyTo).join(" > ");
-        row.innerHTML = `<td>${new Date(flight.local_departure).toLocaleString()}</td>
-                         <td>${new Date(flight.local_arrival).toLocaleString()}</td>
+        
+        // Determine departure and arrival times
+        const departureTime = flight.local_departure ? new Date(flight.local_departure).toLocaleString() : new Date(flight.dTime * 1000).toLocaleString();
+        const arrivalTime = flight.local_arrival ? new Date(flight.local_arrival).toLocaleString() : new Date(flight.aTime * 1000).toLocaleString();
+
+        row.innerHTML = `<td>${departureTime}</td>
+                         <td>${arrivalTime}</td>
                          <td>$${flight.price}</td>
                          <td>${flight.airlines.join(", ")}</td>
                          <td>${directFlight ? '✓' : ''}</td>
