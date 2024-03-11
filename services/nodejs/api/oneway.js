@@ -48,6 +48,43 @@ module.exports = function(app, axios, db) {
           { upsert: true }
         );
 
+        // Check for direct flights and compare prices with directRoutes collection
+        console.log('Checking direct flights');
+        for (const flight of sortedFlights) {
+          for (const route of flight.route) {
+            const existingDirectRoute = await db.collection('directRoutes').findOne({
+              origin: route.flyFrom,
+              destination: route.flyTo
+            });
+
+            if (existingDirectRoute) {
+              if (existingDirectRoute.price > flight.price) {
+                console.log(`Updating direct route from ${route.flyFrom} to ${route.flyTo} with lower price: ${flight.price}`);
+                await db.collection('directRoutes').updateOne(
+                  { _id: existingDirectRoute._id },
+                  { $set: {
+                      price: flight.price,
+                      timestamp: new Date().toISOString().replace(/[-:T]/g, '').slice(0, 14),
+                      source: 'tequila'
+                    }
+                  }
+                );
+              } else {
+                console.log(`Existing price for direct route from ${route.flyFrom} to ${route.flyTo} is lower or equal; no update needed.`);
+              }
+            } else {
+              console.log(`No existing direct route found for ${route.flyFrom} to ${route.flyTo}; inserting new.`);
+              await db.collection('directRoutes').insertOne({
+                origin: route.flyFrom,
+                destination: route.flyTo,
+                price: flight.price,
+                timestamp: new Date().toISOString().replace(/[-:T]/g, '').slice(0, 14),
+                source: 'tequila'
+              });
+            }
+          }
+        }
+
         res.json(sortedFlights);
       } else {
         res.status(500).send("No flight data found");
@@ -56,5 +93,7 @@ module.exports = function(app, axios, db) {
       console.error("Error fetching one-way flights data:", error.response ? error.response.data : error.message);
       res.status(500).send("Error fetching one-way flights data");
     }
+
+    
   });
 };
