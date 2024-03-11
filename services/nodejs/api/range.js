@@ -8,25 +8,7 @@ module.exports = function(app, db, tequilaConfig) {
             return res.status(400).send('Missing required parameters.');
         }
 
-        const cacheCollection = db.collection('cache');
-        const routeKey = `${flyFrom}-${flyTo}`; // Key based on origin-destination
-
-        // Attempt to fetch recent cached flights for the route
-        try {
-            const recentCachedFlights = await cacheCollection.find({
-                flight: routeKey,
-                queriedAt: { $gte: new Date(new Date().getTime() - 24*60*60*1000) } // Flights cached within the last 24 hours
-            }).toArray();
-
-            if (recentCachedFlights && recentCachedFlights.length > 0) {
-                // Return cached flights if they exist and are recent
-                return res.json(recentCachedFlights.map(flight => flight.data));
-            }
-        } catch (error) {
-            console.error("Error accessing cache:", error);
-        }
-
-        // Fetch fresh results from the API if no recent cached flights are found
+        // Fetch fresh results from the Tequila API
         try {
             const response = await axios.get(tequilaConfig.url, {
                 headers: tequilaConfig.headers,
@@ -35,7 +17,6 @@ module.exports = function(app, db, tequilaConfig) {
                     fly_to: flyTo,
                     date_from: dateFrom,
                     date_to: dateTo,
-                    one_per_date: 1, // To get the cheapest flight for each date
                     partner: 'picky',
                     curr: 'USD'
                 }
@@ -44,14 +25,28 @@ module.exports = function(app, db, tequilaConfig) {
             if (response.data && response.data.data) {
                 const flightsData = response.data.data;
 
-                // Cache each flight individually
-                for (const flight of flightsData) {
-                    await cacheCollection.insertOne({
-                        flight: routeKey,
-                        data: flight,
-                        source: 'tequila',
-                        queriedAt: new Date()
+                // Find the direct route with the lowest price
+                const directFlights = flightsData.filter(flight => flight.route.length === 1);
+                const lowestPriceDirectFlight = directFlights.reduce((lowest, flight) => {
+                    return !lowest || flight.price < lowest.price ? flight : lowest;
+                }, null);
+
+                if (lowestPriceDirectFlight) {
+                    const directRoutesCollection = db.collection('directRoutes');
+
+                    // Check for a matching route in the directRoutes collection
+                    const matchingDirectRoute = await directRoutesCollection.findOne({
+                        origin: flyFrom,
+                        destination: flyTo
                     });
+
+                    if (matchingDirectRoute && matchingDirectRoute.price > lowestPriceDirectFlight.price) {
+                        // Update the price for the matching directRoute document
+                        await directRoutesCollection.updateOne(
+                            { _id: matchingDirectRoute._id },
+                            { $set: { price: lowestPriceDirectFlight.price, source: 'tequila', timestamp: new Date().toISOString() } }
+                        );
+                    }
                 }
 
                 // Return the fresh flights data

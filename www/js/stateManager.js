@@ -131,8 +131,8 @@ function updateState(key, value) {
             break;
     }
     document.dispatchEvent(new CustomEvent('stateChange', { detail: { key, value } }));
-    
-    //console.log('appState.routeDates:', appState.routeDates);
+    console.log('event: stateChange:', key, value);
+    console.log('appState.routeDates:', appState.routeDates);
 }
   
 function updateUrl() {

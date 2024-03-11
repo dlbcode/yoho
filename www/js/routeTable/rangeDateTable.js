@@ -58,8 +58,8 @@ function buildDateRangeTable(routeIndex, dateRange) {
 
     const tbody = document.createElement('tbody');
 
-    if (Array.isArray(data) && data.length > 0 && Array.isArray(data[0])) {
-  data[0].forEach(flight => {
+    if (Array.isArray(data)) {
+      data.forEach(flight => {
     // Code to process each flight
     let row = document.createElement('tr');
     row.setAttribute('data-route-id', flight.id);

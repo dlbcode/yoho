@@ -18,8 +18,9 @@ const infoPane = {
 
   handleStateChange(event) {
     this.updateRouteButtons();
-    if (event.detail.key === 'updateSelectedRoute' || event.detail.key === 'removeSelectedRoute' || event.detail.key === 'changeView' || event.detail.key === 'updateRoutes' || event.detail.key === 'updateRoutes') {
+    if (event.detail.key === 'updateSelectedRoute' || event.detail.key === 'removeSelectedRoute' || event.detail.key === 'updateRoutes' || event.detail.key === 'updateRoutes') {
       //appState.currentView = 'trip';
+    } else if (event.detail.key === 'changeView') {
       this.displayContent();
     }
   },  
@@ -33,6 +34,7 @@ const infoPane = {
       this.updateTripTable(selectedRoutesArray);
     } else if (appState.currentView === 'routeTable') {
       const routeIndex = appState.currentRouteIndex;
+      console.log ('displayContent: routeIndex:', routeIndex);
       buildRouteTable(routeIndex);
     } else if (appState.currentView === 'selectedRoute') {
       const routeIndex = appState.currentRouteIndex;
