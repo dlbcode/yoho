@@ -6,16 +6,15 @@ module.exports = function(app, axios, db) {
       return res.status(400).send('Origin, destination, and date are required');
     }
   
-    const flightKey = `${origin}-${destination}`;
+    const flightKey = `${origin}-${destination}-${departureDate}`;
+    console.log('flightKey:', flightKey);
     const cacheCollection = db.collection('cache');
     
     try {
-      // Convert the requested departureDate to a Date object for comparison
       const requestedDepartureDate = new Date(departureDate).setHours(0, 0, 0, 0);
       
       const cachedData = await cacheCollection.find({ flight: flightKey }).toArray();
       const validCachedData = cachedData.filter(data => {
-        // Extract the departure date from either local_departure or dTime
         const cachedDepartureDate = data.data.local_departure ? new Date(data.data.local_departure).setHours(0, 0, 0, 0) : new Date(data.data.dTime * 1000).setHours(0, 0, 0, 0);
         return requestedDepartureDate === cachedDepartureDate;
       });
@@ -23,8 +22,13 @@ module.exports = function(app, axios, db) {
       if (validCachedData.length > 0 && validCachedData[0].queriedAt) {
         const hoursDiff = (new Date() - validCachedData[0].queriedAt) / (1000 * 60 * 60);
         if (hoursDiff <= 24) {
+          console.log(`Cache hit for ${flightKey} on ${departureDate}`);
           return res.json(validCachedData[0].data);
+        } else {
+          console.log(`Cache miss for ${flightKey} on ${departureDate}: Cached data too old`);
         }
+      } else {
+        console.log(`Cache miss for ${flightKey} on ${departureDate}: No cached data found`);
       }
     } catch (error) {
       console.error("Error accessing cache:", error);
@@ -49,7 +53,7 @@ module.exports = function(app, axios, db) {
         );
 
         // Check for direct flights and compare prices with directRoutes collection
-        console.log('Checking direct flights');
+        //console.log('Checking direct flights');
         for (const flight of sortedFlights) {
           for (const route of flight.route) {
             const existingDirectRoute = await db.collection('directRoutes').findOne({
@@ -59,7 +63,7 @@ module.exports = function(app, axios, db) {
 
             if (existingDirectRoute) {
               if (existingDirectRoute.price > flight.price) {
-                console.log(`Updating direct route from ${route.flyFrom} to ${route.flyTo} with lower price: ${flight.price}`);
+                //console.log(`Updating direct route from ${route.flyFrom} to ${route.flyTo} with lower price: ${flight.price}`);
                 await db.collection('directRoutes').updateOne(
                   { _id: existingDirectRoute._id },
                   { $set: {
@@ -70,10 +74,10 @@ module.exports = function(app, axios, db) {
                   }
                 );
               } else {
-                console.log(`Existing price for direct route from ${route.flyFrom} to ${route.flyTo} is lower or equal; no update needed.`);
+                //console.log(`Existing price for direct route from ${route.flyFrom} to ${route.flyTo} is lower or equal; no update needed.`);
               }
             } else {
-              console.log(`No existing direct route found for ${route.flyFrom} to ${route.flyTo}; inserting new.`);
+              //console.log(`No existing direct route found for ${route.flyFrom} to ${route.flyTo}; inserting new.`);
               await db.collection('directRoutes').insertOne({
                 origin: route.flyFrom,
                 destination: route.flyTo,
