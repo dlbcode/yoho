@@ -8,25 +8,25 @@ module.exports = function(app, db, tequilaConfig) {
             return res.status(400).send('Missing required parameters.');
         }
 
-        // Define the cache key
-        const flightKey = `${flyFrom}-${flyTo}`;
         const cacheCollection = db.collection('cache');
+        const routeKey = `${flyFrom}-${flyTo}`; // Key based on origin-destination
 
-        // Check for cached data
+        // Attempt to fetch recent cached flights for the route
         try {
-            const cachedData = await cacheCollection.findOne({ flight: flightKey });
-            if (cachedData && cachedData.queriedAt) {
-                const hoursDiff = (new Date() - new Date(cachedData.queriedAt)) / (1000 * 60 * 60);
-                if (hoursDiff <= 24) {
-                    // Cached data is fresh, return it
-                    return res.json(cachedData.data);
-                }
+            const recentCachedFlights = await cacheCollection.find({
+                flight: routeKey,
+                queriedAt: { $gte: new Date(new Date().getTime() - 24*60*60*1000) } // Flights cached within the last 24 hours
+            }).toArray();
+
+            if (recentCachedFlights && recentCachedFlights.length > 0) {
+                // Return cached flights if they exist and are recent
+                return res.json(recentCachedFlights.map(flight => flight.data));
             }
         } catch (error) {
             console.error("Error accessing cache:", error);
         }
 
-        // Make external API call if no fresh cached data is found
+        // Fetch fresh results from the API if no recent cached flights are found
         try {
             const response = await axios.get(tequilaConfig.url, {
                 headers: tequilaConfig.headers,
@@ -41,17 +41,21 @@ module.exports = function(app, db, tequilaConfig) {
                 }
             });
 
-            // Assuming the flights are in response.data.data
             if (response.data && response.data.data) {
-                // Update cache with new data
-                await cacheCollection.updateOne(
-                    { flight: flightKey },
-                    { $set: { data: response.data.data, source: 'tequila', queriedAt: new Date() } },
-                    { upsert: true }
-                );
+                const flightsData = response.data.data;
 
-                // Return the new data
-                res.json(response.data.data);
+                // Cache each flight individually
+                for (const flight of flightsData) {
+                    await cacheCollection.insertOne({
+                        flight: routeKey,
+                        data: flight,
+                        source: 'tequila',
+                        queriedAt: new Date()
+                    });
+                }
+
+                // Return the fresh flights data
+                res.json(flightsData);
             } else {
                 res.status(500).send("No flight data found");
             }
