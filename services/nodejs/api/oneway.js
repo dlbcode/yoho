@@ -10,11 +10,20 @@ module.exports = function(app, axios, db) {
     const cacheCollection = db.collection('cache');
     
     try {
-      const cachedData = await cacheCollection.findOne({ flight: flightKey });
-      if (cachedData && cachedData.queriedAt) {
-        const hoursDiff = (new Date() - cachedData.queriedAt) / (1000 * 60 * 60);
+      // Convert the requested departureDate to a Date object for comparison
+      const requestedDepartureDate = new Date(departureDate).setHours(0, 0, 0, 0);
+      
+      const cachedData = await cacheCollection.find({ flight: flightKey }).toArray();
+      const validCachedData = cachedData.filter(data => {
+        // Extract the departure date from either local_departure or dTime
+        const cachedDepartureDate = data.data.local_departure ? new Date(data.data.local_departure).setHours(0, 0, 0, 0) : new Date(data.data.dTime * 1000).setHours(0, 0, 0, 0);
+        return requestedDepartureDate === cachedDepartureDate;
+      });
+
+      if (validCachedData.length > 0 && validCachedData[0].queriedAt) {
+        const hoursDiff = (new Date() - validCachedData[0].queriedAt) / (1000 * 60 * 60);
         if (hoursDiff <= 24) {
-          return res.json(cachedData.data);
+          return res.json(validCachedData[0].data);
         }
       }
     } catch (error) {
