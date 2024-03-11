@@ -65,7 +65,15 @@ function attachEventListeners(table, data, routeIndex) {
     row.addEventListener('click', function() {
       const routeIdString = this.getAttribute('data-route-id');
       const routeIds = routeIdString.split('|');
-      const fullFlightData = data[index];
+      
+      // Assuming data[0] contains the array of flights based on the structure you've shared
+      const flightsArray = data[0]; // Access the nested array directly
+      const fullFlightData = flightsArray[index]; // Use flightsArray here instead of data
+
+      if (!fullFlightData || typeof fullFlightData !== 'object' || (!fullFlightData.local_departure && !fullFlightData.dTime)) {
+        console.error('Missing or invalid flight data for row:', index, fullFlightData);
+        return; // Skip this iteration if data is missing or invalid
+      }      
 
       let newRouteGroupId = null;
       const routeDetails = appState.selectedRoutes[routeIndex];
@@ -84,8 +92,8 @@ function attachEventListeners(table, data, routeIndex) {
       routeIds.forEach((id, idx) => {
         const currentRouteIndex = routeIndex + idx;
         const displayData = {
-          departure: new Date(fullFlightData.dTime).toLocaleString(),
-          arrival: new Date(fullFlightData.aTime).toLocaleString(),
+          departure: fullFlightData.local_departure ? new Date(fullFlightData.local_departure).toLocaleString() : new Date(fullFlightData.dTime * 1000).toLocaleString(),
+          arrival: fullFlightData.local_arrival ? new Date(fullFlightData.local_arrival).toLocaleString() : new Date(fullFlightData.aTime * 1000).toLocaleString(),
           price: `$${fullFlightData.price}`,
           airline: fullFlightData.airlines.join(", "),
           stops: fullFlightData.route.length - 1,

@@ -25,6 +25,8 @@ function buildDateRangeTable(routeIndex, dateRange) {
 
   let apiUrl = `https://yonderhop.com/api/range?flyFrom=${origin}&flyTo=${destination}&dateFrom=${startDate}&dateTo=${endDate}`;
 
+  console.log('apiUrl:', apiUrl);
+
   fetch(apiUrl)
   .then(response => {
     if (!response.ok) {
@@ -33,6 +35,7 @@ function buildDateRangeTable(routeIndex, dateRange) {
     return response.json();
   })
   .then(data => {
+    console.log('data:', data);
     const table = document.createElement('table');
     table.className = 'route-info-table';
     table.style.width = '100%';
@@ -55,34 +58,37 @@ function buildDateRangeTable(routeIndex, dateRange) {
 
     const tbody = document.createElement('tbody');
 
-    if (Array.isArray(data)) {
-      data.forEach(flight => {
-        let row = document.createElement('tr');
-        row.setAttribute('data-route-id', flight.id);
-        const directFlight = flight.route.length === 1;
-        const stops = flight.route.length - 1;
-        const layovers = flight.route.slice(0, -1).map(r => r.flyTo).join(", ");
-        const durationHours = Math.floor(flight.duration.total / 3600);
-        const durationMinutes = Math.floor((flight.duration.total % 3600) / 60);
-        const routeIATAs = flight.route.map(r => r.flyFrom).concat(flight.route[flight.route.length - 1].flyTo).join(" > ");
+    if (Array.isArray(data) && data.length > 0 && Array.isArray(data[0])) {
+  data[0].forEach(flight => {
+    // Code to process each flight
+    let row = document.createElement('tr');
+    row.setAttribute('data-route-id', flight.id);
+    const directFlight = flight.route.length === 1;
+    const stops = flight.route.length - 1;
+    const layovers = flight.route.slice(0, -1).map(r => r.flyTo).join(", ");
+    const durationHours = Math.floor(flight.duration.total / 3600);
+    const durationMinutes = Math.floor((flight.duration.total % 3600) / 60);
+    const routeIATAs = flight.route.map(r => r.flyFrom).concat(flight.route[flight.route.length - 1].flyTo).join(" > ");
 
-        const departureDate = new Date(flight.dTime * 1000).toLocaleString();
-        const arrivalDate = new Date(flight.aTime * 1000).toLocaleString();
-      
-        row.innerHTML = `<td>${departureDate}</td>
-                          <td>${arrivalDate}</td>
-                          <td>$${flight.price}</td>
-                          <td>${flight.airlines.join(", ")}</td>
-                          <td>${directFlight ? '✓' : ''}</td>
-                          <td>${stops}</td>
-                          <td>${layovers}</td>
-                          <td>${durationHours}h ${durationMinutes}m</td>
-                          <td>${routeIATAs}</td>`;
-        tbody.appendChild(row);
-      });      
-    } else {
-      console.error('data.data is not an array:', data.data);
-    }
+    // Adjusted to handle both possible date formats
+    const departureDate = flight.local_departure ? new Date(flight.local_departure).toLocaleString() : new Date(flight.dTime * 1000).toLocaleString();
+    const arrivalDate = flight.local_arrival ? new Date(flight.local_arrival).toLocaleString() : new Date(flight.aTime * 1000).toLocaleString();
+
+    row.innerHTML = `<td>${departureDate}</td>
+                      <td>${arrivalDate}</td>
+                      <td>$${flight.price}</td>
+                      <td>${flight.airlines.join(", ")}</td>
+                      <td>${directFlight ? '✓' : ''}</td>
+                      <td>${stops}</td>
+                      <td>${layovers}</td>
+                      <td>${durationHours}h ${durationMinutes}m</td>
+                      <td>${routeIATAs}</td>`;
+    tbody.appendChild(row);
+  });
+} else {
+  console.error('Unexpected data structure:', data);
+}
+
     table.appendChild(tbody);
     infoPaneContent.appendChild(table);
 
