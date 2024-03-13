@@ -18,7 +18,7 @@ const appState = {
     currentView: 'trip',
     currentGroupID: 0,
     routeDates: {
-        1: null, //new Date().toISOString().split('T')[0],
+        1: new Date().toISOString().split('T')[0],
     },
 };
   
@@ -161,7 +161,7 @@ function updateUrl() {
     if (window.location.search !== newUrl) {
         window.history.pushState({}, '', newUrl);
     }
-    
+
     document.dispatchEvent(new CustomEvent('routeDatesUpdated'));
 }
 
