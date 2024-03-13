@@ -120,20 +120,24 @@ const routeHandling = {
                     minDate: routeNumber === 1 ? "today" : appState.routeDates[routeNumber - 1],
                     mode: isDateRange ? "range" : "single",
                     onValueUpdate: (selectedDates) => {
-                        if (selectedDates.length > 1) {
+                        if (selectedDates.length > 1 && selectedDates[0] && selectedDates[1]) {
                             this.textContent = '[...]';
-                        } else if (selectedDates.length === 1) {
+                            const dateValue = `${selectedDates[0].toISOString().split('T')[0]} to ${selectedDates[1].toISOString().split('T')[0]}`;
+                            updateState('updateRouteDate', { routeNumber: routeNumber, date: dateValue });
+                        } else if (selectedDates.length === 1 && selectedDates[0]) {
                             const formatter = new Intl.DateTimeFormat('en-US', {
                                 day: 'numeric',
-                                timeZone: timeZone
+                                timeZone: 'UTC'
                             });
                             this.textContent = formatter.format(selectedDates[0]);
+                            const dateValue = selectedDates[0].toISOString().split('T')[0];
+                            updateState('updateRouteDate', { routeNumber: routeNumber, date: dateValue });
+                        } else {
+                            // Handle the case where no dates are selected or the selection is cleared
+                            this.textContent = 'Select Date'; // Reset the button text or handle as needed
+                            updateState('updateRouteDate', { routeNumber: routeNumber, date: null }); // Update the state accordingly
                         }
-                        const dateValue = selectedDates.length > 1 
-                            ? `${selectedDates[0].toISOString().split('T')[0]} to ${selectedDates[1].toISOString().split('T')[0]}` 
-                            : selectedDates[0].toISOString().split('T')[0];
-                        updateState('updateRouteDate', { routeNumber: routeNumber, date: dateValue });
-                    },               
+                    },                                 
                     onReady: (selectedDates, dateStr, instance) => {
                         let prevMonthButton = instance.calendarContainer.querySelector('.flatpickr-prev-month');
                         let flexibleButton = document.createElement('button');

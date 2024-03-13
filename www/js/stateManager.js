@@ -95,7 +95,6 @@ function updateState(key, value) {
             appState.selectedRoutes = {};
             appState.routeDates = {};
             updateUrl();
-            updateState('updateRouteDate', { routeNumber: 1, date: new Date().toISOString().split('T')[0] });
             break;
 
         case 'updateSelectedRoute':
@@ -137,8 +136,6 @@ function updateState(key, value) {
   
 function updateUrl() {
     const params = new URLSearchParams(window.location.search);
-
-    // Update waypoints
     const waypointIatas = appState.waypoints.map(wp => wp.iata_code);
     if (waypointIatas.length > 0) {
         params.set('waypoints', waypointIatas.join(','));
@@ -146,7 +143,6 @@ function updateUrl() {
         params.delete('waypoints');
     }
 
-    // Update route dates
     const dates = Object.entries(appState.routeDates).map(([key, value]) => `${key}:${value}`).join(',');
     if (dates.length > 0) {
         params.set('dates', dates);
@@ -154,14 +150,18 @@ function updateUrl() {
         params.delete('dates');
     }
 
-    params.set('direction', appState.routeDirection);
+    if (appState.routeDirection !== defaultDirection) {
+        params.set('direction', appState.routeDirection);
+    } else {
+        params.delete('direction');
+    }
 
-    // Construct the new URL
-    const newUrl = `${window.location.pathname}?${params.toString()}`;
+    const paramString = params.toString();
+    const newUrl = paramString ? `${window.location.pathname}?${paramString}` : window.location.pathname;
     if (window.location.search !== newUrl) {
         window.history.pushState({}, '', newUrl);
     }
-    // In stateManager.js, after updating routeDates from URL
+    
     document.dispatchEvent(new CustomEvent('routeDatesUpdated'));
 }
 
