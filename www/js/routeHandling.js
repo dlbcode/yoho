@@ -108,9 +108,10 @@ const routeHandling = {
             appState.routeDates[routeNumber] = currentRouteDate;
         }
 
-        // Set the button text based on whether it's a date range or a single date
-        dateButton.textContent = currentRouteDate.includes(' to ') ? '[...]' : new Date(currentRouteDate).getDate().toString();
+        console.log('currentRouteDate', currentRouteDate);
 
+        // Set the button text based on whether it's a date range or a single date
+        dateButton.textContent = currentRouteDate.includes(' to ') ? '[...]' : new Date(currentRouteDate).getUTCDate().toString();
         dateButton.addEventListener('click', function() {
             if (!this._flatpickr) {
                 const currentRouteDate = appState.routeDates[routeNumber];
