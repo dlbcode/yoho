@@ -457,7 +457,8 @@ const routeHandling = {
                 }
             }
         });
-    }    
+    },
+        
 }
 
 document.addEventListener('routeDatesUpdated', function() {
@@ -470,5 +471,26 @@ document.addEventListener('stateChange', function(event) {
         routeHandling.updateMonthNameBoxes();
     }
 });
+
+document.addEventListener('stateChange', function(event) {
+    if (event.detail.key === 'updateRouteDate') {
+        updateDateButtonsDisplay();
+    }
+});
+
+function updateDateButtonsDisplay() {
+    document.querySelectorAll('.date-select-button').forEach(button => {
+        const routeNumber = button.closest('.route-container').getAttribute('data-route-number');
+        const dateValue = appState.routeDates[routeNumber];
+        if (dateValue) {
+            // Parse the date as UTC to avoid timezone issues
+            const [year, month, day] = dateValue.split('-').map(num => parseInt(num, 10));
+            const date = new Date(Date.UTC(year, month - 1, day));
+
+            // Format the date as needed, here we're just using the day of the month
+            button.textContent = date.getUTCDate().toString(); // Use getUTCDate() to get the day in UTC
+        }
+    });
+}
 
 export { routeHandling }
