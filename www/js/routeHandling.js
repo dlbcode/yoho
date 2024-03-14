@@ -103,7 +103,11 @@ const routeHandling = {
 
         // Initialize currentRouteDate, defaulting to today's date for the first route or the previous route's date otherwise
         const currentRouteDate = appState.routeDates[routeNumber] ? appState.routeDates[routeNumber] : (routeNumber === 1 ? new Date().toISOString().split('T')[0] : appState.routeDates[routeNumber - 1]);
-        
+        // Update appState.routeDates for the current route if it wasn't already set
+        if (!appState.routeDates[routeNumber]) {
+            appState.routeDates[routeNumber] = currentRouteDate;
+        }
+
         // Set the button text based on whether it's a date range or a single date
         console.log('currentRouteDate: ', currentRouteDate);
         dateButton.textContent = currentRouteDate.includes(' to ') ? '[...]' : new Date(currentRouteDate).getUTCDate().toString();
@@ -220,8 +224,9 @@ const routeHandling = {
         uiHandling.toggleTripButtonsVisibility();
         uiHandling.getPriceButton();
         routeDateButtons.updateDateButtons();
-    },                  
+    },
     
+  
     handleSwapButtonClick: function(routeNumber) {
         let routeDiv = document.getElementById(`route${routeNumber}`);
         let inputs = routeDiv.querySelectorAll('input[type="text"]');
