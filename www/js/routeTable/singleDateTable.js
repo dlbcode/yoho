@@ -133,33 +133,35 @@ function buildSingleDateTable(routeIndex) {
         row.addEventListener('click', function() {
             const routeIdString = this.getAttribute('data-route-id');
             const routeIds = routeIdString.split('|');
-            const fullFlightData = data[index]; // Assuming 'data' is an array of full flight data for each row
+            const fullFlightData = data[index]; // Assuming 'data' is correctly referencing your data source
     
-            // Iterate over routeIds to handle each segment individually
             routeIds.forEach((id, idx) => {
-                // Find the corresponding segment data
-                const segmentData = fullFlightData.route[idx]; // Access the specific segment from the fullFlightData.route array
+                const segmentData = fullFlightData.route[idx]; // Access the specific segment
+                const departureDate = new Date(segmentData.local_departure).toISOString().split('T')[0];
     
-                // Use segment-specific data for displayData
+                // Define displayData based on segmentData
                 const displayData = {
                     departure: new Date(segmentData.local_departure).toLocaleString(),
                     arrival: new Date(segmentData.local_arrival).toLocaleString(),
-                    price: `$${fullFlightData.price}`, // Assuming price is the same for all segments
-                    airline: segmentData.airline, // Assuming each segment can have a different airline
-                    stops: fullFlightData.route.length - 1, // Total stops for the journey
-                    route: `${segmentData.flyFrom} > ${segmentData.flyTo}`, // Specific for this segment
-                    deep_link: fullFlightData.deep_link // Assuming the same deep link for the entire journey
+                    price: `$${fullFlightData.price}`,
+                    airline: segmentData.airline,
+                    stops: fullFlightData.route.length - 1,
+                    route: `${segmentData.flyFrom} > ${segmentData.flyTo}`,
+                    deep_link: fullFlightData.deep_link
                 };
     
-                // Update the state with segment-specific displayData
+                // Directly update appState.routeDates for the current segment
+                appState.routeDates[index + idx + 1] = departureDate;
+    
+                // Update the selected route with segment-specific data
                 updateState('updateSelectedRoute', {
-                    routeIndex: index + idx, // Adjust based on how you're calculating routeIndex
+                    routeIndex: index + idx,
                     routeDetails: {
                         id: id,
-                        fullData: segmentData, // Use segment-specific data
+                        fullData: segmentData,
                         displayData: displayData,
-                        group: index, // Adjust if needed
-                        routeDates: new Date(segmentData.local_departure).toISOString().split('T')[0] // Use segment-specific departure date
+                        group: index,
+                        routeDates: departureDate // Use segment-specific departure date
                     }
                 });
     
@@ -169,9 +171,9 @@ function buildSingleDateTable(routeIndex) {
             });
     
             updateState('changeView', 'selectedRoute');
-            highlightSelectedRowForRouteIndex(index); // Adjust based on how you're calculating index
+            highlightSelectedRowForRouteIndex(index);
         });
-    });
+    });           
     
       document.querySelectorAll('.route-info-table tbody tr').forEach(row => {
         row.addEventListener('mouseover', function() {
