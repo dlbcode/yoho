@@ -133,47 +133,64 @@ function buildSingleDateTable(routeIndex) {
         row.addEventListener('click', function() {
             const routeIdString = this.getAttribute('data-route-id');
             const routeIds = routeIdString.split('|');
-            const fullFlightData = data[index]; // Assuming 'data' is correctly referencing your data source
+            const fullFlightData = data[index]; // Ensure 'data' is correctly referencing your data source
+    
+            // Reset or update the application state as necessary before setting new data
+            appState.waypoints = [];
+            appState.routes = [];
+            appState.selectedRoutes = {};
     
             routeIds.forEach((id, idx) => {
                 const segmentData = fullFlightData.route[idx];
                 const departureDate = new Date(segmentData.local_departure).toISOString().split('T')[0];
-            
-                // Define displayData based on segmentData
-                const displayData = {
-                    departure: new Date(segmentData.local_departure).toLocaleString(),
-                    arrival: new Date(segmentData.local_arrival).toLocaleString(),
-                    price: `$${fullFlightData.price}`,
-                    airline: segmentData.airline,
-                    stops: fullFlightData.route.length - 1,
-                    route: `${segmentData.flyFrom} > ${segmentData.flyTo}`,
-                    deep_link: fullFlightData.deep_link
-                };
     
-                // Directly update appState.routeDates for the current segment
-                appState.routeDates[index + idx + 1] = departureDate;
+                // Update waypoints for each segment
+                if (!appState.waypoints.some(wp => wp.iata_code === segmentData.flyFrom)) {
+                    appState.waypoints.push({
+                        iata_code: segmentData.flyFrom,
+                        // Add additional airport data as needed
+                    });
+                }
     
-                // Update the selected route with segment-specific data
-                updateState('updateSelectedRoute', {
-                    routeIndex: index + idx,
-                    routeDetails: {
-                        id: id,
-                        fullData: segmentData,
-                        displayData: displayData,
-                        group: index,
-                        routeDates: departureDate // Use segment-specific departure date
-                    }
+                if (!appState.waypoints.some(wp => wp.iata_code === segmentData.flyTo)) {
+                    appState.waypoints.push({
+                        iata_code: segmentData.flyTo,
+                        // Add additional airport data as needed
+                    });
+                }
+    
+                // Update routes for each segment
+                appState.routes.push({
+                    originAirport: segmentData.flyFrom,
+                    destinationAirport: segmentData.flyTo,
+                    // Add additional route data as needed
                 });
     
-                //console.log('routeIndex: ', index + idx);
-                //console.log('route', displayData);
-                //console.log('appState.selectedRoutes', appState.selectedRoutes);
+                // Update routeDates for the current route
+                appState.routeDates[idx + 1] = departureDate;
+    
+                // Update selectedRoutes with segment-specific data
+                appState.selectedRoutes[idx + 1] = {
+                    id: id,
+                    fullData: segmentData,
+                    departureDate: departureDate,
+                    // Include other relevant data as needed
+                };
             });
     
+            // Assuming there are functions to handle these updates
+            updateState('updateWaypoints', appState.waypoints);
+            updateState('updateRoutes', appState.routes);
+            updateState('updateSelectedRoutes', appState.selectedRoutes);
+    
+            // Trigger UI updates to reflect the new state
+            rebuildRouteDivs(); // Ensure this function exists and is implemented to rebuild route divs based on appState
+            routeDateButtons.updateDateButtons(); // Ensure this function correctly updates the date buttons based on appState
+    
+            // Optionally, change view or trigger any other necessary UI updates
             updateState('changeView', 'selectedRoute');
-            highlightSelectedRowForRouteIndex(index);
         });
-    });               
+    });                    
     
       document.querySelectorAll('.route-info-table tbody tr').forEach(row => {
         row.addEventListener('mouseover', function() {
