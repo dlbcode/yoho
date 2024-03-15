@@ -30,7 +30,7 @@ const routeDateButtons = {
     document.querySelectorAll('.route-container').forEach((routeDiv, index) => {
         const routeNumber = parseInt(routeDiv.getAttribute('data-route-number'));
         const routeDate = appState.routeDates[routeNumber];
-        console.log('routeDate: ',routeDate);
+        //console.log('routeDate: ',routeDate);
         if (routeDate) {
             // Check if the date is a range and split it if necessary
             const effectiveDate = routeDate.includes(' to ') ? routeDate.split(' to ')[0] : routeDate;
@@ -64,7 +64,7 @@ const routeDateButtons = {
     document.querySelectorAll('.date-select-button').forEach(button => {
         const routeNumber = button.closest('.route-container').getAttribute('data-route-number');
         const dateValue = appState.routeDates[routeNumber];
-        console.log('updateDateButtonsDisplay: ',dateValue);
+        //console.log('updateDateButtonsDisplay: ',dateValue);
         if (dateValue) {
           button.textContent = dateValue.includes(' to ') ? '[...]' : new Date(dateValue).getUTCDate().toString();
           //console.log(`No date set for route ${routeNumber}, leaving button text as ${button.textContent}.`);

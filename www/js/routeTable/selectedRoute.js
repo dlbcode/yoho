@@ -1,10 +1,12 @@
 import { appState, updateState } from '../stateManager.js';
 
 const selectedRoute = {
-  displaySelectedRouteInfo(routeIndex) {
-    const selectedRouteDetails = appState.selectedRoutes[routeIndex];
+  displaySelectedRouteInfo: function(routeIndex) {
+    const selectedRouteDetails = appState.selectedRoutes[String(routeIndex)];
+
     if (!selectedRouteDetails) {
-      return;
+        console.error(`Selected route details not found for routeIndex: ${routeIndex}`);
+        return;
     }
 
     const infoPaneContent = document.getElementById('infoPaneContent');
@@ -20,22 +22,23 @@ const selectedRoute = {
     };
     infoPaneContent.appendChild(changeRouteButton);
 
-    // Find the route segment in fullData.route that matches the selected route ID
-    const routeSegment = selectedRouteDetails.fullData.route.find(segment => segment.id === selectedRouteDetails.id);
-    if (!routeSegment) {
-      console.error('Matching route segment not found');
-      return;
-    }
+    // Directly use fullData for displaying route information
+    const routeData = selectedRouteDetails.fullData;
 
-    // Display details for the matching route segment
+    // Display details for the route
     const detailsList = document.createElement('ul');
-    Object.entries(routeSegment).forEach(([key, value]) => {
-      const listItem = document.createElement('li');
-      listItem.textContent = `${key}: ${value}`;
-      detailsList.appendChild(listItem);
+    Object.entries(routeData).forEach(([key, value]) => {
+        // Filter out non-stringifiable values or properties not intended for display
+        if (typeof value === 'string' || typeof value === 'number') {
+            const listItem = document.createElement('li');
+            listItem.textContent = `${key}: ${value}`;
+            detailsList.appendChild(listItem);
+        }
     });
     infoPaneContent.appendChild(detailsList);
-  }
+    console.log('routeDates: ',appState.routeDates);
+}
+
 };
 
 export { selectedRoute };
