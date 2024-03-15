@@ -36,7 +36,7 @@ const selectedRoute = {
         }
     });
     infoPaneContent.appendChild(detailsList);
-    console.log('routeDates: ',appState.routeDates);
+    //console.log('routeDates: ',appState.routeDates);
 }
 
 };

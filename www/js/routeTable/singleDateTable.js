@@ -165,9 +165,9 @@ function buildSingleDateTable(routeIndex) {
                     }
                 });
     
-                console.log('routeIndex: ', index + idx);
-                console.log('route', displayData);
-                console.log('appState.selectedRoutes', appState.selectedRoutes);
+                //console.log('routeIndex: ', index + idx);
+                //console.log('route', displayData);
+                //console.log('appState.selectedRoutes', appState.selectedRoutes);
             });
     
             updateState('changeView', 'selectedRoute');
