@@ -136,9 +136,9 @@ function buildSingleDateTable(routeIndex) {
             const fullFlightData = data[index]; // Assuming 'data' is correctly referencing your data source
     
             routeIds.forEach((id, idx) => {
-                const segmentData = fullFlightData.route[idx]; // Access the specific segment
+                const segmentData = fullFlightData.route[idx];
                 const departureDate = new Date(segmentData.local_departure).toISOString().split('T')[0];
-    
+            
                 // Define displayData based on segmentData
                 const displayData = {
                     departure: new Date(segmentData.local_departure).toLocaleString(),
@@ -173,7 +173,7 @@ function buildSingleDateTable(routeIndex) {
             updateState('changeView', 'selectedRoute');
             highlightSelectedRowForRouteIndex(index);
         });
-    });           
+    });               
     
       document.querySelectorAll('.route-info-table tbody tr').forEach(row => {
         row.addEventListener('mouseover', function() {
