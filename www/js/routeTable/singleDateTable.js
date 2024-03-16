@@ -31,10 +31,10 @@ function buildSingleDateTable(routeIndex) {
   document.head.appendChild(Object.assign(document.createElement('link'), {rel: 'stylesheet', type: 'text/css', href: '../css/routeTable.css'}));
 
   // Correctly access departureDate based on routeIndex
-  const departureDate = appState.routeDates[routeIndex];
+  const departureDate = appState.routeDates[routeIndex +1];
 
   if (typeof departureDate === 'undefined') {
-      console.error(`Departure date for routeIndex ${routeIndex} is undefined.`);
+      console.error(`Departure date for routeIndex ${routeIndex +1} is undefined.`);
       return; // Skip this API call or handle the error appropriately
   }
 
@@ -144,6 +144,7 @@ function buildSingleDateTable(routeIndex) {
     
             // Clear previous state to prevent accumulation of outdated data
             appState.routeDates = {};
+            console.log('routeIds: ',routeIds);
     
             routeIds.forEach((id, idx) => {
                 const segmentData = fullFlightData.route[idx];
@@ -153,6 +154,9 @@ function buildSingleDateTable(routeIndex) {
                 if (!appState.routeDates[idx]) { // Ensure no duplicate date is added
                     appState.routeDates[idx] = departureDate;
                 }
+
+                console.log('route id: ',id);
+                console.log('route idx: ',idx);
     
                 // Update selectedRoutes for each segment
                 updateState('updateSelectedRoute', {
@@ -164,13 +168,7 @@ function buildSingleDateTable(routeIndex) {
                     }
                 });
             });
-    
-            // After updating, ensure routeDates length matches selectedRoutes length
-            const selectedRoutesLength = Object.keys(appState.selectedRoutes).length;
-            appState.routeDates = Object.fromEntries(
-                Object.entries(appState.routeDates).slice(0, selectedRoutesLength)
-            );
-    
+
             updateState('changeView', 'selectedRoute');
             highlightSelectedRowForRouteIndex(index);
         });
