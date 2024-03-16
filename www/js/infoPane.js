@@ -33,6 +33,9 @@ const infoPane = {
       this.updateTripTable(selectedRoutesArray);
     } else if (appState.currentView === 'routeTable') {
       const routeIndex = appState.currentRouteIndex;
+      
+      console.log('appState.routeDates before buildRouteTable:', appState.routeDates);
+
       buildRouteTable(routeIndex);
     } else if (appState.currentView === 'selectedRoute') {
       const routeIndex = appState.currentRouteIndex;

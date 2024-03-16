@@ -20,20 +20,21 @@ function getColumnIndex(columnIdentifier) {
 }
 
 function buildSingleDateTable(routeIndex) {
-  const currentRoute = appState.routes[routeIndex];
-  const infoPaneContent = document.getElementById('infoPaneContent');
-  infoPaneContent.innerHTML = '';
+  const departureDate = appState.routeDates[routeIndex];
+  if (typeof departureDate === 'undefined') {
+    console.error(`Departure date for routeIndex ${routeIndex} is undefined.`);
+    // Optionally handle the undefined departureDate case here
+    return; // Skip the API call
+  }
 
+  const currentRoute = appState.routes[routeIndex];
   if (!currentRoute) {
+    console.error('Current route is undefined.');
     return;
   }
 
-  document.head.appendChild(Object.assign(document.createElement('link'), {rel: 'stylesheet', type: 'text/css', href: '../css/routeTable.css'}));
-
   const origin = currentRoute.originAirport.iata_code;
   const destination = currentRoute.destinationAirport.iata_code;
-  const departureDate = appState.routeDates[routeIndex + 1];
-
   let apiUrl = `https://yonderhop.com/api/yhoneway?origin=${origin}&destination=${destination}&departureDate=${departureDate}`;
 
   fetch(apiUrl)
