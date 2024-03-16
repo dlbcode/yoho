@@ -23,7 +23,6 @@ function buildSingleDateTable(routeIndex) {
   const departureDate = appState.routeDates[routeIndex];
   if (typeof departureDate === 'undefined') {
     console.error(`Departure date for routeIndex ${routeIndex} is undefined.`);
-    // Optionally handle the undefined departureDate case here
     return; // Skip the API call
   }
 
