@@ -25,14 +25,21 @@ function buildSingleDateTable(routeIndex) {
   infoPaneContent.innerHTML = '';
 
   if (!currentRoute) {
-    return;
+      return;
   }
 
   document.head.appendChild(Object.assign(document.createElement('link'), {rel: 'stylesheet', type: 'text/css', href: '../css/routeTable.css'}));
 
+  // Correctly access departureDate based on routeIndex
+  const departureDate = appState.routeDates[routeIndex];
+
+  if (typeof departureDate === 'undefined') {
+      console.error(`Departure date for routeIndex ${routeIndex} is undefined.`);
+      return; // Skip this API call or handle the error appropriately
+  }
+
   const origin = currentRoute.originAirport.iata_code;
   const destination = currentRoute.destinationAirport.iata_code;
-  const departureDate = appState.routeDates[routeIndex + 1];
 
   let apiUrl = `https://yonderhop.com/api/yhoneway?origin=${origin}&destination=${destination}&departureDate=${departureDate}`;
 

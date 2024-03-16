@@ -37,6 +37,7 @@ const selectedRoute = {
     });
     infoPaneContent.appendChild(detailsList);
     console.log('routes: ',appState.routes);
+    console.log('selectedRoutes: ',appState.selectedRoutes);
     console.log('routeDates: ',appState.routeDates);
 
 }
