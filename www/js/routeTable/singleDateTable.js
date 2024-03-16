@@ -155,7 +155,7 @@ function buildSingleDateTable(routeIndex) {
     
                 // Update the selected route with segment-specific data
                 updateState('updateSelectedRoute', {
-                    routeIndex: index + idx,
+                    routeIndex: idx,
                     routeDetails: {
                         id: id,
                         fullData: segmentData,
@@ -165,7 +165,7 @@ function buildSingleDateTable(routeIndex) {
                     }
                 });
     
-                console.log('routeIndex: ', index + idx);
+                console.log('routeIndex: ', idx);
                 console.log('route', displayData);
                 console.log('appState.selectedRoutes', appState.selectedRoutes);
             });
