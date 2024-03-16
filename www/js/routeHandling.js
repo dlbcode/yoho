@@ -278,7 +278,6 @@ const routeHandling = {
             newRouteDates[index + 1] = appState.routeDates[key];
         });
         updateState('updateRouteDates', newRouteDates);
-
     
         // Additional logic to update the UI and application state as needed
         pathDrawing.clearLines();

@@ -18,7 +18,7 @@ const appState = {
     currentView: 'trip',
     currentGroupID: 0,
     routeDates: {
-        1: new Date().toISOString().split('T')[0],
+        0: new Date().toISOString().split('T')[0],
     },
 };
   
@@ -131,7 +131,9 @@ function updateState(key, value) {
     }
     document.dispatchEvent(new CustomEvent('stateChange', { detail: { key, value } }));
     
-    //console.log('appState.routeDates:', appState.routeDates);
+    console.log('appState.routes: ', appState.routes);
+    console.log('appState.routeDates:', appState.routeDates);
+    console.log('appState.selectedRoutes: ', appState.selectedRoutes);
 }
   
 function updateUrl() {
