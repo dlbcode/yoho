@@ -111,22 +111,12 @@ function updateState(key, value) {
         case 'updateSelectedRoute':
             const { routeIndex, routeDetails } = value;
             appState.selectedRoutes[routeIndex] = routeDetails;
-            break;
-
-            case 'removeSelectedRoute':
-                delete appState.selectedRoutes[value];
-                // Adjust appState.routeDates to remove the date for the removed route
-                const updatedRouteDates = {};
-                Object.keys(appState.routeDates).forEach((key, index) => {
-                    if (parseInt(key) < value) {
-                        updatedRouteDates[key] = appState.routeDates[key];
-                    } else if (parseInt(key) > value) {
-                        updatedRouteDates[parseInt(key) - 1] = appState.routeDates[key];
-                    }
-                });
-                appState.routeDates = updatedRouteDates;
-                updateUrl();
-                break;            
+        
+            // Ensure the routeDates match the selectedRoutes' dates
+            appState.routeDates[routeIndex] = routeDetails.routeDates;
+        
+            updateUrl();
+            break;            
 
         default:
             appState[key] = value;
