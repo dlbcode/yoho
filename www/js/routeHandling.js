@@ -275,10 +275,15 @@ const routeHandling = {
         // Re-index routeDates to fill the gap left by the removed route
         const newRouteDates = {};
         Object.keys(appState.routeDates).forEach((key, index) => {
-            newRouteDates[index + 1] = appState.routeDates[key];
+            if (parseInt(key) < routeNumber) {
+                newRouteDates[key] = appState.routeDates[key];
+            } else if (parseInt(key) > routeNumber) {
+                // Shift the dates down to fill the gap left by the removed route
+                newRouteDates[parseInt(key) - 1] = appState.routeDates[key];
+            }
         });
-        updateState('updateRouteDates', newRouteDates);
-    
+        appState.routeDates = newRouteDates;
+        
         // Additional logic to update the UI and application state as needed
         pathDrawing.clearLines();
         pathDrawing.drawLines();
