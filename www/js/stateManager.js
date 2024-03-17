@@ -32,15 +32,15 @@ function updateState(key, value) {
             case 'updateRouteDate':
             const { routeNumber, date } = value;
             appState.routeDates[routeNumber] = date;
-            let groupToRemove = appState.selectedRoutes[routeNumber - 1]?.group;
-            let keysToDelete = [];
-            if (groupToRemove !== null) {
-                for (let route in appState.selectedRoutes) {
-                    if (appState.selectedRoutes[route].group === groupToRemove) {
-                        keysToDelete.push(route);
-                    }
+            // Ensure selectedRoutes are consistent with the updated routeDates
+            Object.keys(appState.selectedRoutes).forEach(key => {
+                if (parseInt(key) >= routeNumber && appState.selectedRoutes[key]) {
+                    appState.selectedRoutes[key].routeDates = date;
                 }
-            }
+            });
+            updateUrl();
+            break;
+
             keysToDelete.forEach(key => {
                 delete appState.selectedRoutes[key];
             });
@@ -85,9 +85,20 @@ function updateState(key, value) {
         case 'updateRoutes':
             if (JSON.stringify(appState.routes) !== JSON.stringify(value)) {
                 appState.routes = value;
+                // Recalculate routeDates to ensure consistency with the updated routes
+                const recalculatedRouteDates = {};
+                appState.routes.forEach((route, index) => {
+                    if (appState.routeDates[index]) {
+                        recalculatedRouteDates[index] = appState.routeDates[index];
+                    } else {
+                        // Assign a default date if missing
+                        recalculatedRouteDates[index] = new Date().toISOString().split('T')[0];
+                    }
+                });
+                appState.routeDates = recalculatedRouteDates;
             }
-            break;        
-    
+            break;
+                        
         case 'clearData':
             appState.waypoints = [];
             appState.routes = [];
@@ -102,11 +113,20 @@ function updateState(key, value) {
             appState.selectedRoutes[routeIndex] = routeDetails;
             break;
 
-        case 'removeSelectedRoute':
-            delete appState.selectedRoutes[value];
-            delete appState.routeDates[value];
-            updateUrl();
-            break;
+            case 'removeSelectedRoute':
+                delete appState.selectedRoutes[value];
+                // Adjust appState.routeDates to remove the date for the removed route
+                const updatedRouteDates = {};
+                Object.keys(appState.routeDates).forEach((key, index) => {
+                    if (parseInt(key) < value) {
+                        updatedRouteDates[key] = appState.routeDates[key];
+                    } else if (parseInt(key) > value) {
+                        updatedRouteDates[parseInt(key) - 1] = appState.routeDates[key];
+                    }
+                });
+                appState.routeDates = updatedRouteDates;
+                updateUrl();
+                break;            
 
         default:
             appState[key] = value;
