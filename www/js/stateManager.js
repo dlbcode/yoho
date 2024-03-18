@@ -29,7 +29,7 @@ function updateState(key, value) {
             updateUrl();
             break;
 
-            case 'updateRouteDate':
+        case 'updateRouteDate':
             const { routeNumber, date } = value;
             appState.routeDates[routeNumber] = date;
             // Ensure selectedRoutes are consistent with the updated routeDates
@@ -38,8 +38,6 @@ function updateState(key, value) {
                     appState.selectedRoutes[key].routeDates = date;
                 }
             });
-            updateUrl();
-            break;
 
             keysToDelete.forEach(key => {
                 delete appState.selectedRoutes[key];
@@ -83,11 +81,13 @@ function updateState(key, value) {
             break;
     
         case 'updateRoutes':
+            console.log('updateRoutes: ',appState.routes);
             if (JSON.stringify(appState.routes) !== JSON.stringify(value)) {
                 appState.routes = value;
                 // Recalculate routeDates to ensure consistency with the updated routes
                 const recalculatedRouteDates = {};
                 appState.routes.forEach((route, index) => {
+                    console.log('ROUTE: ',route);
                     if (appState.routeDates[index]) {
                         recalculatedRouteDates[index] = appState.routeDates[index];
                     } else {

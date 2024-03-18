@@ -101,12 +101,14 @@ const routeHandling = {
         let dateButton = document.createElement('button');
         dateButton.className = 'date-select-button';
 
-        // Initialize currentRouteDate, defaulting to today's date for the first route or the previous route's date otherwise
-        const currentRouteDate = appState.routeDates[routeNumber] ? appState.routeDates[routeNumber] : (routeNumber === 1 ? new Date().toISOString().split('T')[0] : appState.routeDates[routeNumber - 1]);
-        // Update appState.routeDates for the current route if it wasn't already set
-        if (!appState.routeDates[routeNumber -1]) {
+        const currentRouteDate = appState.routeDates.hasOwnProperty(routeNumber) ? 
+        appState.routeDates[routeNumber] : 
+        (routeNumber === 0 ? new Date().toISOString().split('T')[0] : appState.routeDates[routeNumber - 1]);
+
+        if (!appState.routeDates.hasOwnProperty(routeNumber)) {
             appState.routeDates[routeNumber] = currentRouteDate;
         }
+        console.log(`currentRouteDate: ${currentRouteDate}`);
 
         // Set the button text based on whether it's a date range or a single date
         dateButton.textContent = currentRouteDate.includes(' to ') ? '[...]' : new Date(currentRouteDate).getUTCDate().toString();
