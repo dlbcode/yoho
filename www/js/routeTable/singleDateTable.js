@@ -134,32 +134,26 @@ function buildSingleDateTable(routeIndex) {
             const routeIdString = this.getAttribute('data-route-id');
             const routeIds = routeIdString.split('|');
             const fullFlightData = data[index];
-
+    
             // Determine the group ID of the newly selected route
             let newRouteGroupId = null;
-            const routeDetails = appState.selectedRoutes[routeIndex] ? appState.selectedRoutes[routeIndex] : 0;
-            //console.log('ROUTEDETAILS: ', routeDetails);
+            const routeDetails = appState.selectedRoutes[routeIndex] ? appState.selectedRoutes[routeIndex] : null;
             if (routeDetails !== null) {
-                newRouteGroupId = routeDetails.group  + 1;
-                //console.log('NEWGROUP: ', newRouteGroupId);
+                newRouteGroupId = routeDetails.group + 1;
             }
-
+    
             // Remove all selected routes that have the same group ID
             if (newRouteGroupId !== null) {
-              //console.log('REMOVING ALL GROUPS OTHER THAN: ', newRouteGroupId);
-              Object.keys(appState.selectedRoutes).forEach(key => {
-                //console.log('CHECKING ROUTES: ', appState.selectedRoutes[key]);
-                if (appState.selectedRoutes[key].group !== newRouteGroupId) {
-                    updateState('removeSelectedRoute', parseInt(key));
-                }
-            });
+                Object.keys(appState.selectedRoutes).forEach(key => {
+                    if (appState.selectedRoutes[key].group !== newRouteGroupId) {
+                        updateState('removeSelectedRoute', parseInt(key));
+                    }
+                });
             }
-
-            routeIds.forEach((id, idx) => {
-                const segmentData = fullFlightData.route[idx]; // Access the specific segment
-                const departureDate = new Date(segmentData.local_departure).toISOString().split('T')[0];
     
-                // Define displayData based on segmentData
+            routeIds.forEach((id, idx) => {
+                const segmentData = fullFlightData.route[idx];
+                const departureDate = new Date(segmentData.local_departure).toISOString().split('T')[0];
                 const displayData = {
                     departure: new Date(segmentData.local_departure).toLocaleString(),
                     arrival: new Date(segmentData.local_arrival).toLocaleString(),
@@ -170,33 +164,26 @@ function buildSingleDateTable(routeIndex) {
                     deep_link: fullFlightData.deep_link
                 };
     
-                // Directly update appState.routeDates for the current segment
-                console.log('arouteDetails.group: ', routeDetails.group);
-                appState.routeDates[routeIndex + idx] = departureDate;
                 const selectedRouteIndex = routeIndex + idx;
-                const selectedRoute = appState.selectedRoutes[selectedRouteIndex];
-                if (selectedRoute) {
-                  selectedRoute.displayData = displayData;
-                  selectedRoute.fullData = segmentData;
-                  selectedRoute.routeDates = departureDate;
+                appState.routeDates[selectedRouteIndex] = departureDate;
+                if (!appState.selectedRoutes[selectedRouteIndex]) {
+                    appState.selectedRoutes[selectedRouteIndex] = {
+                        displayData: displayData,
+                        fullData: segmentData,
+                        group: newRouteGroupId !== null ? newRouteGroupId : routeIndex, // Use newRouteGroupId if available
+                        routeDates: departureDate
+                    };
                 } else {
-                  appState.selectedRoutes[selectedRouteIndex] = {
-                    displayData: displayData,
-                    fullData: segmentData,
-                    group: routeIndex,
-                    routeDates: departureDate
-                  };
+                    appState.selectedRoutes[selectedRouteIndex].displayData = displayData;
+                    appState.selectedRoutes[selectedRouteIndex].fullData = segmentData;
+                    appState.selectedRoutes[selectedRouteIndex].routeDates = departureDate;
                 }
-
-                console.log('routeIndex: ', idx);
-                console.log('route', displayData);
-                console.log('appState.selectedRoutes', appState.selectedRoutes);
             });
     
             updateState('changeView', 'selectedRoute');
-            highlightSelectedRowForRouteIndex(index);
+            highlightSelectedRowForRouteIndex(routeIndex);
         });
-    });           
+    });              
     
       document.querySelectorAll('.route-info-table tbody tr').forEach(row => {
         row.addEventListener('mouseover', function() {
