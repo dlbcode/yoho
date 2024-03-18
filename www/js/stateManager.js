@@ -116,7 +116,13 @@ function updateState(key, value) {
             appState.routeDates[routeIndex] = routeDetails.routeDates;
         
             updateUrl();
-            break;            
+            break; 
+        
+        case 'removeSelectedRoute':
+            delete appState.selectedRoutes[value];
+            delete appState.routeDates[value];
+            updateUrl();
+            break;
 
         default:
             appState[key] = value;
@@ -141,9 +147,10 @@ function updateState(key, value) {
     }
     document.dispatchEvent(new CustomEvent('stateChange', { detail: { key, value } }));
     
-    console.log('appState.routes: ', appState.routes);
-    console.log('appState.routeDates:', appState.routeDates);
-    console.log('appState.selectedRoutes: ', appState.selectedRoutes);
+    //console.log('appState.routes: ', appState.routes);
+    //console.log('appState.routeDates:', appState.routeDates);
+    //console.log('appState.selectedRoutes: ', appState.selectedRoutes);
+    //console.log('appState.waypoints:', appState.waypoints);
 }
   
 function updateUrl() {
