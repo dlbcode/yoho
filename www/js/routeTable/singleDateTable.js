@@ -133,24 +133,22 @@ function buildSingleDateTable(routeIndex) {
         row.addEventListener('click', function() {
             const routeIdString = this.getAttribute('data-route-id');
             const routeIds = routeIdString.split('|');
-            const fullFlightData = data[index];
+            const fullFlightData = data[index]; // Assuming 'data' is the dataset containing route details
     
-            // Determine the group ID of the newly selected route
+            // Determine the group ID for the newly selected route
             let newRouteGroupId = null;
-            const routeDetails = appState.selectedRoutes[routeIndex] ? appState.selectedRoutes[routeIndex] : null;
-            if (routeDetails !== null) {
-                newRouteGroupId = routeDetails.group + 1;
+            const existingRouteDetails = appState.selectedRoutes[routeIndex];
+            if (existingRouteDetails) {
+                newRouteGroupId = existingRouteDetails.group + 1;
             }
+            // Remove all selected routes that do not belong to the new group
+            Object.keys(appState.selectedRoutes).forEach(key => {
+                if (appState.selectedRoutes[key].group !== newRouteGroupId) {
+                    updateState('removeSelectedRoute', parseInt(key));
+                }
+            });
     
-            // Remove all selected routes that have the same group ID
-            if (newRouteGroupId !== null) {
-                Object.keys(appState.selectedRoutes).forEach(key => {
-                    if (appState.selectedRoutes[key].group !== newRouteGroupId) {
-                        updateState('removeSelectedRoute', parseInt(key));
-                    }
-                });
-            }
-    
+            // Update appState for the selected route
             routeIds.forEach((id, idx) => {
                 const segmentData = fullFlightData.route[idx];
                 const departureDate = new Date(segmentData.local_departure).toISOString().split('T')[0];
@@ -161,29 +159,28 @@ function buildSingleDateTable(routeIndex) {
                     airline: segmentData.airline,
                     stops: fullFlightData.route.length - 1,
                     route: `${segmentData.flyFrom} > ${segmentData.flyTo}`,
-                    deep_link: fullFlightData.deep_link
+                    deep_link: fullFlightData.deep_link,
                 };
     
                 const selectedRouteIndex = routeIndex + idx;
-                appState.routeDates[selectedRouteIndex] = departureDate;
-                if (!appState.selectedRoutes[selectedRouteIndex]) {
-                    appState.selectedRoutes[selectedRouteIndex] = {
-                        displayData: displayData,
-                        fullData: segmentData,
-                        group: newRouteGroupId !== null ? newRouteGroupId : routeIndex, // Use newRouteGroupId if available
-                        routeDates: departureDate
-                    };
-                } else {
-                    appState.selectedRoutes[selectedRouteIndex].displayData = displayData;
-                    appState.selectedRoutes[selectedRouteIndex].fullData = segmentData;
-                    appState.selectedRoutes[selectedRouteIndex].routeDates = departureDate;
+                // Check if the routeDate already exists to prevent duplication
+                if (!appState.routeDates[selectedRouteIndex]) {
+                    appState.routeDates[selectedRouteIndex] = departureDate;
                 }
+    
+                // Update or add the selected route details
+                appState.selectedRoutes[selectedRouteIndex] = {
+                    displayData: displayData,
+                    fullData: segmentData,
+                    group: newRouteGroupId !== null ? newRouteGroupId : routeIndex,
+                    routeDates: departureDate,
+                };
             });
     
             updateState('changeView', 'selectedRoute');
             highlightSelectedRowForRouteIndex(routeIndex);
         });
-    });              
+    });                 
     
       document.querySelectorAll('.route-info-table tbody tr').forEach(row => {
         row.addEventListener('mouseover', function() {
