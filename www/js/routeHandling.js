@@ -10,6 +10,7 @@ import { routeDateButtons } from './routeDateButtons.js';
 const routeHandling = {
 
     buildRouteDivs: function(routeNumber) {
+        console.log('buildRouteDivs routeNumber: ',routeNumber);
 
         if (appState.waypoints.length === 0 && document.querySelectorAll('.route-container').length >= 1) {
             return; // Do not create a new route div if no waypoints are defined and a route div exists
@@ -102,18 +103,17 @@ const routeHandling = {
         dateButton.className = 'date-select-button';
 
         const currentRouteDate = appState.routeDates.hasOwnProperty(routeNumber) ? 
-        appState.routeDates[routeNumber] : 
-        (routeNumber === 0 ? new Date().toISOString().split('T')[0] : appState.routeDates[routeNumber - 1]);
-
-        console.log('appState.routeDates: ', appState.routeDates);
+            appState.routeDates[routeNumber] : 
+            (routeNumber === 1 ? new Date().toISOString().split('T')[0] : appState.routeDates[routeNumber - 1]);
 
         if (!appState.routeDates.hasOwnProperty(routeNumber)) {
             appState.routeDates[routeNumber] = currentRouteDate;
         } else {
-            // set appState.routeDates[routeNumber] to the currentRouteDate if the routeNumber is 0, or the previous route's date if it's not
-            appState.routeDates[routeNumber] = routeNumber === 0? currentRouteDate : appState.routeDates[routeNumber - 1];
+            appState.routeDates[routeNumber] = routeNumber === 1 ? new Date().toISOString().split('T')[0] : appState.routeDates[routeNumber - 1];
         }
-        console.log(`currentRouteDate: ${currentRouteDate}`);
+
+        console.log('appState.routeDates[routeNumber]: ',appState.routeDates[routeNumber]);
+        console.log('currentDate: ',currentRouteDate);
 
         // Set the button text based on whether it's a date range or a single date
         dateButton.textContent = currentRouteDate.includes(' to ') ? '[...]' : new Date(currentRouteDate).getUTCDate().toString();
