@@ -105,8 +105,13 @@ const routeHandling = {
         appState.routeDates[routeNumber] : 
         (routeNumber === 0 ? new Date().toISOString().split('T')[0] : appState.routeDates[routeNumber - 1]);
 
+        console.log('appState.routeDates: ', appState.routeDates);
+
         if (!appState.routeDates.hasOwnProperty(routeNumber)) {
             appState.routeDates[routeNumber] = currentRouteDate;
+        } else {
+            // set appState.routeDates[routeNumber] to the currentRouteDate if the routeNumber is 0, or the previous route's date if it's not
+            appState.routeDates[routeNumber] = routeNumber === 0? currentRouteDate : appState.routeDates[routeNumber - 1];
         }
         console.log(`currentRouteDate: ${currentRouteDate}`);
 
