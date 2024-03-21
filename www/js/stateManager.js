@@ -39,9 +39,9 @@ function updateState(key, value) {
                 }
             });
 
-            keysToDelete.forEach(key => {
-                delete appState.selectedRoutes[key];
-            });
+            //keysToDelete.forEach(key => {
+            //    delete appState.selectedRoutes[key];
+            //});
             updateUrl();
             break;   
             
