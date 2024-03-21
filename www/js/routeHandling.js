@@ -10,6 +10,7 @@ import { routeDateButtons } from './routeDateButtons.js';
 const routeHandling = {
 
     buildRouteDivs: function(routeNumber) {
+        routeNumber = routeNumber - 1;
         console.log('buildRouteDivs routeNumber: ',routeNumber);
 
         if (appState.waypoints.length === 0 && document.querySelectorAll('.route-container').length >= 1) {
@@ -28,7 +29,7 @@ const routeHandling = {
         let waypointsOrder = appState.routeDirection === 'to' ? [1, 0] : [0, 1];
     
         for (let i = 0; i < 2; i++) {
-            let index = (routeNumber - 1) * 2 + waypointsOrder[i];
+            let index = (routeNumber) * 2 + waypointsOrder[i];
             let waypoint = appState.waypoints[index];
             let input = document.createElement('input');
             input.type = 'text';
@@ -102,21 +103,25 @@ const routeHandling = {
         let dateButton = document.createElement('button');
         dateButton.className = 'date-select-button';
 
+        console.log('appState.routeDates[routeNumber]: ',routeNumber, appState.routeDates[routeNumber]);
+
         const currentRouteDate = appState.routeDates.hasOwnProperty(routeNumber) ? 
             appState.routeDates[routeNumber] : 
-            (routeNumber === 1 ? new Date().toISOString().split('T')[0] : appState.routeDates[routeNumber - 1]);
+            (routeNumber === 1 ? new Date().toISOString().split('T')[0] : appState.routeDates[routeNumber]);
+
+        console.log('currentDate: ',currentRouteDate);
 
         if (!appState.routeDates.hasOwnProperty(routeNumber)) {
             appState.routeDates[routeNumber] = currentRouteDate;
         } else {
-            appState.routeDates[routeNumber] = routeNumber === 1 ? new Date().toISOString().split('T')[0] : appState.routeDates[routeNumber - 1];
+            appState.routeDates[routeNumber] = routeNumber === 0 ? new Date().toISOString().split('T')[0] : appState.routeDates[routeNumber];
         }
 
-        console.log('appState.routeDates[routeNumber]: ',appState.routeDates[routeNumber]);
-        console.log('currentDate: ',currentRouteDate);
+        //console.log('appState.routeDates[routeNumber]: ',appState.routeDates[routeNumber]);
+        //console.log('currentDate: ',currentRouteDate);
 
         // Set the button text based on whether it's a date range or a single date
-        dateButton.textContent = currentRouteDate.includes(' to ') ? '[...]' : new Date(currentRouteDate).getUTCDate().toString();
+        dateButton.textContent = currentRouteDate ? (currentRouteDate.includes(' to ') ? '[...]' : new Date(currentRouteDate).getUTCDate().toString()) : new Date(currentRouteDate).getUTCDate().toString();
         dateButton.addEventListener('click', function() {
             if (!this._flatpickr) {
                 const currentRouteDate = appState.routeDates[routeNumber];
@@ -127,7 +132,7 @@ const routeHandling = {
                     enableTime: false,
                     dateFormat: "Y-m-d",
                     defaultDate: isDateRange ? currentRouteDate.split(' to ')[0] : currentRouteDate,
-                    minDate: routeNumber === 1 ? "today" : appState.routeDates[routeNumber - 1],
+                    minDate: routeNumber === 0 ? "today" : appState.routeDates[routeNumber],
                     mode: isDateRange ? "range" : "single",
                     onValueUpdate: (selectedDates) => {
                         if (selectedDates.length > 1 && selectedDates[0] && selectedDates[1]) {
@@ -223,7 +228,7 @@ const routeHandling = {
         }
 
         for (let i = 0; i < 2; i++) {
-            let index = (routeNumber - 1) * 2 + i;
+            let index = (routeNumber) * 2 + i;
             setupAutocompleteForField(`waypoint${index + 1}`);
         }
         uiHandling.setFocusToNextUnsetInput();

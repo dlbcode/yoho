@@ -144,6 +144,7 @@ function buildSingleDateTable(routeIndex) {
             // Remove all selected routes that do not belong to the new group
             Object.keys(appState.selectedRoutes).forEach(key => {
                 if (appState.selectedRoutes[key].group !== newRouteGroupId) {
+                  console.log(`Removing route ${key} from selected routes`);
                     updateState('removeSelectedRoute', parseInt(key));
                 }
             });
