@@ -123,7 +123,6 @@ function updateState(key, value) {
         
         case 'removeSelectedRoute':
             delete appState.selectedRoutes[value];
-            delete appState.routeDates[value];
             updateUrl();
             break;
 
