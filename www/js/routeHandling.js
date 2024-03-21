@@ -265,6 +265,7 @@ const routeHandling = {
         // Calculate the index for selectedRoutes based on the routeNumber
         let selectedRouteIndex = routeNumber - 1;
         let groupNumber = appState.selectedRoutes[selectedRouteIndex]?.group;
+        console.log('Removing groupNumber', groupNumber);
     
         // Remove all selectedRoutes with the same group number
         Object.keys(appState.selectedRoutes).forEach(key => {
