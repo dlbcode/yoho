@@ -25,6 +25,7 @@ async function fetchAirportByIata(iata) {
 }
 
 function setupAutocompleteForField(fieldId) {
+    console.log('setupAutocompleteForField fieldId: ', fieldId);
     const inputField = document.getElementById(fieldId);
     const suggestionBox = document.getElementById(fieldId + 'Suggestions');
     let selectionMade = false; // Track if a selection has been made
@@ -202,19 +203,19 @@ function updateSuggestions(inputId, airports, setSelectionMade) {
 document.addEventListener('DOMContentLoaded', () => {
     document.addEventListener('airportSelected', (event) => {
         const { airport, fieldId } = event.detail;
-        const waypointIndex = parseInt(fieldId.replace('waypoint', '')) - 1;
+        // Adjusted to work with 0-based indexing directly without subtracting 1
+        const waypointIndex = parseInt(fieldId.replace('waypoint', ''));
         const iata = airport.iata_code;
-    
-        // Check if the origin is empty and destination has a selection
+        // Review and adjust the logic below as necessary to ensure it aligns with 0-based indexing
         if (appState.routeDirection == 'from') {
-            if (waypointIndex <= 1 && !document.getElementById('waypoint1').value) {
-            updateState('routeDirection', 'to');
+            if (waypointIndex === 0 && !document.getElementById('waypoint0').value) {
+                updateState('routeDirection', 'to');
             }
         }
 
         if (appState.routeDirection == 'to') {
-            if (waypointIndex <= 1 && !document.getElementById('waypoint2').value) {
-            updateState('routeDirection', 'from');
+            if (waypointIndex === 0 && !document.getElementById('waypoint1').value) {
+                updateState('routeDirection', 'from');
             }
         }
 

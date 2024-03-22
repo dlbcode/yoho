@@ -10,8 +10,7 @@ import { routeDateButtons } from './routeDateButtons.js';
 const routeHandling = {
 
     buildRouteDivs: function(routeNumber) {
-        routeNumber = routeNumber - 1;
-        console.log('buildRouteDivs routeNumber: ',routeNumber);
+        console.log('buildRouteDivs routeNumber: ', routeNumber);
 
         if (appState.waypoints.length === 0 && document.querySelectorAll('.route-container').length >= 1) {
             return; // Do not create a new route div if no waypoints are defined and a route div exists
@@ -29,12 +28,11 @@ const routeHandling = {
         let waypointsOrder = appState.routeDirection === 'to' ? [1, 0] : [0, 1];
     
         for (let i = 0; i < 2; i++) {
-            let index = (routeNumber) * 2 + waypointsOrder[i];
+            let index = routeNumber * 2 + waypointsOrder[i];
             let waypoint = appState.waypoints[index];
             let input = document.createElement('input');
             input.type = 'text';
-            input.id = `waypoint${index + 1}`;
-
+            input.id = `waypoint${index}`;
             input.placeholder = placeholders[i];
             input.value = waypoint ? waypoint.iata_code : '';
     
@@ -55,33 +53,29 @@ const routeHandling = {
             routeDiv.appendChild(input);
     
             const suggestionsDiv = document.createElement('div');
-            suggestionsDiv.id = `waypoint${index + 1}Suggestions`;
+            suggestionsDiv.id = `waypoint${index}Suggestions`;
             suggestionsDiv.className = 'suggestions';
             routeDiv.appendChild(suggestionsDiv);
         }
 
-        // Create a new div for the day name box
         let dayNameBox = document.createElement('div');
         dayNameBox.className = 'day-name-box';
-        dayNameBox.setAttribute('data-route-number', routeNumber); // Store the route number on the element for reference
+        dayNameBox.setAttribute('data-route-number', routeNumber);
 
-        // Check if a date exists for the routeNumber
         if (appState.routeDates[routeNumber]) {
             let dateParts = appState.routeDates[routeNumber].split('-');
             let initialDate = new Date(Date.UTC(dateParts[0], dateParts[1] - 1, dateParts[2]));
             let initialDayName = initialDate.toLocaleDateString('en-US', { weekday: 'long', timeZone: 'UTC' })[0];
             dayNameBox.textContent = initialDayName;
         } else {
-            // set the day name bpx to the value of the previous route's day name box
-            let previousRouteNumber = routeNumber - 1;
-            if (previousRouteNumber > 0) {
+            let previousRouteNumber = routeNumber > 0 ? routeNumber - 1 : 0;
+            if (previousRouteNumber >= 0) {
                 let previousDayNameBox = document.querySelector(`.day-name-box[data-route-number="${previousRouteNumber}"]`);
                 if (previousDayNameBox) {
                     dayNameBox.textContent = previousDayNameBox.textContent;
                 }
             }
         }
-
         dayNameBox.style.width = '24px';
         dayNameBox.style.height = '36px';
         dayNameBox.style.display = 'flex';
@@ -90,26 +84,20 @@ const routeHandling = {
         dayNameBox.style.cursor = 'pointer';
         
         dayNameBox.addEventListener('click', function() {
-            // Find the date-select-button within the same routeDiv
             const dateSelectButton = routeDiv.querySelector('.date-select-button');
             if (dateSelectButton) {
                 dateSelectButton.click(); // Programmatically trigger the click event on the button
             }
         });
-        
-        // Insert the day name box before the date button
+
         routeDiv.insertBefore(dayNameBox, routeDiv.firstChild);
 
         let dateButton = document.createElement('button');
         dateButton.className = 'date-select-button';
 
-        console.log('appState.routeDates[routeNumber]: ',routeNumber, appState.routeDates[routeNumber]);
-
         const currentRouteDate = appState.routeDates.hasOwnProperty(routeNumber) ? 
             appState.routeDates[routeNumber] : 
-            (routeNumber === 1 ? new Date().toISOString().split('T')[0] : appState.routeDates[routeNumber]);
-
-        console.log('currentDate: ',currentRouteDate);
+            (routeNumber === 0 ? new Date().toISOString().split('T')[0] : appState.routeDates[routeNumber]);
 
         if (!appState.routeDates.hasOwnProperty(routeNumber)) {
             appState.routeDates[routeNumber] = currentRouteDate;
@@ -117,10 +105,6 @@ const routeHandling = {
             appState.routeDates[routeNumber] = routeNumber === 0 ? new Date().toISOString().split('T')[0] : appState.routeDates[routeNumber];
         }
 
-        //console.log('appState.routeDates[routeNumber]: ',appState.routeDates[routeNumber]);
-        //console.log('currentDate: ',currentRouteDate);
-
-        // Set the button text based on whether it's a date range or a single date
         dateButton.textContent = currentRouteDate ? (currentRouteDate.includes(' to ') ? '[...]' : new Date(currentRouteDate).getUTCDate().toString()) : new Date(currentRouteDate).getUTCDate().toString();
         dateButton.addEventListener('click', function() {
             if (!this._flatpickr) {
@@ -148,7 +132,6 @@ const routeHandling = {
                             const dateValue = selectedDates[0].toISOString().split('T')[0];
                             updateState('updateRouteDate', { routeNumber: routeNumber, date: dateValue });
                         } else {
-                            // Handle the case where no dates are selected or the selection is cleared
                             this.textContent = 'Select Date'; // Reset the button text or handle as needed
                             updateState('updateRouteDate', { routeNumber: routeNumber, date: null }); // Update the state accordingly
                         }
@@ -181,7 +164,6 @@ const routeHandling = {
                 this._flatpickr.open();
             }
         }, {once: true});           
-        
         routeDiv.insertBefore(dateButton, dayNameBox.nextSibling);
 
         let swapButton = document.createElement('button');
@@ -193,7 +175,7 @@ const routeHandling = {
         let firstInput = routeDiv.querySelector('input[type="text"]');
         routeDiv.insertBefore(swapButton, firstInput.nextSibling);
 
-        if (routeNumber > 1) {
+        if (routeNumber > 0) {
             let minusButton = document.createElement('button');
             minusButton.textContent = '-';
             minusButton.className = 'remove-route-button';
@@ -228,30 +210,26 @@ const routeHandling = {
         }
 
         for (let i = 0; i < 2; i++) {
-            let index = (routeNumber) * 2 + i;
-            setupAutocompleteForField(`waypoint${index + 1}`);
+            let index = routeNumber * 2 + i;
+            setupAutocompleteForField(`waypoint${index}`);
         }
         uiHandling.setFocusToNextUnsetInput();
         uiHandling.toggleTripButtonsVisibility();
         uiHandling.getPriceButton();
         routeDateButtons.updateDateButtons();
     },
-    
-  
     handleSwapButtonClick: function(routeNumber) {
         let routeDiv = document.getElementById(`route${routeNumber}`);
         let inputs = routeDiv.querySelectorAll('input[type="text"]');
         if (inputs.length === 2) {
-            // Swap the values of the input fields
             let temp = inputs[0].value;
             inputs[0].value = inputs[1].value;
             inputs[1].value = temp;
-    
-            // Update the appState.waypoints array
-            let waypointIndex = (routeNumber - 1) * 2;
+
+            let waypointIndex = routeNumber * 2;
             [appState.waypoints[waypointIndex], appState.waypoints[waypointIndex + 1]] = 
                 [appState.waypoints[waypointIndex + 1], appState.waypoints[waypointIndex]];
-    
+
             routeHandling.updateRoutesArray();
         }
     },
@@ -261,42 +239,34 @@ const routeHandling = {
         if (routeDiv) {
             routeDiv.remove();
         }
-    
-        // Calculate the index for selectedRoutes based on the routeNumber
-        let selectedRouteIndex = routeNumber - 1;
+
+        let selectedRouteIndex = routeNumber;
         let groupNumber = appState.selectedRoutes[selectedRouteIndex]?.group;
-        console.log('Removing groupNumber', groupNumber);
-    
-        // Remove all selectedRoutes with the same group number
+
         Object.keys(appState.selectedRoutes).forEach(key => {
             if (appState.selectedRoutes[key].group === groupNumber) {
                 updateState('removeSelectedRoute', parseInt(key));
             }
         });
-    
-        // Remove the waypoints for the route being removed
-        let waypointsIndex = (routeNumber - 1) * 2;
+
+        let waypointsIndex = routeNumber * 2;
         if (appState.waypoints.length > waypointsIndex) {
             appState.waypoints.splice(waypointsIndex, 2); // Remove 2 waypoints starting from the calculated index
             updateState('updateWaypoint', appState.waypoints); // Update the state to reflect the change
         }
 
-        // Remove the route date for the removed route
         delete appState.routeDates[routeNumber];
-    
-        // Re-index routeDates to fill the gap left by the removed route
+
         const newRouteDates = {};
         Object.keys(appState.routeDates).forEach((key, index) => {
             if (parseInt(key) < routeNumber) {
                 newRouteDates[key] = appState.routeDates[key];
             } else if (parseInt(key) > routeNumber) {
-                // Shift the dates down to fill the gap left by the removed route
                 newRouteDates[parseInt(key) - 1] = appState.routeDates[key];
             }
         });
         appState.routeDates = newRouteDates;
-        
-        // Additional logic to update the UI and application state as needed
+
         pathDrawing.clearLines();
         pathDrawing.drawLines();
         mapHandling.updateMarkerIcons();
@@ -304,7 +274,6 @@ const routeHandling = {
         uiHandling.getPriceButton();
         this.updateRoutesArray();
     },
-    
     getRouteIdFromDiv: function (routeDiv) {
         const inputs = routeDiv.querySelectorAll('input[type="text"]');
         if (inputs.length === 2) {
@@ -339,7 +308,7 @@ const routeHandling = {
         document.querySelectorAll('.waypointTooltip').forEach(tooltip => {
             tooltip.remove();
         });
-    },                        
+    },
 
     updateRoutesArray: async function () {
         let newRoutes = [];
@@ -400,11 +369,12 @@ const routeHandling = {
         routeList.updateEstPrice();
         document.dispatchEvent(new CustomEvent('routesArrayUpdated'));
     },
-    
+
     init: function() {
-        this.buildRouteDivs(1); // Dynamically create the first route div
+        this.buildRouteDivs(0); // Dynamically create the first route div starting from index 0
     }
 }
+
 document.addEventListener('routeDatesUpdated', function() {
     routeDateButtons.updateDateButtonsDisplay();
 });

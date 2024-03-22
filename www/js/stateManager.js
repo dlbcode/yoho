@@ -89,11 +89,11 @@ function updateState(key, value) {
                 appState.routes.forEach((route, index) => {
                     console.log('ROUTE, INDEX: ',route, index);
                     if (appState.routeDates[index]) {
-                        console.log('Date was present!');
+                        console.log('Date was present!: ',route, index);
                         recalculatedRouteDates[index] = appState.routeDates[index];
                         console.log('recalculatedRouteDates: ',recalculatedRouteDates);
                     } else {
-                        console.log('Date was missing for route: ',route);
+                        console.log('Date was missing for route: ',route, index);
                         // Assign a default date if missing
                         recalculatedRouteDates[index] = appState.routeDates[index -1];
                     }
