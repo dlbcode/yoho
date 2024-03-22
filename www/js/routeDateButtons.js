@@ -80,7 +80,8 @@ const routeDateButtons = {
 }
 
 document.addEventListener('stateChange', function(event) {
-    if (event.detail.key === 'updateRouteDate') {
+    if (event.detail.key === 'updateRouteDate' || event.detail.key === 'updateRoutes') {
+        console.log('Updating route date buttons');
         routeDateButtons.updateDayNameBoxes();
         routeDateButtons.updateMonthNameBoxes();
     }

@@ -178,7 +178,7 @@ function buildSingleDateTable(routeIndex) {
                     routeDates: departureDate,
                 };
             });
-    
+            updateState('updateRouteDate: ', routeIndex, departureDate);
             updateState('changeView', 'selectedRoute');
             highlightSelectedRowForRouteIndex(routeIndex);
         });

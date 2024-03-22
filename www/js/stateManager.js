@@ -93,9 +93,9 @@ function updateState(key, value) {
                         recalculatedRouteDates[index] = appState.routeDates[index];
                         console.log('recalculatedRouteDates: ',recalculatedRouteDates);
                     } else {
-                        console.log('Date was missing!');
+                        console.log('Date was missing for route: ',route);
                         // Assign a default date if missing
-                        recalculatedRouteDates[index] = new Date().toISOString().split('T')[0];
+                        recalculatedRouteDates[index] = appState.routeDates[index -1];
                     }
                 });
                 appState.routeDates = recalculatedRouteDates;
