@@ -27,18 +27,22 @@ const infoPane = {
   displayContent() {
     const infoPaneContent = document.getElementById('infoPaneContent');
     infoPaneContent.innerHTML = '';
-    
-    if (appState.currentView === 'trip') {
-      const selectedRoutesArray = Object.values(appState.selectedRoutes);
-      this.updateTripTable(selectedRoutesArray);
-    } else if (appState.currentView === 'routeTable') {
-      const routeIndex = appState.currentRouteIndex;
-      buildRouteTable(routeIndex);
-    } else if (appState.currentView === 'selectedRoute') {
-      const routeIndex = appState.currentRouteIndex;
-      selectedRoute.displaySelectedRouteInfo(routeIndex);
+  
+    const { currentView, currentRouteIndex, selectedRoutes } = appState;
+  
+    if (currentView === 'trip') {
+      this.updateTripTable(Object.values(selectedRoutes));
+    } else if (currentView === 'routeTable') {
+      buildRouteTable(currentRouteIndex);
+    } else if (currentView === 'selectedRoute') {
+      if (selectedRoutes[currentRouteIndex] !== undefined) {
+        selectedRoute.displaySelectedRouteInfo(currentRouteIndex);
+      } else {
+        appState.currentView = 'trip';
+        this.displayContent();
+      }
     }
-  },
+  },  
 
   updateRouteButtons() {
     const menuBar = document.getElementById('menu-bar');
