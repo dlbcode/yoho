@@ -138,14 +138,11 @@ function buildSingleDateTable(routeIndex) {
             // Determine the group ID for the newly selected route
             appState.highestGroupId += 1;
             let newRouteGroupId = appState.highestGroupId;
-            console.log('New group ID:' + newRouteGroupId);
-
             const existingRouteDetails = appState.selectedRoutes[routeIndex];
             if (existingRouteDetails) {
                 // Logic to remove routes from the old group, if necessary
                 Object.keys(appState.selectedRoutes).forEach(key => {
                     if (appState.selectedRoutes[key].group == existingRouteDetails.group) {
-                        console.log(`Removing route ${key} from selected routes because it belongs to group ${existingRouteDetails.group}`);
                         updateState('removeSelectedRoute', parseInt(key));
                     }
                 });

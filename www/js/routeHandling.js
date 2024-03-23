@@ -11,7 +11,6 @@ const routeHandling = {
 
     buildRouteDivs: function(routeNumber) {
         routeNumber = routeNumber - 1;
-        console.log('buildRouteDivs routeNumber: ',routeNumber);
 
         if (appState.waypoints.length === 0 && document.querySelectorAll('.route-container').length >= 1) {
             return; // Do not create a new route div if no waypoints are defined and a route div exists
@@ -103,22 +102,15 @@ const routeHandling = {
         let dateButton = document.createElement('button');
         dateButton.className = 'date-select-button';
 
-        console.log('appState.routeDates[routeNumber]: ',routeNumber, appState.routeDates[routeNumber]);
-
         const currentRouteDate = appState.routeDates.hasOwnProperty(routeNumber) ? 
             appState.routeDates[routeNumber] : 
             (routeNumber === 1 ? new Date().toISOString().split('T')[0] : appState.routeDates[routeNumber]);
-
-        console.log('currentDate: ',currentRouteDate);
 
         if (!appState.routeDates.hasOwnProperty(routeNumber)) {
             appState.routeDates[routeNumber] = currentRouteDate;
         } else {
             appState.routeDates[routeNumber] = routeNumber === 0 ? new Date().toISOString().split('T')[0] : appState.routeDates[routeNumber];
         }
-
-        //console.log('appState.routeDates[routeNumber]: ',appState.routeDates[routeNumber]);
-        //console.log('currentDate: ',currentRouteDate);
 
         // Set the button text based on whether it's a date range or a single date
         dateButton.textContent = currentRouteDate ? (currentRouteDate.includes(' to ') ? '[...]' : new Date(currentRouteDate).getUTCDate().toString()) : new Date(currentRouteDate).getUTCDate().toString();
@@ -193,7 +185,7 @@ const routeHandling = {
         let firstInput = routeDiv.querySelector('input[type="text"]');
         routeDiv.insertBefore(swapButton, firstInput.nextSibling);
 
-        if (routeNumber > 1) {
+        if (routeNumber > 0) {
             let minusButton = document.createElement('button');
             minusButton.textContent = '-';
             minusButton.className = 'remove-route-button';
@@ -263,9 +255,8 @@ const routeHandling = {
         }
     
         // Calculate the index for selectedRoutes based on the routeNumber
-        let selectedRouteIndex = routeNumber - 1;
+        let selectedRouteIndex = routeNumber;
         let groupNumber = appState.selectedRoutes[selectedRouteIndex]?.group;
-        console.log('Removing groupNumber', groupNumber);
     
         // Remove all selectedRoutes with the same group number
         Object.keys(appState.selectedRoutes).forEach(key => {
@@ -275,7 +266,7 @@ const routeHandling = {
         });
     
         // Remove the waypoints for the route being removed
-        let waypointsIndex = (routeNumber - 1) * 2;
+        let waypointsIndex = (routeNumber) * 2;
         if (appState.waypoints.length > waypointsIndex) {
             appState.waypoints.splice(waypointsIndex, 2); // Remove 2 waypoints starting from the calculated index
             updateState('updateWaypoint', appState.waypoints); // Update the state to reflect the change

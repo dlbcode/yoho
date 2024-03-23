@@ -82,19 +82,14 @@ function updateState(key, value) {
             break;
     
         case 'updateRoutes':
-            console.log('updateRoutes: ',appState.routes);
             if (JSON.stringify(appState.routes) !== JSON.stringify(value)) {
                 appState.routes = value;
                 // Recalculate routeDates to ensure consistency with the updated routes
                 const recalculatedRouteDates = {};
                 appState.routes.forEach((route, index) => {
-                    console.log('ROUTE, INDEX: ',route, index);
                     if (appState.routeDates[index]) {
-                        console.log('Date was present!');
                         recalculatedRouteDates[index] = appState.routeDates[index];
-                        console.log('recalculatedRouteDates: ',recalculatedRouteDates);
                     } else {
-                        console.log('Date was missing for route: ',route);
                         // Assign a default date if missing
                         recalculatedRouteDates[index] = appState.routeDates[index -1];
                     }
@@ -151,9 +146,9 @@ function updateState(key, value) {
     document.dispatchEvent(new CustomEvent('stateChange', { detail: { key, value } }));
     console.log('appState update key and value: ', key, value);
     console.log('appState.routes: ', appState.routes);
-    console.log('appState.routeDates:', appState.routeDates);
+    //console.log('appState.routeDates:', appState.routeDates);
     console.log('appState.selectedRoutes: ', appState.selectedRoutes);
-    console.log('appState.waypoints:', appState.waypoints);
+    //console.log('appState.waypoints:', appState.waypoints);
 }
   
 function updateUrl() {

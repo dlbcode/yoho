@@ -64,10 +64,8 @@ const routeDateButtons = {
     document.querySelectorAll('.date-select-button').forEach(button => {
         const routeNumber = button.closest('.route-container').getAttribute('data-route-number');
         const dateValue = appState.routeDates[routeNumber];
-        //console.log('updateDateButtonsDisplay: ',dateValue);
         if (dateValue) {
           button.textContent = dateValue.includes(' to ') ? '[...]' : new Date(dateValue).getUTCDate().toString();
-          //console.log(`No date set for route ${routeNumber}, leaving button text as ${button.textContent}.`);
         }
     });
   },
@@ -81,7 +79,6 @@ const routeDateButtons = {
 
 document.addEventListener('stateChange', function(event) {
     if (event.detail.key === 'updateRouteDate' || event.detail.key === 'updateRoutes') {
-        console.log('Updating route date buttons');
         routeDateButtons.updateDayNameBoxes();
         routeDateButtons.updateMonthNameBoxes();
     }
