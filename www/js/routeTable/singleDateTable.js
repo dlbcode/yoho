@@ -133,22 +133,23 @@ function buildSingleDateTable(routeIndex) {
         row.addEventListener('click', function() {
             const routeIdString = this.getAttribute('data-route-id');
             const routeIds = routeIdString.split('|');
-            const fullFlightData = data[index]; // Assuming 'data' is the dataset containing route details
+            const fullFlightData = data[index];
     
             // Determine the group ID for the newly selected route
-            let newRouteGroupId = null;
+            appState.highestGroupId += 1;
+            let newRouteGroupId = appState.highestGroupId;
+            console.log('New group ID:' + newRouteGroupId);
+
             const existingRouteDetails = appState.selectedRoutes[routeIndex];
             if (existingRouteDetails) {
-                newRouteGroupId = existingRouteDetails.group + 1;
-                console.log('Existing group ID:'+ existingRouteDetails.group);
-              // Remove all selected routes that belong to the old group
-              Object.keys(appState.selectedRoutes).forEach(key => {
-                  if (appState.selectedRoutes[key].group == existingRouteDetails.group) {
-                    console.log(`Removing route ${key} from selected routes because it belongs to group ${existingRouteDetails.group}`);
-                      updateState('removeSelectedRoute', parseInt(key));
-                  }
-              });
-            };
+                // Logic to remove routes from the old group, if necessary
+                Object.keys(appState.selectedRoutes).forEach(key => {
+                    if (appState.selectedRoutes[key].group == existingRouteDetails.group) {
+                        console.log(`Removing route ${key} from selected routes because it belongs to group ${existingRouteDetails.group}`);
+                        updateState('removeSelectedRoute', parseInt(key));
+                    }
+                });
+            }
     
             // Update appState for the selected route
             routeIds.forEach((id, idx) => {

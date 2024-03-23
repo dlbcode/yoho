@@ -17,6 +17,7 @@ const appState = {
     routeTablesData: {},
     currentView: 'trip',
     currentGroupID: 0,
+    highestGroupId: 0,
     routeDates: {
         0: new Date().toISOString().split('T')[0],
     },
