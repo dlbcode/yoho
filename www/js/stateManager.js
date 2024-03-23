@@ -103,7 +103,7 @@ function updateState(key, value) {
             appState.routes = [];
             appState.trips = [];
             appState.selectedRoutes = {};
-            appState.routeDates = {};
+            appState.routeDates = { 0: new Date().toISOString().split('T')[0] };
             updateUrl();
             break;
 
