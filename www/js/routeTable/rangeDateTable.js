@@ -146,8 +146,17 @@ function buildDateRangeTable(routeIndex, dateRange) {
       document.querySelectorAll('.route-info-table tbody tr').forEach((row, index) => {
         row.addEventListener('click', function() {
             const routeIdString = this.getAttribute('data-route-id');
-            const routeIds = routeIdString.split('|');
-            const fullFlightData = data[index];
+    
+            // Assuming 'data.data' is an array of flight objects and each has a unique 'id' property
+            const fullFlightData = data.data.find(flight => flight.id === routeIdString);
+    
+            if (!fullFlightData) {
+                console.error('No flight data found for route ID:', routeIdString);
+                return; // Exit if no matching flight data found
+            }
+    
+            // Now that we have confirmed 'fullFlightData' is defined, we can safely access its properties
+            const departureTime = new Date(fullFlightData.dTime * 1000).toLocaleString();
 
             console.log('fullFlightData:', fullFlightData);
     
