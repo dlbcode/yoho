@@ -76,8 +76,18 @@ function buildSingleDateTable(routeIndex) {
         const durationHours = Math.floor(flight.duration.total / 3600);
         const durationMinutes = Math.floor((flight.duration.total % 3600) / 60);
         const routeIATAs = flight.route.map(r => r.flyFrom).concat(flight.route[flight.route.length - 1].flyTo).join(" > ");
-        row.innerHTML = `<td>${new Date(flight.local_departure).toLocaleString()}</td>
-                         <td>${new Date(flight.local_arrival).toLocaleString()}</td>
+    
+        // Format departure and arrival dates to include the short day name
+        const departureDate = new Date(flight.local_departure);
+        const arrivalDate = new Date(flight.local_arrival);
+        const departureDayName = departureDate.toLocaleDateString('en-US', { weekday: 'short' });
+        const arrivalDayName = arrivalDate.toLocaleDateString('en-US', { weekday: 'short' });
+    
+        const formattedDeparture = `${departureDayName} ${departureDate.toLocaleString()}`;
+        const formattedArrival = `${arrivalDayName} ${arrivalDate.toLocaleString()}`;
+    
+        row.innerHTML = `<td>${formattedDeparture}</td>
+                         <td>${formattedArrival}</td>
                          <td>$${flight.price}</td>
                          <td>${flight.airlines.join(", ")}</td>
                          <td>${directFlight ? '✓' : ''}</td>
@@ -86,7 +96,7 @@ function buildSingleDateTable(routeIndex) {
                          <td>${durationHours}h ${durationMinutes}m</td>
                          <td>${routeIATAs}</td>`;
         tbody.appendChild(row);
-      });
+      });    
       table.appendChild(tbody);
       infoPaneContent.appendChild(table);
 

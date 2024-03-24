@@ -64,17 +64,16 @@ const infoPane = {
                   appState.currentView = 'selectedRoute';
                   appState.currentRouteIndex = index;
                   this.displayContent();
-              } else {
-                  appState.currentView = 'routeTable';
-                  appState.currentRouteIndex = index;
-                  this.displayContent();
-                  // Logic to pan and zoom the map for routes without a selectedRoute entry
-                  const origin = route.originAirport;
-                  const destination = route.destinationAirport;
-                  const group = [origin, destination].map(airport => L.latLng(airport.latitude, airport.longitude));
-                  const bounds = L.latLngBounds(group);
-                  map.fitBounds(bounds, { padding: [50, 50] }); // Adjust padding as needed
               }
+              appState.currentView = 'routeTable';
+              appState.currentRouteIndex = index;
+              this.displayContent();
+              // Logic to pan and zoom the map for routes without a selectedRoute entry
+              const origin = route.originAirport;
+              const destination = route.destinationAirport;
+              const group = [origin, destination].map(airport => L.latLng(airport.latitude, airport.longitude));
+              const bounds = L.latLngBounds(group);
+              map.fitBounds(bounds, { padding: [50, 50] }); // Adjust padding as needed
           };          
             menuBar.appendChild(button);
         };
@@ -160,21 +159,22 @@ const infoPane = {
 
     // Create table rows for each group
     Object.values(groupData).forEach(data => {
-        // Remove the last destination from the stops Set
-        data.stops.delete(data.route[data.route.length - 1]);
+        // Format departure and arrival dates to include the short day name
+        const departureDate = new Date(data.departure);
+        const arrivalDate = new Date(data.arrival);
+        const departureDayName = departureDate.toLocaleDateString('en-US', { weekday: 'short' });
+        const arrivalDayName = arrivalDate.toLocaleDateString('en-US', { weekday: 'short' });
 
-        // Calculate stops count as the size of the stops Set
-        const stopsCount = data.stops.size;
-        // Join the route for the route representation
-        const routeRepresentation = data.route.join(' > ');
+        const formattedDeparture = `${departureDayName} ${departureDate.toLocaleDateString('en-US')}`;
+        const formattedArrival = `${arrivalDayName} ${arrivalDate.toLocaleDateString('en-US')}`;
 
         const row = document.createElement('tr');
-        row.innerHTML = `<td>${data.departure}</td>
-            <td>${data.arrival}</td>
+        row.innerHTML = `<td>${formattedDeparture}</td>
+            <td>${formattedArrival}</td>
             <td>${data.price}</td>
             <td>${data.airlines.join(', ')}</td>
-            <td>${stopsCount}</td>
-            <td>${routeRepresentation}</td>
+            <td>${data.stops.size}</td>
+            <td>${data.route.join(' > ')}</td>
             <td><a href="${data.deep_link}" target="_blank"><button>Book Flight</button></a></td>`;
 
         tbody.appendChild(row);
@@ -183,6 +183,7 @@ const infoPane = {
     table.appendChild(tbody);
     infoPaneContent.appendChild(table);
 }
+
 
 }
 

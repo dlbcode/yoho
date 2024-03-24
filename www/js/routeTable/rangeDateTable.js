@@ -78,13 +78,18 @@ function buildDateRangeTable(routeIndex, dateRange) {
         const durationHours = Math.floor(flight.duration.total / 3600);
         const durationMinutes = Math.floor((flight.duration.total % 3600) / 60);
         const routeIATAs = flight.route.map(r => r.flyFrom).concat(flight.route[flight.route.length - 1].flyTo).join(" > ");
-      
-        // Correctly convert epoch time in seconds to milliseconds for JavaScript Date constructor
-        const departureDate = new Date(flight.dTime * 1000).toLocaleString();
-        const arrivalDate = new Date(flight.aTime * 1000).toLocaleString();
-      
-        row.innerHTML = `<td>${departureDate}</td>
-                          <td>${arrivalDate}</td>
+    
+        // Format departure and arrival dates to include the short day name
+        const departureDate = new Date(flight.dTime * 1000);
+        const arrivalDate = new Date(flight.aTime * 1000);
+        const departureDayName = departureDate.toLocaleDateString('en-US', { weekday: 'short' });
+        const arrivalDayName = arrivalDate.toLocaleDateString('en-US', { weekday: 'short' });
+    
+        const formattedDeparture = `${departureDayName} ${departureDate.toLocaleString()}`;
+        const formattedArrival = `${arrivalDayName} ${arrivalDate.toLocaleString()}`;
+    
+        row.innerHTML = `<td>${formattedDeparture}</td>
+                          <td>${formattedArrival}</td>
                           <td>$${flight.price}</td>
                           <td>${flight.airlines.join(", ")}</td>
                           <td>${directFlight ? '✓' : ''}</td>
@@ -93,7 +98,7 @@ function buildDateRangeTable(routeIndex, dateRange) {
                           <td>${durationHours}h ${durationMinutes}m</td>
                           <td>${routeIATAs}</td>`;
         tbody.appendChild(row);
-      });      
+      });         
     } else {
       console.error('data.data is not an array:', data.data);
       // Handle the case where data is not an array, e.g., display a message to the user
