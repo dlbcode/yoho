@@ -14,7 +14,16 @@ const infoPane = {
     tripButton.addEventListener('click', () => {
       appState.currentView = 'trip';
       this.displayContent();
-    });
+  
+      // Extract latitude and longitude from each waypoint
+      const waypointsLatLng = appState.waypoints.map(waypoint => [waypoint.latitude, waypoint.longitude]);
+  
+      // Check if there are waypoints to adjust the map view
+      if (waypointsLatLng.length > 0) {
+          const bounds = L.latLngBounds(waypointsLatLng);
+          map.fitBounds(bounds, { padding: [50, 50] }); // Adjust padding as needed
+      }
+    });  
   },
 
   handleStateChange(event) {
