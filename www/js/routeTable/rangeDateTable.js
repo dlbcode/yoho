@@ -43,7 +43,9 @@ function buildDateRangeTable(routeIndex, dateRange) {
     }
     return response.json();
   })
+
   .then(data => {
+    console.log('data', data);
     const table = document.createElement('table');
     table.className = 'route-info-table';
     table.style.width = '100%';
@@ -144,31 +146,25 @@ function buildDateRangeTable(routeIndex, dateRange) {
       document.querySelectorAll('.route-info-table tbody tr').forEach((row, index) => {
         row.addEventListener('click', function() {
             const routeIdString = this.getAttribute('data-route-id');
-            // Assuming each row's data-route-id corresponds directly to an index in data.data
-            const fullFlightData = data.data.find(flight => flight.id === routeIdString);
-    
-            if (!fullFlightData) {
-                console.error('No flight data found for route ID:', routeIdString);
-                return; // Exit if no matching flight data found
-            }
-    
             const routeIds = routeIdString.split('|');
+            const fullFlightData = data[index];
 
-            // Determine the group ID of the newly selected route
-            let newRouteGroupId = null;
-            const routeDetails = appState.selectedRoutes[routeIndex];
-            if (routeDetails) {
-                newRouteGroupId = routeDetails.group;
-            }
+            console.log('fullFlightData:', fullFlightData);
     
-            // Remove all selected routes that have the same group ID
-            if (newRouteGroupId !== null) {
+            // Determine the group ID for the newly selected route
+            appState.highestGroupId += 1;
+            let newRouteGroupId = appState.highestGroupId;
+            const existingRouteDetails = appState.selectedRoutes[routeIndex];
+            if (existingRouteDetails) {
+                // Logic to remove routes from the old group, if necessary
                 Object.keys(appState.selectedRoutes).forEach(key => {
-                    if (appState.selectedRoutes[key].group === newRouteGroupId) {
+                    if (appState.selectedRoutes[key].group == existingRouteDetails.group) {
                         updateState('removeSelectedRoute', parseInt(key));
                     }
                 });
             }
+    
+            // Update appState for the selected route
             routeIds.forEach((id, idx) => {
                 const currentRouteIndex = routeIndex + idx;
                 const displayData = {
