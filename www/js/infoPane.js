@@ -123,51 +123,59 @@ const infoPane = {
 
     const tbody = document.createElement('tbody');
 
-    // Track the first route of each group to include in the trip table
-    let includedGroups = {};
-
-    selectedRoutesArray.forEach(item => {
-        // Check if the group of this item has already been included
-        if (!includedGroups[item.group]) {
-            // Mark this group as included
-            includedGroups[item.group] = true;
-
-            const { displayData, fullData } = item; // Assuming fullData contains route information
-            if (displayData && fullData) {
-                const row = document.createElement('tr');
-                row.innerHTML = `<td>${displayData.departure}</td>
-                    <td>${displayData.arrival}</td>
-                    <td>${displayData.price}</td>
-                    <td>${displayData.airline}</td>
-                    <td>${displayData.stops}</td>
-                    <td>${displayData.route}</td>
-                    <td><a href="${displayData.deep_link}" target="_blank"><button>Book Flight</button></a></td>`;
-
-                  row.addEventListener('mouseover', function() {
-                    const segments = displayData.route.split(', ');
-                    segments.forEach(segment => {
-                        const [originIata, destinationIata] = segment.split(' > ');
-                        const routeId = `${originIata}-${destinationIata}`;
-                        const pathLines = pathDrawing.routePathCache[routeId];
-                        if (pathLines) {
-                            pathLines.forEach(path => path.setStyle({ color: 'white' }));
-                        }
-                    });
-                  });                                   
-            
-                row.addEventListener('mouseout', function() {
-                    pathDrawing.clearLines();
-                    pathDrawing.drawLines();
-                });
-
-                tbody.appendChild(row);
-            }
+    // Aggregate data for each group
+    let groupData = {};
+    selectedRoutesArray.forEach((item, index) => {
+        const group = item.group;
+        if (!groupData[group]) {
+            groupData[group] = {
+                departure: item.displayData.departure, // First route's departure
+                arrival: item.displayData.arrival, // Last route's arrival (will be updated)
+                price: item.displayData.price,
+                airlines: [item.displayData.airline],
+                stops: new Set(), // Use a Set to ensure unique stops
+                route: [item.displayData.route.split(' > ')[0]], // Initialize with origin
+                deep_link: item.displayData.deep_link
+            };
+        } else {
+            groupData[group].arrival = item.displayData.arrival; // Update to last route's arrival
+            groupData[group].airlines.push(item.displayData.airline);
         }
+        // Always add the destination to the route
+        groupData[group].route.push(item.displayData.route.split(' > ')[1]);
+
+        // Add each stop to the Set, excluding the first origin and the last destination later
+        if (index > 0) { // Exclude the very first origin
+            groupData[group].stops.add(item.displayData.route.split(' > ')[0]);
+        }
+    });
+
+    // Create table rows for each group
+    Object.values(groupData).forEach(data => {
+        // Remove the last destination from the stops Set
+        data.stops.delete(data.route[data.route.length - 1]);
+
+        // Calculate stops count as the size of the stops Set
+        const stopsCount = data.stops.size;
+        // Join the route for the route representation
+        const routeRepresentation = data.route.join(' > ');
+
+        const row = document.createElement('tr');
+        row.innerHTML = `<td>${data.departure}</td>
+            <td>${data.arrival}</td>
+            <td>${data.price}</td>
+            <td>${data.airlines.join(', ')}</td>
+            <td>${stopsCount}</td>
+            <td>${routeRepresentation}</td>
+            <td><a href="${data.deep_link}" target="_blank"><button>Book Flight</button></a></td>`;
+
+        tbody.appendChild(row);
     });
 
     table.appendChild(tbody);
     infoPaneContent.appendChild(table);
-  }
+}
+
 }
 
 export { infoPane };
