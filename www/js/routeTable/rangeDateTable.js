@@ -45,7 +45,6 @@ function buildDateRangeTable(routeIndex, dateRange) {
   })
 
   .then(data => {
-    console.log('data', data);
     const table = document.createElement('table');
     table.className = 'route-info-table';
     table.style.width = '100%';
@@ -152,8 +151,6 @@ function buildDateRangeTable(routeIndex, dateRange) {
                 console.error('No flight data found for route ID:', routeIdString);
                 return;
             }
-
-            console.log('fullFlightData:', fullFlightData);
     
             // Determine the group ID for the newly selected route
             appState.highestGroupId += 1;
@@ -172,7 +169,6 @@ function buildDateRangeTable(routeIndex, dateRange) {
             fullFlightData.route.forEach((id, idx) => {
               const segmentData = fullFlightData.route[idx];
               const departureDate = new Date(segmentData.dTime * 1000).toISOString().split('T')[0];
-              console.log('departureDate:', departureDate);
               const displayData = {
                   departure: new Date(segmentData.dTime * 1000).toLocaleString(),
                   arrival: new Date(segmentData.aTime * 1000).toLocaleString(),
