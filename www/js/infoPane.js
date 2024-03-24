@@ -2,7 +2,8 @@ import { appState, updateState } from './stateManager.js';
 import { pathDrawing } from './pathDrawing.js';
 import { buildRouteTable } from './routeTable/routeTable.js';
 import { selectedRoute } from './routeTable/selectedRoute.js';
-import { flightMap } from './flightMap.js';
+import { map } from './map.js';
+
 
 const infoPane = {
   init() {
@@ -58,16 +59,23 @@ const infoPane = {
         if (!appState.roundTrip || (appState.roundTrip && index === 0)) {
             button.className = 'route-info-button';
             button.onclick = () => {
-                if (appState.selectedRoutes.hasOwnProperty(index)) {
-                    appState.currentView = 'selectedRoute';
-                    appState.currentRouteIndex = index;
-                    this.displayContent();
-                } else {
-                    appState.currentView = 'routeTable';
-                    appState.currentRouteIndex = index;
-                    this.displayContent();
-                }
-            };
+              // Check if the route has a selectedRoutes entry
+              if (appState.selectedRoutes.hasOwnProperty(index)) {
+                  appState.currentView = 'selectedRoute';
+                  appState.currentRouteIndex = index;
+                  this.displayContent();
+              } else {
+                  appState.currentView = 'routeTable';
+                  appState.currentRouteIndex = index;
+                  this.displayContent();
+                  // Logic to pan and zoom the map for routes without a selectedRoute entry
+                  const origin = route.originAirport;
+                  const destination = route.destinationAirport;
+                  const group = [origin, destination].map(airport => L.latLng(airport.latitude, airport.longitude));
+                  const bounds = L.latLngBounds(group);
+                  map.fitBounds(bounds, { padding: [50, 50] }); // Adjust padding as needed
+              }
+          };          
             menuBar.appendChild(button);
         };
 
