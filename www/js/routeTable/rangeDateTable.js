@@ -145,14 +145,13 @@ function buildDateRangeTable(routeIndex, dateRange) {
        
       document.querySelectorAll('.route-info-table tbody tr').forEach((row, index) => {
         row.addEventListener('click', function() {
-          const routeIdString = this.getAttribute('data-route-id');
-          const fullFlightData = data.data.find(flight => flight.id === routeIdString);
-  
-          if (fullFlightData) {
-              const departureDate = new Date(fullFlightData.dTime * 1000).toISOString().split('T')[0];
-              // Assuming routeIndex is correctly determined
-              updateState('updateRouteDate', { routeIndex: routeIndex, date: departureDate });
-          }
+            const routeIdString = this.getAttribute('data-route-id');
+            const fullFlightData = data.data.find(flight => flight.id === routeIdString);
+    
+            if (!fullFlightData) {
+                console.error('No flight data found for route ID:', routeIdString);
+                return;
+            }
     
             // Now that we have confirmed 'fullFlightData' is defined, we can safely access its properties
             const departureTime = new Date(fullFlightData.dTime * 1000).toLocaleString();
@@ -161,7 +160,7 @@ function buildDateRangeTable(routeIndex, dateRange) {
     
             // Determine the group ID for the newly selected route
             appState.highestGroupId += 1;
-            let newRouteGroupId = appState.highestGroupId;
+            let newRouteGroupId = appState.highestGroupId;    
             const existingRouteDetails = appState.selectedRoutes[routeIndex];
             if (existingRouteDetails) {
                 // Logic to remove routes from the old group, if necessary
@@ -175,27 +174,30 @@ function buildDateRangeTable(routeIndex, dateRange) {
             const routeIds = fullFlightData.route.map(route => route.id); // Example initialization
     
             // Update appState for the selected route
-            routeIds.forEach((id, idx) => {
-                const currentRouteIndex = routeIndex + idx;
-                const displayData = {
-                    departure: new Date(fullFlightData.dTime * 1000).toLocaleString(),
-                    arrival: new Date(fullFlightData.aTime * 1000).toLocaleString(),
-                    price: `$${fullFlightData.price}`,
-                    airline: fullFlightData.airlines.join(", "),
-                    stops: fullFlightData.route.length - 1,
-                    route: fullFlightData.route.map(segment => `${segment.flyFrom} > ${segment.flyTo}`).join(", "),
-                    deep_link: fullFlightData.deep_link
-                };
+            fullFlightData.route.forEach((segment, idx) => {
+              const departureDate = new Date(segment.dTime * 1000).toISOString().split('T')[0];
+              const displayData = {
+                  departure: new Date(segment.dTime * 1000).toLocaleString(),
+                  arrival: new Date(segment.aTime * 1000).toLocaleString(),
+                  price: `$${fullFlightData.price}`,
+                  airline: segment.airline,
+                  stops: fullFlightData.route.length - 1,
+                  route: `${segment.flyFrom} > ${segment.flyTo}`,
+                  deep_link: fullFlightData.deep_link,
+              };
     
-                updateState('updateSelectedRoute', {
-                    routeIndex: currentRouteIndex,
-                    routeDetails: {
-                        id: id,
-                        fullData: fullFlightData,
-                        displayData: displayData,
-                        group: routeIndex // Assuming the routeIndex is used as the group identifier
-                    }
-                });
+              const selectedRouteIndex = routeIndex + idx; // Directly calculate the index for each segment
+
+              // Update the application state for each segment
+              updateState('updateRouteDate', { routeNumber: selectedRouteIndex, date: departureDate });
+              updateState('updateSelectedRoute', {
+                  routeIndex: selectedRouteIndex,
+                  routeDetails: {
+                      displayData: displayData,
+                      fullData: segment,
+                      group: newRouteGroupId,
+                  }
+              });
                 updateState('changeView', 'selectedRoute');
             });
     
