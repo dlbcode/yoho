@@ -68,7 +68,7 @@ const routeHandling = {
         if (appState.routeDates[routeNumber]) {
             let dateParts = appState.routeDates[routeNumber].split('-');
             let initialDate = new Date(Date.UTC(dateParts[0], dateParts[1] - 1, dateParts[2]));
-            let initialDayName = initialDate.toLocaleDateString('en-US', { weekday: 'long', timeZone: 'UTC' })[0];
+            let initialDayName = initialDate.toLocaleDateString('en-US', { weekday: 'short', timeZone: 'UTC' });
             dayNameBox.textContent = initialDayName;
         } else {
             // set the day name bpx to the value of the previous route's day name box
@@ -81,7 +81,7 @@ const routeHandling = {
             }
         }
 
-        dayNameBox.style.width = '24px';
+        dayNameBox.style.width = '40px';
         dayNameBox.style.height = '36px';
         dayNameBox.style.display = 'flex';
         dayNameBox.style.alignItems = 'center';
@@ -113,7 +113,7 @@ const routeHandling = {
         }
 
         // Set the button text based on whether it's a date range or a single date
-        dateButton.textContent = currentRouteDate ? (currentRouteDate.includes(' to ') ? '[...]' : new Date(currentRouteDate).getUTCDate().toString()) : new Date(currentRouteDate).getUTCDate().toString();
+        dateButton.textContent = currentRouteDate ? (currentRouteDate.includes(' to ') ? '[..]' : new Date(currentRouteDate).getUTCDate().toString()) : new Date(currentRouteDate).getUTCDate().toString();
         dateButton.addEventListener('click', function() {
             if (!this._flatpickr) {
                 const currentRouteDate = appState.routeDates[routeNumber];
@@ -128,7 +128,7 @@ const routeHandling = {
                     mode: isDateRange ? "range" : "single",
                     onValueUpdate: (selectedDates) => {
                         if (selectedDates.length > 1 && selectedDates[0] && selectedDates[1]) {
-                            this.textContent = '[...]';
+                            this.textContent = '[..]';
                             const dateValue = `${selectedDates[0].toISOString().split('T')[0]} to ${selectedDates[1].toISOString().split('T')[0]}`;
                             updateState('updateRouteDate', { routeNumber: routeNumber, date: dateValue });
                         } else if (selectedDates.length === 1 && selectedDates[0]) {
@@ -157,7 +157,7 @@ const routeHandling = {
                             const newMode = instance.config.mode === "single" ? "range" : "single";
                             instance.set("mode", newMode);
                             flexibleButton.textContent = newMode === "single" ? 'Flexible' : 'Single';
-                            dateButton.textContent = newMode === "single" ? 'Select Date' : '[...]';
+                            dateButton.textContent = newMode === "single" ? 'Select Date' : '[..]';
                             instance.clear();
                             instance.redraw();
                         });

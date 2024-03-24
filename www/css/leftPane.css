@@ -183,9 +183,7 @@ input[type="text"]:focus {
 }
 
 .date-select-button {
-  width: 36px;
-  min-width: 36px;
-  max-width: 36px;
+  width: 22px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;

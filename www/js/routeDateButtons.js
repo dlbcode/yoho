@@ -12,14 +12,14 @@ const routeDateButtons = {
         // Check if the date is a range and split it if necessary
         const effectiveDate = routeDate.includes(' to ') ? routeDate.split(' to ')[0] : routeDate;
         const dateParts = effectiveDate.split('-');
-        let newDayName = new Date(Date.UTC(dateParts[0], dateParts[1] - 1, dateParts[2])).toLocaleDateString('en-US', { weekday: 'long', timeZone: 'UTC' })[0];
+        let newDayName = new Date(Date.UTC(dateParts[0], dateParts[1] - 1, dateParts[2])).toLocaleDateString('en-US', { weekday: 'short', timeZone: 'UTC' });
         box.textContent = newDayName;
 
-        if (newDayName === 'S') {
+        if (newDayName === 'Sun' || newDayName === 'Sat') {
             box.style.backgroundColor = '#01481a'; // Set background color to green for weekend days
         } else {
             box.style.backgroundColor = ''; // Reset background color for non-weekend days
-        }
+        }        
     });
 }, 
 
@@ -65,7 +65,7 @@ const routeDateButtons = {
         const routeNumber = button.closest('.route-container').getAttribute('data-route-number');
         const dateValue = appState.routeDates[routeNumber];
         if (dateValue) {
-          button.textContent = dateValue.includes(' to ') ? '[...]' : new Date(dateValue).getUTCDate().toString();
+          button.textContent = dateValue.includes(' to ') ? '[..]' : new Date(dateValue).getUTCDate().toString();
         }
     });
   },
