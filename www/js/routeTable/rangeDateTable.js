@@ -152,9 +152,6 @@ function buildDateRangeTable(routeIndex, dateRange) {
                 console.error('No flight data found for route ID:', routeIdString);
                 return;
             }
-    
-            // Now that we have confirmed 'fullFlightData' is defined, we can safely access its properties
-            const departureTime = new Date(fullFlightData.dTime * 1000).toLocaleString();
 
             console.log('fullFlightData:', fullFlightData);
     
@@ -163,45 +160,46 @@ function buildDateRangeTable(routeIndex, dateRange) {
             let newRouteGroupId = appState.highestGroupId;    
             const existingRouteDetails = appState.selectedRoutes[routeIndex];
             if (existingRouteDetails) {
-                // Logic to remove routes from the old group, if necessary
                 Object.keys(appState.selectedRoutes).forEach(key => {
                     if (appState.selectedRoutes[key].group == existingRouteDetails.group) {
                         updateState('removeSelectedRoute', parseInt(key));
                     }
                 });
             }
-
             const routeIds = fullFlightData.route.map(route => route.id); // Example initialization
     
             // Update appState for the selected route
-            fullFlightData.route.forEach((segment, idx) => {
-              const departureDate = new Date(segment.dTime * 1000).toISOString().split('T')[0];
+            fullFlightData.route.forEach((id, idx) => {
+              const segmentData = fullFlightData.route[idx];
+              const departureDate = new Date(segmentData.dTime * 1000).toISOString().split('T')[0];
+              console.log('departureDate:', departureDate);
               const displayData = {
-                  departure: new Date(segment.dTime * 1000).toLocaleString(),
-                  arrival: new Date(segment.aTime * 1000).toLocaleString(),
+                  departure: new Date(segmentData.dTime * 1000).toLocaleString(),
+                  arrival: new Date(segmentData.aTime * 1000).toLocaleString(),
                   price: `$${fullFlightData.price}`,
-                  airline: segment.airline,
+                  airline: segmentData.airline,
                   stops: fullFlightData.route.length - 1,
-                  route: `${segment.flyFrom} > ${segment.flyTo}`,
+                  route: `${segmentData.flyFrom} > ${segmentData.flyTo}`,
                   deep_link: fullFlightData.deep_link,
               };
     
-              const selectedRouteIndex = routeIndex + idx; // Directly calculate the index for each segment
+              const selectedRouteIndex = routeIndex + idx;
+              // Check if the routeDate already exists to prevent duplication
+              if (!appState.routeDates[selectedRouteIndex]) {
+                  appState.routeDates[selectedRouteIndex] = departureDate;
+              }
 
-              // Update the application state for each segment
-              updateState('updateRouteDate', { routeNumber: selectedRouteIndex, date: departureDate });
-              updateState('updateSelectedRoute', {
-                  routeIndex: selectedRouteIndex,
-                  routeDetails: {
-                      displayData: displayData,
-                      fullData: segment,
-                      group: newRouteGroupId,
-                  }
-              });
-                updateState('changeView', 'selectedRoute');
-            });
-    
-            highlightSelectedRowForRouteIndex(routeIndex);
+              // Update or add the selected route details
+              appState.selectedRoutes[selectedRouteIndex] = {
+                displayData: displayData,
+                fullData: segmentData,
+                group: newRouteGroupId !== null ? newRouteGroupId : routeIndex,
+                routeDates: departureDate,
+              };
+              updateState('updateRouteDate: ', routeIndex, departureDate);
+          });
+          updateState('changeView', 'selectedRoute');
+          highlightSelectedRowForRouteIndex(routeIndex);
         });
     });    
     
