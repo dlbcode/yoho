@@ -21,14 +21,10 @@ function getColumnIndex(columnIdentifier) {
 
 function buildSingleDateTable(routeIndex) {
   const departureDate = appState.routeDates[routeIndex];
-  if (typeof departureDate === 'undefined') {
-    console.error(`Departure date for routeIndex ${routeIndex} is undefined.`);
-    return; // Skip the API call
-  }
+  const currentRoute = appState.routes && appState.routes.length > routeIndex ? appState.routes[routeIndex] : undefined;
 
-  const currentRoute = appState.routes[routeIndex];
-  if (!currentRoute) {
-    console.error('Current route is undefined.');
+  if (!departureDate || !currentRoute) {
+    document.querySelector('#infoPaneContent').textContent = 'Please select a route to display data.';
     return;
   }
 
