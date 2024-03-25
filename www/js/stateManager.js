@@ -33,16 +33,11 @@ function updateState(key, value) {
         case 'updateRouteDate':
             const { routeNumber, date } = value;
             appState.routeDates[routeNumber] = date;
-            // Ensure selectedRoutes are consistent with the updated routeDates
             Object.keys(appState.selectedRoutes).forEach(key => {
                 if (parseInt(key) >= routeNumber && appState.selectedRoutes[key]) {
                     appState.selectedRoutes[key].routeDates = date;
                 }
             });
-
-            //keysToDelete.forEach(key => {
-            //    delete appState.selectedRoutes[key];
-            //});
             updateUrl();
             break;   
             
@@ -81,29 +76,27 @@ function updateState(key, value) {
             appState.routes.push(value);
             break;
     
-        case 'updateRoutes':
-            if (JSON.stringify(appState.routes) !== JSON.stringify(value)) {
-                appState.routes = value;
-                // Recalculate routeDates to ensure consistency with the updated routes
-                const recalculatedRouteDates = {};
-                appState.routes.forEach((route, index) => {
-                    if (appState.routeDates[index]) {
-                        recalculatedRouteDates[index] = appState.routeDates[index];
-                    } else {
-                        // Assign a default date if missing
-                        recalculatedRouteDates[index] = appState.routeDates[index -1];
-                    }
-                });
-                appState.routeDates = recalculatedRouteDates;
-            }
-            break;
+            case 'updateRoutes':
+                if (JSON.stringify(appState.routes) !== JSON.stringify(value)) {
+                    appState.routes = value;
+                    // Only recalculate routeDates if necessary, otherwise preserve existing dates
+                    const recalculatedRouteDates = { ...appState.routeDates };
+                    appState.routes.forEach((route, index) => {
+                        if (!recalculatedRouteDates.hasOwnProperty(index)) {
+                            // Assign a default date if missing, otherwise preserve existing date
+                            recalculatedRouteDates[index] = new Date().toISOString().split('T')[0];
+                        }
+                    });
+                    appState.routeDates = recalculatedRouteDates;
+                }
+                break;            
                         
         case 'clearData':
             appState.waypoints = [];
             appState.routes = [];
             appState.trips = [];
             appState.selectedRoutes = {};
-            appState.routeDates = { 0: new Date().toISOString().split('T')[0] };
+            appState.routeDates = {};
             updateUrl();
             break;
 
@@ -133,12 +126,7 @@ function updateState(key, value) {
         case 'endDate':
             appState.endDate = value;
             break;
-        
-        case 'updateRouteDates':
-            appState.routeDates = value;
-            updateUrl();
-            break;
-        
+
         case 'changeView':
             appState.currentView = value;
             break;

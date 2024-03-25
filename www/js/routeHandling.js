@@ -104,9 +104,9 @@ const routeHandling = {
 
         const currentRouteDate = appState.routeDates.hasOwnProperty(routeNumber) ? 
             appState.routeDates[routeNumber] : 
-            (routeNumber === 1 ? new Date().toISOString().split('T')[0] : appState.routeDates[routeNumber]);
+            (routeNumber === 0 ? new Date().toISOString().split('T')[0] : appState.routeDates[routeNumber - 1]);
 
-        if (!appState.routeDates.hasOwnProperty(routeNumber)) {
+        if (appState.routeDates.hasOwnProperty(routeNumber)) {
             appState.routeDates[routeNumber] = currentRouteDate;
         } else {
             appState.routeDates[routeNumber] = routeNumber === 0 ? new Date().toISOString().split('T')[0] : appState.routeDates[routeNumber];
@@ -124,7 +124,7 @@ const routeHandling = {
                     enableTime: false,
                     dateFormat: "Y-m-d",
                     defaultDate: isDateRange ? currentRouteDate.split(' to ')[0] : currentRouteDate,
-                    minDate: routeNumber === 0 ? "today" : appState.routeDates[routeNumber],
+                    minDate: routeNumber === 0 ? "today" : appState.routeDates[routeNumber - 1],
                     mode: isDateRange ? "range" : "single",
                     onValueUpdate: (selectedDates) => {
                         if (selectedDates.length > 1 && selectedDates[0] && selectedDates[1]) {

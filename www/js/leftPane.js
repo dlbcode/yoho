@@ -1,5 +1,5 @@
 import { routeList } from './routeList.js';
-import { appState, updateState } from './stateManager.js';
+import { appState } from './stateManager.js';
 
 const leftPane = {
     flatpickrInstances: [], // Array to store Flatpickr instances
@@ -31,8 +31,8 @@ const leftPane = {
 
     refreshFlatpickrInstances: function() {
         leftPane.flatpickrInstances.forEach((instance, index) => {
-            const routeNumber = index + 1; // Assuming routeNumber corresponds to index + 1
-            const newMinDate = routeNumber === 1 ? "today" : appState.routeDates[routeNumber - 1];
+            const routeNumber = index;
+            const newMinDate = routeNumber === 0 ? "today" : appState.routeDates[routeNumber - 1];
             instance.set('minDate', newMinDate);
         });
     }    
@@ -40,14 +40,6 @@ const leftPane = {
 
 document.addEventListener('DOMContentLoaded', function() {
     leftPane.init();
-});
-
-document.addEventListener('appStateChange', function(event) {
-    const { startDate, endDate } = event.detail;
-    updateState('startDate', startDate);
-    if (endDate !== undefined) { // Check for undefined because null is a valid reset value
-        updateState('endDate', endDate);
-    }
 });
 
 export { leftPane };
