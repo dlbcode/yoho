@@ -185,8 +185,6 @@ function buildDateRangeTable(routeIndex, dateRange) {
               };
     
               const selectedRouteIndex = routeIndex + idx;
-              // Check if the routeDate already exists to prevent duplication
-              console.log('appState.routeDates[selectedRouteIndex]: ', appState.routeDates[selectedRouteIndex]);
               if (!appState.routeDates[selectedRouteIndex] || appState.routeDates[selectedRouteIndex].includes('to')) {
                   appState.routeDates[selectedRouteIndex] = departureDate;
               }
