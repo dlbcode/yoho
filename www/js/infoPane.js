@@ -69,14 +69,17 @@ const infoPane = {
             button.className = 'route-info-button';
             button.onclick = () => {
               // Check if the route has a selectedRoutes entry
+              console.log('check selectedRoutes: ',appState.selectedRoutes, index);
+              console.log('check selectedRoutes: ',appState.selectedRoutes.hasOwnProperty(index));
               if (appState.selectedRoutes.hasOwnProperty(index)) {
                   appState.currentView = 'selectedRoute';
                   appState.currentRouteIndex = index;
                   this.displayContent();
+              } else {
+                appState.currentView = 'routeTable';
+                appState.currentRouteIndex = index;
+                this.displayContent();
               }
-              appState.currentView = 'routeTable';
-              appState.currentRouteIndex = index;
-              this.displayContent();
               // Logic to pan and zoom the map for routes without a selectedRoute entry
               const origin = route.originAirport;
               const destination = route.destinationAirport;
