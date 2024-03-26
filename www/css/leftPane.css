@@ -412,3 +412,13 @@ input[type="text"]:focus {
   background: #2f2f2f !important; /* Dark background */
   color: #ccc !important; /* Light text */
 }
+
+.dateTooltip {
+  position: absolute;
+  background-color: #222;
+  border: 1px solid #525252;
+  color: white;
+  padding: 5px;
+  z-index: 1001;
+  white-space: nowrap;
+}

@@ -3,6 +3,7 @@ import { pathDrawing } from './pathDrawing.js';
 import { buildRouteTable } from './routeTable/routeTable.js';
 import { selectedRoute } from './routeTable/selectedRoute.js';
 import { map } from './map.js';
+import { uiHandling } from './uiHandling.js';
 
 
 const infoPane = {
@@ -112,7 +113,8 @@ const infoPane = {
               const originalColor = pathDrawing.getColorBasedOnPrice(route.price);
               path.setStyle({ color: originalColor });
           });
-      });    
+      });
+      uiHandling.attachDateTooltip(button, index);
     });
   },
 

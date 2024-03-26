@@ -144,6 +144,54 @@ const uiHandling = {
     } else {
         document.getElementById('getPriceBtn').classList.add('hidden');
     }
+  },
+
+  attachDateTooltip: function(element, routeNumber) {
+    element.addEventListener('mouseover', function() {
+      const selectedRoute = appState.selectedRoutes[routeNumber];
+      if (selectedRoute && selectedRoute.displayData) {
+          const { departure, arrival } = selectedRoute.displayData;
+          // Format the departure and arrival times
+          const departureDate = new Date(departure);
+          const arrivalDate = new Date(arrival);
+          const options = { weekday: 'short', year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true };
+          const formattedDeparture = departureDate.toLocaleString('en-US', options);
+          const formattedArrival = arrivalDate.toLocaleString('en-US', options);
+          const tooltipText = `${formattedDeparture} to ${formattedArrival}`;
+          // Show tooltip with formatted date and time
+          uiHandling.showDateTooltip(this, tooltipText);
+      } else{
+        const routeDate = appState.routeDates[routeNumber];
+        if (routeDate) {
+            uiHandling.showDateTooltip(this, routeDate);
+        }
+      }
+    });
+    element.addEventListener('mouseout', function() {
+        uiHandling.hideDateTooltip();
+    });
+  },
+
+  showDateTooltip: function(element, text) {
+      clearTimeout(this.tooltipTimeout);
+      this.tooltipTimeout = setTimeout(() => {
+          const tooltip = document.createElement('div');
+          tooltip.className = 'dateTooltip';
+          tooltip.textContent = text;
+          document.body.appendChild(tooltip);
+          const rect = element.getBoundingClientRect();
+          const containerRect = document.querySelector('.container').getBoundingClientRect();
+          tooltip.style.position = 'absolute';
+          tooltip.style.left = `${rect.left - containerRect.left}px`;
+          tooltip.style.top = `${rect.bottom - containerRect.top}px`;
+      }, 300);
+  },
+
+  hideDateTooltip: function() {
+      clearTimeout(this.tooltipTimeout);
+      document.querySelectorAll('.dateTooltip').forEach(tooltip => {
+          tooltip.remove();
+      });
   }
 }
 

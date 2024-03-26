@@ -111,7 +111,7 @@ const routeHandling = {
         } else {
             appState.routeDates[routeNumber] = routeNumber === 0 ? new Date().toISOString().split('T')[0] : appState.routeDates[routeNumber];
         }
-        
+
         // Set the button text based on whether it's a date range or a single date
         dateButton.textContent = currentRouteDate ? (currentRouteDate.includes(' to ') ? '[..]' : new Date(currentRouteDate).getUTCDate().toString()) : new Date(currentRouteDate).getUTCDate().toString();
         dateButton.addEventListener('click', function() {
@@ -172,7 +172,10 @@ const routeHandling = {
             } else {
                 this._flatpickr.open();
             }
-        }, {once: true});           
+        }, {once: true});
+        
+        uiHandling.attachDateTooltip(dayNameBox, routeNumber);
+        uiHandling.attachDateTooltip(dateButton, routeNumber);
         
         routeDiv.insertBefore(dateButton, dayNameBox.nextSibling);
 
@@ -227,8 +230,7 @@ const routeHandling = {
         uiHandling.toggleTripButtonsVisibility();
         uiHandling.getPriceButton();
         routeDateButtons.updateDateButtons();
-    },
-    
+    },   
   
     handleSwapButtonClick: function(routeNumber) {
         let routeDiv = document.getElementById(`route${routeNumber}`);
@@ -313,7 +315,7 @@ const routeHandling = {
             const tooltip = document.createElement('div');
             tooltip.className = 'waypointTooltip';
             tooltip.textContent = text;
-            document.querySelector('.container').appendChild(tooltip);
+            document.body.appendChild(tooltip);
     
             const rect = element.getBoundingClientRect();
             const containerRect = document.querySelector('.container').getBoundingClientRect();
