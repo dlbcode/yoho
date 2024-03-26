@@ -72,24 +72,20 @@ function updateState(key, value) {
             checkAndUpdateRoundTripStatus();
             break;
     
-        case 'addRoute':
-            appState.routes.push(value);
-            break;
-    
-            case 'updateRoutes':
-                if (JSON.stringify(appState.routes) !== JSON.stringify(value)) {
-                    appState.routes = value;
-                    // Only recalculate routeDates if necessary, otherwise preserve existing dates
-                    const recalculatedRouteDates = { ...appState.routeDates };
-                    appState.routes.forEach((route, index) => {
-                        if (!recalculatedRouteDates.hasOwnProperty(index)) {
-                            // Assign a default date if missing, otherwise preserve existing date
-                            recalculatedRouteDates[index] = new Date().toISOString().split('T')[0];
-                        }
-                    });
-                    appState.routeDates = recalculatedRouteDates;
-                }
-                break;            
+        case 'updateRoutes':
+            if (JSON.stringify(appState.routes) !== JSON.stringify(value)) {
+                appState.routes = value;
+                // Only recalculate routeDates if necessary, otherwise preserve existing dates
+                const recalculatedRouteDates = { ...appState.routeDates };
+                appState.routes.forEach((route, index) => {
+                    if (!recalculatedRouteDates.hasOwnProperty(index)) {
+                        // Assign a default date if missing, otherwise preserve existing date
+                        recalculatedRouteDates[index] = new Date().toISOString().split('T')[0];
+                    }
+                });
+                appState.routeDates = recalculatedRouteDates;
+            }
+            break;            
                         
         case 'clearData':
             appState.waypoints = [];

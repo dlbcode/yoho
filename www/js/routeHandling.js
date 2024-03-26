@@ -70,14 +70,14 @@ const routeHandling = {
             let initialDate = new Date(Date.UTC(dateParts[0], dateParts[1] - 1, dateParts[2]));
             let initialDayName = initialDate.toLocaleDateString('en-US', { weekday: 'short', timeZone: 'UTC' });
             dayNameBox.textContent = initialDayName;
-        } else {
-            // set the day name bpx to the value of the previous route's day name box
+        } else { // Attempt to set the date for the new route based on the previous route's date
             let previousRouteNumber = routeNumber - 1;
-            if (previousRouteNumber > 0) {
-                let previousDayNameBox = document.querySelector(`.day-name-box[data-route-number="${previousRouteNumber}"]`);
-                if (previousDayNameBox) {
-                    dayNameBox.textContent = previousDayNameBox.textContent;
-                }
+            if (previousRouteNumber >= 0 && appState.routeDates[previousRouteNumber]) {
+                appState.routeDates[routeNumber] = appState.routeDates[previousRouteNumber];
+                let dateParts = appState.routeDates[routeNumber].split('-');
+                let initialDate = new Date(Date.UTC(dateParts[0], dateParts[1] - 1, dateParts[2]));
+                let initialDayName = initialDate.toLocaleDateString('en-US', { weekday: 'short', timeZone: 'UTC' });
+                dayNameBox.textContent = initialDayName;
             }
         }
 
@@ -92,7 +92,7 @@ const routeHandling = {
             // Find the date-select-button within the same routeDiv
             const dateSelectButton = routeDiv.querySelector('.date-select-button');
             if (dateSelectButton) {
-                dateSelectButton.click(); // Programmatically trigger the click event on the button
+                dateSelectButton.click();
             }
         });
         
@@ -111,6 +111,8 @@ const routeHandling = {
         } else {
             appState.routeDates[routeNumber] = routeNumber === 0 ? new Date().toISOString().split('T')[0] : appState.routeDates[routeNumber];
         }
+
+        console.log('Current route and date: ', routeNumber, currentRouteDate);
 
         // Set the button text based on whether it's a date range or a single date
         dateButton.textContent = currentRouteDate ? (currentRouteDate.includes(' to ') ? '[..]' : new Date(currentRouteDate).getUTCDate().toString()) : new Date(currentRouteDate).getUTCDate().toString();

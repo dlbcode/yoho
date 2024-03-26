@@ -58,7 +58,6 @@ const uiHandling = {
   handleAddButtonClick: function() {
     const lastWaypoint = appState.waypoints[appState.waypoints.length - 1];
     updateState('addWaypoint', lastWaypoint);
-    const newRouteNumber = Math.ceil(appState.waypoints.length / 2);
   },
 
   setFocusToNextUnsetInput: function() {
