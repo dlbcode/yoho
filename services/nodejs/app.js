@@ -68,7 +68,7 @@ MongoClient.connect(mongoUrl, { useNewUrlParser: true, useUnifiedTopology: true 
   flights(app, flightsCollection);
 
   const cheapestFlights = require('./api/cheapestFlights');
-  cheapestFlights(app, routesCollection);
+  cheapestFlights(app, db, tequila);
 
   const aggregateRoutes = require('./api/aggregateRoutes');
   aggregateRoutes(app, airportsCollection, routesCollection);

@@ -1,8 +1,8 @@
 const axios = require('axios');
 
-module.exports = function(app, dbClient) {
+module.exports = function(app, db, tequila) {
   app.get('/cheapestFlights', async (req, res) => {
-    const flightsCollection = dbClient.collection('flights'); // Adjusted to use dbClient directly
+    const flightsCollection = db.collection('flights');
 
     const { origin, date_from: dateFrom, date_to: dateTo, price_to: priceTo = 500, limit = 100 } = req.query;
 
@@ -24,9 +24,10 @@ module.exports = function(app, dbClient) {
       if (cachedData && (now - cachedData.timestamp.getTime()) < 24 * 60 * 60 * 1000) {
         return res.json(cachedData.results);
       } else {
-        const response = await axios.get(`https://api.tequila.kiwi.com/v2/search?fly_from=${origin}&date_from=${dateFrom}&date_to=${dateTo}&price_to=${priceTo}&one_for_city=1&limit=${limit}`, {
-          headers: { 'apikey': process.env.TEQUILA_API_KEY }
-        });
+        // Adjust the URL and query parameters based on the request
+        const apiUrl = `${tequila.url}?fly_from=${origin}&date_from=${dateFrom}&date_to=${dateTo}&price_to=${priceTo}&one_for_city=1&limit=${limit}`;
+
+        const response = await axios({ ...tequila, url: apiUrl });
 
         const newCacheEntry = {
           origin: origin,
