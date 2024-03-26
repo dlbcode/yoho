@@ -111,9 +111,7 @@ const routeHandling = {
         } else {
             appState.routeDates[routeNumber] = routeNumber === 0 ? new Date().toISOString().split('T')[0] : appState.routeDates[routeNumber];
         }
-
-        console.log('Current route and date: ', routeNumber, currentRouteDate);
-
+        
         // Set the button text based on whether it's a date range or a single date
         dateButton.textContent = currentRouteDate ? (currentRouteDate.includes(' to ') ? '[..]' : new Date(currentRouteDate).getUTCDate().toString()) : new Date(currentRouteDate).getUTCDate().toString();
         dateButton.addEventListener('click', function() {
