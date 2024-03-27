@@ -57,63 +57,80 @@ const infoPane = {
 
   updateRouteButtons() {
     const menuBar = document.getElementById('menu-bar');
-    menuBar.innerHTML = '';
+    menuBar.innerHTML = ''; // Clear existing buttons
 
-    appState.routes.forEach((route, index) => {
-        let button = document.createElement('button');
-        if (appState.roundTrip && index === 0) {
-            button.textContent = `${route.originAirport.iata_code}-${route.destinationAirport.iata_code} - ${route.originAirport.iata_code}-${route.destinationAirport.iata_code}`;
-        } else if (!appState.roundTrip) {
-            button.textContent = `${route.originAirport.iata_code}-${route.destinationAirport.iata_code}`;
-        }
-        if (!appState.roundTrip || (appState.roundTrip && index === 0)) {
+    appState.waypoints.forEach((waypoint, index) => {
+        const routeIndex = Math.floor(index / 2);
+        const buttonId = `route-button-${routeIndex}`;
+        let button = document.getElementById(buttonId);
+
+        const origin = appState.waypoints[routeIndex * 2] ? appState.waypoints[routeIndex * 2].iata_code : 'Any';
+        const destination = appState.waypoints[routeIndex * 2 + 1] ? appState.waypoints[routeIndex * 2 + 1].iata_code : 'Any';
+        const buttonText = `${origin}-${destination}`;
+
+        if (!button) {
+            button = document.createElement('button');
+            button.id = buttonId;
             button.className = 'route-info-button';
-            button.onclick = () => {
-              if (appState.selectedRoutes.hasOwnProperty(index)) {
-                  appState.currentView = 'selectedRoute';
-                  appState.currentRouteIndex = index;
-                  this.displayContent();
-              } else {
-                appState.currentView = 'routeTable';
-                appState.currentRouteIndex = index;
-                this.displayContent();
-              }
-              const origin = route.originAirport;
-              const destination = route.destinationAirport;
-              const group = [origin, destination].map(airport => L.latLng(airport.latitude, airport.longitude));
-              const bounds = L.latLngBounds(group);
-              map.fitBounds(bounds, { padding: [50, 50] });
-          };          
             menuBar.appendChild(button);
+        }
+
+        button.textContent = buttonText;
+
+        button.onclick = () => {
+            appState.currentRouteIndex = routeIndex;
+            if (appState.selectedRoutes.hasOwnProperty(routeIndex)) {
+                appState.currentView = 'selectedRoute';
+            } else {
+                appState.currentView = 'routeTable';
+            }
+            this.displayContent();
+
+            // Correctly calculate bounds based on the current waypoints for zooming
+            const originWaypoint = appState.waypoints[routeIndex * 2];
+            const destinationWaypoint = appState.waypoints[routeIndex * 2 + 1];
+            const group = [originWaypoint, destinationWaypoint].filter(wp => wp).map(airport => L.latLng(airport.latitude, airport.longitude));
+            if (group.length > 0) {
+                const bounds = L.latLngBounds(group);
+                map.fitBounds(bounds, { padding: [50, 50] });
+            }
         };
 
-      const checkmark = document.createElement('span');
-      checkmark.innerHTML = '✓'; // Checkmark icon
-      checkmark.classList.add('route-checkmark');
+        // Attach the checkmark to indicate selection status
+        let checkmark = button.querySelector('.route-checkmark');
+        if (!checkmark) {
+            checkmark = document.createElement('span');
+            checkmark.classList.add('route-checkmark');
+            button.appendChild(checkmark);
+        }
 
-      // Conditionally add the selected or unselected class
-      if (appState.selectedRoutes.hasOwnProperty(index)) {
-        checkmark.classList.add('selected'); // Green checkmark for selected routes
-      } else {
-        checkmark.classList.add('unselected'); // Grey checkmark for unselected routes
-      }
+        if (appState.selectedRoutes.hasOwnProperty(routeIndex)) {
+            checkmark.classList.add('selected');
+            checkmark.classList.remove('unselected');
+            checkmark.innerHTML = '✓';
+        } else {
+            checkmark.classList.add('unselected');
+            checkmark.classList.remove('selected');
+            checkmark.innerHTML = ''; // Or any indicator for unselected
+        }
 
-      button.appendChild(checkmark);
-
-      button.addEventListener('mouseover', () => {
-        const routeId = `${route.originAirport.iata_code}-${route.destinationAirport.iata_code}`;
-        const pathLines = pathDrawing.routePathCache[routeId] || pathDrawing.dashedRoutePathCache[routeId] || [];
-        pathLines.forEach(path => path.setStyle({ color: 'white' }));
+        button.addEventListener('mouseover', () => {
+          // Use origin and destination variables to construct routeId
+          const routeId = `${origin}-${destination}`;
+          const pathLines = pathDrawing.routePathCache[routeId] || pathDrawing.dashedRoutePathCache[routeId] || [];
+          pathLines.forEach(path => path.setStyle({ color: 'white' }));
       });
       
       button.addEventListener('mouseout', () => {
-          const routeId = `${route.originAirport.iata_code}-${route.destinationAirport.iata_code}`;
+          const route = appState.routes[appState.currentRouteIndex];
+          const routeId = `${origin}-${destination}`;
           const pathLines = pathDrawing.routePathCache[routeId] || pathDrawing.dashedRoutePathCache[routeId] || [];
           pathLines.forEach(path => {
               const originalColor = pathDrawing.getColorBasedOnPrice(route.price);
               path.setStyle({ color: originalColor });
           });
       });
+      
       uiHandling.attachDateTooltip(button, index);
     });
   },
