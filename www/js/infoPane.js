@@ -144,7 +144,6 @@ const infoPane = {
                 }
             });
         });
-      console.log('Attaching date tooltip for: ', button, index);
       uiHandling.attachDateTooltip(button, index);
     });
   },

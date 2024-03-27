@@ -96,15 +96,37 @@ function updateState(key, value) {
             updateUrl();
             break;
 
-        case 'updateSelectedRoute':
-            const { routeIndex, routeDetails } = value;
-            appState.selectedRoutes[routeIndex] = routeDetails;
+        case 'updateSelectedRoutes':
+            const payload = value;
+            console.log('Inside updateSelectedRoutes case:', payload); // Further debug line
+            const { selectedRouteIndex, newRouteInfo, groupToReplace } = payload;
+            // Increment the group ID for new routes
+            const newGroupId = appState.highestGroupId + 1;
+            appState.highestGroupId = newGroupId;
         
-            // Ensure the routeDates match the selectedRoutes' dates
-            appState.routeDates[routeIndex] = routeDetails.routeDates;
+            // Convert selectedRoutes to an array for manipulation
+            let selectedRoutesArray = Object.entries(appState.selectedRoutes).map(([key, value]) => ({
+                ...value,
+                index: key // Preserve original indexing if necessary
+            }));
+        
+            // Filter out routes from the group being replaced
+            selectedRoutesArray = selectedRoutesArray.filter(route => route.group !== groupToReplace);
+        
+            // Insert new routes at the specified index, adjusting for removed routes
+            newRouteInfo.forEach((route, index) => {
+                // Assuming selectedRouteIndex is adjusted based on the current state of selectedRoutesArray
+                selectedRoutesArray.splice(selectedRouteIndex + index, 0, { ...route, group: newGroupId });
+            });
+        
+            // Convert back to an object if necessary
+            appState.selectedRoutes = selectedRoutesArray.reduce((acc, route, index) => {
+                acc[index] = route; // Re-index or use original indexing if needed
+                return acc;
+            }, {});
         
             updateUrl();
-            break; 
+            break;            
         
         case 'removeSelectedRoute':
             delete appState.selectedRoutes[value];
@@ -130,7 +152,7 @@ function updateState(key, value) {
     document.dispatchEvent(new CustomEvent('stateChange', { detail: { key, value } }));
     //console.log('appState update key and value: ', key, value);
     console.log('appState.routes: ', appState.routes);
-    //console.log('appState.routeDates:', appState.routeDates);
+    console.log('appState.routeDates:', appState.routeDates);
     console.log('appState.selectedRoutes: ', appState.selectedRoutes);
     console.log('appState.waypoints:', appState.waypoints);
 }

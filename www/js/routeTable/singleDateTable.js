@@ -141,49 +141,45 @@ function buildSingleDateTable(routeIndex) {
         row.addEventListener('click', function() {
             const routeIdString = this.getAttribute('data-route-id');
             const routeIds = routeIdString.split('|');
-            const fullFlightData = data[index];
+            const fullFlightData = data[index]; // Ensure 'data' is correctly referenced to your route data
     
-            // Determine the group ID for the newly selected route
-            appState.highestGroupId += 1;
-            let newRouteGroupId = appState.highestGroupId;
-            const existingRouteDetails = appState.selectedRoutes[routeIndex];
+            // Convert selectedRoutes from an object to an array to use .find
+            let groupToReplace = null;
+            const existingRouteDetails = Object.values(appState.selectedRoutes).find(route => route.fullData.group === fullFlightData.group);
             if (existingRouteDetails) {
-                // Logic to remove routes from the old group, if necessary
-                Object.keys(appState.selectedRoutes).forEach(key => {
-                    if (appState.selectedRoutes[key].group == existingRouteDetails.group) {
-                        updateState('removeSelectedRoute', parseInt(key));
-                    }
-                });
+                groupToReplace = existingRouteDetails.group;
             }
     
-            // Update appState for the selected route
-            routeIds.forEach((id, idx) => {
-                const segmentData = fullFlightData.route[idx];
-                const departureDate = new Date(segmentData.local_departure).toISOString().split('T')[0];
-                const displayData = {
-                    departure: new Date(segmentData.local_departure).toLocaleString(),
-                    arrival: new Date(segmentData.local_arrival).toLocaleString(),
-                    price: `$${fullFlightData.price}`,
-                    airline: segmentData.airline,
-                    stops: fullFlightData.route.length - 1,
-                    route: `${segmentData.flyFrom} > ${segmentData.flyTo}`,
-                    deep_link: fullFlightData.deep_link,
-                };
-    
-                const selectedRouteIndex = routeIndex + idx;
-                // Check if the routeDate already exists to prevent duplication
-                if (!appState.routeDates[selectedRouteIndex]) {
-                    appState.routeDates[selectedRouteIndex] = departureDate;
-                }
-    
-                // Update or add the selected route details
-                appState.selectedRoutes[selectedRouteIndex] = {
-                    displayData: displayData,
+            // Construct newRouteInfo from the selected route data
+            const newRouteInfo = routeIds.map(id => {
+                const segmentData = fullFlightData.route.find(route => route.id === id);
+                return {
+                    displayData: {
+                        departure: new Date(segmentData.local_departure).toLocaleString(),
+                        arrival: new Date(segmentData.local_arrival).toLocaleString(),
+                        price: `$${fullFlightData.price}`,
+                        airline: segmentData.airline,
+                        stops: fullFlightData.route.length - 1,
+                        route: `${segmentData.flyFrom} > ${segmentData.flyTo}`,
+                        deep_link: fullFlightData.deep_link,
+                    },
                     fullData: segmentData,
-                    group: newRouteGroupId !== null ? newRouteGroupId : routeIndex,
-                    routeDates: departureDate,
+                    // Note: The group will be set in stateManager.js
                 };
             });
+    
+            // Call updateState with the action 'updateSelectedRoutes' and the constructed payload
+            updateState('updateSelectedRoutes', {
+                selectedRouteIndex: routeIndex,
+                newRouteInfo: newRouteInfo,
+                groupToReplace: groupToReplace,
+            });
+
+            // Ensure routeDates does not have duplicate dates
+            // This step might need adjustment based on how you're using routeDates in your app
+            appState.routeDates[Object.keys(appState.routeDates).length] = departureDate;
+
+            // Update the state and UI as necessary
             updateState('updateRouteDate: ', routeIndex, departureDate);
             updateState('changeView', 'selectedRoute');
             highlightSelectedRowForRouteIndex(routeIndex);
