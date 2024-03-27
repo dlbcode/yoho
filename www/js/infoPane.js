@@ -58,24 +58,30 @@ const infoPane = {
   updateRouteButtons() {
     const menuBar = document.getElementById('menu-bar');
     menuBar.innerHTML = ''; // Clear existing buttons
-
+  
     appState.waypoints.forEach((waypoint, index) => {
-        const routeIndex = Math.floor(index / 2);
-        const buttonId = `route-button-${routeIndex}`;
-        let button = document.getElementById(buttonId);
+      const routeIndex = Math.floor(index / 2);
+      const buttonId = `route-button-${routeIndex}`;
+      let button = document.getElementById(buttonId);
+  
+      if (!button) {
+        button = document.createElement('button');
+        button.id = buttonId;
+        button.className = 'route-info-button';
+        menuBar.appendChild(button);
+      }
 
-        const origin = appState.waypoints[routeIndex * 2] ? appState.waypoints[routeIndex * 2].iata_code : 'Any';
-        const destination = appState.waypoints[routeIndex * 2 + 1] ? appState.waypoints[routeIndex * 2 + 1].iata_code : 'Any';
-        const buttonText = `${origin}-${destination}`;
+      // Set the button text for the route
+      const origin = waypoint.iata_code || 'Any';
+      const destination = (appState.waypoints[routeIndex * 2 + 1] ? appState.waypoints[routeIndex * 2 + 1].iata_code : 'Any');
+      button.textContent = `${origin}-${destination}`;
 
-        if (!button) {
-            button = document.createElement('button');
-            button.id = buttonId;
-            button.className = 'route-info-button';
-            menuBar.appendChild(button);
-        }
-
-        button.textContent = buttonText;
+      if (!button.dataset.hasTooltip) {
+        button.addEventListener('mouseover', () => {
+          uiHandling.attachDateTooltip(button, routeIndex);
+        });
+        button.dataset.hasTooltip = "true"; // Mark that the tooltip event listener is attached
+      }
 
         button.onclick = () => {
             appState.currentRouteIndex = routeIndex;
@@ -114,22 +120,30 @@ const infoPane = {
             checkmark.innerHTML = ''; // Or any indicator for unselected
         }
 
+        const originalPathLineColors = {};
         button.addEventListener('mouseover', () => {
-          // Use origin and destination variables to construct routeId
-          const routeId = `${origin}-${destination}`;
-          const pathLines = pathDrawing.routePathCache[routeId] || pathDrawing.dashedRoutePathCache[routeId] || [];
-          pathLines.forEach(path => path.setStyle({ color: 'white' }));
-      });
-      
-      button.addEventListener('mouseout', () => {
-          const route = appState.routes[appState.currentRouteIndex];
-          const routeId = `${origin}-${destination}`;
-          const pathLines = pathDrawing.routePathCache[routeId] || pathDrawing.dashedRoutePathCache[routeId] || [];
-          pathLines.forEach(path => {
-              const originalColor = pathDrawing.getColorBasedOnPrice(route.price);
-              path.setStyle({ color: originalColor });
-          });
-      });
+            const routeId = `${origin}-${destination}`;
+            const pathLines = pathDrawing.routePathCache[routeId] || pathDrawing.dashedRoutePathCache[routeId] || [];
+            pathLines.forEach((path, index) => {
+                const pathId = `${routeId}-${index}`;
+                if (!originalPathLineColors[pathId]) {
+                    originalPathLineColors[pathId] = path.options.color;
+                }
+                path.setStyle({ color: 'white' });
+            });
+        });
+
+        button.addEventListener('mouseout', () => {
+            const routeId = `${origin}-${destination}`;
+            const pathLines = pathDrawing.routePathCache[routeId] || pathDrawing.dashedRoutePathCache[routeId] || [];
+            pathLines.forEach((path, index) => {
+                const pathId = `${routeId}-${index}`;
+                const originalColor = originalPathLineColors[pathId];
+                if (originalColor) {
+                    path.setStyle({ color: originalColor });
+                }
+            });
+        });
       console.log('Attaching date tooltip for: ', button, index);
       uiHandling.attachDateTooltip(button, index);
     });
