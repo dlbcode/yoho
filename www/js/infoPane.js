@@ -63,7 +63,7 @@ const infoPane = {
       const routeIndex = Math.floor(index / 2);
       const buttonId = `route-button-${routeIndex}`;
       let button = document.getElementById(buttonId);
-  
+      
       if (!button) {
         button = document.createElement('button');
         button.id = buttonId;
@@ -72,8 +72,8 @@ const infoPane = {
       }
 
       // Set the button text for the route
-      const origin = waypoint.iata_code || 'Any';
-      const destination = (appState.waypoints[routeIndex * 2 + 1] ? appState.waypoints[routeIndex * 2 + 1].iata_code : 'Any');
+      const origin = appState.waypoints[routeIndex * 2] ? appState.waypoints[routeIndex * 2].iata_code : 'Any';
+      const destination = appState.waypoints[routeIndex * 2 + 1] ? appState.waypoints[routeIndex * 2 + 1].iata_code : 'Any';
       button.textContent = `${origin}-${destination}`;
 
       if (!button.dataset.hasTooltip) {
