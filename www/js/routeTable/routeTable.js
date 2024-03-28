@@ -5,20 +5,21 @@ import { buildAnyDestTable } from './anyDestTable.js'; // Import the buildAnyOri
 
 
 function buildRouteTable(routeIndex) {
-  const dateRange = appState.routeDates[routeIndex]; // Use routeIndex directly to access the date or date range
+  const dateRange = appState.routeDates[routeIndex];
   console.log('buildRouteTable Route Index: ', routeIndex);
   console.log('buildRouteTable Route: ', appState.routes[routeIndex]);
-  
-  let origin;
-  let destination;
 
-  if (appState.routes.length === 0) {
-    origin = appState.waypoints[0]?.iata_code || 'Any';
-    destination = appState.waypoints[1]?.iata_code || 'Any';
-  } else {
+  let origin, destination;
+
+if (appState.routes[routeIndex] && appState.routes[routeIndex].originAirport && appState.routes[routeIndex].destinationAirport) {
     origin = appState.routes[routeIndex].originAirport.iata_code;
     destination = appState.routes[routeIndex].destinationAirport.iata_code;
-  }  
+} else {
+    // Adjusting this to ensure origin is set correctly when routeIndex is out of bounds
+    // or when the route does not have the expected airports
+    origin = appState.waypoints[routeIndex * 2]?.iata_code;
+    destination = appState.waypoints[(routeIndex * 2) + 1]?.iata_code || 'Any';
+}
 
   console.log('buildRouteTable anyDest from: ', origin);
 
