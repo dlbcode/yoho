@@ -58,7 +58,7 @@ function buildAnyDestTable(routeIndex, origin, dateRange) {
       table.className = 'route-info-table';
       table.style.width = '100%';
       table.setAttribute('data-route-index', routeIndex, 'border', '1');
-
+  
       const thead = document.createElement('thead');
       let headerRow = `<tr>
                         <th>Departure <span class="sortIcon" data-column="departure">&#x21C5;</span><img class="filterIcon" data-column="departure" src="/assets/filter-icon.svg" alt="Filter"></th>
@@ -70,60 +70,91 @@ function buildAnyDestTable(routeIndex, origin, dateRange) {
                         <th>Layovers <span class="sortIcon" data-column="layovers">&#x21C5;</span></th>
                         <th>Duration <span class="sortIcon" data-column="duration">&#x21C5;</span></th>
                         <th>Route <span class="sortIcon" data-column="route">&#x21C5;</span></th>
-                     </tr>`;
+                      </tr>`;
       thead.innerHTML = headerRow;
       table.appendChild(thead);
-
+  
       const tbody = document.createElement('tbody');
-      data.data.forEach(flight => {
-        let row = document.createElement('tr');
-        row.setAttribute('data-route-id', flight.id);
-        const directFlight = flight.route.length === 1;
-        const stops = flight.route.length - 1;
-        const layovers = flight.route.slice(0, -1).map(r => r.flyTo).join(", ");
-        const durationHours = Math.floor(flight.duration.departure / 3600);
-        const durationMinutes = Math.floor((flight.duration.departure % 3600) / 60);
-        const routeIATAs = flight.route.map(r => r.flyFrom).concat(flight.route[flight.route.length - 1].flyTo).join(" > ");
-
-        const formattedDeparture = new Date(flight.dTime * 1000).toLocaleString();
-        const formattedArrival = new Date(flight.aTime * 1000).toLocaleString();
-
-        row.innerHTML = `<td>${formattedDeparture}</td>
-                         <td>${formattedArrival}</td>
-                         <td>€${flight.price}</td>
-                         <td>${flight.airlines.join(", ")}</td>
-                         <td>${directFlight ? '✓' : ''}</td>
-                         <td>${stops}</td>
-                         <td>${layovers}</td>
-                         <td>${durationHours}h ${durationMinutes}m</td>
-                         <td>${routeIATAs}</td>`;
-        tbody.appendChild(row);
-      });
+  
+      // Ensure data.data is an array before proceeding
+      if (Array.isArray(data.data)) {
+        data.data.forEach(flight => {
+          let row = document.createElement('tr');
+          row.setAttribute('data-route-id', flight.id);
+          const directFlight = flight.route.length === 1;
+          const stops = flight.route.length - 1;
+          const layovers = flight.route.slice(0, -1).map(r => r.flyTo).join(", ");
+          const durationHours = Math.floor(flight.duration.total / 3600);
+          const durationMinutes = Math.floor((flight.duration.total % 3600) / 60);
+          const routeIATAs = flight.route.map(r => r.flyFrom).concat(flight.route[flight.route.length - 1].flyTo).join(" > ");
+      
+          // Format departure and arrival dates to include the short day name
+          const departureDate = new Date(flight.dTime * 1000);
+          const arrivalDate = new Date(flight.aTime * 1000);
+          const departureDayName = departureDate.toLocaleDateString('en-US', { weekday: 'short' });
+          const arrivalDayName = arrivalDate.toLocaleDateString('en-US', { weekday: 'short' });
+      
+          const formattedDeparture = `${departureDayName} ${departureDate.toLocaleString()}`;
+          const formattedArrival = `${arrivalDayName} ${arrivalDate.toLocaleString()}`;
+      
+          row.innerHTML = `<td>${formattedDeparture}</td>
+                            <td>${formattedArrival}</td>
+                            <td>$${flight.price}</td>
+                            <td>${flight.airlines.join(", ")}</td>
+                            <td>${directFlight ? '✓' : ''}</td>
+                            <td>${stops}</td>
+                            <td>${layovers}</td>
+                            <td>${durationHours}h ${durationMinutes}m</td>
+                            <td>${routeIATAs}</td>`;
+          tbody.appendChild(row);
+        });         
+      } else {
+        console.error('data.data is not an array:', data.data);
+        // Handle the case where data is not an array, e.g., display a message to the user
+      }
       table.appendChild(tbody);
-      document.getElementById('infoPaneContent').appendChild(table);
-
-      // Reuse existing event listeners from singleDateTable.js or define new ones specific to anyOriginTable
-      attachEventListeners(table, data.data, routeIndex);
+      infoPaneContent.appendChild(table);
+  
+      highlightSelectedRowForRouteIndex(routeIndex);
+  
+      // Reuse existing event listeners or define new ones specific to single date table
+      attachEventListeners(table, data, routeIndex);
     })
     .catch(error => {
-      document.getElementById('infoPaneContent').textContent = 'Error loading data: ' + error.message;
-    });
-
-    function attachEventListeners(table, data, routeIndex) {
-    const headers = table.querySelectorAll('th');
-    headers.forEach(header => {
-      header.style.cursor = 'pointer';
-      header.addEventListener('click', function(event) {
-        if (!event.target.closest('.filterIcon')) {
-          const sortIcon = this.querySelector('.sortIcon');
-          const columnIdentifier = sortIcon.getAttribute('data-column');
-          const columnIndex = getColumnIndex(columnIdentifier);
-          const isAscending = sortIcon.getAttribute('data-sort') !== 'asc';
-          sortTableByColumn(table, columnIndex, isAscending);
-          resetSortIcons(headers, sortIcon, isAscending ? 'asc' : 'desc');
-        }
-      });
-    });
+      infoPaneContent.textContent = 'Error loading data: ' + error.message;
+    });    
+  
+      function attachEventListeners(table, data, routeIndex) {
+        const headers = table.querySelectorAll('th');
+        headers.forEach(header => {
+          header.style.cursor = 'pointer';
+          header.addEventListener('click', function(event) {
+            if (!event.target.closest('.filterIcon')) {
+              const sortIcon = this.querySelector('.sortIcon');
+              const columnIdentifier = sortIcon.getAttribute('data-column');
+              const columnIndex = getColumnIndex(columnIdentifier);
+              const isAscending = sortIcon.getAttribute('data-sort') !== 'asc';
+              sortTableByColumn(table, columnIndex, isAscending);
+              resetSortIcons(headers, sortIcon, isAscending ? 'asc' : 'desc');
+            }
+          });
+        });
+      
+        // Attach event listeners specifically for date filter icons
+        document.querySelectorAll('.filterIcon').forEach(icon => {
+          icon.addEventListener('click', function(event) {
+            event.stopPropagation(); // Prevent the event from bubbling up to the header
+            const column = this.getAttribute('data-column');
+            if (column === 'departure' || column === 'arrival') {
+              const dateFilterPopup = document.getElementById(`${column}DateFilterPopup`);
+              if (dateFilterPopup) {
+                dateFilterPopup.classList.toggle('hidden');
+              } else {
+                showDateFilterPopup(event, column);
+              }
+            }
+          });
+        });
   
     // Attach event listeners specifically for date filter icons
     document.querySelectorAll('.filterIcon').forEach(icon => {
@@ -144,35 +175,39 @@ function buildAnyDestTable(routeIndex, origin, dateRange) {
     document.querySelectorAll('.route-info-table tbody tr').forEach((row, index) => {
       row.addEventListener('click', function() {
           const routeIdString = this.getAttribute('data-route-id');
-          const routeIds = routeIdString.split('|');
-          const fullFlightData = data[index];
+          const fullFlightData = data.data.find(flight => flight.id === routeIdString);
+  
+          if (!fullFlightData) {
+              console.error('No flight data found for route ID:', routeIdString);
+              return;
+          }
   
           // Determine the group ID for the newly selected route
           appState.highestGroupId += 1;
-          let newRouteGroupId = appState.highestGroupId;
+          let newRouteGroupId = appState.highestGroupId;    
           const existingRouteDetails = appState.selectedRoutes[routeIndex];
           if (existingRouteDetails) {
-              // Logic to remove routes from the old group, if necessary
               Object.keys(appState.selectedRoutes).forEach(key => {
                   if (appState.selectedRoutes[key].group == existingRouteDetails.group) {
                       updateState('removeSelectedRoute', parseInt(key));
                   }
               });
           }
+          const routeIds = fullFlightData.route.map(route => route.id); // Example initialization
   
           // Update appState for the selected route
-          routeIds.forEach((id, idx) => {
-              const segmentData = fullFlightData.route[idx];
-              const departureDate = new Date(segmentData.local_departure).toISOString().split('T')[0];
-              const displayData = {
-                  departure: new Date(segmentData.local_departure).toLocaleString(),
-                  arrival: new Date(segmentData.local_arrival).toLocaleString(),
-                  price: `$${fullFlightData.price}`,
-                  airline: segmentData.airline,
-                  stops: fullFlightData.route.length - 1,
-                  route: `${segmentData.flyFrom} > ${segmentData.flyTo}`,
-                  deep_link: fullFlightData.deep_link,
-              };
+          fullFlightData.route.forEach((id, idx) => {
+            const segmentData = fullFlightData.route[idx];
+            const departureDate = new Date(segmentData.dTime * 1000).toISOString().split('T')[0];
+            const displayData = {
+                departure: new Date(segmentData.dTime * 1000).toLocaleString(),
+                arrival: new Date(segmentData.aTime * 1000).toLocaleString(),
+                price: `$${fullFlightData.price}`,
+                airline: segmentData.airline,
+                stops: fullFlightData.route.length - 1,
+                route: `${segmentData.flyFrom} > ${segmentData.flyTo}`,
+                deep_link: fullFlightData.deep_link,
+            };
   
               const selectedRouteIndex = routeIndex + idx;
               if (!appState.routeDates[selectedRouteIndex]) {
