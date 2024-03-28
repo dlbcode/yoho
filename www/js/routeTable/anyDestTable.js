@@ -19,17 +19,19 @@ function getColumnIndex(columnIdentifier) {
   return columnMap[columnIdentifier] || -1; // Default to -1 if identifier not found
 }
 
-function buildAnyOriginTable(routeIndex) {
+function buildAnyDestTable(routeIndex, origin) {
   const currentRoute = appState.routes && appState.routes.length > routeIndex ? appState.routes[routeIndex] : undefined;
 
-  if (!currentRoute) {
-    document.querySelector('#infoPaneContent').textContent = 'Please select a route to display data.';
+  if (!currentRoute && appState.waypoints.length === 0) {
+    document.querySelector('#infoPaneContent').textContent = 'Please select at least one location to display data.';
     return;
   }
 
   document.head.appendChild(Object.assign(document.createElement('link'), {rel: 'stylesheet', type: 'text/css', href: '../css/routeTable.css'}));
 
-  let apiUrl = `https://yonderhop.com/api/cheapestFlights?origin=Any&date_from=${currentRoute.departureDate}&date_to=${currentRoute.returnDate}&price_to=${currentRoute.maxPrice}`;
+  let apiUrl = `https://yonderhop.com/api/cheapestFlights?origin=${origin}&date_from=${currentRoute.departureDate}&date_to=${currentRoute.returnDate}&price_to=${currentRoute.maxPrice}`;
+
+  console.log('apiUrl: ', apiUrl);
 
   fetch(apiUrl)
     .then(response => {
@@ -321,4 +323,4 @@ function buildAnyOriginTable(routeIndex) {
   }
 }
 
-export { buildAnyOriginTable };
+export { buildAnyDestTable };
