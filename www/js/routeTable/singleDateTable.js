@@ -148,11 +148,9 @@ function buildSingleDateTable(routeIndex) {
             let newRouteGroupId = appState.highestGroupId;
             const existingRouteDetails = appState.selectedRoutes[routeIndex];
             if (existingRouteDetails) {
-              console.log('removeSelectedRouteGroup', existingRouteDetails.group);
                 // Logic to remove routes from the old group, if necessary
                 Object.keys(appState.selectedRoutes).forEach(key => {
                     if (appState.selectedRoutes[key].group == existingRouteDetails.group) {
-                        console.log('removeSelectedRoute', parseInt(key));
                         updateState('removeSelectedRoute', parseInt(key));
                     }
                 });
@@ -173,24 +171,27 @@ function buildSingleDateTable(routeIndex) {
                 };
     
                 const selectedRouteIndex = routeIndex + idx;
-                // Check if the routeDate already exists to prevent duplication
                 if (!appState.routeDates[selectedRouteIndex]) {
                     appState.routeDates[selectedRouteIndex] = departureDate;
                 }
     
-                // Update or add the selected route details
-                appState.selectedRoutes[selectedRouteIndex] = {
-                    displayData: displayData,
-                    fullData: segmentData,
-                    group: newRouteGroupId !== null ? newRouteGroupId : routeIndex,
-                    routeDates: departureDate,
-                };
-                console.log('appState.selectedRoutes[selectedRouteIndex]', appState.selectedRoutes[selectedRouteIndex]);
+                if (appState.selectedRoutes.hasOwnProperty(selectedRouteIndex)) {
+                  const keys = Object.keys(appState.selectedRoutes).map(Number).filter(key => key >= selectedRouteIndex).sort((a, b) => b - a); // Sort keys in descending order to avoid overwriting
+                  keys.forEach(key => {
+                      appState.selectedRoutes[key + 1] = appState.selectedRoutes[key]; // Shift each route up by one index
+                  });
+              }
+              
+              appState.selectedRoutes[selectedRouteIndex] = {
+                  displayData: displayData,
+                  fullData: segmentData,
+                  group: newRouteGroupId !== null ? newRouteGroupId : routeIndex,
+                  routeDates: departureDate,
+              };
             });
             updateState('updateRouteDate: ', routeIndex, departureDate);
             updateState('changeView', 'selectedRoute');
             highlightSelectedRowForRouteIndex(routeIndex);
-            console.log('appState.selectedRoutes', appState.selectedRoutes);
         });
     });                 
     
