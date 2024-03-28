@@ -148,9 +148,11 @@ function buildSingleDateTable(routeIndex) {
             let newRouteGroupId = appState.highestGroupId;
             const existingRouteDetails = appState.selectedRoutes[routeIndex];
             if (existingRouteDetails) {
+              console.log('removeSelectedRouteGroup', existingRouteDetails.group);
                 // Logic to remove routes from the old group, if necessary
                 Object.keys(appState.selectedRoutes).forEach(key => {
                     if (appState.selectedRoutes[key].group == existingRouteDetails.group) {
+                        console.log('removeSelectedRoute', parseInt(key));
                         updateState('removeSelectedRoute', parseInt(key));
                     }
                 });
@@ -183,10 +185,12 @@ function buildSingleDateTable(routeIndex) {
                     group: newRouteGroupId !== null ? newRouteGroupId : routeIndex,
                     routeDates: departureDate,
                 };
+                console.log('appState.selectedRoutes[selectedRouteIndex]', appState.selectedRoutes[selectedRouteIndex]);
             });
             updateState('updateRouteDate: ', routeIndex, departureDate);
             updateState('changeView', 'selectedRoute');
             highlightSelectedRowForRouteIndex(routeIndex);
+            console.log('appState.selectedRoutes', appState.selectedRoutes);
         });
     });                 
     
