@@ -96,6 +96,24 @@ function buildSingleDateTable(routeIndex) {
       table.appendChild(tbody);
       infoPaneContent.appendChild(table);
 
+      data.forEach(async (flight) => {
+        const routeIATAs = flight.route.map(r => r.flyFrom).concat(flight.route[flight.route.length - 1].flyTo);
+        for (let i = 0; i < routeIATAs.length - 1; i++) {
+            const originIata = routeIATAs[i];
+            const destinationIata = routeIATAs[i + 1];
+            const originAirportData = await flightMap.getAirportDataByIata(originIata);
+            const destinationAirportData = await flightMap.getAirportDataByIata(destinationIata);
+
+            if (originAirportData && destinationAirportData) {
+                pathDrawing.createRoutePath(originAirportData, destinationAirportData, {
+                    originAirport: originAirportData,
+                    destinationAirport: destinationAirportData,
+                    price: flight.price // Ensure this is the correct way to access price
+                });
+            }
+        }
+      });
+
       highlightSelectedRowForRouteIndex(routeIndex);
 
       // Reuse existing event listeners or define new ones specific to single date table
