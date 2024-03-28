@@ -114,6 +114,8 @@ const infoPane = {
             checkmark.innerHTML = ''; // Or any indicator for unselected
         }
 
+        uiHandling.attachDateTooltip(button, routeIndex);
+
         button.addEventListener('mouseover', () => {
           // Use origin and destination variables to construct routeId
           const routeId = `${origin}-${destination}`;
@@ -130,8 +132,6 @@ const infoPane = {
               path.setStyle({ color: originalColor });
           });
       });
-      
-      uiHandling.attachDateTooltip(button, index);
     });
   },
 
