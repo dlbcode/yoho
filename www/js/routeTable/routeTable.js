@@ -11,15 +11,13 @@ function buildRouteTable(routeIndex) {
 
   let origin, destination;
 
-if (appState.routes[routeIndex] && appState.routes[routeIndex].originAirport && appState.routes[routeIndex].destinationAirport) {
-    origin = appState.routes[routeIndex].originAirport.iata_code;
-    destination = appState.routes[routeIndex].destinationAirport.iata_code;
-} else {
-    // Adjusting this to ensure origin is set correctly when routeIndex is out of bounds
-    // or when the route does not have the expected airports
-    origin = appState.waypoints[routeIndex * 2]?.iata_code;
-    destination = appState.waypoints[(routeIndex * 2) + 1]?.iata_code || 'Any';
-}
+  if (appState.routes[routeIndex] && appState.routes[routeIndex].originAirport && appState.routes[routeIndex].destinationAirport) {
+      origin = appState.routes[routeIndex].originAirport.iata_code;
+      destination = appState.routes[routeIndex].destinationAirport.iata_code;
+  } else {
+      origin = appState.waypoints[routeIndex * 2]?.iata_code;
+      destination = appState.waypoints[(routeIndex * 2) + 1]?.iata_code || 'Any';
+  }
 
   console.log('buildRouteTable anyDest from: ', origin);
 
