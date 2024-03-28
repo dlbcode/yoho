@@ -19,7 +19,7 @@ function getColumnIndex(columnIdentifier) {
   return columnMap[columnIdentifier] || -1; // Default to -1 if identifier not found
 }
 
-function buildAnyDestTable(routeIndex, origin) {
+function buildAnyDestTable(routeIndex, origin, dateRange) {
   const currentRoute = appState.routes && appState.routes.length > routeIndex ? appState.routes[routeIndex] : undefined;
 
   if (!currentRoute && appState.waypoints.length === 0) {
@@ -27,9 +27,22 @@ function buildAnyDestTable(routeIndex, origin) {
     return;
   }
 
+  let fromDate;
+  let toDate;
+
+  if (dateRange.includes(' to ')) {
+    const dateRangeParts = dateRange.split(' to ');
+    fromDate = dateRangeParts[0];
+    toDate = dateRangeParts[1];
+  } else {
+    fromDate = dateRange;
+    toDate = dateRange;
+  }
+  const maxPrice = 500;
+
   document.head.appendChild(Object.assign(document.createElement('link'), {rel: 'stylesheet', type: 'text/css', href: '../css/routeTable.css'}));
 
-  let apiUrl = `https://yonderhop.com/api/cheapestFlights?origin=${origin}&date_from=${currentRoute.departureDate}&date_to=${currentRoute.returnDate}&price_to=${currentRoute.maxPrice}`;
+  let apiUrl = `https://yonderhop.com/api/cheapestFlights?origin=${origin}&date_from=${fromDate}&date_to=${toDate}&price_to=${maxPrice}`;
 
   console.log('apiUrl: ', apiUrl);
 
