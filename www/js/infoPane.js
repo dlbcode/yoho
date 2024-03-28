@@ -90,9 +90,11 @@ const infoPane = {
             const originWaypoint = appState.waypoints[routeIndex * 2];
             const destinationWaypoint = appState.waypoints[routeIndex * 2 + 1];
             const group = [originWaypoint, destinationWaypoint].filter(wp => wp).map(airport => L.latLng(airport.latitude, airport.longitude));
-            if (group.length > 0) {
-                const bounds = L.latLngBounds(group);
+            const bounds = L.latLngBounds(group);
+            if (group.length > 1) {
                 map.fitBounds(bounds, { padding: [50, 50] });
+            } else if (group.length === 1) {
+                map.setView(group[0], 4);
             }
         };
 
