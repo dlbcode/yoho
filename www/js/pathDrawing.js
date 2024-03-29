@@ -266,8 +266,14 @@ const pathDrawing = {
         });
     
         // Clearing invisible lines associated with table entries
-        if (all && this.invisibleRouteLines) {
-             this.invisibleRouteLines.forEach(invisibleLine => {
+        if (all) {
+            this.routeLines.forEach(line => {
+                if (map.hasLayer(line)) {
+                    map.removeLayer(line);
+                }
+            });
+            console.log('Clearing invisibleRouteLines', this.invisiblerouteLines);
+            this.invisibleRouteLines.forEach(invisibleLine => {
                 if (map.hasLayer(invisibleLine)) {
                     map.removeLayer(invisibleLine);
                 }
