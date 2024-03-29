@@ -272,9 +272,11 @@ const pathDrawing = {
     
     drawRouteLines: async function() {
         const rows = document.querySelectorAll('.route-info-table tbody tr');
-        console.log(rows);
-      
+
         for (const row of rows) {
+            if (row.style.display === 'none') {
+                continue; // Skip this row if it's not visible
+            }
           // Extract the route string from the last cell
           const routeString = row.cells[row.cells.length - 1].textContent.trim();
           // Split the route string into an array of IATA codes
@@ -304,6 +306,8 @@ const pathDrawing = {
         
                 // Parse the price as a float and remove the dollar sign before passing it
                 const numericPrice = parseFloat(price.replace('$', ''));
+
+                console.log('drawing route path for', originAirportData, destinationAirportData);
         
                 pathDrawing.createRoutePath(originAirportData, destinationAirportData, {
                     originAirport: originAirportData,

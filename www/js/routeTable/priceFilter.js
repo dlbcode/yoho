@@ -75,10 +75,11 @@ function filterTableByPrice(threshold) {
     row.style.display = price > threshold ? 'none' : '';
   });
 
-  // Assuming pathDrawing.clearLines(true) and drawRouteLines() are accessible
   // Clear existing route lines
+  console.log('Clearing existing route lines');
   pathDrawing.clearLines(true);
   // Redraw route lines based on the updated table contents
+  console.log('Redrawing route lines');
   pathDrawing.drawRouteLines();
 }
 
