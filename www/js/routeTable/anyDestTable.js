@@ -369,6 +369,28 @@ function buildAnyDestTable(routeIndex, origin, dateRange) {
       table.querySelector(`th:nth-child(${columnIndex})`).classList.add("th-sort-desc");
     }
   }
+
+  function attachPathLineEvents() {
+    document.querySelectorAll('.route-info-table tbody tr').forEach((row, index) => {
+      const routeString = row.cells[8].textContent.trim(); // Assuming the IATA codes are in the 9th column
+      const iataCodes = routeString.split(' > ');
+  
+      // Draw path lines for each route
+      for (let i = 0; i < iataCodes.length - 1; i++) {
+        const originIata = iataCodes[i];
+        const destinationIata = iataCodes[i + 1];
+        console.log('Drawing path between'+ originIata +'and'+ destinationIata);
+        pathDrawing.drawPathBetweenAirports(originIata, destinationIata, flightMap.getAirportDataByIata, (path) => {
+          // Attach click event to path line
+          path.on('click', () => {
+            row.click(); // Simulate row click
+          });
+        });
+      }
+    });
+  }
+
+  attachPathLineEvents();
 }
 
 export { buildAnyDestTable };
