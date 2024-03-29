@@ -282,28 +282,29 @@ const pathDrawing = {
           for (let i = 0; i < iataCodes.length - 1; i++) {
             const originIata = iataCodes[i];
             const destinationIata = iataCodes[i + 1];
-      
+        
             try {
-              // Fetch airport data for the origin and destination of the current segment
-              const originAirportData = await flightMap.getAirportDataByIata(originIata);
-              const destinationAirportData = await flightMap.getAirportDataByIata(destinationIata);
-      
-              // Check if airport data was successfully retrieved
-              if (!originAirportData || !destinationAirportData) {
-                console.error(`Airport data not found for segment: ${originIata} to ${destinationIata}`);
-                continue;
-              }
-      
-              // Draw the route path for the current segment
-              pathDrawing.createRoutePath(originAirportData, destinationAirportData, {
-                  originAirport: originAirportData,
-                  destinationAirport: destinationAirportData,
-                  price: price,
-              }, null, true);
+                const originAirportData = await flightMap.getAirportDataByIata(originIata);
+                const destinationAirportData = await flightMap.getAirportDataByIata(destinationIata);
+        
+                if (!originAirportData || !destinationAirportData) {
+                    console.error(`Airport data not found for segment: ${originIata} to ${destinationIata}`);
+                    continue;
+                }
+        
+                // Parse the price as a float and remove the dollar sign before passing it
+                const numericPrice = parseFloat(price.replace('$', ''));
+        
+                pathDrawing.createRoutePath(originAirportData, destinationAirportData, {
+                    originAirport: originAirportData,
+                    destinationAirport: destinationAirportData,
+                    price: numericPrice, // Pass the parsed numeric price
+                }, null, true);
             } catch (error) {
-              console.error('Error fetching airport data for segment:', error);
+                console.error('Error fetching airport data for segment:', error);
             }
-          }
+        }
+        
         }
       }
 };
