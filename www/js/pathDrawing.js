@@ -144,11 +144,12 @@ const pathDrawing = {
                 invisibleLine.on('mouseout', onMouseOut);
                 invisibleLine.on('click', onClick);
 
-                newPaths.push(geodesicLine);
             if (forTable) {
                 // If forTable is true, add to routeLines instead of invisibleLines
                 this.routeLines.push(geodesicLine);
+                this.invisibleRouteLines.push(invisibleLine);
             } else {
+                newPaths.push(geodesicLine);
                 this.invisibleLines.push(invisibleLine); // Continue tracking the invisible line as before
             }
         });
@@ -241,7 +242,7 @@ const pathDrawing = {
         return price < 100 ? '#0099ff' : price < 200 ? 'green' : price < 300 ? '#abb740' : price < 400 ? 'orange' : price < 500 ? '#da4500' : '#c32929';
     },
      
-    clearLines() {
+    clearLines(all = false) {
         // Clearing regular and dashed route paths
         [...Object.values(this.routePathCache).flat(), 
          ...Object.values(this.dashedRoutePathCache).flat()].forEach(line => {
@@ -264,12 +265,22 @@ const pathDrawing = {
             }
         });
     
+        // Clearing invisible lines associated with table entries
+        if (all && this.invisibleRouteLines) {
+             this.invisibleRouteLines.forEach(invisibleLine => {
+                if (map.hasLayer(invisibleLine)) {
+                    map.removeLayer(invisibleLine);
+                }
+            });
+        }
+    
         // Resetting caches and current lines array
         this.routePathCache = {};
         this.dashedRoutePathCache = {};
         this.currentLines = [];
         this.invisibleLines = []; // Resetting invisible lines array
-    },
+        this.invisibleRouteLines = []; // Resetting invisible route lines array for table
+    },    
     
     drawRouteLines: async function() {
         const rows = document.querySelectorAll('.route-info-table tbody tr');
