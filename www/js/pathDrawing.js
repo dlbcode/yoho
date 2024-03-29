@@ -109,7 +109,7 @@ const pathDrawing = {
                 // Create an invisible, wider line for hover interactions
                 var invisibleLine = new L.Geodesic([adjustedOrigin, adjustedDestination], {
                     weight: 10, // Wider line for easier hovering
-                    opacity: 0, // Make the line invisible
+                    opacity: .2, // Make the line invisible
                     wrap: false
                 }).addTo(map);
                 invisibleLine.forTable = forTable; 
@@ -172,6 +172,8 @@ const pathDrawing = {
             }
         });
     }
+    console.log('routeLines', this.routeLines);
+    console.log('invisibleLines', this.invisibleLines);
 },
     
     addDecoratedLine(geodesicLine, route) {
@@ -239,30 +241,34 @@ const pathDrawing = {
         return price < 100 ? '#0099ff' : price < 200 ? 'green' : price < 300 ? '#abb740' : price < 400 ? 'orange' : price < 500 ? '#da4500' : '#c32929';
     },
      
-    clearLines(all = false) {
-        // Only remove lines from the map without clearing the caches
+    clearLines() {
+        // Clearing regular and dashed route paths
         [...Object.values(this.routePathCache).flat(), 
-         ...Object.values(this.dashedRoutePathCache).flat(),
-         ...this.currentLines,
-         ...this.invisibleLines].forEach(line => {
-            if (!line.forTable && map.hasLayer(line)) {
+         ...Object.values(this.dashedRoutePathCache).flat()].forEach(line => {
+            if (map.hasLayer(line)) {
                 map.removeLayer(line);
             }
-
-        // if all is true, clear routeLines as well
-        if (all) {
-                this.routeLines.forEach(line => {
-                    if (map.hasLayer(line)) {
-                        map.removeLayer(line);
-                    }
-                });
-            this.routeLines.length = 0;
+        });
+    
+        // Clearing current lines (decorated lines)
+        this.currentLines.forEach(decoratedLine => {
+            if (map.hasLayer(decoratedLine)) {
+                map.removeLayer(decoratedLine);
             }
         });
- 
-        // Reset currentLines and invisibleLines arrays, but keep the cache intact
-        this.currentLines.length = 0;
-        this.invisibleLines.length = 0;
+    
+        // Clearing invisible lines for hover interactions
+        this.invisibleLines.forEach(invisibleLine => {
+            if (map.hasLayer(invisibleLine)) {
+                map.removeLayer(invisibleLine);
+            }
+        });
+    
+        // Resetting caches and current lines array
+        this.routePathCache = {};
+        this.dashedRoutePathCache = {};
+        this.currentLines = [];
+        this.invisibleLines = []; // Resetting invisible lines array
     },
     
     drawRouteLines: async function() {
