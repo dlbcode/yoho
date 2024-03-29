@@ -1,7 +1,6 @@
 import { appState, updateState } from '../stateManager.js';
 import { showPriceFilterPopup } from './priceFilter.js';
 import { showDateFilterPopup } from './dateFilters.js';
-import { pathDrawing } from '../pathDrawing.js';
 import { flightMap } from '../flightMap.js';
 
 function getColumnIndex(columnIdentifier) {
@@ -233,24 +232,6 @@ function buildAnyDestTable(routeIndex, origin, dateRange) {
           highlightSelectedRowForRouteIndex(routeIndex);
       });
   });                 
-  
-    document.querySelectorAll('.route-info-table tbody tr').forEach(row => {
-      row.addEventListener('mouseover', function() {
-        const routeString = this.cells[8].textContent.trim();
-        const iataCodes = routeString.split(' > ');
-  
-        for (let i = 0; i < iataCodes.length - 1; i++) {
-            const originIata = iataCodes[i];
-            const destinationIata = iataCodes[i + 1];
-            pathDrawing.drawPathBetweenAirports(originIata, destinationIata, flightMap.getAirportDataByIata);
-        }
-      });
-  
-      row.addEventListener('mouseout', function() {
-          pathDrawing.clearLines();
-          pathDrawing.drawLines();
-      });
-    });
   
     document.querySelectorAll('.route-info-table tbody tr').forEach((row) => {
       row.addEventListener('click', function() {
