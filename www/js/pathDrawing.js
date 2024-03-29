@@ -5,6 +5,7 @@ import { flightMap } from './flightMap.js';
 const pathDrawing = {
     currentLines: [],
     invisibleLines: [],
+    invisibleRouteLines: [],
     routePathCache: [],
     dashedRoutePathCache: [],
 
