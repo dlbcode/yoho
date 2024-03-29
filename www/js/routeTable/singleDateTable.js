@@ -104,10 +104,6 @@ function buildSingleDateTable(routeIndex) {
       }));
 
       data.forEach(async (flight) => {
-        // If you need to exempt the entire route as well as individual segments
-        const entireRouteKey = `${flight.route[0].flyFrom}-${flight.route[flight.route.length - 1].flyTo}-${flight.price}`;
-        appState.routeTablePaths.add(entireRouteKey);
-    
         // Process each segment
         for (let i = 0; i < flight.route.length - 1; i++) {
             const segment = flight.route[i];
@@ -115,27 +111,23 @@ function buildSingleDateTable(routeIndex) {
             const originIata = segment.flyFrom;
             const destinationIata = nextSegment.flyTo;
             const price = flight.price;
-            const routeKey = `${originIata}-${destinationIata}-${price}`;
     
             if (originIata && destinationIata) {
-                appState.routeTablePaths.add(routeKey);
+                const originAirportData = await flightMap.getAirportDataByIata(originIata);
+                const destinationAirportData = await flightMap.getAirportDataByIata(destinationIata);
+    
+                if (originAirportData && destinationAirportData) {
+                  pathDrawing.createRoutePath(originAirportData, destinationAirportData, {
+                      originAirport: originAirportData,
+                      destinationAirport: destinationAirportData,
+                      price: flight.price, // This is part of the route object
+                  }, null, true); // Pass `forTable` as true here, outside the route object
+              }              
             } else {
                 console.error('Missing IATA codes for flight segment:', segment);
             }
-    
-            // Assuming you need to draw paths for each segment
-            const originAirportData = await flightMap.getAirportDataByIata(originIata);
-            const destinationAirportData = await flightMap.getAirportDataByIata(destinationIata);
-    
-            if (originAirportData && destinationAirportData) {
-                pathDrawing.createRoutePath(originAirportData, destinationAirportData, {
-                    originAirport: originAirportData,
-                    destinationAirport: destinationAirportData,
-                    price: flight.price // Ensure this is the correct way to access price
-                });
-            }
         }
-    });    
+    });      
 
       highlightSelectedRowForRouteIndex(routeIndex);
 

@@ -71,13 +71,15 @@ const pathDrawing = {
         return L.latLng(latLng.lat, newLng);
     },
     
-    createRoutePath(origin, destination, route, lineColor = null) {
+    createRoutePath(origin, destination, route, lineColor = null, forTable = false) {
         if (!route || !route.originAirport || !route.destinationAirport || 
             typeof route.originAirport.iata_code === 'undefined' || 
             typeof route.destinationAirport.iata_code === 'undefined') {
             console.error('Invalid route data:', route);
             return route; // Return route data early in case of error
-        }      
+        }
+
+        this.routeLines = this.routeLines || [];
         let routeId = `${route.originAirport.iata_code}-${route.destinationAirport.iata_code}`;
         let newPaths = [];
     
@@ -101,6 +103,7 @@ const pathDrawing = {
                     wrap: false,
                     zIndex: -1
                 }).addTo(map);
+                geodesicLine.forTable = forTable; // Set the forTable flag
     
                 // Create an invisible, wider line for hover interactions
                 var invisibleLine = new L.Geodesic([adjustedOrigin, adjustedDestination], {
@@ -108,6 +111,7 @@ const pathDrawing = {
                     opacity: 0, // Make the line invisible
                     wrap: false
                 }).addTo(map);
+                invisibleLine.forTable = forTable; 
 
                 // Function to handle mouseover event
                 const onMouseOver = (e) => {
@@ -140,24 +144,34 @@ const pathDrawing = {
                 invisibleLine.on('click', onClick);
 
                 newPaths.push(geodesicLine);
-                this.invisibleLines.push(invisibleLine); // Track the invisible line
-            });
-            this.routePathCache[routeId] = newPaths;
-        }
-    
-        // Check if the route is direct and currently exists in appState.routes
-        const routeExists = appState.routes.some(r => 
-            r.origin === route.originAirport.iata_code &&
-            r.destination === route.destinationAirport.iata_code
-        );
-    
-        if (route.isDirect && routeExists) {
-            newPaths.forEach(path => {
-                let decoratedLine = this.addDecoratedLine(path, route);
+            if (forTable) {
+                // If forTable is true, add to routeLines instead of invisibleLines
+                this.routeLines.push(geodesicLine);
+            } else {
+                this.invisibleLines.push(invisibleLine); // Continue tracking the invisible line as before
+            }
+        });
+        this.routePathCache[routeId] = newPaths;
+    }
+
+    // Direct route and existence check logic remains unchanged
+    const routeExists = appState.routes.some(r => 
+        r.origin === route.originAirport.iata_code &&
+        r.destination === route.destinationAirport.iata_code
+    );
+
+    if (route.isDirect && routeExists) {
+        newPaths.forEach(path => {
+            let decoratedLine = this.addDecoratedLine(path, route);
+            // Decide where to add the decorated line based on forTable flag
+            if (forTable) {
+                this.routeLines.push(decoratedLine);
+            } else {
                 this.currentLines.push(decoratedLine);
-            });
-        }
-    },       
+            }
+        });
+    }
+},
     
     addDecoratedLine(geodesicLine, route) {
         var planeIcon = L.icon({
@@ -225,48 +239,21 @@ const pathDrawing = {
     },
      
     clearLines() {
-        console.log('appState.routeTablePaths', appState.routeTablePaths);
-        // Assuming each line object has a 'routeKey' property for simplicity
-        const isLineExempt = (line) => appState.routeTablePaths.has(line.routeKey);
-        
-        // Clearing regular and dashed route paths with exemption check
+        // Only remove lines from the map without clearing the caches
         [...Object.values(this.routePathCache).flat(), 
-         ...Object.values(this.dashedRoutePathCache).flat()].forEach(line => {
-            if (!isLineExempt(line) && map.hasLayer(line)) {
+         ...Object.values(this.dashedRoutePathCache).flat(),
+         ...this.currentLines,
+         ...this.invisibleLines].forEach(line => {
+            if (!line.forTable && map.hasLayer(line)) {
                 map.removeLayer(line);
             }
-        });
+        });  
+        // Reset currentLines and invisibleLines arrays, but keep the cache intact
+        this.currentLines.length = 0;
+        this.invisibleLines.length = 0;
     
-        // Resetting caches for non-exempt lines
-        Object.keys(this.routePathCache).forEach(key => {
-            if (!appState.routeTablePaths.has(key)) {
-                delete this.routePathCache[key];
-            }
-        });
-        Object.keys(this.dashedRoutePathCache).forEach(key => {
-            if (!appState.routeTablePaths.has(key)) {
-                delete this.dashedRoutePathCache[key];
-            }
-        });
-    
-        // Clearing current lines (decorated lines) and invisible lines for hover interactions
-        // Only if they are not exempt
-        this.currentLines = this.currentLines.filter(line => {
-            if (!isLineExempt(line) && map.hasLayer(line)) {
-                map.removeLayer(line);
-                return false; // Do not keep this line in the array
-            }
-            return true; // Keep exempt lines in the array
-        });
-        this.invisibleLines = this.invisibleLines.filter(line => {
-            if (!isLineExempt(line) && map.hasLayer(line)) {
-                map.removeLayer(line);
-                return false;
-            }
-            return true;
-        });
-    }       
-            
+        // Note: routeLines are intentionally not cleared
+    }     
 };
 
 export { pathDrawing };

@@ -21,7 +21,6 @@ const appState = {
     routeDates: {
         0: new Date().toISOString().split('T')[0],
     },
-    routeTablePaths: new Set(),
 };
   
 function updateState(key, value) {
