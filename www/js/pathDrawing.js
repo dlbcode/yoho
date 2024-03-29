@@ -238,7 +238,7 @@ const pathDrawing = {
         return price < 100 ? '#0099ff' : price < 200 ? 'green' : price < 300 ? '#abb740' : price < 400 ? 'orange' : price < 500 ? '#da4500' : '#c32929';
     },
      
-    clearLines() {
+    clearLines(all = false) {
         // Only remove lines from the map without clearing the caches
         [...Object.values(this.routePathCache).flat(), 
          ...Object.values(this.dashedRoutePathCache).flat(),
@@ -253,6 +253,10 @@ const pathDrawing = {
         this.invisibleLines.length = 0;
     
         // Note: routeLines are intentionally not cleared
+        // if all is true, clear routeLines as well
+        if (all) {
+            this.routeLines.length = 0;
+        }
     }     
 };
 

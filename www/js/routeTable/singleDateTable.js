@@ -95,39 +95,8 @@ function buildSingleDateTable(routeIndex) {
       });    
       table.appendChild(tbody);
       infoPaneContent.appendChild(table);
-
-      appState.routeTableDisplayed = true;
-      appState.displayedRoutes = data.map(flight => ({
-          originIata: flight.originIata,
-          destinationIata: flight.destinationIata,
-          price: flight.price
-      }));
-
-      data.forEach(async (flight) => {
-        // Process each segment
-        for (let i = 0; i < flight.route.length - 1; i++) {
-            const segment = flight.route[i];
-            const nextSegment = flight.route[i + 1];
-            const originIata = segment.flyFrom;
-            const destinationIata = nextSegment.flyTo;
-            const price = flight.price;
-    
-            if (originIata && destinationIata) {
-                const originAirportData = await flightMap.getAirportDataByIata(originIata);
-                const destinationAirportData = await flightMap.getAirportDataByIata(destinationIata);
-    
-                if (originAirportData && destinationAirportData) {
-                  pathDrawing.createRoutePath(originAirportData, destinationAirportData, {
-                      originAirport: originAirportData,
-                      destinationAirport: destinationAirportData,
-                      price: flight.price, // This is part of the route object
-                  }, null, true); // Pass `forTable` as true here, outside the route object
-              }              
-            } else {
-                console.error('Missing IATA codes for flight segment:', segment);
-            }
-        }
-    });      
+      
+      drawRouteLines();
 
       highlightSelectedRowForRouteIndex(routeIndex);
       attachEventListeners(table, data, routeIndex);
@@ -266,7 +235,53 @@ function buildSingleDateTable(routeIndex) {
         });
       }
     }
+
+    async function drawRouteLines() {
+      const rows = document.querySelectorAll('.route-info-table tbody tr');
     
+      for (const row of rows) {
+        // Extract the route string from the last cell
+        const routeString = row.cells[row.cells.length - 1].textContent.trim();
+        // Split the route string into an array of IATA codes
+        const iataCodes = routeString.split(' > ');
+    
+        if (iataCodes.length < 2) {
+          console.error('Invalid route string or missing IATA codes:', routeString);
+          continue; // Skip this iteration if the route does not have enough information
+        }
+    
+        const price = row.cells[2].textContent.trim(); // Assuming the price is in the 3rd cell
+    
+        // Iterate through each segment of the route
+        for (let i = 0; i < iataCodes.length - 1; i++) {
+          const originIata = iataCodes[i];
+          const destinationIata = iataCodes[i + 1];
+    
+          try {
+            // Fetch airport data for the origin and destination of the current segment
+            const originAirportData = await flightMap.getAirportDataByIata(originIata);
+            const destinationAirportData = await flightMap.getAirportDataByIata(destinationIata);
+    
+            // Check if airport data was successfully retrieved
+            if (!originAirportData || !destinationAirportData) {
+              console.error(`Airport data not found for segment: ${originIata} to ${destinationIata}`);
+              continue; // Skip this segment if airport data is missing
+            }
+    
+            // Draw the route path for the current segment
+            pathDrawing.createRoutePath(originAirportData, destinationAirportData, {
+                originAirport: originAirportData,
+                destinationAirport: destinationAirportData,
+                price: price, // This could be adjusted if price should vary by segment
+            }, null, true);
+          } catch (error) {
+            console.error('Error fetching airport data for segment:', error);
+          }
+        }
+      }
+    }
+      
+            
     function highlightSelectedRowForRouteIndex(routeIndex) {
       document.querySelectorAll(`.route-info-table[data-route-index="${routeIndex}"] tbody tr.selected`).forEach(row => {
         row.classList.remove('selected');
