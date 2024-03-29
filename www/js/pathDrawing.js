@@ -1,5 +1,6 @@
 import { map } from './map.js';
 import { appState, updateState } from './stateManager.js';
+import { flightMap } from './flightMap.js';
 
 const pathDrawing = {
     currentLines: [],
@@ -257,7 +258,54 @@ const pathDrawing = {
         if (all) {
             this.routeLines.length = 0;
         }
-    }     
+    },
+    
+    drawRouteLines: async function() {
+        const rows = document.querySelectorAll('.route-info-table tbody tr');
+        console.log(rows);
+      
+        for (const row of rows) {
+          // Extract the route string from the last cell
+          const routeString = row.cells[row.cells.length - 1].textContent.trim();
+          // Split the route string into an array of IATA codes
+          const iataCodes = routeString.split(' > ');
+      
+          if (iataCodes.length < 2) {
+            console.error('Invalid route string or missing IATA codes:', routeString);
+            continue;
+          }
+      
+          const price = row.cells[2].textContent.trim(); // Assuming the price is in the 3rd cell
+          console.log('price', price);
+      
+          // Iterate through each segment of the route
+          for (let i = 0; i < iataCodes.length - 1; i++) {
+            const originIata = iataCodes[i];
+            const destinationIata = iataCodes[i + 1];
+      
+            try {
+              // Fetch airport data for the origin and destination of the current segment
+              const originAirportData = await flightMap.getAirportDataByIata(originIata);
+              const destinationAirportData = await flightMap.getAirportDataByIata(destinationIata);
+      
+              // Check if airport data was successfully retrieved
+              if (!originAirportData || !destinationAirportData) {
+                console.error(`Airport data not found for segment: ${originIata} to ${destinationIata}`);
+                continue;
+              }
+      
+              // Draw the route path for the current segment
+              pathDrawing.createRoutePath(originAirportData, destinationAirportData, {
+                  originAirport: originAirportData,
+                  destinationAirport: destinationAirportData,
+                  price: price,
+              }, null, true);
+            } catch (error) {
+              console.error('Error fetching airport data for segment:', error);
+            }
+          }
+        }
+      }
 };
 
 export { pathDrawing };

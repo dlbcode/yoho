@@ -105,6 +105,10 @@ function filterTableByDates(column, minDate, maxDate) {
       row.style.display = ''; // Show rows that meet the criteria
     }
   });
+
+  // Update the map visualization after filtering
+  pathDrawing.clearLines(true);
+  pathDrawing.drawRouteLines();
 }
 
 // Global click listener to hide popup if click occurred outside

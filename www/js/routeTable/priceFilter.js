@@ -1,4 +1,5 @@
-// priceFilter.js
+import { pathDrawing } from "../pathDrawing.js";
+
 function createSliderPopup() {
   const sliderPopup = document.createElement('div');
   sliderPopup.id = 'priceSliderPopup';
@@ -73,6 +74,12 @@ function filterTableByPrice(threshold) {
     const price = parseFloat(row.cells[2].textContent.replace('$', ''));
     row.style.display = price > threshold ? 'none' : '';
   });
+
+  // Assuming pathDrawing.clearLines(true) and drawRouteLines() are accessible
+  // Clear existing route lines
+  pathDrawing.clearLines(true);
+  // Redraw route lines based on the updated table contents
+  pathDrawing.drawRouteLines();
 }
 
 export { showPriceFilterPopup };
