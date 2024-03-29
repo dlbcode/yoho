@@ -98,7 +98,7 @@ const eventManager = {
                 updateState('clearData', null);
                 appState.selectedAirport = null;
                 routeList.updateEstPrice();
-                pathDrawing.clearLines();
+                pathDrawing.clearLines(true);
                 mapHandling.updateMarkerIcons();
                 routeHandling.updateRoutesArray();
                 uiHandling.toggleTripButtonsVisibility(false);

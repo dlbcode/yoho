@@ -248,7 +248,17 @@ const pathDrawing = {
             if (!line.forTable && map.hasLayer(line)) {
                 map.removeLayer(line);
             }
-        });  
+
+        // if all is true, clear routeLines as well
+        if (all) {
+                this.routeLines.forEach(line => {
+                    if (map.hasLayer(line)) {
+                        map.removeLayer(line);
+                    }
+                });
+            }
+        });
+ 
         // Reset currentLines and invisibleLines arrays, but keep the cache intact
         this.currentLines.length = 0;
         this.invisibleLines.length = 0;
