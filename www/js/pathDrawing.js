@@ -225,34 +225,47 @@ const pathDrawing = {
     },
      
     clearLines() {
-        // Clearing regular and dashed route paths
+        console.log('appState.routeTablePaths', appState.routeTablePaths);
+        // Assuming each line object has a 'routeKey' property for simplicity
+        const isLineExempt = (line) => appState.routeTablePaths.has(line.routeKey);
+        
+        // Clearing regular and dashed route paths with exemption check
         [...Object.values(this.routePathCache).flat(), 
          ...Object.values(this.dashedRoutePathCache).flat()].forEach(line => {
-            if (map.hasLayer(line)) {
+            if (!isLineExempt(line) && map.hasLayer(line)) {
                 map.removeLayer(line);
             }
         });
     
-        // Clearing current lines (decorated lines)
-        this.currentLines.forEach(decoratedLine => {
-            if (map.hasLayer(decoratedLine)) {
-                map.removeLayer(decoratedLine);
+        // Resetting caches for non-exempt lines
+        Object.keys(this.routePathCache).forEach(key => {
+            if (!appState.routeTablePaths.has(key)) {
+                delete this.routePathCache[key];
+            }
+        });
+        Object.keys(this.dashedRoutePathCache).forEach(key => {
+            if (!appState.routeTablePaths.has(key)) {
+                delete this.dashedRoutePathCache[key];
             }
         });
     
-        // Clearing invisible lines for hover interactions
-        this.invisibleLines.forEach(invisibleLine => {
-            if (map.hasLayer(invisibleLine)) {
-                map.removeLayer(invisibleLine);
+        // Clearing current lines (decorated lines) and invisible lines for hover interactions
+        // Only if they are not exempt
+        this.currentLines = this.currentLines.filter(line => {
+            if (!isLineExempt(line) && map.hasLayer(line)) {
+                map.removeLayer(line);
+                return false; // Do not keep this line in the array
             }
+            return true; // Keep exempt lines in the array
         });
-    
-        // Resetting caches and current lines array
-        this.routePathCache = {};
-        this.dashedRoutePathCache = {};
-        this.currentLines = [];
-        this.invisibleLines = []; // Resetting invisible lines array
-    },    
+        this.invisibleLines = this.invisibleLines.filter(line => {
+            if (!isLineExempt(line) && map.hasLayer(line)) {
+                map.removeLayer(line);
+                return false;
+            }
+            return true;
+        });
+    }       
             
 };
 

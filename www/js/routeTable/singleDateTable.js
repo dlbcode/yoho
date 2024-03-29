@@ -96,14 +96,37 @@ function buildSingleDateTable(routeIndex) {
       table.appendChild(tbody);
       infoPaneContent.appendChild(table);
 
+      appState.routeTableDisplayed = true;
+      appState.displayedRoutes = data.map(flight => ({
+          originIata: flight.originIata,
+          destinationIata: flight.destinationIata,
+          price: flight.price
+      }));
+
       data.forEach(async (flight) => {
-        const routeIATAs = flight.route.map(r => r.flyFrom).concat(flight.route[flight.route.length - 1].flyTo);
-        for (let i = 0; i < routeIATAs.length - 1; i++) {
-            const originIata = routeIATAs[i];
-            const destinationIata = routeIATAs[i + 1];
+        // If you need to exempt the entire route as well as individual segments
+        const entireRouteKey = `${flight.route[0].flyFrom}-${flight.route[flight.route.length - 1].flyTo}-${flight.price}`;
+        appState.routeTablePaths.add(entireRouteKey);
+    
+        // Process each segment
+        for (let i = 0; i < flight.route.length - 1; i++) {
+            const segment = flight.route[i];
+            const nextSegment = flight.route[i + 1];
+            const originIata = segment.flyFrom;
+            const destinationIata = nextSegment.flyTo;
+            const price = flight.price;
+            const routeKey = `${originIata}-${destinationIata}-${price}`;
+    
+            if (originIata && destinationIata) {
+                appState.routeTablePaths.add(routeKey);
+            } else {
+                console.error('Missing IATA codes for flight segment:', segment);
+            }
+    
+            // Assuming you need to draw paths for each segment
             const originAirportData = await flightMap.getAirportDataByIata(originIata);
             const destinationAirportData = await flightMap.getAirportDataByIata(destinationIata);
-
+    
             if (originAirportData && destinationAirportData) {
                 pathDrawing.createRoutePath(originAirportData, destinationAirportData, {
                     originAirport: originAirportData,
@@ -112,7 +135,7 @@ function buildSingleDateTable(routeIndex) {
                 });
             }
         }
-      });
+    });    
 
       highlightSelectedRowForRouteIndex(routeIndex);
 
