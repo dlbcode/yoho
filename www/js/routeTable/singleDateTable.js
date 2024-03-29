@@ -130,8 +130,6 @@ function buildSingleDateTable(routeIndex) {
     });      
 
       highlightSelectedRowForRouteIndex(routeIndex);
-
-      // Reuse existing event listeners or define new ones specific to single date table
       attachEventListeners(table, data, routeIndex);
     })
     .catch(error => {
