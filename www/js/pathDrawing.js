@@ -256,18 +256,13 @@ const pathDrawing = {
                         map.removeLayer(line);
                     }
                 });
+            this.routeLines.length = 0;
             }
         });
  
         // Reset currentLines and invisibleLines arrays, but keep the cache intact
         this.currentLines.length = 0;
         this.invisibleLines.length = 0;
-    
-        // Note: routeLines are intentionally not cleared
-        // if all is true, clear routeLines as well
-        if (all) {
-            this.routeLines.length = 0;
-        }
     },
     
     drawRouteLines: async function() {
