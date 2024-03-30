@@ -1,4 +1,4 @@
-import { pathDrawing } from "../pathDrawing.js";
+import { map } from "../map.js";
 
 function createSliderPopup() {
   const sliderPopup = document.createElement('div');
@@ -71,22 +71,32 @@ sliderPopup.style.top = `${rect.top + window.scrollY - sliderPopup.offsetHeight}
 function filterTableByPrice(threshold) {
   const table = document.querySelector('.route-info-table');
   const rows = table.querySelectorAll('tbody tr');
+
+  // Make all lines invisible and non-interactive
+  map.eachLayer(layer => {
+    if (layer.routeLineId) {
+      layer.setStyle({opacity: 0, fillOpacity: 0}); // Hide the layer
+      // Disable pointer events for the layer's DOM element
+      if (layer._path) {
+        layer._path.style.pointerEvents = 'none';
+      }
+    }
+  });
+
+  // For lines that match the filter criteria, make them visible and interactive
   rows.forEach(row => {
     const price = parseFloat(row.cells[2].textContent.replace('$', ''));
     const isVisible = price <= threshold;
     row.style.display = isVisible ? '' : 'none';
 
-    // Assuming a mechanism to map rows to route lines, e.g., via data attributes
-    const routeLineId = row.getAttribute('data-route-id');
-    if (routeLineId && pathDrawing.routePathCache[routeLineId]) {
-      pathDrawing.routePathCache[routeLineId].forEach(line => {
-        if (isVisible) {
-          if (!map.hasLayer(line)) {
-            line.addTo(map);
-          }
-        } else {
-          if (map.hasLayer(line)) {
-            map.removeLayer(line);
+    if (isVisible) {
+      const routeLineId = row.getAttribute('data-route-id');
+      map.eachLayer(layer => {
+        if (layer.routeLineId === routeLineId) {
+          layer.setStyle({opacity: 1, fillOpacity: 1}); // Show the layer
+          // Re-enable pointer events for the layer's DOM element
+          if (layer._path) {
+            layer._path.style.pointerEvents = '';
           }
         }
       });
