@@ -73,7 +73,7 @@ const pathDrawing = {
         return L.latLng(latLng.lat, newLng);
     },
     
-    createRoutePath(origin, destination, route, lineColor = null, forTable = false) {
+    createRoutePath(origin, destination, route, lineColor = 'grey', forTable = false) {
         if (!route || !route.originAirport || !route.destinationAirport || 
             typeof route.originAirport.iata_code === 'undefined' || 
             typeof route.destinationAirport.iata_code === 'undefined') {
@@ -291,55 +291,62 @@ const pathDrawing = {
     
     drawRouteLines: async function() {
         const rows = document.querySelectorAll('.route-info-table tbody tr');
-
+        let minPrice = Infinity, maxPrice = -Infinity;
+    
+        // First, determine the min and max prices
+        rows.forEach(row => {
+            if (row.style.display !== 'none') {
+                const priceText = row.cells[2].textContent.trim();
+                const price = parseFloat(priceText.replace('$', ''));
+                if (price < minPrice) minPrice = price;
+                if (price > maxPrice) maxPrice = price;
+            }
+        });
+    
+        const priceRange = maxPrice - minPrice;
+        const quartile = priceRange / 4;
+    
+        // Function to determine color based on price
+        const getColorForPrice = (price) => {
+            const relativePrice = price - minPrice;
+            if (relativePrice <= quartile) return 'green';
+            if (relativePrice <= quartile * 2) return 'yellow';
+            if (relativePrice <= quartile * 3) return 'orange';
+            return 'red';
+        };
+    
+        // Then, draw the route lines with the determined color
         for (const row of rows) {
-            if (row.style.display === 'none') {
-                continue; // Skip this row if it's not visible
-            }
-          // Extract the route string from the last cell
-          const routeString = row.cells[row.cells.length - 1].textContent.trim();
-          // Split the route string into an array of IATA codes
-          const iataCodes = routeString.split(' > ');
-      
-          if (iataCodes.length < 2) {
-            console.error('Invalid route string or missing IATA codes:', routeString);
-            continue;
-          }
-      
-          const price = row.cells[2].textContent.trim(); // Assuming the price is in the 3rd cell
-          console.log('price', price);
-      
-          // Iterate through each segment of the route
-          for (let i = 0; i < iataCodes.length - 1; i++) {
-            const originIata = iataCodes[i];
-            const destinationIata = iataCodes[i + 1];
-        
-            try {
-                const originAirportData = await flightMap.getAirportDataByIata(originIata);
-                const destinationAirportData = await flightMap.getAirportDataByIata(destinationIata);
-        
-                if (!originAirportData || !destinationAirportData) {
-                    console.error(`Airport data not found for segment: ${originIata} to ${destinationIata}`);
-                    continue;
+            if (row.style.display === 'none') continue;
+    
+            const routeString = row.cells[row.cells.length - 1].textContent.trim();
+            const iataCodes = routeString.split(' > ');
+            if (iataCodes.length < 2) continue;
+    
+            const priceText = row.cells[2].textContent.trim();
+            const price = parseFloat(priceText.replace('$', ''));
+            const color = getColorForPrice(price);
+    
+            for (let i = 0; i < iataCodes.length - 1; i++) {
+                const originIata = iataCodes[i];
+                const destinationIata = iataCodes[i + 1];
+                // Fetch airport data and continue as before, but now pass the color to createRoutePath
+                try {
+                    const originAirportData = await flightMap.getAirportDataByIata(originIata);
+                    const destinationAirportData = await flightMap.getAirportDataByIata(destinationIata);
+                    if (!originAirportData || !destinationAirportData) continue;
+    
+                    pathDrawing.createRoutePath(originAirportData, destinationAirportData, {
+                        originAirport: originAirportData,
+                        destinationAirport: destinationAirportData,
+                        price: price, // Pass the parsed numeric price
+                    }, color, true); // Pass the determined color
+                } catch (error) {
+                    console.error('Error fetching airport data for segment:', error);
                 }
-        
-                // Parse the price as a float and remove the dollar sign before passing it
-                const numericPrice = parseFloat(price.replace('$', ''));
-
-                console.log('drawing route path for', originAirportData, destinationAirportData);
-        
-                pathDrawing.createRoutePath(originAirportData, destinationAirportData, {
-                    originAirport: originAirportData,
-                    destinationAirport: destinationAirportData,
-                    price: numericPrice, // Pass the parsed numeric price
-                }, null, true);
-            } catch (error) {
-                console.error('Error fetching airport data for segment:', error);
             }
         }
-        
-        }
-      }
+    }    
 };
 
 export { pathDrawing };
