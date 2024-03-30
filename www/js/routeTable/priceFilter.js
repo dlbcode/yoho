@@ -12,8 +12,13 @@ function createSliderPopup() {
   const slider = document.getElementById('priceSlider');
   const valueDisplay = document.getElementById('sliderValueDisplay');
 
+  // Update the displayed price in real-time as the slider moves
   slider.addEventListener('input', function() {
     valueDisplay.textContent = `$${this.value}`;
+  });
+
+  // Perform the filtering and map updates when the slider is released
+  slider.addEventListener('change', function() {
     filterTableByPrice(this.value);
   });
 
