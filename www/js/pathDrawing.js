@@ -273,7 +273,7 @@ const pathDrawing = {
                     map.removeLayer(line);
                 }
             });
-            console.log('Clearing invisibleRouteLines', this.invisiblerouteLines);
+            console.log('Clearing invisibleRouteLines', this.invisibleRouteLines);
             this.invisibleRouteLines.forEach(invisibleLine => {
                 if (map.hasLayer(invisibleLine)) {
                     map.removeLayer(invisibleLine);
