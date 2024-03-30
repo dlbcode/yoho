@@ -73,14 +73,14 @@ const pathDrawing = {
         return L.latLng(latLng.lat, newLng);
     },
     
-    createRoutePath(origin, destination, route, lineColor = 'grey', forTable = false) {
+    createRoutePath(origin, destination, route, lineColor = 'grey', routeLineId) {
         if (!route || !route.originAirport || !route.destinationAirport || 
             typeof route.originAirport.iata_code === 'undefined' || 
             typeof route.destinationAirport.iata_code === 'undefined') {
             console.error('Invalid route data:', route);
             return route; // Return route data early in case of error
         }
-
+    
         this.routeLines = this.routeLines || [];
         let routeId = `${route.originAirport.iata_code}-${route.destinationAirport.iata_code}`;
         let newPaths = [];
@@ -105,7 +105,7 @@ const pathDrawing = {
                     wrap: false,
                     zIndex: -1
                 }).addTo(map);
-                geodesicLine.forTable = forTable; // Set the forTable flag
+                geodesicLine.routeLineId = routeLineId;
     
                 // Create an invisible, wider line for hover interactions
                 var invisibleLine = new L.Geodesic([adjustedOrigin, adjustedDestination], {
@@ -113,7 +113,7 @@ const pathDrawing = {
                     opacity: .2, // Make the line invisible
                     wrap: false
                 }).addTo(map);
-                invisibleLine.forTable = forTable; 
+                invisibleLine.routeLineId = routeLineId;
 
                 // Function to handle mouseover event
                 const onMouseOver = (e) => {
@@ -145,7 +145,7 @@ const pathDrawing = {
                 invisibleLine.on('mouseout', onMouseOut);
                 invisibleLine.on('click', onClick);
 
-            if (forTable) {
+            if (routeLineId) {
                 // If forTable is true, add to routeLines instead of invisibleLines
                 this.routeLines.push(geodesicLine);
                 this.invisibleRouteLines.push(invisibleLine);
@@ -315,10 +315,10 @@ const pathDrawing = {
             return 'red';
         };
     
-        // Then, draw the route lines with the determined color
         for (const row of rows) {
             if (row.style.display === 'none') continue;
     
+            const routeLineId = row.getAttribute('data-route-id'); // Get the routeLineId from the row
             const routeString = row.cells[row.cells.length - 1].textContent.trim();
             const iataCodes = routeString.split(' > ');
             if (iataCodes.length < 2) continue;
@@ -330,17 +330,18 @@ const pathDrawing = {
             for (let i = 0; i < iataCodes.length - 1; i++) {
                 const originIata = iataCodes[i];
                 const destinationIata = iataCodes[i + 1];
-                // Fetch airport data and continue as before, but now pass the color to createRoutePath
+    
                 try {
                     const originAirportData = await flightMap.getAirportDataByIata(originIata);
                     const destinationAirportData = await flightMap.getAirportDataByIata(destinationIata);
                     if (!originAirportData || !destinationAirportData) continue;
     
+                    // Pass the routeLineId to createRoutePath
                     pathDrawing.createRoutePath(originAirportData, destinationAirportData, {
                         originAirport: originAirportData,
                         destinationAirport: destinationAirportData,
                         price: price, // Pass the parsed numeric price
-                    }, color, true); // Pass the determined color
+                    }, color, routeLineId); // Pass the determined color and routeLineId
                 } catch (error) {
                     console.error('Error fetching airport data for segment:', error);
                 }

@@ -73,15 +73,25 @@ function filterTableByPrice(threshold) {
   const rows = table.querySelectorAll('tbody tr');
   rows.forEach(row => {
     const price = parseFloat(row.cells[2].textContent.replace('$', ''));
-    row.style.display = price > threshold ? 'none' : '';
-  });
+    const isVisible = price <= threshold;
+    row.style.display = isVisible ? '' : 'none';
 
-  // Clear existing route lines
-  console.log('Clearing existing route lines');
-  pathDrawing.clearLines(true);
-  // Redraw route lines based on the updated table contents
-  console.log('Redrawing route lines');
-  pathDrawing.drawRouteLines();
+    // Assuming a mechanism to map rows to route lines, e.g., via data attributes
+    const routeLineId = row.getAttribute('data-route-id');
+    if (routeLineId && pathDrawing.routePathCache[routeLineId]) {
+      pathDrawing.routePathCache[routeLineId].forEach(line => {
+        if (isVisible) {
+          if (!map.hasLayer(line)) {
+            line.addTo(map);
+          }
+        } else {
+          if (map.hasLayer(line)) {
+            map.removeLayer(line);
+          }
+        }
+      });
+    }
+  });
 }
 
 export { showPriceFilterPopup };
