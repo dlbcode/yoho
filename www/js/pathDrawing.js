@@ -140,10 +140,12 @@ const pathDrawing = {
                 // Attach event handlers to both visible and invisible lines
                 geodesicLine.on('mouseover', onMouseOver);
                 geodesicLine.on('mouseout', onMouseOut);
-                geodesicLine.on('click', onClick);
                 invisibleLine.on('mouseover', onMouseOver);
                 invisibleLine.on('mouseout', onMouseOut);
-                invisibleLine.on('click', onClick);
+                if (!routeLineId) {
+                    geodesicLine.on('click', onClick);
+                    invisibleLine.on('click', onClick);
+                }
 
             if (routeLineId) {
                 appState.routeLines.push(geodesicLine);
