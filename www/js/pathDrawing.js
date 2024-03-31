@@ -110,7 +110,7 @@ const pathDrawing = {
                 // Create an invisible, wider line for hover interactions
                 var invisibleLine = new L.Geodesic([adjustedOrigin, adjustedDestination], {
                     weight: 10, // Wider line for easier hovering
-                    opacity: .2, // Make the line invisible
+                    opacity: 0, // Make the line invisible
                     wrap: false
                 }).addTo(map);
                 invisibleLine.routeLineId = routeLineId;
@@ -165,7 +165,7 @@ const pathDrawing = {
     if (route.isDirect && routeExists) {
         newPaths.forEach(path => {
             let decoratedLine = this.addDecoratedLine(path, route);
-            if (forTable) {
+            if (routeLineId) {
                 this.routeLines.push(decoratedLine);
             } else {
                 this.currentLines.push(decoratedLine);
