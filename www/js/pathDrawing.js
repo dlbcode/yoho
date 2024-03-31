@@ -146,12 +146,8 @@ const pathDrawing = {
                 invisibleLine.on('click', onClick);
 
             if (routeLineId) {
-                // If forTable is true, add to routeLines instead of invisibleLines
-                this.routeLines.push(geodesicLine);
-                this.invisibleRouteLines.push(invisibleLine);
-            } else {
-                newPaths.push(geodesicLine);
-                this.invisibleLines.push(invisibleLine); // Continue tracking the invisible line as before
+                appState.routeLines.push(geodesicLine);
+                appState.invisibleRouteLines.push(invisibleLine);
             }
         });
         this.routePathCache[routeId] = newPaths;
@@ -166,7 +162,6 @@ const pathDrawing = {
     if (route.isDirect && routeExists) {
         newPaths.forEach(path => {
             let decoratedLine = this.addDecoratedLine(path, route);
-            // Decide where to add the decorated line based on forTable flag
             if (forTable) {
                 this.routeLines.push(decoratedLine);
             } else {
@@ -174,8 +169,8 @@ const pathDrawing = {
             }
         });
     }
-    console.log('routeLines', this.routeLines);
-    console.log('invisibleLines', this.invisibleLines);
+    console.log('routeLines', appState.routeLines);
+    console.log('invisibleLines', appState.invisibleRouteLines);
 },
     
     addDecoratedLine(geodesicLine, route) {

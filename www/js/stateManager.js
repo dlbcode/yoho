@@ -21,6 +21,8 @@ const appState = {
     routeDates: {
         0: new Date().toISOString().split('T')[0],
     },
+    routeLines: [],
+    invisibleRouteLines: [],
 };
   
 function updateState(key, value) {

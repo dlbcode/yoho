@@ -72,30 +72,35 @@ function filterTableByPrice(threshold) {
   const table = document.querySelector('.route-info-table');
   const rows = table.querySelectorAll('tbody tr');
 
-  // Make all lines invisible and non-interactive
+  // Reset visibility for all lines
   map.eachLayer(layer => {
     if (layer.routeLineId) {
-      layer.setStyle({opacity: 0, fillOpacity: 0}); // Hide the layer
-      // Disable pointer events for the layer's DOM element
+      // Assume all lines start as non-interactive and hidden
+      layer.setStyle({opacity: 0, fillOpacity: 0});
       if (layer._path) {
         layer._path.style.pointerEvents = 'none';
       }
     }
   });
 
-  // For lines that match the filter criteria, make them visible and interactive
+  // Adjust visibility based on the filter
   rows.forEach(row => {
     const price = parseFloat(row.cells[2].textContent.replace('$', ''));
     const isVisible = price <= threshold;
     row.style.display = isVisible ? '' : 'none';
 
-    if (isVisible) {
-      const routeLineId = row.getAttribute('data-route-id');
+    const routeLineId = row.getAttribute('data-route-id');
+    if (isVisible && routeLineId) {
       map.eachLayer(layer => {
         if (layer.routeLineId === routeLineId) {
-          layer.setStyle({opacity: 1, fillOpacity: 1}); // Show the layer
-          // Re-enable pointer events for the layer's DOM element
-          if (layer._path) {
+          // Check if the layer is an invisibleRouteLine by its opacity
+          if (layer.options.opacity === 0.2) {
+            // Set invisibleRouteLines to their designated opacity and make interactive
+            layer.setStyle({opacity: 0.2, fillOpacity: 0.2});
+            layer._path.style.pointerEvents = '';
+          } else {
+            // Set routeLines to full visibility and make interactive
+            layer.setStyle({opacity: 1, fillOpacity: 1});
             layer._path.style.pointerEvents = '';
           }
         }
