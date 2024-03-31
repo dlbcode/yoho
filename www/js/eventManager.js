@@ -25,9 +25,12 @@ function handleStateChange(event) {
         routeHandling.updateRoutesArray();
     }
 
-    //if (key === 'routeAdded') {
-    //    routeHandling.buildRouteDivs(value.newRoute);
-    //}
+    if (key === 'changeView') {
+        console.log('changed view to'+ value);
+        if (value != 'routeTable') {
+            pathDrawing.clearLines(true);
+        }
+    }
 
     if (key === 'clearData') {
         const container = document.querySelector('.airport-selection');
