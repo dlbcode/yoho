@@ -131,21 +131,25 @@ const pathDrawing = {
                     map.closePopup();
                 };
 
-                // Function to handle click event
                 const onClick = () => {
                     updateState('addWaypoint', destination);
                     map.closePopup();
                 };
 
-                // Attach event handlers to both visible and invisible lines
-                geodesicLine.on('mouseover', onMouseOver);
-                geodesicLine.on('mouseout', onMouseOut);
-                invisibleLine.on('mouseover', onMouseOver);
-                invisibleLine.on('mouseout', onMouseOut);
-                if (!routeLineId) {
-                    geodesicLine.on('click', onClick);
-                    invisibleLine.on('click', onClick);
-                }
+                const onRouteLineClick = () => {
+                    console.log('clicked routeLineId: ', routeLineId);
+                    document.querySelectorAll('.route-info-table tbody tr').forEach(row => {
+                        row.classList.toggle('selected', row.dataset.routeId === routeLineId);
+                    });
+                    updateState('removeRouteLine', routeLineId);
+                };
+
+                // Attach common event handlers to both lines
+                [geodesicLine, invisibleLine].forEach(line => {
+                    line.on('mouseover', onMouseOver).on('mouseout', onMouseOut);
+                    // Attach the appropriate click handler based on routeLineId
+                    line.on('click', routeLineId ? onRouteLineClick : onClick);
+                });
 
             if (routeLineId) {
                 appState.routeLines.push(geodesicLine);
