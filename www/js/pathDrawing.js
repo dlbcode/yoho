@@ -73,7 +73,7 @@ const pathDrawing = {
         return L.latLng(latLng.lat, newLng);
     },
     
-    createRoutePath(origin, destination, route, lineColor = 'grey', routeLineId) {
+    createRoutePath(origin, destination, route, lineColor = null, routeLineId) {
         if (!route || !route.originAirport || !route.destinationAirport || 
             typeof route.originAirport.iata_code === 'undefined' || 
             typeof route.destinationAirport.iata_code === 'undefined') {
