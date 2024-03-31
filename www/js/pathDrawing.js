@@ -171,8 +171,6 @@ const pathDrawing = {
             }
         });
     }
-    console.log('routeLines', appState.routeLines);
-    console.log('invisibleLines', appState.invisibleRouteLines);
 },
     
     addDecoratedLine(geodesicLine, route) {
@@ -270,7 +268,6 @@ const pathDrawing = {
                     map.removeLayer(line);
                 }
             });
-            console.log('Clearing invisibleRouteLines', this.invisibleRouteLines);
             appState.invisibleRouteLines.forEach(invisibleLine => {
                 if (map.hasLayer(invisibleLine)) {
                     map.removeLayer(invisibleLine);
