@@ -133,7 +133,7 @@ function updateState(key, value) {
     //console.log('appState update key and value: ', key, value);
     //console.log('appState.routes: ', appState.routes);
     //console.log('appState.routeDates:', appState.routeDates);
-    console.log('appState.selectedRoutes: ', appState.selectedRoutes);
+    //console.log('appState.selectedRoutes: ', appState.selectedRoutes);
     //console.log('appState.waypoints:', appState.waypoints);
 }
   

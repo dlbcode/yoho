@@ -102,7 +102,7 @@ const pathDrawing = {
             typeof routeData.originAirport.iata_code === 'undefined' || 
             typeof routeData.destinationAirport.iata_code === 'undefined') {
             console.error('Invalid route data:', routeData);
-            return; // Exit early in case of invalid data
+            return;
         }
     
         // Use the routeId for caching and checking existing paths

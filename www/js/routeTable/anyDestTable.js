@@ -44,7 +44,7 @@ function buildAnyDestTable(routeIndex, origin, dateRange) {
 
   let apiUrl = `https://yonderhop.com/api/cheapestFlights?origin=${origin}&date_from=${fromDate}&date_to=${toDate}&price_to=${maxPrice}`;
 
-  console.log('apiUrl: ', apiUrl);
+  //console.log('apiUrl: ', apiUrl);
 
   fetch(apiUrl)
     .then(response => {
