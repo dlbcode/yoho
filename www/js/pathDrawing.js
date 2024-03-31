@@ -106,6 +106,7 @@ const pathDrawing = {
         }
     
         // Use the routeId for caching and checking existing paths
+        this.routeLines = this.routeLines || [];
         let routeId = `${routeData.originAirport.iata_code}-${routeData.destinationAirport.iata_code}`;
         let newPaths = [];
     
@@ -144,10 +145,6 @@ const pathDrawing = {
                     wrap: false
                 }).addTo(map);
                 invisibleLine.routeLineId = routeLineId;
-    
-                // Add new paths to cache
-                newPaths.push(geodesicLine);
-                this.routePathCache[routeId] = newPaths;
 
                 const onMouseOver = (e) => {
                     geodesicLine.originalColor = geodesicLine.options.color;``
