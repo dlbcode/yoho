@@ -139,7 +139,16 @@ const pathDrawing = {
                 const onRouteLineClick = () => {
                     console.log('clicked routeLineId: ', routeLineId);
                     document.querySelectorAll('.route-info-table tbody tr').forEach(row => {
-                        row.classList.toggle('selected', row.dataset.routeId === routeLineId);
+                        const isMatchingRow = row.dataset.routeId === routeLineId;
+                        row.classList.toggle('selected', isMatchingRow);
+                
+                        if (isMatchingRow) {
+                            row.scrollIntoView({
+                                behavior: 'smooth', // Smooth scroll
+                                block: 'nearest',   // Vertical alignment; 'nearest' for minimal scrolling
+                                inline: 'start'     // Horizontal alignment
+                            });
+                        }
                     });
                     updateState('removeRouteLine', routeLineId);
                 };
