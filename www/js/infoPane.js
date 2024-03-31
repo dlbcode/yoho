@@ -78,6 +78,7 @@ const infoPane = {
         button.textContent = buttonText;
 
         button.onclick = () => {
+          pathDrawing.clearLines();
             appState.currentRouteIndex = routeIndex;
             if (appState.selectedRoutes.hasOwnProperty(routeIndex)) {
                 appState.currentView = 'selectedRoute';
