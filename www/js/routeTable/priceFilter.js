@@ -1,4 +1,5 @@
 import { map } from "../map.js";
+import { appState } from '../stateManager.js';
 
 function createSliderPopup() {
   const sliderPopup = document.createElement('div');
@@ -72,16 +73,8 @@ function filterTableByPrice(threshold) {
   const table = document.querySelector('.route-info-table');
   const rows = table.querySelectorAll('tbody tr');
 
-  // Reset visibility for all lines
-  map.eachLayer(layer => {
-    if (layer.routeLineId) {
-      // Assume all lines start as non-interactive and hidden
-      layer.setStyle({opacity: 0, fillOpacity: 0});
-      if (layer._path) {
-        layer._path.style.pointerEvents = 'none';
-      }
-    }
-  });
+  // First, reset visibility for all lines to ensure a clean state
+  resetLineVisibility();
 
   // Adjust visibility based on the filter
   rows.forEach(row => {
@@ -89,23 +82,35 @@ function filterTableByPrice(threshold) {
     const isVisible = price <= threshold;
     row.style.display = isVisible ? '' : 'none';
 
-    const routeLineId = row.getAttribute('data-route-id');
-    if (isVisible && routeLineId) {
-      map.eachLayer(layer => {
-        if (layer.routeLineId === routeLineId) {
-          // Check if the layer is an invisibleRouteLine by its opacity
-          if (layer.options.opacity === 0.2) {
-            // Set invisibleRouteLines to their designated opacity and make interactive
-            layer.setStyle({opacity: 0.2, fillOpacity: 0.2});
-            layer._path.style.pointerEvents = '';
-          } else {
-            // Set routeLines to full visibility and make interactive
-            layer.setStyle({opacity: 1, fillOpacity: 1});
-            layer._path.style.pointerEvents = '';
-          }
+    if (isVisible) {
+      const routeLineId = row.getAttribute('data-route-id');
+      // Make routeLines fully visible
+      appState.routeLines.forEach(line => {
+        if (line.routeLineId === routeLineId) {
+          line.setStyle({opacity: 1, fillOpacity: 1});
+          line._path.style.pointerEvents = '';
+        }
+      });
+      // Adjust invisibleRouteLines opacity
+      appState.invisibleRouteLines.forEach(line => {
+        if (line.routeLineId === routeLineId) {
+          line.setStyle({opacity: 0.0, fillOpacity: 0.0});
+          line._path.style.pointerEvents = '';
         }
       });
     }
+  });
+}
+
+// Helper function to reset line visibility
+function resetLineVisibility() {
+  appState.routeLines.forEach(line => {
+    line.setStyle({opacity: 0, fillOpacity: 0});
+    line._path.style.pointerEvents = 'none';
+  });
+  appState.invisibleRouteLines.forEach(line => {
+    line.setStyle({opacity: 0, fillOpacity: 0});
+    line._path.style.pointerEvents = 'none';
   });
 }
 
