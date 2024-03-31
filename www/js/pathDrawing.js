@@ -74,17 +74,42 @@ const pathDrawing = {
     },
     
     createRoutePath(origin, destination, route, lineColor = null, routeLineId) {
-        if (!route || !route.originAirport || !route.destinationAirport || 
-            typeof route.originAirport.iata_code === 'undefined' || 
-            typeof route.destinationAirport.iata_code === 'undefined') {
-            console.error('Invalid route data:', route);
-            return route; // Return route data early in case of error
+        let routeData = route;
+    
+        // Convert appState.selectedRoutes to an array if it's in object form
+        let selectedRoutesArray = Array.isArray(appState.selectedRoutes) 
+            ? appState.selectedRoutes 
+            : Object.values(appState.selectedRoutes);
+    
+        // Find a matching selectedRoute based on IATA codes
+        const selectedRoute = selectedRoutesArray.find(sr => 
+            sr.fullData.flyFrom === route.originAirport.iata_code && 
+            sr.fullData.flyTo === route.destinationAirport.iata_code
+        );
+    
+        // If a selectedRoute is found, override the routeData with selectedRoute data
+        if (selectedRoute) {
+            routeData = {
+                ...route,
+                originAirport: { iata_code: selectedRoute.fullData.flyFrom, ...route.originAirport },
+                destinationAirport: { iata_code: selectedRoute.fullData.flyTo, ...route.destinationAirport },
+                price: parseFloat(selectedRoute.displayData.price.replace('$', '')) // Convert price to number
+            };
         }
     
-        this.routeLines = this.routeLines || [];
-        let routeId = `${route.originAirport.iata_code}-${route.destinationAirport.iata_code}`;
+        // Ensure valid route data is present
+        if (!routeData || !routeData.originAirport || !routeData.destinationAirport || 
+            typeof routeData.originAirport.iata_code === 'undefined' || 
+            typeof routeData.destinationAirport.iata_code === 'undefined') {
+            console.error('Invalid route data:', routeData);
+            return; // Exit early in case of invalid data
+        }
+    
+        // Use the routeId for caching and checking existing paths
+        let routeId = `${routeData.originAirport.iata_code}-${routeData.destinationAirport.iata_code}`;
         let newPaths = [];
     
+        // Check cache before drawing new paths
         if (this.routePathCache[routeId]) {
             this.routePathCache[routeId].forEach(path => {
                 if (!map.hasLayer(path)) {
@@ -93,20 +118,24 @@ const pathDrawing = {
                 newPaths.push(path);
             });
         } else {
+            // Draw new paths if not cached
             const worldCopies = [-720, -360, 0, 360, 720];
             worldCopies.forEach(offset => {
                 const adjustedOrigin = L.latLng(origin.latitude, origin.longitude + offset);
                 const adjustedDestination = L.latLng(destination.latitude, destination.longitude + offset);
     
+                // Determine line color based on price, using selectedRoute data if available
+                const determinedLineColor = lineColor || this.getColorBasedOnPrice(routeData.price);
+    
                 var geodesicLine = new L.Geodesic([adjustedOrigin, adjustedDestination], {
                     weight: 1,
                     opacity: 1,
-                    color: lineColor || this.getColorBasedOnPrice(route.price),
+                    color: determinedLineColor,
                     wrap: false,
                     zIndex: -1
                 }).addTo(map);
                 geodesicLine.routeLineId = routeLineId;
-                geodesicLine.originalColor = lineColor || this.getColorBasedOnPrice(route.price);
+                geodesicLine.originalColor = determinedLineColor;
     
                 // Create an invisible, wider line for hover interactions
                 var invisibleLine = new L.Geodesic([adjustedOrigin, adjustedDestination], {
@@ -115,6 +144,10 @@ const pathDrawing = {
                     wrap: false
                 }).addTo(map);
                 invisibleLine.routeLineId = routeLineId;
+    
+                // Add new paths to cache
+                newPaths.push(geodesicLine);
+                this.routePathCache[routeId] = newPaths;
 
                 const onMouseOver = (e) => {
                     geodesicLine.originalColor = geodesicLine.options.color;
@@ -159,34 +192,34 @@ const pathDrawing = {
                     line.on('click', routeLineId ? onRouteLineClick : onClick);
                 });
 
-            if (routeLineId) {
-                appState.routeLines.push(geodesicLine);
-                appState.invisibleRouteLines.push(invisibleLine);
-            } else {
-                newPaths.push(geodesicLine);
-                this.invisibleLines.push(invisibleLine);
-            }
-        });
-        this.routePathCache[routeId] = newPaths;
-    }
+                if (routeLineId) {
+                    appState.routeLines.push(geodesicLine);
+                    appState.invisibleRouteLines.push(invisibleLine);
+                } else {
+                    newPaths.push(geodesicLine);
+                    this.invisibleLines.push(invisibleLine);
+                }
+            });
+            this.routePathCache[routeId] = newPaths;
+        }
 
-    // Direct route and existence check logic remains unchanged
-    const routeExists = appState.routes.some(r => 
-        r.origin === route.originAirport.iata_code &&
-        r.destination === route.destinationAirport.iata_code
-    );
+        // Direct route and existence check logic remains unchanged
+        const routeExists = appState.routes.some(r => 
+            r.origin === route.originAirport.iata_code &&
+            r.destination === route.destinationAirport.iata_code
+        );
 
-    if (route.isDirect && routeExists) {
-        newPaths.forEach(path => {
-            let decoratedLine = this.addDecoratedLine(path, route);
-            if (routeLineId) {
-                this.routeLines.push(decoratedLine);
-            } else {
-                this.currentLines.push(decoratedLine);
-            }
-        });
-    }
-},
+        if (route.isDirect && routeExists) {
+            newPaths.forEach(path => {
+                let decoratedLine = this.addDecoratedLine(path, route);
+                if (routeLineId) {
+                    this.routeLines.push(decoratedLine);
+                } else {
+                    this.currentLines.push(decoratedLine);
+                }
+            });
+        }
+    },
     
     addDecoratedLine(geodesicLine, route) {
         var planeIcon = L.icon({
