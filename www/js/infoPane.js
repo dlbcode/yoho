@@ -121,29 +121,28 @@ const infoPane = {
         uiHandling.attachDateTooltip(button, routeIndex);
 
         button.addEventListener('mouseover', () => {
-          // Use origin and destination variables to construct routeId
           const routeId = `${origin}-${destination}`;
           const pathLines = pathDrawing.routePathCache[routeId] || pathDrawing.dashedRoutePathCache[routeId] || [];
           pathLines.forEach(path => path.setStyle({ color: 'white' }));
       });
       
       button.addEventListener('mouseout', () => {
-        const route = appState.routes[appState.currentRouteIndex];
         const routeId = `${origin}-${destination}`;
         let pathLines = pathDrawing.routePathCache[routeId] || [];
         let dashedPathLines = pathDrawing.dashedRoutePathCache[routeId] || [];
-    
-        // Handle dashed path lines separately
+
         dashedPathLines.forEach(path => {
             path.setStyle({ color: '#999' });
         });
-    
-        // Now handle the regular path lines
+
         pathLines.forEach(path => {
-            const originalColor = pathDrawing.getColorBasedOnPrice(route.price);
-            path.setStyle({ color: originalColor });
+            if (path.originalColor) {
+                path.setStyle({ color: path.originalColor });
+            } else {
+                path.setStyle({ color: 'grey' });
+            }
         });
-      });    
+    });            
     });
   },
 

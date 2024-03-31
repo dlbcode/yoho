@@ -106,6 +106,7 @@ const pathDrawing = {
                     zIndex: -1
                 }).addTo(map);
                 geodesicLine.routeLineId = routeLineId;
+                geodesicLine.originalColor = lineColor || this.getColorBasedOnPrice(route.price);
     
                 // Create an invisible, wider line for hover interactions
                 var invisibleLine = new L.Geodesic([adjustedOrigin, adjustedDestination], {
