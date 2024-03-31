@@ -105,7 +105,6 @@ const pathDrawing = {
                     wrap: false,
                     zIndex: -1
                 }).addTo(map);
-                geodesicLine.originalColor = geodesicLine.options.color;
                 geodesicLine.routeLineId = routeLineId;
     
                 // Create an invisible, wider line for hover interactions
@@ -117,7 +116,9 @@ const pathDrawing = {
                 invisibleLine.routeLineId = routeLineId;
 
                 const onMouseOver = (e) => {
-                    geodesicLine.setStyle({ color: 'white' }); // Temporarily change color to white on mouseover
+                    geodesicLine.originalColor = geodesicLine.options.color;
+                    geodesicLine.setStyle({ color: 'white' });
+                    route.price = Math.round(route.price);
                     L.popup()
                         .setLatLng(e.latlng)
                         .setContent(`${destination.city}<br><strong><span style="color: #ccc; font-size: 14px">$${route.price}</span></strong>`)

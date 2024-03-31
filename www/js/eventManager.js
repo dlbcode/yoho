@@ -102,6 +102,7 @@ const eventManager = {
                 mapHandling.updateMarkerIcons();
                 routeHandling.updateRoutesArray();
                 uiHandling.toggleTripButtonsVisibility(false);
+                appState.currentView = 'trip';
             }            
         });
     },

@@ -129,11 +129,17 @@ const infoPane = {
       button.addEventListener('mouseout', () => {
           const route = appState.routes[appState.currentRouteIndex];
           const routeId = `${origin}-${destination}`;
-          const pathLines = pathDrawing.routePathCache[routeId] || pathDrawing.dashedRoutePathCache[routeId] || [];
-          pathLines.forEach(path => {
-              const originalColor = pathDrawing.getColorBasedOnPrice(route.price);
-              path.setStyle({ color: originalColor });
-          });
+          let pathLines = pathDrawing.routePathCache[routeId] || pathDrawing.dashedRoutePathCache[routeId] || [];
+          if (pathLines = pathDrawing.dashedRoutePathCache[routeId]) {
+            pathLines.forEach(path => {
+                path.setStyle({ color: '#999' });
+            });
+          } else {
+            pathLines.forEach(path => {
+                const originalColor = pathDrawing.getColorBasedOnPrice(route.price);
+                path.setStyle({ color: path.originalColor });
+            });
+          }
       });
     });
   },
