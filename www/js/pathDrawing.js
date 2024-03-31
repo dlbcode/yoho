@@ -148,6 +148,9 @@ const pathDrawing = {
             if (routeLineId) {
                 appState.routeLines.push(geodesicLine);
                 appState.invisibleRouteLines.push(invisibleLine);
+            } else {
+                newPaths.push(geodesicLine);
+                this.invisibleLines.push(invisibleLine);
             }
         });
         this.routePathCache[routeId] = newPaths;
