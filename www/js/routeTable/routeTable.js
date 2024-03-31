@@ -6,8 +6,6 @@ import { buildAnyDestTable } from './anyDestTable.js'; // Import the buildAnyOri
 
 function buildRouteTable(routeIndex) {
   const dateRange = appState.routeDates[routeIndex];
-  console.log('buildRouteTable Route Index: ', routeIndex);
-  console.log('buildRouteTable Route: ', appState.routes[routeIndex]);
 
   let origin, destination;
 
@@ -18,8 +16,6 @@ function buildRouteTable(routeIndex) {
       origin = appState.waypoints[routeIndex * 2]?.iata_code;
       destination = appState.waypoints[(routeIndex * 2) + 1]?.iata_code || 'Any';
   }
-
-  console.log('buildRouteTable anyDest from: ', origin);
 
   if (destination === 'Any') {
     // if origin is 'Any', it means the user wants to search for flights from any origin

@@ -137,7 +137,6 @@ const pathDrawing = {
                 };
 
                 const onRouteLineClick = () => {
-                    console.log('clicked routeLineId: ', routeLineId);
                     document.querySelectorAll('.route-info-table tbody tr').forEach(row => {
                         const isMatchingRow = row.dataset.routeId === routeLineId;
                         row.classList.toggle('selected', isMatchingRow);

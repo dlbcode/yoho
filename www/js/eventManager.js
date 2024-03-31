@@ -26,7 +26,6 @@ function handleStateChange(event) {
     }
 
     if (key === 'changeView') {
-        console.log('changed view to'+ value);
         if (value != 'routeTable') {
             pathDrawing.clearLines(true);
         }
