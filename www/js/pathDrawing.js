@@ -150,12 +150,12 @@ const pathDrawing = {
                 this.routePathCache[routeId] = newPaths;
 
                 const onMouseOver = (e) => {
-                    geodesicLine.originalColor = geodesicLine.options.color;
+                    geodesicLine.originalColor = geodesicLine.options.color;``
                     geodesicLine.setStyle({ color: 'white' });
-                    route.price = Math.round(route.price);
+                    let displayPrice = Math.round(routeData.price); // Ensure routeData is used
                     L.popup()
                         .setLatLng(e.latlng)
-                        .setContent(`${destination.city}<br><strong><span style="color: #ccc; font-size: 14px">$${route.price}</span></strong>`)
+                        .setContent(`${destination.city}<br><strong><span style="color: #ccc; font-size: 14px">$${displayPrice}</span></strong>`)
                         .openOn(map);
                 };
 
