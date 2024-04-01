@@ -188,13 +188,11 @@ const routeHandling = {
         let firstInput = routeDiv.querySelector('input[type="text"]');
         routeDiv.insertBefore(swapButton, firstInput.nextSibling);
 
-        if (routeNumber > 0) {
-            let minusButton = document.createElement('button');
-            minusButton.textContent = '-';
-            minusButton.className = 'remove-route-button';
-            minusButton.onclick = () => this.removeRouteDiv(routeNumber);
-            routeDiv.appendChild(minusButton);
-        }
+        let minusButton = document.createElement('button');
+        minusButton.textContent = '-';
+        minusButton.className = 'remove-route-button';
+        minusButton.onclick = () => this.removeRouteDiv(routeNumber);
+        routeDiv.appendChild(minusButton);
 
         routeDiv.addEventListener('mouseover', () => {
             const routeId = this.getRouteIdFromDiv(routeDiv);

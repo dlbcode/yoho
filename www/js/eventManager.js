@@ -23,6 +23,7 @@ function handleStateChange(event) {
 
         mapHandling.updateMarkerIcons();
         routeHandling.updateRoutesArray();
+        appState.currentView = 'trip';
     }
 
     if (key === 'changeView') {
