@@ -39,8 +39,6 @@ const pathDrawing = {
                 return;
             }
 
-            console.log('calling createRoutePath with:', originAirportData, destinationAirportData);
-    
             this.createRoutePath(originAirportData, destinationAirportData, {
                 originAirport: originAirportData,
                 destinationAirport: destinationAirportData,
