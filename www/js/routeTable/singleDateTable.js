@@ -197,6 +197,7 @@ function buildSingleDateTable(routeIndex) {
     
       document.querySelectorAll('.route-info-table tbody tr').forEach(row => {
         row.addEventListener('mouseover', function() {
+          pathDrawing.clearLines();
           const routeString = this.cells[8].textContent.trim();
           const iataCodes = routeString.split(' > ');
     

@@ -38,6 +38,8 @@ const pathDrawing = {
                 console.error('Airport data not found for one or both IATAs:', originIata, destinationIata);
                 return;
             }
+
+            console.log('calling createRoutePath with:', originAirportData, destinationAirportData);
     
             this.createRoutePath(originAirportData, destinationAirportData, {
                 originAirport: originAirportData,
@@ -135,6 +137,7 @@ const pathDrawing = {
                     wrap: false,
                     zIndex: -1
                 }).addTo(map);
+                geodesicLine.routeId = routeId;
                 geodesicLine.routeLineId = routeLineId;
                 geodesicLine.originalColor = determinedLineColor;
     
@@ -206,7 +209,9 @@ const pathDrawing = {
             r.destination === route.destinationAirport.iata_code
         );
 
-        if (route.isDirect && routeExists) {
+        const routeLineExists = appState.routeLines.some(r => r.routeId === routeId);
+
+        if (routeExists || routeLineExists) {
             newPaths.forEach(path => {
                 let decoratedLine = this.addDecoratedLine(path, route);
                 if (routeLineId) {
