@@ -223,7 +223,7 @@ function buildAnyDestTable(routeIndex, origin, dateRange) {
                 routeDates: departureDate,
             };
           });
-          updateState('updateRouteDate: ', routeIndex, departureDate);
+          updateState('updateRouteDate: ', routeIndex);
           updateState('changeView', 'selectedRoute');
           highlightSelectedRowForRouteIndex(routeIndex);
       });
