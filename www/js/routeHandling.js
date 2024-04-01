@@ -290,7 +290,7 @@ const routeHandling = {
         appState.routeDates = newRouteDates;
         
         // Additional logic to update the UI and application state as needed
-        pathDrawing.clearLines();
+        pathDrawing.clearLines(true);
         pathDrawing.drawLines();
         mapHandling.updateMarkerIcons();
         routeList.updateEstPrice();
@@ -388,7 +388,7 @@ const routeHandling = {
         }
 
         updateState('updateRoutes', newRoutes);
-        pathDrawing.clearLines();
+        pathDrawing.clearLines(true);
         pathDrawing.drawLines();
         routeList.updateEstPrice();
         document.dispatchEvent(new CustomEvent('routesArrayUpdated'));

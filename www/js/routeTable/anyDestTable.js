@@ -44,8 +44,6 @@ function buildAnyDestTable(routeIndex, origin, dateRange) {
 
   let apiUrl = `https://yonderhop.com/api/cheapestFlights?origin=${origin}&date_from=${fromDate}&date_to=${toDate}&price_to=${maxPrice}`;
 
-  //console.log('apiUrl: ', apiUrl);
-
   fetch(apiUrl)
     .then(response => {
       if (!response.ok) {
@@ -58,7 +56,7 @@ function buildAnyDestTable(routeIndex, origin, dateRange) {
       table.className = 'route-info-table';
       table.style.width = '100%';
       table.setAttribute('data-route-index', routeIndex, 'border', '1');
-  
+
       const thead = document.createElement('thead');
       let headerRow = `<tr>
                         <th>Departure <span class="sortIcon" data-column="departure">&#x21C5;</span><img class="filterIcon" data-column="departure" src="/assets/filter-icon.svg" alt="Filter"></th>
@@ -73,10 +71,9 @@ function buildAnyDestTable(routeIndex, origin, dateRange) {
                       </tr>`;
       thead.innerHTML = headerRow;
       table.appendChild(thead);
-  
+
       const tbody = document.createElement('tbody');
-  
-      // Ensure data.data is an array before proceeding
+
       if (Array.isArray(data.data)) {
         data.data.forEach(flight => {
           let row = document.createElement('tr');
@@ -87,16 +84,15 @@ function buildAnyDestTable(routeIndex, origin, dateRange) {
           const durationHours = Math.floor(flight.duration.total / 3600);
           const durationMinutes = Math.floor((flight.duration.total % 3600) / 60);
           const routeIATAs = flight.route.map(r => r.flyFrom).concat(flight.route[flight.route.length - 1].flyTo).join(" > ");
-      
-          // Format departure and arrival dates to include the short day name
+
           const departureDate = new Date(flight.dTime * 1000);
           const arrivalDate = new Date(flight.aTime * 1000);
           const departureDayName = departureDate.toLocaleDateString('en-US', { weekday: 'short' });
           const arrivalDayName = arrivalDate.toLocaleDateString('en-US', { weekday: 'short' });
-      
+
           const formattedDeparture = `${departureDayName} ${departureDate.toLocaleString()}`;
           const formattedArrival = `${arrivalDayName} ${arrivalDate.toLocaleString()}`;
-      
+
           row.innerHTML = `<td>${formattedDeparture}</td>
                             <td>${formattedArrival}</td>
                             <td>$${flight.price}</td>
@@ -110,19 +106,18 @@ function buildAnyDestTable(routeIndex, origin, dateRange) {
         });         
       } else {
         console.error('data.data is not an array:', data.data);
-        // Handle the case where data is not an array, e.g., display a message to the user
       }
       table.appendChild(tbody);
-      infoPaneContent.appendChild(table);
-  
+      document.getElementById('infoPaneContent').appendChild(table);
+
+      pathDrawing.drawRouteLines();
+
       highlightSelectedRowForRouteIndex(routeIndex);
-  
-      // Reuse existing event listeners or define new ones specific to single date table
       attachEventListeners(table, data, routeIndex);
     })
     .catch(error => {
-      infoPaneContent.textContent = 'Error loading data: ' + error.message;
-    });    
+      document.getElementById('infoPaneContent').textContent = 'Error loading data: ' + error.message;
+    });     
   
       function attachEventListeners(table, data, routeIndex) {
         const headers = table.querySelectorAll('th');
@@ -234,141 +229,141 @@ function buildAnyDestTable(routeIndex, origin, dateRange) {
       });
   });                 
   
-    document.querySelectorAll('.route-info-table tbody tr').forEach(row => {
-      row.addEventListener('mouseover', function() {
-        const routeString = this.cells[8].textContent.trim();
+  document.querySelectorAll('.route-info-table tbody tr').forEach(row => {
+    row.addEventListener('mouseover', function() {
+      const routeString = this.cells[8].textContent.trim();
+      const iataCodes = routeString.split(' > ');
+
+      for (let i = 0; i < iataCodes.length - 1; i++) {
+          const originIata = iataCodes[i];
+          const destinationIata = iataCodes[i + 1];
+          pathDrawing.drawPathBetweenAirports(originIata, destinationIata, flightMap.getAirportDataByIata);
+      }
+    });
+
+    row.addEventListener('mouseout', function() {
+        pathDrawing.clearLines();
+        pathDrawing.drawLines();
+    });
+  });
+
+  document.querySelectorAll('.route-info-table tbody tr').forEach((row) => {
+    row.addEventListener('click', function() {
+        const routeString = this.cells[8].textContent.trim(); // Assuming the IATA codes are in the 9th column
         const iataCodes = routeString.split(' > ');
-  
-        for (let i = 0; i < iataCodes.length - 1; i++) {
-            const originIata = iataCodes[i];
-            const destinationIata = iataCodes[i + 1];
-            pathDrawing.drawPathBetweenAirports(originIata, destinationIata, flightMap.getAirportDataByIata);
-        }
-      });
-  
-      row.addEventListener('mouseout', function() {
-          pathDrawing.clearLines();
-          pathDrawing.drawLines();
-      });
+        replaceWaypointsForCurrentRoute(iataCodes, routeIndex);
     });
-  
-    document.querySelectorAll('.route-info-table tbody tr').forEach((row) => {
-      row.addEventListener('click', function() {
-          const routeString = this.cells[8].textContent.trim(); // Assuming the IATA codes are in the 9th column
-          const iataCodes = routeString.split(' > ');
-          replaceWaypointsForCurrentRoute(iataCodes, routeIndex);
-      });
-    });
-  
-    // Separate handling for the price filter icon
-    const priceFilterIcon = document.getElementById('priceFilter');
-    if (priceFilterIcon) {
-      priceFilterIcon.addEventListener('click', function(event) {
-        event.stopPropagation(); // Prevent the event from affecting other elements
-        const priceSliderPopup = document.getElementById('priceSliderPopup');
-        if (priceSliderPopup) {
-          priceSliderPopup.classList.toggle('hidden');
-        } else {
-          showPriceFilterPopup(event, data);
-        }
-      });
-    }
-  }
-  
-  function highlightSelectedRowForRouteIndex(routeIndex) {
-    document.querySelectorAll(`.route-info-table[data-route-index="${routeIndex}"] tbody tr.selected`).forEach(row => {
-      row.classList.remove('selected');
-    });
-  
-    const selectedRouteDetails = appState.selectedRoutes[routeIndex];
-    if (selectedRouteDetails && selectedRouteDetails.id) {
-      let selectedRow = document.querySelector('.route-info-table tbody tr');
-      if (!selectedRow) {
-        document.querySelectorAll(`.route-info-table[data-route-index="${routeIndex}"] tbody tr`).forEach(row => {
-          const routeId = row.getAttribute('data-route-id');
-          if (routeId && routeId.split('|').includes(selectedRouteDetails.id)) {
-            selectedRow = row;
-          }
-        });
-      }
-      
-      if (selectedRow) {
-        selectedRow.classList.add('selected');
-      }
-    }
-  }    
-  
-  function replaceWaypointsForCurrentRoute(intermediaryIatas, routeIndex) {
-    // Adjust startIndex for round trips to ensure the entire waypoints array is considered
-    const startIndex = appState.roundTrip ? 0 : routeIndex * 2;
-    let before = appState.waypoints.slice(0, startIndex);
-    let after = appState.roundTrip ? [] : appState.waypoints.slice((routeIndex + 1) * 2);
-  
-    let updatedSegment = [flightMap.airportDataCache[intermediaryIatas[0]]];
-  
-    for (let i = 1; i < intermediaryIatas.length; i++) {
-        let airportData = flightMap.airportDataCache[intermediaryIatas[i]];
-        updatedSegment.push(airportData);
-        if (i < intermediaryIatas.length - 1) {
-            updatedSegment.push(airportData);
-        }
-    }
-  
-    // For round trips, ensure the return to the origin is explicitly handled
-    if (appState.roundTrip) {
-        const originIata = intermediaryIatas[0];
-        if (updatedSegment[updatedSegment.length - 1].iata_code !== originIata) {
-            updatedSegment.push(flightMap.airportDataCache[originIata]);
-        }
-    } else {
-        // For non-round trips, ensure the final destination is added if not already present
-        const finalDestinationIata = intermediaryIatas[intermediaryIatas.length - 1];
-        if (updatedSegment[updatedSegment.length - 1].iata_code !== finalDestinationIata) {
-            updatedSegment.push(flightMap.airportDataCache[finalDestinationIata]);
-        }
-    }
-  
-    appState.waypoints = [...before, ...updatedSegment, ...after];
-    updateState('updateWaypoint', appState.waypoints);
-  }
-  
-  function resetSortIcons(headers, currentIcon, newSortState) {
-    headers.forEach(header => {
-      const icon = header.querySelector('.sortIcon');
-      if (icon !== currentIcon) {
-        icon.innerHTML = '&#x21C5;'; // Reset to double arrow
-        icon.removeAttribute('data-sort');
+  });
+
+  // Separate handling for the price filter icon
+  const priceFilterIcon = document.getElementById('priceFilter');
+  if (priceFilterIcon) {
+    priceFilterIcon.addEventListener('click', function(event) {
+      event.stopPropagation(); // Prevent the event from affecting other elements
+      const priceSliderPopup = document.getElementById('priceSliderPopup');
+      if (priceSliderPopup) {
+        priceSliderPopup.classList.toggle('hidden');
       } else {
-        icon.innerHTML = newSortState === 'asc' ? '&#x25B2;' : '&#x25BC;';
-        icon.setAttribute('data-sort', newSortState);
+        showPriceFilterPopup(event, data);
       }
     });
   }
-  
-  function sortTableByColumn(table, columnIndex, asc = true) {
-    const dirModifier = asc ? 1 : -1;
-    const tBody = table.tBodies[0];
-    const rows = Array.from(tBody.querySelectorAll("tr"));
-  
-    const sortedRows = rows.sort((a, b) => {
-      let aColText = a.cells[columnIndex - 1].textContent.trim();
-      let bColText = b.cells[columnIndex - 1].textContent.trim();
-      return aColText.localeCompare(bColText, undefined, { numeric: true }) * dirModifier;
-    });
-  
-    while (tBody.firstChild) {
-      tBody.removeChild(tBody.firstChild);
+} 
+        
+function highlightSelectedRowForRouteIndex(routeIndex) {
+  document.querySelectorAll(`.route-info-table[data-route-index="${routeIndex}"] tbody tr.selected`).forEach(row => {
+    row.classList.remove('selected');
+  });
+
+  const selectedRouteDetails = appState.selectedRoutes[routeIndex];
+  if (selectedRouteDetails && selectedRouteDetails.id) {
+    let selectedRow = document.querySelector('.route-info-table tbody tr');
+    if (!selectedRow) {
+      document.querySelectorAll(`.route-info-table[data-route-index="${routeIndex}"] tbody tr`).forEach(row => {
+        const routeId = row.getAttribute('data-route-id');
+        if (routeId && routeId.split('|').includes(selectedRouteDetails.id)) {
+          selectedRow = row;
+        }
+      });
     }
-    tBody.append(...sortedRows);
-  
-    // Update header classes for visual indication of sort direction
-    table.querySelectorAll("th").forEach(th => th.classList.remove("th-sort-asc", "th-sort-desc"));
-    if (asc) {
-      table.querySelector(`th:nth-child(${columnIndex})`).classList.add("th-sort-asc");
-    } else {
-      table.querySelector(`th:nth-child(${columnIndex})`).classList.add("th-sort-desc");
+    
+    if (selectedRow) {
+      selectedRow.classList.add('selected');
     }
   }
+}    
+
+function replaceWaypointsForCurrentRoute(intermediaryIatas, routeIndex) {
+  // Adjust startIndex for round trips to ensure the entire waypoints array is considered
+  const startIndex = appState.roundTrip ? 0 : routeIndex * 2;
+  let before = appState.waypoints.slice(0, startIndex);
+  let after = appState.roundTrip ? [] : appState.waypoints.slice((routeIndex + 1) * 2);
+
+  let updatedSegment = [flightMap.airportDataCache[intermediaryIatas[0]]];
+
+  for (let i = 1; i < intermediaryIatas.length; i++) {
+      let airportData = flightMap.airportDataCache[intermediaryIatas[i]];
+      updatedSegment.push(airportData);
+      if (i < intermediaryIatas.length - 1) {
+          updatedSegment.push(airportData);
+      }
+  }
+
+  // For round trips, ensure the return to the origin is explicitly handled
+  if (appState.roundTrip) {
+      const originIata = intermediaryIatas[0];
+      if (updatedSegment[updatedSegment.length - 1].iata_code !== originIata) {
+          updatedSegment.push(flightMap.airportDataCache[originIata]);
+      }
+  } else {
+      // For non-round trips, ensure the final destination is added if not already present
+      const finalDestinationIata = intermediaryIatas[intermediaryIatas.length - 1];
+      if (updatedSegment[updatedSegment.length - 1].iata_code !== finalDestinationIata) {
+          updatedSegment.push(flightMap.airportDataCache[finalDestinationIata]);
+      }
+  }
+
+  appState.waypoints = [...before, ...updatedSegment, ...after];
+  updateState('updateWaypoint', appState.waypoints);
+}
+
+function resetSortIcons(headers, currentIcon, newSortState) {
+  headers.forEach(header => {
+    const icon = header.querySelector('.sortIcon');
+    if (icon !== currentIcon) {
+      icon.innerHTML = '&#x21C5;'; // Reset to double arrow
+      icon.removeAttribute('data-sort');
+    } else {
+      icon.innerHTML = newSortState === 'asc' ? '&#x25B2;' : '&#x25BC;';
+      icon.setAttribute('data-sort', newSortState);
+    }
+  });
+}
+
+function sortTableByColumn(table, columnIndex, asc = true) {
+  const dirModifier = asc ? 1 : -1;
+  const tBody = table.tBodies[0];
+  const rows = Array.from(tBody.querySelectorAll("tr"));
+
+  const sortedRows = rows.sort((a, b) => {
+    let aColText = a.cells[columnIndex - 1].textContent.trim();
+    let bColText = b.cells[columnIndex - 1].textContent.trim();
+    return aColText.localeCompare(bColText, undefined, { numeric: true }) * dirModifier;
+  });
+
+  while (tBody.firstChild) {
+    tBody.removeChild(tBody.firstChild);
+  }
+  tBody.append(...sortedRows);
+
+  // Update header classes for visual indication of sort direction
+  table.querySelectorAll("th").forEach(th => th.classList.remove("th-sort-asc", "th-sort-desc"));
+  if (asc) {
+    table.querySelector(`th:nth-child(${columnIndex})`).classList.add("th-sort-asc");
+  } else {
+    table.querySelector(`th:nth-child(${columnIndex})`).classList.add("th-sort-desc");
+  }
+}
 }
 
 export { buildAnyDestTable };
