@@ -23,7 +23,6 @@ const appState = {
     },
     routeLines: [],
     invisibleRouteLines: [],
-    loadingComplete: false,
 };
   
 function updateState(key, value) {
