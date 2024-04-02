@@ -65,6 +65,7 @@ const flightMap = {
                 updateState('addWaypoint', airport);
                 clickedMarker.setIcon(magentaDotIcon);
             }
+            appState.selectedAirport = null;
         } else {
             if (appState.selectedAirport && appState.selectedAirport.iata_code === airport.iata_code) {
                 if (appState.waypoints.length % 2 === 0 && appState.waypoints.length > waypointIndex) {
