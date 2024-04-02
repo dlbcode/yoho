@@ -110,13 +110,16 @@ function setupAutocompleteForField(fieldId) {
                 if (items) items[currentFocus].click();
             }
         }
-    });
-
-    inputField.addEventListener('blur', () => {
-        setTimeout(() => {
-            clearInputField(inputField);
-            toggleSuggestionBox(false);
-        }, 300); // Delay to allow for selection
+        inputField.addEventListener('blur', () => {
+            setTimeout(() => {
+                clearInputField(inputField);
+                toggleSuggestionBox(false);
+                if (inputField.value === '' && appState.waypoints.length > 0) {
+                    const waypointIndex = parseInt(fieldId.replace('waypoint', '')) - 1;
+                    updateState('removeWaypoint', waypointIndex);
+                }
+            }, 300); // Delay to allow for selection
+        });
     });
 
     if (!window.outsideClickListenerAdded) {
