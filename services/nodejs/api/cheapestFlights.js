@@ -1,4 +1,5 @@
 const axios = require('axios');
+const updateDirectRoutes = require('./directRouteHandler'); // Import the updateDirectRoutes function
 
 module.exports = function(app, db, tequila) {
   app.get('/cheapestFlights', async (req, res) => {
@@ -28,6 +29,10 @@ module.exports = function(app, db, tequila) {
         const apiUrl = `${tequila.url}?fly_from=${origin}&date_from=${dateFrom}&date_to=${dateTo}&price_to=${priceTo}&one_for_city=1&limit=${limit}`;
 
         const response = await axios({ ...tequila, url: apiUrl });
+        const flightsData = response.data.flights || [];
+        const sortedFlights = flightsData.sort((a, b) => a.price - b.price);
+
+        await updateDirectRoutes(db, sortedFlights);
 
         const newCacheEntry = {
           origin: origin,

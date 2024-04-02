@@ -1,4 +1,5 @@
 const axios = require('axios');
+const updateDirectRoutes = require('./directRouteHandler'); // Import the updateDirectRoutes function
 
 module.exports = function(app, db, tequilaConfig) {
     app.get('/range', async (req, res) => {
@@ -21,6 +22,11 @@ module.exports = function(app, db, tequilaConfig) {
                     curr: 'USD'
                 }
             });
+
+            const flightsData = response.data.flights || [];
+            const sortedFlights = flightsData.sort((a, b) => a.price - b.price);
+
+            await updateDirectRoutes(db, sortedFlights);
 
             res.json(response.data);
         } catch (error) {

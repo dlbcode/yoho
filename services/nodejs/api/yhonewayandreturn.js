@@ -1,3 +1,5 @@
+const updateDirectRoutes = require('./directRouteHandler');
+
 module.exports = function(app, axios, db) {
   app.get('/yhoneway', async (req, res) => {
     const { origin, destination, departureDate } = req.query;
@@ -39,50 +41,7 @@ module.exports = function(app, axios, db) {
       if (response.data && response.data.data) {
         const sortedFlights = response.data.data.sort((a, b) => a.price - b.price);
 
-        // Update cache with new data
-        console.log(`Updating cache for flight ${flightKey}`);
-        await cacheCollection.updateOne(
-          { flight: flightKey },
-          { $set: { data: sortedFlights, queriedAt: new Date() } },
-          { upsert: true }
-        );
-
-        // Check for direct flights and compare prices with directRoutes collection
-        console.log('Checking direct flights');
-        for (const flight of sortedFlights) {
-          for (const route of flight.route) {
-            const existingDirectRoute = await db.collection('directRoutes').findOne({
-              origin: route.flyFrom,
-              destination: route.flyTo
-            });
-
-            if (existingDirectRoute) {
-              if (existingDirectRoute.price > flight.price) {
-                console.log(`Updating direct route from ${route.flyFrom} to ${route.flyTo} with lower price: ${flight.price}`);
-                await db.collection('directRoutes').updateOne(
-                  { _id: existingDirectRoute._id },
-                  { $set: {
-                      price: flight.price,
-                      timestamp: new Date().toISOString().replace(/[-:T]/g, '').slice(0, 14),
-                      source: 'tequila'
-                    }
-                  }
-                );
-              } else {
-                console.log(`Existing price for direct route from ${route.flyFrom} to ${route.flyTo} is lower or equal; no update needed.`);
-              }
-            } else {
-              console.log(`No existing direct route found for ${route.flyFrom} to ${route.flyTo}; inserting new.`);
-              await db.collection('directRoutes').insertOne({
-                origin: route.flyFrom,
-                destination: route.flyTo,
-                price: flight.price,
-                timestamp: new Date().toISOString().replace(/[-:T]/g, '').slice(0, 14),
-                source: 'tequila'
-              });
-            }
-          }
-        }
+        await updateDirectRoutes(db, sortedFlights);
 
         res.json(sortedFlights);
       } else {
