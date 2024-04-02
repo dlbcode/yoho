@@ -1,4 +1,4 @@
-import { map } from './map.js';
+import { map, magentaDotIcon } from './map.js';
 import { flightMap } from './flightMap.js';
 import { routeList } from './routeList.js';
 import { pathDrawing } from './pathDrawing.js';
@@ -66,6 +66,13 @@ const eventManager = {
     // Use debounce for map 'moveend' and 'zoomend' events
     setupMapEventListeners: function() {
         map.on('click', () => {
+            if (appState.selectedAirport) {
+                const selectedAirportIata = appState.selectedAirport.iata_code;
+                const selectedMarker = flightMap.markers[selectedAirportIata];
+                if (selectedMarker) {
+                    selectedMarker.setIcon(magentaDotIcon);
+                }
+            }
             flightMap.selectedMarker = null;
             appState.selectedAirport = null;
             pathDrawing.clearLines();
