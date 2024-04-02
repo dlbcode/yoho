@@ -111,4 +111,11 @@ var magentaDotIcon = L.divIcon({
     iconAnchor: [6, 6]
 });
 
-export { map, blueDotIcon, magentaDotIcon, adjustMapSize };
+var greenDotIcon = L.divIcon({
+    className: 'custom-div-icon',
+    html: '<div style="background-color: #2ec54e; width: 10px; height: 10px; border-radius: 50%;"></div>',
+    iconSize: [10, 10],
+    iconAnchor: [6, 6]
+});
+
+export { map, blueDotIcon, magentaDotIcon, greenDotIcon, adjustMapSize };

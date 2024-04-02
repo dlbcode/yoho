@@ -226,8 +226,6 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             updateState('addWaypoint', airport);
         }
-        appState.selectedAirport = airport;
-
         const routeNumber = Math.floor(waypointIndex / 2);
 
         // Calculate the index for selectedRoutes based on the routeNumber
@@ -251,9 +249,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 duration: 0.5 // Duration in seconds
             });          
         }
-        flightMap.fetchAndCacheRoutes(iata).then(() => {
-            pathDrawing.drawRoutePaths(iata, appState.directRoutes, appState.routeDirection);
-        });
+        //flightMap.fetchAndCacheRoutes(iata).then(() => {
+        //    pathDrawing.drawRoutePaths(iata, appState.directRoutes, appState.routeDirection);
+        //});
     });    
     
     function adjustLatLngForShortestPath(currentLatLng, targetLatLng) {

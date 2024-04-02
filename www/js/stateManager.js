@@ -135,6 +135,7 @@ function updateState(key, value) {
     //console.log('appState.routeDates:', appState.routeDates);
     //console.log('appState.selectedRoutes: ', appState.selectedRoutes);
     //console.log('appState.waypoints:', appState.waypoints);
+    //console.log('appState airportSelected: ', appState.selectedAirport);
 }
   
 function updateUrl() {
