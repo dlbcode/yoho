@@ -116,7 +116,7 @@ function setupAutocompleteForField(fieldId) {
         setTimeout(() => {
             clearInputField(inputField);
             toggleSuggestionBox(false);
-            if (inputField.value === '' && appState.waypoints.length > 0) {
+            if (inputField.value === '' && appState.waypoints.length > 0 && appState.loadingComplete) {
                 const waypointIndex = parseInt(fieldId.replace('waypoint', '')) - 1;
                 if (waypointIndex < appState.waypoints.length) {
                     updateState('removeWaypoint', waypointIndex);

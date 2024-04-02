@@ -246,6 +246,7 @@ const routeHandling = {
     
             routeHandling.updateRoutesArray();
         }
+        appState.loadingComplete = true;
     },
 
     removeRouteDiv: function(routeNumber) {
