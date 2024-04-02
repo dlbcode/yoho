@@ -1,4 +1,4 @@
-import { appState, updateState } from './stateManager.js';
+import { appState, updateState, updateUrl } from './stateManager.js';
 import { setupAutocompleteForField, fetchAirportByIata } from './airportAutocomplete.js';
 import { uiHandling } from './uiHandling.js';
 import { flightMap } from './flightMap.js';
@@ -238,13 +238,12 @@ const routeHandling = {
             let temp = inputs[0].value;
             inputs[0].value = inputs[1].value;
             inputs[1].value = temp;
-    
             // Update the appState.waypoints array
-            let waypointIndex = (routeNumber - 1) * 2;
+            let waypointIndex = (routeNumber) * 2;
             [appState.waypoints[waypointIndex], appState.waypoints[waypointIndex + 1]] = 
                 [appState.waypoints[waypointIndex + 1], appState.waypoints[waypointIndex]];
-    
             routeHandling.updateRoutesArray();
+            updateUrl();
         }
     },
 

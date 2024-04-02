@@ -182,5 +182,5 @@ function checkAndUpdateRoundTripStatus() {
     }
 }
 
-export { appState, updateState };
+export { appState, updateState, updateUrl };
   
