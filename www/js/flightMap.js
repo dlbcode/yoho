@@ -55,8 +55,7 @@ const flightMap = {
     handleMarkerClick(airport, clickedMarker) {
         const lastWaypoint = appState.waypoints[appState.waypoints.length - 1];
         const waypointIndex = appState.waypoints.findIndex(wp => wp.iata_code === airport.iata_code);
-        console.log('waypointIndex: ', waypointIndex);
-
+        
         if (waypointIndex === -1) {
             if (appState.waypoints.length >= 2 && appState.waypoints.length === document.querySelectorAll('.airport-selection input[type="text"]').length) {
                 updateState('addWaypoint', lastWaypoint);
