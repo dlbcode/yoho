@@ -25,14 +25,13 @@ module.exports = function(app, db, tequila) {
       if (cachedData && (now - cachedData.timestamp.getTime()) < 24 * 60 * 60 * 1000) {
         return res.json(cachedData.results);
       } else {
-        // Adjust the URL and query parameters based on the request
         const apiUrl = `${tequila.url}?fly_from=${origin}&date_from=${dateFrom}&date_to=${dateTo}&price_to=${priceTo}&one_for_city=1&limit=${limit}`;
 
         const response = await axios({ ...tequila, url: apiUrl });
-        const flightsData = response.data.flights || [];
-        const sortedFlights = flightsData.sort((a, b) => a.price - b.price);
-
-        await updateDirectRoutes(db, sortedFlights);
+        if (response.data && response.data.data) {
+          const sortedFlights = response.data.data.sort((a, b) => a.price - b.price);
+          await updateDirectRoutes(db, sortedFlights);
+        }
 
         const newCacheEntry = {
           origin: origin,

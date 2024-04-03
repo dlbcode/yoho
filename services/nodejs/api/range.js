@@ -23,10 +23,11 @@ module.exports = function(app, db, tequilaConfig) {
                 }
             });
 
-            const flightsData = response.data.flights || [];
-            const sortedFlights = flightsData.sort((a, b) => a.price - b.price);
-
+            if (response.data && response.data.data) {
+            const sortedFlights = response.data.data.sort((a, b) => a.price - b.price);
+            console.log('Calling updateDirectRoutes from ')
             await updateDirectRoutes(db, sortedFlights);
+            }
 
             res.json(response.data);
         } catch (error) {
