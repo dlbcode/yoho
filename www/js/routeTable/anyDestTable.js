@@ -42,6 +42,10 @@ function buildAnyDestTable(routeIndex, origin, dateRange) {
 
   document.head.appendChild(Object.assign(document.createElement('link'), {rel: 'stylesheet', type: 'text/css', href: '../css/routeTable.css'}));
 
+   // Start the loading animation
+   const topBar = document.getElementById('top-bar');
+   topBar.classList.add('loading');
+
   let apiUrl = `https://yonderhop.com/api/cheapestFlights?origin=${origin}&date_from=${fromDate}&date_to=${toDate}&price_to=${maxPrice}`;
 
   fetch(apiUrl)
@@ -109,6 +113,8 @@ function buildAnyDestTable(routeIndex, origin, dateRange) {
       }
       table.appendChild(tbody);
       document.getElementById('infoPaneContent').appendChild(table);
+
+      topBar.classList.remove('loading');
 
       pathDrawing.drawRouteLines();
 
