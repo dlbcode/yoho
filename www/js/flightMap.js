@@ -35,22 +35,15 @@ const flightMap = {
             const marker = L.marker(latLng, {icon: icon}).addTo(map);
     
             marker.airportWeight = airport.weight;
-    
-            marker.hovered = false;
-    
+            
+            // Bind a simple popup without automatic opening on mouseover
             marker.bindPopup(`<b>${airport.city}</b>`, { maxWidth: 'auto' });
-    
-            marker.on('mouseover', function(e) {
-                this.openPopup();
-            });
-            //marker.on('mouseout', function(e) {
-            //    this.closePopup();
-            //});
     
             eventManager.attachMarkerEventListeners(iata, marker, airport);
             this.markers[iata] = marker;
         }
-    },                
+    },
+                   
 
     handleMarkerClick(airport, clickedMarker) {
         // Close all other tooltips
