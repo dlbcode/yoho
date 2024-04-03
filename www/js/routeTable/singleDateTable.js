@@ -30,6 +30,10 @@ function buildSingleDateTable(routeIndex) {
 
   document.head.appendChild(Object.assign(document.createElement('link'), {rel: 'stylesheet', type: 'text/css', href: '../css/routeTable.css'}));
 
+  // Start the loading animation
+  const topBar = document.getElementById('top-bar');
+  topBar.classList.add('loading');
+
   const origin = currentRoute.originAirport.iata_code;
   const destination = currentRoute.destinationAirport.iata_code;
   let apiUrl = `https://yonderhop.com/api/yhoneway?origin=${origin}&destination=${destination}&departureDate=${departureDate}`;
@@ -95,6 +99,8 @@ function buildSingleDateTable(routeIndex) {
       });    
       table.appendChild(tbody);
       infoPaneContent.appendChild(table);
+
+      topBar.classList.remove('loading');
       
       pathDrawing.drawRouteLines();
 
