@@ -33,57 +33,104 @@ const flightMap = {
         if (this.shouldDisplayAirport(airport.weight, zoom)) {
             const latLng = L.latLng(airport.latitude, airport.longitude);
             const marker = L.marker(latLng, {icon: icon}).addTo(map);
-    
+
             marker.airportWeight = airport.weight;
-    
+
             marker.hovered = false;
-    
-            marker.bindPopup(`<b>${airport.city}</b>`, { maxWidth: 'auto' });
-    
+
+            // Display tooltip with city name and price
+            marker.bindPopup(`<b>${airport.city}</b> - $${airport.price}`, { maxWidth: 'auto' });
+
+            // Store a reference to the correct context of `this`
+            let self = this;
+
             marker.on('mouseover', function(e) {
+                // Use `self` instead of `this` to refer to the correct context
+                Object.values(self.markers).forEach(marker => marker.closePopup());
                 this.openPopup();
             });
-            marker.on('mouseout', function(e) {
-                this.closePopup();
-            });
-    
+            //marker.on('mouseout', function(e) {
+            //    this.closePopup();
+            //});
+
             eventManager.attachMarkerEventListeners(iata, marker, airport);
             this.markers[iata] = marker;
         }
     },                
 
     handleMarkerClick(airport, clickedMarker) {
-        const lastWaypoint = appState.waypoints[appState.waypoints.length - 1];
+        // Hide other tooltips
+        Object.values(this.markers).forEach(marker => marker.closePopup());
+
+        // Set selectedAirport to the airport for the current marker
+        appState.selectedAirport = airport;
+
+        // Show the tooltip for the current marker
+        clickedMarker.openPopup();
+
         const waypointIndex = appState.waypoints.findIndex(wp => wp.iata_code === airport.iata_code);
-        
-        if (waypointIndex === -1) {
+
+        // Create '+' button
+        const addButton = document.createElement('button');
+        addButton.textContent = '+';
+
+        // Create '-' button
+        const removeButton = document.createElement('button');
+        removeButton.textContent = '-';
+
+        // Create a div to hold the city name and the button
+        const popupContent = document.createElement('div');
+        popupContent.innerHTML = `<b>${airport.city}</b>`;
+
+        // Function to handle '+' button click
+        function handleAddButtonClick() {
+            const lastWaypoint = appState.waypoints[appState.waypoints.length - 1];
             if (appState.waypoints.length >= 2 && appState.waypoints.length === document.querySelectorAll('.airport-selection input[type="text"]').length) {
                 updateState('addWaypoint', lastWaypoint);
                 updateState('addWaypoint', airport);
             } else {
                 updateState('addWaypoint', airport);
-                clickedMarker.setIcon(magentaDotIcon);
             }
-            appState.selectedAirport = null;
-        } else {
+            clickedMarker.setIcon(magentaDotIcon);
+            appState.selectedAirport = airport;
+
+            // Update the popup content
+            addButton.removeEventListener('click', handleAddButtonClick);
+            popupContent.removeChild(addButton);
+            removeButton.addEventListener('click', handleRemoveButtonClick);
+            popupContent.appendChild(removeButton);
+        }
+
+        // Function to handle '-' button click
+        function handleRemoveButtonClick() {
             if (appState.selectedAirport && appState.selectedAirport.iata_code === airport.iata_code) {
                 if (appState.waypoints.length % 2 === 0 && appState.waypoints.length > waypointIndex) {
                     updateState('removeWaypoint', waypointIndex + 1);
                     updateState('removeWaypoint', waypointIndex);
-                    clickedMarker.setIcon(blueDotIcon);
-                    appState.selectedAirport = null;
-                    return;
                 } else {
-                updateState('removeWaypoint', appState.waypoints[waypointIndex]);
-                appState.selectedAirport = null;
-                clickedMarker.setIcon(blueDotIcon);
-                return;
+                    updateState('removeWaypoint', appState.waypoints[waypointIndex]);
                 }
-            } else {
-                appState.selectedAirport = airport;
-                clickedMarker.setIcon(greenDotIcon);
+                clickedMarker.setIcon(blueDotIcon);
+                appState.selectedAirport = null;
+
+                // Update the popup content
+                removeButton.removeEventListener('click', handleRemoveButtonClick);
+                popupContent.removeChild(removeButton);
+                addButton.addEventListener('click', handleAddButtonClick);
+                popupContent.appendChild(addButton);
             }
         }
+
+        if (waypointIndex === -1) {
+            addButton.addEventListener('click', handleAddButtonClick);
+            popupContent.appendChild(addButton);
+        } else {
+            removeButton.addEventListener('click', handleRemoveButtonClick);
+            popupContent.appendChild(removeButton);
+        }
+
+        // Include the city name and button in the tooltip
+        clickedMarker.bindPopup(popupContent);
     },        
 
     findRoute(fromIata, toIata) {
