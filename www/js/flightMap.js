@@ -49,9 +49,6 @@ const flightMap = {
                 Object.values(self.markers).forEach(marker => marker.closePopup());
                 this.openPopup();
             });
-            //marker.on('mouseout', function(e) {
-            //    this.closePopup();
-            //});
 
             eventManager.attachMarkerEventListeners(iata, marker, airport);
             this.markers[iata] = marker;
