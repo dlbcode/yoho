@@ -103,12 +103,16 @@ const flightMap = {
 
         // Function to handle '-' button click
         function handleRemoveButtonClick() {
+            console.table(appState.waypoints);
+            console.log('selectedAirport', appState.selectedAirport);
             if (appState.selectedAirport && appState.selectedAirport.iata_code === airport.iata_code) {
-                if (appState.waypoints.length % 2 === 0 && appState.waypoints.length > waypointIndex) {
-                    updateState('removeWaypoint', waypointIndex + 1);
+                if (appState.waypoints.length % 2 != 0 && appState.waypoints.length > waypointIndex) {
+                    console.log('removing waypointIndexes', waypointIndex);
                     updateState('removeWaypoint', waypointIndex);
                 } else {
-                    updateState('removeWaypoint', appState.waypoints[waypointIndex]);
+                    console.log('removing waypointIndex', waypointIndex, waypointIndex + 1);
+                    updateState('removeWaypoint', waypointIndex + 1);
+                    updateState('removeWaypoint', waypointIndex);
                 }
                 clickedMarker.setIcon(blueDotIcon);
                 appState.selectedAirport = null;
