@@ -67,6 +67,7 @@ const flightMap = {
 
         const waypointIndex = appState.waypoints.findIndex(wp => wp.iata_code === airport.iata_code);
 
+
         // Create '+' button
         const addButton = document.createElement('button');
         addButton.textContent = '+';
@@ -82,7 +83,7 @@ const flightMap = {
         // Function to handle '+' button click
         function handleAddButtonClick() {
             const lastWaypoint = appState.waypoints[appState.waypoints.length - 1];
-            if (appState.waypoints.length >= 2 && appState.waypoints.length === document.querySelectorAll('.airport-selection input[type="text"]').length) {
+            if (appState.waypoints.length >= 2 && appState.waypoints.length % 2 === 0){
                 updateState('addWaypoint', lastWaypoint);
                 updateState('addWaypoint', airport);
             } else {
@@ -131,7 +132,8 @@ const flightMap = {
         }
 
         // Include the city name and button in the tooltip
-        clickedMarker.bindPopup(popupContent);
+        clickedMarker.bindPopup(popupContent, { autoClose: false, closeOnClick: false });
+        clickedMarker.openPopup();
     },        
 
     findRoute(fromIata, toIata) {
