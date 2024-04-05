@@ -4,7 +4,7 @@ import { eventManager } from './eventManager.js';
 import { appState, updateState } from './stateManager.js';
 
 const flightMap = {
-    markers: {},
+    markers: [],
     currentLines: [],
     selectedMarker: null,
     routePathCache: {},

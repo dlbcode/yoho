@@ -66,6 +66,7 @@ const eventManager = {
     // Use debounce for map 'moveend' and 'zoomend' events
     setupMapEventListeners: function() {
         map.on('click', () => {
+            Object.values(flightMap.markers).forEach(marker => marker.closePopup());
             if (appState.selectedAirport) {
                 const selectedAirportIata = appState.selectedAirport.iata_code;
                 const selectedMarker = flightMap.markers[selectedAirportIata];
