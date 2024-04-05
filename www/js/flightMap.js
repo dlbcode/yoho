@@ -56,29 +56,25 @@ const flightMap = {
     },                
 
     handleMarkerClick(airport, clickedMarker) {
-        // Hide other tooltips
+        // Close all other popups
         Object.values(this.markers).forEach(marker => marker.closePopup());
-
-        // Set selectedAirport to the airport for the current marker
+    
         appState.selectedAirport = airport;
-
-        // Show the tooltip for the current marker
+    
+        // Open the clicked marker's popup
         clickedMarker.openPopup();
-
+    
         const waypointIndex = appState.waypoints.findIndex(wp => wp.iata_code === airport.iata_code);
-
-
-        // Create '+' button
+    
         const addButton = document.createElement('button');
         addButton.textContent = '+';
-
-        // Create '-' button
+    
         const removeButton = document.createElement('button');
         removeButton.textContent = '-';
-
-        // Create a div to hold the city name and the button
+    
         const popupContent = document.createElement('div');
         popupContent.innerHTML = `<b>${airport.city}</b>`;
+    
 
         // Function to handle '+' button click
         function handleAddButtonClick() {
@@ -132,7 +128,7 @@ const flightMap = {
         }
 
         // Include the city name and button in the tooltip
-        clickedMarker.bindPopup(popupContent, { autoClose: false, closeOnClick: false });
+        clickedMarker.bindPopup(popupContent, { autoClose: true, closeOnClick: true });
         clickedMarker.openPopup();
     },        
 
