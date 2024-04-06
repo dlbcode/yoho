@@ -67,9 +67,11 @@ const eventManager = {
     setupMapEventListeners: function() {
         map.on('click', () => {
             Object.values(flightMap.markers).forEach(marker => marker.closePopup());
-            if (appState.selectedAirport) {
-                const selectedAirportIata = appState.selectedAirport.iata_code;
-                const selectedMarker = flightMap.markers[selectedAirportIata];
+            const selectedAirportIata = appState.selectedAirport ? appState.selectedAirport.iata_code : null;
+            // Check if a waypoint in appState.waypoints has the IATA code
+            const waypoint = appState.waypoints.find(wp => wp.iata_code === selectedAirportIata);
+            if (waypoint) {
+                const selectedMarker = flightMap.markers[waypoint.iata_code];
                 if (selectedMarker) {
                     selectedMarker.setIcon(magentaDotIcon);
                 }

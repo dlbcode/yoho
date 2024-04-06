@@ -73,7 +73,9 @@ const flightMap = {
         removeButton.textContent = '-';
     
         const popupContent = document.createElement('div');
-        popupContent.innerHTML = `<b>${airport.city}</b>`;
+        const cityName = document.createElement('p');
+        cityName.textContent = airport.city;
+        popupContent.appendChild(cityName);
     
 
         // Function to handle '+' button click
@@ -100,11 +102,11 @@ const flightMap = {
             console.table(appState.waypoints);
             console.log('selectedAirport', appState.selectedAirport);
             if (appState.selectedAirport && appState.selectedAirport.iata_code === airport.iata_code) {
-                if (appState.waypoints.length % 2 != 0 && appState.waypoints.length > waypointIndex) {
-                    console.log('removing waypointIndexes', waypointIndex);
+                if (appState.waypoints.length % 2 === 0 && appState.waypoints.length > waypointIndex) {
+                    console.log('removing waypointIndex', waypointIndex);
                     updateState('removeWaypoint', waypointIndex);
                 } else {
-                    console.log('removing waypointIndex', waypointIndex, waypointIndex + 1);
+                    console.log('removing waypointIndexes', waypointIndex, waypointIndex + 1);
                     updateState('removeWaypoint', waypointIndex + 1);
                     updateState('removeWaypoint', waypointIndex);
                 }
