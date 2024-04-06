@@ -60,6 +60,7 @@ const flightMap = {
         Object.values(this.markers).forEach(marker => marker.closePopup());
     
         appState.selectedAirport = airport;
+        console.log('appState.selectedAirport:', appState.selectedAirport);
     
         // Open the clicked marker's popup
         clickedMarker.openPopup();
@@ -130,7 +131,7 @@ const flightMap = {
         }
 
         // Include the city name and button in the tooltip
-        clickedMarker.bindPopup(popupContent, { autoClose: true, closeOnClick: true });
+        clickedMarker.bindPopup(popupContent, { autoClose: false, closeOnClick: true });
         clickedMarker.openPopup();
     },        
 
@@ -204,27 +205,35 @@ const flightMap = {
     },
 
     markerHoverHandler(iata, event) {
+        console.log('markerHoverHandler', iata, event);
+        console.log('markerHoverHandler appState.selectedAirport', appState.selectedAirport);
+
         const marker = this.markers[iata];
         if (!marker) return;
         const airport = this.airportDataCache[iata];// Replace this with your actual function to get airport data
         if (!airport) return;
-        marker.bindPopup(airport.city);
-        if (this.selectedMarker !== iata) {
-            if (event === 'mouseover') {
-                this.fetchAndCacheRoutes(iata).then(() => {
-                    pathDrawing.drawRoutePaths(iata, appState.directRoutes, appState.routeDirection);
-                });
-            } else if (event === 'mouseout') {
-                if (!marker.hovered) {  // Delay only for the first hover
-                    setTimeout(() => {pathDrawing.clearLines();
-                    pathDrawing.drawLines();
-                    }, 200);
-                    marker.hovered = true; // Set the flag to true after the first hover
-                } else {
+
+        if (event === 'mouseover') {
+            this.fetchAndCacheRoutes(iata).then(() => {
+                pathDrawing.drawRoutePaths(iata, appState.directRoutes, appState.routeDirection);
+            });
+        } else if (event === 'mouseout') {
+            if (!marker.hovered) {  // Delay only for the first hover
+                setTimeout(() => {
                     pathDrawing.clearLines();
                     pathDrawing.drawLines();
-                }
+                }, 200);
+                marker.hovered = true; // Set the flag to true after the first hover
+            } else {
+                pathDrawing.clearLines();
+                pathDrawing.drawLines();
             }
+        }
+
+        if (appState.selectedAirport && appState.selectedAirport.iata_code === iata) {
+            console.log('markerHoverHandler appState.selectedAirport.iata_code === iata', appState.selectedAirport.iata_code === iata);
+            console.log('markerHoverHandler opening popup');
+            marker.openPopup();
         }
     },
     
