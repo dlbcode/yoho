@@ -206,6 +206,9 @@ const flightMap = {
     markerHoverHandler(iata, event) {
         const marker = this.markers[iata];
         if (!marker) return;
+        const airport = this.airportDataCache[iata];// Replace this with your actual function to get airport data
+        if (!airport) return;
+        marker.bindPopup(airport.city);
         if (this.selectedMarker !== iata) {
             if (event === 'mouseover') {
                 this.fetchAndCacheRoutes(iata).then(() => {
