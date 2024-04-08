@@ -38,14 +38,11 @@ const flightMap = {
 
             marker.hovered = false;
 
-            // Display tooltip with city name and price
             marker.bindPopup(`<b>${airport.city}</b>`, { maxWidth: 'auto' });
 
-            // Store a reference to the correct context of `this`
             let self = this;
 
             marker.on('mouseover', function(e) {
-                // Use `self` instead of `this` to refer to the correct context
                 Object.values(self.markers).forEach(marker => marker.closePopup());
                 this.openPopup();
             });
@@ -56,12 +53,10 @@ const flightMap = {
     },                
 
     handleMarkerClick(airport, clickedMarker) {
-        // Close all other popups
         Object.values(this.markers).forEach(marker => marker.closePopup());
 
         appState.selectedAirport = airport;
 
-        // Create button with specified text and class
         const createButton = (text, handler) => {
             const button = document.createElement('button');
             button.textContent = text;
@@ -70,7 +65,6 @@ const flightMap = {
             return button;
         };
 
-        // Create '+' and '-' button handlers
         const handleAddButtonClick = () => {
             const lastWaypoint = appState.waypoints[appState.waypoints.length - 1];
             if (appState.waypoints.length >= 2 && appState.waypoints.length % 2 === 0){
@@ -86,14 +80,11 @@ const flightMap = {
         };
 
         const handleRemoveButtonClick = () => {
+            console.table(appState.waypoints);
             const waypointIndex = appState.waypoints.findIndex(wp => wp.iata_code === airport.iata_code);
             if (appState.selectedAirport && appState.selectedAirport.iata_code === airport.iata_code) {
-                if (waypointIndex % 2 === 0 && appState.waypoints.length > waypointIndex) {
-                    updateState('removeWaypoint', waypointIndex);
-                } else {
-                    updateState('removeWaypoint', waypointIndex + 1);
-                    updateState('removeWaypoint', waypointIndex);
-                }
+                updateState('removeWaypoint', waypointIndex + 1);
+                updateState('removeWaypoint', waypointIndex);
                 clickedMarker.setIcon(blueDotIcon);
                 appState.selectedAirport = null;
                 popupContent.removeChild(removeButton);
@@ -101,11 +92,9 @@ const flightMap = {
             }
         };
 
-        // Create '+' and '-' buttons
         const addButton = createButton('+', handleAddButtonClick);
         const removeButton = createButton('-', handleRemoveButtonClick);
 
-        // Create popup content
         const popupContent = document.createElement('div');
         const cityName = document.createElement('p');
         cityName.textContent = airport.city;
@@ -118,7 +107,6 @@ const flightMap = {
             popupContent.appendChild(removeButton);
         }
 
-        // Open the clicked marker's popup
         clickedMarker.bindPopup(popupContent, { autoClose: false, closeOnClick: true }).openPopup();
     },       
 
