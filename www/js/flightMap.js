@@ -39,7 +39,7 @@ const flightMap = {
             marker.hovered = false;
 
             // Display tooltip with city name and price
-            marker.bindPopup(`<b>${airport.city}</b> - $${airport.price}`, { maxWidth: 'auto' });
+            marker.bindPopup(`<b>${airport.city}</b>`, { maxWidth: 'auto' });
 
             // Store a reference to the correct context of `this`
             let self = this;
