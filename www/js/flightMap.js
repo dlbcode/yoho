@@ -77,9 +77,7 @@ const flightMap = {
         const cityName = document.createElement('p');
         cityName.textContent = airport.city;
         popupContent.appendChild(cityName);
-    
 
-        // Function to handle '+' button click
         function handleAddButtonClick() {
             const lastWaypoint = appState.waypoints[appState.waypoints.length - 1];
             if (appState.waypoints.length >= 2 && appState.waypoints.length % 2 === 0){
@@ -91,7 +89,6 @@ const flightMap = {
             clickedMarker.setIcon(magentaDotIcon);
             appState.selectedAirport = airport;
 
-            // Remove the buttons from the popup content
             addButton.removeEventListener('click', handleAddButtonClick);
             if (popupContent.contains(addButton)) {
                 popupContent.removeChild(addButton);
@@ -103,23 +100,18 @@ const flightMap = {
             appState.selectedAirport = null;
         }
 
-        // Function to handle '-' button click
         function handleRemoveButtonClick() {
-            console.table(appState.waypoints);
-            console.log('selectedAirport', appState.selectedAirport);
             if (appState.selectedAirport && appState.selectedAirport.iata_code === airport.iata_code) {
                 if (waypointIndex % 2 === 0 && appState.waypoints.length > waypointIndex) {
                     console.log('removing waypointIndex(even)', waypointIndex);
                     updateState('removeWaypoint', waypointIndex);
                 } else {
-                    console.log('removing waypointIndexes(odd)', waypointIndex, waypointIndex + 1);
                     updateState('removeWaypoint', waypointIndex + 1);
                     updateState('removeWaypoint', waypointIndex);
                 }
                 clickedMarker.setIcon(blueDotIcon);
                 appState.selectedAirport = null;
 
-                // Remove the buttons from the popup content
                 removeButton.removeEventListener('click', handleRemoveButtonClick);
                 if (popupContent.contains(removeButton)) {
                     popupContent.removeChild(removeButton);
@@ -140,7 +132,6 @@ const flightMap = {
             popupContent.appendChild(removeButton);
         }
 
-        // Include the city name and button in the tooltip
         clickedMarker.bindPopup(popupContent, { autoClose: false, closeOnClick: true });
         clickedMarker.openPopup();
     },        
