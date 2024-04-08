@@ -103,11 +103,11 @@ const flightMap = {
             console.table(appState.waypoints);
             console.log('selectedAirport', appState.selectedAirport);
             if (appState.selectedAirport && appState.selectedAirport.iata_code === airport.iata_code) {
-                if (appState.waypoints.length % 2 === 0 && appState.waypoints.length > waypointIndex) {
-                    console.log('removing waypointIndex', waypointIndex);
+                if (waypointIndex % 2 === 0 && appState.waypoints.length > waypointIndex) {
+                    console.log('removing waypointIndex(even)', waypointIndex);
                     updateState('removeWaypoint', waypointIndex);
                 } else {
-                    console.log('removing waypointIndexes', waypointIndex, waypointIndex + 1);
+                    console.log('removing waypointIndexes(odd)', waypointIndex, waypointIndex + 1);
                     updateState('removeWaypoint', waypointIndex + 1);
                     updateState('removeWaypoint', waypointIndex);
                 }
