@@ -58,29 +58,20 @@ const flightMap = {
     handleMarkerClick(airport, clickedMarker) {
         // Close all other popups
         Object.values(this.markers).forEach(marker => marker.closePopup());
-    
-        appState.selectedAirport = airport;
-        console.log('appState.selectedAirport:', appState.selectedAirport);
-    
-        // Open the clicked marker's popup
-        clickedMarker.openPopup();
-    
-        const waypointIndex = appState.waypoints.findIndex(wp => wp.iata_code === airport.iata_code);
-    
-        const addButton = document.createElement('button');
-        addButton.textContent = '+';
-        addButton.className = 'tooltip-button';
-    
-        const removeButton = document.createElement('button');
-        removeButton.textContent = '-';
-        removeButton.className = 'tooltip-button';
-    
-        const popupContent = document.createElement('div');
-        const cityName = document.createElement('p');
-        cityName.textContent = airport.city;
-        popupContent.appendChild(cityName);
 
-        function handleAddButtonClick() {
+        appState.selectedAirport = airport;
+
+        // Create button with specified text and class
+        const createButton = (text, handler) => {
+            const button = document.createElement('button');
+            button.textContent = text;
+            button.className = 'tooltip-button';
+            button.addEventListener('click', handler);
+            return button;
+        };
+
+        // Create '+' and '-' button handlers
+        const handleAddButtonClick = () => {
             const lastWaypoint = appState.waypoints[appState.waypoints.length - 1];
             if (appState.waypoints.length >= 2 && appState.waypoints.length % 2 === 0){
                 updateState('addWaypoint', lastWaypoint);
@@ -89,23 +80,15 @@ const flightMap = {
                 updateState('addWaypoint', airport);
             }
             clickedMarker.setIcon(magentaDotIcon);
-            appState.selectedAirport = airport;
-
-            addButton.removeEventListener('click', handleAddButtonClick);
-            if (popupContent.contains(addButton)) {
-                popupContent.removeChild(addButton);
-            }
-            removeButton.removeEventListener('click', handleRemoveButtonClick);
-            if (popupContent.contains(removeButton)) {
-                popupContent.removeChild(removeButton);
-            }
             appState.selectedAirport = null;
-        }
+            popupContent.removeChild(addButton);
+            clickedMarker.closePopup();
+        };
 
-        function handleRemoveButtonClick() {
+        const handleRemoveButtonClick = () => {
+            const waypointIndex = appState.waypoints.findIndex(wp => wp.iata_code === airport.iata_code);
             if (appState.selectedAirport && appState.selectedAirport.iata_code === airport.iata_code) {
                 if (waypointIndex % 2 === 0 && appState.waypoints.length > waypointIndex) {
-                    console.log('removing waypointIndex(even)', waypointIndex);
                     updateState('removeWaypoint', waypointIndex);
                 } else {
                     updateState('removeWaypoint', waypointIndex + 1);
@@ -113,30 +96,31 @@ const flightMap = {
                 }
                 clickedMarker.setIcon(blueDotIcon);
                 appState.selectedAirport = null;
-
-                removeButton.removeEventListener('click', handleRemoveButtonClick);
-                if (popupContent.contains(removeButton)) {
-                    popupContent.removeChild(removeButton);
-                }
-                addButton.removeEventListener('click', handleAddButtonClick);
-                if (popupContent.contains(addButton)) {
-                    popupContent.removeChild(addButton);
-                }
-                appState.selectedAirport = null;
+                popupContent.removeChild(removeButton);
+                clickedMarker.closePopup();
             }
-        }
+        };
 
+        // Create '+' and '-' buttons
+        const addButton = createButton('+', handleAddButtonClick);
+        const removeButton = createButton('-', handleRemoveButtonClick);
+
+        // Create popup content
+        const popupContent = document.createElement('div');
+        const cityName = document.createElement('p');
+        cityName.textContent = airport.city;
+        popupContent.appendChild(cityName);
+
+        const waypointIndex = appState.waypoints.findIndex(wp => wp.iata_code === airport.iata_code);
         if (waypointIndex === -1) {
-            addButton.addEventListener('click', handleAddButtonClick);
             popupContent.appendChild(addButton);
         } else {
-            removeButton.addEventListener('click', handleRemoveButtonClick);
             popupContent.appendChild(removeButton);
         }
 
-        clickedMarker.bindPopup(popupContent, { autoClose: false, closeOnClick: true });
-        clickedMarker.openPopup();
-    },        
+        // Open the clicked marker's popup
+        clickedMarker.bindPopup(popupContent, { autoClose: false, closeOnClick: true }).openPopup();
+    },       
 
     findRoute(fromIata, toIata) {
         try {
