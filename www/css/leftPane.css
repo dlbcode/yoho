@@ -4,7 +4,7 @@
 
 .leftPane {
   transition: transform 0.5s ease-in-out;
-  flex: 0 0 170px;
+  flex: 0 0 180px;
   padding: 5px;
   overflow-y: auto;
 }
@@ -128,7 +128,7 @@ input[type="text"]:focus {
 }
 
 .route-container input {
-  width: 38px;
+  width: 40px;
 }
 
 .route-container:hover .waypointTooltip {
@@ -162,10 +162,15 @@ input[type="text"]:focus {
 }
 
 .day-name-box {
+  display: flex;
+  height: 36px;
+  width: 40px;
+  align-items: center;
+  cursor: pointer;
   background-color: #555;
   color: #a9a9a9;
   margin-right: -10px;
-  padding: 2px;
+  padding: 1px;
 }
 
 .swap-route-button {
@@ -176,7 +181,7 @@ input[type="text"]:focus {
 }
 
 .remove-route-button {
-  font-size: 20px;
+  font-size: 15px;
   padding: 2px;
   color: #999;
   background-color: #1f1f1f;

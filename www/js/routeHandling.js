@@ -80,13 +80,6 @@ const routeHandling = {
                 dayNameBox.textContent = initialDayName;
             }
         }
-
-        dayNameBox.style.width = '40px';
-        dayNameBox.style.height = '36px';
-        dayNameBox.style.display = 'flex';
-        dayNameBox.style.alignItems = 'center';
-        dayNameBox.style.padding = '2px';
-        dayNameBox.style.cursor = 'pointer';
         
         dayNameBox.addEventListener('click', function() {
             // Find the date-select-button within the same routeDiv
@@ -189,7 +182,7 @@ const routeHandling = {
         routeDiv.insertBefore(swapButton, firstInput.nextSibling);
 
         let minusButton = document.createElement('button');
-        minusButton.textContent = 'x'; // Change '-' to 'x'
+        minusButton.textContent = 'X'; // Change '-' to 'x'
         minusButton.className = 'remove-route-button';
         minusButton.onclick = () => this.removeRouteDiv(routeNumber);
         routeDiv.appendChild(minusButton);
