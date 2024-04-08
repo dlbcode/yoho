@@ -59,7 +59,7 @@ input[type="text"]:focus {
   width: 25px;
   top: 50%;
   transform: translateY(-50%);
-  left: 170px;
+  left: 180px;
   z-index: 500;
   cursor: pointer;
 }
@@ -143,7 +143,7 @@ input[type="text"]:focus {
 
 @media (max-width: 768px) {
   .leftPane {
-    flex-basis: 170px; /* Ensure left pane remains 170px wide on mobile */
+    flex-basis: 180px; /* Ensure left pane remains 170px wide on mobile */
   }
 }
 
@@ -328,7 +328,7 @@ input[type="text"]:focus {
   position: absolute;
   bottom: 2px;
   left: 0;
-  width: 160px;
+  width: 180px;
   display: flex;
   justify-content: space-between; /* Adjusted from space-between to space-around for better spacing */
   font-size: 10px;

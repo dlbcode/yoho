@@ -86,7 +86,7 @@ const uiHandling = {
             toggleBtn.style.left = '0px';
             toggleBtn.textContent = '❯';
         } else {
-            toggleBtn.style.left = '170px';
+            toggleBtn.style.left = '180px';
             toggleBtn.textContent = '❮';
         }
     });
