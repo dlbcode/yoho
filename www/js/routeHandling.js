@@ -114,6 +114,7 @@ const routeHandling = {
                 const timeZone = 'UTC'; // Specify your desired time zone, e.g., 'UTC', 'America/New_York'
                 
                 let fp = flatpickr(this, {
+                    disableMobile: true,
                     enableTime: false,
                     dateFormat: "Y-m-d",
                     defaultDate: isDateRange ? currentRouteDate.split(' to ')[0] : currentRouteDate,
