@@ -91,11 +91,16 @@ const flightMap = {
             clickedMarker.setIcon(magentaDotIcon);
             appState.selectedAirport = airport;
 
-            // Update the popup content
+            // Remove the buttons from the popup content
             addButton.removeEventListener('click', handleAddButtonClick);
-            popupContent.removeChild(addButton);
-            removeButton.addEventListener('click', handleRemoveButtonClick);
-            popupContent.appendChild(removeButton);
+            if (popupContent.contains(addButton)) {
+                popupContent.removeChild(addButton);
+            }
+            removeButton.removeEventListener('click', handleRemoveButtonClick);
+            if (popupContent.contains(removeButton)) {
+                popupContent.removeChild(removeButton);
+            }
+            appState.selectedAirport = null;
         }
 
         // Function to handle '-' button click
@@ -114,11 +119,16 @@ const flightMap = {
                 clickedMarker.setIcon(blueDotIcon);
                 appState.selectedAirport = null;
 
-                // Update the popup content
+                // Remove the buttons from the popup content
                 removeButton.removeEventListener('click', handleRemoveButtonClick);
-                popupContent.removeChild(removeButton);
-                addButton.addEventListener('click', handleAddButtonClick);
-                popupContent.appendChild(addButton);
+                if (popupContent.contains(removeButton)) {
+                    popupContent.removeChild(removeButton);
+                }
+                addButton.removeEventListener('click', handleAddButtonClick);
+                if (popupContent.contains(addButton)) {
+                    popupContent.removeChild(addButton);
+                }
+                appState.selectedAirport = null;
             }
         }
 
