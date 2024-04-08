@@ -176,10 +176,16 @@ input[type="text"]:focus {
 }
 
 .remove-route-button {
+  font-size: 20px;
   padding: 2px;
+  color: #999;
   background-color: #1f1f1f;
   margin: -5px;
   cursor: pointer;
+}
+
+.remove-route-button:hover {
+  color: #830000;
 }
 
 .date-select-button {

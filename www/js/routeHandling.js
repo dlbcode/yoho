@@ -189,7 +189,7 @@ const routeHandling = {
         routeDiv.insertBefore(swapButton, firstInput.nextSibling);
 
         let minusButton = document.createElement('button');
-        minusButton.textContent = '-';
+        minusButton.textContent = 'x'; // Change '-' to 'x'
         minusButton.className = 'remove-route-button';
         minusButton.onclick = () => this.removeRouteDiv(routeNumber);
         routeDiv.appendChild(minusButton);
