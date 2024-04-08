@@ -69,9 +69,11 @@ const flightMap = {
     
         const addButton = document.createElement('button');
         addButton.textContent = '+';
+        addButton.className = 'tooltip-button';
     
         const removeButton = document.createElement('button');
         removeButton.textContent = '-';
+        removeButton.className = 'tooltip-button';
     
         const popupContent = document.createElement('div');
         const cityName = document.createElement('p');

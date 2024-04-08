@@ -59,6 +59,13 @@ button, input[type="number"], input[type="date"], input[type="text"] {
   height: 36px;
 }
 
+.tooltip-button {
+  border-radius: 50%; /* Make the button circular */
+  width: 30px; /* Set the width of the button */
+  height: 30px; /* Set the height of the button */
+  text-align: center; /* Center the '+' or '-' text */
+}
+
 a {
   color: #d3d3d3;
 }
