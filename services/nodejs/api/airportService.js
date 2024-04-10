@@ -49,7 +49,7 @@ async function fetchAndUpsertAirport(iata, airportsCollection) {
                         country = exactMatch.country ? exactMatch.country.name : 'Unknown Country';
                         break;
                     case 'country':
-                        city = 'N/A'; // Not applicable for countries
+                        city = 'Any'; // Not applicable for countries
                         country = exactMatch.name;
                         break;
                     case 'airport':
