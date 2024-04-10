@@ -26,13 +26,13 @@ async function fetchAndUpsertAirport(iata, airportsCollection) {
 
         if (response.data && response.data.locations && response.data.locations.length > 0) {
             // Try to find an exact match for airport, then for other types
-            console.log('trying to find exact match for iata: ', iata + 'in response: ', response.data.locations);
+            console.log('trying to find exact match for iata: ', iata + ' in response: ', response.data.locations);
             let exactMatch = response.data.locations.find(location => location.type === 'airport' && location.code && location.code.toUpperCase() === iata.toUpperCase());
 
             if (!exactMatch) {
                 const locationTypes = ['city', 'country', 'region', 'continent'];
                 for (let type of locationTypes) {
-                    console.log('trying to find match for iata: ', iata +'in type: ', type);
+                    console.log('trying to find match for iata: ', iata +' in type: ', type);
                     exactMatch = response.data.locations.find(location => location.type === type && location.code && location.code.toUpperCase() === iata.toUpperCase());
                     if (exactMatch) break; // Stop if an exact match is found
                 }
@@ -40,10 +40,35 @@ async function fetchAndUpsertAirport(iata, airportsCollection) {
 
             // Ensure exactMatch and necessary properties are not null before proceeding
             if (exactMatch && exactMatch.code) {
+                let city = 'Unknown City', country = 'Unknown Country';
+            
+                // Handling based on the type of exactMatch
+                switch (exactMatch.type) {
+                    case 'city':
+                        city = exactMatch.name;
+                        country = exactMatch.country ? exactMatch.country.name : 'Unknown Country';
+                        break;
+                    case 'country':
+                        city = 'N/A'; // Not applicable for countries
+                        country = exactMatch.name;
+                        break;
+                    case 'airport':
+                        // For airports, check if city information is available and map accordingly
+                        if (exactMatch.city && exactMatch.city.name) {
+                            city = exactMatch.city.name;
+                            // Check if country information is available under the city
+                            if (exactMatch.city.country && exactMatch.city.country.name) {
+                                country = exactMatch.city.country.name;
+                            }
+                        }
+                        break;
+                    // Add cases for 'region' and 'continent' if necessary
+                }
+            
                 const airportData = {
                     iata_code: exactMatch.code,
-                    city: exactMatch.type === 'city' ? exactMatch.name : (exactMatch.city && exactMatch.city.name ? exactMatch.city.name : 'Any'),
-                    country: exactMatch.country ? exactMatch.country.name : (exactMatch.city && exactMatch.city.country ? exactMatch.city.country.name : 'Unknown Country'),
+                    city: city,
+                    country: country,
                     latitude: exactMatch.location ? parseFloat(exactMatch.location.lat) : null,
                     longitude: exactMatch.location ? parseFloat(exactMatch.location.lon) : null,
                     name: exactMatch.name,
@@ -51,10 +76,11 @@ async function fetchAndUpsertAirport(iata, airportsCollection) {
                     weight: calculateWeight(exactMatch.rank),
                     source: 'tequila'
                 };
-
+            
                 await airportsCollection.updateOne({ iata_code: exactMatch.code }, { $set: airportData }, { upsert: true });
                 return [airportData]; // Return the upserted data as an array for consistency
-            }
+            }            
+            
         }
     } catch (error) {
         console.error('Error fetching airport data from Tequila API:', error);
