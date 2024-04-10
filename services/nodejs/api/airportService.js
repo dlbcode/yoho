@@ -25,24 +25,25 @@ async function fetchAndUpsertAirport(iata, airportsCollection) {
         });
 
         if (response.data && response.data.locations && response.data.locations.length > 0) {
-            // First, try to find an exact match among airports
-            let exactMatch = response.data.locations.find(location => location.type === 'airport' && location.code.toUpperCase() === iata.toUpperCase());
+            // Try to find an exact match for airport, then for other types
+            console.log('trying to find exact match for iata: ', iata + 'in response: ', response.data.locations);
+            let exactMatch = response.data.locations.find(location => location.type === 'airport' && location.code && location.code.toUpperCase() === iata.toUpperCase());
 
-            // If no exact airport match, try other location types in order
             if (!exactMatch) {
                 const locationTypes = ['city', 'country', 'region', 'continent'];
                 for (let type of locationTypes) {
-                    exactMatch = response.data.locations.find(location => location.type === type && location.code.toUpperCase() === iata.toUpperCase());
+                    console.log('trying to find match for iata: ', iata +'in type: ', type);
+                    exactMatch = response.data.locations.find(location => location.type === type && location.code && location.code.toUpperCase() === iata.toUpperCase());
                     if (exactMatch) break; // Stop if an exact match is found
                 }
             }
 
-            // If an exact match is found, upsert it
-            if (exactMatch) {
+            // Ensure exactMatch and necessary properties are not null before proceeding
+            if (exactMatch && exactMatch.code) {
                 const airportData = {
                     iata_code: exactMatch.code,
-                    city: exactMatch.type === 'city' ? exactMatch.name : (exactMatch.city ? exactMatch.city.name : 'Unknown City'),
-                    country: exactMatch.country  ? exactMatch.country.name : exactMatch.city.country.name,
+                    city: exactMatch.type === 'city' ? exactMatch.name : (exactMatch.city && exactMatch.city.name ? exactMatch.city.name : 'Any'),
+                    country: exactMatch.country ? exactMatch.country.name : (exactMatch.city && exactMatch.city.country ? exactMatch.city.country.name : 'Unknown Country'),
                     latitude: exactMatch.location ? parseFloat(exactMatch.location.lat) : null,
                     longitude: exactMatch.location ? parseFloat(exactMatch.location.lon) : null,
                     name: exactMatch.name,
