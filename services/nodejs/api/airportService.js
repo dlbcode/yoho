@@ -39,30 +39,35 @@ async function fetchAndUpsertAirport(iata, airportsCollection) {
             }
 
             // Ensure exactMatch and necessary properties are not null before proceeding
+            if (!exactMatch) {
+                const locationTypes = ['city', 'country', 'region', 'continent'];
+                for (let type of locationTypes) {
+                    exactMatch = response.data.locations.find(location => location.type === type && location.code && location.code.toUpperCase() === iata.toUpperCase());
+                    if (exactMatch) break; // Found an exact match
+                }
+            }
+            
             if (exactMatch && exactMatch.code) {
                 let city = 'Unknown City', country = 'Unknown Country';
             
-                // Handling based on the type of exactMatch
                 switch (exactMatch.type) {
                     case 'city':
                         city = exactMatch.name;
                         country = exactMatch.country ? exactMatch.country.name : 'Unknown Country';
                         break;
                     case 'country':
-                        city = 'Any'; // Not applicable for countries
+                        city = 'Any'; // City should be set to 'Any' for countries
                         country = exactMatch.name;
                         break;
                     case 'airport':
-                        // For airports, check if city information is available and map accordingly
                         if (exactMatch.city && exactMatch.city.name) {
                             city = exactMatch.city.name;
-                            // Check if country information is available under the city
                             if (exactMatch.city.country && exactMatch.city.country.name) {
                                 country = exactMatch.city.country.name;
                             }
                         }
                         break;
-                    // Add cases for 'region' and 'continent' if necessary
+                    // Handle other types as needed
                 }
             
                 const airportData = {
@@ -78,8 +83,8 @@ async function fetchAndUpsertAirport(iata, airportsCollection) {
                 };
             
                 await airportsCollection.updateOne({ iata_code: exactMatch.code }, { $set: airportData }, { upsert: true });
-                return [airportData]; // Return the upserted data as an array for consistency
-            }            
+                return [airportData];
+            }                        
             
         }
     } catch (error) {

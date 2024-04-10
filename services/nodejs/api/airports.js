@@ -17,26 +17,32 @@ module.exports = function(app, airportsCollection) {
       }
 
       // Fetch potential matches from the local collection
-      const airports = await airportsCollection.find(query).toArray(); // Removed the limit to fetch all matches
+      const airports = await airportsCollection.find(query).toArray();
 
-      // Check if any returned airport exactly matches the iataParam or queryParam
-      let exactMatch = airports.some(airport => iataParam && airport.iata_code === iataParam.toUpperCase()) || airports.some(airport => queryParam && new RegExp('^' + queryParam, 'i').test(airport.iata_code));
+      // Updated logic for determining exactMatch
+      let exactMatch = false;
+      if (iataParam || queryParam) {
+          const searchParam = (iataParam || queryParam).toUpperCase();
+          exactMatch = airports.some(airport => airport.iata_code === searchParam);
+      }
+
+      console.log('exactMatch: ', exactMatch, ' for iataParam: ', iataParam, ' and queryParam: ', queryParam, ' airports: ', airports.length);
 
       if (!exactMatch && queryParam) {
-        // If no exact match is found and there's a query, try the external API
-        console.log('No exact matching iata_code found, searching using Tequila API for: ', queryParam || iataParam);
-        const newAirports = await fetchAndUpsertAirport(queryParam || iataParam, airportsCollection);
-        if (newAirports && newAirports.length > 0) {
-          res.json(newAirports); // Return the newly added airports
-        } else if (airports.length > 0) {
-          // Return local non-exact matches if no new airports are added
-          res.json(airports);
-        } else {
-          res.status(404).send('No airports found');
-        }
+          // If no exact match is found and there's a query, try the external API
+          console.log('No exact matching iata_code found, searching using Tequila API for: ', queryParam || iataParam);
+          const newAirports = await fetchAndUpsertAirport(queryParam || iataParam, airportsCollection);
+          if (newAirports && newAirports.length > 0) {
+              res.json(newAirports); // Return the newly added airports
+          } else if (airports.length > 0) {
+              // Return local non-exact matches if no new airports are added
+              res.json(airports);
+          } else {
+              res.status(404).send('No airports found');
+          }
       } else {
-        // Return the airports from the collection, both exact and non-exact matches
-        res.json(airports);
+          // Return the airports from the collection, both exact and non-exact matches
+          res.json(airports);
       }
     } catch (error) {
       console.error('Error fetching airports data:', error);
