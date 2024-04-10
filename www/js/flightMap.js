@@ -180,8 +180,8 @@ const flightMap = {
     },
 
     markerHoverHandler(iata, event) {
-        console.log('markerHoverHandler', iata, event);
-        console.log('markerHoverHandler appState.selectedAirport', appState.selectedAirport);
+//        console.log('markerHoverHandler', iata, event);
+//        console.log('markerHoverHandler appState.selectedAirport', appState.selectedAirport);
 
         const marker = this.markers[iata];
         if (!marker) return;
@@ -206,8 +206,8 @@ const flightMap = {
         }
 
         if (appState.selectedAirport && appState.selectedAirport.iata_code === iata) {
-            console.log('markerHoverHandler appState.selectedAirport.iata_code === iata', appState.selectedAirport.iata_code === iata);
-            console.log('markerHoverHandler opening popup');
+//            console.log('markerHoverHandler appState.selectedAirport.iata_code === iata', appState.selectedAirport.iata_code === iata);
+//            console.log('markerHoverHandler opening popup');
             marker.openPopup();
         }
     },
@@ -226,16 +226,13 @@ const flightMap = {
     },    
 
     shouldDisplayAirport(airportWeight, currentZoom) {
-        return (
-            (currentZoom >= 2 && currentZoom <= 4 && airportWeight <= 3) ||
-            (currentZoom >= 5 && currentZoom <= 6 && airportWeight <= 6) ||
-            (currentZoom >= 7 && airportWeight <= 10)
-        );
-    },    
+        return airportWeight <= currentZoom - 1;
+    },       
 
     updateVisibleMarkers() {
         const currentZoom = map.getZoom();
         const currentBounds = map.getBounds();
+        console.log('currentZoom', currentZoom);
     
         // Check and add markers for airports that should be visible at the current zoom level
         Object.values(this.airportDataCache).forEach(airport => {
