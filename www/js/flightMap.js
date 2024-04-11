@@ -24,9 +24,14 @@ const flightMap = {
             return;
         }
     
+        // Do not add a marker if the airport type is 'country'
+        if (airport.type === 'country') {
+            return;
+        }
+    
         let iata = airport.iata_code;
         if (this.markers[iata]) return;
-
+    
         let icon = airport.type === 'city' ? greenDotIcon : 
                    appState.waypoints.some(wp => wp.iata_code === iata) ? magentaDotIcon : blueDotIcon;
     
@@ -59,10 +64,10 @@ const flightMap = {
     
     updateVisibleMarkersForWaypoints(iata) {
         const isWaypoint = appState.waypoints.some(wp => wp.iata_code === iata);
-        if (isWaypoint) {
+        if (isWaypoint && this.markers[iata]) {
             this.markers[iata].addTo(map);
         }
-    },                    
+    },                        
 
     handleMarkerClick(airport, clickedMarker) {
         Object.values(this.markers).forEach(marker => marker.closePopup());
