@@ -27,30 +27,39 @@ const flightMap = {
         let iata = airport.iata_code;
         if (this.markers[iata]) return;
     
-        let icon = appState.waypoints.some(wp => wp.iata_code === iata) ? magentaDotIcon : blueDotIcon;
-        
-        let zoom = map.getZoom();
-        if (this.shouldDisplayAirport(airport.weight, zoom)) {
-            const latLng = L.latLng(airport.latitude, airport.longitude);
-            const marker = L.marker(latLng, {icon: icon}).addTo(map);
+        let icon;
+    if (airport.type === 'city') {
+        icon = greenDotIcon; // Use greenDotIcon for airports of type 'city'
+    } else {
+        // Use magentaDotIcon for selected waypoints or blueDotIcon for others
+        icon = appState.waypoints.some(wp => wp.iata_code === iata) ? magentaDotIcon : blueDotIcon;
+    }
 
-            marker.airportWeight = airport.weight;
+    let zoom = map.getZoom();
+    if (this.shouldDisplayAirport(airport.weight, zoom)) {
+        const latLng = L.latLng(airport.latitude, airport.longitude);
+        const marker = L.marker(latLng, { icon: icon }).addTo(map);
+        marker.airportWeight = airport.weight;
+        marker.hovered = false;
 
-            marker.hovered = false;
-
-            marker.bindPopup(`<b>${airport.city}</b>`, { maxWidth: 'auto' });
-
-            let self = this;
-
-            marker.on('mouseover', function(e) {
-                Object.values(self.markers).forEach(marker => marker.closePopup());
-                this.openPopup();
-            });
-
-            eventManager.attachMarkerEventListeners(iata, marker, airport);
-            this.markers[iata] = marker;
+        // Adjust the popup content based on the type of the airport
+        let popupContent = `<b>${airport.city}</b>`;
+        if (airport.type === 'airport') {
+            popupContent += `<br>${airport.name}`; // Add the airport name for type 'airport'
         }
-    },                
+        
+        marker.bindPopup(popupContent, { maxWidth: 'auto' });
+
+        let self = this;
+        marker.on('mouseover', function(e) {
+            Object.values(self.markers).forEach(marker => marker.closePopup());
+            this.openPopup();
+        });
+
+        eventManager.attachMarkerEventListeners(iata, marker, airport);
+        this.markers[iata] = marker;
+    }
+},                   
 
     handleMarkerClick(airport, clickedMarker) {
         Object.values(this.markers).forEach(marker => marker.closePopup());

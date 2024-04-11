@@ -113,7 +113,7 @@ var magentaDotIcon = L.divIcon({
 
 var greenDotIcon = L.divIcon({
     className: 'custom-div-icon',
-    html: '<div style="background-color: #2ec54e; width: 10px; height: 10px; border-radius: 50%;"></div>',
+    html: '<div style="background-color: #419c54; width: 10px; height: 10px; border-radius: 50%;"></div>',
     iconSize: [10, 10],
     iconAnchor: [6, 6]
 });
