@@ -60,7 +60,6 @@ const flightMap = {
     updateVisibleMarkersForWaypoints(iata) {
         const isWaypoint = appState.waypoints.some(wp => wp.iata_code === iata);
         if (isWaypoint) {
-            console.log('Forcing visibility update for waypoint:', iata);
             this.markers[iata].addTo(map);
         }
     },                    
