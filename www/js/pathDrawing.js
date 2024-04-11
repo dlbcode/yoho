@@ -162,39 +162,28 @@ const pathDrawing = {
                     map.closePopup();
                 };
 
-                // New touch handling logic
-                let touchStartPos = null;
                 const onTouchStart = (e) => {
+                    console.log('Touch start detected');
                     touchStartPos = e.touches[0];
                 };
-
+                
                 const onTouchMove = (e) => {
+                    console.log('Touch move detected');
                     const touchEndPos = e.touches[0];
-                    if (Math.abs(touchStartPos.clientX - touchEndPos.clientX) > 10 || Math.abs(touchStartPos.clientY - touchEndPos.clientY) > 10) {
-                        // Considered a drag, open the popup
-                        onMouseOver(e);
+                    if (Math.abs(touchStartPos.clientX - touchEndPos.clientX) > 10 ||
+                        Math.abs(touchStartPos.clientY - touchEndPos.clientY) > 10) {
+                        console.log('Considered a drag, opening popup');
                     }
                 };
-
-                const onTouchEnd = (e) => {
-                    document.querySelectorAll('.route-info-table tbody tr').forEach(row => {
-                        const isMatchingRow = row.dataset.routeId === routeLineId;
-                        row.classList.toggle('selected', isMatchingRow);
                 
-                        if (isMatchingRow) {
-                            row.scrollIntoView({
-                                behavior: 'smooth', // Smooth scroll
-                                block: 'nearest',   // Vertical alignment; 'nearest' for minimal scrolling
-                                inline: 'start'     // Horizontal alignment
-                            });
-                        }
-                    });
-                    updateState('removeRouteLine', routeLineId);
+                const onTouchEnd = (e) => {
+                    console.log('Touch end detected');
                 };
-
-                // Attaching new touch event listeners to the invisible line for touch drag interactions
-                invisibleLine.on('touchstart', onTouchStart).on('touchmove', onTouchMove, {passive: true}).on('touchend', onTouchEnd);
-
+                
+                invisibleLine.on('touchstart', onTouchStart)
+                             .on('touchmove', onTouchMove)
+                             .on('touchend', onTouchEnd);
+                             
                 const onClick = () => {
                     updateState('addWaypoint', destination);
                     map.closePopup();

@@ -150,19 +150,18 @@ window.addEventListener('resize', function () {
     document.getElementById('map').style.height = height + 'px';
 });
 
-document.addEventListener('stateChange', function(e) {
-    console.log('stateChange event:', e.detail);
-    if (e.detail.key === 'selectedAirport') {
-        if (appState.selectedAirport) {
-            console.log('Disable dragging');
-            map.dragging.disable(); // Disable dragging if an airport is selected
-        } else {
-            console.log('Enable dragging');
-            map.dragging.enable(); // Enable dragging if no airport is selected
-        }
-    }
-});
-
+//document.addEventListener('stateChange', function(e) {
+//    console.log('stateChange event:', e.detail);
+//    if (e.detail.key === 'selectedAirport') {
+//        if (appState.selectedAirport) {
+//            console.log('Disable dragging');
+//            map.dragging.disable(); // Disable dragging if an airport is selected
+//        } else {
+//            console.log('Enable dragging');
+//            map.dragging.enable(); // Enable dragging if no airport is selected
+//        }
+//    }
+//});
 
 document.addEventListener('DOMContentLoaded', function () {
     flightMap.fetchAndDisplayAirports();
