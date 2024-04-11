@@ -241,7 +241,6 @@ const flightMap = {
     updateVisibleMarkers() {
         const currentZoom = map.getZoom();
         const currentBounds = map.getBounds();
-        console.log('currentZoom', currentZoom);
     
         // Check and add markers for airports that should be visible at the current zoom level
         Object.values(this.airportDataCache).forEach(airport => {
