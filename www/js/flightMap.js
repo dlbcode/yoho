@@ -36,11 +36,11 @@ const flightMap = {
         marker.iata_code = iata;
         marker.hovered = false;
     
-        // Adjust the popup content based on the type of the airport
-        let popupContent = `<b>${airport.city}</b>`;
+        let popupContent = `<div style="text-align: center; color: #bababa;"><b>${airport.city}</b>`;
         if (airport.type === 'airport') {
-            popupContent += `<br>${airport.name}`; // Add the airport name for type 'airport'
+            popupContent += `<div>${airport.name}</div>`; 
         }
+        popupContent += '</div>';
         
         marker.bindPopup(popupContent, { maxWidth: 'auto' });
     
