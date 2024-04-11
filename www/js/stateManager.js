@@ -106,7 +106,11 @@ function updateState(key, value) {
             appState.routeDates[routeIndex] = routeDetails.routeDates;
         
             updateUrl();
-            break; 
+            break;
+            
+        case 'selectedAirport':
+            appState.selectedAirport = value;
+            break;
         
         case 'removeSelectedRoute':
             delete appState.selectedRoutes[value];

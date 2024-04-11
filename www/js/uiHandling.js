@@ -192,7 +192,7 @@ const uiHandling = {
       document.querySelectorAll('.dateTooltip').forEach(tooltip => {
           tooltip.remove();
       });
-  }
+  },
 }
 
 document.addEventListener('DOMContentLoaded', () => {

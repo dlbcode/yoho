@@ -77,7 +77,8 @@ const eventManager = {
                 }
             }
             flightMap.selectedMarker = null;
-            appState.selectedAirport = null;
+            //appState.selectedAirport = null;
+            updateState('selectedAirport', null);
             pathDrawing.clearLines();
             pathDrawing.drawLines();
         });
@@ -109,7 +110,8 @@ const eventManager = {
             } else if (event.target.id === 'clearBtn') {
                 updateState('routeDirection', 'from');
                 updateState('clearData', null);
-                appState.selectedAirport = null;
+                //appState.selectedAirport = null;
+                updateState('selectedAirport', null);
                 routeList.updateEstPrice();
                 pathDrawing.clearLines(true);
                 mapHandling.updateMarkerIcons();
@@ -147,6 +149,20 @@ window.addEventListener('resize', function () {
     const height = window.innerHeight;
     document.getElementById('map').style.height = height + 'px';
 });
+
+document.addEventListener('stateChange', function(e) {
+    console.log('stateChange event:', e.detail);
+    if (e.detail.key === 'selectedAirport') {
+        if (appState.selectedAirport) {
+            console.log('Disable dragging');
+            map.dragging.disable(); // Disable dragging if an airport is selected
+        } else {
+            console.log('Enable dragging');
+            map.dragging.enable(); // Enable dragging if no airport is selected
+        }
+    }
+});
+
 
 document.addEventListener('DOMContentLoaded', function () {
     flightMap.fetchAndDisplayAirports();

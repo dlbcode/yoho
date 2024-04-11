@@ -72,7 +72,8 @@ const flightMap = {
     handleMarkerClick(airport, clickedMarker) {
         Object.values(this.markers).forEach(marker => marker.closePopup());
 
-        appState.selectedAirport = airport;
+        // appState.selectedAirport = airport;
+        updateState('selectedAirport', airport);
 
         const createButton = (text, handler) => {
             const button = document.createElement('button');
@@ -91,7 +92,8 @@ const flightMap = {
                 updateState('addWaypoint', airport);
             }
             clickedMarker.setIcon(magentaDotIcon);
-            appState.selectedAirport = null;
+            //appState.selectedAirport = null;
+            updateState('selectedAirport', null);
             popupContent.removeChild(addButton);
             clickedMarker.closePopup();
         };
@@ -103,7 +105,8 @@ const flightMap = {
                 updateState('removeWaypoint', waypointIndex + 1);
                 updateState('removeWaypoint', waypointIndex);
                 clickedMarker.setIcon(blueDotIcon);
-                appState.selectedAirport = null;
+                //appState.selectedAirport = null;
+                updateState('selectedAirport', null);
                 popupContent.removeChild(removeButton);
                 clickedMarker.closePopup();
             }
