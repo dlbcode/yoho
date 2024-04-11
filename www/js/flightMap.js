@@ -4,7 +4,7 @@ import { eventManager } from './eventManager.js';
 import { appState, updateState } from './stateManager.js';
 
 const flightMap = {
-    markers: [],
+    markers: {},
     currentLines: [],
     selectedMarker: null,
     routePathCache: {},
@@ -26,22 +26,16 @@ const flightMap = {
     
         let iata = airport.iata_code;
         if (this.markers[iata]) return;
-    
-        let icon;
-    if (airport.type === 'city') {
-        icon = greenDotIcon; // Use greenDotIcon for airports of type 'city'
-    } else {
-        // Use magentaDotIcon for selected waypoints or blueDotIcon for others
-        icon = appState.waypoints.some(wp => wp.iata_code === iata) ? magentaDotIcon : blueDotIcon;
-    }
 
-    let zoom = map.getZoom();
-    if (this.shouldDisplayAirport(airport.weight, zoom)) {
+        let icon = airport.type === 'city' ? greenDotIcon : 
+                   appState.waypoints.some(wp => wp.iata_code === iata) ? magentaDotIcon : blueDotIcon;
+    
         const latLng = L.latLng(airport.latitude, airport.longitude);
         const marker = L.marker(latLng, { icon: icon }).addTo(map);
         marker.airportWeight = airport.weight;
+        marker.iata_code = iata;
         marker.hovered = false;
-
+    
         // Adjust the popup content based on the type of the airport
         let popupContent = `<b>${airport.city}</b>`;
         if (airport.type === 'airport') {
@@ -49,17 +43,27 @@ const flightMap = {
         }
         
         marker.bindPopup(popupContent, { maxWidth: 'auto' });
-
+    
         let self = this;
         marker.on('mouseover', function(e) {
             Object.values(self.markers).forEach(marker => marker.closePopup());
             this.openPopup();
         });
-
+    
         eventManager.attachMarkerEventListeners(iata, marker, airport);
         this.markers[iata] = marker;
-    }
-},                   
+    
+        // Ensure waypoints are always visible
+        this.updateVisibleMarkersForWaypoints(iata);
+    },
+    
+    updateVisibleMarkersForWaypoints(iata) {
+        const isWaypoint = appState.waypoints.some(wp => wp.iata_code === iata);
+        if (isWaypoint) {
+            console.log('Forcing visibility update for waypoint:', iata);
+            this.markers[iata].addTo(map);
+        }
+    },                    
 
     handleMarkerClick(airport, clickedMarker) {
         Object.values(this.markers).forEach(marker => marker.closePopup());
@@ -252,13 +256,18 @@ const flightMap = {
         });
 
         // Update visibility of existing markers
-        Object.values(this.markers).forEach(marker => {
-            if (this.shouldDisplayAirport(marker.airportWeight, currentZoom) &&
-                currentBounds.contains(marker.getLatLng())) {
-                if (!map.hasLayer(marker)) {
-                    marker.addTo(map);
+        Object.keys(this.markers).forEach(iata => {
+            const marker = this.markers[iata];
+            const isWaypoint = appState.waypoints.some(wp => wp.iata_code === iata);
+            if (isWaypoint || this.shouldDisplayAirport(marker.airportWeight, currentZoom)) {
+                if (currentBounds.contains(marker.getLatLng())) {
+                    if (!map.hasLayer(marker)) {
+                        marker.addTo(map);
+                    }
+                } else if (!isWaypoint) {
+                    map.removeLayer(marker);
                 }
-            } else {
+            } else if (!isWaypoint) {
                 map.removeLayer(marker);
             }
         });
