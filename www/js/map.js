@@ -1,5 +1,5 @@
 import { flightMap } from './flightMap.js';
-import { updateState } from './stateManager.js';
+import { updateState, appState } from './stateManager.js';
 import { getPrice } from './getPrice.js';
 import { leftPane } from './leftPane.js';
 import { infoPane } from './infoPane.js';
@@ -55,20 +55,34 @@ L.control.zoom({ // Zoom control settings
     position: 'bottomright'
 }).addTo(map);
 
+var mc = new Hammer(document.getElementById('map'));
+mc.get('pan').set({ direction: Hammer.DIRECTION_ALL });
+mc.on('pan', function(ev) {
+    if (appState.selectedAirport) {
+        let simulatedEvent = new MouseEvent("mouseover", {
+            view: window,
+            bubbles: true,
+            cancelable: true,
+            clientX: ev.center.x,
+            clientY: ev.center.y
+        });
+        let element = document.elementFromPoint(ev.center.x, ev.center.y);
+        if (element) element.dispatchEvent(simulatedEvent);
+    }
+});
+
 // Use HTML5 Geolocation API to fetch client's location
 if (navigator.geolocation) {
     navigator.geolocation.getCurrentPosition(function(position) {
         map.setView([position.coords.latitude, position.coords.longitude], 4);
     }, function(error) {
         console.error('Geolocation API Error:', error);
-        // Optionally, set a fallback location here
     });
 } else {
     console.error('Geolocation API not supported by this browser.');
-    // Optionally, set a fallback location here
 }
 
-document.getElementById('map').style.height = window.innerHeight + 'px'; // Initial resize on load
+document.getElementById('map').style.height = window.innerHeight + 'px';
 document.addEventListener('DOMContentLoaded', () => {
     initMapFunctions();
     getPrice.init();
@@ -84,18 +98,27 @@ function adjustMapSize() {
     const windowHeight = window.innerHeight;
     const newMapHeight = windowHeight - infoPaneHeight;
     mapElement.style.height = `${newMapHeight}px`;
-
     if (window.map) {
         map.invalidateSize();
-    }    
+    }
 }
 
 window.addEventListener('resize', adjustMapSize);
-
 window.addEventListener('orientationchange', adjustMapSize);
-
-// Initial call to adjust map size
 document.addEventListener('DOMContentLoaded', adjustMapSize);
+
+document.addEventListener('stateChange', function(e) {
+    if (e.detail.key === 'selectedAirport') {
+        if (appState.selectedAirport) {
+            console.log('Activate touch-to-mouse emulation and disable dragging');
+            map.dragging.disable();
+        } else {
+            console.log('Deactivate touch-to-mouse emulation and enable dragging');
+            map.dragging.enable();
+            map.touchZoom.enable();
+        }
+    }
+  });
 
 var blueDotIcon = L.divIcon({
     className: 'custom-div-icon',
