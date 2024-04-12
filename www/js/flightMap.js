@@ -49,12 +49,6 @@ const flightMap = {
         
         marker.bindPopup(popupContent, { maxWidth: 'auto' });
     
-        let self = this;
-        marker.on('mouseover', function(e) {
-            Object.values(self.markers).forEach(marker => marker.closePopup());
-            this.openPopup();
-        });
-    
         eventManager.attachMarkerEventListeners(iata, marker, airport);
         this.markers[iata] = marker;
     
@@ -200,6 +194,7 @@ const flightMap = {
     },
 
     markerHoverHandler(iata, event) {
+        let self = this;
         const marker = this.markers[iata];
         if (!marker) return;
         const airport = this.airportDataCache[iata];
@@ -213,6 +208,8 @@ const flightMap = {
         if (event === 'mouseover') {
             this.fetchAndCacheRoutes(iata).then(() => {
                 pathDrawing.drawRoutePaths(iata, appState.directRoutes, appState.routeDirection);
+                Object.values(self.markers).forEach(marker => marker.closePopup());
+                marker.openPopup();
             });
         } else if (event === 'mouseout') {
             if (!marker.hovered) {  // Delay only for the first hover
