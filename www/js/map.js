@@ -1,9 +1,10 @@
 import { flightMap } from './flightMap.js';
-import { updateState, appState } from './stateManager.js';
+import { updateState } from './stateManager.js';
 import { getPrice } from './getPrice.js';
 import { leftPane } from './leftPane.js';
 import { infoPane } from './infoPane.js';
 import { routeHandling } from './routeHandling.js';
+import { mapHandling } from './mapHandling.js';
 
 async function initMapFunctions() {
     const params = new URLSearchParams(window.location.search);
@@ -17,7 +18,7 @@ async function initMapFunctions() {
                 airports.push(airport);
             }
         }
-        updateState('addWaypoint', airports); // Add all waypoints in one operation
+        updateState('addWaypoint', airports);
     }
     const directionParam = params.get('direction');
     if (directionParam) {
@@ -41,52 +42,19 @@ var map = L.map('map', {
     zoomControl: false, 
     minZoom: 2, 
     maxZoom: 19,
-    worldCopyJump: true // This option makes the map jump to the original world copy
+    worldCopyJump: true 
 });
 
-map.setView([0, 0], 4); // Default view settings
+map.setView([0, 0], 4);
 
-L.tileLayer('https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png', { // Tile layer settings
+L.tileLayer('https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png', {
     maxZoom: 19,
     attribution: '© OpenStreetMap contributors'
 }).addTo(map);
 
-L.control.zoom({ // Zoom control settings
+L.control.zoom({
     position: 'bottomright'
 }).addTo(map);
-
-var mc = new Hammer(document.getElementById('map'));
-mc.get('pan').set({ direction: Hammer.DIRECTION_ALL });
-
-let lastElement = null;
-
-mc.on('pan', function(ev) {
-    if (appState.selectedAirport) {
-        let element = document.elementFromPoint(ev.center.x, ev.center.y);
-        
-        // Simulate mouseover if moving to a new element
-        if (element !== lastElement) {
-            if (lastElement) {
-                simulateMouseEvent('mouseout', ev.center, lastElement);
-            }
-            simulateMouseEvent('mouseover', ev.center, element);
-            lastElement = element;
-        }
-
-        simulateMouseEvent("mousemove", ev.center, element);
-    }
-});
-
-function simulateMouseEvent(eventType, center, target) {
-    let simulatedEvent = new MouseEvent(eventType, {
-        view: window,
-        bubbles: true,
-        cancelable: true,
-        clientX: center.x,
-        clientY: center.y
-    });
-    target.dispatchEvent(simulatedEvent);
-}
 
 // Use HTML5 Geolocation API to fetch client's location
 if (navigator.geolocation) {
@@ -107,6 +75,7 @@ document.addEventListener('DOMContentLoaded', () => {
     infoPane.init();
     routeHandling.init();
     adjustMapSize();
+    mapHandling.initMapContainer(map);
 });
 
 function adjustMapSize() {
@@ -115,27 +84,16 @@ function adjustMapSize() {
     const windowHeight = window.innerHeight;
     const newMapHeight = windowHeight - infoPaneHeight;
     mapElement.style.height = `${newMapHeight}px`;
+
     if (window.map) {
         map.invalidateSize();
-    }
+    }    
 }
 
 window.addEventListener('resize', adjustMapSize);
 window.addEventListener('orientationchange', adjustMapSize);
-document.addEventListener('DOMContentLoaded', adjustMapSize);
 
-document.addEventListener('stateChange', function(e) {
-    if (e.detail.key === 'selectedAirport') {
-        if (appState.selectedAirport) {
-            console.log('Activate touch-to-mouse emulation and disable dragging');
-            map.dragging.disable();
-        } else {
-            console.log('Deactivate touch-to-mouse emulation and enable dragging');
-            map.dragging.enable();
-            map.touchZoom.enable();
-        }
-    }
-  });
+document.addEventListener('DOMContentLoaded', adjustMapSize);
 
 var blueDotIcon = L.divIcon({
     className: 'custom-div-icon',
@@ -143,7 +101,7 @@ var blueDotIcon = L.divIcon({
     iconSize: [8, 8],
     iconAnchor: [5, 5]
 });
-  
+
 var magentaDotIcon = L.divIcon({
     className: 'custom-div-icon',
     html: '<div style="background-color: #b43bd5; width: 10px; height: 10px; border-radius: 50%;"></div>',
