@@ -57,19 +57,36 @@ L.control.zoom({ // Zoom control settings
 
 var mc = new Hammer(document.getElementById('map'));
 mc.get('pan').set({ direction: Hammer.DIRECTION_ALL });
+
+let lastElement = null;
+
 mc.on('pan', function(ev) {
     if (appState.selectedAirport) {
-        let simulatedEvent = new MouseEvent("mouseover", {
-            view: window,
-            bubbles: true,
-            cancelable: true,
-            clientX: ev.center.x,
-            clientY: ev.center.y
-        });
         let element = document.elementFromPoint(ev.center.x, ev.center.y);
-        if (element) element.dispatchEvent(simulatedEvent);
+        
+        // Simulate mouseover if moving to a new element
+        if (element !== lastElement) {
+            if (lastElement) {
+                simulateMouseEvent('mouseout', ev.center, lastElement);
+            }
+            simulateMouseEvent('mouseover', ev.center, element);
+            lastElement = element;
+        }
+
+        simulateMouseEvent("mousemove", ev.center, element);
     }
 });
+
+function simulateMouseEvent(eventType, center, target) {
+    let simulatedEvent = new MouseEvent(eventType, {
+        view: window,
+        bubbles: true,
+        cancelable: true,
+        clientX: center.x,
+        clientY: center.y
+    });
+    target.dispatchEvent(simulatedEvent);
+}
 
 // Use HTML5 Geolocation API to fetch client's location
 if (navigator.geolocation) {
