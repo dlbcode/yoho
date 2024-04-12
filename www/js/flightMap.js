@@ -200,14 +200,16 @@ const flightMap = {
     },
 
     markerHoverHandler(iata, event) {
-//        console.log('markerHoverHandler', iata, event);
-//        console.log('markerHoverHandler appState.selectedAirport', appState.selectedAirport);
-
         const marker = this.markers[iata];
         if (!marker) return;
-        const airport = this.airportDataCache[iata];// Replace this with your actual function to get airport data
+        const airport = this.airportDataCache[iata];
         if (!airport) return;
-
+    
+        // Skip handling hover events for other markers when a specific airport is selected
+        if (appState.selectedAirport && appState.selectedAirport.iata_code !== iata) {
+            return;
+        }
+    
         if (event === 'mouseover') {
             this.fetchAndCacheRoutes(iata).then(() => {
                 pathDrawing.drawRoutePaths(iata, appState.directRoutes, appState.routeDirection);
@@ -224,13 +226,11 @@ const flightMap = {
                 pathDrawing.drawLines();
             }
         }
-
+    
         if (appState.selectedAirport && appState.selectedAirport.iata_code === iata) {
-//            console.log('markerHoverHandler appState.selectedAirport.iata_code === iata', appState.selectedAirport.iata_code === iata);
-//            console.log('markerHoverHandler opening popup');
             marker.openPopup();
         }
-    },
+    },    
     
     async fetchAndCacheRoutes(iata) {
         if (!appState.directRoutes[iata]) {
