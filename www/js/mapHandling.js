@@ -14,10 +14,8 @@ const mapHandling = {
     document.addEventListener('stateChange', function(e) {
         if (e.detail.key === 'selectedAirport') {
             if (appState.selectedAirport) {
-                console.log('Activate touch-to-mouse emulation and disable dragging');
                 map.dragging.disable();
             } else {
-                console.log('Deactivate touch-to-mouse emulation and enable dragging');
                 map.dragging.enable();
                 map.touchZoom.enable();
             }
