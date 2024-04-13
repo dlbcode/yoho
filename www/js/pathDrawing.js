@@ -183,11 +183,30 @@ const pathDrawing = {
                 invisibleLine.on('touchstart', onTouchStart)
                              .on('touchmove', onTouchMove)
                              .on('touchend', onTouchEnd);
-                             
-                const onClick = () => {
-                    updateState('addWaypoint', destination);
-                    map.closePopup();
-                };
+                
+                             const onClick = () => {
+                                console.log('Clicked on invisible line');
+                                if (appState.selectedAirport) {
+                                    let selectedIndex = appState.waypoints.findIndex(wp => wp.iata_code === appState.selectedAirport.iata_code);
+                                    
+                                    if (selectedIndex !== -1) {
+                                        if (!appState.waypoints[selectedIndex + 1] || appState.waypoints[selectedIndex + 1].iata_code !== destination.iata_code) {
+                                            let before = appState.waypoints.slice(0, selectedIndex + 1);
+                                            let after = appState.waypoints.slice(selectedIndex + 1);
+                            
+                                            before.push(origin, destination);
+                                            
+                                            appState.waypoints = [...before, ...after];
+                                            updateState('updateWaypoint', appState.waypoints);
+                                        }
+                                    } else {
+                                        updateState('addWaypoint', [origin, destination]);
+                                    }
+                                } else {
+                                    updateState('addWaypoint', [origin, destination]);
+                                }
+                                map.closePopup();
+                            };                                                                                                                                            
 
                 const onRouteLineClick = () => {
                     document.querySelectorAll('.route-info-table tbody tr').forEach(row => {
