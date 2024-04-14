@@ -10,46 +10,62 @@ module.exports = function(app, axios, db) {
 
     const flightKey = `${origin}-${destination}-${departureDate}`;
     const cacheCollection = db.collection('cache');
+    let flightsData = null;
 
     try {
       const cachedData = await cacheCollection.findOne({ flight: flightKey });
       if (cachedData && cachedData.queriedAt) {
         const hoursDiff = (new Date() - cachedData.queriedAt) / (1000 * 60 * 60);
         if (hoursDiff <= 24) {
-          return res.json(cachedData.data);
+          flightsData = cachedData.data;
+          res.json(flightsData); // Serve cached data
         }
       }
     } catch (error) {
       console.error("Error accessing cache:", error);
     }
 
-    const config = {
-      method: 'get',
-      url: `https://tequila-api.kiwi.com/v2/search?fly_from=${origin}&fly_to=${destination}&date_from=${departureDate}&date_to=${departureDate}&flight_type=oneway&partner=picky&curr=USD`,
-      headers: { 
-        'apikey': process.env.TEQUILA_API_KEY
+    if (!flightsData) { // Fetch new data if not found in cache or cache is outdated
+      const config = {
+        method: 'get',
+        url: `https://tequila-api.kiwi.com/v2/search?fly_from=${origin}&fly_to=${destination}&date_from=${departureDate}&date_to=${departureDate}&flight_type=oneway&partner=picky&curr=USD`,
+        headers: { 
+          'apikey': process.env.TEQUILA_API_KEY
+        }
+      };
+
+      try {
+        const response = await axios(config);
+        if (response.data && response.data.data) {
+          flightsData = response.data.data.sort((a, b) => a.price - b.price);
+          await cacheCollection.updateOne(
+            { flight: flightKey },
+            { $set: { data: flightsData, queriedAt: new Date() } },
+            { upsert: true }
+          );
+          res.json(flightsData);
+        } else {
+          res.status(500).send("No flight data found");
+        }
+      } catch (error) {
+        console.error("Error fetching one-way flights data:", error.response ? error.response.data : error.message);
+        res.status(500).send("Error fetching one-way flights data");
       }
-    };
+    }
 
-    try {
-      const response = await axios(config);
-      if (response.data && response.data.data) {
-        const sortedFlights = response.data.data.sort((a, b) => a.price - b.price);
-        await cacheCollection.updateOne(
-          { flight: flightKey },
-          { $set: { data: sortedFlights, queriedAt: new Date() } },
-          { upsert: true }
-        );
-
-        await updateDirectRoutes(db, sortedFlights); // Utilize updateDirectRoutes to manage direct route updates
-
-        res.json(sortedFlights);
-      } else {
-        res.status(500).send("No flight data found");
+    // Find the lowest priced direct route and update if necessary
+    if (flightsData) {
+      const directFlights = flightsData.filter(flight => flight.route && flight.route.length === 1);
+      if (directFlights.length > 0) {
+        const lowestPricedDirectFlight = directFlights.reduce((lowest, flight) => flight.price < lowest.price ? flight : lowest, directFlights[0]);
+        const flighttData = {
+          origin: lowestPricedDirectFlight.route[0].flyFrom,
+          destination: lowestPricedDirectFlight.route[0].flyTo,
+          price: lowestPricedDirectFlight.price,
+          departureDate: lowestPricedDirectFlight.route[0].local_departure
+        };
+        await updateDirectRoutes(db, [flighttData]); // Adjust this according to how updateDirectRoutes handles data
       }
-    } catch (error) {
-      console.error("Error fetching one-way flights data:", error.response ? error.response.data : error.message);
-      res.status(500).send("Error fetching one-way flights data");
     }
 });
 
