@@ -148,14 +148,26 @@ const pathDrawing = {
                 invisibleLine.routeLineId = routeLineId;
 
                 const onMouseOver = (e) => {
-                    geodesicLine.originalColor = geodesicLine.options.color;``
+                    geodesicLine.originalColor = geodesicLine.options.color;
                     geodesicLine.setStyle({ color: 'white' });
-                    let displayPrice = Math.round(routeData.price); // Ensure routeData is used
+                
+                    let displayPrice = Math.round(routeData.price);
+                    let content = `<div style="line-height: 1.2; margin: 0;">${destination.city}<br><span><strong><span style="color: #ccc; font-size: 14px;">$${displayPrice}</span></strong></span>`;
+                
+                    if (routeData.date) {
+                        let lowestDate = new Date(routeData.date).toLocaleDateString("en-US", {
+                            year: 'numeric', month: 'long', day: 'numeric'
+                        });
+                        content += `<br><span style="line-height: 1; display: block; color: #666">on ${lowestDate}</span>`;
+                    }
+                
+                    content += `</div>`;
+                
                     L.popup()
                         .setLatLng(e.latlng)
-                        .setContent(`${destination.city}<br><strong><span style="color: #ccc; font-size: 14px">$${displayPrice}</span></strong>`)
+                        .setContent(content)
                         .openOn(map);
-                };
+                };                                                             
 
                 const onMouseOut = () => {
                     geodesicLine.setStyle({ color: geodesicLine.originalColor }); // Restore the original color
@@ -286,9 +298,9 @@ const pathDrawing = {
         decoratedLine.on('mouseover', (e) => {
             L.popup()
             .setLatLng(e.latlng)
-            .setContent(`Price: $${route.price}`)
+            .setContent(`Price: $${Math.round(route.price)}`) // Use Math.round to round the price
             .openOn(map);
-        });
+        });        
     
         // Add mouseout event listener to close the popup
         decoratedLine.on('mouseout', () => {
