@@ -434,3 +434,26 @@ input[type="text"]:focus {
   z-index: 1001;
   white-space: nowrap;
 }
+
+
+.info-box {
+  background-color: #272727; /* Dark grey background */
+  color: #888; /* White text color */
+  padding: 5px; /* Padding around the content */
+  display: flex; /* Flexbox to align icon and text */
+}
+
+.info-icon {
+  color: #aaa; /* Light grey color for the icon */
+  margin-right: 5px; /* Space between the icon and text */
+  font-size: 1.2em; /* Relative size of the icon */
+}
+
+#estPriceLabel {
+  color: #aaa;
+} 
+
+#estPriceValue {
+  margin: 0 5px; /* Margin for spacing, adjust as needed */
+  color: #ccc;
+}

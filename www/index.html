@@ -44,7 +44,11 @@
             <div class="airport-selection"></div>
             <ol id="routeDetailsList" class="route-details"></ol>
             <div id="tripButtons"><button id="addBtn">Add</button><button id="clearBtn">Clear</button></div>
-            <div id="estPrice"><span id="estPriceLabel">Lowest: </span><span id="estPriceValue"></span></div>
+            <div id="estPrice" class="info-box">
+                <span class="info-icon">&#9432;</span> <!-- Unicode character for information -->
+                <span id="estPriceLabel">Floor: </span>
+                <span id="estPriceValue"></span>
+            </div>            
             <div><button id="getPriceBtn" class="hidden">Google Price</button></div>
             <div id="legalLinks" class="legalLinks">
                 <a href="legal/privacyPolicy.html" target="_blank">Privacy policy</a>
