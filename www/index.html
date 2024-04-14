@@ -44,9 +44,12 @@
             <div class="airport-selection"></div>
             <ol id="routeDetailsList" class="route-details"></ol>
             <div id="tripButtons"><button id="addBtn">Add</button><button id="clearBtn">Clear</button></div>
-            <div id="estPrice" class="info-box">
-                <span class="info-icon">&#9432;</span> <!-- Unicode character for information -->
-                <span id="estPriceLabel">Floor: </span>
+            <div id="estPrice" class="info-box" style="display: none;">
+                <span class="info-icon">
+                    &#9432;
+                    <span class="tooltip">Floor is the lowest price found for the selected route or set of routes.</span>
+                </span>
+                <span id="estPriceLabel">Price floor: </span>
                 <span id="estPriceValue"></span>
             </div>            
             <div><button id="getPriceBtn" class="hidden">Google Price</button></div>

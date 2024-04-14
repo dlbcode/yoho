@@ -20,10 +20,18 @@ const routeList = {
         appState.routes.forEach(route => {
             estPrice += route.price;
         });
-
+    
         estPrice *= appState.numTravelers;
-        document.getElementById('estPriceValue').innerHTML = `$${estPrice.toFixed(2)}`;
-    },
+        const estPriceElement = document.getElementById('estPrice');
+        const estPriceValueElement = document.getElementById('estPriceValue');
+        
+        if (estPrice > 0) {
+            estPriceValueElement.innerHTML = `$${estPrice}`;
+            estPriceElement.style.display = 'flex'; // Make sure the box is visible if the price is greater than 0
+        } else {
+            estPriceElement.style.display = 'none'; // Hide the box if the price is 0
+        }
+    },    
 
     addStateChangeListener() {
         document.addEventListener('stateChange', (event) => {

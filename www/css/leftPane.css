@@ -440,13 +440,14 @@ input[type="text"]:focus {
   background-color: #272727; /* Dark grey background */
   color: #888; /* White text color */
   padding: 5px; /* Padding around the content */
-  display: flex; /* Flexbox to align icon and text */
 }
 
 .info-icon {
   color: #aaa; /* Light grey color for the icon */
   margin-right: 5px; /* Space between the icon and text */
   font-size: 1.2em; /* Relative size of the icon */
+  position: relative; /* Add this line if missing */
+  cursor: pointer;
 }
 
 #estPriceLabel {
@@ -454,6 +455,29 @@ input[type="text"]:focus {
 } 
 
 #estPriceValue {
-  margin: 0 5px; /* Margin for spacing, adjust as needed */
+  margin: 0px; /* Margin for spacing, adjust as needed */
   color: #ccc;
+}
+
+.tooltip {
+  visibility: hidden;
+  width: 150px;
+  background-color: #333; /* Dark grey */
+  color: #fff;
+  font-size: 12px;
+  text-align: center;
+  border-radius: 6px;
+  padding: 2px;
+  position: absolute;
+  z-index: 1001; /* Higher than most elements */
+  top: 50%;
+  left: 20px; /* Offset to the right */
+  transform: translateY(-50%);
+  opacity: 0;
+  transition: opacity 0.3s, visibility 0.3s;
+}
+
+.info-icon:hover .tooltip {
+  visibility: visible;
+  opacity: 1;
 }
