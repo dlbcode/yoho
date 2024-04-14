@@ -220,7 +220,6 @@ const routeHandling = {
         }
         uiHandling.setFocusToNextUnsetInput();
         uiHandling.toggleTripButtonsVisibility();
-        uiHandling.getPriceButton();
         routeDateButtons.updateDateButtons();
     },   
   

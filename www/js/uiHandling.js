@@ -138,14 +138,6 @@ const uiHandling = {
     resizeHandle.addEventListener('touchstart', startDrag, { passive: false });
   },
 
-  getPriceButton: function () {
-    if (appState.waypoints.length === 2) {
-        document.getElementById('getPriceBtn').classList.remove('hidden');
-    } else {
-        document.getElementById('getPriceBtn').classList.add('hidden');
-    }
-  },
-
   attachDateTooltip: function(element, routeNumber) {
     element.addEventListener('mouseover', function() {
       const selectedRoute = appState.selectedRoutes[routeNumber];

@@ -1,6 +1,5 @@
 import { flightMap } from './flightMap.js';
 import { updateState } from './stateManager.js';
-import { getPrice } from './getPrice.js';
 import { leftPane } from './leftPane.js';
 import { infoPane } from './infoPane.js';
 import { routeHandling } from './routeHandling.js';
@@ -70,7 +69,6 @@ if (navigator.geolocation) {
 document.getElementById('map').style.height = window.innerHeight + 'px';
 document.addEventListener('DOMContentLoaded', () => {
     initMapFunctions();
-    getPrice.init();
     leftPane.init();
     infoPane.init();
     routeHandling.init();
