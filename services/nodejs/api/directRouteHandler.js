@@ -18,15 +18,15 @@ async function updateDirectRoutes(db, sortedFlights) {
               }
             }
           );
-        } else {
-          await db.collection('directRoutes').insertOne({
-            origin: route.flyFrom,
-            destination: route.flyTo,
-            price: flight.price,
-            timestamp: new Date().toISOString().replace(/[-:T]/g, '').slice(0, 14),
-            source: 'tequila'
-          });
         }
+      } else { // This else moves here to ensure it's paired with the if checking for existingDirectRoute
+        await db.collection('directRoutes').insertOne({
+          origin: route.flyFrom,
+          destination: route.flyTo,
+          price: flight.price,
+          timestamp: new Date().toISOString().replace(/[-:T]/g, '').slice(0, 14),
+          source: 'tequila'
+        });
       }
     }
   }
