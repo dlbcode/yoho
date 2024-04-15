@@ -21,7 +21,7 @@ const routeList = {
             estPrice += route.price;
         });
     
-        estPrice *= appState.numTravelers;
+        estPrice = Math.round(estPrice * appState.numTravelers);
         const estPriceElement = document.getElementById('estPrice');
         const estPriceValueElement = document.getElementById('estPriceValue');
         

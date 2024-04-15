@@ -223,11 +223,19 @@ const infoPane = {
 
     // Update the trip button with total price
     let totalPrice = 0; // Initialize total price for all routes
+    let processedGroups = new Set(); // Set to track which groups have been processed
 
     selectedRoutesArray.forEach(item => {
-        let price = item.displayData.price || 0;
-        totalPrice += price; // Sum up all prices
+        // Only add price if this group has not been processed yet
+        if (!processedGroups.has(item.group)) {
+            processedGroups.add(item.group); // Mark this group as processed
+            let price = parseFloat(item.displayData.price.replace(/[^\d.-]/g, ''));
+            price = isNaN(price) ? 0 : price; // Use 0 if the price is not a valid number
+            totalPrice += price; // Add price to total
+        }
     });
+
+    console.log('Total Price:', totalPrice);
     
     const tripButton = document.getElementById('tripButton');
     tripButton.textContent = totalPrice > 0 ? `$${totalPrice.toFixed(2)}` : '$0.00'; // Update button text with total price or $0.00
