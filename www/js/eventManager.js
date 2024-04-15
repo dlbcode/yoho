@@ -47,8 +47,30 @@ const eventManager = {
         this.setupAllPathsButtonEventListener();
         document.addEventListener('stateChange', handleStateChange);
         window.onpopstate = function(event) {
-            window.location.reload();
-        };
+            const params = new URLSearchParams(window.location.search);
+        
+            // Update app state based on URL parameters
+            appState.waypoints = params.get('waypoints') ? params.get('waypoints').split(',').map(iata => ({ iata_code: iata })) : [];
+            appState.routeDates = {};
+            params.forEach((value, key) => {
+                if (key.startsWith('date')) {
+                    appState.routeDates[key.split('_')[1]] = value;
+                }
+            });
+            const container = document.querySelector('.airport-selection');
+            container.innerHTML = '';
+
+            // Ensure at least one route div is present
+            const routeCount = Math.max(1, Math.ceil(appState.waypoints.length / 2));
+            for (let i = 0; i < routeCount; i++) {
+                routeHandling.buildRouteDivs(i + 1);
+            }
+
+            mapHandling.updateMarkerIcons();
+            routeHandling.updateRoutesArray();
+            appState.currentView = 'trip';
+            uiHandling.setFocusToNextUnsetInput();
+        };        
         document.addEventListener('routeAdded', function(event) {
             routeHandling.buildRouteDivs(event.detail.newRoute);
         });
