@@ -234,8 +234,6 @@ const infoPane = {
             totalPrice += price; // Add price to total
         }
     });
-
-    console.log('Total Price:', totalPrice);
     
     const tripButton = document.getElementById('tripButton');
     tripButton.textContent = totalPrice > 0 ? `$${totalPrice.toFixed(2)}` : '$0.00'; // Update button text with total price or $0.00
