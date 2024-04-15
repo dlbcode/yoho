@@ -76,6 +76,7 @@ function buildDateRangeTable(routeIndex, dateRange) {
         let row = document.createElement('tr');
         row.setAttribute('data-route-id', flight.id);
         const directFlight = flight.route.length === 1;
+        const price = parseFloat(flight.price.toFixed(2));
         const stops = flight.route.length - 1;
         const layovers = flight.route.slice(0, -1).map(r => r.flyTo).join(", ");
         const durationHours = Math.floor(flight.duration.total / 3600);
@@ -92,7 +93,7 @@ function buildDateRangeTable(routeIndex, dateRange) {
     
         row.innerHTML = `<td>${formattedDeparture}</td>
                           <td>${formattedArrival}</td>
-                          <td>$${flight.price}</td>
+                          <td>$${price}</td>
                           <td>${flight.airlines.join(", ")}</td>
                           <td>${directFlight ? '✓' : ''}</td>
                           <td>${stops}</td>

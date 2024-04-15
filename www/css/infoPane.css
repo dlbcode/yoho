@@ -22,7 +22,7 @@
   flex-grow: 1; /* Allows the menu bar to take up remaining space */
 }
 
-.list-icon-button {
+/*.list-icon-button {
   height: 24px;
   width: 28px;
   margin-right: 5px;
@@ -44,7 +44,7 @@
 
 .list-icon-button:hover {
   background-color: #525252;
-}
+}*/
 
 .route-info-button {
   height: 23px;
@@ -198,4 +198,19 @@ tr:hover {
   background-image: linear-gradient(90deg, #0060bb 25%, #ffffff 50%, #0060bb 75%);
   background-size: 200% 100%;
   animation: loadingAnimation 1s linear infinite;
+}
+
+.trip-button {
+  background-color: #327935; /* Green background */
+  height: 23px;
+  min-width: 70px;
+  color: white;
+  border: none;
+  padding: 5px;
+  font-size: 14px;
+  cursor: pointer; /* Indicates that the button is clickable */
+}
+
+.trip-button:hover {
+  background-color: #45a049; /* Slightly darker green on hover for interactive feedback */
 }

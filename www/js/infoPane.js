@@ -201,6 +201,7 @@ const infoPane = {
         const arrivalDate = new Date(data.arrival);
         const departureDayName = departureDate.toLocaleDateString('en-US', { weekday: 'short' });
         const arrivalDayName = arrivalDate.toLocaleDateString('en-US', { weekday: 'short' });
+        const price = this.formatPrice(data.price);
 
         const formattedDeparture = `${departureDayName} ${departureDate.toLocaleDateString('en-US')}`;
         const formattedArrival = `${arrivalDayName} ${arrivalDate.toLocaleDateString('en-US')}`;
@@ -208,7 +209,7 @@ const infoPane = {
         const row = document.createElement('tr');
         row.innerHTML = `<td>${formattedDeparture}</td>
             <td>${formattedArrival}</td>
-            <td>${data.price}</td>
+            <td>${price}</td>
             <td>${data.airlines.join(', ')}</td>
             <td>${data.stops.size}</td>
             <td>${data.route.join(' > ')}</td>
@@ -219,8 +220,24 @@ const infoPane = {
 
     table.appendChild(tbody);
     infoPaneContent.appendChild(table);
-}
 
+    // Update the trip button with total price
+    let totalPrice = 0; // Initialize total price for all routes
+
+    selectedRoutesArray.forEach(item => {
+        let price = item.displayData.price || 0;
+        totalPrice += price; // Sum up all prices
+    });
+    
+    const tripButton = document.getElementById('tripButton');
+    tripButton.textContent = totalPrice > 0 ? `$${totalPrice.toFixed(2)}` : '$0.00'; // Update button text with total price or $0.00
+    tripButton.classList.add('green-button'); // Apply green styling class
+},
+
+formatPrice: function(price) {
+  const numericPrice = parseFloat(price.replace(/[^\d.-]/g, ''));
+  return isNaN(numericPrice) ? "0.00" : numericPrice.toFixed(2);
+}
 
 }
 
