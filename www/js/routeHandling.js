@@ -284,7 +284,6 @@ const routeHandling = {
         pathDrawing.drawLines();
         mapHandling.updateMarkerIcons();
         routeList.updateEstPrice();
-        uiHandling.getPriceButton();
         this.updateRoutesArray();
     },
     
