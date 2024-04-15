@@ -4,6 +4,7 @@ import { buildRouteTable } from './routeTable/routeTable.js';
 import { selectedRoute } from './routeTable/selectedRoute.js';
 import { map } from './map.js';
 import { uiHandling } from './uiHandling.js';
+import { flightMap } from './flightMap.js';
 
 
 const infoPane = {
@@ -15,11 +16,9 @@ const infoPane = {
     tripButton.addEventListener('click', () => {
       appState.currentView = 'trip';
       this.displayContent();
-  
-      // Extract latitude and longitude from each waypoint
+
       const waypointsLatLng = appState.waypoints.map(waypoint => [waypoint.latitude, waypoint.longitude]);
   
-      // Check if there are waypoints to adjust the map view
       if (waypointsLatLng.length > 0) {
           const bounds = L.latLngBounds(waypointsLatLng);
           map.fitBounds(bounds, { padding: [50, 50] }); // Adjust padding as needed
@@ -215,6 +214,18 @@ const infoPane = {
             <td>${data.route.join(' > ')}</td>
             <td><a href="${data.deep_link}" target="_blank"><button>Book Flight</button></a></td>`;
 
+          row.addEventListener('mouseover', function() {
+            const routeString = data.route.join(' > ');
+            const iataCodes = routeString.split(' > ');
+            infoPane.highlightRoute(iataCodes);
+          });
+  
+          // Attach mouseout event to clear the route
+          row.addEventListener('mouseout', function() {
+              pathDrawing.clearLines();
+              pathDrawing.drawLines(); // Redraw all active routes if necessary
+          });
+
         tbody.appendChild(row);
     });
 
@@ -238,11 +249,38 @@ const infoPane = {
     const tripButton = document.getElementById('tripButton');
     tripButton.textContent = totalPrice > 0 ? `$${totalPrice.toFixed(2)}` : '$0.00'; // Update button text with total price or $0.00
     tripButton.classList.add('green-button'); // Apply green styling class
+    if (tripButton) {
+      tripButton.addEventListener('mouseover', function() {
+          const allIataCodes = [];
+          const tableRows = document.querySelectorAll('.route-info-table tbody tr');
+          tableRows.forEach(row => {
+              const routeString = row.cells[5].textContent.trim(); // Adjust the index based on the 'Route' column in your table
+              const iataCodes = routeString.split(' > ');
+              allIataCodes.push(...iataCodes);
+          });
+          infoPane.highlightRoute(allIataCodes);
+      });
+
+      tripButton.addEventListener('mouseout', function() {
+        pathDrawing.clearLines();
+        pathDrawing.drawLines(); // Redraw all active routes if necessary
+      });
+    }
+
 },
 
 formatPrice: function(price) {
   const numericPrice = parseFloat(price.replace(/[^\d.-]/g, ''));
   return isNaN(numericPrice) ? "0.00" : numericPrice.toFixed(2);
+},
+
+highlightRoute: function(iataCodes) {
+  pathDrawing.clearLines();
+  iataCodes.forEach((code, index) => {
+      if (index < iataCodes.length - 1) {
+          pathDrawing.drawPathBetweenAirports(iataCodes[index], iataCodes[index + 1], flightMap.getAirportDataByIata);
+      }
+  });
 }
 
 }
