@@ -46,7 +46,6 @@ function buildSingleDateTable(routeIndex) {
       return response.json();
     })
     .then(data => {
-      console.log('Single date route data:', data);
       const table = document.createElement('table');
       table.className = 'route-info-table';
       table.style.width = '100%';
