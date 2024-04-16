@@ -147,13 +147,9 @@ function buildSingleDateTable(routeIndex) {
        
       document.querySelectorAll('.route-info-table tbody tr').forEach((row, index) => {
         row.addEventListener('click', function() {
-            const routeIdString = this.getAttribute('data-route-id');
-            const routeIds = routeIdString.split('|');
-            const fullFlightData = data[index];
-
-            row.addEventListener('click', () => routeInfoRow(fullFlightData, index));
+            routeInfoRow(data[index], this, index);  // Ensure 'this' refers to the 'tr' element
         });
-    });                 
+      });                 
     
       document.querySelectorAll('.route-info-table tbody tr').forEach(row => {
         row.addEventListener('mouseover', function() {
