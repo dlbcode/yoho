@@ -206,7 +206,7 @@ tr:hover {
   min-width: 70px;
   color: white;
   border: none;
-  padding: 5px;
+  padding: 2px;
   font-size: 14px;
   cursor: pointer; /* Indicates that the button is clickable */
 }
