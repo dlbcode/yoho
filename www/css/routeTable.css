@@ -93,3 +93,6 @@
   font-size: 12px;
 }
 
+.route-info-row {
+  border-left: #007bff solid 3px;
+}

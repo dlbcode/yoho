@@ -15,7 +15,11 @@ function routeInfoRow(rowElement, fullFlightData, routeIds, routeIndex) {
         <div>Price: $${flight.price.toFixed(2)}</div>
         <button id="selectRoute">Select Route</button>
     `;
+    detailRow.classList.add('route-info-row');
     detailRow.appendChild(detailCell);
+
+    // add selected class to the clicked row in the table
+    rowElement.classList.add('route-info-row');
 
     // Insert the new row right after the clicked row in the table
     if (rowElement.nextSibling) {
