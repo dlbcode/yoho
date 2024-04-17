@@ -5,6 +5,16 @@ import { flightMap } from '../flightMap.js';
 function routeInfoRow(rowElement, fullFlightData, routeIds, routeIndex) {
     console.log('routeInfoRow called with:', rowElement, fullFlightData, routeIds, routeIndex);
 
+    // Toggle details row visibility
+    let existingDetailRow = rowElement.nextSibling;
+    if (existingDetailRow && existingDetailRow.classList.contains('route-info-row')) {
+        // Remove the existing details row if clicked again
+        rowElement.parentNode.removeChild(existingDetailRow);
+        rowElement.classList.remove('route-info-row-header');
+        rowElement.classList.remove('route-info-row');
+        return; // Exit the function after removing the row
+    }
+
     // Create a new row for detailed information
     const detailRow = document.createElement('tr');
     const detailCell = document.createElement('td');
@@ -20,6 +30,7 @@ function routeInfoRow(rowElement, fullFlightData, routeIds, routeIndex) {
 
     // add selected class to the clicked row in the table
     rowElement.classList.add('route-info-row');
+    rowElement.classList.add('route-info-row-header');
 
     // Insert the new row right after the clicked row in the table
     if (rowElement.nextSibling) {

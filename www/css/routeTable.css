@@ -96,3 +96,7 @@
 .route-info-row {
   border-left: #007bff solid 3px;
 }
+
+.route-info-row-header {
+  background-color: #454545 !important;
+}
