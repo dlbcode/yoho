@@ -99,22 +99,10 @@ const infoPane = {
             }
         };
 
-        // Attach the checkmark to indicate selection status
-        let checkmark = button.querySelector('.route-checkmark');
-        if (!checkmark) {
-            checkmark = document.createElement('span');
-            checkmark.classList.add('route-checkmark');
-            button.appendChild(checkmark);
-        }
-
         if (appState.selectedRoutes.hasOwnProperty(routeIndex)) {
-            checkmark.classList.add('selected');
-            checkmark.classList.remove('unselected');
-            checkmark.innerHTML = '✓';
+          button.classList.add('selected-route-button'); // Adds a class that you will style to make the background green
         } else {
-            checkmark.classList.add('unselected');
-            checkmark.classList.remove('selected');
-            checkmark.innerHTML = ''; // Or any indicator for unselected
+            button.classList.remove('selected-route-button'); // Removes the class, returning to the default style
         }
 
         uiHandling.attachDateTooltip(button, routeIndex);
