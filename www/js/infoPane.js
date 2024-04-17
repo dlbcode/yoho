@@ -249,7 +249,7 @@ const infoPane = {
     const tripButton = document.getElementById('tripButton');
     tripButton.textContent = totalPrice > 0 ? `$${totalPrice.toFixed(2)}` : '$0.00'; // Update button text with total price or $0.00
     tripButton.classList.add('green-button'); // Apply green styling class
-    if (tripButton) {
+    if (tripButton && appState.selectedRoutes.length > 0) {
       tripButton.addEventListener('mouseover', function() {
           const allIataCodes = [];
           const tableRows = document.querySelectorAll('.route-info-table tbody tr');
