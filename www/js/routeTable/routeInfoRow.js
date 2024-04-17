@@ -24,6 +24,15 @@ function routeInfoRow(rowElement, fullFlightData, routeIds, routeIndex) {
         rowElement.parentNode.appendChild(detailRow);  // Append to the end if there's no next sibling
     }
 
+    detailRow.addEventListener('mouseover', () => {
+      highlightRoutePath(fullFlightData.route);
+    });
+
+    detailRow.addEventListener('mouseout', () => {
+        pathDrawing.clearLines();  // Clear the highlighted route path
+        pathDrawing.drawLines();  // Optionally redraw other paths if needed
+    });
+
     const selectRouteButton = detailCell.querySelector('#selectRoute');
     selectRouteButton.addEventListener('click', () => {
       console.log('selectRouteButton clicked');
@@ -107,7 +116,17 @@ function highlightSelectedRowForRouteIndex(routeIndex) {
       selectedRow.classList.add('selected');
     }
   }
-}    
+}
+
+function highlightRoutePath(route) {
+  pathDrawing.clearLines();
+  const iataCodes = route.map(r => r.flyFrom).concat(route[route.length - 1].flyTo);
+  for (let i = 0; i < iataCodes.length - 1; i++) {
+      const originIata = iataCodes[i];
+      const destinationIata = iataCodes[i + 1];
+      pathDrawing.drawPathBetweenAirports(originIata, destinationIata, flightMap.getAirportDataByIata);
+  }
+}
 
 function replaceWaypointsForCurrentRoute(intermediaryIatas, routeIndex) {
   // Adjust startIndex for round trips to ensure the entire waypoints array is considered
