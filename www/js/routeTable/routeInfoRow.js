@@ -3,7 +3,7 @@ import { pathDrawing } from '../pathDrawing.js';
 import { flightMap } from '../flightMap.js';
 
 function routeInfoRow(rowElement, fullFlightData, routeIds, routeIndex) {
-    //console.log('routeInfoRow called with:', rowElement, fullFlightData, routeIds, routeIndex);
+    console.log('routeInfoRow called with:', rowElement, fullFlightData, routeIds, routeIndex);
 
     // Create a new row for detailed information
     const detailRow = document.createElement('tr');
@@ -40,16 +40,16 @@ function routeInfoRow(rowElement, fullFlightData, routeIds, routeIndex) {
                });
            }
 
-           const departureDate = new Date(fullFlightData.local_departure || fullFlightData.dtime);
-           console.log('departureDate:', departureDate);
+           const departureDate = new Date((fullFlightData.local_departure || fullFlightData.dTime * 1000)).toISOString().split('T')[0];
     
            // Update appState for the selected route
            routeIds.forEach((id, idx) => {
                const segmentData = fullFlightData.route[idx];
-               const departureDate = new Date(segmentData.local_departure || segmentData.dtime).toISOString().split('T')[0];
+               console.log('segmentData:', segmentData);
+               const departureDate = new Date(segmentData.local_departure || segmentData.dTime).toISOString().split('T')[0];
                const displayData = {
-                   departure: new Date(segmentData.local_departure).toLocaleString(),
-                   arrival: new Date(segmentData.local_arrival).toLocaleString(),
+                   departure: new Date((segmentData.local_departure || segmentData.dTime * 1000)).toLocaleString(),
+                   arrival: new Date((segmentData.local_arrival || segmentData.aTime * 1000)).toLocaleString(),
                    price: `$${fullFlightData.price}`,
                    airline: segmentData.airline,
                    stops: fullFlightData.route.length - 1,

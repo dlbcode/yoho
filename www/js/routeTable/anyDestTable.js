@@ -3,6 +3,7 @@ import { showPriceFilterPopup } from './priceFilter.js';
 import { showDateFilterPopup } from './dateFilters.js';
 import { pathDrawing } from '../pathDrawing.js';
 import { flightMap } from '../flightMap.js';
+import { routeInfoRow, highlightSelectedRowForRouteIndex } from './routeInfoRow.js';
 
 function getColumnIndex(columnIdentifier) {
   const columnMap = {
@@ -176,63 +177,10 @@ function buildAnyDestTable(routeIndex, origin, dateRange) {
       
     document.querySelectorAll('.route-info-table tbody tr').forEach((row, index) => {
       row.addEventListener('click', function() {
-          const routeIdString = this.getAttribute('data-route-id');
-          const fullFlightData = data.data.find(flight => flight.id === routeIdString);
-  
-          if (!fullFlightData) {
-              console.error('No flight data found for route ID:', routeIdString);
-              return;
-          }
-  
-          // Determine the group ID for the newly selected route
-          appState.highestGroupId += 1;
-          let newRouteGroupId = appState.highestGroupId;    
-          const existingRouteDetails = appState.selectedRoutes[routeIndex];
-          if (existingRouteDetails) {
-              Object.keys(appState.selectedRoutes).forEach(key => {
-                  if (appState.selectedRoutes[key].group == existingRouteDetails.group) {
-                      updateState('removeSelectedRoute', parseInt(key));
-                  }
-              });
-          }
-          const routeIds = fullFlightData.route.map(route => route.id); // Example initialization
-  
-          // Update appState for the selected route
-          fullFlightData.route.forEach((id, idx) => {
-            const segmentData = fullFlightData.route[idx];
-            const departureDate = new Date(segmentData.dTime * 1000).toISOString().split('T')[0];
-            const displayData = {
-                departure: new Date(segmentData.dTime * 1000).toLocaleString(),
-                arrival: new Date(segmentData.aTime * 1000).toLocaleString(),
-                price: `$${fullFlightData.price}`,
-                airline: segmentData.airline,
-                stops: fullFlightData.route.length - 1,
-                route: `${segmentData.flyFrom} > ${segmentData.flyTo}`,
-                deep_link: fullFlightData.deep_link,
-            };
-  
-              const selectedRouteIndex = routeIndex + idx;
-              if (!appState.routeDates[selectedRouteIndex]) {
-                  appState.routeDates[selectedRouteIndex] = departureDate;
-              }
-  
-              if (appState.selectedRoutes.hasOwnProperty(selectedRouteIndex)) {
-                const keys = Object.keys(appState.selectedRoutes).map(Number).filter(key => key >= selectedRouteIndex).sort((a, b) => b - a); // Sort keys in descending order to avoid overwriting
-                keys.forEach(key => {
-                    appState.selectedRoutes[key + 1] = appState.selectedRoutes[key]; // Shift each route up by one index
-                });
-            }
-            
-            appState.selectedRoutes[selectedRouteIndex] = {
-                displayData: displayData,
-                fullData: segmentData,
-                group: newRouteGroupId !== null ? newRouteGroupId : routeIndex,
-                routeDates: departureDate,
-            };
-          });
-          updateState('updateRouteDate: ', routeIndex);
-          updateState('changeView', 'selectedRoute');
-          highlightSelectedRowForRouteIndex(routeIndex);
+        const routeIdString = this.getAttribute('data-route-id');
+        const routeIds = routeIdString.split('|');
+        const fullFlightData = data.data[index];
+        routeInfoRow(this, fullFlightData, routeIds, routeIndex);
       });
   });                 
   
@@ -254,14 +202,6 @@ function buildAnyDestTable(routeIndex, origin, dateRange) {
     });
   });
 
-  document.querySelectorAll('.route-info-table tbody tr').forEach((row) => {
-    row.addEventListener('click', function() {
-        const routeString = this.cells[8].textContent.trim(); // Assuming the IATA codes are in the 9th column
-        const iataCodes = routeString.split(' > ');
-        replaceWaypointsForCurrentRoute(iataCodes, routeIndex);
-    });
-  });
-
   // Separate handling for the price filter icon
   const priceFilterIcon = document.getElementById('priceFilter');
   if (priceFilterIcon) {
@@ -275,76 +215,6 @@ function buildAnyDestTable(routeIndex, origin, dateRange) {
       }
     });
   }
-} 
-        
-function highlightSelectedRowForRouteIndex(routeIndex) {
-  document.querySelectorAll(`.route-info-table[data-route-index="${routeIndex}"] tbody tr.selected`).forEach(row => {
-    row.classList.remove('selected');
-  });
-
-  const selectedRouteDetails = appState.selectedRoutes[routeIndex];
-  if (selectedRouteDetails && selectedRouteDetails.id) {
-    let selectedRow = document.querySelector('.route-info-table tbody tr');
-    if (!selectedRow) {
-      document.querySelectorAll(`.route-info-table[data-route-index="${routeIndex}"] tbody tr`).forEach(row => {
-        const routeId = row.getAttribute('data-route-id');
-        if (routeId && routeId.split('|').includes(selectedRouteDetails.id)) {
-          selectedRow = row;
-        }
-      });
-    }
-    
-    if (selectedRow) {
-      selectedRow.classList.add('selected');
-    }
-  }
-}    
-
-function replaceWaypointsForCurrentRoute(intermediaryIatas, routeIndex) {
-  // Adjust startIndex for round trips to ensure the entire waypoints array is considered
-  const startIndex = appState.roundTrip ? 0 : routeIndex * 2;
-  let before = appState.waypoints.slice(0, startIndex);
-  let after = appState.roundTrip ? [] : appState.waypoints.slice((routeIndex + 1) * 2);
-
-  let updatedSegment = [flightMap.airportDataCache[intermediaryIatas[0]]];
-
-  for (let i = 1; i < intermediaryIatas.length; i++) {
-      let airportData = flightMap.airportDataCache[intermediaryIatas[i]];
-      updatedSegment.push(airportData);
-      if (i < intermediaryIatas.length - 1) {
-          updatedSegment.push(airportData);
-      }
-  }
-
-  // For round trips, ensure the return to the origin is explicitly handled
-  if (appState.roundTrip) {
-      const originIata = intermediaryIatas[0];
-      if (updatedSegment[updatedSegment.length - 1].iata_code !== originIata) {
-          updatedSegment.push(flightMap.airportDataCache[originIata]);
-      }
-  } else {
-      // For non-round trips, ensure the final destination is added if not already present
-      const finalDestinationIata = intermediaryIatas[intermediaryIatas.length - 1];
-      if (updatedSegment[updatedSegment.length - 1].iata_code !== finalDestinationIata) {
-          updatedSegment.push(flightMap.airportDataCache[finalDestinationIata]);
-      }
-  }
-
-  appState.waypoints = [...before, ...updatedSegment, ...after];
-  updateState('updateWaypoint', appState.waypoints);
-}
-
-function resetSortIcons(headers, currentIcon, newSortState) {
-  headers.forEach(header => {
-    const icon = header.querySelector('.sortIcon');
-    if (icon !== currentIcon) {
-      icon.innerHTML = '&#x21C5;'; // Reset to double arrow
-      icon.removeAttribute('data-sort');
-    } else {
-      icon.innerHTML = newSortState === 'asc' ? '&#x25B2;' : '&#x25BC;';
-      icon.setAttribute('data-sort', newSortState);
-    }
-  });
 }
 
 function sortTableByColumn(table, columnIndex, asc = true) {
