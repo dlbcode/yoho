@@ -175,15 +175,12 @@ function updateUrl() {
 
 function checkAndUpdateRoundTripStatus() {
     if (appState.waypoints.length >= 4) {
-        const firstWaypoint = appState.waypoints[0].iata_code;
-        const secondWaypoint = appState.waypoints[1].iata_code;
-        const thirdWaypoint = appState.waypoints[2].iata_code;
-        const fourthWaypoint = appState.waypoints[3].iata_code;
-
-        appState.roundTrip = firstWaypoint === fourthWaypoint && secondWaypoint === thirdWaypoint;
-    } else {
-        appState.roundTrip = false;
-    }
+    const firstWaypoint = appState.waypoints[0].iata_code;
+    const lastWaypoint = appState.waypoints[appState.waypoints.length - 1].iata_code;
+    appState.roundTrip = firstWaypoint === lastWaypoint;
+} else {
+    appState.roundTrip = false;
+}
 }
 
 export { appState, updateState, updateUrl };
