@@ -58,11 +58,9 @@
 
 table {
   width: 100%;
-  border-collapse: collapse;
   font-family: 'Consolas', 'Courier New', Courier, monospace; /* Monospace font */
   font-size: 12px; /* Similar to default console font size */
   color: #2ad8ff; /* Default text color */
-  border: 1px solid #333;
   box-sizing: border-box; /* Include padding and border in the table's total width */
 }
 
