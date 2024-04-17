@@ -62,6 +62,12 @@ input[type="text"]:focus {
   left: 180px;
   z-index: 500;
   cursor: pointer;
+  background-color: #1f1f1f;
+  border: #525252 1px solid;
+}
+
+.toggle-pane-button:hover {
+  background-color: #333;
 }
 
 .leftPane-hidden {

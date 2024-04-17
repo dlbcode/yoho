@@ -2,7 +2,7 @@
   position: relative;
   height: 140px;
   width: 100%;
-  background-color: #000000;
+  background-color: #1d1d1d;
   box-sizing: border-box;
   z-index: 1000;
 }
@@ -58,6 +58,7 @@
 
 table {
   width: 100%;
+  border-collapse: collapse;
   font-family: 'Consolas', 'Courier New', Courier, monospace; /* Monospace font */
   font-size: 12px; /* Similar to default console font size */
   color: #2ad8ff; /* Default text color */
@@ -66,7 +67,7 @@ table {
 
 /* Style for table headers */
 th {
-  background-color: #000000; /* Very light grey background */
+  background-color: #222; /* Very light grey background */
   color: #ccc;
   text-align: left;
   padding: 5px; /* Padding for table cells */
@@ -81,7 +82,7 @@ td {
 
 /* Style for alternating row colors */
 tr:nth-child(even) {
-  background-color: #000000; /* Very light grey for even rows */
+  background-color: #1c1c1c; /* Very light grey for even rows */
 }
 
 /* Style for the cells in the "Price" column */
@@ -90,7 +91,7 @@ td:nth-child(3) { /* Assuming "Price" is the third column */
 }
 
 tr:nth-child(odd) {
-  background-color: #000000; /* White for odd rows */
+  background-color: #161616; /* White for odd rows */
 }
 
 /* Style for table rows on hover */
