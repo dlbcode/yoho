@@ -212,16 +212,9 @@ const flightMap = {
                 marker.openPopup();
             });
         } else if (event === 'mouseout') {
-            if (!marker.hovered) {  // Delay only for the first hover
-                setTimeout(() => {
-                    pathDrawing.clearLines();
-                    pathDrawing.drawLines();
-                }, 200);
-                marker.hovered = true; // Set the flag to true after the first hover
-            } else {
                 pathDrawing.clearLines();
                 pathDrawing.drawLines();
-            }
+            marker.closePopup();
         }
     
         if (appState.selectedAirport && appState.selectedAirport.iata_code === iata) {
