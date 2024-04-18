@@ -142,12 +142,13 @@ const routeHandling = {
                     onReady: (selectedDates, dateStr, instance) => {
                         let prevMonthButton = instance.calendarContainer.querySelector('.flatpickr-prev-month');
                         let dateModeSelect = document.createElement('select');
-                        let options = ['Single', 'Flexible', 'Any'];
+                        let options = ['Specific Date', 'Date Range', 'Any Dates'];
 
                         options.forEach(option => {
                             let opt = document.createElement('option');
-                            opt.value = opt.textContent = option;
-                            if ((isDateRange && option === 'Flexible') || (!isDateRange && option === 'Single')) {
+                            opt.value = option;
+                            opt.textContent = option;
+                            if ((isDateRange && option === 'Date Range') || (!isDateRange && option === 'Specific Date')) {
                                 opt.selected = true;
                             }
                             dateModeSelect.appendChild(opt);
@@ -157,15 +158,17 @@ const routeHandling = {
                         dateModeSelect.style.marginRight = '10px';
                         prevMonthButton.parentNode.insertBefore(dateModeSelect, prevMonthButton);
 
+                        let self = this;
+
                         dateModeSelect.addEventListener('change', () => {
-                            if (dateModeSelect.value === 'Any') {
-                                this.textContent = 'Any';
+                            if (dateModeSelect.value === 'Any Dates') {
+                                self.textContent = 'Any Dates';
                                 updateState('updateRouteDate', { routeNumber: routeNumber, date: 'any' });
                                 instance.close();
                             } else {
-                                const newMode = dateModeSelect.value === "Single" ? "single" : "range";
+                                const newMode = dateModeSelect.value === "Specific Date" ? "single" : "range";
                                 instance.set("mode", newMode);
-                                this.textContent = newMode === "single" ? 'Select Date' : '[..]';
+                                self.textContent = newMode === "single" ? 'Select Date' : '[..]';
                                 instance.clear();
                                 instance.redraw();
 
@@ -180,7 +183,7 @@ const routeHandling = {
                                 }
                             }
                         });
-
+                        
                         // Only set the date if it's not 'any'
                         if (isDateRange && currentRouteDate !== 'any') {
                             const dates = currentRouteDate.split(' to ').map(dateStr => new Date(dateStr));
