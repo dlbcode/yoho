@@ -217,6 +217,19 @@ function buildAnyDestTable(routeIndex, origin, dateRange) {
   }
 }
 
+function resetSortIcons(headers, currentIcon, newSortState) {
+  headers.forEach(header => {
+    const icon = header.querySelector('.sortIcon');
+    if (icon !== currentIcon) {
+      icon.innerHTML = '&#x21C5;'; // Reset to double arrow
+      icon.removeAttribute('data-sort');
+    } else {
+      icon.innerHTML = newSortState === 'asc' ? '&#x25B2;' : '&#x25BC;';
+      icon.setAttribute('data-sort', newSortState);
+    }
+  });
+}
+
 function sortTableByColumn(table, columnIndex, asc = true) {
   const dirModifier = asc ? 1 : -1;
   const tBody = table.tBodies[0];
