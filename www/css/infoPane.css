@@ -181,7 +181,7 @@ tr:hover {
 }
 
 .trip-button {
-  background-color: #327935; /* Green background */
+  background-color: #1f4e22; /* Green background */
   height: 23px;
   min-width: 70px;
   color: white;
@@ -193,5 +193,5 @@ tr:hover {
 }
 
 .trip-button:hover {
-  background-color: #45a049; /* Slightly darker green on hover for interactive feedback */
+  background-color: #347737; /* Slightly darker green on hover for interactive feedback */
 }

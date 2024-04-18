@@ -79,13 +79,13 @@ a {
 }
 
 a:hover, button:hover, input:hover, select:hover, textarea:hover {
-  background-color: #777;
-  color: #fff;
+  background-color: #555;
+  color: #ccc;
 }
 
 a:active, button:active, input:focus, select:focus, textarea:focus {
   background-color: #294e7c;
-  color: #fff;
+  color: #ccc;
 }
 
 /*input, button, select, textarea {

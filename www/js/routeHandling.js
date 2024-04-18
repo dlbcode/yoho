@@ -298,30 +298,30 @@ const routeHandling = {
     },
 
     showWaypointTooltip: function(element, text) {
-        clearTimeout(this.tooltipTimeout);
-    
-        this.tooltipTimeout = setTimeout(() => {
-            const tooltip = document.createElement('div');
-            tooltip.className = 'waypointTooltip';
-            tooltip.textContent = text;
-            document.body.appendChild(tooltip);
-    
-            const rect = element.getBoundingClientRect();
-            const containerRect = document.querySelector('.container').getBoundingClientRect();
-    
-            tooltip.style.position = 'absolute';
-            tooltip.style.left = `${rect.left - containerRect.left}px`;
-            tooltip.style.top = `${rect.bottom - containerRect.top}px`;
-        }, 300);
-    },
-    
-    hideWaypointTooltip: function() {
-        clearTimeout(this.tooltipTimeout);
-    
-        document.querySelectorAll('.waypointTooltip').forEach(tooltip => {
-            tooltip.remove();
-        });
-    },                        
+    clearTimeout(this.tooltipTimeout);
+
+    this.tooltipTimeout = setTimeout(() => {
+        const tooltip = document.createElement('div');
+        tooltip.className = 'waypointTooltip';
+        tooltip.textContent = text;
+        document.body.appendChild(tooltip);
+
+        const rect = element.getBoundingClientRect();
+        const containerRect = document.querySelector('.container').getBoundingClientRect();
+
+        tooltip.style.position = 'absolute';
+        tooltip.style.left = `${rect.left - containerRect.left}px`;
+        tooltip.style.top = `${rect.bottom - containerRect.top}px`;
+    }, 300);
+},
+
+hideWaypointTooltip: function() {
+    clearTimeout(this.tooltipTimeout);
+
+    document.querySelectorAll('.waypointTooltip').forEach(tooltip => {
+        tooltip.remove();
+    });
+},                       
 
     updateRoutesArray: async function () {
         let newRoutes = [];
