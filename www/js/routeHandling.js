@@ -298,30 +298,32 @@ const routeHandling = {
     },
 
     showWaypointTooltip: function(element, text) {
-    clearTimeout(this.tooltipTimeout);
+        clearTimeout(this.tooltipTimeout);
 
-    this.tooltipTimeout = setTimeout(() => {
-        const tooltip = document.createElement('div');
-        tooltip.className = 'waypointTooltip';
-        tooltip.textContent = text;
-        document.body.appendChild(tooltip);
+        this.tooltipTimeout = setTimeout(() => {
+            const tooltip = document.createElement('div');
+            tooltip.className = 'waypointTooltip';
+            tooltip.textContent = text;
+            document.body.appendChild(tooltip);
 
-        const rect = element.getBoundingClientRect();
-        const containerRect = document.querySelector('.container').getBoundingClientRect();
+            const rect = element.getBoundingClientRect();
+            const containerRect = document.querySelector('.container').getBoundingClientRect();
 
-        tooltip.style.position = 'absolute';
-        tooltip.style.left = `${rect.left - containerRect.left}px`;
-        tooltip.style.top = `${rect.bottom - containerRect.top}px`;
-    }, 300);
-},
+            tooltip.style.position = 'absolute';
+            tooltip.style.left = `${rect.left - containerRect.left}px`;
+            tooltip.style.top = `${rect.bottom - containerRect.top}px`;
+        }, 200);
+    },
 
-hideWaypointTooltip: function() {
-    clearTimeout(this.tooltipTimeout);
+    hideWaypointTooltip: function() {
+        this.hideTooltipTimeout = setTimeout(() => {
+            clearTimeout(this.tooltipTimeout);
 
-    document.querySelectorAll('.waypointTooltip').forEach(tooltip => {
-        tooltip.remove();
-    });
-},                       
+            document.querySelectorAll('.waypointTooltip').forEach(tooltip => {
+                tooltip.remove();
+            });
+        }, 20); // Adjust the delay as needed
+    },                      
 
     updateRoutesArray: async function () {
         let newRoutes = [];
