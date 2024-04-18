@@ -141,28 +141,54 @@ const routeHandling = {
                     },                                 
                     onReady: (selectedDates, dateStr, instance) => {
                         let prevMonthButton = instance.calendarContainer.querySelector('.flatpickr-prev-month');
-                        let flexibleButton = document.createElement('button');
-                        flexibleButton.textContent = isDateRange ? 'Single' : 'Flexible';
-                        flexibleButton.className = 'flexible-button';
-                        flexibleButton.style.marginRight = '10px';
-                        prevMonthButton.parentNode.insertBefore(flexibleButton, prevMonthButton);
-        
-                        flexibleButton.addEventListener('click', () => {
-                            const newMode = instance.config.mode === "single" ? "range" : "single";
-                            instance.set("mode", newMode);
-                            flexibleButton.textContent = newMode === "single" ? 'Flexible' : 'Single';
-                            dateButton.textContent = newMode === "single" ? 'Select Date' : '[..]';
-                            instance.clear();
-                            instance.redraw();
+                        let dateModeSelect = document.createElement('select');
+                        let options = ['Single', 'Flexible', 'Any'];
+
+                        options.forEach(option => {
+                            let opt = document.createElement('option');
+                            opt.value = opt.textContent = option;
+                            if ((isDateRange && option === 'Flexible') || (!isDateRange && option === 'Single')) {
+                                opt.selected = true;
+                            }
+                            dateModeSelect.appendChild(opt);
                         });
-        
-                        if (isDateRange) {
+
+                        dateModeSelect.className = 'date-mode-select';
+                        dateModeSelect.style.marginRight = '10px';
+                        prevMonthButton.parentNode.insertBefore(dateModeSelect, prevMonthButton);
+
+                        dateModeSelect.addEventListener('change', () => {
+                            if (dateModeSelect.value === 'Any') {
+                                this.textContent = 'Any';
+                                updateState('updateRouteDate', { routeNumber: routeNumber, date: 'any' });
+                                instance.close();
+                            } else {
+                                const newMode = dateModeSelect.value === "Single" ? "single" : "range";
+                                instance.set("mode", newMode);
+                                this.textContent = newMode === "single" ? 'Select Date' : '[..]';
+                                instance.clear();
+                                instance.redraw();
+
+                                // Set a default date that is valid for the new mode
+                                if (newMode === "single") {
+                                    instance.setDate(new Date(), true);
+                                } else if (newMode === "range") {
+                                    const today = new Date();
+                                    const nextWeek = new Date();
+                                    nextWeek.setDate(today.getDate() + 7);
+                                    instance.setDate([today, nextWeek], true);
+                                }
+                            }
+                        });
+
+                        // Only set the date if it's not 'any'
+                        if (isDateRange && currentRouteDate !== 'any') {
                             const dates = currentRouteDate.split(' to ').map(dateStr => new Date(dateStr));
                             instance.setDate(dates, true);
                         }
                     }
                 });
-                fp.open();
+            fp.open();
             } else {
                 this._flatpickr.open();
             }

@@ -9,17 +9,24 @@ const routeDateButtons = {
         const currentDate = new Date().toISOString().split('T')[0]; // Get current UTC date as fallback
         const routeDate = appState.routeDates[routeNumber] || currentDate;
         
-        // Check if the date is a range and split it if necessary
-        const effectiveDate = routeDate.includes(' to ') ? routeDate.split(' to ')[0] : routeDate;
-        const dateParts = effectiveDate.split('-');
-        let newDayName = new Date(Date.UTC(dateParts[0], dateParts[1] - 1, dateParts[2])).toLocaleDateString('en-US', { weekday: 'short', timeZone: 'UTC' });
-        box.textContent = newDayName;
-
-        if (newDayName === 'Sun' || newDayName === 'Sat') {
-            box.style.backgroundColor = '#01481a'; // Set background color to green for weekend days
+        let newDayName;
+        if (routeDate === 'any') {
+            newDayName = 'Any';
+            box.style.backgroundColor = ''; // Reset background color
         } else {
-            box.style.backgroundColor = ''; // Reset background color for non-weekend days
-        }        
+            // Check if the date is a range and split it if necessary
+            const effectiveDate = routeDate.includes(' to ') ? routeDate.split(' to ')[0] : routeDate;
+            const dateParts = effectiveDate.split('-');
+            newDayName = new Date(Date.UTC(dateParts[0], dateParts[1] - 1, dateParts[2])).toLocaleDateString('en-US', { weekday: 'short', timeZone: 'UTC' });
+
+            if (newDayName === 'Sun' || newDayName === 'Sat') {
+                box.style.backgroundColor = '#01481a'; // Set background color to green for weekend days
+            } else {
+                box.style.backgroundColor = ''; // Reset background color for non-weekend days
+            }        
+        }
+
+        box.textContent = newDayName;
     });
 }, 
 
@@ -32,30 +39,31 @@ const routeDateButtons = {
         const routeDate = appState.routeDates[routeNumber];
         //console.log('routeDate: ',routeDate);
         if (routeDate) {
-            // Check if the date is a range and split it if necessary
-            const effectiveDate = routeDate.includes(' to ') ? routeDate.split(' to ')[0] : routeDate;
-            const dateParts = effectiveDate.split('-');
-            const currentMonth = new Date(Date.UTC(dateParts[0], dateParts[1] - 1, dateParts[2])).getMonth();
-
-            if (currentMonth !== previousMonth) {
-                let monthNameBox;
-                if (routeDiv.previousElementSibling && routeDiv.previousElementSibling.classList.contains('month-name-box')) {
-                    monthNameBox = routeDiv.previousElementSibling;
-                } else {
-                    monthNameBox = document.createElement('div');
-                    monthNameBox.className = 'month-name-box';
-                    container.insertBefore(monthNameBox, routeDiv);
-                }
-
-                const monthName = new Date(Date.UTC(dateParts[0], dateParts[1] - 1, dateParts[2])).toLocaleDateString('en-US', { month: 'long', timeZone: 'UTC' });
-                monthNameBox.textContent = monthName;
-
-                previousMonth = currentMonth;
+            let monthName;
+            if (routeDate === 'any') {
+                monthName = 'All Months';
             } else {
-                if (routeDiv.previousElementSibling && routeDiv.previousElementSibling.classList.contains('month-name-box')) {
-                    container.removeChild(routeDiv.previousElementSibling);
+                // Check if the date is a range and split it if necessary
+                const effectiveDate = routeDate.includes(' to ') ? routeDate.split(' to ')[0] : routeDate;
+                const dateParts = effectiveDate.split('-');
+                const currentMonth = new Date(Date.UTC(dateParts[0], dateParts[1] - 1, dateParts[2])).getMonth();
+
+                if (currentMonth !== previousMonth) {
+                    monthName = new Date(Date.UTC(dateParts[0], dateParts[1] - 1, dateParts[2])).toLocaleDateString('en-US', { month: 'long', timeZone: 'UTC' });
+                    previousMonth = currentMonth;
                 }
             }
+
+            let monthNameBox;
+            if (routeDiv.previousElementSibling && routeDiv.previousElementSibling.classList.contains('month-name-box')) {
+                monthNameBox = routeDiv.previousElementSibling;
+            } else {
+                monthNameBox = document.createElement('div');
+                monthNameBox.className = 'month-name-box';
+                container.insertBefore(monthNameBox, routeDiv);
+            }
+
+            monthNameBox.textContent = monthName;
         }
     });
   },
@@ -65,10 +73,14 @@ const routeDateButtons = {
         const routeNumber = button.closest('.route-container').getAttribute('data-route-number');
         const dateValue = appState.routeDates[routeNumber];
         if (dateValue) {
-          button.textContent = dateValue.includes(' to ') ? '[..]' : new Date(dateValue).getUTCDate().toString();
+            if (dateValue === 'any') {
+                button.textContent = '<>';
+            } else {
+                button.textContent = dateValue.includes(' to ') ? '[..]' : new Date(dateValue).getUTCDate().toString();
+            }
         }
     });
-  },
+},
   
   updateDateButtons: function() {
     this.updateDayNameBoxes();
