@@ -173,11 +173,15 @@ input[type="text"]:focus {
   width: 40px;
   align-items: center;
   cursor: pointer;
-  background-color: #555;
+  background-color: #444;
   color: #a9a9a9;
   margin-right: -10px;
   padding-left: 1px;
   padding-bottom: 3px
+}
+
+.day-name-box:hover {
+  background-color: #555;
 }
 
 .swap-route-button {
