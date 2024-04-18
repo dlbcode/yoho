@@ -24,7 +24,7 @@ module.exports = function(app, db, tequila) {
             if (cachedData && (new Date().getTime() - cachedData.timestamp.getTime()) < 24 * 60 * 60 * 1000) {
                 res.json(cachedData.results);
             } else {
-                const apiUrl = `${tequila.url}?fly_from=${origin}&date_from=${dateFrom}&date_to=${dateTo}&price_to=${priceTo}&one_for_city=1&limit=${limit}`;
+                const apiUrl = `${tequila.url}?fly_from=${origin}&date_from=${dateFrom}&date_to=${dateTo}&price_to=${priceTo}&one_for_city=1&limit=${limit}&partner=picky&curr=USD`;
 
                 const response = await axios({ ...tequila, url: apiUrl });
                 if (response.data && response.data.data) {
