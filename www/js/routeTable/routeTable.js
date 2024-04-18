@@ -21,8 +21,8 @@ function buildRouteTable(routeIndex) {
     // if origin is 'Any', it means the user wants to search for flights from any origin
     buildAnyDestTable(routeIndex, origin, dateRange);
     return;
-  } else if (dateRange && dateRange.includes(' to ')) {
-    // If dateRange includes ' to ', it indicates a range of dates
+  } else if (dateRange && (dateRange.includes(' to ') || dateRange.includes('any'))) {
+    // If dateRange includes ' to ' or 'any', it indicates a range of dates
     buildDateRangeTable(routeIndex, dateRange);
   } else {
     // Otherwise, it's a single departure date

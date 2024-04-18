@@ -39,7 +39,12 @@ function buildDateRangeTable(routeIndex, dateRange) {
   const origin = currentRoute.originAirport.iata_code;
   const destination = currentRoute.destinationAirport.iata_code;
 
-  let apiUrl = `https://yonderhop.com/api/range?flyFrom=${origin}&flyTo=${destination}&dateFrom=${startDate}&dateTo=${endDate}`;
+  let apiUrl = `https://yonderhop.com/api/range?flyFrom=${origin}&flyTo=${destination}`;
+
+  if (!dateRange.includes('any')) {
+      const [startDate, endDate] = dateRange.split(' to ');
+      apiUrl += `&dateFrom=${startDate}&dateTo=${endDate}`;
+  }
 
   fetch(apiUrl)
   .then(response => {
