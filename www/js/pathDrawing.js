@@ -375,6 +375,9 @@ const pathDrawing = {
                 }
             });
         }
+
+        // Ensure line hover popups are cleared on mouseout
+        map.closePopup();
     
         // Resetting caches and current lines array
         this.routePathCache = {};
