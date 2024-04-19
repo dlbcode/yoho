@@ -119,7 +119,7 @@ const routeHandling = {
                     dateFormat: "Y-m-d",
                     defaultDate: isDateRange ? currentRouteDate.split(' to ')[0] : currentRouteDate,
                     minDate: routeNumber === 0 ? "today" : appState.routeDates[routeNumber - 1],
-                    mode: currentRouteDate === 'any' ? 'any' : (currentRouteDate.includes(' to ') ? 'range' : 'single'),
+                    mode: isDateRange ? "range" : "single",mode: currentRouteDate === 'any' ? 'any' : (currentRouteDate.includes(' to ') ? 'range' : 'single'),
                     
                     onValueUpdate: (selectedDates) => {
                         if (selectedDates.length > 1 && selectedDates[0] && selectedDates[1]) {
@@ -227,15 +227,21 @@ const routeHandling = {
                             }
                         });
 
-                        const mode = currentRouteDate === 'any' ? 'any' : (currentRouteDate.includes(' to ') ? 'range' : 'single')
+                        //const mode = currentRouteDate === 'any' ? 'any' : (currentRouteDate.includes(' to ') ? 'range' : 'single')
+//
+                        //if (mode === "single") {
+                        //    instance.setDate(new Date(), true);
+                        //} else if (mode === "range") {
+                        //    const today = new Date();
+                        //    const nextWeek = new Date();
+                        //    nextWeek.setDate(today.getDate() + 7);
+                        //    instance.setDate([today, nextWeek], true);
+                        //}
 
-                        if (mode === "single") {
-                            instance.setDate(new Date(), true);
-                        } else if (mode === "range") {
-                            const today = new Date();
-                            const nextWeek = new Date();
-                            nextWeek.setDate(today.getDate() + 7);
-                            instance.setDate([today, nextWeek], true);
+                        // Only set the date if it's not 'any'
+                        if (isDateRange && currentRouteDate !== 'any') {
+                            const dates = currentRouteDate.split(' to ').map(dateStr => new Date(dateStr));
+                            instance.setDate(dates, true);
                         }
                     }
                 });
