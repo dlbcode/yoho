@@ -142,20 +142,22 @@ a:active, button:active, input:focus, select:focus, textarea:focus {
 .select-wrapper {
   position: relative;
   display: inline-block;
-  width: 110px;
+  background-color: #444;
+  cursor: pointer;
+  width: 104px;
   z-index: 1000;
 }
 
 .select-wrapper .date-mode-select {
   position: absolute;
-  padding: 6px;
-  font-size: 1rem;
+  padding-left: 4px;
+  padding-top: 8px;
   background-color: #444;
-  cursor: pointer;
+  font-size: 1rem;
 }
 
 .select-wrapper .options {
-  /* Style the options container */
+  width: 100%;
 }
 
 .select-wrapper .option {
