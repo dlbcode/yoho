@@ -141,34 +141,68 @@ const routeHandling = {
                     },                                 
                     onReady: (selectedDates, dateStr, instance) => {
                         let prevMonthButton = instance.calendarContainer.querySelector('.flatpickr-prev-month');
-                        let dateModeSelect = document.createElement('select');
+                        // Create a div to wrap the select element for custom styling
+                        let dateModeSelectWrapper = document.createElement('div');
+                        dateModeSelectWrapper.className = 'select-wrapper';
+                        dateModeSelectWrapper.style.marginRight = '10px'; // Move the margin to the wrapper for better control
+
+                        let dateModeSelect = document.createElement('div');
+                        dateModeSelect.className = 'date-mode-select';
+
+                        let selectedOption = document.createElement('div');
+                        selectedOption.className = 'selected-option';
+
                         let options = ['Specific Date', 'Date Range', 'Any Dates'];
 
+                        let optionsContainer = document.createElement('div');
+                        optionsContainer.className = 'options';
+                        optionsContainer.style.display = 'none'; // Hide the options by default
+
                         options.forEach(option => {
-                            let opt = document.createElement('option');
-                            opt.value = option;
+                            let opt = document.createElement('div');
+                            opt.className = 'option';
                             opt.textContent = option;
                             if ((isDateRange && option === 'Date Range') || (!isDateRange && option === 'Specific Date')) {
-                                opt.selected = true;
+                                opt.classList.add('selected');
+                                selectedOption.textContent = option; // Set the text of the selected option
                             }
-                            dateModeSelect.appendChild(opt);
+                            opt.addEventListener('click', (event) => {
+                                // Stop the propagation of the click event
+                                event.stopPropagation();
+                                // Remove the 'selected' class from the previously selected option
+                                optionsContainer.querySelector('.selected').classList.remove('selected');
+                                // Add the 'selected' class to the clicked option
+                                opt.classList.add('selected');
+                                // Set the text of the selected option
+                                selectedOption.textContent = opt.textContent;
+                                // Hide the options
+                                optionsContainer.style.display = 'none';
+                                // Trigger the change event
+                                dateModeSelect.dispatchEvent(new Event('change'));
+                            });
+                            optionsContainer.appendChild(opt);
                         });
 
-                        dateModeSelect.className = 'date-mode-select';
-                        dateModeSelect.style.marginRight = '10px';
-                        prevMonthButton.parentNode.insertBefore(dateModeSelect, prevMonthButton);
+                        dateModeSelect.appendChild(selectedOption);
+                        dateModeSelect.appendChild(optionsContainer);
+                        dateModeSelectWrapper.appendChild(dateModeSelect);
+                        prevMonthButton.parentNode.insertBefore(dateModeSelectWrapper, prevMonthButton);
 
-                        let self = this;
+                        // Show/hide the options when the dropdown is clicked
+                        dateModeSelect.addEventListener('click', () => {
+                            optionsContainer.style.display = optionsContainer.style.display === 'none' ? 'block' : 'none';
+                        });
 
                         dateModeSelect.addEventListener('change', () => {
-                            if (dateModeSelect.value === 'Any Dates') {
-                                self.textContent = 'Any Dates';
+                            let selectedOption = dateModeSelect.querySelector('.selected').textContent;
+                            if (selectedOption === 'Any Dates') {
+                                this.textContent = 'Any Dates';
                                 updateState('updateRouteDate', { routeNumber: routeNumber, date: 'any' });
                                 instance.close();
                             } else {
-                                const newMode = dateModeSelect.value === "Specific Date" ? "single" : "range";
+                                const newMode = selectedOption === "Specific Date" ? "single" : "range";
                                 instance.set("mode", newMode);
-                                self.textContent = newMode === "single" ? 'Select Date' : '[..]';
+                                this.textContent = newMode === "single" ? 'Select Date' : '[..]';
                                 instance.clear();
                                 instance.redraw();
 
@@ -183,7 +217,7 @@ const routeHandling = {
                                 }
                             }
                         });
-                        
+
                         // Only set the date if it's not 'any'
                         if (isDateRange && currentRouteDate !== 'any') {
                             const dates = currentRouteDate.split(' to ').map(dateStr => new Date(dateStr));

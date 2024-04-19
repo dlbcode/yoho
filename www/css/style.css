@@ -138,3 +138,29 @@ a:active, button:active, input:focus, select:focus, textarea:focus {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
   z-index: 500;
 }
+
+.select-wrapper .date-mode-select {
+  padding: 6px;
+  font-size: 1rem;
+}
+
+.select-wrapper .options {
+  /* Style the options container */
+}
+
+.select-wrapper .option {
+  text-align: left;
+}
+
+.select-wrapper .option:hover {
+  background-color: #555;
+  color: #fff;
+}
+
+.select-wrapper .selected {
+  text-align: left;
+}
+
+.select-wrapper .selected-option {
+  text-align: left;
+}
