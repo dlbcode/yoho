@@ -110,16 +110,16 @@ const routeHandling = {
         dateButton.addEventListener('click', function() {
             if (!this._flatpickr) {
                 const currentRouteDate = appState.routeDates[routeNumber];
-                const isDateRange = currentRouteDate && currentRouteDate.includes(' to ');
+                const mode = currentRouteDate === 'any' ? 'any' : (currentRouteDate.includes(' to ') ? 'range' : 'single');
                 const timeZone = 'UTC'; // Specify your desired time zone, e.g., 'UTC', 'America/New_York'
                 
                 let fp = flatpickr(this, {
                     disableMobile: true,
                     enableTime: false,
                     dateFormat: "Y-m-d",
-                    defaultDate: isDateRange ? currentRouteDate.split(' to ')[0] : currentRouteDate,
+                    mode: mode,
+                    defaultDate: mode === 'range' ? currentRouteDate.split(' to ')[0] : currentRouteDate,
                     minDate: routeNumber === 0 ? "today" : appState.routeDates[routeNumber - 1],
-                    mode: isDateRange ? "range" : "single",
                     onValueUpdate: (selectedDates) => {
                         if (selectedDates.length > 1 && selectedDates[0] && selectedDates[1]) {
                             this.textContent = '[..]';
@@ -162,27 +162,22 @@ const routeHandling = {
                             let opt = document.createElement('div');
                             opt.className = 'option';
                             opt.textContent = option;
-                            if ((isDateRange && option === 'Date Range') || (!isDateRange && option === 'Specific Date')) {
+                            if ((mode === 'range' && option === 'Date Range') || 
+                                (mode === 'single' && option === 'Specific Date') || 
+                                (mode === 'any' && option === 'Any Dates')) {
                                 opt.classList.add('selected');
                                 selectedOption.textContent = option; // Set the text of the selected option
                                 opt.style.display = 'none'; // Hide the selected option
                             }
                             opt.addEventListener('click', (event) => {
-                                // Stop the propagation of the click event
                                 event.stopPropagation();
-                                // Remove the 'selected' class from the previously selected option
                                 let previousSelectedOption = optionsContainer.querySelector('.selected');
                                 previousSelectedOption.classList.remove('selected');
                                 previousSelectedOption.style.display = 'block'; // Show the previously selected option
-                                // Add the 'selected' class to the clicked option
                                 opt.classList.add('selected');
-                                // Set the text of the selected option
                                 selectedOption.textContent = opt.textContent;
-                                // Hide the options
                                 optionsContainer.style.display = 'none';
-                                // Hide the clicked option
                                 opt.style.display = 'none';
-                                // Trigger the change event
                                 dateModeSelect.dispatchEvent(new Event('change'));
                             });
                             optionsContainer.appendChild(opt);
@@ -224,7 +219,7 @@ const routeHandling = {
                         });
 
                         // Only set the date if it's not 'any'
-                        if (isDateRange && currentRouteDate !== 'any') {
+                        if (mode && currentRouteDate !== 'any') {
                             const dates = currentRouteDate.split(' to ').map(dateStr => new Date(dateStr));
                             instance.setDate(dates, true);
                         }
