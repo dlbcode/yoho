@@ -144,8 +144,6 @@ const routeHandling = {
                         // Create a div to wrap the select element for custom styling
                         let dateModeSelectWrapper = document.createElement('div');
                         dateModeSelectWrapper.className = 'select-wrapper';
-                        //dateModeSelectWrapper.style.marginRight = '10px'; // Move the margin to the wrapper for better control
-
                         let dateModeSelect = document.createElement('div');
                         dateModeSelect.className = 'date-mode-select';
 
@@ -158,13 +156,18 @@ const routeHandling = {
                         optionsContainer.className = 'options';
                         optionsContainer.style.display = 'none'; // Hide the options by default
 
+                        let selectedOptionText = document.createElement('div');
+                        selectedOption.appendChild(selectedOptionText);
+
                         options.forEach(option => {
                             let opt = document.createElement('div');
                             opt.className = 'option';
-                            opt.textContent = option;
+                            let optText = document.createElement('div');
+                            optText.textContent = option;
+                            opt.appendChild(optText);
                             if ((isDateRange && option === 'Date Range') || (!isDateRange && option === 'Specific Date')) {
                                 opt.classList.add('selected');
-                                selectedOption.textContent = option; // Set the text of the selected option
+                                selectedOptionText.textContent = option; // Set the text of the selected option
                                 opt.style.display = 'none'; // Hide the selected option
                             }
                             opt.addEventListener('click', (event) => {
@@ -177,7 +180,7 @@ const routeHandling = {
                                 // Add the 'selected' class to the clicked option
                                 opt.classList.add('selected');
                                 // Set the text of the selected option
-                                selectedOption.textContent = opt.textContent;
+                                selectedOptionText.textContent = opt.textContent;
                                 // Hide the options
                                 optionsContainer.style.display = 'none';
                                 // Hide the clicked option
