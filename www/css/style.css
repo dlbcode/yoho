@@ -139,10 +139,19 @@ a:active, button:active, input:focus, select:focus, textarea:focus {
   z-index: 500;
 }
 
+.select-wrapper {
+  position: relative;
+  display: inline-block;
+  width: 110px;
+  z-index: 1000;
+}
+
 .select-wrapper .date-mode-select {
+  position: absolute;
   padding: 6px;
   font-size: 1rem;
   background-color: #444;
+  cursor: pointer;
 }
 
 .select-wrapper .options {
@@ -190,9 +199,11 @@ a:active, button:active, input:focus, select:focus, textarea:focus {
 }
 
 .flatpickr-prev-month, .flatpickr-next-month {
-  width: 10px !important;
-  margin-right: 5px !important;
-  margin-left: 5px !important;
+  margin-right: 0px !important;
   padding-left: 0 !important;
   padding-right: 0 !important;
+}
+
+.flatpickr-next-month {
+  margin-right: 5px !important;
 }

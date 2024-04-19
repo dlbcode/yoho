@@ -144,7 +144,7 @@ const routeHandling = {
                         // Create a div to wrap the select element for custom styling
                         let dateModeSelectWrapper = document.createElement('div');
                         dateModeSelectWrapper.className = 'select-wrapper';
-                        dateModeSelectWrapper.style.marginRight = '10px'; // Move the margin to the wrapper for better control
+                        //dateModeSelectWrapper.style.marginRight = '10px'; // Move the margin to the wrapper for better control
 
                         let dateModeSelect = document.createElement('div');
                         dateModeSelect.className = 'date-mode-select';
