@@ -142,6 +142,7 @@ a:active, button:active, input:focus, select:focus, textarea:focus {
 .select-wrapper .date-mode-select {
   padding: 6px;
   font-size: 1rem;
+  background-color: #444;
 }
 
 .select-wrapper .options {
@@ -163,6 +164,10 @@ a:active, button:active, input:focus, select:focus, textarea:focus {
 
 .select-wrapper .selected-option {
   text-align: left;
+}
+
+.date-mode-select .options:not([style*="display: none"]) .option.hide {
+  display: none;
 }
 
 .flatpickr-monthDropdown-months {

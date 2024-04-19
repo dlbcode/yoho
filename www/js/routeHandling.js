@@ -165,18 +165,23 @@ const routeHandling = {
                             if ((isDateRange && option === 'Date Range') || (!isDateRange && option === 'Specific Date')) {
                                 opt.classList.add('selected');
                                 selectedOption.textContent = option; // Set the text of the selected option
+                                opt.style.display = 'none'; // Hide the selected option
                             }
                             opt.addEventListener('click', (event) => {
                                 // Stop the propagation of the click event
                                 event.stopPropagation();
                                 // Remove the 'selected' class from the previously selected option
-                                optionsContainer.querySelector('.selected').classList.remove('selected');
+                                let previousSelectedOption = optionsContainer.querySelector('.selected');
+                                previousSelectedOption.classList.remove('selected');
+                                previousSelectedOption.style.display = 'block'; // Show the previously selected option
                                 // Add the 'selected' class to the clicked option
                                 opt.classList.add('selected');
                                 // Set the text of the selected option
                                 selectedOption.textContent = opt.textContent;
                                 // Hide the options
                                 optionsContainer.style.display = 'none';
+                                // Hide the clicked option
+                                opt.style.display = 'none';
                                 // Trigger the change event
                                 dateModeSelect.dispatchEvent(new Event('change'));
                             });
