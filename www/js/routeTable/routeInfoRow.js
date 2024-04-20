@@ -31,17 +31,29 @@ function routeInfoRow(rowElement, fullFlightData, routeIds, routeIndex) {
     const flight = fullFlightData;
     detailCell.colSpan = 9;  // Assuming there are 9 columns in your table
     detailCell.innerHTML = `
-        <div class='route-details'>
-        <div>Route Details for ${flight.airlines.join(", ")}:</div>
-        ${flight.route.map((segment, idx) => (
-            `<div class='segment-details' style='display: inline-block; margin-right: 20px;'>
-                <div>${segment.flyFrom} > ${segment.flyTo}</div>
-                <div>Departure: ${new Date(segment.local_departure).toLocaleTimeString()}</div>
-                <div>Arrival: ${new Date(segment.local_arrival).toLocaleTimeString()}</div>
-                <div>Duration: ${((new Date(segment.local_arrival) - new Date(segment.local_departure)) / 3600000).toFixed(1)} hrs</div>
-                ${idx < flight.route.length - 1 ? formatLayover(flight, idx) : ''}
-            </div>`
-        )).join('')}
+        <table class='route-details'>
+        <tbody>
+            <tr>
+                ${flight.route.map((segment, idx) => `
+                    <td>${segment.flyFrom}</td>
+                    <td>${segment.flyTo}</td>
+                    <td>Duration: ${((new Date(segment.local_arrival) - new Date(segment.local_departure)) / 3600000).toFixed(1)} hrs</td>
+                    ${idx < flight.route.length - 1 ? `<td>Layover: ${formatLayover(flight, idx)}</td>` : ''}
+                `).join('')}
+            </tr>
+            <tr>
+                ${flight.route.map((segment) => `
+                    <td>Departure: ${new Date(segment.local_departure).toLocaleTimeString()}</td>
+                    <td>Arrival: ${new Date(segment.local_arrival).toLocaleTimeString()}</td>
+                    <td></td>
+                `).join('')}
+            </tr>
+        </tbody>
+        </table>
+        <div class='baggage-info'>Baggage: ${flight.baglimit.hold_weight} kg check-in, ${flight.baglimit.personal_item_weight} kg personal (max dimensions: ${flight.baglimit.personal_item_length}x${flight.baglimit.personal_item_width}x${flight.baglimit.personal_item_height} cm)</div>
+        <div class='price-info'>Price: $${flight.price.toFixed(2)}</div>
+        <button id='selectRoute'>Select Route</button>
+    `;
         </div>
         <div class='baggage-info'>Baggage: ${flight.baglimit.hold_weight} kg check-in, ${flight.baglimit.personal_item_weight} kg personal (max dimensions: ${flight.baglimit.personal_item_length}x${flight.baglimit.personal_item_width}x${flight.baglimit.personal_item_height} cm)</div>
         <div class='price-info'>Price: $${flight.price.toFixed(2)}</div>
