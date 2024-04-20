@@ -22,6 +22,11 @@ function routeInfoRow(rowElement, fullFlightData, routeIds, routeIndex) {
     detailCell.colSpan = 9;  // Assuming there are 9 columns in your table
     detailCell.innerHTML = `
         <div>Route Details for ${flight.airlines.join(", ")}:</div>
+        <div>From ${flight.cityFrom} (${flight.flyFrom}) to ${flight.cityTo} (${flight.flyTo})</div>
+        <div>Departure: ${new Date(flight.local_departure).toLocaleTimeString()} - Arrival: ${new Date(flight.local_arrival).toLocaleTimeString()}</div>
+        <div>Duration: ${flight.duration.total / 3600} hrs</div>
+        ${flight.route.map((_, idx) => formatLayover(flight, idx)).join('')}
+        <div>Baggage: ${flight.baglimit.hold_weight} kg check-in, ${flight.baglimit.personal_item_weight} kg personal (max dimensions: ${flight.baglimit.personal_item_length}x${flight.baglimit.personal_item_width}x${flight.baglimit.personal_item_height} cm)</div>
         <div>Price: $${flight.price.toFixed(2)}</div>
         <button id="selectRoute">Select Route</button>
     `;
