@@ -82,14 +82,12 @@ const routeHandling = {
         }
         
         dayNameBox.addEventListener('click', function() {
-            // Find the date-select-button within the same routeDiv
             const dateSelectButton = routeDiv.querySelector('.date-select-button');
             if (dateSelectButton) {
                 dateSelectButton.click();
             }
         });
         
-        // Insert the day name box before the date button
         routeDiv.insertBefore(dayNameBox, routeDiv.firstChild);
 
         let dateButton = document.createElement('button');
@@ -99,158 +97,122 @@ const routeHandling = {
             appState.routeDates[routeNumber] : 
             (routeNumber === 0 ? new Date().toISOString().split('T')[0] : appState.routeDates[routeNumber - 1]);
 
-        if (appState.routeDates.hasOwnProperty(routeNumber)) {
-            appState.routeDates[routeNumber] = currentRouteDate;
-        } else {
-            appState.routeDates[routeNumber] = routeNumber === 0 ? new Date().toISOString().split('T')[0] : appState.routeDates[routeNumber];
-        }
+        dateButton.textContent = currentRouteDate ? (currentRouteDate.includes(' to ') ? '[..]' : new Date(currentRouteDate).getUTCDate().toString()) : 'Select Date';
 
-        // Set the button text based on whether it's a date range or a single date
-        dateButton.textContent = currentRouteDate ? (currentRouteDate.includes(' to ') ? '[..]' : new Date(currentRouteDate).getUTCDate().toString()) : new Date(currentRouteDate).getUTCDate().toString();
-        dateButton.addEventListener('click', function() {
-            if (!this._flatpickr) {
-                const currentRouteDate = appState.routeDates[routeNumber];
-                const isDateRange = currentRouteDate && currentRouteDate.includes(' to ');
-                const timeZone = 'UTC'; // Specify your desired time zone, e.g., 'UTC', 'America/New_York'
-                
-                let fp = flatpickr(this, {
-                    disableMobile: true,
-                    enableTime: false,
-                    dateFormat: "Y-m-d",
-                    defaultDate: isDateRange ? currentRouteDate.split(' to ')[0] : currentRouteDate,
-                    minDate: routeNumber === 0 ? "today" : appState.routeDates[routeNumber - 1],
-                    mode: isDateRange ? "range" : "single",mode: currentRouteDate === 'any' ? 'any' : (currentRouteDate.includes(' to ') ? 'range' : 'single'),
-                    
-                    onValueUpdate: (selectedDates) => {
-                        if (selectedDates.length > 1 && selectedDates[0] && selectedDates[1]) {
-                            this.textContent = '[..]';
-                            const dateValue = `${selectedDates[0].toISOString().split('T')[0]} to ${selectedDates[1].toISOString().split('T')[0]}`;
-                            updateState('updateRouteDate', { routeNumber: routeNumber, date: dateValue });
-                        } else if (selectedDates.length === 1 && selectedDates[0]) {
-                            const formatter = new Intl.DateTimeFormat('en-US', {
-                                day: 'numeric',
-                                timeZone: 'UTC'
-                            });
-                            this.textContent = formatter.format(selectedDates[0]);
-                            const dateValue = selectedDates[0].toISOString().split('T')[0];
-                            updateState('updateRouteDate', { routeNumber: routeNumber, date: dateValue });
-                        } else {
-                            // Handle the case where no dates are selected or the selection is cleared
-                            this.textContent = 'Select Date'; // Reset the button text or handle as needed
-                            updateState('updateRouteDate', { routeNumber: routeNumber, date: null }); // Update the state accordingly
-                        }
-                    },                                 
-                    onReady: (selectedDates, dateStr, instance) => {
-                        let prevMonthButton = instance.calendarContainer.querySelector('.flatpickr-prev-month');
-                        // Create a div to wrap the select element for custom styling
-                        let dateModeSelectWrapper = document.createElement('div');
-                        dateModeSelectWrapper.className = 'select-wrapper';
-                        let dateModeSelect = document.createElement('div');
-                        dateModeSelect.className = 'date-mode-select';
+        const isDateRange = currentRouteDate && currentRouteDate.includes(' to ');
+        const timeZone = 'UTC';
+        let fp = flatpickr(dateButton, {
+            disableMobile: true,
+            enableTime: false,
+            dateFormat: "Y-m-d",
+            defaultDate: isDateRange ? currentRouteDate.split(' to ')[0] : currentRouteDate,
+            minDate: routeNumber === 0 ? "today" : appState.routeDates[routeNumber - 1],
+            mode: currentRouteDate === 'any' ? 'any' : (currentRouteDate.includes(' to ') ? 'range' : 'single'),
+            onValueUpdate: (selectedDates) => {
+                let dateValue = null;
+                if (selectedDates.length > 0 && selectedDates[0]) {
+                    if (selectedDates.length > 1 && selectedDates[1]) {
+                        this.textContent = '[..]';
+                        dateValue = `${selectedDates[0].toISOString().split('T')[0]} to ${selectedDates[1].toISOString().split('T')[0]}`;
+                    } else {
+                        const formatter = new Intl.DateTimeFormat('en-US', { day: 'numeric', timeZone: 'UTC' });
+                        this.textContent = formatter.format(selectedDates[0]);
+                        dateValue = selectedDates[0].toISOString().split('T')[0];
+                    }
+                } else {
+                    this.textContent = 'Select Date'; // Reset the button text or handle as needed
+                }
+                updateState('updateRouteDate', { routeNumber: routeNumber, date: dateValue }); // Update the state accordingly
+            }, 
+            onReady: (selectedDates, dateStr, instance) => {
+                let prevMonthButton = instance.calendarContainer.querySelector('.flatpickr-prev-month');
+                let dateModeSelectWrapper = document.createElement('div');
+                dateModeSelectWrapper.className = 'select-wrapper';
+                let dateModeSelect = document.createElement('div');
+                dateModeSelect.className = 'date-mode-select';
+                let selectedOption = document.createElement('div');
+                selectedOption.className = 'selected-option';
+                let options = ['Specific Date', 'Date Range', 'Any Dates'];
+                let optionsContainer = document.createElement('div');
+                optionsContainer.className = 'options';
+                optionsContainer.style.display = 'none'; // Hide the options by default
+                let selectedOptionText = document.createElement('div');
+                selectedOption.appendChild(selectedOptionText);
 
-                        let selectedOption = document.createElement('div');
-                        selectedOption.className = 'selected-option';
+                options.forEach(option => {
+                    let opt = document.createElement('div');
+                    opt.className = 'option';
+                    let optText = document.createElement('div');
+                    optText.textContent = option;
+                    opt.appendChild(optText);
+                    if ((isDateRange && option === 'Date Range') || (!isDateRange && option === 'Specific Date')) {
+                        opt.classList.add('selected');
+                        selectedOptionText.textContent = option; // Set the text of the selected option
+                        opt.style.display = 'none'; // Hide the selected option
+                    }
+                    opt.addEventListener('click', (event) => {
+                        event.stopPropagation();
+                        let previousSelectedOption = optionsContainer.querySelector('.selected');
+                        previousSelectedOption.classList.remove('selected');
+                        previousSelectedOption.style.display = 'block'; // Show the previously selected option
+                        opt.classList.add('selected');
+                        selectedOptionText.textContent = opt.textContent;
+                        optionsContainer.style.display = 'none';
+                        opt.style.display = 'none';
+                        dateModeSelect.dispatchEvent(new Event('change'));
+                    });
+                    optionsContainer.appendChild(opt);
+                });
 
-                        let options = ['Specific Date', 'Date Range', 'Any Dates'];
+                dateModeSelect.appendChild(selectedOption)
+                .appendChild(optionsContainer);
+                dateModeSelectWrapper.appendChild(dateModeSelect);
+                prevMonthButton.parentNode.insertBefore(dateModeSelectWrapper, prevMonthButton);
 
-                        let optionsContainer = document.createElement('div');
-                        optionsContainer.className = 'options';
-                        optionsContainer.style.display = 'none'; // Hide the options by default
+                // Show/hide the options when the dropdown is clicked
+                dateModeSelect.addEventListener('click', () => {
+                    optionsContainer.style.display = optionsContainer.style.display === 'none' ? 'block' : 'none';
+                });
 
-                        let selectedOptionText = document.createElement('div');
-                        selectedOption.appendChild(selectedOptionText);
+                dateModeSelect.addEventListener('change', () => {
+                    const selectedOption = dateModeSelect.querySelector('.selected').textContent;
+                    const isAnyDates = selectedOption === 'Any Dates';
+                    const isSpecificDate = selectedOption === 'Specific Date';
 
-                        options.forEach(option => {
-                            let opt = document.createElement('div');
-                            opt.className = 'option';
-                            let optText = document.createElement('div');
-                            optText.textContent = option;
-                            opt.appendChild(optText);
-                            if ((isDateRange && option === 'Date Range') || (!isDateRange && option === 'Specific Date')) {
-                                opt.classList.add('selected');
-                                selectedOptionText.textContent = option; // Set the text of the selected option
-                                opt.style.display = 'none'; // Hide the selected option
-                            }
-                            opt.addEventListener('click', (event) => {
-                                // Stop the propagation of the click event
-                                event.stopPropagation();
-                                // Remove the 'selected' class from the previously selected option
-                                let previousSelectedOption = optionsContainer.querySelector('.selected');
-                                previousSelectedOption.classList.remove('selected');
-                                previousSelectedOption.style.display = 'block'; // Show the previously selected option
-                                // Add the 'selected' class to the clicked option
-                                opt.classList.add('selected');
-                                // Set the text of the selected option
-                                selectedOptionText.textContent = opt.textContent;
-                                // Hide the options
-                                optionsContainer.style.display = 'none';
-                                // Hide the clicked option
-                                opt.style.display = 'none';
-                                // Trigger the change event
-                                dateModeSelect.dispatchEvent(new Event('change'));
-                            });
-                            optionsContainer.appendChild(opt);
-                        });
+                    if (isAnyDates) {
+                        this.textContent = 'Any Dates';
+                        updateState('updateRouteDate', { routeNumber: routeNumber, date: 'any' });
+                        instance.close();
+                    } else {
+                        const newMode = isSpecificDate ? "single" : "range";
+                        instance.set("mode", newMode);
+                        this.textContent = newMode === "single" ? 'Select Date' : '[..]';
+                        instance.clear();
+                        instance.redraw();
 
-                        dateModeSelect.appendChild(selectedOption);
-                        dateModeSelect.appendChild(optionsContainer);
-                        dateModeSelectWrapper.appendChild(dateModeSelect);
-                        prevMonthButton.parentNode.insertBefore(dateModeSelectWrapper, prevMonthButton);
-
-                        // Show/hide the options when the dropdown is clicked
-                        dateModeSelect.addEventListener('click', () => {
-                            optionsContainer.style.display = optionsContainer.style.display === 'none' ? 'block' : 'none';
-                        });
-
-                        dateModeSelect.addEventListener('change', () => {
-                            let selectedOption = dateModeSelect.querySelector('.selected').textContent;
-                            if (selectedOption === 'Any Dates') {
-                                this.textContent = 'Any Dates';
-                                updateState('updateRouteDate', { routeNumber: routeNumber, date: 'any' });
-                                instance.close();
-                            } else {
-                                const newMode = selectedOption === "Specific Date" ? "single" : "range";
-                                instance.set("mode", newMode);
-                                this.textContent = newMode === "single" ? 'Select Date' : '[..]';
-                                instance.clear();
-                                instance.redraw();
-
-                                // Set a default date that is valid for the new mode
-                                if (newMode === "single") {
-                                    instance.setDate(new Date(), true);
-                                } else if (newMode === "range") {
-                                    const today = new Date();
-                                    const nextWeek = new Date();
-                                    nextWeek.setDate(today.getDate() + 7);
-                                    instance.setDate([today, nextWeek], true);
-                                }
-                            }
-                        });
-
-                        //const mode = currentRouteDate === 'any' ? 'any' : (currentRouteDate.includes(' to ') ? 'range' : 'single')
-//
-                        //if (mode === "single") {
-                        //    instance.setDate(new Date(), true);
-                        //} else if (mode === "range") {
-                        //    const today = new Date();
-                        //    const nextWeek = new Date();
-                        //    nextWeek.setDate(today.getDate() + 7);
-                        //    instance.setDate([today, nextWeek], true);
-                        //}
-
-                        // Only set the date if it's not 'any'
-                        if (isDateRange && currentRouteDate !== 'any') {
-                            const dates = currentRouteDate.split(' to ').map(dateStr => new Date(dateStr));
-                            instance.setDate(dates, true);
-                        }
+                        const today = new Date();
+                        const nextWeek = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000);
+                        const dateToSet = newMode === "single" ? today : [today, nextWeek];
+                        instance.setDate(dateToSet, true);
                     }
                 });
-            fp.open();
-            } else {
-                this._flatpickr.open();
+
+                const mode = currentRouteDate === 'any' ? 'any' : (currentRouteDate.includes(' to ') ? 'range' : 'single')
+                if (mode === "single") {
+                    instance.setDate(currentRouteDate, true);
+                } else if (mode === "range") {
+                    const dates = currentRouteDate.split(' to ').map(dateStr => new Date(dateStr));
+                    instance.setDate(dates, true);
+                }
             }
+        });
+
+        dateButton.addEventListener('click', function() {
+            fp.open();
         }, {once: true});
-        
+
+        document.body.appendChild(dateButton);
+
         uiHandling.attachDateTooltip(dayNameBox, routeNumber);
         uiHandling.attachDateTooltip(dateButton, routeNumber);
         
