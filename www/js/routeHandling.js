@@ -137,10 +137,12 @@ const routeHandling = {
                 optionsContainer.className = 'options';
                 optionsContainer.style.display = 'none'; // Hide the options by default
                 let selectedOptionText = document.createElement('div');
+                selectedOptionText.style.paddingLeft = '4px';
                 selectedOption.appendChild(selectedOptionText);
 
                 options.forEach(option => {
                     let opt = document.createElement('div');
+                    opt.style.paddingLeft = '4px';
                     opt.className = 'option';
                     let optText = document.createElement('div');
                     optText.textContent = option;

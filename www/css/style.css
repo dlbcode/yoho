@@ -162,9 +162,6 @@ a:active, button:active, input:focus, select:focus, textarea:focus {
   height: 38px;
 }
 
-.select-wrapper .option div, .selected-option div {
-  padding-left: 4px;
-}
 
 .select-wrapper .option:hover {
   background-color: #555;
