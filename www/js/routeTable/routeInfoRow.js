@@ -2,6 +2,16 @@ import { appState, updateState } from '../stateManager.js';
 import { pathDrawing } from '../pathDrawing.js';
 import { flightMap } from '../flightMap.js';
 
+function formatLayover(flight, idx) {
+    if (idx < flight.route.length - 1) {
+        const arrivalTime = new Date(flight.route[idx].local_arrival);
+        const departureTime = new Date(flight.route[idx + 1].local_departure);
+        const layoverDuration = (departureTime - arrivalTime) / 1000 / 60;  // convert from ms to minutes
+        return `<div>Layover: ${Math.floor(layoverDuration / 60)}h ${layoverDuration % 60}m</div>`;
+    }
+    return '';
+}
+
 function routeInfoRow(rowElement, fullFlightData, routeIds, routeIndex) {
     console.log('routeInfoRow called with:', rowElement, fullFlightData, routeIds, routeIndex);
 
