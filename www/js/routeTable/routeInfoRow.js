@@ -33,14 +33,14 @@ function routeInfoRow(rowElement, fullFlightData, routeIds, routeIndex) {
     detailCell.innerHTML = `
         <div>Route Details for ${flight.airlines.join(", ")}:</div>
         ${flight.route.map((segment, idx) => (
-            `<div>Segment ${idx + 1}: ${segment.flyFrom} to ${segment.flyTo}</div>
-            <div>Departure: ${new Date(segment.local_departure).toLocaleTimeString()} - Arrival: ${new Date(segment.local_arrival).toLocaleTimeString()}</div>
-            <div>Duration: ${(new Date(segment.local_arrival) - new Date(segment.local_departure)) / 3600000} hrs</div>
-            ${idx < flight.route.length - 1 ? formatLayover(flight, idx) : ''}`
+            `<table class='route-info-table'>
+                <tr class='route-info'><td>${segment.flyFrom}</td><td>&gt; Duration: ${((new Date(segment.local_arrival) - new Date(segment.local_departure)) / 3600000).toFixed(1)} hrs</td><td>${segment.flyTo}</td></tr>
+                <tr class='route-info'><td>Departure: ${new Date(segment.local_departure).toLocaleTimeString()}</td><td>${idx < flight.route.length - 1 ? formatLayover(flight, idx) : ''}</td><td>Arrival: ${new Date(segment.local_arrival).toLocaleTimeString()}</td></tr>
+            </table>`
         )).join('')}
-        <div>Baggage: ${flight.baglimit.hold_weight} kg check-in, ${flight.baglimit.personal_item_weight} kg personal (max dimensions: ${flight.baglimit.personal_item_length}x${flight.baglimit.personal_item_width}x${flight.baglimit.personal_item_height} cm)</div>
-        <div>Price: $${flight.price.toFixed(2)}</div>
-        <button id="selectRoute">Select Route</button>
+        <div class='baggage-info'>Baggage: ${flight.baglimit.hold_weight} kg check-in, ${flight.baglimit.personal_item_weight} kg personal (max dimensions: ${flight.baglimit.personal_item_length}x${flight.baglimit.personal_item_width}x${flight.baglimit.personal_item_height} cm)</div>
+        <div class='price-info'>Price: $${flight.price.toFixed(2)}</div>
+        <button id='selectRoute'>Select Route</button>
     `;
     detailRow.classList.add('route-info-row');
     detailRow.appendChild(detailCell);
