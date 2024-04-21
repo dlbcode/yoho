@@ -42,13 +42,14 @@ function routeInfoRow(rowElement, fullFlightData, routeIds, routeIndex) {
                         <span class='segment-departure'>Departure: ${new Date(segment.local_departure).toLocaleTimeString()}</span>
                         <span class='segment-arrival'>Arrival: ${new Date(segment.local_arrival).toLocaleTimeString()}</span>
                     </div>
-                    ${idx < flight.route.length - 1 ? `<span class='layover'>Layover: ${formatLayover(flight, idx)}</span>` : ''}
                 `).join('')}
+                ${idx < flight.route.length - 1 ? `<span class='layover'>Layover: ${formatLayover(flight, idx)}</span>` : ''}
             </div>
         </div>
         <div class='baggage-info'>Baggage: ${flight.baglimit.hold_weight} kg check-in, ${flight.baglimit.personal_item_weight} kg personal (max dimensions: ${flight.baglimit.personal_item_length}x${flight.baglimit.personal_item_width}x${flight.baglimit.personal_item_height} cm)</div>
         <div class='price-info'>Price: $${flight.price.toFixed(2)}</div>
         <button id='selectRoute'>Select Route</button>
+    `;
     `;
                     ${idx < flight.route.length - 1 ? `<span class='layover'>Layover: ${formatLayover(flight, idx)}</span>` : ''}
                 `).join('')}
