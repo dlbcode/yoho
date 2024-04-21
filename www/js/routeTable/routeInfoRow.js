@@ -38,8 +38,9 @@ function routeInfoRow(rowElement, fullFlightData, routeIds, routeIndex) {
                 let nextSegment = arr[idx + 1];
                 let isIntermediary = nextSegment && segment.flyTo === nextSegment.flyFrom;
                 let isFinalDestination = nextSegment && nextSegment.flyTo === arr[arr.length - 1].flyTo;
+                let isDirectFlight = arr.length === 1;
 
-                if (isIntermediary) {
+                if (isIntermediary || isDirectFlight) {
                     acc.push(`<div class='segment-details' style='display: flex; flex-direction: row; align-items: center; margin-right: 20px;'>
                         <div style='margin-right: 10px;'>
                             <div>${segment.flyFrom}</div>
@@ -52,8 +53,8 @@ function routeInfoRow(rowElement, fullFlightData, routeIds, routeIndex) {
                         <div style='margin-right: 10px;'>
                             <div>${segment.flyTo}</div>
                             <div>Arrival: ${new Date(segment.local_arrival).toLocaleTimeString()}</div>
-                            <div>Layover: ${formatLayover(flight, idx)}</div>
-                            <div>Departure: ${new Date(nextSegment.local_departure).toLocaleTimeString()}</div>
+                            ${isIntermediary ? `<div>Layover: ${formatLayover(flight, idx)}</div>
+                            <div>Departure: ${new Date(nextSegment.local_departure).toLocaleTimeString()}</div>` : ''}
                         </div>`);
                 }
 
