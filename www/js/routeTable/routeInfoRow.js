@@ -44,14 +44,6 @@ ${flight.route.map((segment, idx) => `
                     </div>
                     ${idx < flight.route.length - 1 ? `<span class='layover'>Layover: ${formatLayover(flight, idx)}</span>` : ''}`)
                 .join('')}
-                `).join('')}
-            </div>
-        </div>
-        <div class='baggage-info'>Baggage: ${flight.baglimit.hold_weight} kg check-in, ${flight.baglimit.personal_item_weight} kg personal (max dimensions: ${flight.baglimit.personal_item_length}x${flight.baglimit.personal_item_width}x${flight.baglimit.personal_item_height} cm)</div>
-        <div class='price-info'>Price: $${flight.price.toFixed(2)}</div>
-        <button id='selectRoute'>Select Route</button>
-    `;
-        </div>
         <div class='baggage-info'>Baggage: ${flight.baglimit.hold_weight} kg check-in, ${flight.baglimit.personal_item_weight} kg personal (max dimensions: ${flight.baglimit.personal_item_length}x${flight.baglimit.personal_item_width}x${flight.baglimit.personal_item_height} cm)</div>
         <div class='price-info'>Price: $${flight.price.toFixed(2)}</div>
         <button id='selectRoute'>Select Route</button>
