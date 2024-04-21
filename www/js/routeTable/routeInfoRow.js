@@ -31,47 +31,49 @@ function routeInfoRow(rowElement, fullFlightData, routeIds, routeIndex) {
     const flight = fullFlightData;
     detailCell.colSpan = 9;  // Assuming there are 9 columns in your table
     detailCell.innerHTML = `
-    <div class='route-details' style='display: flex; flex-wrap: wrap; align-items: flex-start;'>
-    <div>Route Details for ${flight.airlines.join(", ")}:</div>
-    ${flight.route.reduce((acc, segment, idx, arr) => {
-        let nextSegment = arr[idx + 1];
-        let isIntermediary = nextSegment && segment.flyTo === nextSegment.flyFrom;
-        let isFinalDestination = nextSegment && nextSegment.flyTo === arr[arr.length - 1].flyTo;
+    <div class='route-details' style='display: flex; flex-direction: column; align-items: flex-start;'>
+        <div>Route Details for ${flight.airlines.join(", ")}:</div>
+        <div class='segments' style='display: flex; flex-direction: column; align-items: flex-start;'>
+            ${flight.route.reduce((acc, segment, idx, arr) => {
+                let nextSegment = arr[idx + 1];
+                let isIntermediary = nextSegment && segment.flyTo === nextSegment.flyFrom;
+                let isFinalDestination = nextSegment && nextSegment.flyTo === arr[arr.length - 1].flyTo;
 
-        if (isIntermediary) {
-            acc.push(`<div class='segment-details' style='display: flex; flex-direction: row; align-items: center; margin-right: 20px;'>
-                <div style='margin-right: 10px;'>
-                    <div>${segment.flyFrom}</div>
-                    <div>Departure: ${new Date(segment.local_departure).toLocaleTimeString()}</div>
-                </div>
-                <div style='margin-right: 10px;'>
-                    <div>&gt;</div>
-                    <div>Duration: ${((new Date(segment.local_arrival) - new Date(segment.local_departure)) / 3600000).toFixed(1)} hrs</div>
-                </div>
-                <div style='margin-right: 10px;'>
-                    <div>${segment.flyTo}</div>
-                    <div>Arrival: ${new Date(segment.local_arrival).toLocaleTimeString()}</div>
-                    <div>Layover: ${formatLayover(flight, idx)}</div>
-                    <div>Departure: ${new Date(nextSegment.local_departure).toLocaleTimeString()}</div>
-                </div>`);
-        }
+                if (isIntermediary) {
+                    acc.push(`<div class='segment-details' style='display: flex; flex-direction: row; align-items: center; margin-right: 20px;'>
+                        <div style='margin-right: 10px;'>
+                            <div>${segment.flyFrom}</div>
+                            <div>Departure: ${new Date(segment.local_departure).toLocaleTimeString()}</div>
+                        </div>
+                        <div style='margin-right: 10px;'>
+                            <div>&gt;</div>
+                            <div>Duration: ${((new Date(segment.local_arrival) - new Date(segment.local_departure)) / 3600000).toFixed(1)} hrs</div>
+                        </div>
+                        <div style='margin-right: 10px;'>
+                            <div>${segment.flyTo}</div>
+                            <div>Arrival: ${new Date(segment.local_arrival).toLocaleTimeString()}</div>
+                            <div>Layover: ${formatLayover(flight, idx)}</div>
+                            <div>Departure: ${new Date(nextSegment.local_departure).toLocaleTimeString()}</div>
+                        </div>`);
+                }
 
-        if (isFinalDestination) {
-            acc.push(`<div style='margin-right: 10px;'>
-                <div>&gt;</div>
-                <div>Duration: ${((new Date(nextSegment.local_arrival) - new Date(nextSegment.local_departure)) / 3600000).toFixed(1)} hrs</div>
-            </div>
-            <div style='margin-right: 10px;'>
-                <div>${nextSegment.flyTo}</div>
-                <div>Arrival: ${new Date(nextSegment.local_arrival).toLocaleTimeString()}</div>
-            </div>`);
-        }
+                if (isFinalDestination) {
+                    acc.push(`<div style='margin-right: 10px;'>
+                        <div>&gt;</div>
+                        <div>Duration: ${((new Date(nextSegment.local_arrival) - new Date(nextSegment.local_departure)) / 3600000).toFixed(1)} hrs</div>
+                    </div>
+                    <div style='margin-right: 10px;'>
+                        <div>${nextSegment.flyTo}</div>
+                        <div>Arrival: ${new Date(nextSegment.local_arrival).toLocaleTimeString()}</div>
+                    </div>`);
+                }
 
-        return acc;
-    }, []).join('')}
+                return acc;
+            }, []).join('')}
+        </div>
+        <div class='baggage-info'>Baggage: ${flight.baglimit.hold_weight} kg check-in, ${flight.baglimit.personal_item_weight} kg personal (max dimensions: ${flight.baglimit.personal_item_length}x${flight.baglimit.personal_item_width}x${flight.baglimit.personal_item_height} cm)</div>
+        <div class='price-info'>Price: $${flight.price.toFixed(2)}</div>
     </div>
-    <div class='baggage-info'>Baggage: ${flight.baglimit.hold_weight} kg check-in, ${flight.baglimit.personal_item_weight} kg personal (max dimensions: ${flight.baglimit.personal_item_length}x${flight.baglimit.personal_item_width}x${flight.baglimit.personal_item_height} cm)</div>
-    <div class='price-info'>Price: $${flight.price.toFixed(2)}</div>
     <button id='selectRoute'>Select Route</button>
 `;
     detailRow.classList.add('route-info-row');
