@@ -29,43 +29,25 @@ function routeInfoRow(rowElement, fullFlightData, routeIds, routeIndex) {
     const detailRow = document.createElement('tr');
     const detailCell = document.createElement('td');
     const flight = fullFlightData;
-    detailCell.colSpan = 9; // Assuming there are 9 columns in your table
+    detailCell.colSpan = 9;  // Assuming there are 9 columns in your table
     detailCell.innerHTML = `
-        <div class='route-details' style='display: flex; flex-wrap: nowrap; justify-content: space-between;'>
-            ${flight.route.map((segment, idx) => `
-                <div class='segment-details' style='flex: 0 0 auto; margin-right: 20px;'>
-                    <span class='segment-city'>${segment.flyFrom}</span> to <span class='segment-city'>${segment.flyTo}</span>
-                    <div>Departure: ${new Date(segment.local_departure).toLocaleTimeString()}</div>
-                    <div>Arrival: ${new Date(segment.local_arrival).toLocaleTimeString()}</div>
-                    <div>Duration: ${((new Date(segment.local_arrival) - new Date(segment.local_departure)) / 3600000).toFixed(1)} hrs</div>
-                    ${idx < flight.route.length - 1 ? `<div>Layover: ${formatLayover(flight, idx)}</div>` : ''}
-                </div>
-            `).join('')}
+        <div class='route-details'>
+        <div>Route Details for ${flight.airlines.join(", ")}:</div>
+        ${flight.route.map((segment, idx) => (
+            `<div class='segment-details' style='display: inline-block; margin-right: 20px;'>
+                <div>${segment.flyFrom} > ${segment.flyTo}</div>
+                <div>Departure: ${new Date(segment.local_departure).toLocaleTimeString()}</div>
+                <div>Arrival: ${new Date(segment.local_arrival).toLocaleTimeString()}</div>
+                <div>Duration: ${((new Date(segment.local_arrival) - new Date(segment.local_departure)) / 3600000).toFixed(1)} hrs</div>
+                ${idx < flight.route.length - 1 ? formatLayover(flight, idx) : ''}
+            </div>`
+        )).join('')}
         </div>
         <div class='baggage-info'>Baggage: ${flight.baglimit.hold_weight} kg check-in, ${flight.baglimit.personal_item_weight} kg personal (max dimensions: ${flight.baglimit.personal_item_length}x${flight.baglimit.personal_item_width}x${flight.baglimit.personal_item_height} cm)</div>
         <div class='price-info'>Price: $${flight.price.toFixed(2)}</div>
         <button id='selectRoute'>Select Route</button>
     `;
-                        <span class='segment-duration'>Duration: ${((new Date(segment.local_arrival) - new Date(segment.local_departure)) / 3600000).toFixed(1)} hrs</span>
-                        <span class='segment-city'>${segment.flyTo}</span>
-                        <span class='segment-departure'>Departure: ${new Date(segment.local_departure).toLocaleTimeString()}</span>
-                        <span class='segment-arrival'>Arrival: ${new Date(segment.local_arrival).toLocaleTimeString()}</span>
-                    </div>
-                    ${idx < flight.route.length - 1 ? `<span class='layover'>Layover: ${formatLayover(flight, idx)}</span>` : ''}`)
-                .join('')}
-                `).join('')}
-            </div>
-        </div>
-        <div class='baggage-info'>Baggage: ${flight.baglimit.hold_weight} kg check-in, ${flight.baglimit.personal_item_weight} kg personal (max dimensions: ${flight.baglimit.personal_item_length}x${flight.baglimit.personal_item_width}x${flight.baglimit.personal_item_height} cm)</div>
-        <div class='price-info'>Price: $${flight.price.toFixed(2)}</div>
-        <button id='selectRoute'>Select Route</button>
-    `;
->>>>>>> parent of d560d70... Fixed syntax error in routeInfoRow.js to resolve unexpected token ')' issue.
-        </div>
-        <div class='baggage-info'>Baggage: ${flight.baglimit.hold_weight} kg check-in, ${flight.baglimit.personal_item_weight} kg personal (max dimensions: ${flight.baglimit.personal_item_length}x${flight.baglimit.personal_item_width}x${flight.baglimit.personal_item_height} cm)</div>
-        <div class='price-info'>Price: $${flight.price.toFixed(2)}</div>
-        <button id='selectRoute'>Select Route</button>
-    `;
+    detailRow.classList.add('route-info-row');
     detailRow.appendChild(detailCell);
 
     // add selected class to the clicked row in the table
