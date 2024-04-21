@@ -31,24 +31,21 @@ function routeInfoRow(rowElement, fullFlightData, routeIds, routeIndex) {
     const flight = fullFlightData;
     detailCell.colSpan = 9; // Assuming there are 9 columns in your table
     detailCell.innerHTML = `
-        <div class='route-details'>
-            <div class='segments-display'>
-${flight.route.map((segment, idx) => `
-                    <div class='segment-details' style='display: flex; flex-direction: column; margin-right: 20px;'>
-                        <span class='segment-city'>${segment.flyFrom}</span>
-                        <span class='segment-arrow'>&gt;</span>
-                        <span class='segment-duration'>Duration: ${((new Date(segment.local_arrival) - new Date(segment.local_departure)) / 3600000).toFixed(1)} hrs</span>
-                        <span class='segment-city'>${segment.flyTo}</span>
-                        <span class='segment-departure'>Departure: ${new Date(segment.local_departure).toLocaleTimeString()}</span>
-                        <span class='segment-arrival'>Arrival: ${new Date(segment.local_arrival).toLocaleTimeString()}</span>
-                    </div>
-                    ${idx < flight.route.length - 1 ? `<span class='layover'>Layover: ${formatLayover(flight, idx)}</span>` : ''}`)
-                .join('')}
+        <div class='route-details' style='display: flex; flex-wrap: nowrap; justify-content: space-between;'>
+            ${flight.route.map((segment, idx) => `
+                <div class='segment-details' style='flex: 0 0 auto; margin-right: 20px;'>
+                    <span class='segment-city'>${segment.flyFrom}</span> to <span class='segment-city'>${segment.flyTo}</span>
+                    <div>Departure: ${new Date(segment.local_departure).toLocaleTimeString()}</div>
+                    <div>Arrival: ${new Date(segment.local_arrival).toLocaleTimeString()}</div>
+                    <div>Duration: ${((new Date(segment.local_arrival) - new Date(segment.local_departure)) / 3600000).toFixed(1)} hrs</div>
+                    ${idx < flight.route.length - 1 ? `<div>Layover: ${formatLayover(flight, idx)}</div>` : ''}
+                </div>
+            `).join('')}
+        </div>
         <div class='baggage-info'>Baggage: ${flight.baglimit.hold_weight} kg check-in, ${flight.baglimit.personal_item_weight} kg personal (max dimensions: ${flight.baglimit.personal_item_length}x${flight.baglimit.personal_item_width}x${flight.baglimit.personal_item_height} cm)</div>
         <div class='price-info'>Price: $${flight.price.toFixed(2)}</div>
         <button id='selectRoute'>Select Route</button>
     `;
-    detailRow.classList.add('route-info-row');
     detailRow.appendChild(detailCell);
 
     // add selected class to the clicked row in the table
