@@ -53,11 +53,11 @@ function routeInfoRow(rowElement, fullFlightData, routeIds, routeIndex) {
     rowElement.classList.add('route-info-row-header');
 
     // Insert the new row right after the clicked row in the table
-    if (rowElement.nextSibling) {
-        rowElement.parentNode.insertBefore(detailRow, rowElement.nextSibling);
-    } else {
-        rowElement.parentNode.appendChild(detailRow);  // Append to the end if there's no next sibling
-    }
+if (rowElement.nextSibling) {
+    rowElement.parentNode.insertBefore(detailRow, rowElement.nextSibling);
+} else {
+    rowElement.parentNode.appendChild(detailRow);  // Append to the end if there's no next sibling
+}
 
     detailRow.addEventListener('mouseover', () => {
       highlightRoutePath(fullFlightData.route);
