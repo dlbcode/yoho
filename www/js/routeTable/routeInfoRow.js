@@ -99,7 +99,6 @@ function routeInfoRow(rowElement, fullFlightData, routeIds, routeIndex) {
                 </div>              
             </div>
         </div>
-       
     </div>
     `;
     detailRow.classList.add('route-info-row');
