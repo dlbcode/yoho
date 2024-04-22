@@ -32,7 +32,7 @@ function routeInfoRow(rowElement, fullFlightData, routeIds, routeIndex) {
     detailCell.colSpan = 9;  // Assuming there are 9 columns in your table
 
     function generateSegmentDetails(flight) {
-        let segmentsHtml = ['<div class="route-details" >'];
+        let segmentsHtml = ['<div class="route-details">'];
     
         flight.route.forEach((segment, idx, arr) => {
             const departureTime = new Date(segment.local_departure).toLocaleTimeString();
@@ -41,11 +41,7 @@ function routeInfoRow(rowElement, fullFlightData, routeIds, routeIndex) {
     
             if (idx === 0) {
                 // Origin Column
-                segmentsHtml.push(`<div class="origin">`);
-                segmentsHtml.push(`<div>${segment.flyFrom}</div>`);
-                segmentsHtml.push(`<div>Departure ${departureTime}</div>`);
-                segmentsHtml.push(`</div>`); // Close origin column
-    
+                segmentsHtml.push(`<div class="origin"><div>${segment.flyFrom}</div><div>Departure: ${departureTime}</div></div>`);
                 // First Duration Column
                 segmentsHtml.push(`<div class="duration">${duration}</div>`);
             }
@@ -54,29 +50,20 @@ function routeInfoRow(rowElement, fullFlightData, routeIds, routeIndex) {
                 // Layover Column (for all segments except the first)
                 const layoverDuration = formatLayover(flight, idx - 1);
                 const previousArrivalTime = new Date(flight.route[idx - 1].local_arrival).toLocaleTimeString();
-                segmentsHtml.push(`<div class="layover">`);
-                segmentsHtml.push(`<div>${flight.route[idx - 1].flyTo}</div>`);
-                segmentsHtml.push(`<div">Arrival: ${previousArrivalTime}</div>`);
-                segmentsHtml.push(`<div>Layover: ${layoverDuration}</div>`);
-                segmentsHtml.push(`<div>Departure: ${departureTime}</div>`);
-                segmentsHtml.push(`</div>`); // Close layover column
-    
+                segmentsHtml.push(`<div class="layover"><div>${flight.route[idx - 1].flyTo}</div><div>Arrival: ${previousArrivalTime}</div><div>Layover: ${layoverDuration}</div><div>Departure: ${departureTime}</div></div>`);
                 // Second Duration Column
                 segmentsHtml.push(`<div class="duration">${duration}</div>`);
             }
     
             if (idx === arr.length - 1) {
                 // Destination Column (for the last segment)
-                segmentsHtml.push(`<div class="destination">`);
-                segmentsHtml.push(`<div>${segment.flyTo}</div>`);
-                segmentsHtml.push(`<div>Arrival: ${arrivalTime}</div>`);
-                segmentsHtml.push(`</div>`); // Close destination column
+                segmentsHtml.push(`<div class="destination"><div>${segment.flyTo}</div><div>Arrival: ${arrivalTime}</div></div>`);
             }
         });
     
         segmentsHtml.push('</div>'); // Close route-details
         return segmentsHtml.join('');
-    }                
+    }                   
                        
     detailCell.innerHTML = `
     <div class='route-details' style='display: flex; flex-direction: column; align-items: flex-start;'>
@@ -87,16 +74,16 @@ function routeInfoRow(rowElement, fullFlightData, routeIds, routeIndex) {
                 <button id='selectRoute' style='align-self: flex-start;'>Select Route</button>
             </div>
             <div class='segments-wrapper' style='display: flex; flex-direction: column; align-items: flex-start;'>
-                <div class='segments' style='display: flex; flex-direction: column; align-items: flex-start;'>
+                <div class='segments' style='display: flex; flex-direction: row; align-items: flex-start;'>
                     ${generateSegmentDetails(flight)}
                 </div>
-                <div class='info-wrapper' style='display: flex; flex-direction: row; align-items: flex-start; justify-content: space-between; width: 100%;'>
+                <div class='info-wrapper' style='display: flex; flex-direction: column; align-items: flex-start; width: 100%;'>
                     <div class='baggage-info'>Baggage: ${flight.baglimit.hold_weight} kg check-in, ${flight.baglimit.personal_item_weight} kg personal (max dimensions: ${flight.baglimit.personal_item_length}x${flight.baglimit.personal_item_width}x${flight.baglimit.personal_item_height} cm)</div>
                 </div>              
             </div>
         </div>
     </div>
-    `;
+`;
     detailRow.classList.add('route-info-row');
     detailRow.appendChild(detailCell);
 
