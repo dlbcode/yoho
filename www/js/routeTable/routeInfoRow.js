@@ -94,11 +94,12 @@ function routeInfoRow(rowElement, fullFlightData, routeIds, routeIndex) {
                 <div class='segments' style='display: flex; flex-direction: column; align-items: flex-start;'>
                     ${generateSegmentDetails(flight)}
                 </div>
+                <div class='info-wrapper' style='display: flex; flex-direction: row; align-items: flex-start; justify-content: space-between; width: 100%;'>
+                    <div class='baggage-info'>Baggage: ${flight.baglimit.hold_weight} kg check-in, ${flight.baglimit.personal_item_weight} kg personal (max dimensions: ${flight.baglimit.personal_item_length}x${flight.baglimit.personal_item_width}x${flight.baglimit.personal_item_height} cm)</div>
+                </div>              
             </div>
         </div>
-        <div class='info-wrapper' style='display: flex; flex-direction: row; align-items: flex-start; justify-content: space-between; width: 100%;'>
-            <div class='baggage-info'>Baggage: ${flight.baglimit.hold_weight} kg check-in, ${flight.baglimit.personal_item_weight} kg personal (max dimensions: ${flight.baglimit.personal_item_length}x${flight.baglimit.personal_item_width}x${flight.baglimit.personal_item_height} cm)</div>
-        </div>
+       
     </div>
     `;
     detailRow.classList.add('route-info-row');
