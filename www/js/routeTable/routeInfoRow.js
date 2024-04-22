@@ -32,53 +32,51 @@ function routeInfoRow(rowElement, fullFlightData, routeIds, routeIndex) {
     detailCell.colSpan = 9;  // Assuming there are 9 columns in your table
 
     function generateSegmentDetails(flight) {
-        let segmentsHtml = [];
-        let previousAirport = null;
+        let segmentsHtml = ['<div class="route-details" >'];
     
         flight.route.forEach((segment, idx, arr) => {
             const departureTime = new Date(segment.local_departure).toLocaleTimeString();
             const arrivalTime = new Date(segment.local_arrival).toLocaleTimeString();
-            const duration = ((new Date(segment.local_arrival) - new Date(segment.local_departure)) / 3600000).toFixed(1);
-            
-            // Start with the origin if it's not the same as the last destination
-            if (segment.flyFrom !== previousAirport) {
-                segmentsHtml.push(`
-                    <div class="segment-details" style="display: flex; flex-direction: row; align-items: flex-start; margin-right: 20px;">
-                        <div style="margin-right: 10px;">
-                            <div>${segment.flyFrom}</div>
-                            <div>Departure: ${departureTime}</div>
-                        </div>
-                        <div style="margin-right: 10px;">
-                            <div>&gt;</div>
-                            <div>Duration: ${duration} hrs</div>
-                        </div>
-                `);
-            }
-            
-            // Always add the arrival info
-            segmentsHtml.push(`
-                <div style="margin-right: 10px;">
-                    <div>${segment.flyTo}</div>
-                    <div>Arrival: ${arrivalTime}</div>
-                </div>
-            `);
+            const duration = ((new Date(segment.local_arrival) - new Date(segment.local_departure)) / 3600000).toFixed(1) + ' hrs';
     
-            // If not the last segment, add layover details
-            if (idx < arr.length - 1) {
-                const layoverDuration = formatLayover(flight, idx);
-                segmentsHtml.push(`
-                    <div style="margin-right: 10px;">
-                        <div>Layover: ${layoverDuration}</div>
-                    </div>
-                `);
+            if (idx === 0) {
+                // Origin Column
+                segmentsHtml.push(`<div class="origin">`);
+                segmentsHtml.push(`<div>${segment.flyFrom}</div>`);
+                segmentsHtml.push(`<div>Departure ${departureTime}</div>`);
+                segmentsHtml.push(`</div>`); // Close origin column
+    
+                // First Duration Column
+                segmentsHtml.push(`<div class="duration">${duration}</div>`);
             }
     
-            segmentsHtml.push('</div>'); // Close the segment-details div
-            previousAirport = segment.flyTo; // Update the previous airport
+            if (idx > 0) {
+                // Layover Column (for all segments except the first)
+                const layoverDuration = formatLayover(flight, idx - 1);
+                const previousArrivalTime = new Date(flight.route[idx - 1].local_arrival).toLocaleTimeString();
+                segmentsHtml.push(`<div class="layover">`);
+                segmentsHtml.push(`<div>${flight.route[idx - 1].flyTo}</div>`);
+                segmentsHtml.push(`<div">Arrival: ${previousArrivalTime}</div>`);
+                segmentsHtml.push(`<div>Layover: ${layoverDuration}</div>`);
+                segmentsHtml.push(`<div>Departure: ${departureTime}</div>`);
+                segmentsHtml.push(`</div>`); // Close layover column
+    
+                // Second Duration Column
+                segmentsHtml.push(`<div class="duration">${duration}</div>`);
+            }
+    
+            if (idx === arr.length - 1) {
+                // Destination Column (for the last segment)
+                segmentsHtml.push(`<div class="destination">`);
+                segmentsHtml.push(`<div>${segment.flyTo}</div>`);
+                segmentsHtml.push(`<div>Arrival: ${arrivalTime}</div>`);
+                segmentsHtml.push(`</div>`); // Close destination column
+            }
         });
     
+        segmentsHtml.push('</div>'); // Close route-details
         return segmentsHtml.join('');
-    }
+    }                
                        
     detailCell.innerHTML = `
     <div class='route-details' style='display: flex; flex-direction: column; align-items: flex-start;'>
