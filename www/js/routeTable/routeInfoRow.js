@@ -41,7 +41,7 @@ function routeInfoRow(rowElement, fullFlightData, routeIds, routeIndex) {
     
             if (idx === 0) {
                 // Origin Column
-                segmentsHtml.push(`<div class="origin"><div>${segment.flyFrom}</div><div>Departure: ${departureTime}</div></div>`);
+                segmentsHtml.push(`<div class="origin"><div>${segment.flyFrom}</div><div>Depart: ${departureTime}</div></div>`);
                 // First Duration Column
                 segmentsHtml.push(`<div class="duration">${duration}</div>`);
             }
@@ -50,14 +50,14 @@ function routeInfoRow(rowElement, fullFlightData, routeIds, routeIndex) {
                 // Layover Column (for all segments except the first)
                 const layoverDuration = formatLayover(flight, idx - 1);
                 const previousArrivalTime = new Date(flight.route[idx - 1].local_arrival).toLocaleTimeString();
-                segmentsHtml.push(`<div class="layover"><div>${flight.route[idx - 1].flyTo}</div><div>Arrival: ${previousArrivalTime}</div><div>Layover: ${layoverDuration}</div><div>Departure: ${departureTime}</div></div>`);
+                segmentsHtml.push(`<div class="layover"><div>${flight.route[idx - 1].flyTo}</div><div>Arrive: ${previousArrivalTime}</div><div>Layover: ${layoverDuration}</div><div>Depart: ${departureTime}</div></div>`);
                 // Second Duration Column
                 segmentsHtml.push(`<div class="duration">${duration}</div>`);
             }
     
             if (idx === arr.length - 1) {
                 // Destination Column (for the last segment)
-                segmentsHtml.push(`<div class="destination"><div>${segment.flyTo}</div><div>Arrival: ${arrivalTime}</div></div>`);
+                segmentsHtml.push(`<div class="destination"><div>${segment.flyTo}</div><div>Arrive: ${arrivalTime}</div></div>`);
             }
         });
     

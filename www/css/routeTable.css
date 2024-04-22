@@ -109,10 +109,18 @@
   width: 100%; /* ensures the flex container spans the full width of its parent */
 }
 
-.origin, .layover, .destination, .duration {
+.origin, .layover, .destination {
   flex: 1; /* gives each segment an equal ability to grow and shrink */
-  text-align: center; /* centers the text within each segment */
-  padding: 5px; /* adds some space inside each segment */
+  text-align: left; /* centers the text within each segment *//* adds some space inside each segment */
+  white-space: nowrap;
+  width: auto;
+  padding: 0 5px 0 5px;
+}
+
+.duration {
+  flex: 1; /* gives each segment an equal ability to grow and shrink */
+  text-align: center; /* centers the text within each segment */ /* adds some space inside each segment */
+  width: 60px;
 }
 
 .segments {
@@ -120,11 +128,5 @@
   flex-direction: row;
   align-items: flex-start;
   flex-wrap: nowrap; /* Prevents wrapping of segment items */
-}
-
-.segment-details {
-  flex: 1; /* Adjust based on your design needs */
-  padding: 5px; /* Provides spacing within each segment */
-  box-sizing: border-box; /* Includes padding and border in the element's total width and height */
 }
 
