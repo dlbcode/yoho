@@ -31,19 +31,17 @@ function routeInfoRow(rowElement, fullFlightData, routeIds, routeIndex) {
     const flight = fullFlightData;
     detailCell.colSpan = 9;  // Assuming there are 9 columns in your table
 
-    const generateSegmentDetails = (flight) => {
+    function generateSegmentDetails(flight) {
         let segmentsHtml = [];
-        let previousSegment = null;
+        let previousAirport = null;
     
         flight.route.forEach((segment, idx, arr) => {
-            const isLast = idx === arr.length - 1;
-            const nextSegment = arr[idx + 1];
             const departureTime = new Date(segment.local_departure).toLocaleTimeString();
             const arrivalTime = new Date(segment.local_arrival).toLocaleTimeString();
             const duration = ((new Date(segment.local_arrival) - new Date(segment.local_departure)) / 3600000).toFixed(1);
-    
-            // Start new segment detail for departure
-            if (!previousSegment || segment.flyFrom !== previousSegment.flyTo) {
+            
+            // Start with the origin if it's not the same as the last destination
+            if (segment.flyFrom !== previousAirport) {
                 segmentsHtml.push(`
                     <div class="segment-details" style="display: flex; flex-direction: row; align-items: flex-start; margin-right: 20px;">
                         <div style="margin-right: 10px;">
@@ -56,32 +54,32 @@ function routeInfoRow(rowElement, fullFlightData, routeIds, routeIndex) {
                         </div>
                 `);
             }
-    
-            // Add arrival and check if there's a layover to include
+            
+            // Always add the arrival info
             segmentsHtml.push(`
                 <div style="margin-right: 10px;">
                     <div>${segment.flyTo}</div>
                     <div>Arrival: ${arrivalTime}</div>
+                </div>
             `);
     
-            if (nextSegment && segment.flyTo === nextSegment.flyFrom) {
+            // If not the last segment, add layover details
+            if (idx < arr.length - 1) {
                 const layoverDuration = formatLayover(flight, idx);
-                segmentsHtml.push(`<div>Layover: ${layoverDuration}</div>`);
+                segmentsHtml.push(`
+                    <div style="margin-right: 10px;">
+                        <div>Layover: ${layoverDuration}</div>
+                    </div>
+                `);
             }
     
-            segmentsHtml.push('</div>'); // Close the current segment div
-    
-            // Close div only if it's the last segment or there's no direct continuation
-            if (isLast || !nextSegment || segment.flyTo !== nextSegment.flyFrom) {
-                segmentsHtml.push('</div>'); // Close the segment-details div
-            }
-    
-            previousSegment = segment; // Update previous segment
+            segmentsHtml.push('</div>'); // Close the segment-details div
+            previousAirport = segment.flyTo; // Update the previous airport
         });
     
         return segmentsHtml.join('');
-    }                    
-
+    }
+                       
     detailCell.innerHTML = `
     <div class='route-details' style='display: flex; flex-direction: column; align-items: flex-start;'>
         <div class='top-wrapper' style='display: flex; flex-direction: row; align-items: flex-start; margin-bottom: 20px;'>
