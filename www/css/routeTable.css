@@ -123,6 +123,10 @@
   width: 60px;
 }
 
+.duration img {
+  background-color: #fff;
+}
+
 .segments {
   display: flex;
   flex-direction: row;
