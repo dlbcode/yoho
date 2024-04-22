@@ -32,51 +32,55 @@ function routeInfoRow(rowElement, fullFlightData, routeIds, routeIndex) {
     detailCell.colSpan = 9;  // Assuming there are 9 columns in your table
 
     const generateSegmentDetails = (flight) => {
-        let intermediaryAdded = false;
-        return flight.route.reduce((acc, segment, idx, arr) => {
-            let nextSegment = arr[idx + 1];
-            let isIntermediary = nextSegment && segment.flyTo === nextSegment.flyFrom;
-            let isFinalDestination = segment.flyTo === arr[arr.length - 1].flyTo;
-            let isDirectFlight = arr.length === 1;
-
-            if ((isIntermediary && !intermediaryAdded) || isDirectFlight || isFinalDestination) {
-                intermediaryAdded = true;
-                acc.push(`<div class="segment-details" style="display: flex; flex-direction: row; align-items: flex-start; margin-right: 20px;">
-                    <div style='margin-right: 10px;'>
-                        <div>${segment.flyFrom}</div>
-                        <div>Departure: ${new Date(segment.local_departure).toLocaleTimeString()}</div>
-                    </div>
-                    <div style='margin-right: 10px;'>
-                        <div>&gt;</div>
-                        <div>Duration: ${((new Date(segment.local_arrival) - new Date(segment.local_departure)) / 3600000).toFixed(1)} hrs</div>
-                    </div>
-                    <div style='margin-right: 10px;'>
-                        <div>${segment.flyTo}</div>
-                        <div>Arrival: ${new Date(segment.local_arrival).toLocaleTimeString()}</div>
-                        ${isIntermediary ? `<div>Layover: ${formatLayover(flight, idx)}</div>
-                        <div>Departure: ${new Date(nextSegment.local_departure).toLocaleTimeString()}</div>` : ''}
-                    </div>`);
+        let segmentsHtml = [];
+        let previousSegment = null;
+    
+        flight.route.forEach((segment, idx, arr) => {
+            const isLast = idx === arr.length - 1;
+            const nextSegment = arr[idx + 1];
+            const departureTime = new Date(segment.local_departure).toLocaleTimeString();
+            const arrivalTime = new Date(segment.local_arrival).toLocaleTimeString();
+            const duration = ((new Date(segment.local_arrival) - new Date(segment.local_departure)) / 3600000).toFixed(1);
+    
+            // Start new segment detail for departure
+            if (!previousSegment || segment.flyFrom !== previousSegment.flyTo) {
+                segmentsHtml.push(`
+                    <div class="segment-details" style="display: flex; flex-direction: row; align-items: flex-start; margin-right: 20px;">
+                        <div style="margin-right: 10px;">
+                            <div>${segment.flyFrom}</div>
+                            <div>Departure: ${departureTime}</div>
+                        </div>
+                        <div style="margin-right: 10px;">
+                            <div>&gt;</div>
+                            <div>Duration: ${duration} hrs</div>
+                        </div>
+                `);
             }
-
-            if (isFinalDestination && !intermediaryAdded) {
-                acc.push(`<div style='margin-right: 10px;'>
-                    <div>&gt;</div>
-                    <div>Duration: ${((new Date(segment.local_arrival) - new Date(segment.local_departure)) / 3600000).toFixed(1)} hrs</div>
-                </div>
-                <div style='margin-right: 10px;'>
+    
+            // Add arrival and check if there's a layover to include
+            segmentsHtml.push(`
+                <div style="margin-right: 10px;">
                     <div>${segment.flyTo}</div>
-                    <div>Arrival: ${new Date(segment.local_arrival).toLocaleTimeString()}</div>
-                </div>`);
+                    <div>Arrival: ${arrivalTime}</div>
+            `);
+    
+            if (nextSegment && segment.flyTo === nextSegment.flyFrom) {
+                const layoverDuration = formatLayover(flight, idx);
+                segmentsHtml.push(`<div>Layover: ${layoverDuration}</div>`);
             }
-
-            // Reset the flag for the next segment
-            if (!isIntermediary) {
-                intermediaryAdded = false;
+    
+            segmentsHtml.push('</div>'); // Close the current segment div
+    
+            // Close div only if it's the last segment or there's no direct continuation
+            if (isLast || !nextSegment || segment.flyTo !== nextSegment.flyFrom) {
+                segmentsHtml.push('</div>'); // Close the segment-details div
             }
-
-            return acc;
-        }, []).join('');
-    }
+    
+            previousSegment = segment; // Update previous segment
+        });
+    
+        return segmentsHtml.join('');
+    }                    
 
     detailCell.innerHTML = `
     <div class='route-details' style='display: flex; flex-direction: column; align-items: flex-start;'>
