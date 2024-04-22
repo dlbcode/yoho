@@ -40,12 +40,14 @@ function routeInfoRow(rowElement, fullFlightData, routeIds, routeIndex) {
             const airlineCode = segment.airline; // Assuming `segment.airline` holds the airline code
             const duration = ((new Date(segment.local_arrival) - new Date(segment.local_departure)) / 3600000).toFixed(1) + ' hrs';
     
+            const airlineLogoUrl = `https://pics.avs.io/60/60/${airlineCode}.png`;
+
             if (idx === 0) {
                 // Origin Column
                 segmentsHtml.push(`<div class="origin"><div>${segment.flyFrom}</div><div>Depart: ${departureTime}</div></div>`);
                 // First Duration Column
-                segmentsHtml.push(`<div class=\"duration\"><div>${airlineCode}</div><div>${duration}</div></div>`);
-            }
+                segmentsHtml.push(`<div class="duration"><img src="${airlineLogoUrl}" alt="${airlineCode} Logo"/><div>${duration}</div></div>`);
+    }
     
             if (idx > 0) {
                 // Layover Column (for all segments except the first)
@@ -53,8 +55,8 @@ function routeInfoRow(rowElement, fullFlightData, routeIds, routeIndex) {
                 const previousArrivalTime = new Date(flight.route[idx - 1].local_arrival).toLocaleTimeString();
                 segmentsHtml.push(`<div class="layover"><div>${flight.route[idx - 1].flyTo}</div><div>Arrive: ${previousArrivalTime}</div><div>Layover: ${layoverDuration}</div><div>Depart: ${departureTime}</div></div>`);
                 // Second Duration Column
-                segmentsHtml.push(`<div class=\"duration\"><div>${airlineCode}</div><div>${duration}</div></div>`);
-            }
+                segmentsHtml.push(`<div class="duration"><img src="${airlineLogoUrl}" alt="${airlineCode} Logo"/><div>${duration}</div></div>`);
+    }
     
             if (idx === arr.length - 1) {
                 // Destination Column (for the last segment)
