@@ -95,6 +95,7 @@
 
 .route-info-row {
   border-left: #007bff solid 3px;
+  background-color: inherit !important; /* desable hover highlight */
 }
 
 .route-info-row-header {
