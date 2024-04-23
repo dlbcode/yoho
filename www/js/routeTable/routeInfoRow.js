@@ -47,8 +47,12 @@ function routeInfoRow(rowElement, fullFlightData, routeIds, routeIndex) {
                 // Origin Column
                 segmentsHtml.push(`<div class="origin"><div>${segment.flyFrom} (${segment.cityFrom})</div><div>Depart: ${departureTime}</div></div>`);
                 // First Duration Column
-                segmentsHtml.push(`<div class="duration"><div>${duration}</div><img src="${airlineLogoUrl}" alt="${airlineCode} Logo" style="width: 80px; height: 40px; object-fit: none; object-position: center; border-radius: 5px; box-shadow: inset 0 0 8px #000000;"/></div>`);
-    }
+                segmentsHtml.push(`<div class="duration"><div style="position: relative; margin-top: 8px; color: #ccc;">
+                ${duration}
+                <svg style="position: absolute; bottom: 8px; left: 0; width: 100%; height: 30px; overflow: visible;">
+                    <path d="M0,30 Q50,0 100,30" stroke="#777" fill="transparent" stroke-width="4" stroke-dasharray="0,10" stroke-linecap="round" />
+                </svg></div><img src="${airlineLogoUrl}" alt="${airlineCode} Logo" style="width: 80px; height: 40px; object-fit: none; object-position: center; border-radius: 5px; box-shadow: inset 0 0 8px #000000;"/></div>`);
+                }
     
             if (idx > 0) {
                 // Layover Column (for all segments except the first)
@@ -56,8 +60,12 @@ function routeInfoRow(rowElement, fullFlightData, routeIds, routeIndex) {
                 const previousArrivalTime = new Date(flight.route[idx - 1].local_arrival).toLocaleTimeString();
                 segmentsHtml.push(`<div class="layover"><div>${flight.route[idx - 1].flyTo} (${segment.cityFrom})</div><div>Arrive: ${previousArrivalTime}</div><div style="text-align: center">&darr;</div><div>Layover: ${layoverDuration}</div><div style="text-align: center">&darr;</div><div>Depart: ${departureTime}</div></div>`);
                 // Second Duration Column
-                segmentsHtml.push(`<div class="duration"><div>${duration}</div><img src="${airlineLogoUrl}" alt="${airlineCode} Logo" style="width: 80px; height: 40px; object-fit: none; object-position: center; border-radius: 5px; box-shadow: inset 0 0 8px #000000;"/></div>`);
-    }
+                segmentsHtml.push(`<div class="duration"><div style="position: relative; margin-top: 8px; color: #ccc;">
+                ${duration}
+                <svg style="position: absolute; bottom: 8px; left: 0; width: 100%; height: 30px; overflow: visible;">
+                    <path d="M0,30 Q50,0 100,30" stroke="#777" fill="transparent" stroke-width="4" stroke-dasharray="0,10" stroke-linecap="round" />
+                </svg></div><img src="${airlineLogoUrl}" alt="${airlineCode} Logo" style="width: 80px; height: 40px; object-fit: none; object-position: center; border-radius: 5px; box-shadow: inset 0 0 8px #000000;"/></div>`);
+                }
     
             if (idx === arr.length - 1) {
                 // Destination Column (for the last segment)
