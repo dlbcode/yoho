@@ -41,13 +41,13 @@ function routeInfoRow(rowElement, fullFlightData, routeIds, routeIndex) {
             const airlineCode = segment.airline; // Assuming `segment.airline` holds the airline code
             const duration = ((new Date(segment.local_arrival) - new Date(segment.local_departure)) / 3600000).toFixed(1) + ' hrs';
     
-            const airlineLogoUrl = `https://pics.avs.io/60/60/${airlineCode}.png`;
+            const airlineLogoUrl = `https://pics.avs.io/80/80/${airlineCode}.png`;
 
             if (idx === 0) {
                 // Origin Column
                 segmentsHtml.push(`<div class="origin"><div>${segment.flyFrom} (${segment.cityFrom})</div><div>Depart: ${departureTime}</div></div>`);
                 // First Duration Column
-                segmentsHtml.push(`<div class="duration"><div>${duration}</div><img src="${airlineLogoUrl}" alt="${airlineCode} Logo" style="width: 60px; height: 30px; object-fit: none; object-position: center;"/></div>`);
+                segmentsHtml.push(`<div class="duration"><div>${duration}</div><img src="${airlineLogoUrl}" alt="${airlineCode} Logo" style="width: 80px; height: 40px; object-fit: none; object-position: center;"/></div>`);
     }
     
             if (idx > 0) {
@@ -56,7 +56,7 @@ function routeInfoRow(rowElement, fullFlightData, routeIds, routeIndex) {
                 const previousArrivalTime = new Date(flight.route[idx - 1].local_arrival).toLocaleTimeString();
                 segmentsHtml.push(`<div class="layover"><div>${flight.route[idx - 1].flyTo} (${segment.cityFrom})</div><div>Arrive: ${previousArrivalTime}</div><div style="text-align: center">&darr;</div><div>Layover: ${layoverDuration}</div><div style="text-align: center">&darr;</div><div>Depart: ${departureTime}</div></div>`);
                 // Second Duration Column
-                segmentsHtml.push(`<div class="duration"><div>${duration}</div><img src="${airlineLogoUrl}" alt="${airlineCode} Logo" style="width: 60px; height: 30px; object-fit: none; object-position: center;"/></div>`);
+                segmentsHtml.push(`<div class="duration"><div>${duration}</div><img src="${airlineLogoUrl}" alt="${airlineCode} Logo" style="width: 80px; height: 40px; object-fit: none; object-position: center;"/></div>`);
     }
     
             if (idx === arr.length - 1) {
@@ -73,7 +73,6 @@ function routeInfoRow(rowElement, fullFlightData, routeIds, routeIndex) {
     <div class='route-details' style='display: flex; flex-direction: column; align-items: flex-start;'>
         <div class='top-wrapper' style='display: flex; flex-direction: row; align-items: flex-start; margin-bottom: 20px;'>
             <div class='left-wrapper' style='display: flex; flex-direction: column; align-items: flex-start; margin-right: 20px;'>
-                <div class='airline-info' style='margin-bottom: 20px;'>Route Details for ${flight.airlines.join(", ")}</div>
                 <div class='price-info' style='margin-bottom: 20px;'>Price: $${flight.price.toFixed(2)}</div>
                 <button id='selectRoute' style='align-self: flex-start;'>Select Route</button>
             </div>

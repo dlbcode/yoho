@@ -120,7 +120,7 @@
 .duration {
   flex: 1; /* gives each segment an equal ability to grow and shrink */
   text-align: center; /* centers the text within each segment */ /* adds some space inside each segment */
-  width: 60px;
+  width: 80px;
 }
 
 .duration img {
