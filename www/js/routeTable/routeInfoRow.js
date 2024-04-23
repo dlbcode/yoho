@@ -35,8 +35,9 @@ function routeInfoRow(rowElement, fullFlightData, routeIds, routeIndex) {
         let segmentsHtml = ['<div class="route-details">'];
     
         flight.route.forEach((segment, idx, arr) => {
-            const departureTime = new Date(segment.local_departure).toLocaleTimeString();
-            const arrivalTime = new Date(segment.local_arrival).toLocaleTimeString();
+            const options = { hour: '2-digit', minute: '2-digit' };
+            const departureTime = new Date(segment.local_departure).toLocaleTimeString([], options);
+            const arrivalTime = new Date(segment.local_arrival).toLocaleTimeString([], options);
             const airlineCode = segment.airline; // Assuming `segment.airline` holds the airline code
             const duration = ((new Date(segment.local_arrival) - new Date(segment.local_departure)) / 3600000).toFixed(1) + ' hrs';
     
@@ -46,7 +47,7 @@ function routeInfoRow(rowElement, fullFlightData, routeIds, routeIndex) {
                 // Origin Column
                 segmentsHtml.push(`<div class="origin"><div>${segment.flyFrom}</div><div>Depart: ${departureTime}</div></div>`);
                 // First Duration Column
-                segmentsHtml.push(`<div class="duration"><img src="${airlineLogoUrl}" alt="${airlineCode} Logo"/><div>${duration}</div></div>`);
+                segmentsHtml.push(`<div class="duration"><div>${duration}</div><img src="${airlineLogoUrl}" alt="${airlineCode} Logo"/></div>`);
     }
     
             if (idx > 0) {
@@ -55,7 +56,7 @@ function routeInfoRow(rowElement, fullFlightData, routeIds, routeIndex) {
                 const previousArrivalTime = new Date(flight.route[idx - 1].local_arrival).toLocaleTimeString();
                 segmentsHtml.push(`<div class="layover"><div>${flight.route[idx - 1].flyTo}</div><div>Arrive: ${previousArrivalTime}</div><div>Layover: ${layoverDuration}</div><div>Depart: ${departureTime}</div></div>`);
                 // Second Duration Column
-                segmentsHtml.push(`<div class="duration"><img src="${airlineLogoUrl}" alt="${airlineCode} Logo"/><div>${duration}</div></div>`);
+                segmentsHtml.push(`<div class="duration"><div>${duration}</div><img src="${airlineLogoUrl}" alt="${airlineCode} Logo"/></div>`);
     }
     
             if (idx === arr.length - 1) {
