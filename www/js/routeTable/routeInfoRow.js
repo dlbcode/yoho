@@ -45,7 +45,7 @@ function routeInfoRow(rowElement, fullFlightData, routeIds, routeIndex) {
 
             if (idx === 0) {
                 // Origin Column
-                segmentsHtml.push(`<div class="origin"><div>${segment.flyFrom} (${segment.cityFrom})</div><div>Depart: ${departureTime}</div></div>`);
+                segmentsHtml.push(`<div class="departure"><div>${segment.flyFrom} (${segment.cityFrom})</div><div style="color: #999;">Depart: <span style="color: #ccc;">${departureTime}</span></div></div>`);
                 // First Duration Column
                 segmentsHtml.push(`<div class="duration"><div style="position: relative; margin-top: 8px; color: #ccc;">
                 ${duration}
@@ -58,7 +58,8 @@ function routeInfoRow(rowElement, fullFlightData, routeIds, routeIndex) {
                 // Layover Column (for all segments except the first)
                 const layoverDuration = formatLayover(flight, idx - 1);
                 const previousArrivalTime = new Date(flight.route[idx - 1].local_arrival).toLocaleTimeString();
-                segmentsHtml.push(`<div class="layover"><div>${flight.route[idx - 1].flyTo} (${segment.cityFrom})</div><div>Arrive: ${previousArrivalTime}</div><div style="text-align: center">&darr;</div><div>Layover: ${layoverDuration}</div><div style="text-align: center">&darr;</div><div>Depart: ${departureTime}</div></div>`);
+                segmentsHtml.push(`<div class="layover"><div>${flight.route[idx - 1].flyTo} (${segment.cityFrom})</div><div style="color: #999;">Arrive: <span style="color: #ccc;">${previousArrivalTime}</span></div><div style="text-align: center; color: #999;">&darr;</div><div style="color: #999;">Layover: <span style="color: #ccc;">${layoverDuration}</span></div><div style="text-align: center; color: #999;">&darr;</div><div style="color: #999;">Depart: <span style="color: #ccc;">${departureTime}</span></div></div>`);
+
                 // Second Duration Column
                 segmentsHtml.push(`<div class="duration"><div style="position: relative; margin-top: 8px; color: #ccc;">
                 ${duration}
@@ -69,7 +70,7 @@ function routeInfoRow(rowElement, fullFlightData, routeIds, routeIndex) {
     
             if (idx === arr.length - 1) {
                 // Destination Column (for the last segment)
-                segmentsHtml.push(`<div class="destination"><div>${segment.flyTo} (${segment.cityTo})</div><div>Arrive: ${arrivalTime}</div></div>`);
+                segmentsHtml.push(`<div class="destination"><div>${segment.flyTo} (${segment.cityTo})</div><div style="color: #999;">Arrive: <span style="color: #ccc;">${arrivalTime}</span></div></div>`);
             }
         });
     
