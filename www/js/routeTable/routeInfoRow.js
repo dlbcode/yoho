@@ -54,7 +54,7 @@ function routeInfoRow(rowElement, fullFlightData, routeIds, routeIndex) {
                 // Layover Column (for all segments except the first)
                 const layoverDuration = formatLayover(flight, idx - 1);
                 const previousArrivalTime = new Date(flight.route[idx - 1].local_arrival).toLocaleTimeString();
-                segmentsHtml.push(`<div class="layover"><div>${flight.route[idx - 1].flyTo} (${segment.cityFrom})</div><div>Arrive: ${previousArrivalTime}</div><div>Layover: ${layoverDuration}</div><div>Depart: ${departureTime}</div></div>`);
+                segmentsHtml.push(`<div class="layover"><div>${flight.route[idx - 1].flyTo} (${segment.cityFrom})</div><div>Arrive: ${previousArrivalTime}</div><div style="text-align: center">&darr;</div><div>Layover: ${layoverDuration}</div><div style="text-align: center">&darr;</div><div>Depart: ${departureTime}</div></div>`);
                 // Second Duration Column
                 segmentsHtml.push(`<div class="duration"><div>${duration}</div><img src="${airlineLogoUrl}" alt="${airlineCode} Logo"/></div>`);
     }
