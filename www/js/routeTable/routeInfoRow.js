@@ -82,8 +82,10 @@ function routeInfoRow(rowElement, fullFlightData, routeIds, routeIndex) {
     <div class='route-details' style='display: flex; flex-direction: column; align-items: flex-start;'>
         <div class='top-wrapper' style='display: flex; flex-direction: row; align-items: flex-start; margin-bottom: 20px;'>
             <div class='left-wrapper' style='display: flex; flex-direction: column; align-items: flex-start; margin-right: 20px;'>
-                <div class='price-info' style='margin-bottom: 20px;'>Price: <span style="color: #fff">$${flight.price.toFixed(2)}</span></div>
-                <button id='selectRoute' style='align-self: flex-start;'>Select Route</button>
+               <button id='selectRoute' class="select-button">
+                    <div style='font-size: 20px;'>$${Math.ceil(flight.price)}</div>
+                    <div>Select</div>
+                </button>
             </div>
             <div class='segments-wrapper' style='display: flex; flex-direction: column; align-items: flex-start;'>
                 <div class='segments' style='display: flex; flex-direction: row; align-items: flex-start;'>
