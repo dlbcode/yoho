@@ -50,7 +50,7 @@ function routeInfoRow(rowElement, fullFlightData, routeIds, routeIndex) {
                 segmentsHtml.push(`<div class="duration"><div style="position: relative; margin-top: 12px; color: #ccc;">
                 ${duration}
                 <svg style="position: absolute; bottom: 12px; left: 0px; width: 100%; height: 30px; overflow: visible;">
-                <path d="M2,35 Q45,-2 88,35" stroke="#777" fill="transparent" stroke-width="4" stroke-dasharray="1,11" stroke-dashoffset="6" stroke-linecap="round"></path>
+                <path d="M2,35 Q45,-2 88,35" stroke="#666" fill="transparent" stroke-width="4" stroke-dasharray="1,11" stroke-dashoffset="6" stroke-linecap="round"></path>
                 </svg></div><img src="${airlineLogoUrl}" alt="${airlineCode} Logo" style="width: 60px; height: 60px; object-fit: contain; object-position: center; border-radius: 5px;"/></div>`);
                 }
     
@@ -64,7 +64,7 @@ function routeInfoRow(rowElement, fullFlightData, routeIds, routeIndex) {
                 segmentsHtml.push(`<div class="duration"><div style="position: relative; margin-top: 12px; color: #ccc;">
                 ${duration}
                 <svg style="position: absolute; bottom: 12px; left: 0px; width: 100%; height: 30px; overflow: visible;">
-                <path d="M2,35 Q45,-2 88,35" stroke="#777" fill="transparent" stroke-width="4" stroke-dasharray="1,11" stroke-dashoffset="6" stroke-linecap="round"></path>
+                <path d="M2,35 Q45,-2 88,35" stroke="#666" fill="transparent" stroke-width="4" stroke-dasharray="1,11" stroke-dashoffset="6" stroke-linecap="round"></path>
                 </svg></div><img src="${airlineLogoUrl}" alt="${airlineCode} Logo" style="width: 60px; height: 60px; object-fit: contain; object-position: center; border-radius: 5px;"/></div>`);
                 }
     
