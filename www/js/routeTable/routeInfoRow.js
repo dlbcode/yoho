@@ -41,17 +41,17 @@ function routeInfoRow(rowElement, fullFlightData, routeIds, routeIndex) {
             const airlineCode = segment.airline; // Assuming `segment.airline` holds the airline code
             const duration = ((new Date(segment.local_arrival) - new Date(segment.local_departure)) / 3600000).toFixed(1) + ' hrs';
     
-            const airlineLogoUrl = `https://pics.avs.io/80/80/${airlineCode}.png`;
+            const airlineLogoUrl = `assets/airline_logos/70px/${airlineCode}.png`;
 
             if (idx === 0) {
                 // Origin Column
-                segmentsHtml.push(`<div class="departure"><div>${segment.flyFrom} (${segment.cityFrom})</div><div style="color: #999;">Depart: <span style="color: #ccc;">${departureTime}</span></div></div>`);
+                segmentsHtml.push(`<div class="departure" style="margin-right: 2px;"><div>${segment.flyFrom} (${segment.cityFrom})</div><div style="color: #999;">Depart: <span style="color: #ccc;">${departureTime}</span></div></div>`);
                 // First Duration Column
-                segmentsHtml.push(`<div class="duration"><div style="position: relative; margin-top: 8px; color: #ccc;">
+                segmentsHtml.push(`<div class="duration"><div style="position: relative; margin-top: 12px; color: #ccc;">
                 ${duration}
-                <svg style="position: absolute; bottom: 8px; left: 0; width: 100%; height: 30px; overflow: visible;">
-                    <path d="M0,30 Q50,0 100,30" stroke="#777" fill="transparent" stroke-width="4" stroke-dasharray="0,10" stroke-linecap="round" />
-                </svg></div><img src="${airlineLogoUrl}" alt="${airlineCode} Logo" style="width: 80px; height: 40px; object-fit: none; object-position: center; border-radius: 5px; box-shadow: inset 0 0 8px #000000;"/></div>`);
+                <svg style="position: absolute; bottom: 12px; left: 0px; width: 100%; height: 30px; overflow: visible;">
+                <path d="M2,35 Q45,-2 88,35" stroke="#777" fill="transparent" stroke-width="4" stroke-dasharray="1,11" stroke-dashoffset="6" stroke-linecap="round"></path>
+                </svg></div><img src="${airlineLogoUrl}" alt="${airlineCode} Logo" style="width: 60px; height: 60px; object-fit: contain; object-position: center; border-radius: 5px;"/></div>`);
                 }
     
             if (idx > 0) {
@@ -61,11 +61,11 @@ function routeInfoRow(rowElement, fullFlightData, routeIds, routeIndex) {
                 segmentsHtml.push(`<div class="layover"><div>${flight.route[idx - 1].flyTo} (${segment.cityFrom})</div><div style="color: #999;">Arrive: <span style="color: #ccc;">${previousArrivalTime}</span></div><div style="text-align: center; color: #999;">&darr;</div><div style="color: #999;">Layover: <span style="color: #ccc;">${layoverDuration}</span></div><div style="text-align: center; color: #999;">&darr;</div><div style="color: #999;">Depart: <span style="color: #ccc;">${departureTime}</span></div></div>`);
 
                 // Second Duration Column
-                segmentsHtml.push(`<div class="duration"><div style="position: relative; margin-top: 8px; color: #ccc;">
+                segmentsHtml.push(`<div class="duration"><div style="position: relative; margin-top: 12px; color: #ccc;">
                 ${duration}
-                <svg style="position: absolute; bottom: 8px; left: 0; width: 100%; height: 30px; overflow: visible;">
-                    <path d="M0,30 Q50,0 100,30" stroke="#777" fill="transparent" stroke-width="4" stroke-dasharray="0,10" stroke-linecap="round" />
-                </svg></div><img src="${airlineLogoUrl}" alt="${airlineCode} Logo" style="width: 80px; height: 40px; object-fit: none; object-position: center; border-radius: 5px; box-shadow: inset 0 0 8px #000000;"/></div>`);
+                <svg style="position: absolute; bottom: 12px; left: 0px; width: 100%; height: 30px; overflow: visible;">
+                <path d="M2,35 Q45,-2 88,35" stroke="#777" fill="transparent" stroke-width="4" stroke-dasharray="1,11" stroke-dashoffset="6" stroke-linecap="round"></path>
+                </svg></div><img src="${airlineLogoUrl}" alt="${airlineCode} Logo" style="width: 60px; height: 60px; object-fit: contain; object-position: center; border-radius: 5px;"/></div>`);
                 }
     
             if (idx === arr.length - 1) {
