@@ -86,7 +86,7 @@ function routeInfoRow(rowElement, fullFlightData, routeIds, routeIndex) {
                     <div style='font-size: 20px;'>$${Math.ceil(flight.price)}</div>
                     <div>Select</div>
                 </button>
-                <div class="info-box" style="margin-top: 4px; padding-bottom: 2px; width: 100%;">
+                <div class="info-box" style="display: flex; flex-direction: row; margin-top: 4px; padding-bottom: 2px; width: 100%;">
                 <svg fill="#aaa" height="20px" width="20px" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" 
                     viewBox="0 0 248.35 248.35" xml:space="preserve">
                     <g>
@@ -100,6 +100,7 @@ function routeInfoRow(rowElement, fullFlightData, routeIds, routeIndex) {
                         </g>
                     </g>
                 </svg>
+                <div style="padding: 2px 2px 4px 2px;font-size: 16px;color: #bbb;">$${Math.ceil(flight.bags_price[1] * appState.eurToUsd)}</div>
                 </div>
             </div>
             <div class='segments-wrapper' style='display: flex; flex-direction: column; align-items: flex-start;'>
