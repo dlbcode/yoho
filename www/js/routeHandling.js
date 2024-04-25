@@ -64,20 +64,22 @@ const routeHandling = {
         dayNameBox.className = 'day-name-box';
         dayNameBox.setAttribute('data-route-number', routeNumber); // Store the route number on the element for reference
 
-        // Check if a date exists for the routeNumber
-        if (appState.routeDates[routeNumber]) {
-            let dateParts = appState.routeDates[routeNumber].split('-');
-            let initialDate = new Date(Date.UTC(dateParts[0], dateParts[1] - 1, dateParts[2]));
+        // Check if the date includes a range
+        const isDateRange = appState.routeDates[routeNumber] && appState.routeDates[routeNumber].includes(' to ');
+
+        if (isDateRange) {
+            let dateRange = appState.routeDates[routeNumber].split(' to ');
+            let startDate = new Date(Date.UTC(...dateRange[0].split('-')));
+            let endDate = new Date(Date.UTC(...dateRange[1].split('-')));
+            let startDateFormatted = startDate.toLocaleDateString('en-US', { weekday: 'short', timeZone: 'UTC' });
+            let endDateFormatted = endDate.toLocaleDateString('en-US', { weekday: 'short', timeZone: 'UTC' });
+            dayNameBox.textContent = `${startDateFormatted} to ${endDateFormatted}`;
+        } else {
+            if (appState.routeDates && appState.routeDates[routeNumber]) {
+                let dateParts = appState.routeDates[routeNumber].split('-');
+                let initialDate = new Date(Date.UTC(...dateParts));
             let initialDayName = initialDate.toLocaleDateString('en-US', { weekday: 'short', timeZone: 'UTC' });
             dayNameBox.textContent = initialDayName;
-        } else { // Attempt to set the date for the new route based on the previous route's date
-            let previousRouteNumber = routeNumber - 1;
-            if (previousRouteNumber >= 0 && appState.routeDates[previousRouteNumber]) {
-                appState.routeDates[routeNumber] = appState.routeDates[previousRouteNumber];
-                let dateParts = appState.routeDates[routeNumber].split('-');
-                let initialDate = new Date(Date.UTC(dateParts[0], dateParts[1] - 1, dateParts[2]));
-                let initialDayName = initialDate.toLocaleDateString('en-US', { weekday: 'short', timeZone: 'UTC' });
-                dayNameBox.textContent = initialDayName;
             }
         }
         
@@ -99,7 +101,6 @@ const routeHandling = {
 
         dateButton.textContent = currentRouteDate ? (currentRouteDate.includes(' to ') ? '[..]' : new Date(currentRouteDate).getUTCDate().toString()) : 'Select Date';
 
-        const isDateRange = currentRouteDate && currentRouteDate.includes(' to ');
         const timeZone = 'UTC';
         let fp = flatpickr(dateButton, {
             disableMobile: true,
