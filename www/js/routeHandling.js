@@ -199,10 +199,7 @@ const routeHandling = {
                     }
                 });
 
-                const mode = currentRouteDate === 'any' ? 'any' : (currentRouteDate.includes(' to ') ? 'range' : 'single')
-                if (mode === "single") {
-                    instance.setDate(currentRouteDate, true);
-                } else if (mode === "range") {
+                    if (isDateRange && currentRouteDate !== 'any') {
                     const dates = currentRouteDate.split(' to ').map(dateStr => new Date(dateStr));
                     instance.setDate(dates, true);
                 }
