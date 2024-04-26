@@ -51,9 +51,10 @@ const eventManager = {
         
             // Update app state based on URL parameters
             appState.waypoints = params.get('waypoints') ? params.get('waypoints').split(',').map(iata => ({ iata_code: iata })) : [];
-
-            // Initialize appState.routeDates as an empty object
+            console.log('eventManager.js: appState.waypoints: ', appState.waypoints);
             appState.routeDates = {};
+
+            console.log('ONPOPSTATE: appState.routeDates 1: ', appState.routeDates);
 
             // Parse the 'dates' parameter
             if (params.has('dates')) {
@@ -62,7 +63,7 @@ const eventManager = {
                 let dateRange = datesParam[1];
                 appState.routeDates[routeNumber] = dateRange;
             }
-
+            
             console.log('appState.routeDates 2: ', appState.routeDates);
 
             const container = document.querySelector('.airport-selection');
