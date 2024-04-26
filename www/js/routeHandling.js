@@ -100,16 +100,18 @@ const routeHandling = {
             (routeNumber === 0 ? new Date().toISOString().split('T')[0] : appState.routeDates[routeNumber - 1]);
 
         dateButton.textContent = currentRouteDate ? (currentRouteDate.includes(' to ') ? '[..]' : new Date(currentRouteDate).getUTCDate().toString()) : 'Select Date';
+        console.log('currentRouteDate', currentRouteDate);
 
         const timeZone = 'UTC';
         let fp = flatpickr(dateButton, {
             disableMobile: true,
             enableTime: false,
             dateFormat: "Y-m-d",
-            defaultDate: isDateRange ? currentRouteDate.split(' to ')[0] : currentRouteDate,
+            defaultDate: currentRouteDate,
             minDate: routeNumber === 0 ? "today" : appState.routeDates[routeNumber - 1],
             mode: currentRouteDate === 'any' ? 'any' : (currentRouteDate.includes(' to ') ? 'range' : 'single'),
             onValueUpdate: (selectedDates) => {
+                console.log('selectedDates', selectedDates);
                 let dateValue = null;
                 if (selectedDates.length > 0 && selectedDates[0]) {
                     if (selectedDates.length > 1 && selectedDates[1]) {
@@ -199,11 +201,6 @@ const routeHandling = {
                         instance.setDate(dateToSet, true);
                     }
                 });
-
-                    if (isDateRange && currentRouteDate !== 'any') {
-                    const dates = currentRouteDate.split(' to ').map(dateStr => new Date(dateStr));
-                    instance.setDate(dates, true);
-                }
             }
         });
 
