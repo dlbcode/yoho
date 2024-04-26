@@ -7,6 +7,10 @@ import { mapHandling } from './mapHandling.js';
 
 async function initMapFunctions() {
     const params = new URLSearchParams(window.location.search);
+    let waypoints = null;
+    let routeDirection = null;
+    let routeDates = [];
+
     const waypointParam = params.get('waypoints');
     if (waypointParam) {
         const waypointIatas = waypointParam.split(',').map(decodeURIComponent);
@@ -17,12 +21,14 @@ async function initMapFunctions() {
                 airports.push(airport);
             }
         }
-        updateState('addWaypoint', airports);
+        waypoints = airports;
     }
+
     const directionParam = params.get('direction');
     if (directionParam) {
-        updateState('routeDirection', directionParam);
+        routeDirection = directionParam;
     }
+
     const routeDatesParam = params.get('dates');
     if (routeDatesParam) {
         const datePairs = routeDatesParam.split(',');
@@ -31,12 +37,20 @@ async function initMapFunctions() {
             const routeNumber = parseInt(key, 10); 
             const date = value;
             console.log('map.js initMapFunctions routeDatesParam', routeNumber, date);
-            updateState('updateRouteDate', { routeNumber: routeNumber, date: date });
+            routeDates.push({ routeNumber: routeNumber, date: date });
         });
     }
 
-    appState.urlDataLoaded = true;
-    document.dispatchEvent(new CustomEvent('waypointsLoadedFromURL'));
+    // Make the updateState function calls
+    if (routeDirection) {
+        updateState('routeDirection', routeDirection);
+    }
+    routeDates.forEach(routeDate => {
+        updateState('updateRouteDate', routeDate);
+    });
+    if (waypoints) {
+        updateState('addWaypoint', waypoints);
+    }
 }
 
 var map = L.map('map', { 

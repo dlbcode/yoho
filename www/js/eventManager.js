@@ -15,6 +15,8 @@ function handleStateChange(event) {
         const container = document.querySelector('.airport-selection');
         container.innerHTML = '';
 
+        console.log('handleStateChange: ', key, value);
+
         // Ensure at least one route div is present
         const routeCount = Math.max(1, Math.ceil(appState.waypoints.length / 2));
         for (let i = 0; i < routeCount; i++) {
@@ -194,12 +196,15 @@ window.addEventListener('resize', function () {
 //    }
 //});
 
-document.addEventListener('waypointsLoadedFromURL', function() {
-    const routeCount = Math.max(1, Math.ceil(appState.waypoints.length / 2));
-        for (let i = 0; i < routeCount; i++) {
-            routeHandling.buildRouteDivs(i + 1);
-        }
-});
+// document.addEventListener('waypointsLoadedFromURL', function() {
+//    console.log('waypointsLoadedFromURL initial loading');
+//    const container = document.querySelector('.airport-selection');
+//        // Ensure at least one route div is present
+//        const routeCount = Math.max(1, Math.ceil(appState.waypoints.length / 2));
+//        for (let i = 0; i < routeCount; i++) {
+//            routeHandling.buildRouteDivs(i + 1);
+//        }
+//});
 
 document.addEventListener('DOMContentLoaded', function () {
     flightMap.fetchAndDisplayAirports();

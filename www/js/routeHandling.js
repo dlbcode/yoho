@@ -10,9 +10,6 @@ import { routeDateButtons } from './routeDateButtons.js';
 const routeHandling = {
 
     buildRouteDivs: function(routeNumber) {
-        if (!appState.urlDataLoaded) {
-            return;
-        }
 
         console.log('buildRouteDivs appState.routeDates #1: ', appState.routeDates);
         routeNumber = routeNumber - 1;
