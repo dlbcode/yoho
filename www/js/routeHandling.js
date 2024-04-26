@@ -163,7 +163,7 @@ const routeHandling = {
                     let optText = document.createElement('div');
                     optText.textContent = option;
                     opt.appendChild(optText);
-                    if ((isDateRange && option === 'Date Range') || (!isDateRange && option === 'Specific Date')) {
+                    if ((isDateRange && option === 'Date Range') || (!isDateRange && option === 'Specific Date' && currentRouteDate !== 'any') || (currentRouteDate === 'any' && option === 'Any Dates')) {
                         opt.classList.add('selected');
                         selectedOptionText.textContent = option; // Set the text of the selected option
                         opt.style.display = 'none'; // Hide the selected option
