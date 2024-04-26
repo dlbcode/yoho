@@ -52,11 +52,14 @@ const eventManager = {
             // Update app state based on URL parameters
             appState.waypoints = params.get('waypoints') ? params.get('waypoints').split(',').map(iata => ({ iata_code: iata })) : [];
             appState.routeDates = {};
+            console.log('appState.routeDates 1: ', appState.routeDates);
             params.forEach((value, key) => {
-                if (key.startsWith('date')) {
-                    appState.routeDates[key.split('_')[1]] = value;
-                }
+                console.log('key:'+ key + ', value:'+ value);
+                appState.routeDates[key] = value;
             });
+            
+            console.log('appState.routeDates 2: ', appState.routeDates);
+
             const container = document.querySelector('.airport-selection');
             container.innerHTML = '';
 
@@ -70,7 +73,7 @@ const eventManager = {
             routeHandling.updateRoutesArray();
             appState.currentView = 'trip';
             uiHandling.setFocusToNextUnsetInput();
-        };        
+        };
         document.addEventListener('routeAdded', function(event) {
             routeHandling.buildRouteDivs(event.detail.newRoute);
         });

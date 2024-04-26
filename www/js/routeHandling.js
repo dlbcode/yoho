@@ -10,6 +10,7 @@ import { routeDateButtons } from './routeDateButtons.js';
 const routeHandling = {
 
     buildRouteDivs: function(routeNumber) {
+        console.log('buildRouteDivs appState.routeDates #1: ', appState.routeDates);
         routeNumber = routeNumber - 1;
 
         if (appState.waypoints.length === 0 && document.querySelectorAll('.route-container').length >= 1) {
@@ -64,6 +65,8 @@ const routeHandling = {
         dayNameBox.className = 'day-name-box';
         dayNameBox.setAttribute('data-route-number', routeNumber); // Store the route number on the element for reference
 
+        console.log('buildRouteDivs appState.routeDates #2: ', appState.routeDates);
+
         // Check if the date includes a range
         const isDateRange = appState.routeDates[routeNumber] && appState.routeDates[routeNumber].includes(' to ');
 
@@ -95,9 +98,12 @@ const routeHandling = {
         let dateButton = document.createElement('button');
         dateButton.className = 'date-select-button';
 
-        const currentRouteDate = appState.routeDates.hasOwnProperty(routeNumber) ? 
-            appState.routeDates[routeNumber] : 
-            (routeNumber === 0 ? new Date().toISOString().split('T')[0] : appState.routeDates[routeNumber - 1]);
+        console.log('buildRouteDivs currentRouteNumber: ', routeNumber);
+        console.log('buildRouteDivs appState.routeDates #3: ', appState.routeDates);
+        console.log('buildRouteDivs appState.routeDates[routeNumber]: ', appState.routeDates[routeNumber]);
+
+        const currentRouteDate = appState.routeDates.hasOwnProperty(routeNumber) ? appState.routeDates[routeNumber] :
+                                (routeNumber === 0 ? new Date().toISOString().split('T')[0] : appState.routeDates[routeNumber - 1]);
 
         dateButton.textContent = currentRouteDate ? (currentRouteDate.includes(' to ') ? '[..]' : new Date(currentRouteDate).getUTCDate().toString()) : 'Select Date';
         console.log('currentRouteDate', currentRouteDate);
