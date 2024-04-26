@@ -60,12 +60,13 @@ const eventManager = {
 
             // Parse the 'dates' parameter
             if (params.has('dates')) {
-                let datesParam = params.get('dates').split(':');
-                let routeNumber = datesParam[0];
-                let dateRange = datesParam[1];
-                appState.routeDates[routeNumber] = dateRange;
+                let datesParam = params.get('dates').split(',');
+                datesParam.forEach(pair => {
+                    let [routeNumber, dateRange] = pair.split(':');
+                    appState.routeDates[routeNumber] = dateRange;
+                });
             }
-            
+                        
             console.log('appState.routeDates 2: ', appState.routeDates);
 
             const container = document.querySelector('.airport-selection');
