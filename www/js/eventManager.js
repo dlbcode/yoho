@@ -51,13 +51,18 @@ const eventManager = {
         
             // Update app state based on URL parameters
             appState.waypoints = params.get('waypoints') ? params.get('waypoints').split(',').map(iata => ({ iata_code: iata })) : [];
+
+            // Initialize appState.routeDates as an empty object
             appState.routeDates = {};
-            console.log('appState.routeDates 1: ', appState.routeDates);
-            params.forEach((value, key) => {
-                console.log('key:'+ key + ', value:'+ value);
-                appState.routeDates[key] = value;
-            });
-            
+
+            // Parse the 'dates' parameter
+            if (params.has('dates')) {
+                let datesParam = params.get('dates').split(':');
+                let routeNumber = datesParam[0];
+                let dateRange = datesParam[1];
+                appState.routeDates[routeNumber] = dateRange;
+            }
+
             console.log('appState.routeDates 2: ', appState.routeDates);
 
             const container = document.querySelector('.airport-selection');
@@ -187,6 +192,13 @@ window.addEventListener('resize', function () {
 //        }
 //    }
 //});
+
+document.addEventListener('waypointsLoadedFromURL', function() {
+    const routeCount = Math.max(1, Math.ceil(appState.waypoints.length / 2));
+        for (let i = 0; i < routeCount; i++) {
+            routeHandling.buildRouteDivs(i + 1);
+        }
+});
 
 document.addEventListener('DOMContentLoaded', function () {
     flightMap.fetchAndDisplayAirports();

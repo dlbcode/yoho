@@ -10,6 +10,10 @@ import { routeDateButtons } from './routeDateButtons.js';
 const routeHandling = {
 
     buildRouteDivs: function(routeNumber) {
+        if (!appState.urlDataLoaded) {
+            return;
+        }
+
         console.log('buildRouteDivs appState.routeDates #1: ', appState.routeDates);
         routeNumber = routeNumber - 1;
 
@@ -98,6 +102,7 @@ const routeHandling = {
         let dateButton = document.createElement('button');
         dateButton.className = 'date-select-button';
 
+        console.log('buildRouteDivs appState.routeDates.hasOwnProperty(routeNumber): ', appState.routeDates.hasOwnProperty(routeNumber));
         console.log('buildRouteDivs currentRouteNumber: ', routeNumber);
         console.log('buildRouteDivs appState.routeDates #3: ', appState.routeDates);
         console.log('buildRouteDivs appState.routeDates[routeNumber]: ', appState.routeDates[routeNumber]);

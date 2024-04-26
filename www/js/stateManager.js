@@ -2,6 +2,7 @@ const params = new URLSearchParams(window.location.search);
 const defaultDirection = params.get('direction') || 'from';
 
 const appState = {
+    urlDataLoaded: false,
     selectedAirport: null,
     roundTrip: false,
     numTravelers: 1,

@@ -1,5 +1,5 @@
 import { flightMap } from './flightMap.js';
-import { updateState } from './stateManager.js';
+import { appState, updateState } from './stateManager.js';
 import { leftPane } from './leftPane.js';
 import { infoPane } from './infoPane.js';
 import { routeHandling } from './routeHandling.js';
@@ -35,6 +35,7 @@ async function initMapFunctions() {
         });
     }
 
+    appState.urlDataLoaded = true;
     document.dispatchEvent(new CustomEvent('waypointsLoadedFromURL'));
 }
 
