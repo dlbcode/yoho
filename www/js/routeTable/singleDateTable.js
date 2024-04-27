@@ -149,7 +149,7 @@ function buildSingleDateTable(routeIndex) {
         row.addEventListener('click', function() {
           const routeIdString = this.getAttribute('data-route-id');
           const routeIds = routeIdString.split('|');
-          const fullFlightData = data.data[index];
+          const fullFlightData = data[index];
           routeInfoRow(this, fullFlightData, routeIds, routeIndex);
         });
     });    
