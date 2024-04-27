@@ -147,84 +147,83 @@ function buildSingleDateTable(routeIndex) {
        
       document.querySelectorAll('.route-info-table tbody tr').forEach((row, index) => {
         row.addEventListener('click', function() {
-            const routeIdString = this.getAttribute('data-route-id');
-            const routeIds = routeIdString.split('|');
-            const fullFlightData = data[index];
-            routeInfoRow(this, fullFlightData, routeIds, routeIndex);
+          const routeIdString = this.getAttribute('data-route-id');
+          const routeIds = routeIdString.split('|');
+          const fullFlightData = data.data[index];
+          routeInfoRow(this, fullFlightData, routeIds, routeIndex);
         });
-    });                 
+    });    
     
-      document.querySelectorAll('.route-info-table tbody tr').forEach(row => {
-        row.addEventListener('mouseover', function() {
-          pathDrawing.clearLines();
-          const routeString = this.cells[8].textContent.trim();
-          const iataCodes = routeString.split(' > ');
-    
-          for (let i = 0; i < iataCodes.length - 1; i++) {
-              const originIata = iataCodes[i];
-              const destinationIata = iataCodes[i + 1];
-              pathDrawing.drawPathBetweenAirports(originIata, destinationIata, flightMap.getAirportDataByIata);
-          }
-        });
-    
-        row.addEventListener('mouseout', function() {
-            pathDrawing.clearLines();
-            pathDrawing.drawLines();
-        });
+    document.querySelectorAll('.route-info-table tbody tr').forEach(row => {
+      row.addEventListener('mouseover', function() {
+        const routeString = this.cells[8].textContent.trim();
+        const iataCodes = routeString.split(' > ');
+  
+        for (let i = 0; i < iataCodes.length - 1; i++) {
+            const originIata = iataCodes[i];
+            const destinationIata = iataCodes[i + 1];
+            pathDrawing.drawPathBetweenAirports(originIata, destinationIata, flightMap.getAirportDataByIata);
+        }
       });
-    
-      // Separate handling for the price filter icon
-      const priceFilterIcon = document.getElementById('priceFilter');
-      if (priceFilterIcon) {
-        priceFilterIcon.addEventListener('click', function(event) {
-          event.stopPropagation(); // Prevent the event from affecting other elements
-          const priceSliderPopup = document.getElementById('priceSliderPopup');
-          if (priceSliderPopup) {
-            priceSliderPopup.classList.toggle('hidden');
-          } else {
-            showPriceFilterPopup(event, data);
-          }
-        });
-      }
-    }         
-    
-    function resetSortIcons(headers, currentIcon, newSortState) {
-      headers.forEach(header => {
-        const icon = header.querySelector('.sortIcon');
-        if (icon !== currentIcon) {
-          icon.innerHTML = '&#x21C5;'; // Reset to double arrow
-          icon.removeAttribute('data-sort');
+  
+      row.addEventListener('mouseout', function() {
+          pathDrawing.clearLines();
+          pathDrawing.drawLines();
+      });
+    });
+  
+    // Separate handling for the price filter icon
+    const priceFilterIcon = document.getElementById('priceFilter');
+    if (priceFilterIcon) {
+      priceFilterIcon.addEventListener('click', function(event) {
+        event.stopPropagation(); // Prevent the event from affecting other elements
+        const priceSliderPopup = document.getElementById('priceSliderPopup');
+        if (priceSliderPopup) {
+          priceSliderPopup.classList.toggle('hidden');
         } else {
-          icon.innerHTML = newSortState === 'asc' ? '&#x25B2;' : '&#x25BC;';
-          icon.setAttribute('data-sort', newSortState);
+          showPriceFilterPopup(event, data);
         }
       });
     }
-    
-    function sortTableByColumn(table, columnIndex, asc = true) {
-      const dirModifier = asc ? 1 : -1;
-      const tBody = table.tBodies[0];
-      const rows = Array.from(tBody.querySelectorAll("tr"));
-    
-      const sortedRows = rows.sort((a, b) => {
-        let aColText = a.cells[columnIndex - 1].textContent.trim();
-        let bColText = b.cells[columnIndex - 1].textContent.trim();
-        return aColText.localeCompare(bColText, undefined, { numeric: true }) * dirModifier;
-      });
-    
-      while (tBody.firstChild) {
-        tBody.removeChild(tBody.firstChild);
-      }
-      tBody.append(...sortedRows);
-    
-      // Update header classes for visual indication of sort direction
-      table.querySelectorAll("th").forEach(th => th.classList.remove("th-sort-asc", "th-sort-desc"));
-      if (asc) {
-        table.querySelector(`th:nth-child(${columnIndex})`).classList.add("th-sort-asc");
+  } 
+  
+  function resetSortIcons(headers, currentIcon, newSortState) {
+    headers.forEach(header => {
+      const icon = header.querySelector('.sortIcon');
+      if (icon !== currentIcon) {
+        icon.innerHTML = '&#x21C5;'; // Reset to double arrow
+        icon.removeAttribute('data-sort');
       } else {
-        table.querySelector(`th:nth-child(${columnIndex})`).classList.add("th-sort-desc");
+        icon.innerHTML = newSortState === 'asc' ? '&#x25B2;' : '&#x25BC;';
+        icon.setAttribute('data-sort', newSortState);
       }
+    });
+  }
+  
+  function sortTableByColumn(table, columnIndex, asc = true) {
+    const dirModifier = asc ? 1 : -1;
+    const tBody = table.tBodies[0];
+    const rows = Array.from(tBody.querySelectorAll("tr"));
+  
+    const sortedRows = rows.sort((a, b) => {
+      let aColText = a.cells[columnIndex - 1].textContent.trim();
+      let bColText = b.cells[columnIndex - 1].textContent.trim();
+      return aColText.localeCompare(bColText, undefined, { numeric: true }) * dirModifier;
+    });
+  
+    while (tBody.firstChild) {
+      tBody.removeChild(tBody.firstChild);
+    }
+    tBody.append(...sortedRows);
+  
+    // Update header classes for visual indication of sort direction
+    table.querySelectorAll("th").forEach(th => th.classList.remove("th-sort-asc", "th-sort-desc"));
+    if (asc) {
+      table.querySelector(`th:nth-child(${columnIndex})`).classList.add("th-sort-asc");
+    } else {
+      table.querySelector(`th:nth-child(${columnIndex})`).classList.add("th-sort-desc");
     }
   }
+}
 
 export { buildSingleDateTable };
