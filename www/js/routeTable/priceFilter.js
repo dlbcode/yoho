@@ -1,4 +1,3 @@
-import { map } from "../map.js";
 import { appState } from '../stateManager.js';
 
 const priceFilter = {
@@ -71,7 +70,7 @@ const priceFilter = {
     slider.value = maxPrice; // Optionally, reset the slider to the max value or another default
 
     // Update the displayed value
-    valueDisplay.textContent = `${maxPrice}`;
+    valueDisplay.textContent = `$${maxPrice}`;
 
     // Position the slider popup each time it is shown
     this.positionSliderPopup();
