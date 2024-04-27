@@ -33,11 +33,18 @@ const priceFilter = {
     const priceFilter = document.querySelector('#priceFilter');
     const rect = priceFilter.getBoundingClientRect();
     const sliderPopup = document.getElementById('priceSliderPopup');
-
-    console.log('priceFilter rect:', rect); // Logging the current rectangle of the priceFilter element
-    sliderPopup.style.left = `${rect.left + window.scrollX}px`;
-    sliderPopup.style.top = `${rect.top + window.scrollY - sliderPopup.offsetHeight}px`;
+ 
+    // Ensure sliderPopup is visible and has a calculated size before positioning
+    sliderPopup.style.visibility = 'hidden'; // Hide during calculation to avoid flickering
+    sliderPopup.style.height = '';           // Reset any previously set height
+    sliderPopup.classList.remove('hidden');  // Remove hidden class to ensure dimensions are calculable
+  
+    sliderPopup.style.left = `${rect.left + window.scrollX - 80}px`;
+    sliderPopup.style.top = `${rect.top + window.scrollY - sliderPopup.offsetHeight -8}px`;
+  
+    sliderPopup.style.visibility = '';       // Make it visible again
   },
+  
 
   showPriceFilterPopup: function(event, data) {
     let prices;
