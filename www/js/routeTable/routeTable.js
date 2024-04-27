@@ -5,16 +5,6 @@ import { buildAnyDestTable } from './anyDestTable.js'; // Import the buildAnyOri
 
 
 function buildRouteTable(routeIndex) {
-  // Load the slider CSS file
-  let link = document.createElement('link');
-  link.rel = 'stylesheet';
-  link.href = 'css/rSlider.min.css';
-  document.head.appendChild(link);
-
-  // Load the slider JS file
-  let script = document.createElement('script');
-  script.src = 'js/rSlider.min.js';
-  document.body.appendChild(script);
 
   const dateRange = appState.routeDates[routeIndex];
 
