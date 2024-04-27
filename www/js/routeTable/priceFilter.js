@@ -5,7 +5,7 @@ const priceFilter = {
     const sliderPopup = document.createElement('div');
     sliderPopup.id = 'priceSliderPopup';
     sliderPopup.innerHTML = `
-      <div id="sliderValueDisplay" style="text-align: center; margin-bottom: 10px;">$50</div>
+      <div id="sliderValueDisplay" style="text-align: center; margin-bottom: 10px; color: #ddd">$50</div>
       <input type="range" min="0" max="100" value="50" class="price-slider" id="priceSlider">
     `;
     document.body.appendChild(sliderPopup);
