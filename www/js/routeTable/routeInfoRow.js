@@ -4,8 +4,8 @@ import { flightMap } from '../flightMap.js';
 
 function formatLayover(flight, idx) {
     if (idx < flight.route.length - 1) {
-        const arrivalTime = new Date(flight.route[idx].local_arrival);
-        const departureTime = new Date(flight.route[idx + 1].local_departure);
+        const arrivalTime = flight.route[idx].local_arrival ? new Date(flight.route[idx].local_arrival) : new Date(flight.route[idx].aTime * 1000);
+        const departureTime = flight.route[idx + 1].local_departure ? new Date(flight.route[idx + 1].local_departure) : new Date(flight.route[idx + 1].dTime * 1000);
         const layoverDuration = (departureTime - arrivalTime) / 1000 / 60;  // convert from ms to minutes
         return `${Math.floor(layoverDuration / 60)}h ${layoverDuration % 60}m`;
     }
