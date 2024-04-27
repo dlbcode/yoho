@@ -74,37 +74,38 @@ const priceFilter = {
   },
 
   filterTableByPrice: function(threshold) {
-    const table = document.querySelector('.route-info-table');
-    const rows = table.querySelectorAll('tbody tr');
+  const table = document.querySelector('.route-info-table');
+  const rows = table.querySelectorAll('tbody tr:not(.route-info-row)');  // Excludes rows with class 'route-info-row'
 
-    // First, reset visibility for all lines to ensure a clean state
-    this.resetLineVisibility();
+  // First, reset visibility for all lines to ensure a clean state
+  this.resetLineVisibility();
 
-    // Adjust visibility based on the filter
-    rows.forEach(row => {
-      const price = parseFloat(row.cells[2].textContent.replace('$', ''));
-      const isVisible = price <= threshold;
-      row.style.display = isVisible ? '' : 'none';
+  // Adjust visibility based on the filter
+  rows.forEach(row => {
+    const price = parseFloat(row.cells[2].textContent.replace('$', ''));
+    const isVisible = price <= threshold;
+    row.style.display = isVisible ? '' : 'none';
 
-      if (isVisible) {
-        const routeLineId = row.getAttribute('data-route-id');
-        // Make routeLines fully visible
-        appState.routeLines.forEach(line => {
-          if (line.routeLineId === routeLineId) {
-            line.setStyle({opacity: 1, fillOpacity: 1});
-            line._path.style.pointerEvents = '';
-          }
-        });
-        // Adjust invisibleRouteLines opacity
-        appState.invisibleRouteLines.forEach(line => {
-          if (line.routeLineId === routeLineId) {
-            line.setStyle({opacity: 0.0, fillOpacity: 0.0});
-            line._path.style.pointerEvents = 'none';
-          }
-        });
-      }
-    });
-  },
+    if (isVisible) {
+      const routeLineId = row.getAttribute('data-route-id');
+      // Make routeLines fully visible
+      appState.routeLines.forEach(line => {
+        if (line.routeLineId === routeLineId) {
+          line.setStyle({opacity: 1, fillOpacity: 1});
+          line._path.style.pointerEvents = '';
+        }
+      });
+      // Adjust invisibleRouteLines opacity
+      appState.invisibleRouteLines.forEach(line => {
+        if (line.routeLineId === routeLineId) {
+          line.setStyle({opacity: 0.0, fillOpacity: 0.0});
+          line._path.style.pointerEvents = 'none';
+        }
+      });
+    }
+  });
+},
+
 
   // Helper function to reset line visibility
   resetLineVisibility: function() {
