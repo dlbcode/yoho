@@ -113,7 +113,7 @@
 .select-button {
   background-color: green;
   color: #eee;
-  padding: 10px;
+  padding: 6px 0 6px 0;
   border: none;
   cursor: pointer;
   text-align: center;

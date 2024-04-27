@@ -53,13 +53,14 @@ function routeInfoRow(rowElement, fullFlightData, routeIds, routeIndex) {
                 <path d="M2,35 Q45,-2 88,35" stroke="#666" fill="transparent" stroke-width="4" stroke-dasharray="1,11" stroke-dashoffset="6" stroke-linecap="round"></path>
                 </svg></div><img src="${airlineLogoUrl}" alt="${airlineCode} Logo" style="width: 60px; height: 60px; object-fit: contain; object-position: center; border-radius: 5px;"/></div>`);
                 }
-    
-            if (idx > 0) {
-                // Layover Column (for all segments except the first)
-                const layoverDuration = formatLayover(flight, idx - 1);
-                const previousArrivalTime = new Date(flight.route[idx - 1].local_arrival).toLocaleTimeString();
-                segmentsHtml.push(`<div class="layover"><div>${flight.route[idx - 1].flyTo} (${segment.cityFrom})</div><div style="color: #999;">Arrive: <span style="color: #ccc;">${previousArrivalTime}</span></div><div style="text-align: center; color: #999;">&darr;</div><div style="color: #999;">Layover: <span style="color: #ccc;">${layoverDuration}</span></div><div style="text-align: center; color: #999;">&darr;</div><div style="color: #999;">Depart: <span style="color: #ccc;">${departureTime}</span></div></div>`);
 
+                if (idx > 0) {
+                    // Layover Column (for all segments except the first)
+                    const layoverDuration = formatLayover(flight, idx - 1);
+                    const previousArrivalTime = new Date(flight.route[idx - 1].local_arrival).toLocaleTimeString();
+                    const recheckBagsText = flight.route[idx - 1].bags_recheck_required ? '<div style="color: #FFBF00;">- Recheck bags</div>' : '';
+                    segmentsHtml.push(`<div class="layover"><div>${flight.route[idx - 1].flyTo} (${segment.cityFrom})</div><div style="color: #999;">Arrive: <span style="color: #ccc;">${previousArrivalTime}</span></div><div style="text-align: center; color: #999;">&darr;</div><div style="color: #999;">Layover: <span style="color: #ccc;">${layoverDuration}</span></div>${recheckBagsText}<div style="text-align: center; color: #999;">&darr;</div><div style="color: #999;">Depart: <span style="color: #ccc;">${departureTime}</span></div></div>`);
+                
                 // Second Duration Column
                 segmentsHtml.push(`<div class="duration"><div style="position: relative; margin-top: 12px; color: #ccc;">
                 ${duration}
@@ -106,10 +107,7 @@ function routeInfoRow(rowElement, fullFlightData, routeIds, routeIndex) {
             <div class='segments-wrapper' style='display: flex; flex-direction: column; align-items: flex-start;'>
                 <div class='segments' style='display: flex; flex-direction: row; align-items: flex-start;'>
                     ${generateSegmentDetails(flight)}
-                </div>
-                <div class='info-wrapper' style='display: flex; flex-direction: column; align-items: flex-start; width: 100%;'>
-                    <div class='baggage-info'>Baggage: ${flight.baglimit.hold_weight} kg check-in, ${flight.baglimit.personal_item_weight} kg personal (max dimensions: ${flight.baglimit.personal_item_length}x${flight.baglimit.personal_item_width}x${flight.baglimit.personal_item_height} cm)</div>
-                </div>              
+                </div>             
             </div>
         </div>
     </div>
