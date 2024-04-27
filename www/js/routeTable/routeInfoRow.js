@@ -36,11 +36,13 @@ function routeInfoRow(rowElement, fullFlightData, routeIds, routeIndex) {
     
         flight.route.forEach((segment, idx, arr) => {
             const options = { hour: '2-digit', minute: '2-digit' };
-            const departureTime = new Date(segment.local_departure).toLocaleTimeString([], options);
-            const arrivalTime = new Date(segment.local_arrival).toLocaleTimeString([], options);
+            const departureDate = segment.local_departure ? new Date(segment.local_departure) : new Date(segment.dTime * 1000);
+            const arrivalDate = segment.local_arrival ? new Date(segment.local_arrival) : new Date(segment.aTime * 1000);
+            const departureTime = departureDate.toLocaleTimeString([], options);
+            const arrivalTime = arrivalDate.toLocaleTimeString([], options);
+            const duration = ((arrivalDate - departureDate) / 3600000).toFixed(1) + ' hrs';
             const airlineCode = segment.airline; // Assuming `segment.airline` holds the airline code
-            const duration = ((new Date(segment.local_arrival) - new Date(segment.local_departure)) / 3600000).toFixed(1) + ' hrs';
-    
+            
             const airlineLogoUrl = `assets/airline_logos/70px/${airlineCode}.png`;
 
             if (idx === 0) {
@@ -57,7 +59,7 @@ function routeInfoRow(rowElement, fullFlightData, routeIds, routeIndex) {
                 if (idx > 0) {
                     // Layover Column (for all segments except the first)
                     const layoverDuration = formatLayover(flight, idx - 1);
-                    const previousArrivalTime = new Date(flight.route[idx - 1].local_arrival).toLocaleTimeString();
+                    const previousArrivalTime = flight.route[idx - 1].local_arrival ? new Date(flight.route[idx - 1].local_arrival).toLocaleTimeString() : new Date(flight.route[idx - 1].aTime * 1000).toLocaleTimeString();
                     const recheckBagsText = flight.route[idx - 1].bags_recheck_required ? '<div style="color: #FFBF00;">- Recheck bags</div>' : '';
                     segmentsHtml.push(`<div class="layover"><div>${flight.route[idx - 1].flyTo} (${segment.cityFrom})</div><div style="color: #999;">Arrive: <span style="color: #ccc;">${previousArrivalTime}</span></div><div style="text-align: center; color: #999;">&darr;</div><div style="color: #999;">Layover: <span style="color: #ccc;">${layoverDuration}</span></div>${recheckBagsText}<div style="text-align: center; color: #999;">&darr;</div><div style="color: #999;">Depart: <span style="color: #ccc;">${departureTime}</span></div></div>`);
                 
