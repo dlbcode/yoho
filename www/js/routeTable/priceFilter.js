@@ -47,26 +47,25 @@ function showPriceFilterPopup(event, data) {
   const maxPrice = Math.max(...prices);
 
   const sliderPopup = document.getElementById('priceSliderPopup') || createSliderPopup();
-const slider = sliderPopup.querySelector('#priceSlider');
-const valueDisplay = sliderPopup.querySelector('#sliderValueDisplay');
+  const slider = sliderPopup.querySelector('#priceSlider');
+  const valueDisplay = sliderPopup.querySelector('#sliderValueDisplay');
 
-// Update the slider with the new min and max prices
-slider.min = minPrice;
-slider.max = maxPrice;
-slider.value = maxPrice; // Optionally, reset the slider to the max value or another default
+  // Update the slider with the new min and max prices
+  slider.min = minPrice;
+  slider.max = maxPrice;
+  slider.value = maxPrice; // Optionally, reset the slider to the max value or another default
 
-// Update the displayed value
-valueDisplay.textContent = `${maxPrice}`;
+  // Update the displayed value
+  valueDisplay.textContent = `${maxPrice}`;
 
-// Make sure the slider popup is visible
-sliderPopup.classList.remove('hidden');
+  // Make sure the slider popup is visible
+  sliderPopup.classList.remove('hidden');
 
-// Position the slider popup appropriately
-// This assumes you have a mechanism to position the popup near the price filter icon
-const priceHeader = document.querySelector('th:nth-child(3)'); // Assuming price is in the third column
-const rect = priceHeader.getBoundingClientRect();
-sliderPopup.style.left = `${rect.left + window.scrollX}px`;
-sliderPopup.style.top = `${rect.top + window.scrollY - sliderPopup.offsetHeight}px`;
+  // Position the slider popup appropriately
+  const priceFilter = document.querySelector('#priceFilter');
+  const rect = priceFilter.getBoundingClientRect();
+  sliderPopup.style.left = `${rect.left + window.scrollX}px`;
+  sliderPopup.style.top = `${rect.top + window.scrollY - sliderPopup.offsetHeight}px`;
 }
 
 function filterTableByPrice(threshold) {
