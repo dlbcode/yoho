@@ -1,5 +1,5 @@
 import { appState, updateState } from '../stateManager.js';
-import { showPriceFilterPopup } from './priceFilter.js';
+import { priceFilter } from './priceFilter.js';
 import { showDateFilterPopup } from './dateFilters.js';
 import { pathDrawing } from '../pathDrawing.js';
 import { flightMap } from '../flightMap.js';
@@ -195,7 +195,7 @@ function buildDateRangeTable(routeIndex, dateRange) {
         if (priceSliderPopup) {
           priceSliderPopup.classList.toggle('hidden');
         } else {
-          showPriceFilterPopup(event, data);
+          priceFilter.showPriceFilterPopup(event, data);
         }
       });
     }

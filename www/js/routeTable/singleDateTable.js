@@ -1,5 +1,5 @@
 import { appState, updateState } from '../stateManager.js';
-import { showPriceFilterPopup } from './priceFilter.js';
+import { priceFilter } from './priceFilter.js';
 import { showDateFilterPopup } from './dateFilters.js';
 import { pathDrawing } from '../pathDrawing.js';
 import { flightMap } from '../flightMap.js';
@@ -174,17 +174,26 @@ function buildSingleDateTable(routeIndex) {
   
     // Separate handling for the price filter icon
     const priceFilterIcon = document.getElementById('priceFilter');
-    if (priceFilterIcon) {
-      priceFilterIcon.addEventListener('click', function(event) {
-        event.stopPropagation(); // Prevent the event from affecting other elements
-        const priceSliderPopup = document.getElementById('priceSliderPopup');
-        if (priceSliderPopup) {
-          priceSliderPopup.classList.toggle('hidden');
-        } else {
-          showPriceFilterPopup(event, data);
-        }
-      });
+if (priceFilterIcon) {
+  priceFilterIcon.addEventListener('click', function(event) {
+    event.stopPropagation(); // Prevent the event from affecting other elements
+    const priceSliderPopup = document.getElementById('priceSliderPopup');
+    if (priceSliderPopup) {
+      if (priceSliderPopup.classList.contains('hidden')) {
+        // Reposition and show the popup if it was previously hidden
+        priceFilter.positionSliderPopup();
+        priceSliderPopup.classList.remove('hidden');
+      } else {
+        // Hide the popup if it is currently visible
+        priceSliderPopup.classList.add('hidden');
+      }
+    } else {
+      // If the popup doesn't exist, create and show it
+      priceFilter.showPriceFilterPopup(event, data);
     }
+  });
+}
+
   } 
   
   function resetSortIcons(headers, currentIcon, newSortState) {
