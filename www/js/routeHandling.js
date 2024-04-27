@@ -105,7 +105,7 @@ const routeHandling = {
         dateButton.className = 'date-select-button';
 
         const currentRouteDate = appState.routeDates.hasOwnProperty(routeNumber) ? appState.routeDates[routeNumber] :
-                                (routeNumber === 0 ? new Date().toISOString().split('T')[0] : appState.routeDates[routeNumber - 1]);
+                                (routeNumber === 0 ? new Date().toLocaleDateString() : appState.routeDates[routeNumber - 1]);
 
         console.log('buildRouteDivs appState.routeDates.hasOwnProperty(routeNumber): ', appState.routeDates.hasOwnProperty(routeNumber));
         console.log('buildRouteDivs currentRouteNumber: ', routeNumber);
