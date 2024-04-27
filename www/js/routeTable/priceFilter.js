@@ -1,16 +1,5 @@
 import { appState } from '../stateManager.js';
 
-// Load the slider CSS file
-let link = document.createElement('link');
-link.rel = 'stylesheet';
-link.href = '../css/rSlider.min.css';
-document.head.appendChild(link);
-
-// Load the slider JS file
-let script = document.createElement('script');
-script.src = '../js/rSlider.min.js';
-document.body.appendChild(script);
-
 const priceFilter = {
   createSliderPopup: function() {
     const sliderPopup = document.createElement('div');

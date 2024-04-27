@@ -3,7 +3,6 @@ import { buildSingleDateTable } from './singleDateTable.js';
 import { buildDateRangeTable } from './rangeDateTable.js';
 import { buildAnyDestTable } from './anyDestTable.js'; // Import the buildAnyOriginTable function
 
-
 function buildRouteTable(routeIndex) {
 
   const dateRange = appState.routeDates[routeIndex];
