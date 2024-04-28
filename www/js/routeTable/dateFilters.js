@@ -1,129 +1,148 @@
-document.addEventListener('DOMContentLoaded', loadNoUiSlider);
-
-function loadNoUiSlider() {
-  if (!window.noUiSlider) {
-    appendElement(document.head, 'script', {
-      src: "https://cdn.jsdelivr.net/npm/nouislider/distribute/nouislider.min.js",
-      onload: () => console.log('noUiSlider is loaded and ready to use!')
-    });
-    appendElement(document.head, 'link', {
-      rel: "stylesheet",
-      href: "https://cdn.jsdelivr.net/npm/nouislider/distribute/nouislider.min.css"
-    });
-  }
-}
-
-function appendElement(parent, type, attributes) {
-  const element = document.createElement(type);
-  Object.keys(attributes).forEach(key => element[key] = attributes[key]);
-  parent.appendChild(element);
-}
-
-function initializeSlider(sliderId) {
-  const sliderElement = document.getElementById(sliderId);
-  if (!sliderElement) {
-    console.error("Slider element not found!");
-    return;
-  }
-
-  noUiSlider.create(sliderElement, {
-    start: [0, 24],
-    connect: true,
-    range: { 'min': 0, 'max': 24 },
-    step: 0.5,
-    tooltips: [true, true],
-    format: { to: formatTime, from: Number }
-  });
-
-  manageSliderHandles(sliderElement);
-  const timeDisplay = updateTimeDisplayElement(sliderElement);
-  sliderElement.noUiSlider.on('update', () => {
-    const values = sliderElement.noUiSlider.get();
-    updateTimeDisplay(values, timeDisplay);
-    filterTableRows(parseFloat(values[0]), parseFloat(values[1]));
-  });
-}
-
-function manageSliderHandles(sliderElement) {
-  const handles = sliderElement.querySelectorAll('.noUi-handle');
-  handles.forEach(handle => {
-    handle.classList.add('slider-handle');
-    const tooltip = handle.querySelector('.noUi-tooltip');
-    tooltip.style.display = 'none';
-    ['mousedown', 'touchstart'].forEach(event => {
-      handle.addEventListener(event, () => tooltip.style.display = 'block');
-    });
-  });
-}
-
-function updateTimeDisplayElement(sliderElement) {
-  let timeDisplay = document.querySelector('.time-display');
-  if (!timeDisplay) {
-    timeDisplay = document.createElement('div');
-    timeDisplay.className = 'time-display';
-    sliderElement.parentElement.insertBefore(timeDisplay, sliderElement);
-  }
-  return timeDisplay;
-}
-
-function updateTimeDisplay(values, displayElement) {
-  const [start, end] = values.map(value => formatTime(parseFloat(value)));
-  displayElement.textContent = `${start} – ${end}`;
-}
-
-function formatTime(value) {
-  const hours = Math.floor(value) % 12 || 12;
-  const minutes = Math.floor((value % 1) * 60).toString().padStart(2, '0');
-  const amPm = value >= 12 ? 'PM' : 'AM';
-  return `${hours}:${minutes} ${amPm}`;
-}
-
-function filterTableRows(startHour, endHour) {
-  const table = document.querySelector('.route-info-table');
-  const rows = table.querySelectorAll('tbody tr');
-  rows.forEach(row => {
-    const departureTime = getTimeFromDateTimeString(row.cells[0].textContent);
-    const arrivalTime = getTimeFromDateTimeString(row.cells[1].textContent);
-    const isVisible = departureTime >= startHour && departureTime <= endHour || arrivalTime >= startHour && arrivalTime <= endHour;
-    row.style.display = isVisible ? '' : 'none';
-  });
-}
-
-function getTimeFromDateTimeString(dateTimeStr) {
-  const [, time, modifier] = dateTimeStr.match(/(\d+:\d+ [AP]M)/);
-  const [hour, minute] = time.split(':');
-  return parseInt(hour) % 12 + (modifier === 'PM' ? 12 : 0) + parseInt(minute) / 60;
-}
-
 function createDateFilterPopup(column) {
   const filterPopup = document.createElement('div');
   filterPopup.id = `${column}DateFilterPopup`;
   filterPopup.className = 'date-filter-popup';
-  filterPopup.innerHTML = ['departure', 'arrival'].includes(column) ? `<div id="${column}Slider"></div>` : '';
+
+  // Simplified content, no longer adding extra descriptions
+  if (column === 'departure' || column === 'arrival') {
+    filterPopup.innerHTML = `<div id="${column}Slider"></div>`; // Only include the slider div
+  }
   document.body.appendChild(filterPopup);
   return filterPopup;
 }
 
-function showDateFilterPopup(event, column) {
-  let popup = document.getElementById(`${column}DateFilterPopup`) || createDateFilterPopup(column);
-  popup.classList.remove('hidden');
-  positionPopup(event.target.closest('.filterIcon'), popup);
-  if (['departure', 'arrival'].includes(column)) initializeSlider(`${column}Slider`);
+function loadNoUiSlider() {
+  if (!window.noUiSlider) {
+    const script = document.createElement('script');
+    script.src = "https://cdn.jsdelivr.net/npm/nouislider/distribute/nouislider.min.js";
+    script.onload = () => {
+        console.log('noUiSlider is loaded and ready to use!');
+    };
+    document.head.appendChild(script);
+
+    const link = document.createElement('link');
+    link.rel = "stylesheet";
+    link.href = "https://cdn.jsdelivr.net/npm/nouislider/distribute/nouislider.min.css";
+    document.head.appendChild(link);
+  }
 }
 
-function positionPopup(icon, popup) {
-  requestAnimationFrame(() => {
-    if (!popup.classList.contains('hidden') && icon) {
-      const rect = icon.getBoundingClientRect();
-      popup.style.position = 'absolute';
-      popup.style.left = `${rect.left + window.scrollX}px`;
-      popup.style.top = `${rect.top + window.scrollY - popup.offsetHeight - 5}px`;
+function initializeSlider(sliderId) {
+  const sliderElement = document.getElementById(sliderId);
+  if (sliderElement) {
+    noUiSlider.create(sliderElement, {
+      start: [0, 24],  // Covering the full day from 0 hours to 24 hours
+      connect: true,
+      range: {
+          'min': 0,
+          'max': 24
+      },
+      step: 0.5,  // Setting the step to 0.5 hours, which is 30 minutes
+      tooltips: [true, true]  // Enable tooltips for both handles
+    });
+
+    // Apply custom styles to handles and tooltips
+    const handles = sliderElement.querySelectorAll('.noUi-handle');
+    handles.forEach(handle => handle.classList.add('slider-handle'));
+
+    const tooltips = sliderElement.querySelectorAll('.noUi-tooltip');
+    tooltips.forEach(tooltip => tooltip.classList.add('noUi-tooltip'));
+
+    // Ensure the time-display element is created and added to the DOM
+    let timeDisplay = document.querySelector('.time-display');
+    if (!timeDisplay) {
+      timeDisplay = document.createElement('div');
+      timeDisplay.className = 'time-display';
+      sliderElement.parentElement.insertBefore(timeDisplay, sliderElement);
+    }
+
+    sliderElement.noUiSlider.on('slide', function (values, handle) {
+      let tooltip = sliderElement.querySelector('.noUi-tooltip');
+      if (tooltip) {
+        tooltip.style.top = '-25px';  // Position the tooltip above the handle
+        tooltip.style.left = '-10px';  // Center it slightly
+        tooltip.textContent = formatTime(values[handle]);  // Update tooltip content dynamically
+      }
+    });
+
+    sliderElement.noUiSlider.on('update', function (values, handle) {
+      if (timeDisplay) {  // Check if timeDisplay exists before updating
+        const startTime = formatTime(values[0]);
+        const endTime = formatTime(values[1]);
+        timeDisplay.textContent = `${startTime} – ${endTime}`;  // Updating the display
+      } else {
+        console.error('Time display element not found');
+      }
+      filterTableByTime(values[0], values[1], sliderId.includes('departure') ? 0 : 1);
+    });
+  } else {
+    console.error("Slider element not found!");
+  }
+}
+
+function formatTime(value) {
+  const hours = Math.floor(value);
+  const minutes = Math.floor((value % 1) * 60);
+  return `${hours}:${minutes < 10 ? '0' + minutes : minutes}h`;
+}
+
+function filterTableByTime(startTime, endTime, columnIndex) {
+  const rows = document.querySelectorAll('.route-info-table tbody tr');
+  rows.forEach(row => {
+    const timeCell = row.cells[columnIndex].textContent;
+    const timeMatch = timeCell.match(/(\d{1,2}:\d{2}:\d{2}) (AM|PM)/);
+    if (timeMatch) {
+      const timeString = timeMatch[1] + ' ' + timeMatch[2];
+      const timeValue = convertTimeToDecimal(timeString); // Convert to decimal hours
+      const isVisible = timeValue >= parseFloat(startTime) && timeValue <= parseFloat(endTime);
+      row.style.display = isVisible ? '' : 'none';
     }
   });
 }
 
-document.addEventListener('click', event => {
-  document.querySelectorAll('.date-filter-popup').forEach(popup => {
+function convertTimeToDecimal(timeStr) {
+  const [time, modifier] = timeStr.split(' ');
+  let [hours, minutes] = time.split(':');
+  hours = parseInt(hours);
+  minutes = parseInt(minutes);
+
+  if (modifier === 'PM' && hours < 12) hours += 12;
+  if (modifier === 'AM' && hours === 12) hours = 0;
+
+  return hours + minutes / 60;
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  loadNoUiSlider();
+});
+
+function showDateFilterPopup(event, column) {
+  let existingPopup = document.getElementById(`${column}DateFilterPopup`);
+
+  if (!existingPopup) {
+    existingPopup = createDateFilterPopup(column);
+  }
+  existingPopup.classList.toggle('hidden', false);
+
+  requestAnimationFrame(() => {
+    if (!existingPopup.classList.contains('hidden')) {
+      const icon = event.target.closest('.filterIcon');
+      if (icon) {
+        const rect = icon.getBoundingClientRect();
+        existingPopup.style.position = 'absolute';
+        existingPopup.style.left = `${rect.left + window.scrollX}px`;
+        existingPopup.style.top = `${rect.top + window.scrollY - existingPopup.offsetHeight - 5}px`;
+      }
+      if (column === 'departure' || column === 'arrival') {
+        initializeSlider(`${column}Slider`);
+      }
+    }
+  });
+}
+
+document.addEventListener('click', function(event) {
+  const datePopups = document.querySelectorAll('.date-filter-popup');
+  datePopups.forEach(popup => {
     if (!popup.contains(event.target) && !event.target.closest('.filterIcon')) {
       popup.classList.add('hidden');
     }
