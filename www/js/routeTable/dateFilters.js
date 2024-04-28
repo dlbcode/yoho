@@ -99,12 +99,17 @@ function initializeSlider(sliderId) {
 function formatTime(value) {
   let hours = Math.floor(value);
   const minutes = Math.floor((value % 1) * 60);
+
+  // Special case handling for 24 hours to show as 12:00 AM
+  if (hours === 24) {
+    return `12:00 AM`;  // Directly return "12:00 AM" for 24 hours
+  }
+
   const ampm = hours >= 12 ? 'PM' : 'AM';
   hours = hours % 12;
   hours = hours ? hours : 12; // the hour '0' should be '12'
   return `${hours}:${minutes < 10 ? '0' + minutes : minutes} ${ampm}`;
 }
-
 
 function filterTableByTime(startTime, endTime, columnIndex) {
   const rows = document.querySelectorAll('.route-info-table tbody tr');

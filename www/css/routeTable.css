@@ -75,11 +75,12 @@
 /* Custom Handle Style */
 .slider-handle {
   background-color: #007bff; /* Blue background */
-  width: 10px; /* Width of the handle */
-  height: 10px; /* Height of the handle */
+  width: 16px !important; /* Width of the handle */
+  height: 16px !important; /* Height of the handle */
   border-radius: 50%; /* Circular handle */
   border: none; /* No border */
   top: -2px; /* Adjust vertical alignment to center with the slider bar */
+  left: 9px;
   cursor: pointer; /* Cursor indicates that the handle can be moved */
   box-shadow: none; /* Remove any shadow effects */
 }
@@ -87,6 +88,20 @@
 .slider-handle::before,
 .slider-handle::after {
     content: none; /* This will remove pseudo-elements that may be adding lines */
+}
+
+.noUi-target,
+.noUi-base {
+  background: #004c86;
+  height: 4px;
+  border: none; 
+  box-shadow: none;
+}
+
+.noUi-connect {
+  height: 8px !important;  /* Set the height of the slider bar */
+  background: #0084e9;  /* Set the color of the slider bar to blue */
+  border: none !important;
 }
 
 .noUi-tooltip {
