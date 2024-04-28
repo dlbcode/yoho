@@ -31,17 +31,22 @@ function initializeSlider(sliderId) {
   const sliderElement = document.getElementById(sliderId);
   if (sliderElement) {
     noUiSlider.create(sliderElement, {
-      start: [0, 24],  // Covering the full day from 0 hours to 24 hours
+      start: [0, 24],  // Full day
       connect: true,
-      range: {
-          'min': 0,
-          'max': 24
-      },
-      step: 0.5,  // Setting the step to 0.5 hours, which is 30 minutes
-      tooltips: [true, true]  // Enable tooltips for both handles
+      range: { 'min': 0, 'max': 24 },
+      step: 0.5,
+      tooltips: [true, true]
     });
 
-    // Ensure the time-display element is created and added to the DOM
+    sliderElement.noUiSlider.on('update', function (values, handle) {
+      const tooltips = sliderElement.querySelectorAll('.noUi-tooltip');
+      if (tooltips[handle]) {
+        tooltips[handle].innerHTML = formatTime(values[handle]);
+        tooltips[handle].style.top = '-25px';
+        tooltips[handle].style.left = '-10px';
+      }
+    });
+
     let timeDisplay = document.querySelector('.time-display');
     if (!timeDisplay) {
       timeDisplay = document.createElement('div');
@@ -50,23 +55,9 @@ function initializeSlider(sliderId) {
     }
 
     sliderElement.noUiSlider.on('slide', function (values, handle) {
-      let tooltip = sliderElement.querySelector('.noUi-tooltip');
-      if (tooltip) {
-        tooltip.style.top = '-25px';  // Position the tooltip above the handle
-        tooltip.style.left = '-10px';  // Center it slightly
-        tooltip.textContent = formatTime(values[handle]);  // Update tooltip content dynamically
-      }
-    });
-
-    sliderElement.noUiSlider.on('update', function (values, handle) {
-      if (timeDisplay) {  // Check if timeDisplay exists before updating
-        const startTime = formatTime(values[0]);
-        const endTime = formatTime(values[1]);
-        timeDisplay.textContent = `${startTime} – ${endTime}`;  // Updating the display
-      } else {
-        console.error('Time display element not found');
-      }
-      filterTableByTime(values[0], values[1], sliderId.includes('departure') ? 0 : 1);
+      const startTime = formatTime(values[0]);
+      const endTime = formatTime(values[1]);
+      timeDisplay.textContent = `${startTime} – ${endTime}`;
     });
   } else {
     console.error("Slider element not found!");
@@ -77,32 +68,6 @@ function formatTime(value) {
   const hours = Math.floor(value);
   const minutes = Math.floor((value % 1) * 60);
   return `${hours}:${minutes < 10 ? '0' + minutes : minutes}h`;
-}
-
-function filterTableByTime(startTime, endTime, columnIndex) {
-  const rows = document.querySelectorAll('.route-info-table tbody tr');
-  rows.forEach(row => {
-    const timeCell = row.cells[columnIndex].textContent;
-    const timeMatch = timeCell.match(/(\d{1,2}:\d{2}:\d{2}) (AM|PM)/);
-    if (timeMatch) {
-      const timeString = timeMatch[1] + ' ' + timeMatch[2];
-      const timeValue = convertTimeToDecimal(timeString); // Convert to decimal hours
-      const isVisible = timeValue >= parseFloat(startTime) && timeValue <= parseFloat(endTime);
-      row.style.display = isVisible ? '' : 'none';
-    }
-  });
-}
-
-function convertTimeToDecimal(timeStr) {
-  const [time, modifier] = timeStr.split(' ');
-  let [hours, minutes] = time.split(':');
-  hours = parseInt(hours);
-  minutes = parseInt(minutes);
-
-  if (modifier === 'PM' && hours < 12) hours += 12;
-  if (modifier === 'AM' && hours === 12) hours = 0;
-
-  return hours + minutes / 60;
 }
 
 document.addEventListener('DOMContentLoaded', function() {
