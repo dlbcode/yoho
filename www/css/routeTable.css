@@ -61,6 +61,16 @@
   padding: 10px; /* For better content spacing */
 }
 
+.time-display {
+  font-size: 14px;
+  color: #FFF;
+  padding: 5px;
+  background-color: #333;
+  border-radius: 5px;
+  text-align: center;
+  margin-bottom: 5px;
+}
+
 /* Ensure the filter icon is correctly positioned within the table header */
 .filterIcon {
   cursor: pointer;

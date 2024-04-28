@@ -33,26 +33,34 @@ function initializeSlider(sliderId) {
   const sliderElement = document.getElementById(sliderId);
   if (sliderElement) {
     noUiSlider.create(sliderElement, {
-        start: [0, 24],  // Adjusted to 24-hour range
-        connect: true,
-        range: {
-            'min': 0,
-            'max': 24
-        },
-        format: {
-          to: function(value) {
-            return parseFloat(value).toFixed(2); // Keeping two decimals for precision
-          },
-          from: Number
-        }
+      start: [0, 24],  // Set to cover the full day from 0 hours to 24 hours
+      connect: true,
+      range: {
+          'min': 0,
+          'max': 24
+      }
     });
 
+    // Creating elements to display the selected time range
+    const timeDisplay = document.createElement('div');
+    timeDisplay.className = 'time-display';
+    sliderElement.parentElement.insertBefore(timeDisplay, sliderElement);
+
     sliderElement.noUiSlider.on('update', function (values) {
+      const startTime = formatTime(values[0]);
+      const endTime = formatTime(values[1]);
+      timeDisplay.textContent = `${startTime} – ${endTime}`;  // Updating the display
       filterTableByTime(values[0], values[1], sliderId.includes('departure') ? 0 : 1);
     });
   } else {
     console.error("Slider element not found!");
   }
+}
+
+function formatTime(value) {
+  const hours = Math.floor(value);
+  const minutes = Math.floor((value % 1) * 60);
+  return `${hours}:${minutes < 10 ? '0' : ''}${minutes}`;
 }
 
 function filterTableByTime(startTime, endTime, columnIndex) {
