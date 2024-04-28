@@ -15,8 +15,6 @@ function handleStateChange(event) {
         const container = document.querySelector('.airport-selection');
         container.innerHTML = '';
 
-        console.log('handleStateChange: ', key, value);
-
         // Ensure at least one route div is present
         const routeCount = Math.max(1, Math.ceil(appState.waypoints.length / 2));
         for (let i = 0; i < routeCount; i++) {
@@ -53,10 +51,7 @@ const eventManager = {
         
             // Update app state based on URL parameters
             appState.waypoints = params.get('waypoints') ? params.get('waypoints').split(',').map(iata => ({ iata_code: iata })) : [];
-            console.log('eventManager.js: appState.waypoints: ', appState.waypoints);
             appState.routeDates = {};
-
-            console.log('ONPOPSTATE: appState.routeDates 1: ', appState.routeDates);
 
             // Parse the 'dates' parameter
             if (params.has('dates')) {
@@ -67,8 +62,6 @@ const eventManager = {
                 });
             }
                         
-            console.log('appState.routeDates 2: ', appState.routeDates);
-
             const container = document.querySelector('.airport-selection');
             container.innerHTML = '';
 

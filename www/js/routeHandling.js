@@ -11,7 +11,6 @@ const routeHandling = {
 
     buildRouteDivs: function(routeNumber) {
 
-        console.log('buildRouteDivs appState.routeDates #1: ', appState.routeDates);
         routeNumber = routeNumber - 1;
 
         // if there is not routeDate for the current routeNumber set it to todays date
@@ -71,8 +70,6 @@ const routeHandling = {
         dayNameBox.className = 'day-name-box';
         dayNameBox.setAttribute('data-route-number', routeNumber); // Store the route number on the element for reference
 
-        console.log('buildRouteDivs appState.routeDates #2: ', appState.routeDates);
-
         // Check if the date includes a range
         const isDateRange = appState.routeDates[routeNumber] && appState.routeDates[routeNumber].includes(' to ');
 
@@ -107,13 +104,7 @@ const routeHandling = {
         const currentRouteDate = appState.routeDates.hasOwnProperty(routeNumber) ? appState.routeDates[routeNumber] :
                                 (routeNumber === 0 ? new Date().toLocaleDateString() : appState.routeDates[routeNumber - 1]);
 
-        console.log('buildRouteDivs appState.routeDates.hasOwnProperty(routeNumber): ', appState.routeDates.hasOwnProperty(routeNumber));
-        console.log('buildRouteDivs currentRouteNumber: ', routeNumber);
-        console.log('buildRouteDivs appState.routeDates #3: ', appState.routeDates);
-        console.log('buildRouteDivs appState.routeDates[routeNumber]: ', appState.routeDates[routeNumber]);
-
         dateButton.textContent = currentRouteDate ? (currentRouteDate.includes(' to ') ? '[..]' : new Date(currentRouteDate).getUTCDate().toString()) : 'Select Date';
-        console.log('currentRouteDate', currentRouteDate);
 
         const timeZone = 'UTC';
         let fp = flatpickr(dateButton, {
@@ -124,7 +115,6 @@ const routeHandling = {
             minDate: routeNumber === 0 ? "today" : appState.routeDates[routeNumber - 1],
             mode: currentRouteDate === 'any' ? 'any' : (currentRouteDate.includes(' to ') ? 'range' : 'single'),
             onValueUpdate: (selectedDates) => {
-                console.log('selectedDates', selectedDates);
                 let dateValue = null;
                 if (selectedDates.length > 0 && selectedDates[0]) {
                     if (selectedDates.length > 1 && selectedDates[1]) {

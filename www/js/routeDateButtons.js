@@ -37,7 +37,6 @@ const routeDateButtons = {
     document.querySelectorAll('.route-container').forEach((routeDiv, index) => {
         const routeNumber = parseInt(routeDiv.getAttribute('data-route-number'));
         const routeDate = appState.routeDates[routeNumber];
-        //console.log('routeDate: ',routeDate);
         if (routeDate) {
             let monthName;
             if (routeDate === 'any') {

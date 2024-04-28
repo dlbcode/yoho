@@ -36,7 +36,6 @@ async function initMapFunctions() {
             const [key, value] = pair.split(':');
             const routeNumber = parseInt(key, 10); 
             const date = value;
-            console.log('map.js initMapFunctions routeDatesParam', routeNumber, date);
             routeDates.push({ routeNumber: routeNumber, date: date });
         });
     }
