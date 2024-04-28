@@ -38,15 +38,9 @@ function initializeSlider(sliderId) {
           'max': 24
       },
       step: 0.5,  // Setting the step to 0.5 hours, which is 30 minutes
-      tooltips: [true, true]  // Enable tooltips for both handles
+      tooltips: [true, true],  // Enable tooltips for both handles
+      format: { to: formatTime, from: Number }
     });
-
-    // Apply custom styles to handles and tooltips
-    const handles = sliderElement.querySelectorAll('.noUi-handle');
-    handles.forEach(handle => handle.classList.add('slider-handle'));
-
-    const tooltips = sliderElement.querySelectorAll('.noUi-tooltip');
-    tooltips.forEach(tooltip => tooltip.classList.add('noUi-tooltip'));
 
     // Ensure the time-display element is created and added to the DOM
     let timeDisplay = document.querySelector('.time-display');
@@ -56,16 +50,29 @@ function initializeSlider(sliderId) {
       sliderElement.parentElement.insertBefore(timeDisplay, sliderElement);
     }
 
-    sliderElement.noUiSlider.on('slide', function (values, handle) {
-      let tooltip = sliderElement.querySelector('.noUi-tooltip');
-      if (tooltip) {
-        tooltip.style.top = '-25px';  // Position the tooltip above the handle
-        tooltip.style.left = '-10px';  // Center it slightly
-        tooltip.textContent = formatTime(values[handle]);  // Update tooltip content dynamically
-      }
+    sliderElement.noUiSlider.on('start', function () {
+      // Show tooltips when a handle is clicked or touched
+      const tooltips = sliderElement.querySelectorAll('.noUi-tooltip');
+      tooltips.forEach(tooltip => {
+        tooltip.style.display = 'block';
+      });
+    });
+
+    sliderElement.noUiSlider.on('end', function () {
+      // Hide tooltips when a handle is released
+      const tooltips = sliderElement.querySelectorAll('.noUi-tooltip');
+      tooltips.forEach(tooltip => {
+        tooltip.style.display = 'none';
+      });
     });
 
     sliderElement.noUiSlider.on('update', function (values, handle) {
+      // Apply custom styles to handles
+      const handles = sliderElement.querySelectorAll('.noUi-handle');
+      handles.forEach(handle => {
+        handle.classList.add('slider-handle');
+      });
+
       if (timeDisplay) {  // Check if timeDisplay exists before updating
         const startTime = formatTime(values[0]);
         const endTime = formatTime(values[1]);
