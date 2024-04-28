@@ -3,11 +3,9 @@ function createDateFilterPopup(column) {
   filterPopup.id = `${column}DateFilterPopup`;
   filterPopup.className = 'date-filter-popup';
 
-  const content = `<div class="popup-content">Filter settings for ${column}</div>`;
+  // Simplified content, no longer adding extra descriptions
   if (column === 'departure' || column === 'arrival') {
-    filterPopup.innerHTML = `${content}<div id="${column}Slider"></div>`; // Unique ID for each slider
-  } else {
-    filterPopup.innerHTML = content;
+    filterPopup.innerHTML = `<div id="${column}Slider"></div>`; // Only include the slider div
   }
   document.body.appendChild(filterPopup);
   return filterPopup;
@@ -33,12 +31,14 @@ function initializeSlider(sliderId) {
   const sliderElement = document.getElementById(sliderId);
   if (sliderElement) {
     noUiSlider.create(sliderElement, {
-      start: [0, 24],  // Set to cover the full day from 0 hours to 24 hours
+      start: [0, 24],  // Covering the full day from 0 hours to 24 hours
       connect: true,
       range: {
           'min': 0,
           'max': 24
-      }
+      },
+      step: 0.5,  // Setting the step to 0.5 hours, which is 30 minutes
+      // Removed the pips configuration to eliminate markers
     });
 
     // Creating elements to display the selected time range
@@ -60,7 +60,7 @@ function initializeSlider(sliderId) {
 function formatTime(value) {
   const hours = Math.floor(value);
   const minutes = Math.floor((value % 1) * 60);
-  return `${hours}:${minutes < 10 ? '0' : ''}${minutes}`;
+  return `${hours}:${minutes < 10 ? '0' + minutes : minutes}`;
 }
 
 function filterTableByTime(startTime, endTime, columnIndex) {

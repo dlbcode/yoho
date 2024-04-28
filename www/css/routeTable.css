@@ -54,16 +54,17 @@
 }
 
 .date-filter-popup {
-  position: absolute; /* Ensure this is absolute */
-  z-index: 1000; /* Make sure it's above other content */
-  background-color: #333; /* For visibility */
-  border: 1px solid #555; /* To see the edges */
-  padding: 10px; /* For better content spacing */
+  position: absolute;
+  z-index: 1000;
+  background-color: #333;
+  border: 1px solid #555;
+  padding: 10px;
+  width: 200px;
 }
 
 .time-display {
   font-size: 14px;
-  color: #FFF;
+  color: #ddd;
   padding: 5px;
   background-color: #333;
   border-radius: 5px;
