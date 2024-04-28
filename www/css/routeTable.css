@@ -72,7 +72,25 @@
   margin-bottom: 5px;
 }
 
+/* Custom Handle Style */
+.slider-handle {
+  background-color: #007bff; /* Blue background */
+  width: 10px; /* Width of the handle */
+  height: 10px; /* Height of the handle */
+  border-radius: 50%; /* Circular handle */
+  border: none; /* No border */
+  top: -2px; /* Adjust vertical alignment to center with the slider bar */
+  cursor: pointer; /* Cursor indicates that the handle can be moved */
+  box-shadow: none; /* Remove any shadow effects */
+}
+
+.slider-handle::before,
+.slider-handle::after {
+    content: none; /* This will remove pseudo-elements that may be adding lines */
+}
+
 .noUi-tooltip {
+  display: none;
   background-color: #00bbff;
   color: #222;
   font-size: 12px;

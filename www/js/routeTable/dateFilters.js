@@ -44,6 +44,19 @@ function initializeSlider(sliderId) {
       }
     });
 
+    const handles = sliderElement.querySelectorAll('.noUi-handle');
+    handles.forEach(handle => {
+      handle.classList.add('slider-handle');  // Apply the custom class
+
+      // Add event listeners to handle interactions
+      handle.addEventListener('mousedown', function() {
+        this.querySelector('.noUi-tooltip').style.display = 'block';  // Show tooltip on mouse down
+      });
+      handle.addEventListener('touchstart', function() {
+        this.querySelector('.noUi-tooltip').style.display = 'block';  // Show tooltip on touch start
+      });
+    });
+
     let timeDisplay = document.querySelector('.time-display');
     if (!timeDisplay) {
       timeDisplay = document.createElement('div');
