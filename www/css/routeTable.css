@@ -54,30 +54,11 @@
 }
 
 .date-filter-popup {
-  position: absolute;
-  z-index: 1000;
-  background-color: #333;
-  border: 1px solid #525252;
-  padding: 5px;
-  border-radius: 5px;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-  display: flex;
-  flex-direction: row; /* Adjusts direction to row for container alignment */
-  flex-wrap: wrap;
-  justify-content: space-between;
-}
-
-.date-filter-container {
-  display: flex;
-  flex-direction: column; /* Stacks label and select vertically */
-  align-items: flex-start; /* Aligns items to the start of the container */
-}
-
-.date-filter {
-  width: auto;
-  padding: 5px;
-  margin-top: 5px;
-  margin-right: 5px;
+  position: absolute; /* Ensure this is absolute */
+  z-index: 1000; /* Make sure it's above other content */
+  background-color: white; /* For visibility */
+  border: 1px solid black; /* To see the edges */
+  padding: 10px; /* For better content spacing */
 }
 
 /* Ensure the filter icon is correctly positioned within the table header */
@@ -87,10 +68,6 @@
   right: 5px;
   top: 50%;
   transform: translateY(-50%);
-}
-
-.date-filter-popup .date-filter-container label {
-  font-size: 12px;
 }
 
 .route-info-row {
