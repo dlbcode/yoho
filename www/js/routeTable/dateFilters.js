@@ -39,7 +39,14 @@ function initializeSlider(sliderId) {
       },
       step: 0.5,  // Setting the step to 0.5 hours, which is 30 minutes
       tooltips: [true, true],  // Enable tooltips for both handles
-      format: { to: formatTime, from: Number }
+      format: {
+        to: function(value) {  // Ensure tooltips and time display use the same format
+          const hours = Math.floor(value);
+          const minutes = Math.floor((value % 1) * 60);
+          return `${hours}:${minutes < 10 ? '0' + minutes : minutes}`;
+        },
+        from: Number
+      }
     });
 
     // Ensure the time-display element is created and added to the DOM
@@ -67,19 +74,23 @@ function initializeSlider(sliderId) {
     });
 
     sliderElement.noUiSlider.on('update', function (values, handle) {
-      // Apply custom styles to handles
+      console.log("Updating time display with:", values);
+      if (timeDisplay) {
+        timeDisplay.textContent = `${values[0]} – ${values[1]}`;
+      } else {
+        console.error('Time display element not found, creating a new one');
+        timeDisplay = document.createElement('div');
+        timeDisplay.className = 'time-display';
+        sliderElement.parentElement.insertBefore(timeDisplay, sliderElement);
+        timeDisplay.textContent = `${values[0]} – ${values[1]}`;
+      }
+
+      // Ensure slider handles retain their custom styling
       const handles = sliderElement.querySelectorAll('.noUi-handle');
       handles.forEach(handle => {
-        handle.classList.add('slider-handle');
+        handle.classList.add('slider-handle');  // Re-add class for custom styling
       });
 
-      if (timeDisplay) {  // Check if timeDisplay exists before updating
-        const startTime = formatTime(values[0]);
-        const endTime = formatTime(values[1]);
-        timeDisplay.textContent = `${startTime} – ${endTime}`;  // Updating the display
-      } else {
-        console.error('Time display element not found');
-      }
       filterTableByTime(values[0], values[1], sliderId.includes('departure') ? 0 : 1);
     });
   } else {
