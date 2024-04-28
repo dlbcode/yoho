@@ -40,10 +40,8 @@ function initializeSlider(sliderId) {
       step: 0.5,  // Setting the step to 0.5 hours, which is 30 minutes
       tooltips: [true, true],  // Enable tooltips for both handles
       format: {
-        to: function(value) {  // Ensure tooltips and time display use the same format
-          const hours = Math.floor(value);
-          const minutes = Math.floor((value % 1) * 60);
-          return `${hours}:${minutes < 10 ? '0' + minutes : minutes}`;
+        to: function(value) {  // Adjusted to use the updated formatTime function
+          return formatTime(value);
         },
         from: Number
       }
@@ -99,10 +97,14 @@ function initializeSlider(sliderId) {
 }
 
 function formatTime(value) {
-  const hours = Math.floor(value);
+  let hours = Math.floor(value);
   const minutes = Math.floor((value % 1) * 60);
-  return `${hours}:${minutes < 10 ? '0' + minutes : minutes}h`;
+  const ampm = hours >= 12 ? 'PM' : 'AM';
+  hours = hours % 12;
+  hours = hours ? hours : 12; // the hour '0' should be '12'
+  return `${hours}:${minutes < 10 ? '0' + minutes : minutes} ${ampm}`;
 }
+
 
 function filterTableByTime(startTime, endTime, columnIndex) {
   const rows = document.querySelectorAll('.route-info-table tbody tr');
