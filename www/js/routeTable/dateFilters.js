@@ -38,18 +38,34 @@ function initializeSlider(sliderId) {
           'max': 24
       },
       step: 0.5,  // Setting the step to 0.5 hours, which is 30 minutes
-      // Removed the pips configuration to eliminate markers
+      tooltips: [true, true]  // Enable tooltips for both handles
     });
 
-    // Creating elements to display the selected time range
-    const timeDisplay = document.createElement('div');
-    timeDisplay.className = 'time-display';
-    sliderElement.parentElement.insertBefore(timeDisplay, sliderElement);
+    // Ensure the time-display element is created and added to the DOM
+    let timeDisplay = document.querySelector('.time-display');
+    if (!timeDisplay) {
+      timeDisplay = document.createElement('div');
+      timeDisplay.className = 'time-display';
+      sliderElement.parentElement.insertBefore(timeDisplay, sliderElement);
+    }
 
-    sliderElement.noUiSlider.on('update', function (values) {
-      const startTime = formatTime(values[0]);
-      const endTime = formatTime(values[1]);
-      timeDisplay.textContent = `${startTime} – ${endTime}`;  // Updating the display
+    sliderElement.noUiSlider.on('slide', function (values, handle) {
+      let tooltip = sliderElement.querySelector('.noUi-tooltip');
+      if (tooltip) {
+        tooltip.style.top = '-25px';  // Position the tooltip above the handle
+        tooltip.style.left = '-10px';  // Center it slightly
+        tooltip.textContent = formatTime(values[handle]);  // Update tooltip content dynamically
+      }
+    });
+
+    sliderElement.noUiSlider.on('update', function (values, handle) {
+      if (timeDisplay) {  // Check if timeDisplay exists before updating
+        const startTime = formatTime(values[0]);
+        const endTime = formatTime(values[1]);
+        timeDisplay.textContent = `${startTime} – ${endTime}`;  // Updating the display
+      } else {
+        console.error('Time display element not found');
+      }
       filterTableByTime(values[0], values[1], sliderId.includes('departure') ? 0 : 1);
     });
   } else {
@@ -60,7 +76,7 @@ function initializeSlider(sliderId) {
 function formatTime(value) {
   const hours = Math.floor(value);
   const minutes = Math.floor((value % 1) * 60);
-  return `${hours}:${minutes < 10 ? '0' + minutes : minutes}`;
+  return `${hours}:${minutes < 10 ? '0' + minutes : minutes}h`;
 }
 
 function filterTableByTime(startTime, endTime, columnIndex) {
