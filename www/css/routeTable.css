@@ -60,34 +60,40 @@
   border: 1px solid #555;
   padding: 10px;
   width: 200px;
+  height: 80px;
 }
 
 .time-display {
+  position: relative;
+  bottom: 10px;
   font-size: 14px;
   color: #ddd;
   padding: 5px;
   background-color: #333;
   border-radius: 5px;
   text-align: center;
-  margin-bottom: 5px;
+  margin-bottom: 10px;
 }
 
-/* Custom Handle Style */
+#departureSlider {
+  margin-top: 20px; /* Adjust this value as needed */
+}
+
 .slider-handle {
-  background-color: #007bff; /* Blue background */
-  width: 16px !important; /* Width of the handle */
-  height: 16px !important; /* Height of the handle */
-  border-radius: 50%; /* Circular handle */
-  border: none; /* No border */
-  top: -2px; /* Adjust vertical alignment to center with the slider bar */
+  background-color: #007bff;
+  width: 16px !important;
+  height: 16px !important;
+  border-radius: 50%;
+  border: none;
+  top: -2px;
   left: 9px;
-  cursor: pointer; /* Cursor indicates that the handle can be moved */
-  box-shadow: none; /* Remove any shadow effects */
+  cursor: pointer;
+  box-shadow: none;
 }
 
 .slider-handle::before,
 .slider-handle::after {
-    content: none; /* This will remove pseudo-elements that may be adding lines */
+  content: none;
 }
 
 .noUi-target,
@@ -99,16 +105,17 @@
 }
 
 .noUi-connect {
-  height: 8px !important;  /* Set the height of the slider bar */
-  background: #0084e9;  /* Set the color of the slider bar to blue */
+  height: 8px !important;
+  background: #0084e9;
   border: none !important;
 }
 
 .noUi-tooltip {
   display: none;
-  background-color: #00bbff;
+  background-color: #0092c7;
   color: #222;
   font-size: 12px;
+  font-weight: 500;
   padding: 5px 8px;
   border-radius: 4px;
   border: none;
