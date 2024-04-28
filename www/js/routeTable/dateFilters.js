@@ -31,20 +31,11 @@ function initializeSlider(sliderId) {
   const sliderElement = document.getElementById(sliderId);
   if (sliderElement) {
     noUiSlider.create(sliderElement, {
-      start: [0, 24],  // Full day
+      start: [0, 24],  // Covering the full day
       connect: true,
       range: { 'min': 0, 'max': 24 },
-      step: 0.5,
-      tooltips: [true, true]
-    });
-
-    sliderElement.noUiSlider.on('update', function (values, handle) {
-      const tooltips = sliderElement.querySelectorAll('.noUi-tooltip');
-      if (tooltips[handle]) {
-        tooltips[handle].innerHTML = formatTime(values[handle]);
-        tooltips[handle].style.top = '-25px';
-        tooltips[handle].style.left = '-10px';
-      }
+      step: 0.5,  // Half-hour increments
+      tooltips: [true, true]  // Enable tooltips for both handles
     });
 
     let timeDisplay = document.querySelector('.time-display');
@@ -54,10 +45,19 @@ function initializeSlider(sliderId) {
       sliderElement.parentElement.insertBefore(timeDisplay, sliderElement);
     }
 
-    sliderElement.noUiSlider.on('slide', function (values, handle) {
-      const startTime = formatTime(values[0]);
-      const endTime = formatTime(values[1]);
+    // Function to update time display based on slider values
+    function updateTimeDisplay() {
+      const values = sliderElement.noUiSlider.get();
+      const startTime = formatTime(parseFloat(values[0]));
+      const endTime = formatTime(parseFloat(values[1]));
       timeDisplay.textContent = `${startTime} – ${endTime}`;
+    }
+
+    // Initialize with current values
+    updateTimeDisplay();
+
+    sliderElement.noUiSlider.on('update', function (values, handle) {
+      updateTimeDisplay();  // Update on slider move
     });
   } else {
     console.error("Slider element not found!");
@@ -67,7 +67,7 @@ function initializeSlider(sliderId) {
 function formatTime(value) {
   const hours = Math.floor(value);
   const minutes = Math.floor((value % 1) * 60);
-  return `${hours}:${minutes < 10 ? '0' + minutes : minutes}h`;
+  return `${hours}:${minutes < 10 ? '0' + minutes : minutes}`;
 }
 
 document.addEventListener('DOMContentLoaded', function() {
