@@ -63,11 +63,14 @@ function initializeSlider(sliderId) {
       });
     });
 
-    sliderElement.noUiSlider.on('end', function () {
-      // Hide tooltips when a handle is released
-      const tooltips = sliderElement.querySelectorAll('.noUi-tooltip');
-      tooltips.forEach(tooltip => {
-        tooltip.style.display = 'none';
+    // Add blur event handler to hide tooltips when slider loses focus
+    const handles = sliderElement.querySelectorAll('.noUi-handle');
+    handles.forEach(handle => {
+      handle.addEventListener('blur', function () {
+        const tooltips = sliderElement.querySelectorAll('.noUi-tooltip');
+        tooltips.forEach(tooltip => {
+          tooltip.style.display = 'none';
+        });
       });
     });
 
