@@ -3,10 +3,9 @@ function createDateFilterPopup(column) {
   filterPopup.id = `${column}DateFilterPopup`;
   filterPopup.className = 'date-filter-popup';
 
-  // Add slider element directly within the popup for relevant columns
   const content = `<div class="popup-content">Filter settings for ${column}</div>`;
   if (column === 'departure' || column === 'arrival') {
-    filterPopup.innerHTML = `${content}<div id="${column}Slider"></div>`; // Correct the ID to be unique
+    filterPopup.innerHTML = `${content}<div id="${column}Slider"></div>`; // Unique ID for each slider
   } else {
     filterPopup.innerHTML = content;
   }
@@ -34,19 +33,54 @@ function initializeSlider(sliderId) {
   const sliderElement = document.getElementById(sliderId);
   if (sliderElement) {
     noUiSlider.create(sliderElement, {
-        start: [10, 30],
+        start: [0, 24],  // Adjusted to 24-hour range
         connect: true,
         range: {
             'min': 0,
-            'max': 40
+            'max': 24
+        },
+        format: {
+          to: function(value) {
+            return parseFloat(value).toFixed(2); // Keeping two decimals for precision
+          },
+          from: Number
         }
+    });
+
+    sliderElement.noUiSlider.on('update', function (values) {
+      filterTableByTime(values[0], values[1], sliderId.includes('departure') ? 0 : 1);
     });
   } else {
     console.error("Slider element not found!");
   }
 }
 
-// Ensure noUiSlider loads and initializes only when DOM is fully ready
+function filterTableByTime(startTime, endTime, columnIndex) {
+  const rows = document.querySelectorAll('.route-info-table tbody tr');
+  rows.forEach(row => {
+    const timeCell = row.cells[columnIndex].textContent;
+    const timeMatch = timeCell.match(/(\d{1,2}:\d{2}:\d{2}) (AM|PM)/);
+    if (timeMatch) {
+      const timeString = timeMatch[1] + ' ' + timeMatch[2];
+      const timeValue = convertTimeToDecimal(timeString); // Convert to decimal hours
+      const isVisible = timeValue >= parseFloat(startTime) && timeValue <= parseFloat(endTime);
+      row.style.display = isVisible ? '' : 'none';
+    }
+  });
+}
+
+function convertTimeToDecimal(timeStr) {
+  const [time, modifier] = timeStr.split(' ');
+  let [hours, minutes] = time.split(':');
+  hours = parseInt(hours);
+  minutes = parseInt(minutes);
+
+  if (modifier === 'PM' && hours < 12) hours += 12;
+  if (modifier === 'AM' && hours === 12) hours = 0;
+
+  return hours + minutes / 60;
+}
+
 document.addEventListener('DOMContentLoaded', function() {
   loadNoUiSlider();
 });
@@ -55,38 +89,32 @@ function showDateFilterPopup(event, column) {
   let existingPopup = document.getElementById(`${column}DateFilterPopup`);
 
   if (!existingPopup) {
-      existingPopup = createDateFilterPopup(column);
+    existingPopup = createDateFilterPopup(column);
   }
-
-  // Toggle visibility and ensure it's visible before positioning
   existingPopup.classList.toggle('hidden', false);
 
   requestAnimationFrame(() => {
-      // Ensure the popup is visible when getting its dimensions
-      if (!existingPopup.classList.contains('hidden')) {
-          const icon = event.target.closest('.filterIcon');
-          if (icon) {
-              const rect = icon.getBoundingClientRect();
-              existingPopup.style.position = 'absolute';
-              existingPopup.style.left = `${rect.left + window.scrollX}px`;
-              existingPopup.style.top = `${rect.top + window.scrollY - existingPopup.offsetHeight - 5}px`; // Adjusted to be 5px above the icon
-          }
-
-          // Initialize the slider only if for 'departure' or 'arrival'
-          if (column === 'departure' || column === 'arrival') {
-              initializeSlider(`${column}Slider`);
-          }
+    if (!existingPopup.classList.contains('hidden')) {
+      const icon = event.target.closest('.filterIcon');
+      if (icon) {
+        const rect = icon.getBoundingClientRect();
+        existingPopup.style.position = 'absolute';
+        existingPopup.style.left = `${rect.left + window.scrollX}px`;
+        existingPopup.style.top = `${rect.top + window.scrollY - existingPopup.offsetHeight - 5}px`;
       }
+      if (column === 'departure' || column === 'arrival') {
+        initializeSlider(`${column}Slider`);
+      }
+    }
   });
 }
 
-// Global click listener to hide popup if click occurred outside
 document.addEventListener('click', function(event) {
   const datePopups = document.querySelectorAll('.date-filter-popup');
   datePopups.forEach(popup => {
-      if (!popup.contains(event.target) && !event.target.closest('.filterIcon')) {
-          popup.classList.add('hidden');
-      }
+    if (!popup.contains(event.target) && !event.target.closest('.filterIcon')) {
+      popup.classList.add('hidden');
+    }
   });
 });
 

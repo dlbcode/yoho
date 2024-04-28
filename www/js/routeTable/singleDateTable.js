@@ -139,6 +139,7 @@ function buildSingleDateTable(routeIndex) {
             if (dateFilterPopup) {
               dateFilterPopup.classList.toggle('hidden');
             } else {
+              console.log('calling showDateFilterPopup with data:', data);
               showDateFilterPopup(event, column);
             }
           }
