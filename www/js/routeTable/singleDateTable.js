@@ -132,10 +132,39 @@ function buildSingleDateTable(routeIndex) {
         icon.addEventListener('click', function(event) {
             event.stopPropagation();
             const column = this.getAttribute('data-column');
-            console.log('Filtering column:', column, 'Data:', data);
-            createFilterPopup(column, event, data );
+            if (!column) {
+                console.error('Column attribute is missing on the icon:', this);
+                return;
+            }
+            console.log('Filtering column:', column);
+            const data = fetchDataForColumn(column);
+            console.log('Data for column:', data)
+            if (data) {
+                createFilterPopup(column, data, event);
+            } else {
+                console.error('Failed to fetch data for column:', column);
+            }
         });
-    });        
+    });
+ 
+    function fetchDataForColumn(column) {
+        // Replace with actual data fetching logic
+        switch (column) {
+            case 'price':
+                return {
+                    min: 10,
+                    max: 1000
+                };
+            case 'departure':
+                return {
+                    min: 0,
+                    max: 24
+                };
+            default:
+                console.error('Unsupported column:', column);
+                return null;
+        }
+    }        
 
       document.querySelectorAll('.route-info-table tbody tr').forEach((row, index) => {
         row.addEventListener('click', function() {

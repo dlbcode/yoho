@@ -2,7 +2,7 @@
 import { appState } from '../stateManager.js';  // Assuming state manager handles global state
 import { logFilterState } from './tableFilter.js';
 
-export function createFilterPopup(column, event) {
+export function createFilterPopup(column, data, event) {
     const existingPopup = document.getElementById(`${column}FilterPopup`);
     if (existingPopup) {
         existingPopup.classList.toggle('hidden');
@@ -12,12 +12,13 @@ export function createFilterPopup(column, event) {
     const filterPopup = document.createElement('div');
     filterPopup.id = `${column}FilterPopup`;
     filterPopup.className = 'filter-popup';
-    filterPopup.style.width = '200px'; // Set width
-    filterPopup.style.height = '80px'; // Set height
-    filterPopup.style.position = 'absolute';
     document.body.appendChild(filterPopup);
 
-    const data = determineDataByColumn(column);
+    if (!data) {
+        console.error('No data provided for filtering:', column);
+        return; // Do not proceed if no data is provided
+    }
+
     positionPopup(filterPopup, event);
     initializeSlider(filterPopup, column, data);
 }
