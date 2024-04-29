@@ -1,5 +1,6 @@
 // Importing necessary functionality
 import { appState } from '../stateManager.js';  // Assuming state manager handles global state
+import { logFilterState } from './tableFilter.js';
 
 export function createFilterPopup(column, type, data, event) {
     const existingPopup = document.getElementById(`${column}FilterPopup`);
@@ -37,28 +38,71 @@ function initializeSlider(popup, column, type, data) {
     slider.id = `${column}Slider`;
     popup.appendChild(slider);
 
-    // Slider settings without wNumb, using noUiSlider's format option
-    const sliderSettings = {
-        start: [type === 'range' ? data.min : data.median], // For a single handle use a median or any starting value
-        connect: type === 'range' ? [true, false] : [true, false],
-        range: {
-            'min': data.min,
-            'max': data.max
-        },
-        format: {
-            to: function(value) {
-                return `${column === 'price' ? '$' : ''}${Math.round(value)}`;
+    let sliderSettings;
+    if (column === 'departure' || column === 'arrival') {
+        sliderSettings = {
+            start: [data.minTime || 0, data.maxTime || 24],
+            connect: true,
+            range: {
+                'min': 0,
+                'max': 24
             },
-            from: function(value) {
-                return Number(value.replace('$', ''));
+            step: 0.5,
+            tooltips: true,
+            format: {
+                to: function(value) {
+                    const hours = Math.floor(value);
+                    const minutes = Math.floor((value % 1) * 60);
+                    return `${hours}:${minutes < 10 ? '0' + minutes : minutes}`;
+                },
+                from: function(value) {
+                    return parseFloat(value);
+                }
             }
+        };
+    } else if (column === 'price') {
+        // Ensure that data has the required properties before using them
+        if (data && data.hasOwnProperty('median') && data.hasOwnProperty('min') && data.hasOwnProperty('max')) {
+            sliderSettings = {
+                start: [data.median],
+                connect: 'lower',
+                range: {
+                    'min': data.min,
+                    'max': data.max
+                },
+                step: 1,
+                tooltips: true,
+                format: {
+                    to: function(value) {
+                        return `$${Math.round(value)}`;
+                    },
+                    from: function(value) {
+                        return Number(value.replace('$', ''));
+                    }
+                }
+            };
+        } else {
+            console.error('Data object missing required properties for price slider:', data);
+            return; // Exit function if data is not correct
         }
-    };
+    }
 
-    noUiSlider.create(slider, sliderSettings);
+    if (sliderSettings) {
+        noUiSlider.create(slider, sliderSettings);
+    } else {
+        console.error('Slider settings not defined due to missing or incorrect data');
+    }
 
-    slider.noUiSlider.on('update', function (values, handle) {
-        appState.filterState[column] = { value: parseFloat(values[handle].replace('$', '')) };
-        // Implement a callback or event dispatch to reapply filters
+    // Update global filter state on slider update
+    slider.noUiSlider.on('update', function(values, handle) {
+        if (column === 'price') {
+            // For price, we just use one value as it's a threshold slider
+            appState.filterState[column] = { threshold: parseFloat(values[handle].replace('$', '')) };
+        } else {
+            // For time, keep track of both start and end
+            appState.filterState[column] = { start: parseFloat(values[0]), end: parseFloat(values[1]) };
+        }
+        // Assuming there's a function to reapply filters based on the updated state
+        logFilterState(); // Log the current filter state, assuming you have such a function
     });
 }
