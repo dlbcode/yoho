@@ -148,25 +148,24 @@ function buildSingleDateTable(routeIndex) {
     });
  
     function fetchDataForColumn(column) {
-        // Replace with actual data fetching logic
-        switch (column) {
+          switch (column) {
             case 'price':
                 return {
                     min: 10,
                     max: 1000,
                     median: 505
                 };
-            case 'departure':
-                return {
-                    min: 0,
-                    max: 24,
-                    median: 12
-                };
-            default:
-                console.error('Unsupported column:', column);
-                return null;
-        }
-    }        
+              case 'departure':
+                  return {
+                      min: 0,
+                      max: 24,
+                      median: 12
+                  };
+              default:
+                  console.error('Unsupported column:', column);
+                  return null;
+          }
+      }        
 
       document.querySelectorAll('.route-info-table tbody tr').forEach((row, index) => {
         row.addEventListener('click', function() {
