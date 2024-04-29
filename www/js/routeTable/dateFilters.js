@@ -40,20 +40,11 @@ function initializeSlider(sliderId) {
       step: 0.5,  // Setting the step to 0.5 hours, which is 30 minutes
       tooltips: [true, true],  // Enable tooltips for both handles
       format: {
-to: function(value) {
-  let hours = Math.floor(value);
-  const minutes = Math.floor((value % 1) * 60);
-  let ampm = hours >= 12 ? 'PM' : 'AM';
-  hours = hours % 12 || 12;
-
-  // Handling for the unique case of 24:00, showing as 12 AM
-  if (value === 24) {
-    hours = 12;
-    ampm = 'AM';
-  }
-
-  return `${hours}:${minutes < 10 ? '0' + minutes : minutes} ${ampm}`;
-
+        to: function(value) {  // Ensure tooltips and time display use the same format
+          const hours = Math.floor(value);
+          const minutes = Math.floor((value % 1) * 60);
+          return `${hours}:${minutes < 10 ? '0' + minutes : minutes}`;
+        },
         from: Number
       }
     });
