@@ -2,7 +2,7 @@
 import { appState } from '../stateManager.js';  // Assuming state manager handles global state
 import { logFilterState } from './tableFilter.js';
 
-export function createFilterPopup(column, type, data, event) {
+export function createFilterPopup(column, event) {
     const existingPopup = document.getElementById(`${column}FilterPopup`);
     if (existingPopup) {
         existingPopup.classList.toggle('hidden');
@@ -17,10 +17,31 @@ export function createFilterPopup(column, type, data, event) {
     filterPopup.style.position = 'absolute';
     document.body.appendChild(filterPopup);
 
-    // Position the popup correctly using the event from the click
+    const data = determineDataByColumn(column);
     positionPopup(filterPopup, event);
+    initializeSlider(filterPopup, column, data);
+}
 
-    initializeSlider(filterPopup, column, type, data);
+function determineDataByColumn(column) {
+    // Assuming data for times are converted to decimal and managed in appState
+    switch(column) {
+        case 'price':
+            return {
+                min: Math.min(...appState.priceData),
+                max: Math.max(...appState.priceData),
+                median: (Math.min(...appState.priceData) + Math.max(...appState.priceData)) / 2
+            };
+        case 'departure':
+        case 'arrival':
+            // Assuming times are converted from specific data entries to decimal and managed in appState
+            return {
+                minTime: 0,
+                maxTime: 24,
+                medianTime: 12
+            };
+        default:
+            return { min: 0, max: 100, median: 50 }; // Default or error handling
+    }
 }
 
 function positionPopup(popup, event) {
@@ -93,16 +114,13 @@ function initializeSlider(popup, column, type, data) {
         console.error('Slider settings not defined due to missing or incorrect data');
     }
 
-    // Update global filter state on slider update
-    slider.noUiSlider.on('update', function(values, handle) {
-        if (column === 'price') {
-            // For price, we just use one value as it's a threshold slider
-            appState.filterState[column] = { threshold: parseFloat(values[handle].replace('$', '')) };
-        } else {
-            // For time, keep track of both start and end
-            appState.filterState[column] = { start: parseFloat(values[0]), end: parseFloat(values[1]) };
-        }
-        // Assuming there's a function to reapply filters based on the updated state
-        logFilterState(); // Log the current filter state, assuming you have such a function
-    });
+    if (slider && slider.noUiSlider) {
+        slider.noUiSlider.on('update', function(values, handle) {
+            appState.filterState[column] = { value: parseFloat(values[handle].replace('$', '')) };
+            logFilterState(); // Log the current filter state
+        });
+    } else {
+        console.error('Failed to create slider for column:', column);
+    }
+    
 }
