@@ -150,11 +150,22 @@ function buildSingleDateTable(routeIndex) {
     function fetchDataForColumn(column) {
       switch (column) {
           case 'price':
-              return {
-                  min: 10,
-                  max: 1000,
-                  median: 505
-              };
+              const priceCells = document.querySelectorAll('.route-info-table tbody tr td:nth-child(' + (getColumnIndex('price') + 1) + ')');
+              const prices = Array.from(priceCells).map(cell => {
+                  const priceText = cell.textContent.replace(/[^\d.]/g, ''); // Remove any non-numeric characters, including the dollar sign
+                  return parseFloat(priceText);
+              }).filter(price => !isNaN(price)); // Ensure only valid numbers are included
+  
+              if (prices.length === 0) {
+                  console.error('No valid prices found in the column');
+                  return { min: 0, max: 0, median: 0 }; // Return default or error values if no prices are found
+              }
+  
+              const min = Math.min(...prices);
+              const max = Math.max(...prices);
+              const median = calculateMedian(prices); // Calculate median using a helper function
+              return { min, max, median };
+  
           case 'departure':
           case 'arrival':
               return {
@@ -162,13 +173,38 @@ function buildSingleDateTable(routeIndex) {
                   max: 24,
                   median: 12
               };
+  
           default:
               console.error('Unsupported column:', column);
               return null;
       }
   }
-         
-
+  
+  function getColumnIndex(columnIdentifier) {
+      const columnMap = {
+          'departure': 0,
+          'arrival': 1,
+          'price': 2,
+          'airlines': 3,
+          'direct': 4,
+          'stops': 5,
+          'layovers': 6,
+          'duration': 7,
+          'route': 8
+      };
+      return columnMap[columnIdentifier] || -1;
+  }
+  
+  function calculateMedian(values) {
+      values.sort((a, b) => a - b);
+      const half = Math.floor(values.length / 2);
+      if (values.length % 2) {
+          return values[half];
+      } else {
+          return (values[half - 1] + values[half]) / 2.0;
+      }
+  }
+    
       document.querySelectorAll('.route-info-table tbody tr').forEach((row, index) => {
         row.addEventListener('click', function() {
           const routeIdString = this.getAttribute('data-route-id');
