@@ -9,17 +9,21 @@ function applyFilters() {
     const rows = table.querySelectorAll('tbody tr');
 
     rows.forEach(row => {
-        const departure = parseTime(row.cells[getColumnIndex('departure')].textContent);
-        const arrival = parseTime(row.cells[getColumnIndex('arrival')].textContent);
-        const price = parseFloat(row.cells[getColumnIndex('price')].textContent.replace(/[^\d.]/g, ''));
+        const departureCell = row.cells[getColumnIndex('departure')];
+        const arrivalCell = row.cells[getColumnIndex('arrival')];
+        const priceCell = row.cells[getColumnIndex('price')];
+
+        const departure = departureCell ? parseTime(departureCell.textContent) : null;
+        const arrival = arrivalCell ? parseTime(arrivalCell.textContent) : null;
+        const price = priceCell ? parseFloat(priceCell.textContent.replace(/[^0-9.]+/g, "")) : null;
 
         const departureFilter = appState.filterState.departure;
         const arrivalFilter = appState.filterState.arrival;
         const priceFilter = appState.filterState.price;
 
-        const isDepartureMatch = departure >= departureFilter.start && departure <= departureFilter.end;
-        const isArrivalMatch = arrival >= arrivalFilter.start && arrival <= arrivalFilter.end;
-        const isPriceMatch = price === priceFilter.value;
+        const isDepartureMatch = departure !== null && departure >= departureFilter.start && departure <= departureFilter.end;
+        const isArrivalMatch = arrival !== null && arrival >= arrivalFilter.start && arrival <= arrivalFilter.end;
+        const isPriceMatch = price !== null && price === priceFilter.value;
 
         if (isDepartureMatch && isArrivalMatch && isPriceMatch) {
             row.style.display = ''; // Show row
@@ -27,6 +31,14 @@ function applyFilters() {
             row.style.display = 'none'; // Hide row
         }
     });
+}
+
+function parseTime(timeStr) {
+    const time = timeStr.split(', ')[1].split(' ')[1];  // Assumes format "Day Month/Date/Year, Time AM/PM"
+    const parts = time.split(':');
+    const hours = parseInt(parts[0]) + (time.includes('PM') && parseInt(parts[0]) < 12 ? 12 : 0);
+    const minutes = parseInt(parts[1].substring(0, 2));
+    return hours * 60 + minutes; // Convert time to minutes since midnight for easier comparison
 }
 
 function getColumnIndex(columnIdentifier) {
@@ -41,12 +53,7 @@ function getColumnIndex(columnIdentifier) {
         'duration': 7,
         'route': 8
     };
-    return columnMap[columnIdentifier] || -1;
-}
-
-function parseTime(timeStr) {
-    const parts = timeStr.split(':');
-    return parseInt(parts[0]) * 60 + parseInt(parts[1]); // Convert time to minutes since midnight for easier comparison
+    return columnMap[columnIdentifier] || -1; // Default to -1 if identifier not found
 }
 
 export { logFilterState, applyFilters };
