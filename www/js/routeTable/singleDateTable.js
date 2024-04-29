@@ -153,12 +153,14 @@ function buildSingleDateTable(routeIndex) {
             case 'price':
                 return {
                     min: 10,
-                    max: 1000
+                    max: 1000,
+                    median: 505
                 };
             case 'departure':
                 return {
                     min: 0,
-                    max: 24
+                    max: 24,
+                    median: 12
                 };
             default:
                 console.error('Unsupported column:', column);
