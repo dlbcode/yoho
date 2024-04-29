@@ -44,11 +44,12 @@ function initializeSlider(sliderId) {
       }
     });
 
-    // Ensure the time-display element is created and added to the DOM
-    let timeDisplay = document.querySelector('.time-display');
+    const column = sliderId.replace('Slider', ''); // Extracts 'departure' or 'arrival' from the ID
+    // Ensure the time-display element is created and added to the DOM with a unique class based on the column
+    let timeDisplay = document.querySelector(`.time-display-${column}`);
     if (!timeDisplay) {
       timeDisplay = document.createElement('div');
-      timeDisplay.className = 'time-display';
+      timeDisplay.className = `time-display time-display-${column}`;
       sliderElement.parentElement.insertBefore(timeDisplay, sliderElement);
     }
 
@@ -61,7 +62,7 @@ function initializeSlider(sliderId) {
     });
 
    // Add blur event handler to hide tooltips when slider loses focus
-  const handles = sliderElement.querySelectorAll('.noUi-handle');
+    const handles = sliderElement.querySelectorAll('.noUi-handle');
     handles.forEach((handle, index) => {
       handle.addEventListener('blur', function () {
         // Delay the check until after the new handle has been focused
@@ -78,60 +79,69 @@ function initializeSlider(sliderId) {
         }, 0);
       });
     });
-    
-    function formatTo12Hour(value) {
-      if (value === 24 || value === 0) { // Explicitly handle the midnight case
-        return "12:00 AM"; // 24:00 or 0 should be displayed as 12:00 AM
-      }
-    
-      let hours = Math.floor(value);
-      let decimalPart = value % 1;
-      const minutes = Math.floor(decimalPart * 60);
-      const ampm = hours >= 12 ? 'PM' : 'AM';
-      hours = hours % 12;
-      hours = hours ? hours : 12; // Adjust '0' hour to '12' for 12-hour format
-      return `${hours}:${minutes < 10 ? '0' + minutes : minutes} ${ampm}`;
-    }
-    
-    function convertToDecimalHours(value) {
-      if (typeof value === "string" && value.includes(':')) {
-        let parts = value.split(':');
-        let hours = parseInt(parts[0], 10);
-        let minutes = parseInt(parts[1], 10);
-        return hours + (minutes / 60);
-      }
-      return parseFloat(value); // Fallback to handle already correct decimal values
-    }
-    
+
     sliderElement.noUiSlider.on('update', function (values, handle) {
-      const formattedValues = values.map(value => {
-        value = convertToDecimalHours(value); // Convert to decimal hours if needed
-    
-        return formatTo12Hour(value); // Format to 12-hour display
-      });
-    
+      const formattedValues = values.map(value => formatTo12Hour(convertToDecimalHours(value)));
       console.log("Updating time display with formatted values:", formattedValues);
-    
       if (timeDisplay) {
         timeDisplay.textContent = `${formattedValues[0]} – ${formattedValues[1]}`;
-      } else {
-        console.error('Time display element not found, creating a new one');
-        timeDisplay = document.createElement('div');
-        timeDisplay.className = 'time-display';
-        sliderElement.parentElement.insertBefore(timeDisplay, sliderElement);
-        timeDisplay.textContent = `${formattedValues[0]} – ${formattedValues[1]}`;
       }
-    
-      // Ensure slider handles retain their custom styling
-      const handles = sliderElement.querySelectorAll('.noUi-handle');
-      handles.forEach(handle => {
-        handle.classList.add('slider-handle');  // Re-add class for custom styling
-      });
-    
-      filterTableByTime(values[0], values[1], sliderId.includes('departure') ? 0 : 1);
     });
+
+function formatTo12Hour(value) {
+  if (value === 24 || value === 0) {
+    return "12:00 AM";
   }
-}    
+  let hours = Math.floor(value);
+  let decimalPart = value % 1;
+  const minutes = Math.floor(decimalPart * 60);
+  const ampm = hours >= 12 ? 'PM' : 'AM';
+  hours = hours % 12;
+  hours = hours ? hours : 12;
+  return `${hours}:${minutes < 10 ? '0' + minutes : minutes} ${ampm}`;
+}
+
+function convertToDecimalHours(value) {
+  if (typeof value === "string" && value.includes(':')) {
+    let parts = value.split(':');
+    let hours = parseInt(parts[0], 10);
+    let minutes = parseInt(parts[1], 10);
+    return hours + (minutes / 60);
+  }
+  return parseFloat(value);
+}
+    
+  sliderElement.noUiSlider.on('update', function (values, handle) {
+    const formattedValues = values.map(value => {
+      value = convertToDecimalHours(value); // Convert to decimal hours if needed
+  
+      return formatTo12Hour(value); // Format to 12-hour display
+    });
+  
+    console.log("Updating time display with formatted values:", formattedValues);
+  
+    if (timeDisplay) {
+      timeDisplay.textContent = `${formattedValues[0]} – ${formattedValues[1]}`;
+    } else {
+      console.error('Time display element not found, creating a new one');
+      timeDisplay = document.createElement('div');
+      timeDisplay.className = 'time-display';
+      sliderElement.parentElement.insertBefore(timeDisplay, sliderElement);
+      timeDisplay.textContent = `${formattedValues[0]} – ${formattedValues[1]}`;
+    }
+  
+    // Ensure slider handles retain their custom styling
+    const handles = sliderElement.querySelectorAll('.noUi-handle');
+    handles.forEach(handle => {
+      handle.classList.add('slider-handle');  // Re-add class for custom styling
+    });
+  
+    filterTableByTime(values[0], values[1], sliderId.includes('departure') ? 0 : 1);
+  });
+  }
+}
+ 
+    
 
 function filterTableByTime(startTime, endTime, columnIndex) {
   const rows = document.querySelectorAll('.route-info-table tbody tr');
