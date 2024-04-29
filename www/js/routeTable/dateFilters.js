@@ -101,12 +101,6 @@ function initializeSlider(sliderId) {
   }
 }
 
-function formatTime(value) {
-  const hours = Math.floor(value);
-  const minutes = Math.floor((value % 1) * 60);
-  return `${hours}:${minutes < 10 ? '0' + minutes : minutes}h`;
-}
-
 function filterTableByTime(startTime, endTime, columnIndex) {
   const rows = document.querySelectorAll('.route-info-table tbody tr');
   rows.forEach(row => {
