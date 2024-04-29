@@ -99,10 +99,14 @@ function initializeSlider(popup, column, data) {
     }
 
     if (slider && slider.noUiSlider) {
-        slider.noUiSlider.on('update', function(values, handle) {
-            appState.filterState[column] = { value: parseFloat(values[handle].replace('$', '')) };
+        slider.noUiSlider.on('update', function(values) {
+            // Store both start and end values in the app state for range sliders
+            appState.filterState[column] = {
+                start: parseFloat(values[0].replace('$', '')),
+                end: parseFloat(values[1].replace('$', ''))
+            };
             logFilterState(); // Log the current filter state
-        });
+        });        
     } else {
         console.error('Failed to create slider for column:', column);
     }
