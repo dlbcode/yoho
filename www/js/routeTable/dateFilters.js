@@ -1,3 +1,23 @@
+// Global state to store filter values
+let filterStates = { departure: [0, 24], arrival: [0, 24] };  // Default to full day
+
+// Function to apply filter based on stored states
+function applyCombinedFilter() {
+    const rows = document.querySelectorAll('.route-info-table tbody tr');
+    rows.forEach(row => {
+        const departureTime = convertTimeToDecimal(row.cells[0].textContent);
+        const arrivalTime = convertTimeToDecimal(row.cells[1].textContent);
+        const departureVisible = departureTime >= filterStates.departure[0] && departureTime <= filterStates.departure[1];
+        const arrivalVisible = arrivalTime >= filterStates.arrival[0] && arrivalTime <= filterStates.arrival[1];
+        row.style.display = (departureVisible && arrivalVisible) ? '' : 'none';
+    });
+}
+
+// Modify the slider update callback to update the filter state and reapply the filter
+function updateFilter(column, values) {
+    filterStates[column] = values.map(convertToDecimalHours);
+    applyCombinedFilter();
+}
 function createDateFilterPopup(column) {
   const filterPopup = document.createElement('div');
   filterPopup.id = `${column}DateFilterPopup`;
