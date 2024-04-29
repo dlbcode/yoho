@@ -3,7 +3,6 @@ function createDateFilterPopup(column) {
   filterPopup.id = `${column}DateFilterPopup`;
   filterPopup.className = 'date-filter-popup';
 
-  // Simplified content, no longer adding extra descriptions
   if (column === 'departure' || column === 'arrival') {
     filterPopup.innerHTML = `<div id="${column}Slider"></div>`; // Only include the slider div
   }
@@ -15,11 +14,7 @@ function loadNoUiSlider() {
   if (!window.noUiSlider) {
     const script = document.createElement('script');
     script.src = "https://cdn.jsdelivr.net/npm/nouislider/distribute/nouislider.min.js";
-    script.onload = () => {
-        console.log('noUiSlider is loaded and ready to use!');
-    };
     document.head.appendChild(script);
-
     const link = document.createElement('link');
     link.rel = "stylesheet";
     link.href = "https://cdn.jsdelivr.net/npm/nouislider/distribute/nouislider.min.css";
