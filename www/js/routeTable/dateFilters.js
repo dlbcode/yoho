@@ -1,4 +1,6 @@
-const filterState = {
+import { appState } from '../stateManager.js';
+
+appState.filterState = {
   departure: { start: 0, end: 24 },
   arrival: { start: 0, end: 24 }
 };
@@ -133,7 +135,7 @@ function initializeSlider(sliderId) {
       handles.forEach(handle => {
         handle.classList.add('slider-handle');  // Re-add class for custom styling
       });
-      filterState[column] = { start: values[0], end: values[1] };
+      appState.filterState[column] = { start: values[0], end: values[1] };
       filterTableByTime(values[0], values[1], sliderId.includes('departure') ? 0 : 1);
     });
   }
@@ -151,8 +153,8 @@ function filterTableByTime() {
       const arrivalTimeString = arrivalTimeMatch[1] + ' ' + arrivalTimeMatch[2];
       const departureTimeValue = convertTimeToDecimal(departureTimeString); // Convert to decimal hours
       const arrivalTimeValue = convertTimeToDecimal(arrivalTimeString); // Convert to decimal hours
-      const isDepartureTimeVisible = departureTimeValue >= parseFloat(filterState.departure.start) && departureTimeValue <= parseFloat(filterState.departure.end);
-      const isArrivalTimeVisible = arrivalTimeValue >= parseFloat(filterState.arrival.start) && arrivalTimeValue <= parseFloat(filterState.arrival.end);
+      const isDepartureTimeVisible = departureTimeValue >= parseFloat(appState.filterState.departure.start) && departureTimeValue <= parseFloat(appState.filterState.departure.end);
+      const isArrivalTimeVisible = arrivalTimeValue >= parseFloat(appState.filterState.arrival.start) && arrivalTimeValue <= parseFloat(appState.filterState.arrival.end);
       const isVisible = isDepartureTimeVisible && isArrivalTimeVisible;
       row.style.display = isVisible ? '' : 'none';
     }
