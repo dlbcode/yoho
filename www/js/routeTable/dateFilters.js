@@ -128,8 +128,7 @@ function initializeSlider(sliderId) {
         sliderElement.parentElement.insertBefore(timeDisplay, sliderElement);
         timeDisplay.textContent = `${formattedValues[0]} – ${formattedValues[1]}`;
       }
-    
-      // Ensure slider handles retain their custom styling
+
       const handles = sliderElement.querySelectorAll('.noUi-handle');
       handles.forEach(handle => {
         handle.classList.add('slider-handle');  // Re-add class for custom styling
