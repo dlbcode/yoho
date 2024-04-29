@@ -158,20 +158,18 @@ function buildSingleDateTable(routeIndex) {
   
               if (prices.length === 0) {
                   console.error('No valid prices found in the column');
-                  return { min: 0, max: 0, median: 0 }; // Return default or error values if no prices are found
+                  return { min: 0, max: 0 }; // Return default or error values if no prices are found
               }
   
               const min = Math.min(...prices);
               const max = Math.max(...prices);
-              const median = calculateMedian(prices); // Calculate median using a helper function
-              return { min, max, median };
+              return { min, max };
   
           case 'departure':
           case 'arrival':
               return {
                   min: 0,
-                  max: 24,
-                  median: 12
+                  max: 24
               };
   
           default:
@@ -193,18 +191,8 @@ function buildSingleDateTable(routeIndex) {
           'route': 8
       };
       return columnMap[columnIdentifier] || -1;
-  }
-  
-  function calculateMedian(values) {
-      values.sort((a, b) => a - b);
-      const half = Math.floor(values.length / 2);
-      if (values.length % 2) {
-          return values[half];
-      } else {
-          return (values[half - 1] + values[half]) / 2.0;
-      }
-  }
-    
+  }  
+
       document.querySelectorAll('.route-info-table tbody tr').forEach((row, index) => {
         row.addEventListener('click', function() {
           const routeIdString = this.getAttribute('data-route-id');

@@ -66,10 +66,10 @@ function initializeSlider(popup, column, data) {
         };
     } else if (column === 'price') {
         // Ensure that data has the required properties before using them
-        if (data && data.hasOwnProperty('median') && data.hasOwnProperty('min') && data.hasOwnProperty('max')) {
-            console.log('Median:', data.median, 'Min:', data.min, 'Max:', data.max);
+        if (data && data.hasOwnProperty('min') && data.hasOwnProperty('max')) {
+            console.log('Min:', data.min, 'Max:', data.max);
             sliderSettings = {
-                start: [data.median],
+                start: [data.max],
                 connect: 'lower',
                 range: {
                     'min': data.min,
