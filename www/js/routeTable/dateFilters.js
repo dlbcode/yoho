@@ -71,6 +71,20 @@ function initializeSlider(sliderId) {
       });
     });
 
+    function formatTo12Hour(value) {
+      if (value === 24 || value === 0) { // Explicitly handle the midnight case
+        return "12:00 AM"; // 24:00 or 0 should be displayed as 12:00 AM
+      }
+    
+      let hours = Math.floor(value);
+      let decimalPart = value % 1;
+      const minutes = Math.floor(decimalPart * 60);
+      const ampm = hours >= 12 ? 'PM' : 'AM';
+      hours = hours % 12;
+      hours = hours ? hours : 12; // Adjust '0' hour to '12' for 12-hour format
+      return `${hours}:${minutes < 10 ? '0' + minutes : minutes} ${ampm}`;
+    }
+    
     function convertToDecimalHours(value) {
       if (typeof value === "string" && value.includes(':')) {
         let parts = value.split(':');
@@ -83,23 +97,9 @@ function initializeSlider(sliderId) {
     
     sliderElement.noUiSlider.on('update', function (values, handle) {
       const formattedValues = values.map(value => {
-        value = convertToDecimalHours(value); // Ensure value is correctly formatted
+        value = convertToDecimalHours(value); // Convert to decimal hours if needed
     
-        let hours = Math.floor(value);
-        let decimalPart = value % 1;
-        const minutes = Math.floor(decimalPart * 60);
-        const ampm = hours >= 12 ? 'PM' : 'AM';
-        hours = hours % 12;
-        hours = hours ? hours : 12; // Adjust '0' hour to '12' for 12-hour format
-    
-        // Debugging statements to help track down the issue
-        console.log(`Original value: ${value}`);
-        console.log(`Hours: ${hours}`);
-        console.log(`Decimal part: ${decimalPart}`);
-        console.log(`Minutes: ${minutes}`);
-        console.log(`AM/PM: ${ampm}`);
-    
-        return `${hours}:${minutes < 10 ? '0' + minutes : minutes} ${ampm}`;
+        return formatTo12Hour(value); // Format to 12-hour display
       });
     
       console.log("Updating time display with formatted values:", formattedValues);
@@ -122,20 +122,8 @@ function initializeSlider(sliderId) {
     
       filterTableByTime(values[0], values[1], sliderId.includes('departure') ? 0 : 1);
     });
-                
-  } else {
-    console.error("Slider element not found!");
   }
-}
-
-function formatTo12Hour(value) {
-  let hours = Math.floor(value);
-  const minutes = Math.floor((value - hours) * 60); // Ensures that the remainder is properly converted to minutes
-  const ampm = hours >= 12 ? 'PM' : 'AM';
-  hours = hours % 12;
-  hours = hours ? hours : 12; // the hour '0' should be '12'
-  return `${hours}:${minutes < 10 ? '0' + minutes : minutes} ${ampm}`;
-}
+}    
 
 function filterTableByTime(startTime, endTime, columnIndex) {
   const rows = document.querySelectorAll('.route-info-table tbody tr');
