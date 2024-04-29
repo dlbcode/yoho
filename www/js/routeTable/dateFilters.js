@@ -60,17 +60,25 @@ function initializeSlider(sliderId) {
       });
     });
 
-    // Add blur event handler to hide tooltips when slider loses focus
-    const handles = sliderElement.querySelectorAll('.noUi-handle');
-    handles.forEach(handle => {
+   // Add blur event handler to hide tooltips when slider loses focus
+  const handles = sliderElement.querySelectorAll('.noUi-handle');
+    handles.forEach((handle, index) => {
       handle.addEventListener('blur', function () {
-        const tooltips = sliderElement.querySelectorAll('.noUi-tooltip');
-        tooltips.forEach(tooltip => {
-          tooltip.style.display = 'none';
-        });
+        // Delay the check until after the new handle has been focused
+        setTimeout(() => {
+          // Check if the other handle is focused
+          const otherHandle = handles[(index + 1) % handles.length];
+          if (document.activeElement !== otherHandle) {
+            // If the other handle is not focused, hide the tooltips
+            const tooltips = sliderElement.querySelectorAll('.noUi-tooltip');
+            tooltips.forEach(tooltip => {
+              tooltip.style.display = 'none';
+            });
+          }
+        }, 0);
       });
     });
-
+    
     function formatTo12Hour(value) {
       if (value === 24 || value === 0) { // Explicitly handle the midnight case
         return "12:00 AM"; // 24:00 or 0 should be displayed as 12:00 AM
