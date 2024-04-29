@@ -100,13 +100,20 @@ function initializeSlider(popup, column, data) {
 
     if (slider && slider.noUiSlider) {
         slider.noUiSlider.on('update', function(values) {
-            // Store both start and end values in the app state for range sliders
-            appState.filterState[column] = {
-                start: parseFloat(values[0].replace('$', '')),
-                end: parseFloat(values[1].replace('$', ''))
-            };
+            // Check if the slider is for price and handle it accordingly
+            if (column === 'price') {
+                appState.filterState[column] = {
+                    value: parseFloat(values[0].replace('$', ''))
+                };
+            } else {
+                // Ensure both values are available for range sliders
+                appState.filterState[column] = {
+                    start: parseFloat(values[0].replace('$', '')),
+                    end: parseFloat(values[1] ? values[1].replace('$', '') : values[0].replace('$', '')) // Fallback to start if end is not available
+                };
+            }
             logFilterState(); // Log the current filter state
-        });        
+        });               
     } else {
         console.error('Failed to create slider for column:', column);
     }
