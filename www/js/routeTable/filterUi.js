@@ -23,27 +23,6 @@ export function createFilterPopup(column, data, event) {
     initializeSlider(filterPopup, column, data);
 }
 
-function determineDataByColumn(column) {
-    switch(column) {
-        case 'price':
-            return {
-                min: 0,  // Example: real minimum price
-                max: 200,  // Example: real maximum price
-                median: 100  // Example: calculated or average price
-            };
-        case 'departure':
-        case 'arrival':
-            return {
-                minTime: 0,
-                maxTime: 24,
-                medianTime: 12
-            };
-        default:
-            console.error('Invalid column type:', column);
-            return null;  // Ensure to handle this in your slider initialization
-    }
-}
-
 function positionPopup(popup, event) {
     if (!event || !event.target) {
         console.error('Event or event target is undefined in positionPopup.');
