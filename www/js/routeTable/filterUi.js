@@ -20,6 +20,9 @@ export function createFilterPopup(column, data, event) {
     }
 
     positionPopup(filterPopup, event);
+
+    console.log('Data in createFIlterPopup:', data);
+
     initializeSlider(filterPopup, column, data);
 }
 
@@ -33,7 +36,8 @@ function positionPopup(popup, event) {
     popup.style.top = `${iconRect.top + window.scrollY - 90}px`; // Position above the icon
 }
 
-function initializeSlider(popup, column, type, data) {
+function initializeSlider(popup, column, data) {
+    console.log('Data received in initializeSlider:', data);
     const slider = document.createElement('div');
     slider.id = `${column}Slider`;
     popup.appendChild(slider);
@@ -63,6 +67,7 @@ function initializeSlider(popup, column, type, data) {
     } else if (column === 'price') {
         // Ensure that data has the required properties before using them
         if (data && data.hasOwnProperty('median') && data.hasOwnProperty('min') && data.hasOwnProperty('max')) {
+            console.log('Median:', data.median, 'Min:', data.min, 'Max:', data.max);
             sliderSettings = {
                 start: [data.median],
                 connect: 'lower',
