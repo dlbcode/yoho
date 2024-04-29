@@ -129,22 +129,26 @@ function buildSingleDateTable(routeIndex) {
         });
       });
     
-      // Attach event listeners specifically for date filter icons
       document.querySelectorAll('.filterIcon').forEach(icon => {
         icon.addEventListener('click', function(event) {
           event.stopPropagation(); // Prevent the event from bubbling up to the header
           const column = this.getAttribute('data-column');
-          if (column === 'departure' || column === 'arrival') {
-            const dateFilterPopup = document.getElementById(`${column}DateFilterPopup`);
-            if (dateFilterPopup) {
-              dateFilterPopup.classList.toggle('hidden');
-            } else {
-              console.log('calling showDateFilterPopup with data:', data);
-              showDateFilterPopup(event, column);
+          // Hide all other popups
+          document.querySelectorAll('.date-filter-popup').forEach(popup => {
+            if (popup.id !== `${column}DateFilterPopup`) {
+              popup.classList.add('hidden');
             }
+          });
+          // Toggle the current popup
+          const dateFilterPopup = document.getElementById(`${column}DateFilterPopup`);
+          if (dateFilterPopup) {
+            dateFilterPopup.classList.toggle('hidden');
+          } else {
+            console.log('calling showDateFilterPopup with data:', data);
+            showDateFilterPopup(event, column);
           }
         });
-      });
+      });      
        
       document.querySelectorAll('.route-info-table tbody tr').forEach((row, index) => {
         row.addEventListener('click', function() {
