@@ -1,6 +1,6 @@
 // Importing necessary functionality
 import { appState } from '../stateManager.js';  // Assuming state manager handles global state
-import { logFilterState } from './tableFilter.js';
+import { logFilterState, applyFilters } from './tableFilter.js';
 
 export function createFilterPopup(column, data, event) {
     const existingPopup = document.getElementById(`${column}FilterPopup`);
@@ -113,6 +113,7 @@ function initializeSlider(popup, column, data) {
                 };
             }
             logFilterState(); // Log the current filter state
+            applyFilters(); // Apply the filters to the table
         });               
     } else {
         console.error('Failed to create slider for column:', column);
