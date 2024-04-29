@@ -21,7 +21,7 @@ export function createFilterPopup(column, data, event) {
 
     positionPopup(filterPopup, event);
 
-    console.log('Data in createFIlterPopup:', data);
+    console.log('Creating filter popup for:', column, data);
 
     initializeSlider(filterPopup, column, data);
 }
@@ -37,7 +37,6 @@ function positionPopup(popup, event) {
 }
 
 function initializeSlider(popup, column, data) {
-    console.log('Data received in initializeSlider:', data);
     const slider = document.createElement('div');
     slider.id = `${column}Slider`;
     popup.appendChild(slider);
@@ -65,9 +64,7 @@ function initializeSlider(popup, column, data) {
             }
         };
     } else if (column === 'price') {
-        // Ensure that data has the required properties before using them
         if (data && data.hasOwnProperty('min') && data.hasOwnProperty('max')) {
-            console.log('Min:', data.min, 'Max:', data.max);
             sliderSettings = {
                 start: [data.max],
                 connect: 'lower',
