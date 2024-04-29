@@ -23,24 +23,23 @@ export function createFilterPopup(column, event) {
 }
 
 function determineDataByColumn(column) {
-    // Assuming data for times are converted to decimal and managed in appState
     switch(column) {
         case 'price':
             return {
-                min: Math.min(...appState.priceData),
-                max: Math.max(...appState.priceData),
-                median: (Math.min(...appState.priceData) + Math.max(...appState.priceData)) / 2
+                min: 0,  // Example: real minimum price
+                max: 200,  // Example: real maximum price
+                median: 100  // Example: calculated or average price
             };
         case 'departure':
         case 'arrival':
-            // Assuming times are converted from specific data entries to decimal and managed in appState
             return {
                 minTime: 0,
                 maxTime: 24,
                 medianTime: 12
             };
         default:
-            return { min: 0, max: 100, median: 50 }; // Default or error handling
+            console.error('Invalid column type:', column);
+            return null;  // Ensure to handle this in your slider initialization
     }
 }
 

@@ -55,7 +55,7 @@ function buildSingleDateTable(routeIndex) {
       let headerRow = `<tr>
                         <th>Departure <span class="sortIcon" data-column="departure">&#x21C5;</span><img class="filterIcon" data-column="departure" src="/assets/filter-icon.svg" alt="Filter"></th>
                         <th>Arrival <span class="sortIcon" data-column="arrival">&#x21C5;</span><img class="filterIcon" data-column="arrival" src="/assets/filter-icon.svg" alt="Filter"></th>
-                        <th>Price <span class="sortIcon" data-column="price">&#x21C5;</span><img id="priceFilter" class="filterIcon" src="/assets/filter-icon.svg" alt="Filter"></th>
+                        <th>Price <span class="sortIcon" data-column="price">&#x21C5;</span><img id="priceFilter" class="filterIcon" data-column="price" src="/assets/filter-icon.svg" alt="Filter"></th>
                         <th>Airlines <span class="sortIcon" data-column="airlines">&#x21C5;</span></th>
                         <th>Direct <span class="sortIcon" data-column="direct">&#x21C5;</span></th>
                         <th>Stops <span class="sortIcon" data-column="stops">&#x21C5;</span></th>
@@ -132,7 +132,8 @@ function buildSingleDateTable(routeIndex) {
         icon.addEventListener('click', function(event) {
             event.stopPropagation();
             const column = this.getAttribute('data-column');
-            createFilterPopup(column, event); // Correctly pass the event along with the column
+            console.log('Filtering column:', column, 'Data:', data);
+            createFilterPopup(column, event, data );
         });
     });        
 
