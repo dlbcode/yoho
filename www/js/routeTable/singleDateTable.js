@@ -1,6 +1,5 @@
 import { appState, updateState } from '../stateManager.js';
-import { priceFilter } from './priceFilter.js';
-import { showDateFilterPopup } from './dateFilters.js';
+import { createFilterPopup } from './filterUi.js';
 import { pathDrawing } from '../pathDrawing.js';
 import { flightMap } from '../flightMap.js';
 import { routeInfoRow, highlightSelectedRowForRouteIndex } from './routeInfoRow.js';
@@ -128,28 +127,24 @@ function buildSingleDateTable(routeIndex) {
           }
         });
       });
-    
+
       document.querySelectorAll('.filterIcon').forEach(icon => {
-        icon.addEventListener('click', function(event) {
-          event.stopPropagation(); // Prevent the event from bubbling up to the header
-          const column = this.getAttribute('data-column');
-          // Hide all other popups
-          document.querySelectorAll('.date-filter-popup').forEach(popup => {
-            if (popup.id !== `${column}DateFilterPopup`) {
-              popup.classList.add('hidden');
-            }
+          icon.addEventListener('click', function(event) {
+              event.stopPropagation(); // Prevent the event from bubbling up to the header
+              const column = this.getAttribute('data-column');
+              
+              // Hide all other popups
+              document.querySelectorAll('.filter-popup').forEach(popup => {
+                  if (popup.id !== `${column}FilterPopup`) {
+                      popup.classList.add('hidden');
+                  }
+              });
+
+              // Create or toggle the current popup
+              createFilterPopup(column);
           });
-          // Toggle the current popup
-          const dateFilterPopup = document.getElementById(`${column}DateFilterPopup`);
-          if (dateFilterPopup) {
-            dateFilterPopup.classList.toggle('hidden');
-          } else {
-            console.log('calling showDateFilterPopup with data:', data);
-            showDateFilterPopup(event, column);
-          }
-        });
-      });      
-       
+      });
+
       document.querySelectorAll('.route-info-table tbody tr').forEach((row, index) => {
         row.addEventListener('click', function() {
           const routeIdString = this.getAttribute('data-route-id');
@@ -176,29 +171,6 @@ function buildSingleDateTable(routeIndex) {
           pathDrawing.drawLines();
       });
     });
-  
-    // Separate handling for the price filter icon
-    const priceFilterIcon = document.getElementById('priceFilter');
-if (priceFilterIcon) {
-  priceFilterIcon.addEventListener('click', function(event) {
-    event.stopPropagation(); // Prevent the event from affecting other elements
-    const priceSliderPopup = document.getElementById('priceSliderPopup');
-    if (priceSliderPopup) {
-      if (priceSliderPopup.classList.contains('hidden')) {
-        // Reposition and show the popup if it was previously hidden
-        priceFilter.positionSliderPopup();
-        priceSliderPopup.classList.remove('hidden');
-      } else {
-        // Hide the popup if it is currently visible
-        priceSliderPopup.classList.add('hidden');
-      }
-    } else {
-      // If the popup doesn't exist, create and show it
-      priceFilter.showPriceFilterPopup(event, data);
-    }
-  });
-}
-
   } 
   
   function resetSortIcons(headers, currentIcon, newSortState) {

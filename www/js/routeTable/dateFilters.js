@@ -1,3 +1,4 @@
+import { logFilterState } from './tableFilter.js';
 import { appState } from '../stateManager.js';
 
 appState.filterState = {
@@ -136,7 +137,9 @@ function initializeSlider(sliderId) {
         handle.classList.add('slider-handle');  // Re-add class for custom styling
       });
       appState.filterState[column] = { start: values[0], end: values[1] };
-      filterTableByTime(values[0], values[1], sliderId.includes('departure') ? 0 : 1);
+
+      // Call applyFilters from tableFilter.js
+      logFilterState();
     });
   }
 }  
