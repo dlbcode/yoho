@@ -129,21 +129,20 @@ function buildSingleDateTable(routeIndex) {
       });
 
       document.querySelectorAll('.filterIcon').forEach(icon => {
-          icon.addEventListener('click', function(event) {
-              event.stopPropagation(); // Prevent the event from bubbling up to the header
-              const column = this.getAttribute('data-column');
-              
-              // Hide all other popups
-              document.querySelectorAll('.filter-popup').forEach(popup => {
-                  if (popup.id !== `${column}FilterPopup`) {
-                      popup.classList.add('hidden');
-                  }
-              });
-
-              // Create or toggle the current popup
-              createFilterPopup(column);
-          });
-      });
+        icon.addEventListener('click', function(event) {
+            event.stopPropagation(); // Prevent the event from bubbling up to the header
+            const column = this.getAttribute('data-column');
+            // Example: Define how to fetch or define the correct data for each column
+            const data = { 
+                min: 0, 
+                max: 100, 
+                median: 50 // Make sure 'median' or other required properties are defined based on actual data
+            }; 
+    
+            // Make sure to pass 'event' and 'data' correctly
+            createFilterPopup(column, 'range', data, event);
+        });
+    });    
 
       document.querySelectorAll('.route-info-table tbody tr').forEach((row, index) => {
         row.addEventListener('click', function() {
