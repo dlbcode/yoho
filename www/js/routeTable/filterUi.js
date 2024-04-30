@@ -121,7 +121,7 @@ function updateFilterStateAndLabel(column, values, label) {
         const start = parseFloat(values[0]);
         const end = parseFloat(values[1] ? values[1] : values[0]);
         appState.filterState[column] = { start: start, end: end };
-        label.textContent = `Start: ${formatTime(start)}, End: ${formatTime(end)}`;
+        label.textContent = `${formatTime(start)}, ${formatTime(end)}`;
     }
     logFilterState();
     applyFilters();
