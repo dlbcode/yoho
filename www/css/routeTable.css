@@ -61,23 +61,21 @@
   padding: 10px;
   width: 200px;
   height: 80px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between; /* Ensures content is evenly spaced */
 }
 
-
-.time-display {
-  position: relative;
-  bottom: 10px;
-  font-size: 14px;
+.filter-value-label {
   color: #ddd;
-  padding: 5px;
-  background-color: #333;
-  border-radius: 5px;
+  font-size: 14px;
   text-align: center;
-  margin-bottom: 10px;
+  margin-bottom: 5px; /* Ensures consistent space between label and slider */
 }
 
-#departureSlider {
-  margin-top: 20px; /* Adjust this value as needed */
+.noUi-target {
+  margin-top: 5px; /* Reduced to ensure consistent spacing above slider */
+  width: 100%; /* Ensures slider uses full width of the popup */
 }
 
 .slider-handle {
@@ -106,6 +104,7 @@
 }
 
 .noUi-connect {
+  background: #0084e9;
   height: 8px !important;
   background: #0084e9;
   border: none !important;
