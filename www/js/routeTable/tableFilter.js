@@ -14,12 +14,12 @@ function applyFilters() {
     rows.forEach(row => {
         const price = parseFloat(row.cells[getColumnIndex('price')].textContent.replace(/[$,]/g, ''));
         const isVisible = price <= appState.filterState.price.value;
+        const routeLineId = row.getAttribute('data-route-id');  // Moved this line outside of the if-else structure
 
         row.style.display = isVisible ? '' : 'none';
 
         // Additional handling for graphical elements associated with rows
         if (isVisible) {
-            const routeLineId = row.getAttribute('data-route-id');
             appState.routeLines.forEach(line => {
                 if (line.routeLineId === routeLineId) {
                     line.setStyle({opacity: 1, fillOpacity: 1});
