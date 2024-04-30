@@ -4,7 +4,6 @@ import { logFilterState, applyFilters } from './tableFilter.js';
 export function createFilterPopup(column, data, event) {
     const existingPopup = document.getElementById(`${column}FilterPopup`);
     if (existingPopup) {
-        // Toggle the popup without hiding it again if clicking the same filter icon
         if (!existingPopup.contains(event.target)) {
             existingPopup.classList.toggle('hidden');
         }
@@ -66,7 +65,18 @@ function initializeSlider(popup, column, data, valueLabel) {
                 'max': 24
             },
             step: 0.5,
-            tooltips: true
+            tooltips: [true, true].map(() => ({
+                to: function(value) {
+                    const hours = Math.floor(value);
+                    const minutes = Math.floor((value % 1) * 60);
+                    const period = hours < 12 || hours === 24 ? 'AM' : 'PM';
+                    const displayHours = hours % 12 === 0 ? 12 : hours % 12;
+                    return `${displayHours}:${minutes < 10 ? '0' + minutes : minutes} ${period}`;
+                },
+                from: function(value) {
+                    return parseFloat(value);
+                }
+            }))
         };
     } else if (column === 'price') {
         if (data && data.hasOwnProperty('min') && data.hasOwnProperty('max')) {
@@ -126,4 +136,3 @@ function updateFilterStateAndLabel(column, values, label) {
     logFilterState();
     applyFilters();
 }
-
