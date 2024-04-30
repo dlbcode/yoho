@@ -124,6 +124,13 @@
   position: absolute;
 }
 
+.filter-value-label {
+  color: #ddd;
+  font-size: 12px;
+  text-align: center;
+  margin-bottom: 5px;
+}
+
 /* Ensure the filter icon is correctly positioned within the table header */
 .filterIcon {
   cursor: pointer;

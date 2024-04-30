@@ -126,12 +126,12 @@ function formatTime(value) {
 function updateFilterStateAndLabel(column, values, label) {
     if (column === 'price') {
         appState.filterState[column] = { value: parseFloat(values[0].replace('$', '')) };
-        label.textContent = `Price: $${appState.filterState[column].value}`;
+        label.textContent = `Max price: $${appState.filterState[column].value}`;
     } else {
         const start = parseFloat(values[0]);
         const end = parseFloat(values[1] ? values[1] : values[0]);
         appState.filterState[column] = { start: start, end: end };
-        label.textContent = `${formatTime(start)}, ${formatTime(end)}`;
+        label.textContent = `Departure: ${formatTime(start)} - ${formatTime(end)}`;
     }
     logFilterState();
     applyFilters();
