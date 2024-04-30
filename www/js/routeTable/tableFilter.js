@@ -8,35 +8,14 @@ function applyFilters() {
     const table = document.querySelector('.route-info-table');
     const rows = table.querySelectorAll('tbody tr');
 
-    console.log('table:', table);
-
     rows.forEach(row => {
-        // Safely get text content from a cell, or return null if the cell is undefined
-        const safeGetText = (cell) => cell ? cell.textContent : null;
+        const price = parseFloat(row.cells[getColumnIndex('price')].textContent.replace(/[$,]/g, ''));
+        const isVisible = price <= appState.filterState.price.value;
 
-        const departureText = safeGetText(row.cells[getColumnIndex('departure')]);
-        const arrivalText = safeGetText(row.cells[getColumnIndex('arrival')]);
-        const priceText = safeGetText(row.cells[getColumnIndex('price')]);
-
-        const departure = departureText ? parseTime(departureText) : null;
-        const arrival = arrivalText ? parseTime(arrivalText) : null;
-        const price = priceText ? parseFloat(priceText.replace(/[^\d.]/g, '')) : null;
-
-        const departureFilter = appState.filterState.departure || {start: 0, end: 24};
-        const arrivalFilter = appState.filterState.arrival || {start: 0, end: 24};
-        const priceFilter = appState.filterState.price || {value: price};  // Default to current price if undefined
-
-        const isDepartureMatch = departure !== null && departure >= departureFilter.start && departure <= departureFilter.end;
-        const isArrivalMatch = arrival !== null && arrival >= arrivalFilter.start && arrival <= arrivalFilter.end;
-        const isPriceMatch = price !== null && price === priceFilter.value;
-
-        if (isDepartureMatch && isArrivalMatch && isPriceMatch) {
-            row.style.display = ''; // Show row
-        } else {
-            row.style.display = 'none'; // Hide row
-        }
+        row.style.display = isVisible ? '' : 'none';
     });
 }
+
 
 function parseTime(timeStr) {
     if (!timeStr) {
