@@ -5,7 +5,10 @@ import { logFilterState, applyFilters } from './tableFilter.js';
 export function createFilterPopup(column, data, event) {
     const existingPopup = document.getElementById(`${column}FilterPopup`);
     if (existingPopup) {
-        existingPopup.classList.toggle('hidden');
+        // Toggle the popup without hiding it again if clicking the same filter icon
+        if (!existingPopup.contains(event.target)) {
+            existingPopup.classList.toggle('hidden');
+        }
         if (!existingPopup.classList.contains('hidden')) {
             positionPopup(existingPopup, event);  // Update position every time it's shown
         }
@@ -23,10 +26,14 @@ export function createFilterPopup(column, data, event) {
     }
 
     positionPopup(filterPopup, event);  // Initial position setting
-
-    console.log('Creating filter popup for:', column, data);
-
     initializeSlider(filterPopup, column, data);
+
+    // Add click event listener on document to hide popup when clicking outside
+    document.addEventListener('click', function (e) {
+        if (!filterPopup.contains(e.target) && e.target !== filterPopup && e.target !== event.target) {
+            filterPopup.classList.add('hidden');
+        }
+    }, true); // Use capture phase to handle the event earlier
 }
 
 function positionPopup(popup, event) {
