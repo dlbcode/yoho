@@ -66,44 +66,32 @@ function initializeSlider(popup, column, data, valueLabel) {
                 'max': 24
             },
             step: 0.5,
-            tooltips: true,
-            format: {
-                to: function(value) {
-                    const hours = Math.floor(value);
-                    const minutes = Math.floor((value % 1) * 60);
-                    const period = hours < 12 || hours === 24 ? 'AM' : 'PM';
-                    const displayHours = hours % 12 === 0 ? 12 : hours % 12;
-                    return `${displayHours}:${minutes < 10 ? '0' + minutes : minutes} ${period}`;
-                },
-                from: function(value) {
-                    return parseFloat(value);
-                }
-            }
+            tooltips: true
         };
     } else if (column === 'price') {
-    if (data && data.hasOwnProperty('min') && data.hasOwnProperty('max')) {
-        sliderSettings = {
-            start: data.max,
-            range: {
-                'min': data.min,
-                'max': data.max
-            },
-            step: 1,
-            tooltips: true,
-            format: {
-                to: function(value) {
-                    return `$${Math.round(value)}`;
+        if (data && data.hasOwnProperty('min') && data.hasOwnProperty('max')) {
+            sliderSettings = {
+                start: data.max,
+                range: {
+                    'min': data.min,
+                    'max': data.max
                 },
-                from: function(value) {
-                    return Number(value.replace('$', ''));
+                step: 1,
+                tooltips: true,
+                format: {
+                    to: function(value) {
+                        return `$${Math.round(value)}`;
+                    },
+                    from: function(value) {
+                        return Number(value.replace('$', ''));
+                    }
                 }
-            }
-        };
-    } else {
-        console.error('Data object missing required properties for price slider:', data);
-        return; // Exit function if data is not correct
+            };
+        } else {
+            console.error('Data object missing required properties for price slider:', data);
+            return; // Exit function if data is not correct
+        }
     }
-}
 
     if (sliderSettings) {
         noUiSlider.create(slider, sliderSettings);
@@ -117,17 +105,25 @@ function initializeSlider(popup, column, data, valueLabel) {
     }
 }
 
+function formatTime(value) {
+    const hours = Math.floor(value);
+    const minutes = Math.floor((value % 1) * 60);
+    const period = hours < 12 || hours === 24 ? 'AM' : 'PM';
+    const displayHours = hours % 12 === 0 ? 12 : hours % 12;
+    return `${displayHours}:${minutes < 10 ? '0' + minutes : minutes} ${period}`;
+}
+
 function updateFilterStateAndLabel(column, values, label) {
     if (column === 'price') {
         appState.filterState[column] = { value: parseFloat(values[0].replace('$', '')) };
         label.textContent = `Price: $${appState.filterState[column].value}`;
     } else {
-        appState.filterState[column] = {
-            start: parseFloat(values[0]),
-            end: parseFloat(values[1] ? values[1] : values[0])
-        };
-        label.textContent = `Start: ${appState.filterState[column].start}, End: ${appState.filterState[column].end}`;
+        const start = parseFloat(values[0]);
+        const end = parseFloat(values[1] ? values[1] : values[0]);
+        appState.filterState[column] = { start: start, end: end };
+        label.textContent = `Start: ${formatTime(start)}, End: ${formatTime(end)}`;
     }
     logFilterState();
     applyFilters();
 }
+
