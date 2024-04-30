@@ -6,6 +6,9 @@ export function createFilterPopup(column, data, event) {
     const existingPopup = document.getElementById(`${column}FilterPopup`);
     if (existingPopup) {
         existingPopup.classList.toggle('hidden');
+        if (!existingPopup.classList.contains('hidden')) {
+            positionPopup(existingPopup, event);  // Update position every time it's shown
+        }
         return;
     }
 
@@ -19,7 +22,7 @@ export function createFilterPopup(column, data, event) {
         return; // Do not proceed if no data is provided
     }
 
-    positionPopup(filterPopup, event);
+    positionPopup(filterPopup, event);  // Initial position setting
 
     console.log('Creating filter popup for:', column, data);
 
