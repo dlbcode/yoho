@@ -79,30 +79,29 @@ function initializeSlider(popup, column, data, valueLabel) {
             }
         };
     } else if (column === 'price') {
-        if (data && data.hasOwnProperty('min') && data.hasOwnProperty('max')) {
-            sliderSettings = {
-                start: [data.min, data.max],
-                connect: true,
-                range: {
-                    'min': data.min,
-                    'max': data.max
+    if (data && data.hasOwnProperty('min') && data.hasOwnProperty('max')) {
+        sliderSettings = {
+            start: data.max,
+            range: {
+                'min': data.min,
+                'max': data.max
+            },
+            step: 1,
+            tooltips: true,
+            format: {
+                to: function(value) {
+                    return `$${Math.round(value)}`;
                 },
-                step: 1,
-                tooltips: true,
-                format: {
-                    to: function(value) {
-                        return `$${Math.round(value)}`;
-                    },
-                    from: function(value) {
-                        return Number(value.replace('$', ''));
-                    }
+                from: function(value) {
+                    return Number(value.replace('$', ''));
                 }
-            };
-        } else {
-            console.error('Data object missing required properties for price slider:', data);
-            return; // Exit function if data is not correct
-        }
+            }
+        };
+    } else {
+        console.error('Data object missing required properties for price slider:', data);
+        return; // Exit function if data is not correct
     }
+}
 
     if (sliderSettings) {
         noUiSlider.create(slider, sliderSettings);
