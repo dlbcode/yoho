@@ -207,17 +207,17 @@ function buildSingleDateTable(routeIndex) {
 
   function getColumnIndex(columnIdentifier) {
     const columnMap = {
-      'departure': 1,  // Updated to 1-based index
-      'arrival': 2,
-      'price': 3,
-      'airlines': 4,
-      'direct': 5,
-      'stops': 6,
-      'layovers': 7,
-      'duration': 8,
-      'route': 9
+      'departure': 0,  // Updated to 1-based index
+      'arrival': 1,
+      'price': 2,
+      'airlines': 3,
+      'direct': 4,
+      'stops': 5,
+      'layovers': 6,
+      'duration': 7,
+      'route': 8
     };
-    return columnMap[columnIdentifier] || -1;
+    return columnMap[columnIdentifier];
   }
 }
 

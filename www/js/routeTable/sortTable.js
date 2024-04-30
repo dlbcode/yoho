@@ -26,8 +26,6 @@ export function sortTableByColumn(table, columnIndex, asc = true) {
       tBody.removeChild(tBody.firstChild);
   }
   tBody.append(...sortedRows);
-
-  // Update header classes for visual indication of sort direction
   table.querySelectorAll("th").forEach(th => th.classList.remove("th-sort-asc", "th-sort-desc"));
   if (asc) {
       table.querySelector(`th:nth-child(${columnIndex + 1})`).classList.add("th-sort-asc");
@@ -42,7 +40,9 @@ function convertData(data, columnIndex) {
         case 1:
             return new Date(data);
         case 2: // Price (Numeric)
-            return parseFloat(data.replace(/[^\\d.]/g, ''));
+            const cleanedData = data.replace(/[^0-9.]/g, '');
+            const parsedPrice = parseFloat(cleanedData);
+            return parsedPrice;
         case 4: // Direct (Boolean)
             return data === '✓';
         case 7: // Duration (hh mm)
