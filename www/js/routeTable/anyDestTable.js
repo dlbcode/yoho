@@ -5,21 +5,6 @@ import { pathDrawing } from '../pathDrawing.js';
 import { flightMap } from '../flightMap.js';
 import { routeInfoRow, highlightSelectedRowForRouteIndex } from './routeInfoRow.js';
 
-function getColumnIndex(columnIdentifier) {
-  const columnMap = {
-    'departure': 1,
-    'arrival': 2,
-    'price': 3,
-    'airlines': 4,
-    'direct': 5,
-    'stops': 6,
-    'layovers': 7,
-    'duration': 8,
-    'route': 9
-  };
-  return columnMap[columnIdentifier] || -1; // Default to -1 if identifier not found
-}
-
 function buildAnyDestTable(routeIndex, origin, dateRange) {
   const currentRoute = appState.routes && appState.routes.length > routeIndex ? appState.routes[routeIndex] : undefined;
 
@@ -66,14 +51,14 @@ function buildAnyDestTable(routeIndex, origin, dateRange) {
       let headerRow = `<tr>
                         <th>Departure <span class="sortIcon" data-column="departure">&#x21C5;</span><img class="filterIcon" data-column="departure" src="/assets/filter-icon.svg" alt="Filter"></th>
                         <th>Arrival <span class="sortIcon" data-column="arrival">&#x21C5;</span><img class="filterIcon" data-column="arrival" src="/assets/filter-icon.svg" alt="Filter"></th>
-                        <th>Price <span class="sortIcon" data-column="price">&#x21C5;</span><img id="priceFilter" class="filterIcon" src="/assets/filter-icon.svg" alt="Filter"></th>
+                        <th>Price <span class="sortIcon" data-column="price">&#x21C5;</span><img id="priceFilter" class="filterIcon" data-column="price" src="/assets/filter-icon.svg" alt="Filter"></th>
                         <th>Airlines <span class="sortIcon" data-column="airlines">&#x21C5;</span></th>
                         <th>Direct <span class="sortIcon" data-column="direct">&#x21C5;</span></th>
                         <th>Stops <span class="sortIcon" data-column="stops">&#x21C5;</span></th>
                         <th>Layovers <span class="sortIcon" data-column="layovers">&#x21C5;</span></th>
                         <th>Duration <span class="sortIcon" data-column="duration">&#x21C5;</span></th>
                         <th>Route <span class="sortIcon" data-column="route">&#x21C5;</span></th>
-                      </tr>`;
+                     </tr>`;
       thead.innerHTML = headerRow;
       table.appendChild(thead);
 
@@ -159,21 +144,70 @@ function buildAnyDestTable(routeIndex, origin, dateRange) {
           });
         });
   
-    // Attach event listeners specifically for date filter icons
-    document.querySelectorAll('.filterIcon').forEach(icon => {
-      icon.addEventListener('click', function(event) {
-        event.stopPropagation(); // Prevent the event from bubbling up to the header
-        const column = this.getAttribute('data-column');
-        if (column === 'departure' || column === 'arrival') {
-          const dateFilterPopup = document.getElementById(`${column}DateFilterPopup`);
-          if (dateFilterPopup) {
-            dateFilterPopup.classList.toggle('hidden');
-          } else {
-            showDateFilterPopup(event, column);
-          }
-        }
+        document.querySelectorAll('.filterIcon').forEach(icon => {
+          icon.addEventListener('click', function(event) {
+              event.stopPropagation();
+              const column = this.getAttribute('data-column');
+              if (!column) {
+                  console.error('Column attribute is missing on the icon:', this);
+                  return;
+              }
+              console.log('Filtering column:', column);
+              const data = fetchDataForColumn(column);
+              console.log('Data for column:', data)
+              if (data) {
+                  createFilterPopup(column, data, event);
+              } else {
+                  console.error('Failed to fetch data for column:', column);
+              }
+          });
       });
-    });
+   
+      function fetchDataForColumn(column) {
+        switch (column) {
+            case 'price':
+                const priceCells = document.querySelectorAll('.route-info-table tbody tr td:nth-child(' + (getColumnIndex('price') + 1) + ')');
+                const prices = Array.from(priceCells).map(cell => {
+                    const priceText = cell.textContent.replace(/[^\d.]/g, ''); // Remove any non-numeric characters, including the dollar sign
+                    return parseFloat(priceText);
+                }).filter(price => !isNaN(price)); // Ensure only valid numbers are included
+    
+                if (prices.length === 0) {
+                    console.error('No valid prices found in the column');
+                    return { min: 0, max: 0 }; // Return default or error values if no prices are found
+                }
+    
+                const min = Math.min(...prices);
+                const max = Math.max(...prices);
+                return { min, max };
+    
+            case 'departure':
+            case 'arrival':
+                return {
+                    min: 0,
+                    max: 24
+                };
+    
+            default:
+                console.error('Unsupported column:', column);
+                return null;
+        }
+    }
+    
+    function getColumnIndex(columnIdentifier) {
+        const columnMap = {
+            'departure': 0,
+            'arrival': 1,
+            'price': 2,
+            'airlines': 3,
+            'direct': 4,
+            'stops': 5,
+            'layovers': 6,
+            'duration': 7,
+            'route': 8
+        };
+        return columnMap[columnIdentifier] || -1;
+    }
       
     document.querySelectorAll('.route-info-table tbody tr').forEach((row, index) => {
       row.addEventListener('click', function() {
