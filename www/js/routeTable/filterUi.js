@@ -20,13 +20,19 @@ export function createFilterPopup(column, data, event) {
     filterPopup.className = 'filter-popup';
     document.body.appendChild(filterPopup);
 
+    // Create label for displaying filter values
+    const valueLabel = document.createElement('div');
+    valueLabel.id = `${column}ValueLabel`;
+    valueLabel.className = 'filter-value-label';
+    filterPopup.appendChild(valueLabel);
+
     if (!data) {
         console.error('No data provided for filtering:', column);
         return; // Do not proceed if no data is provided
     }
 
     positionPopup(filterPopup, event);  // Initial position setting
-    initializeSlider(filterPopup, column, data);
+    initializeSlider(filterPopup, column, data, valueLabel);
 
     // Add click event listener on document to hide popup when clicking outside
     document.addEventListener('click', function (e) {
@@ -46,7 +52,7 @@ function positionPopup(popup, event) {
     popup.style.top = `${iconRect.top + window.scrollY - 90}px`; // Position above the icon
 }
 
-function initializeSlider(popup, column, data) {
+function initializeSlider(popup, column, data, valueLabel) {
     const slider = document.createElement('div');
     slider.id = `${column}Slider`;
     popup.appendChild(slider);
@@ -76,8 +82,8 @@ function initializeSlider(popup, column, data) {
     } else if (column === 'price') {
         if (data && data.hasOwnProperty('min') && data.hasOwnProperty('max')) {
             sliderSettings = {
-                start: [data.max],
-                connect: 'lower',
+                start: [data.min, data.max],
+                connect: true,
                 range: {
                     'min': data.min,
                     'max': data.max
@@ -101,29 +107,26 @@ function initializeSlider(popup, column, data) {
 
     if (sliderSettings) {
         noUiSlider.create(slider, sliderSettings);
+        slider.noUiSlider.on('update', function(values) {
+            updateFilterStateAndLabel(column, values, valueLabel);
+        });
     } else {
         console.error('Slider settings not defined due to missing or incorrect data');
     }
+}
 
-    if (slider && slider.noUiSlider) {
-        slider.noUiSlider.on('update', function(values) {
-            // Check if the slider is for price and handle it accordingly
-            if (column === 'price') {
-                appState.filterState[column] = {
-                    value: parseFloat(values[0].replace('$', ''))
-                };
-            } else {
-                // Ensure both values are available for range sliders
-                appState.filterState[column] = {
-                    start: parseFloat(values[0].replace('$', '')),
-                    end: parseFloat(values[1] ? values[1].replace('$', '') : values[0].replace('$', '')) // Fallback to start if end is not available
-                };
-            }
-            logFilterState(); // Log the current filter state
-            applyFilters(); // Apply the filters to the table
-        });               
+function updateFilterStateAndLabel(column, values, label) {
+    // Update the filter state based on slider values
+    if (column === 'price') {
+        appState.filterState[column] = { value: parseFloat(values[0].replace('$', '')) };
+        label.textContent = `Price: $${appState.filterState[column].value}`;
     } else {
-        console.error('Failed to create slider for column:', column);
+        appState.filterState[column] = {
+            start: parseFloat(values[0]),
+            end: parseFloat(values[1] ? values[1] : values[0])
+        };
+        label.textContent = `Start: ${appState.filterState[column].start}, End: ${appState.filterState[column].end}`;
     }
-    
+    logFilterState();  // Log the current filter state
+    applyFilters();    // Apply the filters to the table
 }
