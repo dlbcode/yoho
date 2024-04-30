@@ -4,21 +4,6 @@ import { pathDrawing } from '../pathDrawing.js';
 import { flightMap } from '../flightMap.js';
 import { routeInfoRow, highlightSelectedRowForRouteIndex } from './routeInfoRow.js';
 
-function getColumnIndex(columnIdentifier) {
-  const columnMap = {
-    'departure': 1,
-    'arrival': 2,
-    'price': 3,
-    'airlines': 4,
-    'direct': 5,
-    'stops': 6,
-    'layovers': 7,
-    'duration': 8,
-    'route': 9
-  };
-  return columnMap[columnIdentifier] || -1; // Default to -1 if identifier not found
-}
-
 function buildSingleDateTable(routeIndex) {
   const departureDate = appState.routeDates[routeIndex];
   const currentRoute = appState.routes && appState.routes.length > routeIndex ? appState.routes[routeIndex] : undefined;
@@ -191,7 +176,7 @@ function buildSingleDateTable(routeIndex) {
           'route': 8
       };
       return columnMap[columnIdentifier] || -1;
-  }  
+  }
 
       document.querySelectorAll('.route-info-table tbody tr').forEach((row, index) => {
         row.addEventListener('click', function() {
