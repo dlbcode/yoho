@@ -63,29 +63,31 @@
   height: 80px;
   display: flex;
   flex-direction: column;
-  justify-content: space-between; /* Ensures content is evenly spaced */
+  justify-content: space-between;
 }
 
 .filter-value-label {
   color: #ddd;
   font-size: 14px;
   text-align: center;
-  margin-bottom: 5px; /* Ensures consistent space between label and slider */
+  margin-bottom: 5px;
 }
 
 .noUi-target {
-  margin-top: 5px; /* Reduced to ensure consistent spacing above slider */
-  width: 100%; /* Ensures slider uses full width of the popup */
+  margin-top: 5px;
+  width: calc(100% - 20px); /* Adjust width considering the padding */
+  margin-left: auto;
+  margin-right: auto;
+  box-sizing: border-box; /* Ensures padding and border are included in width calculation */
 }
 
 .slider-handle {
   background-color: #007bff;
   width: 16px !important;
   height: 16px !important;
+  left: 8px;
   border-radius: 50%;
   border: none;
-  top: -2px;
-  left: 9px;
   cursor: pointer;
   box-shadow: none;
 }
@@ -99,15 +101,15 @@
 .noUi-base {
   background: #004c86;
   height: 4px;
-  border: none; 
+  border: none;
   box-shadow: none;
+  box-sizing: border-box;
 }
 
 .noUi-connect {
   background: #0084e9;
-  height: 8px !important;
-  background: #0084e9;
-  border: none !important;
+  height: 8px;
+  box-sizing: border-box;
 }
 
 .noUi-tooltip {
