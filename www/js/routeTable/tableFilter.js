@@ -11,10 +11,8 @@ function applyFilters() {
     resetLineVisibility();  // Reset visibility for all related graphical elements
 
     rows.forEach(row => {
-        // Ensure that the row has enough cells
-        if (row.cells.length < getColumnIndex('arrival') + 1) {
-            console.error('Row has insufficient cells:', row);
-            return;  // Skip this row to prevent errors
+        if (row.classList.contains('route-info-row')) {
+            return; // Skip the route-info-row
         }
 
         const priceText = row.cells[getColumnIndex('price')].textContent;
