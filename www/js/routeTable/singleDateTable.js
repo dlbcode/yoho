@@ -162,22 +162,6 @@ function buildSingleDateTable(routeIndex) {
               return null;
       }
   }
-  
-  function getColumnIndex(columnIdentifier) {
-      const columnMap = {
-          'departure': 0,
-          'arrival': 1,
-          'price': 2,
-          'airlines': 3,
-          'direct': 4,
-          'stops': 5,
-          'layovers': 6,
-          'duration': 7,
-          'route': 8
-      };
-      return columnMap[columnIdentifier] || -1;
-  }
-
       document.querySelectorAll('.route-info-table tbody tr').forEach((row, index) => {
         row.addEventListener('click', function() {
           const routeIdString = this.getAttribute('data-route-id');
@@ -218,6 +202,21 @@ function buildSingleDateTable(routeIndex) {
       }
     });
   }
+
+  function getColumnIndex(columnIdentifier) {
+    const columnMap = {
+      'departure': 1,  // Updated to 1-based index
+      'arrival': 2,
+      'price': 3,
+      'airlines': 4,
+      'direct': 5,
+      'stops': 6,
+      'layovers': 7,
+      'duration': 8,
+      'route': 9
+    };
+    return columnMap[columnIdentifier] || -1;
+  }  
   
   function sortTableByColumn(table, columnIndex, asc = true) {
     const dirModifier = asc ? 1 : -1;
@@ -225,8 +224,8 @@ function buildSingleDateTable(routeIndex) {
     const rows = Array.from(tBody.querySelectorAll("tr"));
   
     const sortedRows = rows.sort((a, b) => {
-      let aColText = a.cells[columnIndex - 1].textContent.trim();
-      let bColText = b.cells[columnIndex - 1].textContent.trim();
+      let aColText = a.cells[columnIndex].textContent.trim();  // Adjusted index usage here
+      let bColText = b.cells[columnIndex].textContent.trim();
       return aColText.localeCompare(bColText, undefined, { numeric: true }) * dirModifier;
     });
   
