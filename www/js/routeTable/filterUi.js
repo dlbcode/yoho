@@ -71,7 +71,9 @@ function initializeSlider(popup, column, data, valueLabel) {
                 to: function(value) {
                     const hours = Math.floor(value);
                     const minutes = Math.floor((value % 1) * 60);
-                    return `${hours}:${minutes < 10 ? '0' + minutes : minutes}`;
+                    const period = hours < 12 || hours === 24 ? 'AM' : 'PM';
+                    const displayHours = hours % 12 === 0 ? 12 : hours % 12;
+                    return `${displayHours}:${minutes < 10 ? '0' + minutes : minutes} ${period}`;
                 },
                 from: function(value) {
                     return parseFloat(value);
