@@ -1,4 +1,3 @@
-// Importing necessary functionality
 import { appState } from '../stateManager.js';  // Assuming state manager handles global state
 import { logFilterState, applyFilters } from './tableFilter.js';
 
@@ -107,6 +106,8 @@ function initializeSlider(popup, column, data, valueLabel) {
 
     if (sliderSettings) {
         noUiSlider.create(slider, sliderSettings);
+        const handles = slider.querySelectorAll('.noUi-handle');
+        handles.forEach(handle => handle.classList.add('slider-handle'));
         slider.noUiSlider.on('update', function(values) {
             updateFilterStateAndLabel(column, values, valueLabel);
         });
@@ -116,7 +117,6 @@ function initializeSlider(popup, column, data, valueLabel) {
 }
 
 function updateFilterStateAndLabel(column, values, label) {
-    // Update the filter state based on slider values
     if (column === 'price') {
         appState.filterState[column] = { value: parseFloat(values[0].replace('$', '')) };
         label.textContent = `Price: $${appState.filterState[column].value}`;
@@ -127,6 +127,6 @@ function updateFilterStateAndLabel(column, values, label) {
         };
         label.textContent = `Start: ${appState.filterState[column].start}, End: ${appState.filterState[column].end}`;
     }
-    logFilterState();  // Log the current filter state
-    applyFilters();    // Apply the filters to the table
+    logFilterState();
+    applyFilters();
 }
