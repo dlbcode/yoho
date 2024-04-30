@@ -23,17 +23,16 @@ function applyFilters() {
         const departureTime = parseTime(departureText);
         const arrivalTime = parseTime(arrivalText);
 
-        const priceVisible = price <= appState.filterState.price.value;
+        const priceVisible = appState.filterState.price && price <= appState.filterState.price.value;
         const departureVisible = departureTime >= appState.filterState.departure.start && departureTime <= appState.filterState.departure.end;
         const arrivalVisible = arrivalTime >= appState.filterState.arrival.start && arrivalTime <= appState.filterState.arrival.end;
 
-        const isVisible = priceVisible && departureVisible && arrivalVisible;
+        const isVisible = (appState.filterState.price ? priceVisible : true) && departureVisible && arrivalVisible;
         row.style.display = isVisible ? '' : 'none';
 
         updateLineVisibility(isVisible, row);
     });
 }
-
 
 function updateLineVisibility(isVisible, row) {
     const routeLineId = row.getAttribute('data-route-id');

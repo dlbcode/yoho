@@ -54,7 +54,7 @@ function initializeSlider(popup, column, data) {
     let sliderSettings;
     if (column === 'departure' || column === 'arrival') {
         sliderSettings = {
-            start: [data.minTime || 0, data.maxTime || 24],
+            start: [data.min || 0, data.max || 24],
             connect: true,
             range: {
                 'min': 0,
