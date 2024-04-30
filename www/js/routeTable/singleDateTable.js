@@ -1,5 +1,6 @@
 import { appState, updateState } from '../stateManager.js';
 import { createFilterPopup } from './filterUi.js';
+import { sortTableByColumn } from './sortTable.js';
 import { pathDrawing } from '../pathDrawing.js';
 import { flightMap } from '../flightMap.js';
 import { routeInfoRow, highlightSelectedRowForRouteIndex } from './routeInfoRow.js';
@@ -107,6 +108,7 @@ function buildSingleDateTable(routeIndex) {
             const columnIdentifier = sortIcon.getAttribute('data-column');
             const columnIndex = getColumnIndex(columnIdentifier);
             const isAscending = sortIcon.getAttribute('data-sort') !== 'asc';
+            console.log('Sorting by column:', columnIdentifier, 'index:', columnIndex, 'ascending:', isAscending);
             sortTableByColumn(table, columnIndex, isAscending);
             resetSortIcons(headers, sortIcon, isAscending ? 'asc' : 'desc');
           }
@@ -216,31 +218,6 @@ function buildSingleDateTable(routeIndex) {
       'route': 9
     };
     return columnMap[columnIdentifier] || -1;
-  }  
-  
-  function sortTableByColumn(table, columnIndex, asc = true) {
-    const dirModifier = asc ? 1 : -1;
-    const tBody = table.tBodies[0];
-    const rows = Array.from(tBody.querySelectorAll("tr"));
-  
-    const sortedRows = rows.sort((a, b) => {
-      let aColText = a.cells[columnIndex].textContent.trim();  // Adjusted index usage here
-      let bColText = b.cells[columnIndex].textContent.trim();
-      return aColText.localeCompare(bColText, undefined, { numeric: true }) * dirModifier;
-    });
-  
-    while (tBody.firstChild) {
-      tBody.removeChild(tBody.firstChild);
-    }
-    tBody.append(...sortedRows);
-  
-    // Update header classes for visual indication of sort direction
-    table.querySelectorAll("th").forEach(th => th.classList.remove("th-sort-asc", "th-sort-desc"));
-    if (asc) {
-      table.querySelector(`th:nth-child(${columnIndex})`).classList.add("th-sort-asc");
-    } else {
-      table.querySelector(`th:nth-child(${columnIndex})`).classList.add("th-sort-desc");
-    }
   }
 }
 
