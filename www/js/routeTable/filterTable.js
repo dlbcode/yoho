@@ -1,7 +1,7 @@
 import { appState } from '../stateManager.js';
 
 function logFilterState() {
-    console.log('Current Filter State:', JSON.stringify(appState.filterState));
+    //console.log('Current Filter State:', JSON.stringify(appState.filterState));
 }
 
 function applyFilters() {
@@ -41,10 +41,11 @@ function updateLineVisibility(isVisible, row) {
     const linesToUpdate = isVisible ? [...appState.routeLines, ...appState.invisibleRouteLines] : appState.invisibleRouteLines;
 
     linesToUpdate.forEach(line => {
-        if (line.routeLineId === routeLineId) {
-            line.setStyle({opacity: isVisible ? 1 : 0, fillOpacity: isVisible ? 1 : 0});
-            line._path.style.pointerEvents = isVisible ? '' : 'none';
-        }
+            if (line.routeLineId === routeLineId) {
+                const isLineInvisible = appState.invisibleRouteLines.includes(line);
+                line.setStyle({opacity: isVisible ? 0.5 : (isVisible ? 1 : 0), fillOpacity: isVisible ? 1 : 0});
+                line._path.style.pointerEvents = isVisible ? '' : 'none';
+            }
     });
 }
 

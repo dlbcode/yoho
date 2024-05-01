@@ -142,7 +142,7 @@ const pathDrawing = {
                 // Create an invisible, wider line for hover interactions
                 var invisibleLine = new L.Geodesic([adjustedOrigin, adjustedDestination], {
                     weight: 10, // Wider line for easier hovering
-                    opacity: .5, // Make the line invisible
+                    opacity: 0, // Make the line invisible
                     wrap: false
                 }).addTo(map);
                 invisibleLine.routeLineId = routeLineId;
