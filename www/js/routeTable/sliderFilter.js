@@ -38,38 +38,41 @@ const sliderFilter = {
                 existingPopup.classList.toggle('hidden');
             }
             if (!existingPopup.classList.contains('hidden')) {
-                this.updateSliderRange(existingPopup.querySelector(`#${column}Slider`), data.min, data.max);
-                this.positionPopup(existingPopup, event);  // Update position every time it's shown
+                const slider = existingPopup.querySelector(`#${column}Slider`);
+                // Assuming the slider initialization already occurred:
+                const filterValues = appState.filterState[column];
+                if (slider && filterValues) {
+                    slider.noUiSlider.set([filterValues.start, filterValues.end]);
+                }
+                sliderFilter.positionPopup(existingPopup, event);  // Update position every time it's shown
             }
             return;
         }
-
+    
         const filterPopup = document.createElement('div');
         filterPopup.id = `${column}FilterPopup`;
         filterPopup.className = 'filter-popup';
         document.body.appendChild(filterPopup);
-
-        // Create label for displaying filter values
+    
         const valueLabel = document.createElement('div');
         valueLabel.id = `${column}ValueLabel`;
         valueLabel.className = 'filter-value-label';
         filterPopup.appendChild(valueLabel);
-
+    
         if (!data) {
             console.error('No data provided for filtering:', column);
             return; // Do not proceed if no data is provided
         }
-
-        this.positionPopup(filterPopup, event);  // Initial position setting
-        this.initializeSlider(filterPopup, column, data, valueLabel);
-
-        // Add click event listener on document to hide popup when clicking outside
+    
+        sliderFilter.positionPopup(filterPopup, event);  // Initial position setting
+        sliderFilter.initializeSlider(filterPopup, column, data, valueLabel);
+    
         document.addEventListener('click', function (e) {
             if (!filterPopup.contains(e.target) && e.target !== filterPopup && e.target !== event.target) {
                 filterPopup.classList.add('hidden');
             }
         }, true); // Use capture phase to handle the event earlier
-    },
+    },    
 
     positionPopup: function(popup, event) {
         if (!event || !event.target) {
