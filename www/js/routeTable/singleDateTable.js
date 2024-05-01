@@ -41,7 +41,12 @@ function buildSingleDateTable(routeIndex) {
       let headerRow = `<tr>
                         <th>Departure <span class="sortIcon" data-column="departure">&#x21C5;</span><img class="filterIcon" data-column="departure" src="/assets/filter-icon.svg" alt="Filter"></th>
                         <th>Arrival <span class="sortIcon" data-column="arrival">&#x21C5;</span><img class="filterIcon" data-column="arrival" src="/assets/filter-icon.svg" alt="Filter"></th>
-<button id="priceFilterBtn" class="filterBtn" data-column="price">
+<th>
+  <button id="priceFilterBtn" class="filterBtn" data-column="price">
+    <span id="priceFilterText">Price</span>
+    <img id="priceFilterIcon" src="/assets/filter-icon.svg" alt="Filter">
+  </button>
+</th>
   <span id="priceFilterText">Price</span>
   <!-- Icon will change based on whether a filter is active -->
   <img id="priceFilterIcon" src="/assets/filter-icon.svg" alt="Filter">
