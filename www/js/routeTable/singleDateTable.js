@@ -108,7 +108,6 @@ function buildSingleDateTable(routeIndex) {
             const columnIdentifier = sortIcon.getAttribute('data-column');
             const columnIndex = getColumnIndex(columnIdentifier);
             const isAscending = sortIcon.getAttribute('data-sort') !== 'asc';
-            console.log('Sorting by column:', columnIdentifier, 'index:', columnIndex, 'ascending:', isAscending);
             sortTableByColumn(table, columnIndex, isAscending);
             resetSortIcons(headers, sortIcon, isAscending ? 'asc' : 'desc');
           }
@@ -123,9 +122,7 @@ function buildSingleDateTable(routeIndex) {
                 console.error('Column attribute is missing on the icon:', this);
                 return;
             }
-            console.log('Filtering column:', column);
             const data = fetchDataForColumn(column);
-            console.log('Data for column:', data)
             if (data) {
                 sliderFilter.createFilterPopup(column, data, event);
             } else {
