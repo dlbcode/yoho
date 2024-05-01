@@ -19,6 +19,16 @@ const sliderFilter = {
         }
     },
 
+    updateSliderRange: function(slider, newMin, newMax) {
+        slider.noUiSlider.updateOptions({
+            range: {
+                'min': newMin,
+                'max': newMax
+            },
+            start: [newMax]
+        });
+    },    
+
     createFilterPopup: function(column, data, event) {
         const existingPopup = document.getElementById(`${column}FilterPopup`);
         if (existingPopup) {
@@ -26,6 +36,7 @@ const sliderFilter = {
                 existingPopup.classList.toggle('hidden');
             }
             if (!existingPopup.classList.contains('hidden')) {
+                this.updateSliderRange(existingPopup.querySelector(`#${column}Slider`), data.min, data.max);
                 this.positionPopup(existingPopup, event);  // Update position every time it's shown
             }
             return;
