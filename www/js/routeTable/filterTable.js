@@ -41,12 +41,20 @@ function updateLineVisibility(isVisible, row) {
     const linesToUpdate = isVisible ? [...appState.routeLines, ...appState.invisibleRouteLines] : appState.invisibleRouteLines;
 
     linesToUpdate.forEach(line => {
-            if (line.routeLineId === routeLineId) {
-                const isLineInvisible = appState.invisibleRouteLines.includes(line);
-                line.setStyle({opacity: isVisible ? 0.5 : (isVisible ? 1 : 0), fillOpacity: isVisible ? 1 : 0});
-                line._path.style.pointerEvents = isVisible ? '' : 'none';
-            }
-    });
+    if (line.routeLineId === routeLineId) {
+        const isLineInvisible = appState.invisibleRouteLines.includes(line);
+        let opacity;
+        if (isLineInvisible && isVisible) {
+            opacity = 0;
+        } else if (!isLineInvisible && isVisible) {
+            opacity = 1;
+        } else {
+            opacity = 0;
+        }
+        line.setStyle({opacity: opacity, fillOpacity: isVisible ? 1 : 0});
+        line._path.style.pointerEvents = isVisible ? '' : 'none';
+    }
+});
 }
 
 function resetLineVisibility() {
