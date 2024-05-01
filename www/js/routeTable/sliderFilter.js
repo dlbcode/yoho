@@ -19,15 +19,17 @@ const sliderFilter = {
         }
     },
 
-    updateSliderRange: function(slider, newMin, newMax) {
+    updateSliderRange: function(slider, newMin, newMax, isDualHandle = true) {
+        const startValues = isDualHandle ? [newMin, newMax] : [newMax];
+    
         slider.noUiSlider.updateOptions({
             range: {
                 'min': newMin,
                 'max': newMax
             },
-            start: [newMax]
+            start: startValues
         });
-    },    
+    },       
 
     createFilterPopup: function(column, data, event) {
         const existingPopup = document.getElementById(`${column}FilterPopup`);
@@ -159,7 +161,6 @@ const sliderFilter = {
         } else {
                 const start = parseFloat(values[0]);
                 const end = parseFloat(values[1] ? values[1] : values[0]);
-                console.log('Updating filter state:', column, start, end);
                 appState.filterState[column] = { start: start, end: end };
                 if (start === 0 && end === 24) {
                     label.textContent = 'Anytime';
