@@ -1,6 +1,6 @@
 import { appState, updateState } from '../stateManager.js';
-import { priceFilter } from './priceFilter.js';
-import { showDateFilterPopup } from './dateFilters.js';
+import { sliderFilter } from './sliderFilter.js';
+import { sortTableByColumn } from './sortTable.js';
 import { pathDrawing } from '../pathDrawing.js';
 import { flightMap } from '../flightMap.js';
 import { routeInfoRow, highlightSelectedRowForRouteIndex } from './routeInfoRow.js';
@@ -112,57 +112,42 @@ function buildAnyDestTable(routeIndex, origin, dateRange) {
       document.getElementById('infoPaneContent').textContent = 'Error loading data: ' + error.message;
     });     
   
-      function attachEventListeners(table, data, routeIndex) {
-        const headers = table.querySelectorAll('th');
-        headers.forEach(header => {
-          header.style.cursor = 'pointer';
-          header.addEventListener('click', function(event) {
-            if (!event.target.closest('.filterIcon')) {
-              const sortIcon = this.querySelector('.sortIcon');
-              const columnIdentifier = sortIcon.getAttribute('data-column');
-              const columnIndex = getColumnIndex(columnIdentifier);
-              const isAscending = sortIcon.getAttribute('data-sort') !== 'asc';
-              sortTableByColumn(table, columnIndex, isAscending);
-              resetSortIcons(headers, sortIcon, isAscending ? 'asc' : 'desc');
-            }
-          });
+    function attachEventListeners(table, data, routeIndex) {
+      const headers = table.querySelectorAll('th');
+      headers.forEach(header => {
+        header.style.cursor = 'pointer';
+        header.addEventListener('click', function(event) {
+          if (!event.target.closest('.filterIcon')) {
+            const sortIcon = this.querySelector('.sortIcon');
+            const columnIdentifier = sortIcon.getAttribute('data-column');
+            const columnIndex = getColumnIndex(columnIdentifier);
+            const isAscending = sortIcon.getAttribute('data-sort') !== 'asc';
+            console.log('Sorting by column:', columnIdentifier, 'index:', columnIndex, 'ascending:', isAscending);
+            sortTableByColumn(table, columnIndex, isAscending);
+            resetSortIcons(headers, sortIcon, isAscending ? 'asc' : 'desc');
+          }
         });
-      
-        // Attach event listeners specifically for date filter icons
-        document.querySelectorAll('.filterIcon').forEach(icon => {
-          icon.addEventListener('click', function(event) {
-            event.stopPropagation(); // Prevent the event from bubbling up to the header
-            const column = this.getAttribute('data-column');
-            if (column === 'departure' || column === 'arrival') {
-              const dateFilterPopup = document.getElementById(`${column}DateFilterPopup`);
-              if (dateFilterPopup) {
-                dateFilterPopup.classList.toggle('hidden');
-              } else {
-                showDateFilterPopup(event, column);
-              }
-            }
-          });
-        });
-  
-        document.querySelectorAll('.filterIcon').forEach(icon => {
-          icon.addEventListener('click', function(event) {
-              event.stopPropagation();
-              const column = this.getAttribute('data-column');
-              if (!column) {
-                  console.error('Column attribute is missing on the icon:', this);
-                  return;
-              }
-              console.log('Filtering column:', column);
-              const data = fetchDataForColumn(column);
-              console.log('Data for column:', data)
-              if (data) {
-                  createFilterPopup(column, data, event);
-              } else {
-                  console.error('Failed to fetch data for column:', column);
-              }
-          });
       });
-   
+  
+      document.querySelectorAll('.filterIcon').forEach(icon => {
+        icon.addEventListener('click', function(event) {
+            event.stopPropagation();
+            const column = this.getAttribute('data-column');
+            if (!column) {
+                console.error('Column attribute is missing on the icon:', this);
+                return;
+            }
+            console.log('Filtering column:', column);
+            const data = fetchDataForColumn(column);
+            console.log('Data for column:', data)
+            if (data) {
+                sliderFilter.createFilterPopup(column, data, event);
+            } else {
+                console.error('Failed to fetch data for column:', column);
+            }
+        });
+      });
+  
       function fetchDataForColumn(column) {
         switch (column) {
             case 'price':
@@ -171,123 +156,84 @@ function buildAnyDestTable(routeIndex, origin, dateRange) {
                     const priceText = cell.textContent.replace(/[^\d.]/g, ''); // Remove any non-numeric characters, including the dollar sign
                     return parseFloat(priceText);
                 }).filter(price => !isNaN(price)); // Ensure only valid numbers are included
-    
+  
                 if (prices.length === 0) {
                     console.error('No valid prices found in the column');
                     return { min: 0, max: 0 }; // Return default or error values if no prices are found
                 }
-    
+  
                 const min = Math.min(...prices);
                 const max = Math.max(...prices);
                 return { min, max };
-    
+  
             case 'departure':
             case 'arrival':
                 return {
                     min: 0,
                     max: 24
                 };
-    
+  
             default:
                 console.error('Unsupported column:', column);
                 return null;
         }
-    }
-    
-    function getColumnIndex(columnIdentifier) {
-        const columnMap = {
-            'departure': 0,
-            'arrival': 1,
-            'price': 2,
-            'airlines': 3,
-            'direct': 4,
-            'stops': 5,
-            'layovers': 6,
-            'duration': 7,
-            'route': 8
-        };
-        return columnMap[columnIdentifier] || -1;
-    }
-      
-    document.querySelectorAll('.route-info-table tbody tr').forEach((row, index) => {
-      row.addEventListener('click', function() {
-        const routeIdString = this.getAttribute('data-route-id');
-        const routeIds = routeIdString.split('|');
-        const fullFlightData = data.data[index];
-        routeInfoRow(this, fullFlightData, routeIds, routeIndex);
-      });
-  });                 
+      }
   
-  document.querySelectorAll('.route-info-table tbody tr').forEach(row => {
-    row.addEventListener('mouseover', function() {
-      const routeString = this.cells[8].textContent.trim();
-      const iataCodes = routeString.split(' > ');
-
-      for (let i = 0; i < iataCodes.length - 1; i++) {
-          const originIata = iataCodes[i];
-          const destinationIata = iataCodes[i + 1];
-          pathDrawing.drawPathBetweenAirports(originIata, destinationIata, flightMap.getAirportDataByIata);
-      }
-    });
-
-    row.addEventListener('mouseout', function() {
-        pathDrawing.clearLines();
-        pathDrawing.drawLines();
-    });
-  });
-
-  // Separate handling for the price filter icon
-  const priceFilterIcon = document.getElementById('priceFilter');
-  if (priceFilterIcon) {
-    priceFilterIcon.addEventListener('click', function(event) {
-      event.stopPropagation(); // Prevent the event from affecting other elements
-      const priceSliderPopup = document.getElementById('priceSliderPopup');
-      if (priceSliderPopup) {
-        priceSliderPopup.classList.toggle('hidden');
-      } else {
-        priceFilter.showPriceFilterPopup(event, data);
-      }
-    });
-  }
-}
-
-function resetSortIcons(headers, currentIcon, newSortState) {
-  headers.forEach(header => {
-    const icon = header.querySelector('.sortIcon');
-    if (icon !== currentIcon) {
-      icon.innerHTML = '&#x21C5;'; // Reset to double arrow
-      icon.removeAttribute('data-sort');
-    } else {
-      icon.innerHTML = newSortState === 'asc' ? '&#x25B2;' : '&#x25BC;';
-      icon.setAttribute('data-sort', newSortState);
+      document.querySelectorAll('.route-info-table tbody tr').forEach((row, index) => {
+        row.addEventListener('click', function() {
+          const routeIdString = this.getAttribute('data-route-id');
+          const routeIds = routeIdString.split('|');
+          const fullFlightData = data.data[index];
+          routeInfoRow(this, fullFlightData, routeIds, routeIndex);
+        });
+      });    
+      
+      document.querySelectorAll('.route-info-table tbody tr').forEach(row => {
+        row.addEventListener('mouseover', function() {
+          const routeString = this.cells[8].textContent.trim();
+          const iataCodes = routeString.split(' > ');
+  
+          for (let i = 0; i < iataCodes.length - 1; i++) {
+              const originIata = iataCodes[i];
+              const destinationIata = iataCodes[i + 1];
+              pathDrawing.drawPathBetweenAirports(originIata, destinationIata, flightMap.getAirportDataByIata);
+          }
+        });
+  
+        row.addEventListener('mouseout', function() {
+            pathDrawing.clearLines();
+            pathDrawing.drawLines();
+        });
+      });
+    } 
+    
+    function resetSortIcons(headers, currentIcon, newSortState) {
+      headers.forEach(header => {
+        const icon = header.querySelector('.sortIcon');
+        if (icon !== currentIcon) {
+          icon.innerHTML = '&#x21C5;'; // Reset to double arrow
+          icon.removeAttribute('data-sort');
+        } else {
+          icon.innerHTML = newSortState === 'asc' ? '&#x25B2;' : '&#x25BC;';
+          icon.setAttribute('data-sort', newSortState);
+        }
+      });
     }
-  });
-}
-
-function sortTableByColumn(table, columnIndex, asc = true) {
-  const dirModifier = asc ? 1 : -1;
-  const tBody = table.tBodies[0];
-  const rows = Array.from(tBody.querySelectorAll("tr"));
-
-  const sortedRows = rows.sort((a, b) => {
-    let aColText = a.cells[columnIndex - 1].textContent.trim();
-    let bColText = b.cells[columnIndex - 1].textContent.trim();
-    return aColText.localeCompare(bColText, undefined, { numeric: true }) * dirModifier;
-  });
-
-  while (tBody.firstChild) {
-    tBody.removeChild(tBody.firstChild);
-  }
-  tBody.append(...sortedRows);
-
-  // Update header classes for visual indication of sort direction
-  table.querySelectorAll("th").forEach(th => th.classList.remove("th-sort-asc", "th-sort-desc"));
-  if (asc) {
-    table.querySelector(`th:nth-child(${columnIndex})`).classList.add("th-sort-asc");
-  } else {
-    table.querySelector(`th:nth-child(${columnIndex})`).classList.add("th-sort-desc");
-  }
-}
+  
+    function getColumnIndex(columnIdentifier) {
+      const columnMap = {
+        'departure': 0,
+        'arrival': 1,
+        'price': 2,
+        'airlines': 3,
+        'direct': 4,
+        'stops': 5,
+        'layovers': 6,
+        'duration': 7,
+        'route': 8
+      };
+      return columnMap[columnIdentifier];
+    }
 }
 
 export { buildAnyDestTable };

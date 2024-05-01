@@ -1,5 +1,5 @@
 import { appState, updateState } from '../stateManager.js';
-import { createFilterPopup } from './filterUi.js';
+import { sliderFilter } from './sliderFilter.js';
 import { sortTableByColumn } from './sortTable.js';
 import { pathDrawing } from '../pathDrawing.js';
 import { flightMap } from '../flightMap.js';
@@ -127,7 +127,7 @@ function buildSingleDateTable(routeIndex) {
             const data = fetchDataForColumn(column);
             console.log('Data for column:', data)
             if (data) {
-                createFilterPopup(column, data, event);
+                sliderFilter.createFilterPopup(column, data, event);
             } else {
                 console.error('Failed to fetch data for column:', column);
             }

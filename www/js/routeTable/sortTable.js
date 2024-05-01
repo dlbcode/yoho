@@ -36,13 +36,16 @@ export function sortTableByColumn(table, columnIndex, asc = true) {
 
 function convertData(data, columnIndex) {
     switch (columnIndex) {
-        case 0: // Departure and Arrival (Date/time)
+        case 0:
+            return new Date(data);
         case 1:
             return new Date(data);
         case 2: // Price (Numeric)
             return parseFloat(data.replace(/[^0-9.]/g, ''));
         case 4: // Direct (Boolean)
             return data === '✓';
+        case 5: // Stops (Numeric)
+            return parseInt(data);
         case 7: // Duration (hh mm)
             const [hours, minutes] = data.split('h ');
             return parseInt(hours) * 60 + parseInt(minutes.replace('m', ''));
