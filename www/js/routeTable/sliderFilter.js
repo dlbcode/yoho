@@ -39,39 +39,53 @@ const sliderFilter = {
             }
             if (!existingPopup.classList.contains('hidden')) {
                 const slider = existingPopup.querySelector(`#${column}Slider`);
-                // Assuming the slider initialization already occurred:
                 const filterValues = appState.filterState[column];
-                if (slider && filterValues) {
-                    slider.noUiSlider.set([filterValues.start, filterValues.end]);
+                // Check if the filter values are null and reset to default if necessary
+                if (slider) {
+                    if (filterValues) {
+                        // Adjust based on whether the filter is a range or a single value
+                        if (filterValues.hasOwnProperty('start')) {
+                            slider.noUiSlider.set([filterValues.start, filterValues.end]);
+                        } else {
+                            slider.noUiSlider.set([filterValues.value]);
+                        }
+                    } else {
+                        // Reset to default values, e.g., the whole range or the mid-point for single handle sliders
+                        if (data.hasOwnProperty('start')) {
+                            slider.noUiSlider.set([data.min, data.max]);
+                        } else {
+                            slider.noUiSlider.set([data.max]);
+                        }
+                    }
                 }
                 sliderFilter.positionPopup(existingPopup, event);  // Update position every time it's shown
             }
             return;
         }
-    
+
         const filterPopup = document.createElement('div');
         filterPopup.id = `${column}FilterPopup`;
         filterPopup.className = 'filter-popup';
         document.body.appendChild(filterPopup);
-    
+
         const valueLabel = document.createElement('div');
         valueLabel.id = `${column}ValueLabel`;
         valueLabel.className = 'filter-value-label';
         filterPopup.appendChild(valueLabel);
-    
+
         if (!data) {
             console.error('No data provided for filtering:', column);
             return; // Do not proceed if no data is provided
         }
-    
+
         sliderFilter.positionPopup(filterPopup, event);  // Initial position setting
         sliderFilter.initializeSlider(filterPopup, column, data, valueLabel);
-    
+
         document.addEventListener('click', function (e) {
             if (!filterPopup.contains(e.target) && e.target !== filterPopup && e.target !== event.target) {
                 filterPopup.classList.add('hidden');
             }
-        }, true); // Use capture phase to handle the event earlier
+        }, true);
     },    
 
     positionPopup: function(popup, event) {
