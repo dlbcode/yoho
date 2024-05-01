@@ -90,10 +90,19 @@ function updatePriceHeader() {
 
     if (resetButton) {
         resetButton.style.display = appState.filterState.price ? '' : 'none';
+        resetButton.addEventListener('click', () => {
+            appState.filterState.price = null;
+            priceText.textContent = 'Price';
+        });
     } else if (appState.filterState.price) {
         const resetButtonHTML = `<span id="resetPrice" style="margin-left: 5px; cursor: pointer;">&#x2715;</span>`; // Using Unicode 'X' character
         const priceFilterIcon = document.getElementById('priceFilter');
         priceFilterIcon.insertAdjacentHTML('afterend', resetButtonHTML);
+        document.getElementById('resetPrice').addEventListener('click', () => {
+            appState.filterState.price = null;
+            priceText.textContent = 'Price';
+            applyFilters();
+        });
     }
 }
 
