@@ -1,4 +1,5 @@
 import { appState } from '../stateManager.js';
+import { sliderFilter } from './sliderFilter.js';
 
 function logFilterState() {
     //console.log('Current Filter State:', JSON.stringify(appState.filterState));
@@ -81,9 +82,18 @@ function parseTime(timeStr) {
 function updatePriceHeader() {
     const priceText = document.getElementById('priceText');
     const priceFilterValue = appState.filterState.price ? `$${appState.filterState.price.value}` : 'Price';
+    const resetButton = document.getElementById('resetPrice');
+
     if (priceText) {
-        console.log('setting price header to', priceFilterValue);
         priceText.textContent = priceFilterValue;
+    }
+
+    if (resetButton) {
+        resetButton.style.display = appState.filterState.price ? '' : 'none';
+    } else if (appState.filterState.price) {
+        const resetButtonHTML = `<span id="resetPrice" style="margin-left: 5px; cursor: pointer;">&#x2715;</span>`; // Using Unicode 'X' character
+        const priceFilterIcon = document.getElementById('priceFilter');
+        priceFilterIcon.insertAdjacentHTML('afterend', resetButtonHTML);
     }
 }
 
