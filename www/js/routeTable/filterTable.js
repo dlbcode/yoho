@@ -32,6 +32,7 @@ function applyFilters() {
 
         updateLineVisibility(isVisible, row);
     });
+    updatePriceHeader();
 }
 
 function updateLineVisibility(isVisible, row) {
@@ -75,6 +76,15 @@ function parseTime(timeStr) {
     hours = modifier === 'AM' && hours === 12 ? 0 : hours; // Convert 12 AM to 0 hours
 
     return hours + minutes / 60; // Converts time to decimal hours
+}
+
+function updatePriceHeader() {
+    const priceText = document.getElementById('priceText');
+    const priceFilterValue = appState.filterState.price ? `$${appState.filterState.price.value}` : 'Price';
+    if (priceText) {
+        console.log('setting price header to', priceFilterValue);
+        priceText.textContent = priceFilterValue;
+    }
 }
 
 function getColumnIndex(columnIdentifier) {

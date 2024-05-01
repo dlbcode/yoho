@@ -39,16 +39,16 @@ function buildSingleDateTable(routeIndex) {
 
       const thead = document.createElement('thead');
       let headerRow = `<tr>
-                        <th>Departure <span class="sortIcon" data-column="departure">&#x21C5;</span><img class="filterIcon" data-column="departure" src="/assets/filter-icon.svg" alt="Filter"></th>
-                        <th>Arrival <span class="sortIcon" data-column="arrival">&#x21C5;</span><img class="filterIcon" data-column="arrival" src="/assets/filter-icon.svg" alt="Filter"></th>
-                        <th>Price <span class="sortIcon" data-column="price">&#x21C5;</span><img id="priceFilter" class="filterIcon" data-column="price" src="/assets/filter-icon.svg" alt="Filter"></th>
-                        <th>Airlines <span class="sortIcon" data-column="airlines">&#x21C5;</span></th>
-                        <th>Direct <span class="sortIcon" data-column="direct">&#x21C5;</span></th>
-                        <th>Stops <span class="sortIcon" data-column="stops">&#x21C5;</span></th>
-                        <th>Layovers <span class="sortIcon" data-column="layovers">&#x21C5;</span></th>
-                        <th>Duration <span class="sortIcon" data-column="duration">&#x21C5;</span></th>
-                        <th>Route <span class="sortIcon" data-column="route">&#x21C5;</span></th>
-                     </tr>`;
+                    <th data-column="departure">Departure <span class="sortIcon" data-column="departure">&#x21C5;</span><img class="filterIcon" data-column="departure" src="/assets/filter-icon.svg" alt="Filter"></th>
+                    <th data-column="arrival">Arrival <span class="sortIcon" data-column="arrival">&#x21C5;</span><img class="filterIcon" data-column="arrival" src="/assets/filter-icon.svg" alt="Filter"></th>
+                    <th data-column="price"><span id="priceText">Price</span><span class="sortIcon" data-column="price">&#x21C5;</span><img id="priceFilter" class="filterIcon" data-column="price" src="/assets/filter-icon.svg" alt="Filter"></th>
+                    <th data-column="airlines">Airlines <span class="sortIcon" data-column="airlines">&#x21C5;</span></th>
+                    <th data-column="direct">Direct <span class="sortIcon" data-column="direct">&#x21C5;</span></th>
+                    <th data-column="stops">Stops <span class="sortIcon" data-column="stops">&#x21C5;</span></th>
+                    <th data-column="layovers">Layovers <span class="sortIcon" data-column="layovers">&#x21C5;</span></th>
+                    <th data-column="duration">Duration <span class="sortIcon" data-column="duration">&#x21C5;</span></th>
+                    <th data-column="route">Route <span class="sortIcon" data-column="route">&#x21C5;</span></th>
+                 </tr>`;
       thead.innerHTML = headerRow;
       table.appendChild(thead);
 
