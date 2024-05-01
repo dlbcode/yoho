@@ -101,18 +101,18 @@ function buildSingleDateTable(routeIndex) {
     function attachEventListeners(table, data, routeIndex) {
       const headers = table.querySelectorAll('th');
       headers.forEach(header => {
-        header.style.cursor = 'pointer';
-        header.addEventListener('click', function(event) {
-          if (!event.target.closest('.filterIcon')) {
-            const sortIcon = this.querySelector('.sortIcon');
-            const columnIdentifier = sortIcon.getAttribute('data-column');
-            const columnIndex = getColumnIndex(columnIdentifier);
-            const isAscending = sortIcon.getAttribute('data-sort') !== 'asc';
-            sortTableByColumn(table, columnIndex, isAscending);
-            resetSortIcons(headers, sortIcon, isAscending ? 'asc' : 'desc');
-          }
-        });
-      });
+          header.style.cursor = 'pointer';
+          header.addEventListener('click', function(event) {
+              const sortIcon = event.target.closest('.sortIcon');
+              if (sortIcon) {  // This checks if the clicked element is the sortIcon itself
+                  const columnIdentifier = sortIcon.getAttribute('data-column');
+                  const columnIndex = getColumnIndex(columnIdentifier);
+                  const isAscending = sortIcon.getAttribute('data-sort') !== 'asc';
+                  sortTableByColumn(table, columnIndex, isAscending);
+                  resetSortIcons(headers, sortIcon, isAscending ? 'asc' : 'desc');
+              }
+          });
+      });  
 
       document.querySelectorAll('.filterIcon').forEach(icon => {
         icon.addEventListener('click', function(event) {
