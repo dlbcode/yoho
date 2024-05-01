@@ -36,7 +36,11 @@ function applyFilters() {
 
 function updateLineVisibility(isVisible, row) {
     const routeLineId = row.getAttribute('data-route-id');
-    (isVisible ? appState.routeLines : appState.invisibleRouteLines).forEach(line => {
+
+    // Update visibility for both routeLines and invisibleRouteLines when isVisible is true
+    const linesToUpdate = isVisible ? [...appState.routeLines, ...appState.invisibleRouteLines] : appState.invisibleRouteLines;
+
+    linesToUpdate.forEach(line => {
         if (line.routeLineId === routeLineId) {
             line.setStyle({opacity: isVisible ? 1 : 0, fillOpacity: isVisible ? 1 : 0});
             line._path.style.pointerEvents = isVisible ? '' : 'none';
@@ -45,8 +49,8 @@ function updateLineVisibility(isVisible, row) {
 }
 
 function resetLineVisibility() {
-    if (appState.routeLines && appState.invisibleRouteLines) {
-        appState.routeLines.concat(appState.invisibleRouteLines).forEach(line => {
+    if (appState.routeLines) {
+        appState.routeLines.forEach(line => {
             line.setStyle({opacity: 0, fillOpacity: 0});
             line._path.style.pointerEvents = 'none';
         });
