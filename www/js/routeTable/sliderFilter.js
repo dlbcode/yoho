@@ -96,57 +96,40 @@ const sliderFilter = {
                     }
                 }))
             };
-// Function to update slider settings dynamically
-function updateSliderSettings(slider, newMin, newMax) {
-    slider.noUiSlider.updateOptions({
-        range: {
-            'min': newMin,
-            'max': newMax
-        },
-        start: [newMin, newMax]
-    });
-}
-
-// Extracted initialization of slider settings
-function initializeSliderSettings(column, data) {
-    let sliderSettings = {};
-    if (column === 'price' && data && data.hasOwnProperty('min') && data.hasOwnProperty('max')) {
-        sliderSettings = {
-            start: [data.min, data.max],
-            range: {
-                'min': data.min,
-                'max': data.max
-            },
-            step: 1,
-            tooltips: true,
-            format: {
-                to: function(value) {
-                    return `$${Math.round(value)}`;
-                },
-                from: function(value) {
-                    return Number(value.replace('$', ''));
-                }
+        } else if (column === 'price') {
+            if (data && data.hasOwnProperty('min') && data.hasOwnProperty('max')) {
+                sliderSettings = {
+                    start: data.max,
+                    range: {
+                        'min': data.min,
+                        'max': data.max
+                    },
+                    step: 1,
+                    tooltips: true,
+                    format: {
+                        to: function(value) {
+                            return `$${Math.round(value)}`;
+                        },
+                        from: function(value) {
+                            return Number(value.replace('$', ''));
+                        }
+                    }
+                };
+            } else {
+                console.error('Data object missing required properties for price slider:', data);
+                return; // Exit function if data is not correct
             }
-        };
-    }
-    return sliderSettings;
-}
+        }
 
-// Modified initialization of the slider to use the new function
-sliderFilter.initializeSlider = function(popup, column, data, valueLabel) {
-    const slider = document.createElement('div');
-    slider.id = `${column}Slider`;
-    popup.appendChild(slider);
-    const sliderSettings = initializeSliderSettings(column, data);
-    if (Object.keys(sliderSettings).length !== 0) {
-        noUiSlider.create(slider, sliderSettings);
-        slider.noUiSlider.on('update', function(values) {
-            sliderFilter.updateFilterStateAndLabel(column, values, valueLabel);
-        });
-    } else {
-        console.error('Slider settings not defined due to missing or incorrect data');
-    }
-};
+        if (sliderSettings) {
+            noUiSlider.create(slider, sliderSettings);
+            const handles = slider.querySelectorAll('.noUi-handle');
+            handles.forEach(handle => handle.classList.add('slider-handle'));
+            slider.noUiSlider.on('update', function(values) {
+                sliderFilter.updateFilterStateAndLabel(column, values, valueLabel);
+            });
+        } else {
+            console.error('Slider settings not defined due to missing or incorrect data');
         }
     },
 
