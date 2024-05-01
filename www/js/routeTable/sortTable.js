@@ -40,9 +40,7 @@ function convertData(data, columnIndex) {
         case 1:
             return new Date(data);
         case 2: // Price (Numeric)
-            const cleanedData = data.replace(/[^0-9.]/g, '');
-            const parsedPrice = parseFloat(cleanedData);
-            return parsedPrice;
+            return parseFloat(data.replace(/[^0-9.]/g, ''));
         case 4: // Direct (Boolean)
             return data === '✓';
         case 7: // Duration (hh mm)

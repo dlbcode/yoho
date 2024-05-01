@@ -207,7 +207,7 @@ function buildSingleDateTable(routeIndex) {
 
   function getColumnIndex(columnIdentifier) {
     const columnMap = {
-      'departure': 0,  // Updated to 1-based index
+      'departure': 0,
       'arrival': 1,
       'price': 2,
       'airlines': 3,
