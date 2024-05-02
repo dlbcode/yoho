@@ -22,17 +22,8 @@
 }
 
 .filterIcon, .route-info-table th .filterIcon {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
   width: 16px;
   height: 16px;
-}
-
-.sortIcon {
-  position: relative; /* Inline but on the opposite side */
-  float: right; /* Pushes the icon to the right */
-  margin-left: 5px; /* Spacing from the text */
 }
 
 #sortIcon:hover, #priceFilterIcon:hover {
@@ -42,6 +33,29 @@
 .route-info-table th {
   position: relative;
   text-align: left;
+  width: auto; /* Ensure the th is only as wide as needed */
+  padding-right: 30px; /* Increase if necessary to accommodate the sort icon */
+  overflow: visible; /* Changed from hidden to visible to test layout */
+}
+
+.filterButton {
+  background: rgb(3, 97, 164);
+  height: 30px;
+  border-radius: 5px;
+  display: inline-flex;
+  padding: 0 5px 0 5px;
+  align-items: center;
+  font-size: 14px;
+  justify-content: space-between;
+  width: calc(100% - 40px); /* Adjust width to leave space for the sort icon */
+}
+
+.sortIcon {
+  float: right;
+  margin-left: 5px;
+  font-size: 18px;
+  font-weight: 300;
+  position: relative;
 }
 
 .route-info-table tbody tr.selected {
