@@ -177,7 +177,7 @@ function buildDateRangeTable(routeIndex, dateRange) {
         row.addEventListener('click', function() {
           const routeIdString = this.getAttribute('data-route-id');
           const routeIds = routeIdString.split('|');
-          const fullFlightData = data[index];
+          const fullFlightData = data.data[index];
           routeInfoRow(this, fullFlightData, routeIds, routeIndex);
         });
     });    
