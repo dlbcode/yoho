@@ -109,8 +109,8 @@ function buildRouteTable(routeIndex) {
 
       const thead = document.createElement('thead');
       let headerRow = `<tr>
-                    <th data-column="departure">Departure <span class="sortIcon" data-column="departure">&#x21C5;</span><img class="filterIcon" id="departureFilter"data-column="departure" src="/assets/filter-icon.svg" alt="Filter"></th>
-                    <th data-column="arrival">Arrival <span class="sortIcon" data-column="arrival">&#x21C5;</span><img id="arrivalFilter" class="filterIcon" data-column="arrival" src="/assets/filter-icon.svg" alt="Filter"></th>
+                    <th data-column="departure">Departure <img class="filterIcon" id="departureFilter" data-column="departure" src="/assets/filter-icon.svg" alt="Filter"><span class="sortIcon" data-column="departure">&#x21C5;</span></th>
+                    <th data-column="arrival">Arrival <img id="arrivalFilter" class="filterIcon" data-column="arrival" src="/assets/filter-icon.svg" alt="Filter"><span class="sortIcon" data-column="arrival">&#x21C5;</span></th>
                     <th data-column="price"><span id="priceText">Price</span><span class="sortIcon" data-column="price">&#x21C5;</span><img id="priceFilter" class="filterIcon" data-column="price" src="/assets/filter-icon.svg" alt="Filter"></th>
                     <th data-column="airlines">Airlines <span class="sortIcon" data-column="airlines">&#x21C5;</span></th>
                     <th data-column="direct">Direct <span class="sortIcon" data-column="direct">&#x21C5;</span></th>
