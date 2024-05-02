@@ -9,11 +9,11 @@ function applyFilters() {
     const table = document.querySelector('.route-info-table');
     const rows = table.querySelectorAll('tbody tr');
 
-    resetLineVisibility();  // Reset visibility for all related graphical elements
+    resetLineVisibility();
 
     rows.forEach(row => {
         if (row.classList.contains('route-info-row')) {
-            return; // Skip the route-info-row
+            return;
         }
 
         const priceText = row.cells[getColumnIndex('price')].textContent;
@@ -33,13 +33,12 @@ function applyFilters() {
 
         updateLineVisibility(isVisible, row);
     });
-    updatePriceHeader();
+    updateFilterHeaders();
 }
 
 function updateLineVisibility(isVisible, row) {
     const routeLineId = row.getAttribute('data-route-id');
 
-    // Update visibility for both routeLines and invisibleRouteLines when isVisible is true
     const linesToUpdate = isVisible ? [...appState.routeLines, ...appState.invisibleRouteLines] : appState.invisibleRouteLines;
 
     linesToUpdate.forEach(line => {
@@ -62,7 +61,9 @@ function updateLineVisibility(isVisible, row) {
 function resetLineVisibility() {
     if (appState.routeLines) {
         appState.routeLines.forEach(line => {
-            line.setStyle({opacity: 0, fillOpacity: 0});
+            let opacity = 0;  // Since resetting visibility should hide lines, set opacity to 0
+            let isVisible = false;  // We assume lines are not visible when reset
+            line.setStyle({ opacity: opacity, fillOpacity: isVisible ? 1 : 0 });
             line._path.style.pointerEvents = 'none';
         });
     }
@@ -79,31 +80,39 @@ function parseTime(timeStr) {
     return hours + minutes / 60; // Converts time to decimal hours
 }
 
-function updatePriceHeader() {
-    const priceText = document.getElementById('priceText');
-    const priceFilterValue = appState.filterState.price ? `$${appState.filterState.price.value}` : 'Price';
-    const resetButton = document.getElementById('resetPrice');
+function updateFilterHeaders() {
+    const filterTypes = ['price', 'departure', 'arrival'];
+    filterTypes.forEach(type => {
+        const filterIcon = document.getElementById(`${type}Filter`);
+        if (!filterIcon) {
+            console.error(`Filter icon for ${type} not found.`);
+            return;
+        }
 
-    if (priceText) {
-        priceText.textContent = priceFilterValue;
-    }
+        const filterValue = appState.filterState[type];
+        const filterTextElement = document.getElementById(`${type}Text`);
+        const resetButtonId = `reset${type.charAt(0).toUpperCase() + type.slice(1)}`;
+        const resetButton = document.getElementById(resetButtonId);
 
-    if (resetButton) {
-        resetButton.style.display = appState.filterState.price ? '' : 'none';
-        resetButton.addEventListener('click', () => {
-            appState.filterState.price = null;
-            priceText.textContent = 'Price';
-        });
-    } else if (appState.filterState.price) {
-        const resetButtonHTML = `<span id="resetPrice" style="margin-left: 5px; cursor: pointer;">&#x2715;</span>`; // Using Unicode 'X' character
-        const priceFilterIcon = document.getElementById('priceFilter');
-        priceFilterIcon.insertAdjacentHTML('afterend', resetButtonHTML);
-        document.getElementById('resetPrice').addEventListener('click', () => {
-            appState.filterState.price = null;
-            priceText.textContent = 'Price';
-            applyFilters();
-        });
-    }
+        if (filterValue && !resetButton) {
+            const resetButtonHTML = `<span id="${resetButtonId}" style="margin-left: 5px; cursor: pointer;">&#x2715;</span>`;
+            filterIcon.insertAdjacentHTML('afterend', resetButtonHTML);
+            document.getElementById(resetButtonId).addEventListener('click', () => {
+                if (type === 'departure' || type === 'arrival') {
+                    appState.filterState[type] = { start: 0, end: 24 };
+                } else {
+                    appState.filterState[type] = null;  // For price or other filters
+                }
+                applyFilters();
+            });
+        } else if (resetButton) {
+            resetButton.style.display = filterValue ? '' : 'none';
+        }
+
+        if (filterTextElement) {
+            filterTextElement.textContent = filterValue ? `$${filterValue.value}` : `${type.charAt(0).toUpperCase() + type.slice(1)}`;
+        }
+    });
 }
 
 function getColumnIndex(columnIdentifier) {
