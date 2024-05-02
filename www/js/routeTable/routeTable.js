@@ -9,6 +9,36 @@ function buildRouteTable(routeIndex) {
 
   const dateRange = appState.routeDates[routeIndex];
 
+  let origin, destination, currentRoute, startDate, endDate, departureDate;
+
+  if (appState.routes[routeIndex] && appState.routes[routeIndex].originAirport && appState.routes[routeIndex].destinationAirport) {
+      origin = appState.routes[routeIndex].originAirport.iata_code;
+      destination = appState.routes[routeIndex].destinationAirport.iata_code;
+  } else {
+      origin = appState.waypoints[routeIndex * 2]?.iata_code;
+      destination = appState.waypoints[(routeIndex * 2) + 1]?.iata_code || 'Any';
+  }
+
+  if (destination === 'Any') {
+    if (!currentRoute && appState.waypoints.length === 0) {
+      document.querySelector('#infoPaneContent').textContent = 'Please select at least one location to display data.';
+      return;
+    }
+  
+    let fromDate;
+    let toDate;
+  
+    if (dateRange.includes(' to ')) {
+      const dateRangeParts = dateRange.split(' to ');
+      fromDate = dateRangeParts[0];
+      toDate = dateRangeParts[1];
+    } else {
+      fromDate = dateRange;
+      toDate = dateRange;
+    }
+    const maxPrice = 500;
+  }
+
   let tableType = 'single';
   if (dateRange) {
     if (dateRange.includes(' to ')) {
@@ -18,8 +48,6 @@ function buildRouteTable(routeIndex) {
     }
   }
 
-  let destination;
-
   if (appState.routes[routeIndex] && appState.routes[routeIndex].originAirport && appState.routes[routeIndex].destinationAirport) {
       origin = appState.routes[routeIndex].originAirport.iata_code;
       destination = appState.routes[routeIndex].destinationAirport.iata_code;
@@ -28,8 +56,7 @@ function buildRouteTable(routeIndex) {
       destination = appState.waypoints[(routeIndex * 2) + 1]?.iata_code || 'Any';
   }
   
-  let currentRoute, startDate, endDate, departureDate;
-  if (!currentRoute) {
+  if (!currentRoute && destination !== 'Any') {
     if (tableType === 'range' || tableType === 'any') {
       console.log('dateRange:', routeIndex, dateRange);
       [startDate, endDate] = dateRange.split(' to ');
@@ -47,6 +74,8 @@ function buildRouteTable(routeIndex) {
       document.querySelector('#infoPaneContent').textContent = 'Please select a route to display data.';
       return;
     }
+  } else {
+    currentRoute = appState.routes && appState.routes.length > routeIndex ? appState.routes[routeIndex] : undefined;
   }
   
 
@@ -60,7 +89,9 @@ function buildRouteTable(routeIndex) {
 
 // Assign values first before using them in the apiUrl.
 origin = currentRoute.originAirport.iata_code;
-destination = currentRoute.destinationAirport.iata_code;
+if (destination !== 'Any') {
+  destination = currentRoute.destinationAirport.iata_code;
+}
 
 let apiUrl = `https://yonderhop.com/api/range?flyFrom=${origin}&flyTo=${destination}`;
 
