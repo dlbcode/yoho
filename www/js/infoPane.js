@@ -77,7 +77,7 @@ const infoPane = {
         button.textContent = buttonText;
 
         button.onclick = () => {
-          pathDrawing.clearLines();
+          pathDrawing.clearLines(true);
           pathDrawing.drawLines();
             appState.currentRouteIndex = routeIndex;
             if (appState.selectedRoutes.hasOwnProperty(routeIndex)) {
