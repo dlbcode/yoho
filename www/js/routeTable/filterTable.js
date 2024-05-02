@@ -132,7 +132,6 @@ function toggleFilterResetIcon(column) {
     }
 }
 
-// add listener for filter reset icons
 document.addEventListener('click', function (e) {
     if (e.target.classList.contains('resetIcon')) {
         const column = e.target.getAttribute('data-column');
