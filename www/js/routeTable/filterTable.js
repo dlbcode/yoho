@@ -91,28 +91,6 @@ function updateFilterHeaders() {
 
         const filterValue = appState.filterState[type];
         const filterTextElement = document.getElementById(`${type}Text`);
-        //const resetButtonId = `reset${type.charAt(0).toUpperCase() + type.slice(1)}`;
-        //const resetButton = document.getElementById(resetButtonId);
-//
-        //if (filterValue && !resetButton) {
-        //    const resetButtonHTML = `<span id="${resetButtonId}" style="margin-left: 5px; cursor: pointer;">&#x2715;</span>`;
-        //    filterIcon.insertAdjacentHTML('afterend', resetButtonHTML);
-        //    document.getElementById(resetButtonId).addEventListener('click', () => {
-        //        if (type === 'departure' || type === 'arrival') {
-        //            appState.filterState[type] = { start: 0, end: 24 };
-        //        } else {
-        //            appState.filterState[type] = null;  // For price or other filters
-        //        }
-        //        applyFilters();
-        //    });
-        //} else if (resetButton) {
-        //    if (type === 'departure' || type === 'arrival') {
-        //        resetButton.style.display = filterValue && (filterValue.start != 0 || filterValue.end != 24) ? '' : 'none';
-        //    } else {
-        //        resetButton.style.display = filterValue ? '' : 'none';
-        //    }
-        //}
-
         if (filterTextElement) {
             filterTextElement.textContent = filterValue ? `$${filterValue.value}` : `${type.charAt(0).toUpperCase() + type.slice(1)}`;
         }
