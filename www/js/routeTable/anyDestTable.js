@@ -5,7 +5,7 @@ import { pathDrawing } from '../pathDrawing.js';
 import { flightMap } from '../flightMap.js';
 import { routeInfoRow, highlightSelectedRowForRouteIndex } from './routeInfoRow.js';
 
-function buildAnyDestTable(routeIndex, origin, dateRange) {
+function buildAnyDestTable(routeIndex, dateRange, origin) {
   const currentRoute = appState.routes && appState.routes.length > routeIndex ? appState.routes[routeIndex] : undefined;
 
   if (!currentRoute && appState.waypoints.length === 0) {
