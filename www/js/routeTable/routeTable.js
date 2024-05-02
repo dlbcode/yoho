@@ -58,18 +58,12 @@ function buildRouteTable(routeIndex) {
   
   if (!currentRoute && destination !== 'Any') {
     if (tableType === 'range' || tableType === 'any') {
-      console.log('dateRange:', routeIndex, dateRange);
       [startDate, endDate] = dateRange.split(' to ');
-      currentRoute = appState.routes[routeIndex];  // Assign to already declared currentRoute
-      console.log(appState.routes[routeIndex]);
-      console.log('currentRoute 1: ', currentRoute);
+      currentRoute = appState.routes[routeIndex];
     } else {
-      console.log('SingleDate:', routeIndex);
       departureDate = appState.routeDates[routeIndex];
       currentRoute = appState.routes && appState.routes.length > routeIndex ? appState.routes[routeIndex] : undefined;  // Assign to already declared currentRoute
     }
-    console.log('currentRoute 2:', currentRoute);
-  
     if (!currentRoute) {
       document.querySelector('#infoPaneContent').textContent = 'Please select a route to display data.';
       return;
@@ -92,14 +86,11 @@ function buildRouteTable(routeIndex) {
   let apiUrl = `https://yonderhop.com/api/range?flyFrom=${origin}&flyTo=${destination}`;
 
   if (tableType === 'range') {
-      console.log('dateRange:', dateRange);
       const [startDate, endDate] = dateRange.split(' to ');
       apiUrl += `&dateFrom=${startDate}&dateTo=${endDate}`;
   } else if (tableType === 'any') {
-      console.log('Any date range');
       apiUrl = `https://yonderhop.com/api/range?flyFrom=${origin}&flyTo=${destination}`;
   } else if (tableType === 'single') {
-    console.log('Single date:', departureDate);
     apiUrl = `https://yonderhop.com/api/yhoneway?origin=${origin}&destination=${destination}&departureDate=${departureDate}`;
   }
 
@@ -133,8 +124,6 @@ function buildRouteTable(routeIndex) {
 
       const tbody = document.createElement('tbody');
 
-      console.log('dateRange 1:', dateRange);
-
       if (tableType === 'range' || tableType === 'any') {
           data = data.data;
       }
@@ -149,7 +138,6 @@ function buildRouteTable(routeIndex) {
         const durationHours = Math.floor(flight.duration.total / 3600);
         const durationMinutes = Math.floor((flight.duration.total % 3600) / 60);
         const routeIATAs = flight.route.map(r => r.flyFrom).concat(flight.route[flight.route.length - 1].flyTo).join(" > ");
-        console.log('dateRange 2:', dateRange);
         if (tableType === 'range' || tableType === 'any') {
           departureDate = new Date(flight.dTime * 1000);
           arrivalDate = new Date(flight.aTime * 1000);
