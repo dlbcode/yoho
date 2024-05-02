@@ -134,11 +134,10 @@ function toggleFilterResetIcon(column) {
 
 // add listener for filter reset icons
 document.addEventListener('click', function (e) {
-    const filterIcon = e.target;
-    const resetIcon = e.target;
-    const column = e.target.getAttribute('data-column');
-    if (resetIcon.id.startsWith('reset')) {
-        filterIcon.textContent.replace(/reset/gi, '').replace(/Filter/gi, '').toLowerCase();
+    if (e.target.classList.contains('resetIcon')) {
+        const column = e.target.getAttribute('data-column');
+        const filterIcon = document.querySelector(`#${column}Filter`);
+        const resetIcon = e.target;
         if (column === 'departure' || column === 'arrival') {
             appState.filterState[column] = { start: 0, end: 24 };
         } else {
