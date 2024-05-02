@@ -109,9 +109,9 @@ function buildRouteTable(routeIndex) {
 
       const thead = document.createElement('thead');
       let headerRow = `<tr>
-                    <th data-column="departure">Departure <img class="filterIcon" id="departureFilter" data-column="departure" src="/assets/filter-icon.svg" alt="Filter"><span class="sortIcon" data-column="departure">&#x21C5;</span></th>
-                    <th data-column="arrival">Arrival <img id="arrivalFilter" class="filterIcon" data-column="arrival" src="/assets/filter-icon.svg" alt="Filter"><span class="sortIcon" data-column="arrival">&#x21C5;</span></th>
-                    <th data-column="price"><span id="priceText">Price</span><span class="sortIcon" data-column="price">&#x21C5;</span><img id="priceFilter" class="filterIcon" data-column="price" src="/assets/filter-icon.svg" alt="Filter"></th>
+                    <th data-column="departure"><span class="filteredHeader" data-column="departure">Departure</span> <img class="filterIcon" id="departureFilter" data-column="departure" src="/assets/filter-icon.svg" alt="Filter"><span class="sortIcon" data-column="departure">&#x21C5;</span></th>
+                    <th data-column="arrival"><span class="filteredHeader" data-column="arrival">Arrival</span> <img id="arrivalFilter" class="filterIcon" data-column="arrival" src="/assets/filter-icon.svg" alt="Filter"><span class="sortIcon" data-column="arrival">&#x21C5;</span></th>
+                    <th data-column="price"><span class="filteredHeader" data-column="price" id="priceText">Price</span> <span class="sortIcon" data-column="price">&#x21C5;</span><img id="priceFilter" class="filterIcon" data-column="price" src="/assets/filter-icon.svg" alt="Filter"></th>
                     <th data-column="airlines">Airlines <span class="sortIcon" data-column="airlines">&#x21C5;</span></th>
                     <th data-column="direct">Direct <span class="sortIcon" data-column="direct">&#x21C5;</span></th>
                     <th data-column="stops">Stops <span class="sortIcon" data-column="stops">&#x21C5;</span></th>
@@ -190,22 +190,27 @@ function buildRouteTable(routeIndex) {
           });
       });  
 
-      document.querySelectorAll('.filterIcon').forEach(icon => {
-        icon.addEventListener('click', function(event) {
-            event.stopPropagation();
-            const column = this.getAttribute('data-column');
-            if (!column) {
-                console.error('Column attribute is missing on the icon:', this);
-                return;
-            }
-            const data = fetchDataForColumn(column);
-            if (data) {
-                sliderFilter.createFilterPopup(column, data, event);
-            } else {
-                console.error('Failed to fetch data for column:', column);
-            }
-        });
-    });
+      headers.forEach(header => {
+        const filteredHeader = header.querySelector('.filteredHeader');
+    
+        // Attach event listeners only to headers that have a 'filteredHeader' span
+        if (filteredHeader) {
+            filteredHeader.addEventListener('click', function(event) {
+              event.stopPropagation();
+              const column = this.getAttribute('data-column');
+              if (!column) {
+                  console.error('Column attribute is missing on the icon:', this);
+                  return;
+              }
+              const data = fetchDataForColumn(column);
+              if (data) {
+                  sliderFilter.createFilterPopup(column, data, event);
+              } else {
+                  console.error('Failed to fetch data for column:', column);
+              }
+          });
+        }
+    });    
  
     function fetchDataForColumn(column) {
       switch (column) {
