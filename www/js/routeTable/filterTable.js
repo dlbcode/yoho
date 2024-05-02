@@ -106,7 +106,11 @@ function updateFilterHeaders() {
                 applyFilters();
             });
         } else if (resetButton) {
-            resetButton.style.display = filterValue ? '' : 'none';
+            if (type === 'departure' || type === 'arrival') {
+                resetButton.style.display = filterValue && (filterValue.start != 0 || filterValue.end != 24) ? '' : 'none';
+            } else {
+                resetButton.style.display = filterValue ? '' : 'none';
+            }
         }
 
         if (filterTextElement) {
