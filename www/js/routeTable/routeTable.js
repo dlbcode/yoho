@@ -1,6 +1,7 @@
 import { appState } from '../stateManager.js';
-import { buildSingleDateTable } from './singleDateTable.js';
-import { buildDateRangeTable } from './rangeDateTable.js';
+//import { buildSingleDateTable } from './singleDateTable.js';
+//import { buildDateRangeTable } from './rangeDateTable.js';
+import { newBuildRouteTable } from './NewrouteTable.js';
 import { buildAnyDestTable } from './anyDestTable.js'; // Import the buildAnyOriginTable function
 
 function buildRouteTable(routeIndex) {
@@ -23,10 +24,10 @@ function buildRouteTable(routeIndex) {
     return;
   } else if (dateRange && (dateRange.includes(' to ') || dateRange.includes('any'))) {
     // If dateRange includes ' to ' or 'any', it indicates a range of dates
-    buildDateRangeTable(routeIndex, dateRange);
+    newBuildRouteTable(routeIndex, dateRange);
   } else {
     // Otherwise, it's a single departure date
-    buildSingleDateTable(routeIndex);
+    newBuildRouteTable(routeIndex);
   }
 }
 

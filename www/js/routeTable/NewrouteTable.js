@@ -5,15 +5,29 @@ import { pathDrawing } from '../pathDrawing.js';
 import { flightMap } from '../flightMap.js';
 import { routeInfoRow, highlightSelectedRowForRouteIndex } from './routeInfoRow.js';
 
-function buildRouteTable(routeIndex, dateRange) {
-  const [startDate, endDate] = dateRange.split(' to ');
-  const currentRoute = appState.routes[routeIndex];
-  const infoPaneContent = document.getElementById('infoPaneContent');
-  infoPaneContent.innerHTML = '';
-
+function newBuildRouteTable(routeIndex, dateRange = null) {
+  
+  let currentRoute, startDate, endDate, departureDate;
   if (!currentRoute) {
-    return;
+    if (dateRange) {
+      console.log('dateRange:', routeIndex, dateRange);
+      [startDate, endDate] = dateRange.split(' to ');
+      currentRoute = appState.routes[routeIndex];  // Assign to already declared currentRoute
+      console.log(appState.routes[routeIndex]);
+      console.log('currentRoute 1: ', currentRoute);
+    } else {
+      console.log('SingleDate:', routeIndex);
+      departureDate = appState.routeDates[routeIndex];
+      currentRoute = appState.routes && appState.routes.length > routeIndex ? appState.routes[routeIndex] : undefined;  // Assign to already declared currentRoute
+    }
+    console.log('currentRoute 2:', currentRoute);
+  
+    if (!currentRoute) {
+      document.querySelector('#infoPaneContent').textContent = 'Please select a route to display data.';
+      return;
+    }
   }
+  
 
   document.head.appendChild(Object.assign(document.createElement('link'), {rel: 'stylesheet', type: 'text/css', href: '../css/routeTable.css'}));
 
@@ -21,15 +35,27 @@ function buildRouteTable(routeIndex, dateRange) {
   const topBar = document.getElementById('top-bar');
   topBar.classList.add('loading');
 
-  const origin = currentRoute.originAirport.iata_code;
-  const destination = currentRoute.destinationAirport.iata_code;
+  let origin, destination;
 
-  let apiUrl = `https://yonderhop.com/api/range?flyFrom=${origin}&flyTo=${destination}`;
+// Assign values first before using them in the apiUrl.
+origin = currentRoute.originAirport.iata_code;
+destination = currentRoute.destinationAirport.iata_code;
 
+let apiUrl = `https://yonderhop.com/api/range?flyFrom=${origin}&flyTo=${destination}`;
+
+if (dateRange) {
   if (!dateRange.includes('any')) {
-      const [startDate, endDate] = dateRange.split(' to ');
-      apiUrl += `&dateFrom=${startDate}&dateTo=${endDate}`;
+    console.log('dateRange:', dateRange);
+    const [startDate, endDate] = dateRange.split(' to ');  // Ensure these are declared and accessible here
+    apiUrl += `&dateFrom=${startDate}&dateTo=${endDate}`;
+  } else {
+    console.log('Any date range');
+    apiUrl = `https://yonderhop.com/api/range?flyFrom=${origin}&flyTo=${destination}`;
   }
+} else {
+  console.log('Single date:', departureDate);
+  apiUrl = `https://yonderhop.com/api/yhoneway?origin=${origin}&destination=${destination}&departureDate=${departureDate}`;
+} 
 
   fetch(apiUrl)
     .then(response => {
@@ -61,9 +87,14 @@ function buildRouteTable(routeIndex, dateRange) {
 
       const tbody = document.createElement('tbody');
 
-    if (Array.isArray(data.data)) {
-      data.data.forEach(flight => {
+      console.log('dateRange 1:', dateRange);
+
+      if (dateRange) {
+          data = data.data;
+      }
+      data.forEach(flight => {
         let row = document.createElement('tr');
+        let departureDate, arrivalDate;
         row.setAttribute('data-route-id', flight.id);
         const directFlight = flight.route.length === 1;
         const price = parseFloat(flight.price.toFixed(2));
@@ -72,9 +103,14 @@ function buildRouteTable(routeIndex, dateRange) {
         const durationHours = Math.floor(flight.duration.total / 3600);
         const durationMinutes = Math.floor((flight.duration.total % 3600) / 60);
         const routeIATAs = flight.route.map(r => r.flyFrom).concat(flight.route[flight.route.length - 1].flyTo).join(" > ");
-
-        const departureDate = new Date(flight.dTime * 1000);
-        const arrivalDate = new Date(flight.aTime * 1000);
+        console.log('dateRange 2:', dateRange);
+        if (dateRange) {
+          departureDate = new Date(flight.dTime * 1000);
+          arrivalDate = new Date(flight.aTime * 1000);
+        } else {
+          departureDate = new Date(flight.local_departure);
+          arrivalDate = new Date(flight.local_arrival);
+        }
         const departureDayName = departureDate.toLocaleDateString('en-US', { weekday: 'short' });
         const arrivalDayName = arrivalDate.toLocaleDateString('en-US', { weekday: 'short' });
     
@@ -91,17 +127,11 @@ function buildRouteTable(routeIndex, dateRange) {
                          <td>${durationHours}h ${durationMinutes}m</td>
                          <td>${routeIATAs}</td>`;
         tbody.appendChild(row);
-      });         
-    } else {
-      console.error('data.data is not an array:', data.data);
-
-    }
+      });
       table.appendChild(tbody);
       infoPaneContent.appendChild(table);
-
-    topBar.classList.remove('loading');
-
-    pathDrawing.drawRouteLines();
+      topBar.classList.remove('loading');
+      pathDrawing.drawRouteLines();
 
       highlightSelectedRowForRouteIndex(routeIndex);
       attachEventListeners(table, data, routeIndex);
@@ -230,4 +260,4 @@ function buildRouteTable(routeIndex, dateRange) {
   }
 }
 
-export { buildDateRangeTable };
+export { newBuildRouteTable };
