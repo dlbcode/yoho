@@ -84,28 +84,24 @@ function buildRouteTable(routeIndex) {
   // Start the loading animation
   const topBar = document.getElementById('top-bar');
   topBar.classList.add('loading');
+  origin = currentRoute.originAirport.iata_code;
+  if (destination !== 'Any') {
+    destination = currentRoute.destinationAirport.iata_code;
+  }
 
-  //let origin, destination;
+  let apiUrl = `https://yonderhop.com/api/range?flyFrom=${origin}&flyTo=${destination}`;
 
-// Assign values first before using them in the apiUrl.
-origin = currentRoute.originAirport.iata_code;
-if (destination !== 'Any') {
-  destination = currentRoute.destinationAirport.iata_code;
-}
-
-let apiUrl = `https://yonderhop.com/api/range?flyFrom=${origin}&flyTo=${destination}`;
-
-if (tableType === 'range') {
-    console.log('dateRange:', dateRange);
-    const [startDate, endDate] = dateRange.split(' to ');
-    apiUrl += `&dateFrom=${startDate}&dateTo=${endDate}`;
-} else if (tableType === 'any') {
-    console.log('Any date range');
-    apiUrl = `https://yonderhop.com/api/range?flyFrom=${origin}&flyTo=${destination}`;
-} else if (tableType === 'single') {
-  console.log('Single date:', departureDate);
-  apiUrl = `https://yonderhop.com/api/yhoneway?origin=${origin}&destination=${destination}&departureDate=${departureDate}`;
-}
+  if (tableType === 'range') {
+      console.log('dateRange:', dateRange);
+      const [startDate, endDate] = dateRange.split(' to ');
+      apiUrl += `&dateFrom=${startDate}&dateTo=${endDate}`;
+  } else if (tableType === 'any') {
+      console.log('Any date range');
+      apiUrl = `https://yonderhop.com/api/range?flyFrom=${origin}&flyTo=${destination}`;
+  } else if (tableType === 'single') {
+    console.log('Single date:', departureDate);
+    apiUrl = `https://yonderhop.com/api/yhoneway?origin=${origin}&destination=${destination}&departureDate=${departureDate}`;
+  }
 
   fetch(apiUrl)
     .then(response => {
