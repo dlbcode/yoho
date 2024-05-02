@@ -1,5 +1,5 @@
 import { appState } from '../stateManager.js';  // Assuming state manager handles global state
-import { logFilterState, applyFilters } from './filterTable.js';
+import { logFilterState, applyFilters, toggleFilterResetIcon } from './filterTable.js';
 
 appState.filterState = {
     departure: { start: 0, end: 24 },
@@ -86,6 +86,14 @@ const sliderFilter = {
                 filterPopup.classList.add('hidden');
             }
         }, true);
+
+        document.addEventListener('click', function (e) {
+            const existingPopup = document.getElementById(`${column}FilterPopup`);
+            if (existingPopup && !existingPopup.contains(e.target) && e.target !== existingPopup) {
+                existingPopup.classList.add('hidden');
+                toggleFilterResetIcon(column); // Make sure this function is called here
+            }
+        }, true);      
     },    
 
     positionPopup: function(popup, event) {

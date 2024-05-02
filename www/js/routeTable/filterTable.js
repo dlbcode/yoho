@@ -91,27 +91,27 @@ function updateFilterHeaders() {
 
         const filterValue = appState.filterState[type];
         const filterTextElement = document.getElementById(`${type}Text`);
-        const resetButtonId = `reset${type.charAt(0).toUpperCase() + type.slice(1)}`;
-        const resetButton = document.getElementById(resetButtonId);
-
-        if (filterValue && !resetButton) {
-            const resetButtonHTML = `<span id="${resetButtonId}" style="margin-left: 5px; cursor: pointer;">&#x2715;</span>`;
-            filterIcon.insertAdjacentHTML('afterend', resetButtonHTML);
-            document.getElementById(resetButtonId).addEventListener('click', () => {
-                if (type === 'departure' || type === 'arrival') {
-                    appState.filterState[type] = { start: 0, end: 24 };
-                } else {
-                    appState.filterState[type] = null;  // For price or other filters
-                }
-                applyFilters();
-            });
-        } else if (resetButton) {
-            if (type === 'departure' || type === 'arrival') {
-                resetButton.style.display = filterValue && (filterValue.start != 0 || filterValue.end != 24) ? '' : 'none';
-            } else {
-                resetButton.style.display = filterValue ? '' : 'none';
-            }
-        }
+        //const resetButtonId = `reset${type.charAt(0).toUpperCase() + type.slice(1)}`;
+        //const resetButton = document.getElementById(resetButtonId);
+//
+        //if (filterValue && !resetButton) {
+        //    const resetButtonHTML = `<span id="${resetButtonId}" style="margin-left: 5px; cursor: pointer;">&#x2715;</span>`;
+        //    filterIcon.insertAdjacentHTML('afterend', resetButtonHTML);
+        //    document.getElementById(resetButtonId).addEventListener('click', () => {
+        //        if (type === 'departure' || type === 'arrival') {
+        //            appState.filterState[type] = { start: 0, end: 24 };
+        //        } else {
+        //            appState.filterState[type] = null;  // For price or other filters
+        //        }
+        //        applyFilters();
+        //    });
+        //} else if (resetButton) {
+        //    if (type === 'departure' || type === 'arrival') {
+        //        resetButton.style.display = filterValue && (filterValue.start != 0 || filterValue.end != 24) ? '' : 'none';
+        //    } else {
+        //        resetButton.style.display = filterValue ? '' : 'none';
+        //    }
+        //}
 
         if (filterTextElement) {
             filterTextElement.textContent = filterValue ? `$${filterValue.value}` : `${type.charAt(0).toUpperCase() + type.slice(1)}`;
@@ -134,4 +134,24 @@ function getColumnIndex(columnIdentifier) {
     return columnMap[columnIdentifier] !== undefined ? columnMap[columnIdentifier] : -1;
 }
 
-export { logFilterState, applyFilters };
+function toggleFilterResetIcon(column) {
+    const filterIcon = document.getElementById(`${column}Filter`);
+    const resetIcon = document.getElementById(`reset${column.charAt(0).toUpperCase() + column.slice(1)}Filter`);
+    const filterValue = appState.filterState[column];
+
+    const isNonDefault = filterValue && (
+        (column === 'price' && filterValue.value) ||
+        (column === 'departure' || column === 'arrival') &&
+        (filterValue.start !== 0 || filterValue.end !== 24)
+    );
+
+    if (isNonDefault) {
+        filterIcon.style.display = 'none';
+        resetIcon.style.display = 'inline';
+    } else {
+        filterIcon.style.display = 'inline';
+        resetIcon.style.display = 'none';
+    }
+}
+
+export { logFilterState, applyFilters, toggleFilterResetIcon };
