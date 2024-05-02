@@ -154,4 +154,22 @@ function toggleFilterResetIcon(column) {
     }
 }
 
+// add listener for filter reset icons
+document.addEventListener('click', function (e) {
+    const filterIcon = e.target;
+    const resetIcon = e.target;
+    const column = e.target.getAttribute('data-column');
+    if (resetIcon.id.startsWith('reset')) {
+        filterIcon.textContent.replace(/reset/gi, '').replace(/Filter/gi, '').toLowerCase();
+        if (column === 'departure' || column === 'arrival') {
+            appState.filterState[column] = { start: 0, end: 24 };
+        } else {
+            appState.filterState[column] = null;
+        }
+        filterIcon.style.display = 'inline';
+        resetIcon.style.display = 'none';
+        applyFilters();
+    }
+});
+
 export { logFilterState, applyFilters, toggleFilterResetIcon };
