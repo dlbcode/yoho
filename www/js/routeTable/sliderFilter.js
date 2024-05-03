@@ -63,31 +63,40 @@ const sliderFilter = {
     },
     
     createAndShowPopup: function(column, data, event) {
-        if (!data) {
-            console.error('No data provided for filtering:', column);
-            return; // Abort if no data
+    if (!data) {
+        console.error('No data provided for filtering:', column);
+        return; // Abort if no data
+    }
+    const filterPopup = document.createElement('div');
+    filterPopup.id = `${column}FilterPopup`;
+    filterPopup.className = 'filter-popup';
+    document.body.appendChild(filterPopup);
+
+    // Create close button
+    const closeButton = document.createElement('span');
+    closeButton.innerHTML = '✕';
+    closeButton.className = 'popup-close-button';
+    closeButton.addEventListener('click', function() {
+        filterPopup.classList.add('hidden');
+    });
+    filterPopup.appendChild(closeButton);
+
+    const valueLabel = document.createElement('div');
+    valueLabel.id = `${column}ValueLabel`;
+    valueLabel.className = 'filter-value-label';
+    filterPopup.appendChild(valueLabel);
+
+    sliderFilter.positionPopup(filterPopup, event);
+    sliderFilter.initializeSlider(filterPopup, column, data, valueLabel);
+
+    document.addEventListener('click', (e) => {
+        const existingPopup = document.getElementById(`${column}FilterPopup`);
+        if (!filterPopup.contains(e.target) && e.target !== filterPopup && e.target !== event.target) {
+            filterPopup.classList.add('hidden');
         }
-        const filterPopup = document.createElement('div');
-        filterPopup.id = `${column}FilterPopup`;
-        filterPopup.className = 'filter-popup';
-        document.body.appendChild(filterPopup);
-    
-        const valueLabel = document.createElement('div');
-        valueLabel.id = `${column}ValueLabel`;
-        valueLabel.className = 'filter-value-label';
-        filterPopup.appendChild(valueLabel);
-    
-        sliderFilter.positionPopup(filterPopup, event);
-        sliderFilter.initializeSlider(filterPopup, column, data, valueLabel);
-    
-        document.addEventListener('click', (e) => {
-            const existingPopup = document.getElementById(`${column}FilterPopup`);
-            if (!filterPopup.contains(e.target) && e.target !== filterPopup && e.target !== event.target) {
-                filterPopup.classList.add('hidden');
-            }
-            toggleFilterResetIcon(column);
-        }, true);
-    },        
+        toggleFilterResetIcon(column);
+    }, true);
+},       
 
     positionPopup: function(popup, event) {
         if (!event || !event.target) {
@@ -186,7 +195,7 @@ const sliderFilter = {
     updateFilterStateAndLabel: function(column, values, label) {
         if (column === 'price') {
             appState.filterState[column] = { value: parseFloat(values[0].replace('$', '')) };
-            label.textContent = `Max price: $${appState.filterState[column].value}`;
+            label.textContent = `up to: $${appState.filterState[column].value}`;
         } else {
                 const start = parseFloat(values[0]);
                 const end = parseFloat(values[1] ? values[1] : values[0]);
