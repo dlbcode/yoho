@@ -6,5 +6,6 @@
 mongodb/
 logs/
 node_modules/
+.certbot/
 package-lock.json
 
