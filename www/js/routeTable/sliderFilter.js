@@ -71,15 +71,30 @@ const sliderFilter = {
         filterPopup.id = `${column}FilterPopup`;
         filterPopup.className = 'filter-popup';
         document.body.appendChild(filterPopup);
-    
+
+        // Create label
+        const label = document.createElement('span');
+        label.innerHTML = column;
+        label.textContent = label.textContent.charAt(0).toUpperCase() + label.textContent.slice(1);
+        label.className = 'popup-label';
+        filterPopup.appendChild(label);
+
+        const closeButton = document.createElement('span');
+        closeButton.innerHTML = '✕';
+        closeButton.className = 'popup-close-button';
+        closeButton.addEventListener('click', function() {
+            filterPopup.classList.add('hidden');
+        });
+        filterPopup.appendChild(closeButton);
+
         const valueLabel = document.createElement('div');
         valueLabel.id = `${column}ValueLabel`;
         valueLabel.className = 'filter-value-label';
         filterPopup.appendChild(valueLabel);
-    
+
         sliderFilter.positionPopup(filterPopup, event);
         sliderFilter.initializeSlider(filterPopup, column, data, valueLabel);
-    
+
         document.addEventListener('click', (e) => {
             const existingPopup = document.getElementById(`${column}FilterPopup`);
             if (!filterPopup.contains(e.target) && e.target !== filterPopup && e.target !== event.target) {
@@ -87,7 +102,7 @@ const sliderFilter = {
             }
             toggleFilterResetIcon(column);
         }, true);
-    },        
+    },       
 
     positionPopup: function(popup, event) {
         if (!event || !event.target) {
@@ -186,7 +201,7 @@ const sliderFilter = {
     updateFilterStateAndLabel: function(column, values, label) {
         if (column === 'price') {
             appState.filterState[column] = { value: parseFloat(values[0].replace('$', '')) };
-            label.textContent = `Max price: $${appState.filterState[column].value}`;
+            label.textContent = `up to: $${appState.filterState[column].value}`;
         } else {
                 const start = parseFloat(values[0]);
                 const end = parseFloat(values[1] ? values[1] : values[0]);
@@ -194,7 +209,7 @@ const sliderFilter = {
                 if (start === 0 && end === 24) {
                     label.textContent = 'Anytime';
                 } else {
-                    label.textContent = `Departure: ${this.formatTime(start)} - ${this.formatTime(end)}`;
+                    label.textContent = `${this.formatTime(start)} - ${this.formatTime(end)}`;
                 }
             }
         logFilterState();

@@ -69,6 +69,15 @@
   width: 100%;
 }
 
+.resetIcon {
+  cursor: pointer;
+  padding: 8px; /* Increase padding to make the icon easier to click */
+  margin: -8px; /* Optional: use negative margin to maintain the layout */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .sortIcon {
   background: #444; /* Light grey background */
   float: right;
@@ -91,21 +100,37 @@
 .filter-popup {
   position: absolute;
   z-index: 1000;
-  background-color: #333;
-  border: 1px solid #555;
+  background-color: #444;
+  border-radius: 5px;
   padding: 10px;
-  width: 200px;
-  height: 80px;
+  width: 220px;
+  height: 90px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
 }
 
+.popup-label {
+  position: absolute;
+  color: #ddd;
+  font-size: 15px;
+  font-weight: 500;
+  top: 10px;
+  left:10px;
+}
+
+.popup-close-button {
+  position: absolute;
+  top: 0px;
+  right: 5px;
+  cursor: pointer;
+}
+
 .filter-value-label {
   color: #ddd;
-  font-size: 14px;
+  font-size: 15px;
   text-align: center;
-  margin-bottom: 5px;
+  margin-top: 20px;
 }
 
 .noUi-target {
