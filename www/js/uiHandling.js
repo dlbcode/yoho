@@ -139,27 +139,30 @@ const uiHandling = {
   },
 
   attachDateTooltip: function(element, routeNumber) {
+    let tooltipTimeout;
     element.addEventListener('mouseover', function() {
-      const selectedRoute = appState.selectedRoutes[routeNumber];
-      if (selectedRoute && selectedRoute.displayData) {
-          const { departure, arrival } = selectedRoute.displayData;
-          // Format the departure and arrival times
-          const departureDate = new Date(departure);
-          const arrivalDate = new Date(arrival);
-          const options = { weekday: 'short', year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true };
-          const formattedDeparture = departureDate.toLocaleString('en-US', options);
-          const formattedArrival = arrivalDate.toLocaleString('en-US', options);
-          const tooltipText = `${formattedDeparture} to ${formattedArrival}`;
-          // Show tooltip with formatted date and time
-          uiHandling.showDateTooltip(this, tooltipText);
-      } else{
-        const routeDate = appState.routeDates[routeNumber];
-        if (routeDate) {
-            uiHandling.showDateTooltip(this, routeDate);
+        const selectedRoute = appState.selectedRoutes[routeNumber];
+        if (selectedRoute && selectedRoute.displayData) {
+            const { departure, arrival } = selectedRoute.displayData;
+            const departureDate = new Date(departure);
+            const arrivalDate = new Date(arrival);
+            const options = { weekday: 'short', year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true };
+            const formattedDeparture = departureDate.toLocaleString('en-US', options);
+            const formattedArrival = arrivalDate.toLocaleString('en-US', options);
+            const tooltipText = `${formattedDeparture} to ${formattedArrival}`;
+            uiHandling.showDateTooltip(this, tooltipText);
+        } else {
+            const routeDate = appState.routeDates[routeNumber];
+            if (routeDate) {
+                uiHandling.showDateTooltip(this, routeDate);
+            }
         }
-      }
+        // Set a timeout to hide the tooltip after 2000ms
+        tooltipTimeout = setTimeout(uiHandling.hideDateTooltip, 2000);
     });
     element.addEventListener('mouseout', function() {
+        // Clear the timeout when the mouse leaves the element
+        clearTimeout(tooltipTimeout);
         uiHandling.hideDateTooltip();
     });
   },
