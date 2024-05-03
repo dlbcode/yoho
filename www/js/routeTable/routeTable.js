@@ -214,8 +214,6 @@ function buildRouteTable(routeIndex) {
       headers.forEach(header => {
         const filteredHeader = header.querySelector('.filteredHeader');
         const filterIcon = header.querySelector('.filterIcon');
-    
-        // Define a common event listener function
         const handleFilterClick = function(event) {
             event.stopPropagation();
             const column = this.getAttribute('data-column');
@@ -231,7 +229,7 @@ function buildRouteTable(routeIndex) {
             }
         };
     
-        // Attach event listeners only to elements that exist
+        // Attach listener to button area and filterIcon
         if (filteredHeader) {
             filteredHeader.addEventListener('click', handleFilterClick);
         }

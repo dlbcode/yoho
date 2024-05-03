@@ -33,8 +33,10 @@ const sliderFilter = {
 
     createFilterPopup: function(column, data, event) {
         const existingPopup = document.getElementById(`${column}FilterPopup`);
+        console.log('Existing popup:', existingPopup, 'Event:', event.target);
         if (existingPopup) {
             if (!existingPopup.contains(event.target)) {
+                console.log('Toggling existing popup:', existingPopup);
                 existingPopup.classList.toggle('hidden');
             }
             if (!existingPopup.classList.contains('hidden')) {
