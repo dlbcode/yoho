@@ -110,7 +110,7 @@ function buildRouteTable(routeIndex) {
       const thead = document.createElement('thead');
       let headerRow = `<tr>
                     <th data-column="departure">
-                        <span class="filterButton" " data-column="departure">
+                        <span class="headerText" " data-column="departure">
                         <span class="filteredHeader" data-column="departure">Departure</span>
                         <img class="filterIcon" id="departureFilter" data-column="departure" src="/assets/filter-icon.svg" alt="Filter">
                         <span class="resetIcon" id="resetDepartureFilter" data-column="departure" style="display:none; cursor:pointer;">✕</span>
@@ -118,7 +118,7 @@ function buildRouteTable(routeIndex) {
                         <span class="sortIcon" data-column="departure">&#x21C5;</span>
                     </th>
                     <th data-column="arrival">
-                        <span class="filterButton" data-column="arrival">
+                        <span class="headerText" data-column="arrival">
                         <span class="filteredHeader" data-column="arrival">Arrival</span>
                         <img id="arrivalFilter" class="filterIcon" data-column="arrival" src="/assets/filter-icon.svg" alt="Filter">
                         <span class="resetIcon" id="resetArrivalFilter" data-column="arrival" style="display:none; cursor:pointer;">✕</span>
@@ -126,7 +126,7 @@ function buildRouteTable(routeIndex) {
                         <span class="sortIcon" data-column="arrival">&#x21C5;</span>
                     </th>
                     <th data-column="price">
-                        <span class="filterButton" data-column="price">
+                        <span class="headerText" data-column="price">
                         <span class="filteredHeader" data-column="price" id="priceText">Price</span>
                         <img id="priceFilter" class="filterIcon" data-column="price" src="/assets/filter-icon.svg" alt="Filter">
                         <span class="resetIcon" id="resetPriceFilter" data-column="price" style="display:none; cursor:pointer;">✕</span>

@@ -116,19 +116,30 @@ function toggleFilterResetIcon(column) {
     const filterIcon = document.getElementById(`${column}Filter`);
     const resetIcon = document.getElementById(`reset${column.charAt(0).toUpperCase() + column.slice(1)}Filter`);
     const filterValue = appState.filterState[column];
-
+    let filterButtonSpan = filterIcon.closest('.headerText'); // Get the parent span of the filter icon
+    if (!filterButtonSpan) {
+        filterButtonSpan = filterIcon.closest('.filterButton');
+    }
     const isNonDefault = filterValue && (
         (column === 'price' && filterValue.value) ||
         (column === 'departure' || column === 'arrival') &&
         (filterValue.start !== 0 || filterValue.end !== 24)
     );
 
+    console.log('isNonDefault:', isNonDefault);
+
     if (isNonDefault) {
         filterIcon.style.display = 'none';
         resetIcon.style.display = 'inline';
+        // Add 'filterButton' and remove 'headerText'
+        filterButtonSpan.classList.add('filterButton');
+        filterButtonSpan.classList.remove('headerText');
     } else {
         filterIcon.style.display = 'inline';
         resetIcon.style.display = 'none';
+        // Remove 'filterButton' and add 'headerText'
+        filterButtonSpan.classList.remove('filterButton');
+        filterButtonSpan.classList.add('headerText');
     }
 }
 
@@ -136,6 +147,7 @@ document.addEventListener('click', function (e) {
     if (e.target.classList.contains('resetIcon')) {
         const column = e.target.getAttribute('data-column');
         const filterIcon = document.querySelector(`#${column}Filter`);
+        const filterButtonSpan = filterIcon.closest('.filterButton');
         const resetIcon = e.target;
         if (column === 'departure' || column === 'arrival') {
             appState.filterState[column] = { start: 0, end: 24 };
@@ -144,6 +156,8 @@ document.addEventListener('click', function (e) {
         }
         filterIcon.style.display = 'inline';
         resetIcon.style.display = 'none';
+        filterButtonSpan.classList.remove('filterButton');
+        filterButtonSpan.classList.add('headerText');
         applyFilters();
     }
 });
