@@ -63,40 +63,46 @@ const sliderFilter = {
     },
     
     createAndShowPopup: function(column, data, event) {
-    if (!data) {
-        console.error('No data provided for filtering:', column);
-        return; // Abort if no data
-    }
-    const filterPopup = document.createElement('div');
-    filterPopup.id = `${column}FilterPopup`;
-    filterPopup.className = 'filter-popup';
-    document.body.appendChild(filterPopup);
-
-    // Create close button
-    const closeButton = document.createElement('span');
-    closeButton.innerHTML = '✕';
-    closeButton.className = 'popup-close-button';
-    closeButton.addEventListener('click', function() {
-        filterPopup.classList.add('hidden');
-    });
-    filterPopup.appendChild(closeButton);
-
-    const valueLabel = document.createElement('div');
-    valueLabel.id = `${column}ValueLabel`;
-    valueLabel.className = 'filter-value-label';
-    filterPopup.appendChild(valueLabel);
-
-    sliderFilter.positionPopup(filterPopup, event);
-    sliderFilter.initializeSlider(filterPopup, column, data, valueLabel);
-
-    document.addEventListener('click', (e) => {
-        const existingPopup = document.getElementById(`${column}FilterPopup`);
-        if (!filterPopup.contains(e.target) && e.target !== filterPopup && e.target !== event.target) {
-            filterPopup.classList.add('hidden');
+        if (!data) {
+            console.error('No data provided for filtering:', column);
+            return; // Abort if no data
         }
-        toggleFilterResetIcon(column);
-    }, true);
-},       
+        const filterPopup = document.createElement('div');
+        filterPopup.id = `${column}FilterPopup`;
+        filterPopup.className = 'filter-popup';
+        document.body.appendChild(filterPopup);
+
+        // Create label
+        const label = document.createElement('span');
+        label.innerHTML = column;
+        label.textContent = label.textContent.charAt(0).toUpperCase() + label.textContent.slice(1);
+        label.className = 'popup-label';
+        filterPopup.appendChild(label);
+
+        const closeButton = document.createElement('span');
+        closeButton.innerHTML = '✕';
+        closeButton.className = 'popup-close-button';
+        closeButton.addEventListener('click', function() {
+            filterPopup.classList.add('hidden');
+        });
+        filterPopup.appendChild(closeButton);
+
+        const valueLabel = document.createElement('div');
+        valueLabel.id = `${column}ValueLabel`;
+        valueLabel.className = 'filter-value-label';
+        filterPopup.appendChild(valueLabel);
+
+        sliderFilter.positionPopup(filterPopup, event);
+        sliderFilter.initializeSlider(filterPopup, column, data, valueLabel);
+
+        document.addEventListener('click', (e) => {
+            const existingPopup = document.getElementById(`${column}FilterPopup`);
+            if (!filterPopup.contains(e.target) && e.target !== filterPopup && e.target !== event.target) {
+                filterPopup.classList.add('hidden');
+            }
+            toggleFilterResetIcon(column);
+        }, true);
+    },       
 
     positionPopup: function(popup, event) {
         if (!event || !event.target) {
@@ -203,7 +209,7 @@ const sliderFilter = {
                 if (start === 0 && end === 24) {
                     label.textContent = 'Anytime';
                 } else {
-                    label.textContent = `Departure: ${this.formatTime(start)} - ${this.formatTime(end)}`;
+                    label.textContent = `${this.formatTime(start)} - ${this.formatTime(end)}`;
                 }
             }
         logFilterState();
