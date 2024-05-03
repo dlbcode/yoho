@@ -95,9 +95,20 @@ const sliderFilter = {
             return;
         }
         const iconRect = event.target.getBoundingClientRect();
-        popup.style.left = `${iconRect.left + window.scrollX}px`;
+        const popupWidth = popup.offsetWidth;
+        const screenPadding = 10; // Padding from edge of the screen
+    
+        // Calculate left position to ensure the popup doesn't overflow the screen
+        let leftPosition = iconRect.left + window.scrollX;
+        if (leftPosition + popupWidth > window.innerWidth - screenPadding) {
+            leftPosition = window.innerWidth - popupWidth - screenPadding;
+        } else if (leftPosition < screenPadding) {
+            leftPosition = screenPadding;
+        }
+    
+        popup.style.left = `${leftPosition}px`;
         popup.style.top = `${iconRect.top + window.scrollY - 90}px`; // Position above the icon
-    },
+    },    
 
     initializeSlider: function(popup, column, data, valueLabel) {
         const slider = document.createElement('div');
