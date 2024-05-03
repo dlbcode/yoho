@@ -213,56 +213,64 @@ function buildRouteTable(routeIndex) {
 
       headers.forEach(header => {
         const filteredHeader = header.querySelector('.filteredHeader');
+        const filterIcon = header.querySelector('.filterIcon');
     
-        // Attach event listeners only to headers that have a 'filteredHeader' span
+        // Define a common event listener function
+        const handleFilterClick = function(event) {
+            event.stopPropagation();
+            const column = this.getAttribute('data-column');
+            if (!column) {
+                console.error('Column attribute is missing on the icon:', this);
+                return;
+            }
+            const data = fetchDataForColumn(column);
+            if (data) {
+                sliderFilter.createFilterPopup(column, data, event);
+            } else {
+                console.error('Failed to fetch data for column:', column);
+            }
+        };
+    
+        // Attach event listeners only to elements that exist
         if (filteredHeader) {
-            filteredHeader.addEventListener('click', function(event) {
-              event.stopPropagation();
-              const column = this.getAttribute('data-column');
-              if (!column) {
-                  console.error('Column attribute is missing on the icon:', this);
-                  return;
-              }
-              const data = fetchDataForColumn(column);
-              if (data) {
-                  sliderFilter.createFilterPopup(column, data, event);
-              } else {
-                  console.error('Failed to fetch data for column:', column);
-              }
-          });
+            filteredHeader.addEventListener('click', handleFilterClick);
         }
-    });    
+        if (filterIcon) {
+            filterIcon.addEventListener('click', handleFilterClick);
+        }
+      });       
  
-    function fetchDataForColumn(column) {
-      switch (column) {
-          case 'price':
-              const priceCells = document.querySelectorAll('.route-info-table tbody tr td:nth-child(' + (getColumnIndex('price') + 1) + ')');
-              const prices = Array.from(priceCells).map(cell => {
-                  const priceText = cell.textContent.replace(/[^\d.]/g, ''); // Remove any non-numeric characters, including the dollar sign
-                  return parseFloat(priceText);
-              }).filter(price => !isNaN(price)); // Ensure only valid numbers are included
-  
-              if (prices.length === 0) {
-                  console.error('No valid prices found in the column');
-                  return { min: 0, max: 0 }; // Return default or error values if no prices are found
-              }
-  
-              const min = Math.min(...prices);
-              const max = Math.max(...prices);
-              return { min, max };
-  
-          case 'departure':
-          case 'arrival':
-              return {
-                  min: 0,
-                  max: 24
-              };
-  
-          default:
-              console.error('Unsupported column:', column);
-              return null;
+      function fetchDataForColumn(column) {
+        switch (column) {
+            case 'price':
+                const priceCells = document.querySelectorAll('.route-info-table tbody tr td:nth-child(' + (getColumnIndex('price') + 1) + ')');
+                const prices = Array.from(priceCells).map(cell => {
+                    const priceText = cell.textContent.replace(/[^\d.]/g, ''); // Remove any non-numeric characters, including the dollar sign
+                    return parseFloat(priceText);
+                }).filter(price => !isNaN(price)); // Ensure only valid numbers are included
+    
+                if (prices.length === 0) {
+                    console.error('No valid prices found in the column');
+                    return { min: 0, max: 0 }; // Return default or error values if no prices are found
+                }
+    
+                const min = Math.min(...prices);
+                const max = Math.max(...prices);
+                return { min, max };
+    
+            case 'departure':
+            case 'arrival':
+                return {
+                    min: 0,
+                    max: 24
+                };
+    
+            default:
+                console.error('Unsupported column:', column);
+                return null;
+        }
       }
-  }
+
       document.querySelectorAll('.route-info-table tbody tr').forEach((row, index) => {
         row.addEventListener('click', function() {
           const routeIdString = this.getAttribute('data-route-id');
@@ -270,26 +278,26 @@ function buildRouteTable(routeIndex) {
           const fullFlightData = data[index];
           routeInfoRow(this, fullFlightData, routeIds, routeIndex);
         });
-    });    
+      });    
     
-    document.querySelectorAll('.route-info-table tbody tr').forEach(row => {
-      row.addEventListener('mouseover', function() {
-        const routeString = this.cells[8].textContent.trim();
-        const iataCodes = routeString.split(' > ');
-  
-        for (let i = 0; i < iataCodes.length - 1; i++) {
-            const originIata = iataCodes[i];
-            const destinationIata = iataCodes[i + 1];
-            pathDrawing.drawPathBetweenAirports(originIata, destinationIata, flightMap.getAirportDataByIata);
-        }
+      document.querySelectorAll('.route-info-table tbody tr').forEach(row => {
+        row.addEventListener('mouseover', function() {
+          const routeString = this.cells[8].textContent.trim();
+          const iataCodes = routeString.split(' > ');
+    
+          for (let i = 0; i < iataCodes.length - 1; i++) {
+              const originIata = iataCodes[i];
+              const destinationIata = iataCodes[i + 1];
+              pathDrawing.drawPathBetweenAirports(originIata, destinationIata, flightMap.getAirportDataByIata);
+          }
+        });
+    
+        row.addEventListener('mouseout', function() {
+            pathDrawing.clearLines();
+            pathDrawing.drawLines();
+        });
       });
-  
-      row.addEventListener('mouseout', function() {
-          pathDrawing.clearLines();
-          pathDrawing.drawLines();
-      });
-    });
-  } 
+    } 
   
   function resetSortIcons(headers, currentIcon, newSortState) {
     headers.forEach(header => {

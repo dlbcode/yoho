@@ -32,22 +32,27 @@
 
 .route-info-table th {
   position: relative;
+  font-size: 14px;
   text-align: left;
   width: auto; /* Ensure the th is only as wide as needed */
-  padding-right: 30px; /* Increase if necessary to accommodate the sort icon */
+  padding-right: 10px; /* Increase if necessary to accommodate the sort icon */
   overflow: visible; /* Changed from hidden to visible to test layout */
 }
 
 .filterButton {
   background: rgb(3, 97, 164);
-  height: 30px;
+  height: 26px;
   border-radius: 5px;
   display: inline-flex;
   padding: 0 5px 0 5px;
   align-items: center;
   font-size: 14px;
   justify-content: space-between;
-  width: calc(100% - 40px); /* Adjust width to leave space for the sort icon */
+  width: calc(100% - 20px); /* Adjust width to leave space for the sort icon */
+}
+
+.filteredHeader {
+  width: 100%;
 }
 
 .sortIcon {
