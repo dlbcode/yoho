@@ -34,11 +34,13 @@ const sliderFilter = {
     createFilterPopup: function(column, data, event) {
         const existingPopup = document.getElementById(`${column}FilterPopup`);
         if (existingPopup) {
+            // Toggle visibility based on current state
             existingPopup.classList.toggle('hidden');
             if (!existingPopup.classList.contains('hidden')) {
                 this.updatePopupValues(existingPopup, column, data);
             }
         } else {
+            // Create the popup since it does not exist
             this.createAndShowPopup(column, data, event);
         }
     },
@@ -48,9 +50,11 @@ const sliderFilter = {
         const filterValues = appState.filterState[column];
         if (slider) {
             if (filterValues) {
+                // Set slider to existing filter values or default
                 slider.noUiSlider.set(filterValues.hasOwnProperty('start') ?
                     [filterValues.start, filterValues.end] : [filterValues.value]);
             } else {
+                // Reset slider to default values
                 slider.noUiSlider.set(data.hasOwnProperty('start') ?
                     [data.min, data.max] : [data.max]);
             }
@@ -61,7 +65,7 @@ const sliderFilter = {
     createAndShowPopup: function(column, data, event) {
         if (!data) {
             console.error('No data provided for filtering:', column);
-            return;
+            return; // Abort if no data
         }
         const filterPopup = document.createElement('div');
         filterPopup.id = `${column}FilterPopup`;
