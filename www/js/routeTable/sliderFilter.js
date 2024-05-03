@@ -33,70 +33,57 @@ const sliderFilter = {
 
     createFilterPopup: function(column, data, event) {
         const existingPopup = document.getElementById(`${column}FilterPopup`);
-        console.log('Existing popup:', existingPopup, 'Event:', event.target);
         if (existingPopup) {
-            if (!existingPopup.contains(event.target)) {
-                console.log('Toggling existing popup:', existingPopup);
-                existingPopup.classList.toggle('hidden');
-            }
+            existingPopup.classList.toggle('hidden');
             if (!existingPopup.classList.contains('hidden')) {
-                const slider = existingPopup.querySelector(`#${column}Slider`);
-                const filterValues = appState.filterState[column];
-                // Check if the filter values are null and reset to default if necessary
-                if (slider) {
-                    if (filterValues) {
-                        // Adjust based on whether the filter is a range or a single value
-                        if (filterValues.hasOwnProperty('start')) {
-                            slider.noUiSlider.set([filterValues.start, filterValues.end]);
-                        } else {
-                            slider.noUiSlider.set([filterValues.value]);
-                        }
-                    } else {
-                        // Reset to default values, e.g., the whole range or the mid-point for single handle sliders
-                        if (data.hasOwnProperty('start')) {
-                            slider.noUiSlider.set([data.min, data.max]);
-                        } else {
-                            slider.noUiSlider.set([data.max]);
-                        }
-                    }
-                }
-                sliderFilter.positionPopup(existingPopup, event);  // Update position every time it's shown
+                this.updatePopupValues(existingPopup, column, data);
             }
+        } else {
+            this.createAndShowPopup(column, data, event);
+        }
+    },
+    
+    updatePopupValues: function(popup, column, data) {
+        const slider = popup.querySelector(`#${column}Slider`);
+        const filterValues = appState.filterState[column];
+        if (slider) {
+            if (filterValues) {
+                slider.noUiSlider.set(filterValues.hasOwnProperty('start') ?
+                    [filterValues.start, filterValues.end] : [filterValues.value]);
+            } else {
+                slider.noUiSlider.set(data.hasOwnProperty('start') ?
+                    [data.min, data.max] : [data.max]);
+            }
+        }
+        sliderFilter.positionPopup(popup, event);
+    },
+    
+    createAndShowPopup: function(column, data, event) {
+        if (!data) {
+            console.error('No data provided for filtering:', column);
             return;
         }
-
         const filterPopup = document.createElement('div');
         filterPopup.id = `${column}FilterPopup`;
         filterPopup.className = 'filter-popup';
         document.body.appendChild(filterPopup);
-
+    
         const valueLabel = document.createElement('div');
         valueLabel.id = `${column}ValueLabel`;
         valueLabel.className = 'filter-value-label';
         filterPopup.appendChild(valueLabel);
-
-        if (!data) {
-            console.error('No data provided for filtering:', column);
-            return; // Do not proceed if no data is provided
-        }
-
-        sliderFilter.positionPopup(filterPopup, event);  // Initial position setting
+    
+        sliderFilter.positionPopup(filterPopup, event);
         sliderFilter.initializeSlider(filterPopup, column, data, valueLabel);
-
-        document.addEventListener('click', function (e) {
+    
+        document.addEventListener('click', (e) => {
+            const existingPopup = document.getElementById(`${column}FilterPopup`);
             if (!filterPopup.contains(e.target) && e.target !== filterPopup && e.target !== event.target) {
                 filterPopup.classList.add('hidden');
             }
+            toggleFilterResetIcon(column);
         }, true);
-
-        document.addEventListener('click', function (e) {
-            const existingPopup = document.getElementById(`${column}FilterPopup`);
-            if (existingPopup && !existingPopup.contains(e.target) && e.target !== existingPopup) {
-                existingPopup.classList.add('hidden');
-                toggleFilterResetIcon(column); // Make sure this function is called here
-            }
-        }, true);      
-    },    
+    },        
 
     positionPopup: function(popup, event) {
         if (!event || !event.target) {
