@@ -41,8 +41,16 @@
 }
 
 .headerText {
+  background: #333;
+  height: 26px;
+  width: calc(100% - 24px);
+  border-top-left-radius: 5px;
+  border-bottom-left-radius: 5px;
   display: inline-flex;
-  padding-top: 4px;
+  padding: 0 5px 0 5px;
+  align-items: center;
+  font-size: 14px;
+  justify-content: space-between;
 }
 
 .filterButton {
