@@ -184,6 +184,13 @@
   position: absolute;
 }
 
+.noUi-touch-area {
+  margin: -7px -7px 7px -7px;
+  padding: 15px;
+  background: rgba(0, 0, 0, 0);
+  z-index: 1;
+}
+
 .filter-value-label {
   color: #ddd;
   font-size: 12px;
