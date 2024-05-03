@@ -18,7 +18,7 @@ services:
       - manual
     volumes:
       - /etc/letsencrypt:/etc/letsencrypt
-      - ./certbot/www:/var/www/certbot
+      - ./services/certbot/www:/var/www/certbot
 
   mongodb:
     image: mongo
