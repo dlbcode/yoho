@@ -7,6 +7,11 @@ import { routeInfoRow, highlightSelectedRowForRouteIndex } from './routeInfoRow.
 
 function buildRouteTable(routeIndex) {
 
+  appState.filterState = {
+    departure: { start: 0, end: 24 },
+    arrival: { start: 0, end: 24 }
+  };
+
   const dateRange = appState.routeDates[routeIndex];
 
   let origin, destination, currentRoute, startDate, endDate, departureDate;
