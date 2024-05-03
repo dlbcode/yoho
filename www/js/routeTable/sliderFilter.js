@@ -185,6 +185,9 @@ const sliderFilter = {
             slider.noUiSlider.on('update', function(values) {
                 sliderFilter.updateFilterStateAndLabel(column, values, valueLabel);
             });
+            slider.addEventListener('touchend', function() {
+                toggleFilterResetIcon(column);
+            });    
         } else {
             console.error('Slider settings not defined due to missing or incorrect data');
         }
