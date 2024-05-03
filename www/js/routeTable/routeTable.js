@@ -133,12 +133,12 @@ function buildRouteTable(routeIndex) {
                         </span>
                         <span class="sortIcon" data-column="price">&#x21C5;</span>
                     </th>
-                    <th data-column="airlines">Airlines <span class="sortIcon" data-column="airlines">&#x21C5;</span></th>
-                    <th data-column="direct">Direct <span class="sortIcon" data-column="direct">&#x21C5;</span></th>
-                    <th data-column="stops">Stops <span class="sortIcon" data-column="stops">&#x21C5;</span></th>
-                    <th data-column="layovers">Layovers <span class="sortIcon" data-column="layovers">&#x21C5;</span></th>
-                    <th data-column="duration">Duration <span class="sortIcon" data-column="duration">&#x21C5;</span></th>
-                    <th data-column="route">Route <span class="sortIcon" data-column="route">&#x21C5;</span></th>
+                    <th data-column="airlines"><span class="headerText">Airlines</span><span class="sortIcon" data-column="airlines">&#x21C5;</span></th>
+                    <th data-column="direct"><span class="headerText">Direct</span><span class="sortIcon" data-column="direct">&#x21C5;</span></th>
+                    <th data-column="stops"><span class="headerText">Stops</span><span class="sortIcon" data-column="stops">&#x21C5;</span></th>
+                    <th data-column="layovers"><span class="headerText">Layovers</span><span class="sortIcon" data-column="layovers">&#x21C5;</span></th>
+                    <th data-column="duration"><span class="headerText">Duration</span><span class="sortIcon" data-column="duration">&#x21C5;</span></th>
+                    <th data-column="route"><span class="headerText">Route</span><span class="sortIcon" data-column="route">&#x21C5;</span></th>
                  </tr>`;
       thead.innerHTML = headerRow;
       table.appendChild(thead);

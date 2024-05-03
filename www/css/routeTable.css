@@ -34,9 +34,15 @@
   position: relative;
   font-size: 14px;
   text-align: left;
-  width: auto; /* Ensure the th is only as wide as needed */
+  width: auto;
+  vertical-align: middle;
   padding-right: 10px; /* Increase if necessary to accommodate the sort icon */
   overflow: visible; /* Changed from hidden to visible to test layout */
+}
+
+.headerText {
+  display: inline-flex;
+  padding-top: 4px;
 }
 
 .filterButton {
@@ -58,8 +64,9 @@
 .sortIcon {
   float: right;
   margin-left: 5px;
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 300;
+  padding-top: 5px;
   position: relative;
 }
 
