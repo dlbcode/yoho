@@ -48,13 +48,14 @@
 .filterButton {
   background: rgb(3, 97, 164);
   height: 26px;
-  border-radius: 5px;
+  border-top-left-radius: 5px;
+  border-bottom-left-radius: 5px;
   display: inline-flex;
   padding: 0 5px 0 5px;
   align-items: center;
   font-size: 14px;
   justify-content: space-between;
-  width: calc(100% - 20px); /* Adjust width to leave space for the sort icon */
+  margin-right: -4px; /* Overlap sortIcon */
 }
 
 .filteredHeader {
@@ -62,12 +63,17 @@
 }
 
 .sortIcon {
+  background: #444; /* Light grey background */
   float: right;
-  margin-left: 5px;
+  height: 26px;
+  margin-left: 0px; /* Eliminated margin */
   font-size: 16px;
   font-weight: 300;
-  padding-top: 5px;
-  position: relative;
+  padding: 5px 5px; /* Adjust padding for alignment */
+  border-top-right-radius: 5px;
+  border-bottom-right-radius: 5px;
+  display: inline-flex;
+  align-items: center;
 }
 
 .route-info-table tbody tr.selected {
