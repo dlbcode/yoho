@@ -76,6 +76,14 @@ function routeInfoRow(rowElement, fullFlightData, routeIds, routeIndex) {
                 // Destination Column (for the last segment)
                 segmentsHtml.push(`<div class="destination" data-destination="${segment.flyTo}"><div>${segment.flyTo} (${segment.cityTo})</div><div style="color: #999;">Arrive: <span style="color: #ccc;">${arrivalTime}</span></div></div>`);
             }
+
+            document.querySelectorAll('.departure').forEach(element => {
+                element.addEventListener('click', function() {
+                    console.log('clicked on departure:', this.getAttribute('data-origin'));
+                    const originIata = this.getAttribute('data-origin');
+                    flyToLocation(originIata);
+                });
+            });
         });
     
         segmentsHtml.push('</div>'); // Close route-details
