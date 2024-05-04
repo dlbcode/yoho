@@ -48,7 +48,7 @@ function routeInfoRow(rowElement, fullFlightData, routeIds, routeIndex) {
 
             if (idx === 0) {
                 // Origin Column
-                segmentsHtml.push(`<div class="departure" style="margin-right: 2px;" data-origin="${segment.flyFrom}"><div>${segment.flyFrom} (${segment.cityFrom})</div><div style="color: #999;">Depart: <span style="color: #ccc;">${departureTime}</span></div></div>`);
+                segmentsHtml.push(`<div class="departure" style="margin-right: 2px;" data-origin="${segment.flyFrom}"><div>${segment.flyFrom} (${segment.cityFrom})</div><div style="color: #999;">TESTDepart: <span style="color: #ccc;">${departureTime}</span></div></div>`);
                 // First Duration Column
                 segmentsHtml.push(`<div class="duration" data-origin="${segment.flyFrom}" data-destination="${segment.flyTo}"><div style="position: relative; margin-top: 12px; color: #ccc;">
                 ${duration}
@@ -76,14 +76,7 @@ function routeInfoRow(rowElement, fullFlightData, routeIds, routeIndex) {
                 // Destination Column (for the last segment)
                 segmentsHtml.push(`<div class="destination" data-destination="${segment.flyTo}"><div>${segment.flyTo} (${segment.cityTo})</div><div style="color: #999;">Arrive: <span style="color: #ccc;">${arrivalTime}</span></div></div>`);
             }
-
-            document.querySelectorAll('.departure').forEach(element => {
-                element.addEventListener('click', function() {
-                    console.log('clicked on departure:', this.getAttribute('data-origin'));
-                    const originIata = this.getAttribute('data-origin');
-                    flyToLocation(originIata);
-                });
-            });
+            
         });
     
         segmentsHtml.push('</div>'); // Close route-details
@@ -206,6 +199,14 @@ function routeInfoRow(rowElement, fullFlightData, routeIds, routeIndex) {
         highlightSelectedRowForRouteIndex(routeIndex);
     });
 }
+
+document.addEventListener('DOMContentLoaded', function() {
+    document.body.addEventListener('click', function(event) {
+        if (event.target.classList.contains('departure')) {
+            console.log('Delegated click on departure:', event.target.getAttribute('data-origin'));
+        }
+    });
+});
 
 function highlightSelectedRowForRouteIndex(routeIndex) {
   document.querySelectorAll(`.route-info-table[data-route-index="${routeIndex}"] tbody tr.selected`).forEach(row => {
