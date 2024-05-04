@@ -59,14 +59,15 @@
 table {
   width: 100%;
   border-collapse: collapse;
-  font-family: 'Consolas', 'Courier New', Courier, monospace; /* Monospace font */
-  font-size: 12px; /* Similar to default console font size */
-  color: #2ad8ff; /* Default text color */
+  font-family: "Google Sans", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-size: 14px; /* Similar to default console font size */
+  color: #acacac; /* Default text color */
   box-sizing: border-box; /* Include padding and border in the table's total width */
 }
 
 /* Style for table headers */
 th {
+  font-weight: 500;
   background-color: #222; /* Very light grey background */
   color: #ccc;
   text-align: left;
@@ -87,7 +88,8 @@ tr:nth-child(even) {
 
 /* Style for the cells in the "Price" column */
 td:nth-child(3) { /* Assuming "Price" is the third column */
-  color: rgb(153, 113, 255); /* Change text color to purple */
+  color: #39a7ff;
+  font-weight: 500;
 }
 
 tr:nth-child(odd) {
