@@ -1,6 +1,7 @@
 import { appState, updateState } from '../stateManager.js';
 import { pathDrawing } from '../pathDrawing.js';
 import { flightMap } from '../flightMap.js';
+import { map } from '../map.js';
 
 function formatLayover(flight, idx) {
     if (idx < flight.route.length - 1) {
@@ -13,8 +14,6 @@ function formatLayover(flight, idx) {
 }
 
 function routeInfoRow(rowElement, fullFlightData, routeIds, routeIndex) {
-    console.log('routeInfoRow called with:', rowElement, fullFlightData, routeIds, routeIndex);
-
     // Toggle details row visibility
     let existingDetailRow = rowElement.nextSibling;
     if (existingDetailRow && existingDetailRow.classList.contains('route-info-row')) {
@@ -47,9 +46,9 @@ function routeInfoRow(rowElement, fullFlightData, routeIds, routeIndex) {
 
             if (idx === 0) {
                 // Origin Column
-                segmentsHtml.push(`<div class="departure" style="margin-right: 2px;"><div>${segment.flyFrom} (${segment.cityFrom})</div><div style="color: #999;">Depart: <span style="color: #ccc;">${departureTime}</span></div></div>`);
+                segmentsHtml.push(`<div class="departure" style="margin-right: 2px;" data-origin="${segment.flyFrom}"><div>${segment.flyFrom} (${segment.cityFrom})</div><div style="color: #999;">TESTDepart: <span style="color: #ccc;">${departureTime}</span></div></div>`);
                 // First Duration Column
-                segmentsHtml.push(`<div class="duration"><div style="position: relative; margin-top: 12px; color: #ccc;">
+                segmentsHtml.push(`<div class="duration" data-origin="${segment.flyFrom}" data-destination="${segment.flyTo}"><div style="position: relative; margin-top: 12px; color: #ccc;">
                 ${duration}
                 <svg style="position: absolute; bottom: 12px; left: 0px; width: 100%; height: 30px; overflow: visible;">
                 <path d="M2,35 Q45,-2 88,35" stroke="#666" fill="transparent" stroke-width="2" stroke-dasharray="1,4" stroke-dashoffset="6" stroke-linecap="round"></path>
@@ -61,10 +60,10 @@ function routeInfoRow(rowElement, fullFlightData, routeIds, routeIndex) {
                     const layoverDuration = formatLayover(flight, idx - 1);
                     const previousArrivalTime = flight.route[idx - 1].local_arrival ? new Date(flight.route[idx - 1].local_arrival).toLocaleTimeString() : new Date(flight.route[idx - 1].aTime * 1000).toLocaleTimeString();
                     const recheckBagsText = flight.route[idx - 1].bags_recheck_required ? '<div style="color: #FFBF00;">- Recheck bags</div>' : '';
-                    segmentsHtml.push(`<div class="layover"><div>${flight.route[idx - 1].flyTo} (${segment.cityFrom})</div><div style="color: #999;">Arrive: <span style="color: #ccc;">${previousArrivalTime}</span></div><div style="text-align: center; color: #999;">&darr;</div><div style="color: #999;">Layover: <span style="color: #ccc;">${layoverDuration}</span></div>${recheckBagsText}<div style="text-align: center; color: #999;">&darr;</div><div style="color: #999;">Depart: <span style="color: #ccc;">${departureTime}</span></div></div>`);
+                    segmentsHtml.push(`<div class="layover" data-layover="${flight.route[idx - 1].flyTo}"><div>${flight.route[idx - 1].flyTo} (${segment.cityFrom})</div><div style="color: #999;">Arrive: <span style="color: #ccc;">${previousArrivalTime}</span></div><div style="text-align: center; color: #999;">&darr;</div><div style="color: #999;">Layover: <span style="color: #ccc;">${layoverDuration}</span></div>${recheckBagsText}<div style="text-align: center; color: #999;">&darr;</div><div style="color: #999;">Depart: <span style="color: #ccc;">${departureTime}</span></div></div>`);
                 
                 // Second Duration Column
-                segmentsHtml.push(`<div class="duration"><div style="position: relative; margin-top: 12px; color: #ccc;">
+                segmentsHtml.push(`<div class="duration" data-origin="${flight.route[idx].flyFrom}" data-destination="${flight.route[idx].flyTo}"><div style="position: relative; margin-top: 12px; color: #ccc;">
                 ${duration}
                 <svg style="position: absolute; bottom: 12px; left: 0px; width: 100%; height: 30px; overflow: visible;">
                 <path d="M2,35 Q45,-2 88,35" stroke="#666" fill="transparent" stroke-width="2" stroke-dasharray="1,4" stroke-dashoffset="6" stroke-linecap="round"></path>
@@ -73,8 +72,9 @@ function routeInfoRow(rowElement, fullFlightData, routeIds, routeIndex) {
     
             if (idx === arr.length - 1) {
                 // Destination Column (for the last segment)
-                segmentsHtml.push(`<div class="destination"><div>${segment.flyTo} (${segment.cityTo})</div><div style="color: #999;">Arrive: <span style="color: #ccc;">${arrivalTime}</span></div></div>`);
+                segmentsHtml.push(`<div class="destination" data-destination="${segment.flyTo}"><div>${segment.flyTo} (${segment.cityTo})</div><div style="color: #999;">Arrive: <span style="color: #ccc;">${arrivalTime}</span></div></div>`);
             }
+            
         });
     
         segmentsHtml.push('</div>'); // Close route-details
@@ -112,8 +112,7 @@ function routeInfoRow(rowElement, fullFlightData, routeIds, routeIndex) {
                 </div>             
             </div>
         </div>
-    </div>
-`;
+    </div>`;
     detailRow.classList.add('route-info-row');
     detailRow.appendChild(detailCell);
 
@@ -137,6 +136,53 @@ function routeInfoRow(rowElement, fullFlightData, routeIds, routeIndex) {
         pathDrawing.drawLines();  // Optionally redraw other paths if needed
     });
 
+    function addClickListener(element, attr, callback) {
+        element.addEventListener('click', (event) => {
+            const iataCode = element.getAttribute(attr);
+            callback(iataCode);
+        });
+    }
+
+    async function fetchAndDisplayAirportData(origin, destination) {
+        try {
+            const [originAirport, destinationAirport] = await Promise.all([
+                flightMap.getAirportDataByIata(origin),
+                flightMap.getAirportDataByIata(destination)
+            ]);
+
+            if (originAirport && destinationAirport) {
+                map.fitBounds([
+                    [originAirport.latitude, originAirport.longitude],
+                    [destinationAirport.latitude, destinationAirport.longitude]
+                ]);
+            }
+        } catch (error) {
+            console.error('Error fetching airport data:', error);
+        }
+    }
+
+    const departureColumn = detailCell.querySelector('.departure');
+    addClickListener(departureColumn, 'data-origin', flyToLocation);
+
+    const destinationColumn = detailCell.querySelector('.destination');
+    addClickListener(destinationColumn, 'data-destination', flyToLocation);
+
+    const durationColumn = detailCell.querySelectorAll('.duration');
+    durationColumn.forEach(column => {
+        addClickListener(column, 'data-origin', (origin) => {
+            const destination = column.getAttribute('data-destination');
+            fetchAndDisplayAirportData(origin, destination);
+        });
+    });
+    
+    const layoverColumn = detailCell.querySelectorAll('.layover');
+    layoverColumn.forEach(column => {
+        column.addEventListener('click', (event) => {
+            const layover = column.getAttribute('data-layover');
+            flyToLocation(layover);
+        });
+    });
+
     const selectRouteButton = detailCell.querySelector('#selectRoute');
     selectRouteButton.addEventListener('click', () => {
         // Determine the group ID for the newly selected route
@@ -157,7 +203,6 @@ function routeInfoRow(rowElement, fullFlightData, routeIds, routeIndex) {
         // Update appState for the selected route
         routeIds.forEach((id, idx) => {
             const segmentData = fullFlightData.route[idx];
-            console.log('segmentData:', segmentData);
             const departureDate = new Date(segmentData.local_departure || segmentData.dTime).toISOString().split('T')[0];
             const displayData = {
                 departure: new Date((segmentData.local_departure || segmentData.dTime * 1000)).toLocaleString(),
@@ -229,6 +274,18 @@ function highlightRoutePath(route) {
       const destinationIata = iataCodes[i + 1];
       pathDrawing.drawPathBetweenAirports(originIata, destinationIata, flightMap.getAirportDataByIata);
   }
+}
+
+function flyToLocation(iata) {
+    flightMap.getAirportDataByIata(iata).then(airport => {
+        if (airport) {
+            const lat = airport.latitude;
+            const lng = airport.longitude;
+            map.flyTo([lat, lng]);
+        }
+    }).catch(error => {
+        console.error('Error getting airport data:', error);
+    });
 }
 
 function replaceWaypointsForCurrentRoute(intermediaryIatas, routeIndex) {
