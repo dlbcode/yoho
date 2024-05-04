@@ -46,7 +46,7 @@ function routeInfoRow(rowElement, fullFlightData, routeIds, routeIndex) {
 
             if (idx === 0) {
                 // Origin Column
-                segmentsHtml.push(`<div class="departure" style="margin-right: 2px;" data-origin="${segment.flyFrom}"><div>${segment.flyFrom} (${segment.cityFrom})</div><div style="color: #999;">TESTDepart: <span style="color: #ccc;">${departureTime}</span></div></div>`);
+                segmentsHtml.push(`<div class="departure" style="margin-right: 2px;" data-origin="${segment.flyFrom}"><div>${segment.flyFrom} (${segment.cityFrom})</div><div style="color: #999;">Depart: <span style="color: #ccc;">${departureTime}</span></div></div>`);
                 // First Duration Column
                 segmentsHtml.push(`<div class="duration" data-origin="${segment.flyFrom}" data-destination="${segment.flyTo}"><div style="position: relative; margin-top: 12px; color: #ccc;">
                 ${duration}
