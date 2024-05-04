@@ -65,7 +65,7 @@ function routeInfoRow(rowElement, fullFlightData, routeIds, routeIndex) {
                     segmentsHtml.push(`<div class="layover" data-layover="${flight.route[idx - 1].flyTo}"><div>${flight.route[idx - 1].flyTo} (${segment.cityFrom})</div><div style="color: #999;">Arrive: <span style="color: #ccc;">${previousArrivalTime}</span></div><div style="text-align: center; color: #999;">&darr;</div><div style="color: #999;">Layover: <span style="color: #ccc;">${layoverDuration}</span></div>${recheckBagsText}<div style="text-align: center; color: #999;">&darr;</div><div style="color: #999;">Depart: <span style="color: #ccc;">${departureTime}</span></div></div>`);
                 
                 // Second Duration Column
-                segmentsHtml.push(`<div class="duration" data-origin="${flight.route[idx - 1].flyFrom}" data-destination="${flight.route[idx - 1].flyTo}"><div style="position: relative; margin-top: 12px; color: #ccc;">
+                segmentsHtml.push(`<div class="duration" data-origin="${flight.route[idx].flyFrom}" data-destination="${flight.route[idx].flyTo}"><div style="position: relative; margin-top: 12px; color: #ccc;">
                 ${duration}
                 <svg style="position: absolute; bottom: 12px; left: 0px; width: 100%; height: 30px; overflow: visible;">
                 <path d="M2,35 Q45,-2 88,35" stroke="#666" fill="transparent" stroke-width="2" stroke-dasharray="1,4" stroke-dashoffset="6" stroke-linecap="round"></path>
@@ -159,12 +159,16 @@ function routeInfoRow(rowElement, fullFlightData, routeIds, routeIndex) {
             // for each iata, get the lat and long for both the origin and destination and fit the map to those bounds
             flightMap.getAirportDataByIata(origin).then(airport => {
                 if (airport) {
+                    console.log('origin:', origin, airport.latitude, airport.longitude);
                     const lat = airport.latitude;
                     const lng = airport.longitude;
+                    console.log('origin:', lat, lng);
                     flightMap.getAirportDataByIata(destination).then(airport => {
                         if (airport) {
+                            console.log('destination:', destination, airport.latitude, airport.longitude);
                             const lat2 = airport.latitude;
                             const lng2 = airport.longitude;
+                            console.log('destination:', lat2, lng2);
                             map.fitBounds([[lat, lng], [lat2, lng2]]);
                         } else {
                             console.log('No airport found for IATA:', destination);
