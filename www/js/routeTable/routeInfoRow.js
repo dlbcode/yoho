@@ -198,15 +198,13 @@ function routeInfoRow(rowElement, fullFlightData, routeIds, routeIndex) {
         updateState('changeView', 'trip');
         highlightSelectedRowForRouteIndex(routeIndex);
     });
-}
 
-document.addEventListener('DOMContentLoaded', function() {
-    document.body.addEventListener('click', function(event) {
+    detailRow.addEventListener('click', function(event) {
         if (event.target.classList.contains('departure')) {
-            console.log('Delegated click on departure:', event.target.getAttribute('data-origin'));
+            console.log('Click on departure:', event.target.getAttribute('data-origin'));
         }
     });
-});
+}
 
 function highlightSelectedRowForRouteIndex(routeIndex) {
   document.querySelectorAll(`.route-info-table[data-route-index="${routeIndex}"] tbody tr.selected`).forEach(row => {
