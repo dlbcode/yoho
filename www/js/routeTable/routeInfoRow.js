@@ -14,8 +14,6 @@ function formatLayover(flight, idx) {
 }
 
 function routeInfoRow(rowElement, fullFlightData, routeIds, routeIndex) {
-    console.log('routeInfoRow called with:', rowElement, fullFlightData, routeIds, routeIndex);
-
     // Toggle details row visibility
     let existingDetailRow = rowElement.nextSibling;
     if (existingDetailRow && existingDetailRow.classList.contains('route-info-row')) {
@@ -114,8 +112,7 @@ function routeInfoRow(rowElement, fullFlightData, routeIds, routeIndex) {
                 </div>             
             </div>
         </div>
-    </div>
-`;
+    </div>`;
     detailRow.classList.add('route-info-row');
     detailRow.appendChild(detailCell);
 
@@ -139,48 +136,42 @@ function routeInfoRow(rowElement, fullFlightData, routeIds, routeIndex) {
         pathDrawing.drawLines();  // Optionally redraw other paths if needed
     });
 
+    function addClickListener(element, attr, callback) {
+        element.addEventListener('click', (event) => {
+            const iataCode = element.getAttribute(attr);
+            callback(iataCode);
+        });
+    }
+
+    async function fetchAndDisplayAirportData(origin, destination) {
+        try {
+            const [originAirport, destinationAirport] = await Promise.all([
+                flightMap.getAirportDataByIata(origin),
+                flightMap.getAirportDataByIata(destination)
+            ]);
+
+            if (originAirport && destinationAirport) {
+                map.fitBounds([
+                    [originAirport.latitude, originAirport.longitude],
+                    [destinationAirport.latitude, destinationAirport.longitude]
+                ]);
+            }
+        } catch (error) {
+            console.error('Error fetching airport data:', error);
+        }
+    }
+
     const departureColumn = detailCell.querySelector('.departure');
-    departureColumn.addEventListener('click', (event) => {
-            const originIata = departureColumn.getAttribute('data-origin');
-            flyToLocation(originIata);
-    });
+    addClickListener(departureColumn, 'data-origin', flyToLocation);
 
     const destinationColumn = detailCell.querySelector('.destination');
-    destinationColumn.addEventListener('click', (event) => {
-            const destinationIata = destinationColumn.getAttribute('data-destination');
-            flyToLocation(destinationIata);
-    });
+    addClickListener(destinationColumn, 'data-destination', flyToLocation);
 
     const durationColumn = detailCell.querySelectorAll('.duration');
     durationColumn.forEach(column => {
-        column.addEventListener('click', async (event) => {
-            const origin = column.getAttribute('data-origin');
+        addClickListener(column, 'data-origin', (origin) => {
             const destination = column.getAttribute('data-destination');
-
-            try {
-                const [originAirport, destinationAirport] = await Promise.all([
-                    flightMap.getAirportDataByIata(origin),
-                    flightMap.getAirportDataByIata(destination)
-                ]);
-
-                if (originAirport && destinationAirport) {
-                    console.log('origin:', origin, originAirport.latitude, originAirport.longitude);
-                    console.log('destination:', destination, destinationAirport.latitude, destinationAirport.longitude);
-                    map.fitBounds([
-                        [originAirport.latitude, originAirport.longitude],
-                        [destinationAirport.latitude, destinationAirport.longitude]
-                    ]);
-                } else {
-                    if (!originAirport) {
-                        console.log('No airport found for IATA:', origin);
-                    }
-                    if (!destinationAirport) {
-                        console.log('No airport found for IATA:', destination);
-                    }
-                }
-            } catch (error) {
-                console.error('Error fetching airport data:', error);
-            }
+            fetchAndDisplayAirportData(origin, destination);
         });
     });
     
@@ -212,7 +203,6 @@ function routeInfoRow(rowElement, fullFlightData, routeIds, routeIndex) {
         // Update appState for the selected route
         routeIds.forEach((id, idx) => {
             const segmentData = fullFlightData.route[idx];
-            console.log('segmentData:', segmentData);
             const departureDate = new Date(segmentData.local_departure || segmentData.dTime).toISOString().split('T')[0];
             const displayData = {
                 departure: new Date((segmentData.local_departure || segmentData.dTime * 1000)).toLocaleString(),
@@ -288,14 +278,10 @@ function highlightRoutePath(route) {
 
 function flyToLocation(iata) {
     flightMap.getAirportDataByIata(iata).then(airport => {
-        console.log('flyToLocation called with:', iata, airport);
         if (airport) {
             const lat = airport.latitude;
             const lng = airport.longitude;
-            console.log('Flying to:', lat, lng);
             map.flyTo([lat, lng]);
-        } else {
-            console.log('No airport found for IATA:', iata);
         }
     }).catch(error => {
         console.error('Error getting airport data:', error);
