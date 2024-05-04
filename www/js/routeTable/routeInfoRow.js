@@ -153,30 +153,34 @@ function routeInfoRow(rowElement, fullFlightData, routeIds, routeIndex) {
 
     const durationColumn = detailCell.querySelectorAll('.duration');
     durationColumn.forEach(column => {
-        column.addEventListener('click', (event) => {
+        column.addEventListener('click', async (event) => {
             const origin = column.getAttribute('data-origin');
             const destination = column.getAttribute('data-destination');
-            // for each iata, get the lat and long for both the origin and destination and fit the map to those bounds
-            flightMap.getAirportDataByIata(origin).then(airport => {
-                if (airport) {
-                    console.log('origin:', origin, airport.latitude, airport.longitude);
-                    const lat = airport.latitude;
-                    const lng = airport.longitude;
-                    console.log('origin:', lat, lng);
-                    flightMap.getAirportDataByIata(destination).then(airport => {
-                        if (airport) {
-                            console.log('destination:', destination, airport.latitude, airport.longitude);
-                            const lat2 = airport.latitude;
-                            const lng2 = airport.longitude;
-                            console.log('destination:', lat2, lng2);
-                            map.fitBounds([[lat, lng], [lat2, lng2]]);
-                        } else {
-                            console.log('No airport found for IATA:', destination);
-                        }
+
+            try {
+                const [originAirport, destinationAirport] = await Promise.all([
+                    flightMap.getAirportDataByIata(origin),
+                    flightMap.getAirportDataByIata(destination)
+                ]);
+
+                if (originAirport && destinationAirport) {
+                    console.log('origin:', origin, originAirport.latitude, originAirport.longitude);
+                    console.log('destination:', destination, destinationAirport.latitude, destinationAirport.longitude);
+                    map.fitBounds([
+                        [originAirport.latitude, originAirport.longitude],
+                        [destinationAirport.latitude, destinationAirport.longitude]
+                    ]);
+                } else {
+                    if (!originAirport) {
+                        console.log('No airport found for IATA:', origin);
                     }
-                );
+                    if (!destinationAirport) {
+                        console.log('No airport found for IATA:', destination);
+                    }
                 }
-            });
+            } catch (error) {
+                console.error('Error fetching airport data:', error);
+            }
         });
     });
     
