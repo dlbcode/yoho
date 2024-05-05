@@ -90,7 +90,6 @@ function buildRouteTable(routeIndex) {
       apiUrl += `flyFrom=${origin}&flyTo=${destination}`;
     } else {
       apiUrl += `origin=${origin}&flyFrom=${origin}&flyTo=${destination}&dateFrom=${startDate}&dateTo=${endDate}`;
-//https://yonderhop.com/api/range?origin=DEN&flyFrom=DEN}&flyTo=MSP&dateFrom=2024-05-13&dateTo=2024-05-20 
     }
   } else if (tableType === 'single') {
     if (destination === 'Any') {
