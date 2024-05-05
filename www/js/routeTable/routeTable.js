@@ -14,7 +14,7 @@ function buildRouteTable(routeIndex) {
 
   const dateRange = appState.routeDates[routeIndex];
 
-  let origin, destination, currentRoute, startDate, endDate, departureDate;
+  let origin, destination, currentRoute, startDate, endDate, departureDate, endPoint = 'yhoneway', maxPrice = 500;
 
   if (appState.routes[routeIndex] && appState.routes[routeIndex].originAirport && appState.routes[routeIndex].destinationAirport) {
       origin = appState.routes[routeIndex].originAirport.iata_code;
@@ -29,7 +29,7 @@ function buildRouteTable(routeIndex) {
       document.querySelector('#infoPaneContent').textContent = 'Please select at least one location to display data.';
       return;
     }
-  
+    
     let fromDate;
     let toDate;
   
@@ -41,15 +41,13 @@ function buildRouteTable(routeIndex) {
       fromDate = dateRange;
       toDate = dateRange;
     }
-    const maxPrice = 500;
   }
 
   let tableType = 'single';
   if (dateRange) {
-    if (dateRange.includes(' to ')) {
+    if (dateRange.includes(' to ') || dateRange.includes('any')) {
         tableType = 'range';
-    } else if (dateRange.includes('any')) {
-        tableType = 'any';
+        endPoint = 'range';
     }
   }
 
@@ -61,44 +59,46 @@ function buildRouteTable(routeIndex) {
       destination = appState.waypoints[(routeIndex * 2) + 1]?.iata_code || 'Any';
   }
   
-  if (!currentRoute && destination !== 'Any') {
-    if (tableType === 'range' || tableType === 'any') {
+  if (!currentRoute) {
+    if (tableType === 'range') {
       [startDate, endDate] = dateRange.split(' to ');
       currentRoute = appState.routes[routeIndex];
     } else {
       departureDate = appState.routeDates[routeIndex];
       currentRoute = appState.routes && appState.routes.length > routeIndex ? appState.routes[routeIndex] : undefined;  // Assign to already declared currentRoute
     }
-    if (!currentRoute) {
-      document.querySelector('#infoPaneContent').textContent = 'Please select a route to display data.';
-      return;
-    }
-  } else {
-    currentRoute = appState.routes && appState.routes.length > routeIndex ? appState.routes[routeIndex] : undefined;
   }
-  
 
   document.head.appendChild(Object.assign(document.createElement('link'), {rel: 'stylesheet', type: 'text/css', href: '../css/routeTable.css'}));
 
   // Start the loading animation
   const topBar = document.getElementById('top-bar');
   topBar.classList.add('loading');
-  origin = currentRoute.originAirport.iata_code;
-  if (destination !== 'Any') {
-    destination = currentRoute.destinationAirport.iata_code;
+  if (destination === 'Any') {
+    endPoint = 'cheapestFlights';
+    origin = origin = appState.waypoints[routeIndex * 2]?.iata_code;
+  } else {
+    origin = currentRoute.originAirport.iata_code;
   }
 
-  let apiUrl = `https://yonderhop.com/api/range?flyFrom=${origin}&flyTo=${destination}`;
-
+  let apiUrl = `https://yonderhop.com/api/${endPoint}?`;
+  
   if (tableType === 'range') {
-      const [startDate, endDate] = dateRange.split(' to ');
-      apiUrl += `&dateFrom=${startDate}&dateTo=${endDate}`;
-  } else if (tableType === 'any') {
-      apiUrl = `https://yonderhop.com/api/range?flyFrom=${origin}&flyTo=${destination}`;
+    if (destination === 'Any') {
+      apiUrl += `origin=${origin}&date_from=${startDate}&date_to=${endDate}&price_to=${maxPrice}`;
+    } else if (dateRange === 'any') {
+      apiUrl += `flyFrom=${origin}&flyTo=${destination}`;
+    } else {
+      apiUrl += `origin=${origin}&flyFrom=${origin}&flyTo=${destination}&dateFrom=${startDate}&dateTo=${endDate}`;
+    }
   } else if (tableType === 'single') {
-    apiUrl = `https://yonderhop.com/api/yhoneway?origin=${origin}&destination=${destination}&departureDate=${departureDate}`;
+    if (destination === 'Any') {
+      apiUrl += `origin=${origin}&date_from=${departureDate}&date_to=${departureDate}&price_to=${maxPrice}`;
+    } else {
+      apiUrl += `origin=${origin}&destination=${destination}&departureDate=${departureDate}`;
+    }
   }
-
+  
   fetch(apiUrl)
     .then(response => {
       if (!response.ok) {
@@ -150,7 +150,7 @@ function buildRouteTable(routeIndex) {
 
       const tbody = document.createElement('tbody');
 
-      if (tableType === 'range' || tableType === 'any') {
+      if (tableType === 'range' || destination === 'Any') {
           data = data.data;
       }
       data.forEach(flight => {
