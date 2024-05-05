@@ -45,8 +45,7 @@ function buildRouteTable(routeIndex) {
 
   let tableType = 'single';
   if (dateRange) {
-    console.log('dateRange:', dateRange);
-    if (dateRange.includes(' to ' || 'any')) {
+    if (dateRange.includes(' to ') || dateRange.includes('any')) {
         tableType = 'range';
         endPoint = 'range';
     }
@@ -68,8 +67,6 @@ function buildRouteTable(routeIndex) {
       departureDate = appState.routeDates[routeIndex];
       currentRoute = appState.routes && appState.routes.length > routeIndex ? appState.routes[routeIndex] : undefined;  // Assign to already declared currentRoute
     }
-    //document.querySelector('#infoPaneContent').textContent = 'Please select a route to display data.';
-    //return;
   }
 
   document.head.appendChild(Object.assign(document.createElement('link'), {rel: 'stylesheet', type: 'text/css', href: '../css/routeTable.css'}));
@@ -84,18 +81,21 @@ function buildRouteTable(routeIndex) {
     origin = currentRoute.originAirport.iata_code;
   }
 
-  let apiUrl = `https://yonderhop.com/api/${endPoint}?origin=${origin}`;
+  let apiUrl = `https://yonderhop.com/api/${endPoint}?`;
   
   if (tableType === 'range') {
     if (destination === 'Any') {
-      apiUrl += `&dateFrom=${startDate}&dateTo=${endDate}&price_to=${maxPrice}`;
-      return
+      apiUrl += `origin=${origin}&date_from=${startDate}&date_to=${endDate}&price_to=${maxPrice}`;
+    } else if (dateRange === 'any') {
+      apiUrl += `flyFrom=${origin}&flyTo=${destination}`;
+    } else {
+      apiUrl += `origin=${origin}&flyFrom=${origin}}&flyTo=${destination}&dateFrom=${startDate}&dateTo=${endDate}`;
     }
   } else if (tableType === 'single') {
     if (destination === 'Any') {
-      apiUrl += `&dateFrom=${departureDate}&dateTo=${departureDate}&price_to=${maxPrice}`;
+      apiUrl += `origin=${origin}&date_from=${departureDate}&date_to=${departureDate}&price_to=${maxPrice}`;
     } else {
-    apiUrl += `&flyTo=${destination}&departureDate=${departureDate}`;
+      apiUrl += `origin=${origin}&destination=${destination}&departureDate=${departureDate}`;
     }
   }
   
@@ -150,7 +150,7 @@ function buildRouteTable(routeIndex) {
 
       const tbody = document.createElement('tbody');
 
-      if (tableType === 'range' || tableType === 'any') {
+      if (tableType === 'range' || destination === 'Any') {
           data = data.data;
       }
       data.forEach(flight => {
