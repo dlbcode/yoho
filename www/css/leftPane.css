@@ -107,7 +107,6 @@ input[type="text"]:focus {
   align-items: center;
   justify-content: space-between;
   gap: 5px;
-  margin-bottom: 5px;
 }
 
 #numTravelers {
@@ -247,6 +246,7 @@ input[type="text"]:focus {
 
 .travelers-dropdown-btn,
 .trip-type-dropdown-btn {
+  height: 23px;
   padding: 5px; /* Combined padding rules */
   white-space: nowrap;
   overflow: hidden;

@@ -30,15 +30,6 @@
                 </div>
             </div>
             <div class="options-container">
-                <div class="travelers-container">
-                    <button id="travelersDropdownBtn" class="travelers-dropdown-btn">
-                        <img src="assets/person.svg" alt="" class="icon-person"> 1 
-                        <span class="icon-dropdown"></span>
-                    </button>
-                    <ul id="travelersDropdown" class="travelers-dropdown hidden">
-                        <li>1</li><li>2</li><li>3</li><li>4</li><li>5</li><li>6</li><li>7</li><li>8</li>        
-                    </ul>
-                </div>
             </div>
             <div id="datePickerContainer"></div>                                                                                                   
             <div class="airport-selection"></div>
@@ -67,9 +58,18 @@
     <div id="infoPane">
         <div id="resizeHandle" class="resize-handle"></div>
         <div id="top-bar">
-            <button id="tripButton" class="trip-button">$0.00</button>
+            <div class="travelers-container">
+                <button id="travelersDropdownBtn" class="travelers-dropdown-btn">
+                    <img src="assets/person.svg" alt="" class="icon-person"> 1 
+                    <span class="icon-dropdown"></span>
+                </button>
+                <ul id="travelersDropdown" class="travelers-dropdown hidden">
+                    <li>1</li><li>2</li><li>3</li><li>4</li><li>5</li><li>6</li><li>7</li><li>8</li>        
+                </ul>
+            </div>
             <div id="menu-bar">
             </div>
+            <button id="tripButton" class="trip-button">$0.00</button>
         </div>
         <div id="infoPaneContent">
     </div>
