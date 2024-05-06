@@ -258,6 +258,7 @@ input[type="text"]:focus {
   color: white;
   cursor: pointer;
   width: 55px;
+  border-right: #666 1px solid;
 }
 
 #tripTypeDropdownBtn:disabled {

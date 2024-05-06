@@ -128,14 +128,10 @@ a:active, button:active, input:focus, select:focus, textarea:focus {
   pointer-events: none; /* Prevents the tooltip from interfering with other mouse events */
 }
 
-.floating-controls {
+.floating-logo {
   position: absolute;
   top: 5px;
-  left: 20px;
-  padding: 5px;
-  background-color: rgba(255, 255, 255, 0.1); /* Semi-transparent white */
-  border-radius: 5px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  left: 5px;
   z-index: 500;
 }
 
