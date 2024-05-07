@@ -164,7 +164,7 @@ function buildRouteTable(routeIndex) {
         const durationHours = Math.floor(flight.duration.total / 3600);
         const durationMinutes = Math.floor((flight.duration.total % 3600) / 60);
         const routeIATAs = flight.route.map(r => r.flyFrom).concat(flight.route[flight.route.length - 1].flyTo).join(" > ");
-        if (tableType === 'range' || tableType === 'any') {
+        if (tableType === 'range' || destination === 'Any') {
           departureDate = new Date(flight.dTime * 1000);
           arrivalDate = new Date(flight.aTime * 1000);
         } else {
