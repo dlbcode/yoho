@@ -23,7 +23,8 @@ const infoPane = {
           const bounds = L.latLngBounds(waypointsLatLng);
           map.fitBounds(bounds, { padding: [50, 50] }); // Adjust padding as needed
       }
-    });  
+    });
+    this.addPlusButton();
   },
 
   handleStateChange(event) {
@@ -79,38 +80,38 @@ const infoPane = {
         button.onclick = () => {
           pathDrawing.clearLines(true);
           pathDrawing.drawLines();
-            appState.currentRouteIndex = routeIndex;
-            if (appState.selectedRoutes.hasOwnProperty(routeIndex)) {
-                appState.currentView = 'selectedRoute';
-            } else {
-                appState.currentView = 'routeTable';
-            }
-            this.displayContent();
+          appState.currentRouteIndex = routeIndex;
+          if (appState.selectedRoutes.hasOwnProperty(routeIndex)) {
+              appState.currentView = 'selectedRoute';
+          } else {
+              appState.currentView = 'routeTable';
+          }
+          this.displayContent();
 
-            // Correctly calculate bounds based on the current waypoints for zooming
-            const originWaypoint = appState.waypoints[routeIndex * 2];
-            const destinationWaypoint = appState.waypoints[routeIndex * 2 + 1];
-            const group = [originWaypoint, destinationWaypoint].filter(wp => wp).map(airport => L.latLng(airport.latitude, airport.longitude));
-            const bounds = L.latLngBounds(group);
-            if (group.length > 1) {
-                map.fitBounds(bounds, { padding: [50, 50] });
-            } else if (group.length === 1) {
-                map.setView(group[0], 4);
-            }
-        };
+          // Correctly calculate bounds based on the current waypoints for zooming
+          const originWaypoint = appState.waypoints[routeIndex * 2];
+          const destinationWaypoint = appState.waypoints[routeIndex * 2 + 1];
+          const group = [originWaypoint, destinationWaypoint].filter(wp => wp).map(airport => L.latLng(airport.latitude, airport.longitude));
+          const bounds = L.latLngBounds(group);
+          if (group.length > 1) {
+              map.fitBounds(bounds, { padding: [50, 50] });
+          } else if (group.length === 1) {
+              map.setView(group[0], 4);
+          }
+      };
 
-        if (appState.selectedRoutes.hasOwnProperty(routeIndex)) {
-          button.classList.add('selected-route-button'); // Adds a class that you will style to make the background green
-        } else {
-            button.classList.remove('selected-route-button'); // Removes the class, returning to the default style
-        }
+      if (appState.selectedRoutes.hasOwnProperty(routeIndex)) {
+        button.classList.add('selected-route-button'); // Adds a class that you will style to make the background green
+      } else {
+          button.classList.remove('selected-route-button'); // Removes the class, returning to the default style
+      }
 
-        uiHandling.attachDateTooltip(button, routeIndex);
+      uiHandling.attachDateTooltip(button, routeIndex);
 
-        button.addEventListener('mouseover', () => {
-          const routeId = `${origin}-${destination}`;
-          const pathLines = pathDrawing.routePathCache[routeId] || pathDrawing.dashedRoutePathCache[routeId] || [];
-          pathLines.forEach(path => path.setStyle({ color: 'white' }));
+      button.addEventListener('mouseover', () => {
+        const routeId = `${origin}-${destination}`;
+        const pathLines = pathDrawing.routePathCache[routeId] || pathDrawing.dashedRoutePathCache[routeId] || [];
+        pathLines.forEach(path => path.setStyle({ color: 'white' }));
       });
       
       button.addEventListener('mouseout', () => {
@@ -129,8 +130,11 @@ const infoPane = {
                 path.setStyle({ color: 'grey' });
             }
         });
-    });            
+      });            
     });
+    if (appState.waypoints.lenth === 0 || appState.waypoints.length % 2 === 0) {
+      this.addPlusButton();
+    }
   },
 
   updateTripTable: function(selectedRoutesArray) {
@@ -269,6 +273,20 @@ highlightRoute: function(iataCodes) {
           pathDrawing.drawPathBetweenAirports(iataCodes[index], iataCodes[index + 1], flightMap.getAirportDataByIata);
       }
   });
+},
+
+addPlusButton() {
+  const menuBar = document.getElementById('menu-bar');
+  if (!document.getElementById('plus-button')) { // Check to avoid duplicates
+      let plusButton = document.createElement('button');
+      plusButton.innerHTML = '+';
+      plusButton.id = 'plus-button';
+      plusButton.className = 'plus-button';
+      plusButton.onclick = () => {
+          console.log('Plus button clicked');
+      };
+      menuBar.appendChild(plusButton);
+  }
 }
 
 }
