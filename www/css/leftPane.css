@@ -496,14 +496,10 @@ input[type="text"]:focus {
 .plus-button {
   height: 23px;
   width: 24px;
-  /*background-color: #1f4e22;  Green background */
   color: #ccc;
   font-size: 20px;
   font-weight: 100;
   padding: 0px;
   border: none;
   cursor: pointer;
-}
-.plus-button:hover {
-  background-color: #347737; /* Slightly darker green on hover */
 }

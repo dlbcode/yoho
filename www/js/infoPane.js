@@ -5,6 +5,7 @@ import { selectedRoute } from './routeTable/selectedRoute.js';
 import { map } from './map.js';
 import { uiHandling } from './uiHandling.js';
 import { flightMap } from './flightMap.js';
+import { routeBox } from './routeBox.js';
 
 
 const infoPane = {
@@ -283,8 +284,8 @@ addPlusButton() {
       plusButton.id = 'plus-button';
       plusButton.className = 'plus-button';
       plusButton.onclick = () => {
-          console.log('Plus button clicked');
-      };
+        routeBox.openRouteSelection(); // Open the route selection box
+    };
       menuBar.appendChild(plusButton);
   }
 }
