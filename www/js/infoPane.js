@@ -284,7 +284,7 @@ addPlusButton() {
       plusButton.id = 'plus-button';
       plusButton.className = 'plus-button';
       plusButton.onclick = () => {
-        routeBox.openRouteSelection(); // Open the route selection box
+        // open route box
     };
       menuBar.appendChild(plusButton);
   }
