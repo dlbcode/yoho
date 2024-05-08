@@ -26,8 +26,9 @@ const routeBox = {
         content.textContent = 'Route Box Content';
         routeBox.appendChild(content);
 
-        const closeButton = document.createElement('button');
-        closeButton.textContent = 'Close';
+        const closeButton = document.createElement('span');
+        closeButton.innerHTML = '✕';
+        closeButton.className = 'popup-close-button';
         closeButton.onclick = () => routeBox.style.display = 'none';
         routeBox.appendChild(closeButton);
         

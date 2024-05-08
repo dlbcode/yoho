@@ -196,3 +196,10 @@ tr:hover {
 .trip-button:hover {
   background-color: #347737; /* Slightly darker green on hover for interactive feedback */
 }
+
+.popup-close-button {
+  position: absolute;
+  top: 0px;
+  right: 5px;
+  cursor: pointer;
+}
