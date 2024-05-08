@@ -9,7 +9,8 @@ document.head.appendChild(link);
 
 // In routeBox.js
 const routeBox = {
-    showRouteBox: function(event) {
+    showRouteBox: function(event, routIndex) {
+        console.log('showRouteBox', routIndex);
         // Remove existing popup if it exists
         let existingRouteBox = document.getElementById('routeBox');
         if (existingRouteBox) {

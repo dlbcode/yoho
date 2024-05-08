@@ -278,13 +278,14 @@ highlightRoute: function(iataCodes) {
 
 addPlusButton() {
   const menuBar = document.getElementById('menu-bar');
+  const routeIndex = Math.floor(appState.routes.length);
   if (!document.getElementById('plus-button')) { // Check to avoid duplicates
       let plusButton = document.createElement('button');
       plusButton.innerHTML = '+';
       plusButton.id = 'plus-button';
       plusButton.className = 'plus-button';
       plusButton.onclick = (event) => {
-        routeBox.showRouteBox(event);
+        routeBox.showRouteBox(event, routeIndex);
     };    
       menuBar.appendChild(plusButton);
   }
