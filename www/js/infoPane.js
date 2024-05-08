@@ -283,9 +283,9 @@ addPlusButton() {
       plusButton.innerHTML = '+';
       plusButton.id = 'plus-button';
       plusButton.className = 'plus-button';
-      plusButton.onclick = () => {
+      plusButton.onclick = (event) => {
         routeBox.showRouteBox(event);
-    };
+    };    
       menuBar.appendChild(plusButton);
   }
 }

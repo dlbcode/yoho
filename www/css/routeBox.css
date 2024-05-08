@@ -1,13 +1,15 @@
 .route-box-popup {
   position: absolute;
-  width: 300px; /* Adjust size as needed */
-  padding: 10px;
+  z-index: 1000;
   background-color: #333;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-  z-index: 1000; /* Ensure it appears above other elements */
-  display: none; /* Initially hidden */
-  border: 1px solid #666; /* Optional: for a border */
-  border-radius: 5px; /* Optional: for rounded corners */
+  border-radius: 5px;
+  border: 1px solid #525252;
+  padding: 10px;
+  width: 300px;
+  height: 150px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
 .route-box-popup button {
