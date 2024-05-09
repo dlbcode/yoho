@@ -16,10 +16,10 @@ const routeBox = {
             existingRouteBox.remove();
         }
 
-        let routeBox = document.createElement('div');
-        routeBox.id = 'routeBox';
-        routeBox.className = 'route-box-popup';
-        document.body.appendChild(routeBox);
+        let popup = document.createElement('div'); // Change 'routeBox' to 'popup'
+        popup.id = 'routeBox';
+        popup.className = 'route-box-popup';
+        document.body.appendChild(popup);
 
         let placeholders = ['From', 'To'];
 
