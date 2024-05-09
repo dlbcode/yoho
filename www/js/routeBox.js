@@ -10,7 +10,6 @@ document.head.appendChild(link);
 // In routeBox.js
 const routeBox = {
     showRouteBox: function(event, routeNumber) {
-        console.log('showRouteBox', routeNumber);
         let existingRouteBox = document.getElementById('routeBox');
         if (existingRouteBox) {
             existingRouteBox.remove();
@@ -55,7 +54,6 @@ const routeBox = {
 
         for (let i = 0; i < 2; i++) {
             let index = (routeNumber) * 2 + i;
-            console.log('setting up autocomplete for waypoint', index + 1);
             setupAutocompleteForField(`waypoint-input-${index + 1}`);
         }
 
@@ -83,9 +81,12 @@ const routeBox = {
             minDate: routeNumber === 0 ? "today" : appState.routeDates[routeNumber - 1],
             mode: currentRouteDate === 'any' ? 'any' : (currentRouteDate.includes(' to ') ? 'range' : 'single'),
             onValueUpdate: (selectedDates) => {
+                console.log('selectedDates: ', selectedDates);
                 let dateValue = null;
                 if (selectedDates.length > 0 && selectedDates[0]) {
                     if (selectedDates.length > 1 && selectedDates[1]) {
+                        console.log('this: ', this);
+                        console.log('this.textContent: ', this.textContent);
                         this.textContent = '[..]';
                         dateValue = `${selectedDates[0].toISOString().split('T')[0]} to ${selectedDates[1].toISOString().split('T')[0]}`;
                     } else {
@@ -96,8 +97,6 @@ const routeBox = {
                 } else {
                     this.textContent = 'Select Date'; // Reset the button text or handle as needed
                 }
-                console.log('updating route date', routeNumber, dateValue);
-                console.log('routeDates', appState.routeDates);
                 updateState('updateRouteDate', { routeNumber: routeNumber, date: dateValue }); // Update the state accordingly
             }, 
             onReady: (selectedDates, dateStr, instance) => {
@@ -158,7 +157,7 @@ const routeBox = {
                     const isSpecificDate = selectedOption === 'Specific Date';
 
                     if (isAnyDates) {
-                        this.textContent = 'Any Dates';
+                        document.getElementById('depart-date-input').value = 'Any Dates'; // Directly updating the input field's value
                         updateState('updateRouteDate', { routeNumber: routeNumber, date: 'any' });
                         instance.close();
                     } else {
