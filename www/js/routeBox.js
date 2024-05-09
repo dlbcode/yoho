@@ -1,5 +1,6 @@
 import { appState, updateState } from './stateManager.js';
 import { setupAutocompleteForField, fetchAirportByIata } from './airportAutocomplete.js';
+import { buildRouteTable } from './routeTable/routeTable.js';
 
 // link and load the routeBox.css file
 const link = document.createElement('link');
@@ -39,7 +40,7 @@ const routeBox = {
                 if (iataCode) {
                     const airportInfo = await fetchAirportByIata(iataCode[1]);
                     if (airportInfo) {
-                        routeHandling.showWaypointTooltip(this, `${airportInfo.name} (${airportInfo.iata_code}) ${airportInfo.city}, ${airportInfo.country}`);
+                        routeBox.showWaypointTooltip(this, `${airportInfo.name} (${airportInfo.iata_code}) ${airportInfo.city}, ${airportInfo.country}`);
                     }
                 }
             });
@@ -182,6 +183,17 @@ const routeBox = {
         closeButton.onclick = () => routeBox.style.display = 'none';
         routeBox.appendChild(closeButton);
 
+        // add a search button to the route box
+        let searchButton = document.createElement('button');
+        searchButton.textContent = 'Search';
+        searchButton.className = 'search-button';
+        searchButton.onclick = () => {
+            updateState('currentView', 'routeTable');
+            buildRouteTable(routeNumber);
+        }
+ 
+        routeBox.appendChild(searchButton);
+
         this.positionPopup(routeBox, event);
         routeBox.style.display = 'block';
     },
@@ -200,7 +212,25 @@ const routeBox = {
 
         popup.style.left = `${leftPosition}px`;
         popup.style.top = `${iconRect.top + window.scrollY - popup.offsetHeight - 10}px`; // Position above the icon
-    }
+    },
+
+    showWaypointTooltip: function(element, text) {
+        clearTimeout(this.tooltipTimeout);
+
+        this.tooltipTimeout = setTimeout(() => {
+            const tooltip = document.createElement('div');
+            tooltip.className = 'waypointTooltip';
+            tooltip.textContent = text;
+            document.body.appendChild(tooltip);
+
+            const rect = element.getBoundingClientRect();
+            const containerRect = document.querySelector('.container').getBoundingClientRect();
+
+            tooltip.style.position = 'absolute';
+            tooltip.style.left = `${rect.left - containerRect.left}px`;
+            tooltip.style.top = `${rect.bottom - containerRect.top}px`;
+        }, 200);
+    },
 }
 
 export { routeBox };
