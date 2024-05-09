@@ -70,6 +70,7 @@ function setupAutocompleteForField(fieldId) {
         suggestionBox.style.display = display ? 'block' : 'none';
         if (display) {
             const rect = inputField.getBoundingClientRect();
+            console.log('rect left', rect.left, 'rect top', rect.top);
             suggestionBox.style.left = `${rect.left}px`;
             suggestionBox.style.top = `${rect.bottom}px`;
         }

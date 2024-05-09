@@ -133,7 +133,7 @@ input[type="text"]:focus {
 }
 
 .route-container input {
-  width: 40px;
+  width: 200px;
 }
 
 .route-container:hover .waypointTooltip {
