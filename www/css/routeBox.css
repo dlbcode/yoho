@@ -6,12 +6,33 @@
   border: 1px solid #525252;
   padding: 10px;
   width: 420px;
-  height: 150px;
+  height: auto; /* Adjusted to auto to accommodate dynamic content size */
   display: flex;
   flex-direction: column;
   justify-content: space-between;
 }
 
-.route-box-popup button {
-  margin-top: 10px; /* Space above the button */
+.route-box-header {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.popup-close-button {
+  cursor: pointer;
+  border: none;
+  background: none;
+  color: #ccc;
+  font-size: 1.5rem;
+  padding: 0;
+  margin: 0 0 10px 10px; /* Proper spacing from the top-right corner */
+}
+
+.route-box-footer {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.route-box-footer .search-button {
+  padding: 5px 20px; /* Button sizing for better clickability */
+  margin-top: 10px; /* Ensured space above the button */
 }
