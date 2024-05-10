@@ -44,7 +44,6 @@ const routeBox = {
             input.type = 'text';
             input.id = `waypoint-input-${index + 1}`;
             input.classList.add('waypoint-input');
-        
             input.placeholder = placeholders[i];
             input.value = waypoint ? waypoint.iata_code : '';
         
@@ -67,7 +66,6 @@ const routeBox = {
             });
         
             waypointInputsContainer.appendChild(input);
-        
             const suggestionsDiv = document.createElement('div');
             suggestionsDiv.id = `waypoint-input-${index + 1}Suggestions`;
             suggestionsDiv.className = 'suggestions';
@@ -196,6 +194,15 @@ const routeBox = {
                 });
             }
         });
+
+        let fromInput = document.getElementById('waypoint-input-' + (routeNumber * 2 + 1));
+        let toInput = document.getElementById('waypoint-input-' + (routeNumber * 2 + 2));
+
+        if (!fromInput.value) {
+            fromInput.focus();
+        } else if (!toInput.value) {
+            toInput.focus();
+        }
 
         const closeButton = document.createElement('span');
         closeButton.innerHTML = '✕';
