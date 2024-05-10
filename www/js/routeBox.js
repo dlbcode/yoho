@@ -215,10 +215,12 @@ const routeBox = {
     }
 }
 
-function showWaypointTooltip(element, text) {
-    clearTimeout(this.tooltipTimeout);
+let tooltipTimeout;
 
-    this.tooltipTimeout = setTimeout(() => {
+function showWaypointTooltip(element, text) {
+    clearTimeout(tooltipTimeout);
+
+    tooltipTimeout = setTimeout(() => {
         const tooltip = document.createElement('div');
         tooltip.className = 'waypointTooltip';
         tooltip.textContent = text;
@@ -232,5 +234,6 @@ function showWaypointTooltip(element, text) {
         tooltip.style.top = `${rect.bottom - containerRect.top}px`;
     }, 200);
 }
+
 
 export { routeBox };
