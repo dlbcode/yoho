@@ -40,7 +40,7 @@ const routeBox = {
                 if (iataCode) {
                     const airportInfo = await fetchAirportByIata(iataCode[1]);
                     if (airportInfo) {
-                        routeBox.showWaypointTooltip(this, `${airportInfo.name} (${airportInfo.iata_code}) ${airportInfo.city}, ${airportInfo.country}`);
+                        showWaypointTooltip(this, `${airportInfo.name} (${airportInfo.iata_code}) ${airportInfo.city}, ${airportInfo.country}`);
                     }
                 }
             });
@@ -212,25 +212,25 @@ const routeBox = {
 
         popup.style.left = `${leftPosition}px`;
         popup.style.top = `${iconRect.top + window.scrollY - popup.offsetHeight - 10}px`; // Position above the icon
-    },
+    }
+}
 
-    showWaypointTooltip: function(element, text) {
-        clearTimeout(this.tooltipTimeout);
+function showWaypointTooltip(element, text) {
+    clearTimeout(this.tooltipTimeout);
 
-        this.tooltipTimeout = setTimeout(() => {
-            const tooltip = document.createElement('div');
-            tooltip.className = 'waypointTooltip';
-            tooltip.textContent = text;
-            document.body.appendChild(tooltip);
+    this.tooltipTimeout = setTimeout(() => {
+        const tooltip = document.createElement('div');
+        tooltip.className = 'waypointTooltip';
+        tooltip.textContent = text;
+        document.body.appendChild(tooltip);
 
-            const rect = element.getBoundingClientRect();
-            const containerRect = document.querySelector('.container').getBoundingClientRect();
+        const rect = element.getBoundingClientRect();
+        const containerRect = document.querySelector('.container').getBoundingClientRect();
 
-            tooltip.style.position = 'absolute';
-            tooltip.style.left = `${rect.left - containerRect.left}px`;
-            tooltip.style.top = `${rect.bottom - containerRect.top}px`;
-        }, 200);
-    },
+        tooltip.style.position = 'absolute';
+        tooltip.style.left = `${rect.left - containerRect.left}px`;
+        tooltip.style.top = `${rect.bottom - containerRect.top}px`;
+    }, 200);
 }
 
 export { routeBox };
