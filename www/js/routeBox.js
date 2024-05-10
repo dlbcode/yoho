@@ -45,6 +45,14 @@ const routeBox = {
                 }
             });
 
+            input.addEventListener('mouseleave', () => {
+                clearTimeout(tooltipTimeout);
+                const tooltip = document.querySelector('.waypointTooltip');
+                if (tooltip) {
+                    tooltip.remove();
+                }
+            });
+
             routeBox.appendChild(input);
     
             const suggestionsDiv = document.createElement('div');
@@ -61,8 +69,6 @@ const routeBox = {
         const currentRouteDate = appState.routeDates[routeNumber] || 'any';
         const isDateRange = appState.routeDates[routeNumber] && appState.routeDates[routeNumber].includes(' to ');
 
-        
-        // add date field with the value of the route date for the current route
         let dateInput = document.createElement('input');
         dateInput.type = 'date';
         dateInput.id = 'depart-date-input';
