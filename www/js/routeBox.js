@@ -116,6 +116,7 @@ const routeBox = {
                 updateState('updateRouteDate', { routeNumber: routeNumber, date: dateValue }); // Update the state accordingly
             }, 
             onReady: (selectedDates, dateStr, instance) => {
+                instance.calendarContainer.classList.add('do-not-close-routebox');
                 let prevMonthButton = instance.calendarContainer.querySelector('.flatpickr-prev-month');
                 let dateModeSelectWrapper = document.createElement('div');
                 dateModeSelectWrapper.className = 'select-wrapper';
@@ -241,14 +242,23 @@ const routeBox = {
 
 document.addEventListener('click', function(event) {
     let routeBox = document.getElementById('routeBox');
-    let flatpickrCalendar = document.querySelector('.flatpickr-calendar');
     const routeNumber = appState.currentRouteIndex;
     let routeButton = document.getElementById(`route-button-${routeNumber}`);
-    console.log('event.target', event.target);
-    console.log('flatpickrCalendar', flatpickrCalendar);
-    if (routeBox && !routeBox.contains(event.target) && event.target !== routeButton && 
-    !(flatpickrCalendar && flatpickrCalendar.contains(event.target))) {
-        console.log('hiding routeBox');
+
+    // Function to check if the event target or any of its parents have a specific class
+    function hasParentWithClass(element, className) {
+        while (element) {
+            if (element.classList && element.classList.contains(className)) {
+                return true;
+            }
+            element = element.parentNode;
+        }
+        return false;
+    }
+
+    // Check if the click was within elements that should not trigger closing
+    if (routeBox && !routeBox.contains(event.target) && event.target !== routeButton && !hasParentWithClass(event.target, 'do-not-close-routebox')) {
+        console.log('closing routeBox');
         routeBox.style.display = 'none';
     }
 }, true);
