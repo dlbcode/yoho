@@ -239,8 +239,18 @@ const routeBox = {
 
         popup.style.left = `${leftPosition}px`;
         popup.style.top = `${iconRect.top + window.scrollY - popup.offsetHeight - 10}px`; // Position above the icon
-    }
+    },
 }
+
+document.addEventListener('click', function(event) {
+    let routeBox = document.getElementById('routeBox');
+    const routeNumber = appState.currentRouteIndex;
+    let routeButton = document.getElementById(`route-button-${routeNumber}`);
+    if (routeBox && !routeBox.contains(event.target) && event.target !== routeButton) {
+        console.log('closing routeBox');
+        routeBox.style.display = 'none';
+    }
+}, true);
 
 let tooltipTimeout;
 

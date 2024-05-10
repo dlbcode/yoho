@@ -91,12 +91,10 @@ const infoPane = {
             }
             this.displayContent();
           } else {
-            // if the routeBox for the current route is not open, open it
             if (document.getElementById('routeBox').style.display === 'none') {
               routeBox.showRouteBox(event, routeIndex);
             } else {
-            // close the routeBox
-            document.getElementById('routeBox').style.display = 'none';
+              document.getElementById('routeBox').style.display = 'none';
             }
           }
 
