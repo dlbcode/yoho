@@ -100,7 +100,6 @@ const routeBox = {
             minDate: routeNumber === 0 ? "today" : appState.routeDates[routeNumber - 1],
             mode: currentRouteDate === 'any' ? 'any' : (currentRouteDate.includes(' to ') ? 'range' : 'single'),
             onValueUpdate: (selectedDates) => {
-                console.log('selectedDates: ', selectedDates);
                 let dateValue = null;
                 if (selectedDates.length > 0 && selectedDates[0]) {
                     if (selectedDates.length > 1 && selectedDates[1]) {
@@ -242,10 +241,14 @@ const routeBox = {
 
 document.addEventListener('click', function(event) {
     let routeBox = document.getElementById('routeBox');
+    let flatpickrCalendar = document.querySelector('.flatpickr-calendar');
     const routeNumber = appState.currentRouteIndex;
     let routeButton = document.getElementById(`route-button-${routeNumber}`);
-    if (routeBox && !routeBox.contains(event.target) && event.target !== routeButton) {
-        console.log('closing routeBox');
+    console.log('event.target', event.target);
+    console.log('flatpickrCalendar', flatpickrCalendar);
+    if (routeBox && !routeBox.contains(event.target) && event.target !== routeButton && 
+    !(flatpickrCalendar && flatpickrCalendar.contains(event.target))) {
+        console.log('hiding routeBox');
         routeBox.style.display = 'none';
     }
 }, true);
