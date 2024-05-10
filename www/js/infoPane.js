@@ -91,8 +91,13 @@ const infoPane = {
             }
             this.displayContent();
           } else {
+            // if the routeBox for the current route is not open, open it
+            if (document.getElementById('routeBox').style.display === 'none') {
+              routeBox.showRouteBox(event, routeIndex);
+            } else {
             // close the routeBox
             document.getElementById('routeBox').style.display = 'none';
+            }
           }
 
           // Correctly calculate bounds based on the current waypoints for zooming
