@@ -1,4 +1,5 @@
 import { appState, updateState } from '../stateManager.js';
+import { routeBox } from '../routeBox.js';
 
 const selectedRoute = {
   displaySelectedRouteInfo: function(routeIndex) {
@@ -16,6 +17,7 @@ const selectedRoute = {
     const changeRouteButton = document.createElement('button');
     changeRouteButton.textContent = 'Change Route';
     changeRouteButton.onclick = () => {
+      routeBox.showRouteBox(event, routeIndex);
       appState.currentView = 'routeTable';
       appState.currentRouteIndex = routeIndex;
       document.dispatchEvent(new CustomEvent('stateChange', { detail: { key: 'changeView', value: 'routeTable' } }));

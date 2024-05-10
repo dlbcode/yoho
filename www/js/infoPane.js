@@ -81,13 +81,19 @@ const infoPane = {
         button.onclick = () => {
           pathDrawing.clearLines(true);
           pathDrawing.drawLines();
-          appState.currentRouteIndex = routeIndex;
-          if (appState.selectedRoutes.hasOwnProperty(routeIndex)) {
+          if (appState.currentRouteIndex != routeIndex) {
+            appState.currentRouteIndex = routeIndex;
+            if (appState.selectedRoutes.hasOwnProperty(routeIndex)) {
               appState.currentView = 'selectedRoute';
-          } else {
+            } else {
               appState.currentView = 'routeTable';
+              routeBox.showRouteBox(event, routeIndex);
+            }
+            this.displayContent();
+          } else {
+            // close the routeBox
+            document.getElementById('routeBox').style.display = 'none';
           }
-          this.displayContent();
 
           // Correctly calculate bounds based on the current waypoints for zooming
           const originWaypoint = appState.waypoints[routeIndex * 2];

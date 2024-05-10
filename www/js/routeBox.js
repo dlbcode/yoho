@@ -36,10 +36,10 @@ const routeBox = {
             input.type = 'text';
             input.id = `waypoint-input-${index + 1}`;
             input.classList.add('waypoint-input');
-
+        
             input.placeholder = placeholders[i];
             input.value = waypoint ? waypoint.iata_code : '';
-    
+        
             input.addEventListener('mouseover', async function() {
                 const iataCode = this.value.match(/\b([A-Z]{3})\b/); // Extract IATA code using regex
                 if (iataCode) {
@@ -49,7 +49,7 @@ const routeBox = {
                     }
                 }
             });
-
+        
             input.addEventListener('mouseleave', () => {
                 clearTimeout(tooltipTimeout);
                 const tooltip = document.querySelector('.waypointTooltip');
@@ -57,33 +57,34 @@ const routeBox = {
                     tooltip.remove();
                 }
             });
-
+        
             waypointInputsContainer.appendChild(input);
-    
+        
             const suggestionsDiv = document.createElement('div');
             suggestionsDiv.id = `waypoint-input-${index + 1}Suggestions`;
             suggestionsDiv.className = 'suggestions';
             waypointInputsContainer.appendChild(suggestionsDiv);
         }
-
+        
+        // Setup autocomplete after all inputs are created
         for (let i = 0; i < 2; i++) {
             let index = (routeNumber) * 2 + i;
             setupAutocompleteForField(`waypoint-input-${index + 1}`);
         }
-
-        const currentRouteDate = appState.routeDates[routeNumber] || 'any';
+        
+        // Date input setup with value populated from appState
+        const currentRouteDate = appState.routeDates[routeNumber] || '';
         const isDateRange = appState.routeDates[routeNumber] && appState.routeDates[routeNumber].includes(' to ');
-
+        
         let dateInput = document.createElement('input');
         dateInput.type = 'date';
         dateInput.id = 'depart-date-input';
-        dateInput.value = appState.routeDates[routeNumber] || '';
-        // open the date picker when the input is clicked
-        dateInput.addEventListener('click', () => {
-            fp.open();
-        });
+        dateInput.value = currentRouteDate;
         dateInput.placeholder = 'Date';
-        routeBox.appendChild(dateInput);
+        dateInput.addEventListener('click', () => {
+            fp.open(); // Ensure 'fp' (flatpickr instance) is defined and configured properly earlier in your script
+        });
+        routeBox.appendChild(dateInput);        
 
         let fp = flatpickr(dateInput, {
             disableMobile: true,
