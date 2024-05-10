@@ -20,6 +20,14 @@ const routeBox = {
         routeBox.className = 'route-box-popup';
         document.body.appendChild(routeBox);
 
+        if (routeNumber > 0 && !appState.waypoints[(routeNumber * 2)]) {
+            let previousDestinationIndex = (routeNumber * 2) - 1;
+            let previousDestination = appState.waypoints[previousDestinationIndex];
+            if (previousDestination) {
+                appState.waypoints[routeNumber * 2] = previousDestination;  // Set the previous destination as the current origin
+            }
+        }        
+
         // Create a new container for waypoint inputs
         let waypointInputsContainer = document.createElement('div');
         waypointInputsContainer.className = 'waypoint-inputs-container';
