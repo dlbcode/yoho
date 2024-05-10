@@ -8,7 +8,6 @@ link.rel = 'stylesheet';
 link.href = 'css/routeBox.css';
 document.head.appendChild(link);
 
-// In routeBox.js
 const routeBox = {
     showRouteBox: function(event, routeNumber) {
         let existingRouteBox = document.getElementById('routeBox');
@@ -59,16 +58,27 @@ const routeBox = {
             tripOptionsContainer.appendChild(opt);
         });
 
-        tripTypeSelect.appendChild(selectedTripOption);
-        tripTypeSelect.appendChild(tripOptionsContainer);
-        tripTypeSelectWrapper.appendChild(tripTypeSelect);
-        routeBox.appendChild(tripTypeSelectWrapper);
-
         // Toggle display of options and update display when opened
         tripTypeSelect.addEventListener('click', () => {
             tripOptionsContainer.style.display = tripOptionsContainer.style.display === 'none' ? 'block' : 'none';
             updateOptionsDisplay(); // Update display each time it's opened
         });
+
+        // Wrap the trip type select in a container
+        let tripTypeSelectContainer = document.createElement('div');
+        tripTypeSelectContainer.className = 'trip-type-select-container';
+        tripTypeSelectContainer.appendChild(tripTypeSelectWrapper);
+        routeBox.appendChild(tripTypeSelectContainer);
+
+        tripTypeSelect.appendChild(selectedTripOption);
+        tripTypeSelect.appendChild(tripOptionsContainer);
+        tripTypeSelectWrapper.appendChild(tripTypeSelect);
+        routeBox.appendChild(tripTypeSelectWrapper);
+
+        // Create a new container for waypoint inputs
+        let waypointInputsContainer = document.createElement('div');
+        waypointInputsContainer.className = 'waypoint-inputs-container';
+        routeBox.appendChild(waypointInputsContainer);
 
         let placeholders = ['From', 'To'];
 
@@ -102,12 +112,12 @@ const routeBox = {
                 }
             });
 
-            routeBox.appendChild(input);
+            waypointInputsContainer.appendChild(input);
     
             const suggestionsDiv = document.createElement('div');
             suggestionsDiv.id = `waypoint-input-${index + 1}Suggestions`;
             suggestionsDiv.className = 'suggestions';
-            routeBox.appendChild(suggestionsDiv);
+            waypointInputsContainer.appendChild(suggestionsDiv);
         }
 
         for (let i = 0; i < 2; i++) {

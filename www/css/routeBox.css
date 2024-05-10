@@ -15,3 +15,24 @@
 .route-box-popup button {
   margin-top: 10px; /* Space above the button */
 }
+
+#depart-date-input {
+  display: block; /* Ensures the input is on a new line */
+  margin-top: 10px; /* Adjust spacing as necessary */
+}
+
+/* In routeBox.css */
+.trip-type-select-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.trip-type-select {
+  padding: 5px;
+}
+
+.waypoint-inputs-container {
+  display: flex;
+  flex-direction: column;
+  margin-top: 10px; /* Space above the waypoint inputs */
+}
