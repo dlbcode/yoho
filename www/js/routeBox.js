@@ -20,61 +20,6 @@ const routeBox = {
         routeBox.className = 'route-box-popup';
         document.body.appendChild(routeBox);
 
-        let tripTypeSelectWrapper = document.createElement('div');
-        tripTypeSelectWrapper.className = 'select-wrapper';
-
-        let tripTypeSelect = document.createElement('div');
-        tripTypeSelect.className = 'trip-type-select';
-
-        let selectedTripOption = document.createElement('div');
-        selectedTripOption.className = 'selected-option';
-        selectedTripOption.textContent = 'Round trip'; // Default selected option
-
-        let tripOptions = ['Round trip', 'One way'];
-        let tripOptionsContainer = document.createElement('div');
-        tripOptionsContainer.className = 'options';
-        tripOptionsContainer.style.display = 'none'; // Hide options by default
-
-        function updateOptionsDisplay() {
-            Array.from(tripOptionsContainer.children).forEach(opt => {
-                if (opt.textContent === selectedTripOption.textContent) {
-                    opt.style.display = 'none'; // Hide selected option
-                } else {
-                    opt.style.display = 'block'; // Show other options
-                }
-            });
-        }
-
-        tripOptions.forEach(option => {
-            let opt = document.createElement('div');
-            opt.className = 'option';
-            opt.textContent = option;
-            opt.addEventListener('click', (event) => {
-                selectedTripOption.textContent = opt.textContent; // Update the selected option text
-                updateOptionsDisplay(); // Update options display
-                tripOptionsContainer.style.display = 'none'; // Hide options after selection
-                event.stopPropagation();
-            });
-            tripOptionsContainer.appendChild(opt);
-        });
-
-        // Toggle display of options and update display when opened
-        tripTypeSelect.addEventListener('click', () => {
-            tripOptionsContainer.style.display = tripOptionsContainer.style.display === 'none' ? 'block' : 'none';
-            updateOptionsDisplay(); // Update display each time it's opened
-        });
-
-        // Wrap the trip type select in a container
-        let tripTypeSelectContainer = document.createElement('div');
-        tripTypeSelectContainer.className = 'trip-type-select-container';
-        tripTypeSelectContainer.appendChild(tripTypeSelectWrapper);
-        routeBox.appendChild(tripTypeSelectContainer);
-
-        tripTypeSelect.appendChild(selectedTripOption);
-        tripTypeSelect.appendChild(tripOptionsContainer);
-        tripTypeSelectWrapper.appendChild(tripTypeSelect);
-        routeBox.appendChild(tripTypeSelectWrapper);
-
         // Create a new container for waypoint inputs
         let waypointInputsContainer = document.createElement('div');
         waypointInputsContainer.className = 'waypoint-inputs-container';
@@ -90,6 +35,7 @@ const routeBox = {
             let input = document.createElement('input');
             input.type = 'text';
             input.id = `waypoint-input-${index + 1}`;
+            input.classList.add('waypoint-input');
 
             input.placeholder = placeholders[i];
             input.value = waypoint ? waypoint.iata_code : '';

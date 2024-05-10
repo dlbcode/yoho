@@ -4,8 +4,8 @@
   background-color: #333;
   border-radius: 5px;
   border: 1px solid #525252;
-  padding: 10px;
-  width: 420px;
+  padding: 5px;
+  width: 340px;
   height: 150px;
   display: flex;
   flex-direction: column;
@@ -13,26 +13,40 @@
 }
 
 .route-box-popup button {
-  margin-top: 10px; /* Space above the button */
+  margin-top: 5px; /* Space above the button */
 }
 
 #depart-date-input {
   display: block; /* Ensures the input is on a new line */
-  margin-top: 10px; /* Adjust spacing as necessary */
-}
-
-/* In routeBox.css */
-.trip-type-select-container {
-  display: flex;
-  flex-direction: column;
-}
-
-.trip-type-select {
-  padding: 5px;
+  margin-top: 10px; /* Space above the date input */
+  background-color: #333; /* Dark background */
+  border: 1px solid #555; /* Border color */
+  padding: 5px 5px; /* Padding inside the input */
+  width: 330px; /* Set a fixed width */
 }
 
 .waypoint-inputs-container {
   display: flex;
-  flex-direction: column;
-  margin-top: 10px; /* Space above the waypoint inputs */
+  flex-direction: row; /* Change from 'column' to 'row' */
+  margin-top: 20px; /* Space above the waypoint inputs */
+}
+
+.waypoint-inputs-container input {
+  margin-right: 10px;
+}
+
+.waypoint-inputs-container .waypoint-input {
+  background-color: #333; /* Dark background */
+  border: 1px solid #555; /* Border color */
+  padding: 5px 5px; /* Padding inside the input */
+  width: 160px; /* Set a fixed width */
+}
+
+.search-button {
+  background-color: #0060bb; /* Blue background */
+  color: #fff; /* White text */
+  border: none; /* No border */
+  padding: 5px 10px; /* Padding inside the button */
+  margin-top: 10px; /* Space above the button */
+  width: 330px; /* Set a fixed width */
 }
