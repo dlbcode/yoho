@@ -32,6 +32,10 @@ body {
   }
 }
 
+a[href="https://yonderhop.com"]:hover {
+  background: none;
+}
+
 /* Interactive Elements Style */
 button, input[type="number"], input[type="date"], input[type="text"] {
   background-color: #333;
