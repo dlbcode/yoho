@@ -235,5 +235,4 @@ function showWaypointTooltip(element, text) {
     }, 200);
 }
 
-
 export { routeBox };
