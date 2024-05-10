@@ -104,8 +104,6 @@ const routeBox = {
                 let dateValue = null;
                 if (selectedDates.length > 0 && selectedDates[0]) {
                     if (selectedDates.length > 1 && selectedDates[1]) {
-                        console.log('this: ', this);
-                        console.log('this.textContent: ', this.textContent);
                         this.textContent = '[..]';
                         dateValue = `${selectedDates[0].toISOString().split('T')[0]} to ${selectedDates[1].toISOString().split('T')[0]}`;
                     } else {
