@@ -45,7 +45,8 @@ const routeBox = {
             input.id = `waypoint-input-${index + 1}`;
             input.classList.add('waypoint-input');
             input.placeholder = placeholders[i];
-            input.value = waypoint ? waypoint.iata_code : '';
+            input.value = waypoint ? waypoint.city : '';
+            console.log('waypoint', waypoint);
         
             input.addEventListener('mouseover', async function() {
                 const iataCode = this.value.match(/\b([A-Z]{3})\b/); // Extract IATA code using regex
@@ -248,7 +249,6 @@ document.addEventListener('click', function(event) {
     const routeNumber = appState.currentRouteIndex;
     let routeButton = document.getElementById(`route-button-${routeNumber}`);
 
-    // Function to check if the event target or any of its parents have a specific class
     function hasParentWithClass(element, className) {
         while (element) {
             if (element.classList && element.classList.contains(className)) {
@@ -259,9 +259,7 @@ document.addEventListener('click', function(event) {
         return false;
     }
 
-    // Check if the click was within elements that should not trigger closing
     if (routeBox && !routeBox.contains(event.target) && event.target !== routeButton && !hasParentWithClass(event.target, 'do-not-close-routebox')) {
-        console.log('closing routeBox');
         routeBox.style.display = 'none';
     }
 }, true);

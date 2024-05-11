@@ -177,7 +177,7 @@ function updateSuggestions(inputId, airports, setSelectionMade) {
                 e.stopPropagation();
                 
                 const inputField = document.getElementById(inputId);
-                inputField.value = `${airport.iata_code}`;
+                inputField.value = `${airport.city}`;
                 suggestionBox.style.display = 'none';
                 document.dispatchEvent(new CustomEvent('airportSelected', { 
                     detail: { airport, fieldId: inputId }
