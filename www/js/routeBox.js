@@ -99,7 +99,9 @@ const routeBox = {
             defaultDate: currentRouteDate,
             minDate: routeNumber === 0 ? "today" : appState.routeDates[routeNumber - 1],
             mode: currentRouteDate === 'any' ? 'any' : (currentRouteDate.includes(' to ') ? 'range' : 'single'),
-            onValueUpdate: (selectedDates) => {
+            altInput: true,
+            altFormat: "D, d M", // This will display the date as 'Fri, 10 May'
+            onValueUpdate: function(selectedDates, dateStr) {
                 let dateValue = null;
                 if (selectedDates.length > 0 && selectedDates[0]) {
                     if (selectedDates.length > 1 && selectedDates[1]) {
