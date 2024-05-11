@@ -86,6 +86,7 @@ const routeBox = {
         dateInput.type = 'date';
         dateInput.id = 'depart-date-input';
         dateInput.value = currentRouteDate;
+        dateInput.className = 'date-input';
         dateInput.placeholder = 'Date';
         dateInput.addEventListener('click', () => {
             fp.open(); // Ensure 'fp' (flatpickr instance) is defined and configured properly earlier in your script

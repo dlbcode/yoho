@@ -38,8 +38,28 @@
 .waypoint-inputs-container .waypoint-input {
   background-color: #333; /* Dark background */
   border: 1px solid #555; /* Border color */
+  border-radius: 3px;
   padding: 5px 5px; /* Padding inside the input */
   width: 160px; /* Set a fixed width */
+}
+
+.waypoint-inputs-container .waypoint-input:focus {
+  border: 2px solid #0084ff;
+  background-color: #292929;
+}
+
+.date-input {
+  background-color: #333 !important; /* Dark background */
+  border: 1px solid #555 !important; /* Border color */
+  border-radius: 3px !important;
+  padding: 5px 5px !important; /* Padding inside the input */
+  width: 330px !important; /* Set a fixed width */
+  margin-top: 10px !important; /* Space above the date input */
+}
+
+.date-input:focus {
+  border: 2px solid #0084ff !important;
+  background-color: #292929 !important;
 }
 
 .search-button {
