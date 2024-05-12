@@ -46,8 +46,6 @@ const routeBox = {
             input.classList.add('waypoint-input');
             input.placeholder = placeholders[i];
             input.value = waypoint ? waypoint.city : '';
-            console.log('waypoint', waypoint);
-        
             input.addEventListener('mouseover', async function() {
                 const iataCode = this.value.match(/\b([A-Z]{3})\b/); // Extract IATA code using regex
                 if (iataCode) {
@@ -82,15 +80,16 @@ const routeBox = {
         // Date input setup with value populated from appState
         const currentRouteDate = appState.routeDates[routeNumber] || '';
         const isDateRange = appState.routeDates[routeNumber] && appState.routeDates[routeNumber].includes(' to ');
-
-        let flatpickrOpen = false;
         
         let dateInput = document.createElement('input');
         dateInput.type = 'date';
-        dateInput.id = 'date-input';
+        dateInput.id = 'depart-date-input';
         dateInput.value = currentRouteDate;
         dateInput.className = 'date-input';
         dateInput.placeholder = 'Date';
+        dateInput.addEventListener('click', () => {
+            fp.open(); // Ensure 'fp' (flatpickr instance) is defined and configured properly earlier in your script
+        });
         routeBox.appendChild(dateInput);        
 
         let fp = flatpickr(dateInput, {
@@ -102,12 +101,6 @@ const routeBox = {
             mode: currentRouteDate === 'any' ? 'any' : (currentRouteDate.includes(' to ') ? 'range' : 'single'),
             altInput: true,
             altFormat: "D, d M", // This will display the date as 'Fri, 10 May'
-            onOpen: function(selectedDates, dateStr, instance) {
-                flatpickrOpen = true; // Set flag when flatpickr opens
-            },
-            onClose: function(selectedDates, dateStr, instance) {
-                flatpickrOpen = false; // Reset flag when flatpickr closes
-            },
             onValueUpdate: function(selectedDates, dateStr) {
                 let dateValue = null;
                 if (selectedDates.length > 0 && selectedDates[0]) {
@@ -183,7 +176,7 @@ const routeBox = {
                     const isSpecificDate = selectedOption === 'Specific Date';
 
                     if (isAnyDates) {
-                        document.getElementById('date-input').value = 'Any Dates'; // Directly updating the input field's value
+                        document.getElementById('depart-date-input').value = 'Any Dates'; // Directly updating the input field's value
                         updateState('updateRouteDate', { routeNumber: routeNumber, date: 'any' });
                         instance.close();
                     } else {
@@ -265,11 +258,7 @@ document.addEventListener('click', function(event) {
     }
 
     if (routeBox && !routeBox.contains(event.target) && event.target !== routeButton && !hasParentWithClass(event.target, 'do-not-close-routebox')) {
-        if (event.target === dateInput && flatpickrOpen) {
-            fp.close(); // Close flatpickr if it's open and date input is clicked again
-        } else {
-            routeBox.style.display = 'none'; // Existing behavior
-        }
+        routeBox.style.display = 'none';
     }
 }, true);
 

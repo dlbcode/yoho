@@ -61,7 +61,7 @@ const uiHandling = {
   },
 
   setFocusToNextUnsetInput: function() {
-    const waypointInputs = document.querySelectorAll('.airport-selection input[type="text"]');
+    const waypointInputs = document.querySelectorAll('.waypoint-input[type="text"]');
     requestAnimationFrame(() => {
         for (let input of waypointInputs) {
             if (!input.value) {
