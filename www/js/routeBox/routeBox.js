@@ -132,7 +132,7 @@ const routeBox = {
         }
  
         routeBox.appendChild(searchButton);
-        routeBox.appendChild(removeRouteButton);
+        removeRouteButton(routeBox, routeNumber);
 
         this.positionPopup(routeBox, event);
         routeBox.style.display = 'block';
