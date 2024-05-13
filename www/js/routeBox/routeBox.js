@@ -3,6 +3,7 @@ import { setupAutocompleteForField, fetchAirportByIata } from '../airportAutocom
 import { buildRouteTable } from '../routeTable/routeTable.js';
 import { initDatePicker } from './datePicker.js';
 import { travelersPicker } from './travelersPicker.js';
+import { tripTypePicker } from './tripTypePicker.js';
 
 const link = document.createElement('link');
 link.rel = 'stylesheet';
@@ -21,13 +22,16 @@ const routeBox = {
         routeBox.className = 'route-box-popup';
         document.body.appendChild(routeBox);
 
-        const travelersDropdown = travelersPicker(routeNumber);
-        routeBox.appendChild(travelersDropdown);
-
         const topRow = document.createElement('div');
         topRow.id = 'topRow';
         topRow.className = 'top-row';
         routeBox.prepend(topRow);
+
+        const tripTypeDropdown = tripTypePicker();
+        topRow.appendChild(tripTypeDropdown);
+
+        const travelersDropdown = travelersPicker(routeNumber);
+        routeBox.appendChild(travelersDropdown);
 
         if (routeNumber > 0 && !appState.waypoints[(routeNumber * 2)]) {
             let previousDestinationIndex = (routeNumber * 2) - 1;

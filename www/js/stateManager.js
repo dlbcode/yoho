@@ -4,6 +4,7 @@ const defaultDirection = params.get('direction') || 'from';
 const appState = {
     eurToUsd: 1.13,
     selectedAirport: null,
+    tripType: 'roundTrip',
     roundTrip: false,
     travelers: 1,
     routeDirection: defaultDirection,
