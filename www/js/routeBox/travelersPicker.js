@@ -1,3 +1,5 @@
+import { appState, updateState } from "../stateManager.js";
+
 export function travelersPicker() {
   const travelersContainer = document.createElement('div');
   travelersContainer.className = 'travelers-container';
@@ -18,6 +20,14 @@ export function travelersPicker() {
       const listItem = document.createElement('li');
       listItem.textContent = option;
       dropdownList.appendChild(listItem);
+
+      // Add click event to update the state and button face when an option is selected
+      listItem.addEventListener('click', function() {
+          updateState('updateTravelers', routeNumber, this.textContent); // Update the state with selected option
+          dropdownBtn.innerHTML = `<img src="assets/person.svg" alt="" class="icon-person"> ${this.textContent} <span class="icon-dropdown"></span>`; // Update button face
+          dropdownList.classList.add('hidden'); // Hide the dropdown after selection
+          console.log('travelers: ', this.textContent, 'appState.routes', appState.routes);
+      });
   });
 
   travelersContainer.appendChild(dropdownList);

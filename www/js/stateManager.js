@@ -28,12 +28,13 @@ const appState = {
   
 function updateState(key, value) {
     switch (key) {
-        case 'routeDirection':
+        case 'routeDirection': {
             appState.routeDirection = value;
             updateUrl();
             break;
+        }
 
-        case 'updateRouteDate':
+        case 'updateRouteDate': {
             const { routeNumber, date } = value;
             appState.routeDates[routeNumber] = date;
             Object.keys(appState.selectedRoutes).forEach(key => {
@@ -42,7 +43,21 @@ function updateState(key, value) {
                 }
             });
             updateUrl();
-            break;   
+            break;
+        }
+
+        case 'updateTravelers': {
+            const { routeNumber, travelers } = value;
+            if (routeNumber >= 0 && routeNumber < appState.routes.length) {
+                appState.routes[routeNumber] = {
+                    ...appState.routes[routeNumber],
+                    travelers: parseInt(travelers)  // Ensure the traveler count is stored as an integer
+                };
+            }
+            console.log('routeNumber: ', routeNumber);
+            console.log('travelers: ', appState.routes[routeNumber].travelers);          
+            break;
+        }
             
         case 'updateWaypoint':
             if (value.index >= 0 && value.index < appState.waypoints.length) {
@@ -88,7 +103,7 @@ function updateState(key, value) {
                 });
                 appState.routeDates = recalculatedRouteDates;
             }
-            break;            
+            break;          
                         
         case 'clearData':
             appState.waypoints = [];
