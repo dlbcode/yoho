@@ -48,16 +48,14 @@ function updateState(key, value) {
 
         case 'updateTravelers': {
             const { routeNumber, travelers } = value;
-            if (routeNumber >= 0 && routeNumber < appState.routes.length) {
-                appState.routes[routeNumber] = {
-                    ...appState.routes[routeNumber],
-                    travelers: parseInt(travelers)  // Ensure the traveler count is stored as an integer
-                };
+            if (routeNumber != null && appState.routes[routeNumber]) { // Check if the route exists
+                appState.routes[routeNumber].travelers = parseInt(travelers);  // Update the travelers count
+                console.log('Updated travelers for route number:', routeNumber, 'to:', travelers);
+            } else {
+                console.error('Invalid routeNumber:', routeNumber, 'or route is undefined.');
             }
-            console.log('routeNumber: ', routeNumber);
-            console.log('travelers: ', appState.routes[routeNumber].travelers);          
             break;
-        }
+        }        
             
         case 'updateWaypoint':
             if (value.index >= 0 && value.index < appState.waypoints.length) {

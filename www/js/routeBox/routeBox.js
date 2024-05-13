@@ -21,7 +21,7 @@ const routeBox = {
         routeBox.className = 'route-box-popup';
         document.body.appendChild(routeBox);
 
-        const travelersDropdown = travelersPicker();
+        const travelersDropdown = travelersPicker(routeNumber);
         routeBox.appendChild(travelersDropdown);
 
         const topRow = document.createElement('div');
