@@ -4,6 +4,7 @@ import { buildRouteTable } from '../routeTable/routeTable.js';
 import { initDatePicker } from './datePicker.js';
 import { travelersPicker } from './travelersPicker.js';
 import { tripTypePicker } from './tripTypePicker.js';
+import { removeRouteButton } from './removeRoute.js';
 
 const link = document.createElement('link');
 link.rel = 'stylesheet';
@@ -131,6 +132,7 @@ const routeBox = {
         }
  
         routeBox.appendChild(searchButton);
+        routeBox.appendChild(removeRouteButton);
 
         this.positionPopup(routeBox, event);
         routeBox.style.display = 'block';
