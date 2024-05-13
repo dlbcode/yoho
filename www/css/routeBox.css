@@ -6,7 +6,7 @@
   border: 1px solid #525252;
   padding: 5px;
   width: 340px;
-  height: 150px;
+  height: 175px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -18,8 +18,7 @@
 
 .route-box-popup .button-container {
   display: flex;
-  justify-content: flex-end;
-  padding: 10px;
+  margin: 0px;
 }
 
 .route-box-popup .search-button, .route-box-popup .remove-button, .route-box-popup .popup-close-button {
@@ -39,7 +38,7 @@
 .waypoint-inputs-container {
   display: flex;
   flex-direction: row; /* Change from 'column' to 'row' */
-  margin-top: 20px; /* Space above the waypoint inputs */
+  margin-top: 10px; /* Space above the waypoint inputs */
 }
 
 .waypoint-inputs-container input {
@@ -76,17 +75,21 @@
 .search-button, .remove-button {
   color: #fff; /* White text */
   border: none; /* No border */
-  padding: 5px 10px; /* Padding inside the button */
+  padding: 5px; /* Padding inside the button */
   margin-top: 10px; /* Space above the button */
-  width: 165px; /* Set a fixed width */
+   /* Set a fixed width */
 }
 
 .search-button {
   background-color: #0060bb; /* Blue background */
+  width: 265px;
+  margin-right: 5px;
 }
 
 .remove-button {
   background-color: #7e1103;
+  width: 65px;
+  margin-right: 0px !important;
 }
 
 
