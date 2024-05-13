@@ -124,6 +124,8 @@ const routeBox = {
         searchButton.textContent = 'Search';
         searchButton.className = 'search-button';
         searchButton.onclick = () => {
+            const infoPaneContent = document.getElementById('infoPaneContent');
+            infoPaneContent.innerHTML = '';
             updateState('currentView', 'routeTable');
             buildRouteTable(routeNumber);
         }
