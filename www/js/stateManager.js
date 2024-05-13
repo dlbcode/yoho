@@ -5,7 +5,7 @@ const appState = {
     eurToUsd: 1.13,
     selectedAirport: null,
     roundTrip: false,
-    numTravelers: 1,
+    travelers: 1,
     routeDirection: defaultDirection,
     startDate: null,
     endDate: null,
@@ -87,7 +87,12 @@ function updateState(key, value) {
     
         case 'updateRoutes':
             if (JSON.stringify(appState.routes) !== JSON.stringify(value)) {
-                appState.routes = value;
+                // Ensure each route has at least 1 traveler
+                appState.routes = value.map(route => ({
+                    ...route,
+                    travelers: route.travelers || 1  // Set default travelers to 1 if not provided
+                }));
+        
                 // Only recalculate routeDates if necessary, otherwise preserve existing dates
                 const recalculatedRouteDates = { ...appState.routeDates };
                 appState.routes.forEach((route, index) => {
@@ -98,8 +103,8 @@ function updateState(key, value) {
                 });
                 appState.routeDates = recalculatedRouteDates;
             }
-            break;          
-                        
+            break;
+                                             
         case 'clearData':
             appState.waypoints = [];
             appState.routes = [];
