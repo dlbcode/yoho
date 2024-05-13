@@ -18,7 +18,6 @@ export function initDatePicker(inputId, routeNumber) {
           let dateValue = null;
           if (selectedDates.length > 0 && selectedDates[0]) {
               if (selectedDates.length > 1 && selectedDates[1]) {
-                  this.textContent = '[..]';
                   dateValue = `${selectedDates[0].toISOString().split('T')[0]} to ${selectedDates[1].toISOString().split('T')[0]}`;
               } else {
                   const formatter = new Intl.DateTimeFormat('en-US', { day: 'numeric', timeZone: 'UTC' });
@@ -95,7 +94,6 @@ export function initDatePicker(inputId, routeNumber) {
               } else {
                   const newMode = isSpecificDate ? "single" : "range";
                   instance.set("mode", newMode);
-                  this.textContent = newMode === "single" ? 'Select Date' : '[..]';
                   instance.clear();
                   instance.redraw();
 
