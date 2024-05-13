@@ -4,7 +4,7 @@ import { buildRouteTable } from '../routeTable/routeTable.js';
 import { initDatePicker } from './datePicker.js';
 import { travelersPicker } from './travelersPicker.js';
 import { tripTypePicker } from './tripTypePicker.js';
-import { removeRouteButton } from './removeRoute.js';
+import { removeRoute } from './removeRoute.js';
 
 const link = document.createElement('link');
 link.rel = 'stylesheet';
@@ -137,7 +137,7 @@ const routeBox = {
         buttonContainer.appendChild(closeButton); // If you want the close button next to search/remove
 
         // Assuming removeRouteButton appends the button inside the passed container
-        removeRouteButton(buttonContainer, routeNumber);
+        removeRoute.removeRouteButton(buttonContainer, routeNumber);
 
         routeBox.appendChild(buttonContainer);
 
