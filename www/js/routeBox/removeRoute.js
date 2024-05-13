@@ -4,7 +4,7 @@ import { routeList } from '../routeList.js';
 import { mapHandling } from '../mapHandling.js';
 import { routeHandling } from '../routeHandling.js';
 
-export function removeRouteButton(routeBox, routeNumber) {
+export function removeRouteButton(container, routeNumber) {
   const removeButton = document.createElement('button');
   removeButton.textContent = 'Remove';
   removeButton.className = 'remove-button';
@@ -55,7 +55,7 @@ export function removeRouteButton(routeBox, routeNumber) {
       document.getElementById('routeBox').style.display = 'none';
   };
   if (routeBox instanceof HTMLElement) {
-    routeBox.appendChild(removeButton);
+    container.appendChild(removeButton);
   } else {
     console.error('Invalid routeBox element provided');
   }

@@ -115,24 +115,25 @@ const routeBox = {
             toInput.focus();
         }
 
-        const closeButton = document.createElement('span');
-        closeButton.innerHTML = '✕';
-        closeButton.className = 'popup-close-button';
-        closeButton.onclick = () => routeBox.style.display = 'none';
-        routeBox.appendChild(closeButton);
+        const buttonContainer = document.createElement('div');
+        buttonContainer.className = 'button-container';  // This class will be used for CSS styling
 
         let searchButton = document.createElement('button');
         searchButton.textContent = 'Search';
         searchButton.className = 'search-button';
-        searchButton.onclick = () => {
-            const infoPaneContent = document.getElementById('infoPaneContent');
-            infoPaneContent.innerHTML = '';
-            updateState('currentView', 'routeTable');
-            buildRouteTable(routeNumber);
-        }
- 
-        routeBox.appendChild(searchButton);
-        removeRouteButton(routeBox, routeNumber);
+
+        let closeButton = document.createElement('span');
+        closeButton.innerHTML = '✕';
+        closeButton.className = 'popup-close-button';
+        closeButton.onclick = () => routeBox.style.display = 'none';
+
+        buttonContainer.appendChild(searchButton);
+        buttonContainer.appendChild(closeButton); // If you want the close button next to search/remove
+
+        // Assuming removeRouteButton appends the button inside the passed container
+        removeRouteButton(buttonContainer, routeNumber);
+
+        routeBox.appendChild(buttonContainer);
 
         this.positionPopup(routeBox, event);
         routeBox.style.display = 'block';

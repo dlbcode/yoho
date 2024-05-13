@@ -16,6 +16,17 @@
   margin-top: 5px; /* Space above the button */
 }
 
+.route-box-popup .button-container {
+  display: flex;
+  justify-content: flex-end;
+  padding: 10px;
+}
+
+.route-box-popup .search-button, .route-box-popup .remove-button, .route-box-popup .popup-close-button {
+  margin-right: 5px;
+  cursor: pointer;
+}
+
 #depart-date-input {
   display: block; /* Ensures the input is on a new line */
   margin-top: 10px; /* Space above the date input */
@@ -62,14 +73,22 @@
   background-color: #292929 !important;
 }
 
-.search-button {
-  background-color: #0060bb; /* Blue background */
+.search-button, .remove-button {
   color: #fff; /* White text */
   border: none; /* No border */
   padding: 5px 10px; /* Padding inside the button */
   margin-top: 10px; /* Space above the button */
-  width: 330px; /* Set a fixed width */
+  width: 165px; /* Set a fixed width */
 }
+
+.search-button {
+  background-color: #0060bb; /* Blue background */
+}
+
+.remove-button {
+  background-color: #7e1103;
+}
+
 
 #topRow {
   display: flex;  /* This will line up the children horizontally */
