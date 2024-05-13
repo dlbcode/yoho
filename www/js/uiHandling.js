@@ -3,42 +3,6 @@ import { adjustMapSize } from "./map.js";
 
 const uiHandling = {
 
-  initTravelersDropdown: function() {
-    if (this.travelersDropdownInitialized) return; // Prevent multiple initializations
-    this.travelersDropdownInitialized = true;
-
-    const dropdownBtn = document.getElementById('travelersDropdownBtn');
-    const dropdown = document.getElementById('travelersDropdown');
-
-    dropdownBtn.addEventListener('click', function() {
-        dropdown.classList.toggle('hidden');
-    });
-
-    dropdown.addEventListener('click', function(event) {
-        const item = event.target.closest('li');
-        if (item) {
-            const numTravelersText = item.textContent.match(/\d+/)[0];
-            const numTravelers = parseInt(numTravelersText, 10);
-            document.getElementById('travelersDropdownBtn').innerHTML = `<img src="assets/person.svg" alt="" class="icon-person"> ${numTravelersText} <span class="icon-dropdown"></span>`;
-            dropdown.classList.add('hidden');
-            updateState('numTravelers', numTravelers);
-        }
-    });
-  },  
-
-  hideDropdowns: function() {
-    document.addEventListener('click', function(event) {
-        const dropdownSelectors = ['#travelersDropdown', '#tripTypeDropdown'];
-        dropdownSelectors.forEach(selector => {
-            const dropdown = document.getElementById(selector.substring(1));
-            const dropdownBtn = document.querySelector(`${selector}Btn`);
-            if (dropdown && !dropdown.contains(event.target) && !dropdownBtn.contains(event.target)) {
-                dropdown.classList.add('hidden');
-            }
-        });
-    });
-  },
-
   handleStateChange: function(event) {
         this.updateTripTypeContainerVisibility();
   }, 
@@ -191,10 +155,8 @@ const uiHandling = {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  uiHandling.initTravelersDropdown();
   uiHandling.initTogglePaneButton();
   uiHandling.initInfoPaneDragButton();
-  uiHandling.hideDropdowns();
   uiHandling.initTripButtons();
 });
 

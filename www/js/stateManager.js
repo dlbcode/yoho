@@ -49,10 +49,7 @@ function updateState(key, value) {
         case 'updateTravelers': {
             const { routeNumber, travelers } = value;
             if (routeNumber != null && appState.routes[routeNumber]) { // Check if the route exists
-                appState.routes[routeNumber].travelers = parseInt(travelers);  // Update the travelers count
-                console.log('Updated travelers for route number:', routeNumber, 'to:', travelers);
-            } else {
-                console.error('Invalid routeNumber:', routeNumber, 'or route is undefined.');
+                appState.routes[routeNumber].travelers = parseInt(travelers);
             }
             break;
         }        

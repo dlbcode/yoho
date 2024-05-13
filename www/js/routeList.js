@@ -3,16 +3,7 @@ import { appState } from './stateManager.js';
 const routeList = {
 
     init() {
-        this.initTravelersDropdown();
         this.addStateChangeListener();
-    },
-
-    initTravelersDropdown: function() {
-        const travelersDropdown = document.getElementById('travelersDropdown');
-        travelersDropdown.addEventListener('change', (event) => {
-            appState.numTravelers = parseInt(event.target.value, 10);
-            this.updateEstPrice();
-        });
     },
 
     updateEstPrice: function() {

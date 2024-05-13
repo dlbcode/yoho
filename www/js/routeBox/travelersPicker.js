@@ -23,12 +23,11 @@ export function travelersPicker(routeNumber) {
 
       // Add click event to update the state and button face when an option is selected
       listItem.addEventListener('click', function() {
-          dropdownBtn.innerHTML = `<img src="assets/person.svg" alt="" class="icon-person"> ${this.textContent} <span class="icon-dropdown"></span>`; // Update button face
-          dropdownList.classList.add('hidden'); // Hide the dropdown after selection
-          console.log('routeNumber: ', routeNumber, 'travelers: ', this.textContent, 'appState.routes', appState.routes);
-          updateState('updateTravelers', routeNumber, this.textContent); // Update the state with selected option
-          
-      });
+        if (routeNumber != null && routeNumber < appState.routes.length) {
+            updateState('updateTravelers', { routeNumber, travelers: this.textContent });
+        }
+        console.log('appState.routes: ', appState.routes);
+    });
   });
 
   travelersContainer.appendChild(dropdownList);
