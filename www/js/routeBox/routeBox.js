@@ -121,6 +121,12 @@ const routeBox = {
         let searchButton = document.createElement('button');
         searchButton.textContent = 'Search';
         searchButton.className = 'search-button';
+        searchButton.onclick = () => {
+            const infoPaneContent = document.getElementById('infoPaneContent');
+            infoPaneContent.innerHTML = '';
+            updateState('currentView', 'routeTable');
+            buildRouteTable(routeNumber);
+        }
 
         let closeButton = document.createElement('span');
         closeButton.innerHTML = '✕';
