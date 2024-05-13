@@ -21,5 +21,11 @@ export function travelersPicker() {
   });
 
   travelersContainer.appendChild(dropdownList);
+
+  // Toggle dropdown visibility on button click
+  dropdownBtn.addEventListener('click', function() {
+      dropdownList.classList.toggle('hidden');
+  });
+
   return travelersContainer;  // Ensure this line is added
 }
