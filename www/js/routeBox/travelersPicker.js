@@ -21,4 +21,5 @@ export function travelersPicker() {
   });
 
   travelersContainer.appendChild(dropdownList);
+  return travelersContainer;  // Ensure this line is added
 }
