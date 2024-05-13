@@ -1,5 +1,5 @@
 import { appState, updateState } from '../stateManager.js';
-import { routeBox } from '../routeBox.js';
+import { routeBox } from '../routeBox/routeBox.js';
 
 const selectedRoute = {
   displaySelectedRouteInfo: function(routeIndex) {

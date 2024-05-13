@@ -5,7 +5,7 @@ import { selectedRoute } from './routeTable/selectedRoute.js';
 import { map } from './map.js';
 import { uiHandling } from './uiHandling.js';
 import { flightMap } from './flightMap.js';
-import { routeBox } from './routeBox.js';
+import { routeBox } from './routeBox/routeBox.js';
 
 
 const infoPane = {
