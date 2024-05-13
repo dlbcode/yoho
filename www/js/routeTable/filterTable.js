@@ -114,30 +114,39 @@ function getColumnIndex(columnIdentifier) {
 
 function toggleFilterResetIcon(column) {
     const filterIcon = document.getElementById(`${column}Filter`);
-    const resetIcon = document.getElementById(`reset${column.charAt(0).toUpperCase() + column.slice(1)}Filter`);
-    const filterValue = appState.filterState[column];
-    let filterButtonSpan = filterIcon.closest('.headerText'); // Get the parent span of the filter icon
-    if (!filterButtonSpan) {
-        filterButtonSpan = filterIcon.closest('.filterButton');
+    if (!filterIcon) {
+        console.error(`Filter icon for ${column} not found.`);
+        return; // Exit if the icon is not found
     }
-    const isNonDefault = filterValue && (
-        (column === 'price' && filterValue.value) ||
-        (column === 'departure' || column === 'arrival') &&
-        (filterValue.start !== 0 || filterValue.end !== 24)
-    );
 
-    console.log('isNonDefault:', isNonDefault);
+    const resetIcon = document.getElementById(`reset${column.charAt(0).toUpperCase() + column.slice(1)}Filter`);
+    if (!resetIcon) {
+        console.error(`Reset icon for ${column} not found.`);
+        return; // Exit if the reset icon is not found
+    }
+
+    let filterButtonSpan = filterIcon.closest('.headerText');
+    if (!filterButtonSpan) {
+        console.error('Parent span with class .headerText not found for filterIcon.');
+        filterButtonSpan = filterIcon.closest('.filterButton'); // Backup option
+        if (!filterButtonSpan) {
+            console.error('Backup parent span with class .filterButton not found.');
+            return; // Exit if no appropriate parent is found
+        }
+    }
+
+    const filterValue = appState.filterState[column];
+    const isNonDefault = filterValue && ((column === 'price' && filterValue.value) ||
+        (column === 'departure' || column === 'arrival') && (filterValue.start !== 0 || filterValue.end !== 24));
 
     if (isNonDefault) {
         filterIcon.style.display = 'none';
         resetIcon.style.display = 'inline';
-        // Add 'filterButton' and remove 'headerText'
         filterButtonSpan.classList.add('filterButton');
         filterButtonSpan.classList.remove('headerText');
     } else {
         filterIcon.style.display = 'inline';
         resetIcon.style.display = 'none';
-        // Remove 'filterButton' and add 'headerText'
         filterButtonSpan.classList.remove('filterButton');
         filterButtonSpan.classList.add('headerText');
     }
