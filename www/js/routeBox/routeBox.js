@@ -21,9 +21,12 @@ const routeBox = {
         routeBox.className = 'route-box-popup';
         document.body.appendChild(routeBox);
 
-        routeBox.appendChild(travelersPicker);
+        const travelersDropdown = travelersPicker();
+        routeBox.appendChild(travelersDropdown);
 
-        // Append the top row to the routeBox
+        const topRow = document.createElement('div');
+        topRow.id = 'topRow';
+        topRow.className = 'top-row';
         routeBox.prepend(topRow);
 
         if (routeNumber > 0 && !appState.waypoints[(routeNumber * 2)]) {
