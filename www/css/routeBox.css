@@ -70,3 +70,25 @@
   margin-top: 10px; /* Space above the button */
   width: 330px; /* Set a fixed width */
 }
+
+#topRow {
+  display: flex;  /* This will line up the children horizontally */
+  align-items: center;  /* Aligns children vertically in the middle */
+  justify-content: flex-start;  /* Aligns children to the start of the row */
+}
+
+.travelers-dropdown-btn,
+.trip-type-dropdown-btn {
+  height: 23px;
+  padding: 5px; /* Combined padding rules */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #333;
+  color: white;
+  cursor: pointer;
+  border-right: #666 1px solid;
+}

@@ -119,12 +119,6 @@ input[type="text"]:focus {
   padding: 5px 5pxpx;
 }
 
-.date-picker-container,
-.trip-type-container,
-.airport-selection {
-  margin-bottom: 5px;
-}
-
 .route-container {
   display: flex;
   align-items: center;
@@ -242,23 +236,6 @@ input[type="text"]:focus {
 
 .hidden {
   display: none;
-}
-
-.travelers-dropdown-btn,
-.trip-type-dropdown-btn {
-  height: 23px;
-  padding: 5px; /* Combined padding rules */
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background-color: #333;
-  color: white;
-  cursor: pointer;
-  width: 55px;
-  border-right: #666 1px solid;
 }
 
 #tripTypeDropdownBtn:disabled {

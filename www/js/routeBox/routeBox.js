@@ -31,7 +31,7 @@ const routeBox = {
         topRow.appendChild(tripTypeDropdown);
 
         const travelersDropdown = travelersPicker(routeNumber);
-        routeBox.appendChild(travelersDropdown);
+        topRow.appendChild(travelersDropdown);
 
         if (routeNumber > 0 && !appState.waypoints[(routeNumber * 2)]) {
             let previousDestinationIndex = (routeNumber * 2) - 1;
