@@ -1,10 +1,11 @@
-import { appState, updateState } from '../stateManager.js';
+import { appState, updateState, updateUrl } from '../stateManager.js';
 import { setupAutocompleteForField, fetchAirportByIata } from '../airportAutocomplete.js';
 import { buildRouteTable } from '../routeTable/routeTable.js';
 import { initDatePicker } from './datePicker.js';
 import { travelersPicker } from './travelersPicker.js';
 import { tripTypePicker } from './tripTypePicker.js';
 import { removeRoute } from './removeRoute.js';
+import { routeHandling } from '../routeHandling.js';
 
 const link = document.createElement('link');
 link.rel = 'stylesheet';
@@ -71,7 +72,16 @@ const routeBox = {
             let index = (routeNumber) * 2 + i;
             setupAutocompleteForField(`waypoint-input-${index + 1}`);
         }
-        
+
+        let swapButton = document.createElement('button');
+        swapButton.innerHTML = '&#8646;'; // Double-headed arrow symbol
+        swapButton.className = 'swap-route-button';
+        swapButton.onclick = () => handleSwapButtonClick(routeNumber);
+        swapButton.title = 'Swap waypoints'; // Tooltip for accessibility
+
+        let firstInput = waypointInputsContainer.querySelector('input[type="text"]');
+        waypointInputsContainer.insertBefore(swapButton, firstInput.nextSibling);
+
         const currentRouteDate = appState.routeDates[routeNumber] || '';
         const isDateRange = appState.routeDates[routeNumber] && appState.routeDates[routeNumber].includes(' to ');
         
@@ -163,8 +173,8 @@ document.addEventListener('click', function(event) {
 }, true);
 
 function handleSwapButtonClick(routeNumber) {
-    let routeDiv = document.getElementById(`route${routeNumber}`);
-    let inputs = routeDiv.querySelectorAll('input[type="text"]');
+    let waypointInputsContainer = document.getElementById('routeBox').querySelector('.waypoint-inputs-container');
+    let inputs = waypointInputsContainer.querySelectorAll('input[type="text"]');
     if (inputs.length === 2) {
         // Swap the values of the input fields
         let temp = inputs[0].value;
