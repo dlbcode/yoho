@@ -59,16 +59,7 @@ const routeBox = {
             input.classList.add('waypoint-input');
             input.placeholder = placeholders[i];
             input.value = waypoint ? waypoint.city : '';
-            input.addEventListener('mouseover', async function() {
-                const iataCode = this.value.match(/\b([A-Z]{3})\b/); // Extract IATA code using regex
-                if (iataCode) {
-                    const airportInfo = await fetchAirportByIata(iataCode[1]);
-                    if (airportInfo) {
-                        showWaypointTooltip(this, `${airportInfo.name} (${airportInfo.iata_code}) ${airportInfo.city}, ${airportInfo.country}`);
-                    }
-                }
-            });
-        
+
             input.addEventListener('mouseleave', () => {
                 clearTimeout(tooltipTimeout);
                 const tooltip = document.querySelector('.waypointTooltip');

@@ -87,7 +87,6 @@ function setupAutocompleteForField(fieldId) {
     const outsideClickListener = (e) => {
         if (!inputField.contains(e.target) && !suggestionBox.contains(e.target)) {
             toggleSuggestionBox(false);
-            clearInputField(inputField); // Pass the correct inputField reference
         }
     };    
 
