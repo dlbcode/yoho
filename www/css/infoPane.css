@@ -8,22 +8,22 @@
 }
 
 #top-bar {
-  height: 26px;
+  height: 30px;
   display: flex;
   align-items: center;
   background-color: #333; /* Optional: to match the menu bar's background */
-  border-top: 2px solid #0060bb;
+  border-top: 3px solid #0060bb;
 }
 
 #menu-bar {
   display: flex;
-  height: 26px;
+  height: 30px;
   align-items: center;
   flex-grow: 1; /* Allows the menu bar to take up remaining space */
 }
 
 .plus-button {
-  height: 23px;
+  height: 28px;
   width: 24px;
   color: #ccc;
   font-size: 20px;
@@ -34,7 +34,7 @@
 }
 
 .route-info-button {
-  height: 23px;
+  height: 28px;
   border-right: #666 1px solid;
 }
 
@@ -195,7 +195,7 @@ tr:hover {
 
 .trip-button {
   background-color: #1f4e22; /* Green background */
-  height: 23px;
+  height: 28px;
   min-width: 70px;
   color: white;
   padding: 2px;
