@@ -125,7 +125,7 @@ function toggleFilterResetIcon(column) {
         return; // Exit if the reset icon is not found
     }
 
-    let filterButtonSpan = filterIcon.closest('.headerText');
+    let filterButtonSpan = filterIcon.closest('.headerText') || filterIcon.closest('.filterButton');
     if (!filterButtonSpan) {
         console.error('Parent span with class .headerText not found for filterIcon.');
         filterButtonSpan = filterIcon.closest('.filterButton'); // Backup option

@@ -22,6 +22,17 @@
   flex-grow: 1; /* Allows the menu bar to take up remaining space */
 }
 
+.plus-button {
+  height: 23px;
+  width: 24px;
+  color: #ccc;
+  font-size: 20px;
+  font-weight: 100;
+  padding: 0px;
+  border: none;
+  cursor: pointer;
+}
+
 .route-info-button {
   height: 23px;
   border-right: #666 1px solid;

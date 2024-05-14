@@ -1,6 +1,5 @@
 import { map, magentaDotIcon } from './map.js';
 import { flightMap } from './flightMap.js';
-import { routeList } from './routeList.js';
 import { pathDrawing } from './pathDrawing.js';
 import { drawAllRoutePaths } from './allPaths.js';
 import { appState, updateState } from './stateManager.js';
@@ -12,8 +11,8 @@ function handleStateChange(event) {
     const { key, value } = event.detail;
 
     if (key === 'addWaypoint' || key === 'removeWaypoint' || key === 'updateWaypoint') {
-        const container = document.querySelector('.airport-selection');
-        container.innerHTML = '';
+        //const container = document.querySelector('.airport-selection');
+        //container.innerHTML = '';
 
         mapHandling.updateMarkerIcons();
         routeHandling.updateRoutesArray();

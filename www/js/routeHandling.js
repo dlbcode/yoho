@@ -1,8 +1,6 @@
 import { appState, updateState } from './stateManager.js';
 import { flightMap } from './flightMap.js';
 import { pathDrawing } from './pathDrawing.js';
-import { routeList } from './routeList.js';
-
 const routeHandling = {           
 
     updateRoutesArray: async function () {
@@ -61,7 +59,6 @@ const routeHandling = {
         updateState('updateRoutes', newRoutes);
         pathDrawing.clearLines(true);
         pathDrawing.drawLines();
-        routeList.updateEstPrice();
         document.dispatchEvent(new CustomEvent('routesArrayUpdated'));
     }
 }
