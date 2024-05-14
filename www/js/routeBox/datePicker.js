@@ -16,6 +16,7 @@ export function initDatePicker(inputId, routeNumber) {
       altFormat: "D, d M", // This will display the date as 'Fri, 10 May'
       onValueUpdate: function(selectedDates, dateStr) {
           let dateValue = null;
+          console.log('dateStr:', dateStr)
           if (selectedDates.length > 0 && selectedDates[0]) {
               if (selectedDates.length > 1 && selectedDates[1]) {
                   dateValue = `${selectedDates[0].toISOString().split('T')[0]} to ${selectedDates[1].toISOString().split('T')[0]}`;
@@ -30,21 +31,25 @@ export function initDatePicker(inputId, routeNumber) {
           updateState('updateRouteDate', { routeNumber: routeNumber, date: dateValue }); // Update the state accordingly
       }, 
       onReady: (selectedDates, dateStr, instance) => {
-          instance.calendarContainer.classList.add('do-not-close-routebox');
-          let prevMonthButton = instance.calendarContainer.querySelector('.flatpickr-prev-month');
-          let dateModeSelectWrapper = document.createElement('div');
-          dateModeSelectWrapper.className = 'select-wrapper';
-          let dateModeSelect = document.createElement('div');
-          dateModeSelect.className = 'date-mode-select';
-          let selectedOption = document.createElement('div');
-          selectedOption.className = 'selected-option';
-          let options = ['Specific Date', 'Date Range', 'Any Dates'];
-          let optionsContainer = document.createElement('div');
-          optionsContainer.className = 'options';
-          optionsContainer.style.display = 'none'; // Hide the options by default
-          let selectedOptionText = document.createElement('div');
-          selectedOptionText.style.paddingLeft = '4px';
-          selectedOption.appendChild(selectedOptionText);
+        instance.calendarContainer.classList.add('do-not-close-routebox');
+        let prevMonthButton = instance.calendarContainer.querySelector('.flatpickr-prev-month');
+        let dateModeSelectWrapper = document.createElement('div');
+        dateModeSelectWrapper.className = 'select-wrapper';
+        let dateModeSelect = document.createElement('div');
+        dateModeSelect.className = 'date-mode-select';
+        let selectedOption = document.createElement('div');
+        selectedOption.className = 'selected-option';
+        let options = ['Specific Date', 'Date Range', 'Any Dates'];
+        let optionsContainer = document.createElement('div');
+        optionsContainer.className = 'options';
+        optionsContainer.style.display = 'none'; // Hide the options by default
+        let selectedOptionText = document.createElement('div');
+        selectedOptionText.style.paddingLeft = '4px';
+        selectedOption.appendChild(selectedOptionText);
+        const altInput = instance.altInput;
+        if (currentRouteDate === "any") {
+            altInput.value = "Any dates"; // Set custom text for 'any' mode
+        }
 
           options.forEach(option => {
               let opt = document.createElement('div');
@@ -83,27 +88,28 @@ export function initDatePicker(inputId, routeNumber) {
           });
 
           dateModeSelect.addEventListener('change', () => {
-              const selectedOption = dateModeSelect.querySelector('.selected').textContent;
-              const isAnyDates = selectedOption === 'Any Dates';
-              const isSpecificDate = selectedOption === 'Specific Date';
-
-              if (isAnyDates) {
-                  document.getElementById('date-input').value = 'Any Dates';
-                  console.log('setting date-input to Any Dates');
-                  updateState('updateRouteDate', { routeNumber: routeNumber, date: 'any' });
-                  instance.close();
-              } else {
-                  const newMode = isSpecificDate ? "single" : "range";
-                  instance.set("mode", newMode);
-                  instance.clear();
-                  instance.redraw();
-
-                  const today = new Date();
-                  const nextWeek = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000);
-                  const dateToSet = newMode === "single" ? today : [today, nextWeek];
-                  instance.setDate(dateToSet, true);
-              }
-          });
+            const selectedOption = dateModeSelect.querySelector('.selected').textContent;
+            const isAnyDates = selectedOption === 'Any Dates';
+            const isSpecificDate = selectedOption === 'Specific Date';
+        
+            if (isAnyDates) {
+                const altInput = instance.altInput || document.getElementById('date-input');
+                updateState('updateRouteDate', { routeNumber: routeNumber, date: 'any' });
+                instance.clear(); // Clear any selected dates in flatpickr
+                instance.close(); // Optionally close the flatpickr calendar
+                altInput.value = 'Any Dates';  // Directly set the displayed input value
+            } else {
+                const newMode = isSpecificDate ? "single" : "range";
+                instance.set("mode", newMode);
+                instance.clear();
+                instance.redraw();
+        
+                const today = new Date();
+                const nextWeek = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000);
+                const dateToSet = newMode === "single" ? today : [today, nextWeek];
+                instance.setDate(dateToSet, true); // Set a valid date
+            }
+        });                
       }
   });
 }

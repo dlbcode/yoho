@@ -99,9 +99,6 @@ const routeBox = {
         dateInput.value = currentRouteDate;
         dateInput.className = 'date-input';
         dateInput.placeholder = 'Date';
-        dateInput.addEventListener('click', () => {
-            fp.open();
-        });
         routeBox.appendChild(dateInput);
 
         initDatePicker(dateInputId, routeNumber);
