@@ -59,14 +59,6 @@ const routeBox = {
             input.classList.add('waypoint-input');
             input.placeholder = placeholders[i];
             input.value = waypoint ? waypoint.city : '';
-
-            input.addEventListener('mouseleave', () => {
-                clearTimeout(tooltipTimeout);
-                const tooltip = document.querySelector('.waypointTooltip');
-                if (tooltip) {
-                    tooltip.remove();
-                }
-            });
         
             waypointInputsContainer.appendChild(input);
             const suggestionsDiv = document.createElement('div');
@@ -169,26 +161,6 @@ document.addEventListener('click', function(event) {
         routeBox.style.display = 'none';
     }
 }, true);
-
-let tooltipTimeout;
-
-function showWaypointTooltip(element, text) {
-    clearTimeout(tooltipTimeout);
-
-    tooltipTimeout = setTimeout(() => {
-        const tooltip = document.createElement('div');
-        tooltip.className = 'waypointTooltip';
-        tooltip.textContent = text;
-        document.body.appendChild(tooltip);
-
-        const rect = element.getBoundingClientRect();
-        const containerRect = document.querySelector('.container').getBoundingClientRect();
-
-        tooltip.style.position = 'absolute';
-        tooltip.style.left = `${rect.left - containerRect.left}px`;
-        tooltip.style.top = `${rect.bottom - containerRect.top}px`;
-    }, 200);
-}
 
 function handleSwapButtonClick(routeNumber) {
     let routeDiv = document.getElementById(`route${routeNumber}`);
