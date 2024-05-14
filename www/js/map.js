@@ -1,8 +1,6 @@
 import { flightMap } from './flightMap.js';
 import { appState, updateState } from './stateManager.js';
-import { leftPane } from './leftPane.js';
 import { infoPane } from './infoPane.js';
-import { routeHandling } from './routeHandling.js';
 import { mapHandling } from './mapHandling.js';
 
 async function initMapFunctions() {
@@ -84,9 +82,7 @@ if (navigator.geolocation) {
 document.getElementById('map').style.height = window.innerHeight + 'px';
 document.addEventListener('DOMContentLoaded', () => {
     initMapFunctions();
-    leftPane.init();
     infoPane.init();
-    routeHandling.init();
     adjustMapSize();
     mapHandling.initMapContainer(map);
 });

@@ -2,105 +2,12 @@
   box-sizing: border-box;
 }
 
-.leftPane {
-  transition: transform 0.5s ease-in-out;
-  flex: 0 0 180px;
-  padding: 5px;
-  overflow-y: auto;
-}
-
-input[type="text"]:focus {
-  border: none; /* Removes the border */
-  background-color: #aaa; /* Changes the background color; adjust as needed */
-  outline: none; /* Optionally removes the outline to ensure no focus indicator is shown */
-}
-
-/* Scrollbar styles for leftPane and suggestions containers */
-.leftPane::-webkit-scrollbar-track, [id$='Suggestions']::-webkit-scrollbar-track {
-  background-color: #222;
-}
-
-.leftPane::-webkit-scrollbar-thumb, [id$='Suggestions']::-webkit-scrollbar-thumb {
-  background-color: #555;
-  border-radius: 2px;
-}
-
-.leftPane::-webkit-scrollbar, [id$='Suggestions']::-webkit-scrollbar {
-  width: 5px;
-}
-
-#leftPaneHeader {
-  display: flex;
-  margin-top: -5px;
-  margin-bottom: 3px;
-  height: 30px;
-}
-
 #yonderHopLogo {
   width: 30px;
   height: 30px;
   margin-right: 5px;
   z-index: 5000;
 }
-
-#leftPaneTitle {
-  position: relative;
-  font-size: 1rem;
-  font-weight: 500;
-  color: #ccc;
-  line-height: 28px;
-  padding-bottom: 5px;
-  margin: 0px;
-}
-
-.toggle-pane-button {
-  position: absolute;
-  height: 70px;
-  width: 25px;
-  top: 50%;
-  transform: translateY(-50%);
-  left: 180px;
-  z-index: 500;
-  cursor: pointer;
-  background-color: #1f1f1f;
-  border: #525252 1px solid;
-}
-
-.toggle-pane-button:hover {
-  background-color: #333;
-}
-
-.leftPane-hidden {
-  visibility: hidden;
-  width: 0;
-  overflow: hidden;
-  position: absolute;
-}
-
-.mapPane-expanded {
-  flex: 1 1 auto;
-  transition: flex 0.5s ease-in-out;
-}
-
-.month-name-box {
-    position: relative; /* Needed for absolute positioning of pseudo-elements */
-    text-align: center;
-    padding: 0 20px; /* Provides space around the text to cover the line */
-    line-height: 1px; /* Adjust the height of the element */
-    background-color: #444; /* Background color of the text area to cover the line */
-    font-size: 10px; /* Makes the text small */
-    text-transform: uppercase;
-    margin-top: 7px;
-    margin-bottom: 7px;
-    text-shadow: #222 5px 5px 5px; /* Adds a shadow to the text */
-}
-
-.options-container {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
 .travelers-container, .trip-type-container {
   position: relative;
   display: flex;
@@ -109,41 +16,8 @@ input[type="text"]:focus {
   gap: 5px;
 }
 
-#numTravelers {
-  width: 26px;
-  padding: 0;
-  text-align: left;
-}
-
-#decreaseTravelers, #increaseTravelers {
-  padding: 5px 5pxpx;
-}
-
-.route-container {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  margin-bottom: 5px;
-}
-
-.route-container input {
-  width: 40px;
-}
-
-.route-container:hover .waypointTooltip {
-  position: absolute;
-  top: calc(100% + 5px); /* Adjust as needed to position the tooltip below the route div */
-  left: 0;
-}
-
 .autocomplete-active {
   color: #e7e7e7;
-}
-
-@media (max-width: 768px) {
-  .leftPane {
-    flex-basis: 180px; /* Ensure left pane remains 170px wide on mobile */
-  }
 }
 
 .travelers-icon-label {
@@ -160,48 +34,10 @@ input[type="text"]:focus {
   margin-right: 5px;
 }
 
-.day-name-box {
-  display: flex;
-  height: 36px;
-  width: 40px;
-  align-items: center;
-  cursor: pointer;
-  background-color: #444;
-  color: #a9a9a9;
-  margin-right: -10px;
-  padding-left: 1px;
-  padding-bottom: 3px
-}
-
-.day-name-box:hover {
-  background-color: #555;
-}
-
 .swap-route-button {
   padding: 2px;
   background-color: #1f1f1f;
   margin: -5px;
-  cursor: pointer;
-}
-
-.remove-route-button {
-  font-size: 15px;
-  padding: 2px;
-  color: #999;
-  background-color: #1f1f1f;
-  margin: -5px;
-  cursor: pointer;
-}
-
-.remove-route-button:hover {
-  color: #830000;
-}
-
-.date-select-button {
-  width: 22px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
   cursor: pointer;
 }
 
@@ -268,48 +104,6 @@ input[type="text"]:focus {
 /* Highlighting items on hover within any suggestions container */
 [id$='Suggestions'] div:hover, .autocomplete-active {
   background-color: #555;
-}
-
-.waypointTooltip {
-  position: absolute;
-  background-color: #222;
-  border: 1px solid #525252;
-  color: white;
-  padding: 5px;
-  z-index: 1001;
-  white-space: nowrap;
-}
-
-#tripButtons {
-  margin-top: -5px;
-}
-
-#tripButtons button {
-  flex: 1;
-  margin-right: 5px;
-  margin-bottom: 5px;
-}
-
-#tripButtons button:last-child {
-  margin-right: 0; /* Remove margin for the last button */
-}
-
-#estPrice {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  width: 100%;
-  margin-bottom: 10px;
-}
-
-#estPriceLabel {
-  font-size: 14px;
-  bottom: 0px;
-}
-
-#estPriceValue {
-  font-weight: 500; /* Makes the text bold */
-  color: #fff; /* Sets the text color to white */
 }
 
 #legalLinks {
@@ -412,17 +206,6 @@ input[type="text"]:focus {
   background: #2f2f2f !important; /* Dark background */
   color: #ccc !important; /* Light text */
 }
-
-.dateTooltip {
-  position: absolute;
-  background-color: #222;
-  border: 1px solid #525252;
-  color: white;
-  padding: 5px;
-  z-index: 1001;
-  white-space: nowrap;
-}
-
 
 .info-box {
   background-color: #272727; /* Dark grey background */

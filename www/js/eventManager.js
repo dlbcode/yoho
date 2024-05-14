@@ -15,12 +15,6 @@ function handleStateChange(event) {
         const container = document.querySelector('.airport-selection');
         container.innerHTML = '';
 
-        // Ensure at least one route div is present
-        const routeCount = Math.max(1, Math.ceil(appState.waypoints.length / 2));
-        for (let i = 0; i < routeCount; i++) {
-            routeHandling.buildRouteDivs(i + 1);
-        }
-
         mapHandling.updateMarkerIcons();
         routeHandling.updateRoutesArray();
         appState.currentView = 'trip';
@@ -32,18 +26,12 @@ function handleStateChange(event) {
         }
     }
 
-    if (key === 'clearData') {
-        const container = document.querySelector('.airport-selection');
-        container.innerHTML = '';
-        routeHandling.buildRouteDivs(1);
-    }
     uiHandling.setFocusToNextUnsetInput();
 }
 
 const eventManager = {
     setupEventListeners: function () {
         this.setupMapEventListeners();
-        this.setupUIEventListeners();
         this.setupAllPathsButtonEventListener();
         document.addEventListener('stateChange', handleStateChange);
         window.onpopstate = function(event) {
@@ -65,20 +53,11 @@ const eventManager = {
             const container = document.querySelector('.airport-selection');
             container.innerHTML = '';
 
-            // Ensure at least one route div is present
-            const routeCount = Math.max(1, Math.ceil(appState.waypoints.length / 2));
-            for (let i = 0; i < routeCount; i++) {
-                routeHandling.buildRouteDivs(i + 1);
-            }
-
             mapHandling.updateMarkerIcons();
             routeHandling.updateRoutesArray();
             appState.currentView = 'trip';
             uiHandling.setFocusToNextUnsetInput();
         };
-        document.addEventListener('routeAdded', function(event) {
-            routeHandling.buildRouteDivs(event.detail.newRoute);
-        });
     },
 
     debounce: function(func, wait) {
@@ -117,35 +96,6 @@ const eventManager = {
         map.on('zoomend', this.debounce(() => {
             flightMap.updateVisibleMarkers();
         }, 250));
-    },
-
-    setupUIEventListeners: function () {
-        document.querySelector('.airport-selection').addEventListener('click', function(event) {
-            if (event.target.classList.contains('remove-route-button')) {
-                const routeNumber = event.target.closest('.route-container').dataset.routeNumber;
-            }
-        });
-
-        document.addEventListener('click', function (event) {
-            if (event.target.id === 'increaseTravelers') {
-                updateState('numTravelers', appState.numTravelers + 1);
-                routeList.updateEstPrice();
-            } else if (event.target.id === 'decreaseTravelers' && appState.numTravelers > 1) {
-                updateState('numTravelers', appState.numTravelers - 1);
-                routeList.updateEstPrice();
-            } else if (event.target.id === 'clearBtn') {
-                updateState('routeDirection', 'from');
-                updateState('clearData', null);
-                //appState.selectedAirport = null;
-                updateState('selectedAirport', null);
-                routeList.updateEstPrice();
-                pathDrawing.clearLines(true);
-                mapHandling.updateMarkerIcons();
-                routeHandling.updateRoutesArray();
-                uiHandling.toggleTripButtonsVisibility(false);
-                appState.currentView = 'trip';
-            }            
-        });
     },
 
     setupAllPathsButtonEventListener: function () {

@@ -202,4 +202,21 @@ function showWaypointTooltip(element, text) {
     }, 200);
 }
 
+function handleSwapButtonClick(routeNumber) {
+    let routeDiv = document.getElementById(`route${routeNumber}`);
+    let inputs = routeDiv.querySelectorAll('input[type="text"]');
+    if (inputs.length === 2) {
+        // Swap the values of the input fields
+        let temp = inputs[0].value;
+        inputs[0].value = inputs[1].value;
+        inputs[1].value = temp;
+        // Update the appState.waypoints array
+        let waypointIndex = (routeNumber) * 2;
+        [appState.waypoints[waypointIndex], appState.waypoints[waypointIndex + 1]] = 
+            [appState.waypoints[waypointIndex + 1], appState.waypoints[waypointIndex]];
+        routeHandling.updateRoutesArray();
+        updateUrl();
+    }
+} 
+
 export { routeBox };

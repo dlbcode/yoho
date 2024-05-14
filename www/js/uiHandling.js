@@ -3,27 +3,6 @@ import { adjustMapSize } from "./map.js";
 
 const uiHandling = {
 
-  handleStateChange: function(event) {
-        this.updateTripTypeContainerVisibility();
-  }, 
-
-  initTripButtons: function() {
-    const addButton = document.getElementById('addBtn');
-    addButton.addEventListener('click', () => this.handleAddButtonClick());
-    this.toggleTripButtonsVisibility(false);
-  },
-
-  toggleTripButtonsVisibility: function() {
-    document.getElementById('tripButtons').style.display =
-      appState.waypoints.length > 1 ? 'flex' : 'none';
-      addBtn.focus();
-  },
-
-  handleAddButtonClick: function() {
-    const lastWaypoint = appState.waypoints[appState.waypoints.length - 1];
-    updateState('addWaypoint', lastWaypoint);
-  },
-
   setFocusToNextUnsetInput: function() {
     const waypointInputs = document.querySelectorAll('.waypoint-input[type="text"]');
     requestAnimationFrame(() => {
@@ -32,26 +11,6 @@ const uiHandling = {
                 input.focus();
                 break;
             }
-        }
-    });
-  },
-  
-  initTogglePaneButton: function() {
-    const toggleBtn = document.getElementById('togglePaneBtn');
-    const leftPane = document.querySelector('.leftPane');
-    const mapPane = document.querySelector('.mapPane');
-
-    toggleBtn.addEventListener('click', () => {
-        leftPane.classList.toggle('leftPane-hidden');
-        mapPane.classList.toggle('mapPane-expanded');
-        adjustMapSize();
-
-        if (leftPane.classList.contains('leftPane-hidden')) {
-            toggleBtn.style.left = '0px';
-            toggleBtn.textContent = '❯';
-        } else {
-            toggleBtn.style.left = '180px';
-            toggleBtn.textContent = '❮';
         }
     });
   },
@@ -155,9 +114,7 @@ const uiHandling = {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  uiHandling.initTogglePaneButton();
   uiHandling.initInfoPaneDragButton();
-  uiHandling.initTripButtons();
 });
 
 export { uiHandling }
