@@ -92,10 +92,10 @@ const routeBox = {
         const currentRouteDate = appState.routeDates[routeNumber] || '';
         const isDateRange = appState.routeDates[routeNumber] && appState.routeDates[routeNumber].includes(' to ');
         
-        const dateInputId = 'depart-date-input';
+        const dateInputId = 'date-input';
         let dateInput = document.createElement('input');
         dateInput.type = 'date';
-        dateInput.id = 'depart-date-input';
+        dateInput.id = 'date-input';
         dateInput.value = currentRouteDate;
         dateInput.className = 'date-input';
         dateInput.placeholder = 'Date';

@@ -88,7 +88,8 @@ export function initDatePicker(inputId, routeNumber) {
               const isSpecificDate = selectedOption === 'Specific Date';
 
               if (isAnyDates) {
-                  document.getElementById('depart-date-input').value = 'Any Dates'; // Directly updating the input field's value
+                  document.getElementById('date-input').value = 'Any Dates';
+                  console.log('setting date-input to Any Dates');
                   updateState('updateRouteDate', { routeNumber: routeNumber, date: 'any' });
                   instance.close();
               } else {
