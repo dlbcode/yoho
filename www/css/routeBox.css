@@ -50,7 +50,7 @@
   border: 1px solid #555; /* Border color */
   border-radius: 3px;
   padding: 5px 5px; /* Padding inside the input */
-  width: 160px; /* Set a fixed width */
+  width: 159px; /* Set a fixed width */
 }
 
 .waypoint-inputs-container .waypoint-input:focus {
@@ -142,9 +142,8 @@
 }
 
 .swap-route-button {
-  padding: 2px;
-  background-color: #1f1f1f;
-  margin: -5px;
+  margin: 0px 0 0 -10px !important;
+  padding: 0px;
   cursor: pointer;
 }
 
