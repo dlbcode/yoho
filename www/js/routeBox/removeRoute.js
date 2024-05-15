@@ -1,6 +1,5 @@
 import { appState, updateState } from '../stateManager.js';
 import { pathDrawing } from '../pathDrawing.js';
-import { routeList } from '../routeList.js';
 import { mapHandling } from '../mapHandling.js';
 import { flightMap } from '../flightMap.js';
 
@@ -50,10 +49,10 @@ const removeRoute = {
         pathDrawing.clearLines(true);
         pathDrawing.drawLines();
         mapHandling.updateMarkerIcons();
-        routeList.updateEstPrice();
         removeRoute.updateRoutesArray();
 
         // Close the route box after operation
+        console.log('Closing route box');
         document.getElementById('routeBox').style.display = 'none';
     };
     if (routeBox instanceof HTMLElement) {
@@ -119,7 +118,7 @@ const removeRoute = {
     updateState('updateRoutes', newRoutes);
     pathDrawing.clearLines(true);
     pathDrawing.drawLines();
-    routeList.updateEstPrice();
+    //routeList.updateEstPrice();
     document.dispatchEvent(new CustomEvent('routesArrayUpdated'));
 }
 

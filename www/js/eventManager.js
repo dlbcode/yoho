@@ -4,7 +4,6 @@ import { pathDrawing } from './pathDrawing.js';
 import { drawAllRoutePaths } from './allPaths.js';
 import { appState, updateState } from './stateManager.js';
 import { routeHandling } from './routeHandling.js';
-import { uiHandling } from './uiHandling.js';
 import { mapHandling } from './mapHandling.js';
 
 function handleStateChange(event) {

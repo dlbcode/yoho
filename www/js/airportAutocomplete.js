@@ -1,8 +1,6 @@
 import { appState, updateState } from './stateManager.js';
 import { map } from './map.js';
 import { uiHandling } from './uiHandling.js';
-import { pathDrawing } from './pathDrawing.js';
-import { flightMap } from './flightMap.js';
 
 async function fetchAirports(query) {
     try {

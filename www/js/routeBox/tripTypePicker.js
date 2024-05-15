@@ -1,4 +1,4 @@
-import { appState, updateState } from "../stateManager.js";
+import { appState } from "../stateManager.js";
 
 export function tripTypePicker() {
     const tripTypeContainer = document.createElement('div');
