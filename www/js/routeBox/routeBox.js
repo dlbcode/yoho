@@ -59,7 +59,7 @@ const routeBox = {
             input.id = `waypoint-input-${index + 1}`;
             input.classList.add('waypoint-input');
             input.placeholder = placeholders[i];
-            input.value = waypoint ? waypoint.city : '';
+            input.value = waypoint ? waypoint.city + ', ' + waypoint.country + ' (' + waypoint.iata_code + ')' : '';
         
             waypointInputsContainer.appendChild(input);
             const suggestionsDiv = document.createElement('div');
