@@ -205,18 +205,18 @@ function updateSuggestions(inputId, airports, setSelectionMade) {
 document.addEventListener('DOMContentLoaded', () => {
     document.addEventListener('airportSelected', (event) => {
         const { airport, fieldId } = event.detail;
-        const waypointIndex = parseInt(fieldId.replace('waypoint', '')) - 1;
+        const waypointIndex = parseInt(fieldId.replace('waypoint-input-', '')) - 1;
         const iata = airport.iata_code;
     
         // Check if the origin is empty and destination has a selection
         if (appState.routeDirection == 'from') {
-            if (waypointIndex <= 1 && !document.getElementById('waypoint1').value) {
+            if (waypointIndex <= 1 && !document.getElementById('waypoint-input-1').value) {
             updateState('routeDirection', 'to');
             }
         }
 
         if (appState.routeDirection == 'to') {
-            if (waypointIndex <= 1 && !document.getElementById('waypoint2').value) {
+            if (waypointIndex <= 1 && !document.getElementById('waypoint-input-2').value) {
             updateState('routeDirection', 'from');
             }
         }
