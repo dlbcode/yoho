@@ -24,8 +24,6 @@ function handleStateChange(event) {
             pathDrawing.clearLines(true);
         }
     }
-
-    uiHandling.setFocusToNextUnsetInput();
 }
 
 const eventManager = {
@@ -55,7 +53,6 @@ const eventManager = {
             mapHandling.updateMarkerIcons();
             routeHandling.updateRoutesArray();
             appState.currentView = 'trip';
-            uiHandling.setFocusToNextUnsetInput();
         };
     },
 

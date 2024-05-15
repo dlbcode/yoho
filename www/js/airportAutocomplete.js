@@ -1,5 +1,6 @@
 import { appState, updateState } from './stateManager.js';
 import { map } from './map.js';
+import { uiHandling } from './uiHandling.js';
 import { pathDrawing } from './pathDrawing.js';
 import { flightMap } from './flightMap.js';
 
@@ -248,9 +249,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 duration: 0.5 // Duration in seconds
             });          
         }
-        //flightMap.fetchAndCacheRoutes(iata).then(() => {
-        //    pathDrawing.drawRoutePaths(iata, appState.directRoutes, appState.routeDirection);
-        //});
+        uiHandling.setFocusToNextUnsetInput();
     });    
     
     function adjustLatLngForShortestPath(currentLatLng, targetLatLng) {
