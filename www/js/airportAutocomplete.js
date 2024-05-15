@@ -115,8 +115,8 @@ function setupAutocompleteForField(fieldId) {
                 clearInputField(inputField);
                 toggleSuggestionBox(false);
                 if (inputField.value === '' && appState.waypoints.length > 0) {
-                    const waypointIndex = parseInt(fieldId.replace('waypoint', '')) - 1;
-                    updateState('removeWaypoint', waypointIndex);
+                   const waypointIndex = parseInt(inputField.id.replace('waypoint-input-', '')) - 1;
+                   updateState('removeWaypoint', waypointIndex);
                 }
             }, 300); // Delay to allow for selection
         });
