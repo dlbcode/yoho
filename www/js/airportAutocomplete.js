@@ -70,7 +70,7 @@ function setupAutocompleteForField(fieldId) {
         if (display) {
             const rect = inputField.getBoundingClientRect();
             suggestionBox.style.left = `${rect.left}px`;
-            suggestionBox.style.top = '61px';
+            suggestionBox.style.top = '80px';
         }
     };
 
