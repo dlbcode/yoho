@@ -56,7 +56,7 @@ const routeBox = {
             let waypoint = appState.waypoints[index];
             let inputWrapper = document.createElement('div');
             inputWrapper.className = 'input-wrapper';
-            
+        
             let input = document.createElement('input');
             input.type = 'text';
             input.id = `waypoint-input-${index + 1}`;
@@ -67,14 +67,20 @@ const routeBox = {
             let clearSpan = document.createElement('span');
             clearSpan.innerHTML = '✕';
             clearSpan.className = 'clear-span';
+            clearSpan.style.visibility = input.value ? 'visible' : 'hidden'; // Initial visibility based on input value
             clearSpan.onclick = function() {
-                input.value = ''; // Clear the input
-                input.focus(); // Optional: Focus the input after clearing
+                input.value = '';
+                clearSpan.style.visibility = 'hidden'; // Hide clear button when input is cleared
+                input.focus();
+            };
+        
+            input.oninput = function() { // Update visibility on input change
+                clearSpan.style.visibility = input.value ? 'visible' : 'hidden';
             };
         
             inputWrapper.appendChild(input);
             inputWrapper.appendChild(clearSpan);
-            waypointInputsContainer.appendChild(inputWrapper);
+            waypointInputsContainer.appendChild(inputWrapper);        
             
             const suggestionsDiv = document.createElement('div');
             suggestionsDiv.id = `waypoint-input-${index + 1}Suggestions`;
