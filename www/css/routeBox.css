@@ -5,7 +5,7 @@
   border-radius: 5px;
   border: 1px solid #525252;
   padding: 5px;
-  width: 340px;
+  width: 400px;
   height: 175px;
   display: flex;
   flex-direction: column;
@@ -32,7 +32,7 @@
   background-color: #333; /* Dark background */
   border: 1px solid #555; /* Border color */
   padding: 5px 5px; /* Padding inside the input */
-  width: 330px; /* Set a fixed width */
+  width: 390px; /* Set a fixed width */
 }
 
 .waypoint-inputs-container {
@@ -50,7 +50,7 @@
   border: 1px solid #555; /* Border color */
   border-radius: 3px;
   padding: 5px 5px; /* Padding inside the input */
-  width: 159px; /* Set a fixed width */
+  width: 189px; /* Set a fixed width */
 }
 
 .waypoint-inputs-container .waypoint-input:focus {
@@ -63,7 +63,7 @@
   border: 1px solid #555 !important; /* Border color */
   border-radius: 3px !important;
   padding: 5px 5px !important; /* Padding inside the input */
-  width: 330px !important; /* Set a fixed width */
+  width: 390px !important; /* Set a fixed width */
   margin-top: 10px !important; /* Space above the date input */
 }
 
