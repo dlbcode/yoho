@@ -252,3 +252,25 @@
   background: #2f2f2f !important; /* Dark background */
   color: #ccc !important; /* Light text */
 }
+
+.input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.clear-span {
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  background: none;
+  border: none;
+  color: #888;
+  font-size: 1rem; /* Adjust size as needed */
+}
+
+.clear-span:hover {
+  color: #ccc;
+}

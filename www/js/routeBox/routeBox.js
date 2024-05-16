@@ -64,17 +64,16 @@ const routeBox = {
             input.placeholder = placeholders[i];
             input.value = waypoint ? waypoint.city + ', ' + waypoint.country + ' (' + waypoint.iata_code + ')' : '';
         
-            let clearButton = document.createElement('button');
-            clearButton.innerHTML = '✕';
-            clearButton.className = 'clear-button';
-            clearButton.type = 'button';
-            clearButton.onclick = function() {
+            let clearSpan = document.createElement('span');
+            clearSpan.innerHTML = '✕';
+            clearSpan.className = 'clear-span';
+            clearSpan.onclick = function() {
                 input.value = ''; // Clear the input
                 input.focus(); // Optional: Focus the input after clearing
             };
         
             inputWrapper.appendChild(input);
-            inputWrapper.appendChild(clearButton);
+            inputWrapper.appendChild(clearSpan);
             waypointInputsContainer.appendChild(inputWrapper);
             
             const suggestionsDiv = document.createElement('div');
@@ -82,20 +81,24 @@ const routeBox = {
             suggestionsDiv.className = 'suggestions';
             waypointInputsContainer.appendChild(suggestionsDiv);
         }
+
+        for (let i = 0; i < 2; i++) {
+            let index = (routeNumber) * 2 + i;
+            setupAutocompleteForField(`waypoint-input-${index + 1}`);
+        }
         
-        // Adding the swap button without using insertBefore
+        // Adjust the swap button positioning
         let swapButton = document.createElement('button');
         swapButton.innerHTML = '&#8646;'; // Double-headed arrow symbol
         swapButton.className = 'swap-route-button';
         swapButton.onclick = () => handleSwapButtonClick(routeNumber);
         swapButton.title = 'Swap waypoints'; // Tooltip for accessibility
         
-        // Simply append the swap button at the start of the waypointInputsContainer
-        if (waypointInputsContainer.firstChild) {
-            waypointInputsContainer.insertBefore(swapButton, waypointInputsContainer.firstChild);
-        } else {
-            waypointInputsContainer.appendChild(swapButton);
-        }        
+        // Place swap button between the two input wrappers
+        let inputWrappers = waypointInputsContainer.querySelectorAll('.input-wrapper');
+        if (inputWrappers.length === 2) {
+            waypointInputsContainer.insertBefore(swapButton, inputWrappers[1]);
+        }                      
 
         //let firstInput = waypointInputsContainer.querySelector('input[type="text"]');
         //waypointInputsContainer.insertBefore(swapButton, firstInput.nextSibling);
