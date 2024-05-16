@@ -45,7 +45,7 @@
   margin-right: 10px;
 }
 
-.waypoint-inputs-container .waypoint-input {
+.route-box-popup .waypoint-inputs-container .waypoint-input {
   background-color: #333; /* Dark background */
   border: 1px solid #555; /* Border color */
   border-radius: 3px;
@@ -55,12 +55,7 @@
   box-sizing: border-box; /* Include padding and border in the element's total width and height */
 }
 
-.waypoint-inputs-container .waypoint-input:focus {
-  border: 2px solid #0084ff;
-  background-color: #292929;
-}
-
-.date-input {
+.route-box-popup .date-input {
   background-color: #333 !important; /* Dark background */
   border: 1px solid #555 !important; /* Border color */
   border-radius: 3px !important;
@@ -69,8 +64,13 @@
   margin-top: 10px !important; /* Space above the date input */
 }
 
-.date-input:focus {
-  border: 2px solid #0084ff !important;
+.route-box-popup .waypoint-inputs-container .waypoint-input:focus {
+  outline: 1px solid #0084ff !important;
+  background-color: #292929 !important;
+}
+
+.route-box-popup .date-input:focus {
+  outline: 1px solid #0084ff !important;
   background-color: #292929 !important;
 }
 
