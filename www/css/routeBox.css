@@ -302,40 +302,30 @@
   align-items: center;
 }
 
-.route-box-popup .waypoint-inputs-container .waypoint-input {
-  background-color: #333; /* Dark background */
-  border: 1px solid #555; /* Border color */
-  border-radius: 3px;
-  padding: 5px; /* Padding inside the input */
-  width: 159px; /* Set a fixed width */
-  padding-right: 10px; /* Adjust padding to prevent text from overlapping with the clear span */
-  box-sizing: border-box; /* Include padding and border in the element's total width and height */
-  position: relative; /* Ensure the pseudo-element is positioned relative to the input field */
-  overflow: hidden; /* Ensure the gradient effect works correctly */
+.route-box-popup .waypoint-inputs-container .waypoint-input.focused {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 330px; /* Full width minus padding */
+  z-index: 10; /* Ensure it appears above other elements */
 }
 
-.fade-overlay {
-  position: absolute;
-  height: 25px;
-  margin-top: 5px;
-  right: 23px; /* Position to the left of the clear button */
-  top: 0;
-  bottom: 0;
-  width: 20px; /* Width of the fade effect */
-  background: linear-gradient(to right, rgba(51, 51, 51, 0) 0%, rgba(51, 51, 51, 1) 100%);
-  pointer-events: none; /* Ensure it does not interfere with input interactions */
+.route-box-popup .waypoint-inputs-container .waypoint-input.focused + .clear-span {
+  display: block; /* Show the clear button when input is focused */
+  right: 5px;
 }
 
 .clear-span {
   position: absolute;
-  right: 13px;
-  top: 16px;
+  right: 5px;
+  top: 50%;
   transform: translateY(-50%);
   cursor: pointer;
-  background: #333;
+  background: none;
   border: none;
   color: #888;
   font-size: 1rem; /* Adjust size as needed */
+  display: none; /* Initially hidden */
 }
 
 .clear-span:hover {

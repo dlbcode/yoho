@@ -60,32 +60,38 @@ const routeBox = {
             let input = document.createElement('input');
             input.type = 'text';
             input.id = `waypoint-input-${index + 1}`;
-            input.classList.add('waypoint-input');
+            input.classList.add('waypoint-input'); // Ensure this class is applied
             input.placeholder = placeholders[i];
             input.value = waypoint ? waypoint.city + ', ' + waypoint.country + ' (' + waypoint.iata_code + ')' : '';
 
-            // Create the fade overlay element
-            let fadeOverlay = document.createElement('div');
-            fadeOverlay.className = 'fade-overlay';
-        
             let clearSpan = document.createElement('span');
             clearSpan.innerHTML = '✕';
             clearSpan.className = 'clear-span';
-            clearSpan.style.visibility = input.value ? 'visible' : 'hidden'; // Initial visibility based on input value
+
             clearSpan.onclick = function() {
-                input.value = '';
-                clearSpan.style.visibility = 'hidden'; // Hide clear button when input is cleared
-                input.focus();
+            input.value = '';
+            clearSpan.style.display = 'none'; // Hide clear button when input is cleared
+            input.focus();
             };
-        
+
             input.oninput = function() { // Update visibility on input change
-                clearSpan.style.visibility = input.value ? 'visible' : 'hidden';
+            clearSpan.style.display = input.value ? 'block' : 'none';
             };
-        
+
+            // Add focus and blur event listeners to expand and collapse the input field
+            input.addEventListener('focus', function() {
+            input.classList.add('focused');
+            clearSpan.style.display = input.value ? 'block' : 'none'; // Show clear button if input has value
+            });
+
+            input.addEventListener('blur', function() {
+            input.classList.remove('focused');
+            clearSpan.style.display = 'none'; // Hide clear button when input loses focus
+            });
+
             inputWrapper.appendChild(input);
-            inputWrapper.appendChild(fadeOverlay);
             inputWrapper.appendChild(clearSpan);
-            waypointInputsContainer.appendChild(inputWrapper);        
+            waypointInputsContainer.appendChild(inputWrapper);
             
             const suggestionsDiv = document.createElement('div');
             suggestionsDiv.id = `waypoint-input-${index + 1}Suggestions`;
