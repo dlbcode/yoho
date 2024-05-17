@@ -63,6 +63,10 @@ const routeBox = {
             input.classList.add('waypoint-input');
             input.placeholder = placeholders[i];
             input.value = waypoint ? waypoint.city + ', ' + waypoint.country + ' (' + waypoint.iata_code + ')' : '';
+
+            // Create the fade overlay element
+            let fadeOverlay = document.createElement('div');
+            fadeOverlay.className = 'fade-overlay';
         
             let clearSpan = document.createElement('span');
             clearSpan.innerHTML = '✕';
@@ -79,6 +83,7 @@ const routeBox = {
             };
         
             inputWrapper.appendChild(input);
+            inputWrapper.appendChild(fadeOverlay);
             inputWrapper.appendChild(clearSpan);
             waypointInputsContainer.appendChild(inputWrapper);        
             

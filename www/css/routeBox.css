@@ -21,7 +21,9 @@
   margin: 0px;
 }
 
-.route-box-popup .search-button, .route-box-popup .remove-button, .route-box-popup .popup-close-button {
+.route-box-popup .search-button,
+.route-box-popup .remove-button,
+.route-box-popup .popup-close-button {
   margin-right: 5px;
   cursor: pointer;
 }
@@ -49,10 +51,24 @@
   background-color: #333; /* Dark background */
   border: 1px solid #555; /* Border color */
   border-radius: 3px;
-  padding: 5px 5px; /* Padding inside the input */
+  padding: 5px; /* Padding inside the input */
   width: 159px; /* Set a fixed width */
   padding-right: 20px; /* Adjust padding to prevent text from overlapping with the clear span */
   box-sizing: border-box; /* Include padding and border in the element's total width and height */
+  position: relative; /* Ensure the pseudo-element is positioned relative to the input field */
+  overflow: hidden; /* Ensure the gradient effect works correctly */
+}
+
+.route-box-popup .waypoint-inputs-container .waypoint-input::after {
+  content: '';
+  position: absolute;
+  right: 20px; /* Position 20px from the right to start the gradient */
+  top: 0;
+  bottom: 0;
+  width: 25px; /* Width of the gradient */
+  pointer-events: none; /* Ensure the gradient does not interfere with input interactions */
+  background: linear-gradient(to right, rgba(51, 51, 51, 0) 0%, rgba(51, 51, 51, 1) 100%);
+  z-index: 1; /* Ensure the gradient is above the input text */
 }
 
 .route-box-popup .date-input {
@@ -74,12 +90,13 @@
   background-color: #292929 !important;
 }
 
-.search-button, .remove-button {
+.search-button,
+.remove-button {
   color: #fff; /* White text */
   border: none; /* No border */
   padding: 5px; /* Padding inside the button */
   margin-top: 10px; /* Space above the button */
-   /* Set a fixed width */
+  /* Set a fixed width */
 }
 
 .search-button {
@@ -94,11 +111,10 @@
   margin-right: 0px !important;
 }
 
-
 #topRow {
-  display: flex;  /* This will line up the children horizontally */
-  align-items: center;  /* Aligns children vertically in the middle */
-  justify-content: flex-start;  /* Aligns children to the start of the row */
+  display: flex; /* This will line up the children horizontally */
+  align-items: center; /* Aligns children vertically in the middle */
+  justify-content: flex-start; /* Aligns children to the start of the row */
 }
 
 .travelers-dropdown-btn,
@@ -117,7 +133,8 @@
   border-right: #666 1px solid;
 }
 
-.travelers-container, .trip-type-container {
+.travelers-container,
+.trip-type-container {
   position: relative;
   display: flex;
   align-items: center;
@@ -149,7 +166,8 @@
   cursor: pointer;
 }
 
-.travelers-dropdown, .trip-type-dropdown {
+.travelers-dropdown,
+.trip-type-dropdown {
   position: absolute;
   top: 100%;
   left: 0;
@@ -164,7 +182,8 @@
   white-space: nowrap;
 }
 
-.travelers-dropdown li:hover, .trip-type-dropdown li:hover{
+.travelers-dropdown li:hover,
+.trip-type-dropdown li:hover {
   background-color: #555;
 }
 
@@ -179,7 +198,7 @@
   width: auto;
   max-height: 200px;
   overflow-y: auto;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
 }
 
 /* Styling individual suggestion items within any suggestions container */
@@ -190,37 +209,59 @@
 }
 
 /* Highlighting items on hover within any suggestions container */
-[id$='Suggestions'] div:hover, .autocomplete-active {
+[id$='Suggestions'] div:hover,
+.autocomplete-active {
   background-color: #555;
 }
 
 /* Base Flatpickr styling for a dark theme */
-.flatpickr-calendar, .flatpickr-weekdays, .flatpickr-weekday, .flatpickr-month, .flatpickr-months, .flatpickr-monthDropdown-months, .flatpickr-year, .flatpickr-current-month, .flathpickr-monthDropdown-months {
+.flatpickr-calendar,
+.flatpickr-weekdays,
+.flatpickr-weekday,
+.flatpickr-month,
+.flatpickr-months,
+.flatpickr-monthDropdown-months,
+.flatpickr-year,
+.flatpickr-current-month,
+.flathpickr-monthDropdown-months {
   background: #333 !important; /* Dark background */
   color: #ccc !important; /* Light text */
 }
 
 /* Days */
-.flatpickr-day, .flatpickr-day.today {
+.flatpickr-day,
+.flatpickr-day.today {
   background: #444; /* Dark background for days */
   color: #fff; /* White text for days */
 }
 
 /* Hover and Focus Styles for Days */
-.flatpickr-day:hover, .flatpickr-day:focus, .flatpickr-day:not(.selected):hover, .flatpickr-day.inRange:hover {
+.flatpickr-day:hover,
+.flatpickr-day:focus,
+.flatpickr-day:not(.selected):hover,
+.flatpickr-day.inRange:hover {
   background: #3b74d5 !important; /* Consistent hover background */
   color: #ffffff !important; /* White text on hover */
 }
 
 /* Selected and Range Days */
-.flatpickr-day.selected, .flatpickr-day.startRange, .flatpickr-day.endRange, .flatpickr-day.selected.inRange, .flatpickr-day.startRange.inRange, .flatpickr-day.endRange.inRange, .flatpickr-day.inRange {
+.flatpickr-day.selected,
+.flatpickr-day.startRange,
+.flatpickr-day.endRange,
+.flatpickr-day.selected.inRange,
+.flatpickr-day.startRange.inRange,
+.flatpickr-day.endRange.inRange,
+.flatpickr-day.inRange {
   background: #135dbe !important; /* Highlight color for selected and range days */
   color: #fff !important; /* White text for selected and range days */
   border: none;
 }
 
 /* Navigation buttons */
-.flatpickr-prev-month, .flatpickr-next-month, .flatpickr-prev-month:hover, .flatpickr-next-month:hover {
+.flatpickr-prev-month,
+.flatpickr-next-month,
+.flatpickr-prev-month:hover,
+.flatpickr-next-month:hover {
   position: static !important;
   background: #333; /* Dark background for buttons */
   color: #ccc; /* Light text for buttons */
@@ -261,13 +302,37 @@
   align-items: center;
 }
 
+.route-box-popup .waypoint-inputs-container .waypoint-input {
+  background-color: #333; /* Dark background */
+  border: 1px solid #555; /* Border color */
+  border-radius: 3px;
+  padding: 5px; /* Padding inside the input */
+  width: 159px; /* Set a fixed width */
+  padding-right: 10px; /* Adjust padding to prevent text from overlapping with the clear span */
+  box-sizing: border-box; /* Include padding and border in the element's total width and height */
+  position: relative; /* Ensure the pseudo-element is positioned relative to the input field */
+  overflow: hidden; /* Ensure the gradient effect works correctly */
+}
+
+.fade-overlay {
+  position: absolute;
+  height: 25px;
+  margin-top: 5px;
+  right: 23px; /* Position to the left of the clear button */
+  top: 0;
+  bottom: 0;
+  width: 20px; /* Width of the fade effect */
+  background: linear-gradient(to right, rgba(51, 51, 51, 0) 0%, rgba(51, 51, 51, 1) 100%);
+  pointer-events: none; /* Ensure it does not interfere with input interactions */
+}
+
 .clear-span {
   position: absolute;
-  right: 15px;
-  top: 50%;
+  right: 13px;
+  top: 16px;
   transform: translateY(-50%);
   cursor: pointer;
-  background: none;
+  background: #333;
   border: none;
   color: #888;
   font-size: 1rem; /* Adjust size as needed */
