@@ -74,23 +74,23 @@ const routeBox = {
             input.placeholder = placeholders[i];
             input.value = waypoint ? waypoint.city + ', ' + waypoint.country + ' (' + waypoint.iata_code + ')' : '';
         
-            let clearSpan = document.createElement('span');
-            clearSpan.innerHTML = '✕';
-            clearSpan.className = 'clear-span';
+            //let clearSpan = document.createElement('span');
+            //clearSpan.innerHTML = '✕';
+            //clearSpan.className = 'clear-span';
+        //
+            //clearSpan.onclick = function() {
+            //    input.value = '';
+            //    clearSpan.style.display = 'none'; 
+            //    input.focus();
+            //};
         
-            clearSpan.onclick = function() {
-                input.value = '';
-                clearSpan.style.display = 'none'; 
-                input.focus();
-            };
-        
-            input.oninput = function() { 
-                clearSpan.style.display = input.value ? 'block' : 'none';
-            };
+            //input.oninput = function() { 
+            //    clearSpan.style.display = input.value ? 'block' : 'none';
+            //};
         
             input.addEventListener('focus', function() {
                 input.classList.add('focused');
-                clearSpan.style.display = input.value ? 'block' : 'none'; 
+                //clearSpan.style.display = input.value ? 'block' : 'none'; 
                 if (i === 0) {
                     fromTab.classList.add('active');
                     toTab.classList.remove('active');
@@ -102,13 +102,13 @@ const routeBox = {
         
             input.addEventListener('blur', function() {
                 input.classList.remove('focused');
-                clearSpan.style.display = 'none';
+                //clearSpan.style.display = 'none';
                 fromTab.classList.remove('active');
                 toTab.classList.remove('active');
             });
         
             waypointInputsContainer.appendChild(input);
-            waypointInputsContainer.appendChild(clearSpan);
+            //waypointInputsContainer.appendChild(clearSpan);
         
             const suggestionsDiv = document.createElement('div');
             suggestionsDiv.id = `waypoint-input-${index + 1}Suggestions`;
@@ -191,12 +191,21 @@ const routeBox = {
     handleTabClick: function(tab, routeNumber) {
         const fromInput = document.getElementById('waypoint-input-' + (routeNumber * 2 + 1));
         const toInput = document.getElementById('waypoint-input-' + (routeNumber * 2 + 2));
+        console.log('Tab Clicked:', tab);
+        console.log('From Input:', fromInput);
+        console.log('To Input:', toInput);
         if (tab === 'from') {
-            fromInput.focus();
+            setTimeout(() => {
+                fromInput.focus();
+                console.log('Focusing From Input');
+            }, 100);
         } else {
-            toInput.focus();
+            setTimeout(() => {
+                toInput.focus();
+                console.log('Focusing To Input');
+            }, 100);
         }
-    },
+    },          
 
     positionPopup: function(popup, event) {
         const iconRect = event.target.getBoundingClientRect();

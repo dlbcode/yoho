@@ -50,12 +50,12 @@
   width: 50%;
   font-size: 12px;
   cursor: pointer;
-  color: white;
-  transition: all 0.3s ease;
+  color: #999;
 }
 
 .tab.active {
   background-color: #0268c7;
+  color: #fff
 }
 
 .waypoint-inputs-container {
@@ -64,7 +64,6 @@
   margin-top: 0px;
   position: relative;
   width: 100%;
-  gap: 10px; /* Add gap to separate the inputs when not focused */
 }
 
 .route-box-popup .waypoint-inputs-container .waypoint-input {
@@ -79,8 +78,6 @@
   width: 330px;; /* Full width minus padding/margin */
   z-index: 10;
   position: absolute;
-  left: 0;
-  right: 0;
 }
 
 .route-box-popup .waypoint-inputs-container .waypoint-input.focused + .clear-span {
@@ -92,7 +89,7 @@
   line-height: normal;
   margin-right: 10px;
 }
-
+/*
 .clear-span {
   position: absolute;
   right: 5px;
@@ -109,7 +106,7 @@
 .clear-span:hover {
   color: #ccc;
 }
-
+*/
 .route-box-popup .date-input {
   background-color: #333 !important; /* Dark background */
   border: 1px solid #555 !important; /* Border color */
