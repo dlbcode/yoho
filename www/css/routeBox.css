@@ -51,11 +51,33 @@
   font-size: 12px;
   cursor: pointer;
   color: #999;
+  position: relative; /* Ensure the clear button can be positioned inside */
 }
 
 .tab.active {
   background-color: #0268c7;
-  color: #fff
+  color: #fff;
+}
+
+.tab .clear-span {
+  position: absolute;
+  right: 5px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  background: none;
+  border: none;
+  color: #999;
+  font-size: 1rem;
+  display: none;
+}
+
+.tab .clear-span:hover {
+  color: #fff;
+}
+
+.tab.active .clear-span {
+  display: block;
 }
 
 .waypoint-inputs-container {
@@ -80,33 +102,6 @@
   position: absolute;
 }
 
-.route-box-popup .waypoint-inputs-container .waypoint-input.focused + .clear-span {
-  display: block;
-  left: 150px;
-  top: -10px;
-  bottom: 0;
-  height: 100%;
-  line-height: normal;
-  margin-right: 10px;
-}
-/*
-.clear-span {
-  position: absolute;
-  right: 5px;
-  top: 50%;
-  transform: translateY(-50%);
-  cursor: pointer;
-  background: none;
-  border: none;
-  color: #888;
-  font-size: 1rem;
-  display: none;
-}
-
-.clear-span:hover {
-  color: #ccc;
-}
-*/
 .route-box-popup .date-input {
   background-color: #333 !important; /* Dark background */
   border: 1px solid #555 !important; /* Border color */

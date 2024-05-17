@@ -42,10 +42,21 @@ const routeBox = {
         fromTab.className = 'tab';
         fromTab.id = 'from-tab';
         fromTab.innerText = 'From';
+
         const toTab = document.createElement('div');
         toTab.className = 'tab';
         toTab.id = 'to-tab';
         toTab.innerText = 'To';
+
+        const fromClearSpan = document.createElement('span');
+        fromClearSpan.innerHTML = '✕';
+        fromClearSpan.className = 'clear-span';
+        fromTab.appendChild(fromClearSpan);
+
+        const toClearSpan = document.createElement('span');
+        toClearSpan.innerHTML = '✕';
+        toClearSpan.className = 'clear-span';
+        toTab.appendChild(toClearSpan);
 
         tabsContainer.appendChild(fromTab);
         tabsContainer.appendChild(toTab);
@@ -54,7 +65,7 @@ const routeBox = {
         fromTab.addEventListener('click', () => this.handleTabClick('from', routeNumber));
         toTab.addEventListener('click', () => this.handleTabClick('to', routeNumber));
 
-        // Existing code to create input fields
+        // Create input fields
         let waypointInputsContainer = document.createElement('div');
         waypointInputsContainer.className = 'waypoint-inputs-container';
         routeBox.appendChild(waypointInputsContainer);
@@ -66,55 +77,53 @@ const routeBox = {
         for (let i = 0; i < 2; i++) {
             let index = (routeNumber) * 2 + waypointsOrder[i];
             let waypoint = appState.waypoints[index];
-        
+
             let input = document.createElement('input');
             input.type = 'text';
             input.id = `waypoint-input-${index + 1}`;
             input.classList.add('waypoint-input');
             input.placeholder = placeholders[i];
             input.value = waypoint ? waypoint.city + ', ' + waypoint.country + ' (' + waypoint.iata_code + ')' : '';
-        
-            //let clearSpan = document.createElement('span');
-            //clearSpan.innerHTML = '✕';
-            //clearSpan.className = 'clear-span';
-        //
-            //clearSpan.onclick = function() {
-            //    input.value = '';
-            //    clearSpan.style.display = 'none'; 
-            //    input.focus();
-            //};
-        
-            //input.oninput = function() { 
-            //    clearSpan.style.display = input.value ? 'block' : 'none';
-            //};
-        
+
+            input.oninput = function() {
+                if (i === 0) {
+                    fromClearSpan.style.display = input.value ? 'block' : 'none';
+                } else {
+                    toClearSpan.style.display = input.value ? 'block' : 'none';
+                }
+            };
+
             input.addEventListener('focus', function() {
                 input.classList.add('focused');
-                //clearSpan.style.display = input.value ? 'block' : 'none'; 
                 if (i === 0) {
                     fromTab.classList.add('active');
                     toTab.classList.remove('active');
+                    fromClearSpan.style.display = input.value ? 'block' : 'none';
                 } else {
                     toTab.classList.add('active');
                     fromTab.classList.remove('active');
+                    toClearSpan.style.display = input.value ? 'block' : 'none';
                 }
             });
-        
+
             input.addEventListener('blur', function() {
                 input.classList.remove('focused');
-                //clearSpan.style.display = 'none';
+                if (i === 0) {
+                    fromClearSpan.style.display = 'none';
+                } else {
+                    toClearSpan.style.display = 'none';
+                }
                 fromTab.classList.remove('active');
                 toTab.classList.remove('active');
             });
-        
+
             waypointInputsContainer.appendChild(input);
-            //waypointInputsContainer.appendChild(clearSpan);
-        
+
             const suggestionsDiv = document.createElement('div');
             suggestionsDiv.id = `waypoint-input-${index + 1}Suggestions`;
             suggestionsDiv.className = 'suggestions';
             waypointInputsContainer.appendChild(suggestionsDiv);
-        }        
+        }
 
         // Existing code to set up autocomplete and other elements
         for (let i = 0; i < 2; i++) {
@@ -191,6 +200,8 @@ const routeBox = {
     handleTabClick: function(tab, routeNumber) {
         const fromInput = document.getElementById('waypoint-input-' + (routeNumber * 2 + 1));
         const toInput = document.getElementById('waypoint-input-' + (routeNumber * 2 + 2));
+        const fromClearSpan = document.querySelector('#from-tab .clear-span');
+        const toClearSpan = document.querySelector('#to-tab .clear-span');
         console.log('Tab Clicked:', tab);
         console.log('From Input:', fromInput);
         console.log('To Input:', toInput);
@@ -198,14 +209,18 @@ const routeBox = {
             setTimeout(() => {
                 fromInput.focus();
                 console.log('Focusing From Input');
+                fromClearSpan.style.display = fromInput.value ? 'block' : 'none';
+                toClearSpan.style.display = 'none';
             }, 100);
         } else {
             setTimeout(() => {
                 toInput.focus();
                 console.log('Focusing To Input');
+                toClearSpan.style.display = toInput.value ? 'block' : 'none';
+                fromClearSpan.style.display = 'none';
             }, 100);
         }
-    },          
+    },
 
     positionPopup: function(popup, event) {
         const iconRect = event.target.getBoundingClientRect();
