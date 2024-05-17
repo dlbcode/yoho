@@ -115,10 +115,7 @@ const routeBox = {
         let inputWrappers = waypointInputsContainer.querySelectorAll('.input-wrapper');
         if (inputWrappers.length === 2) {
             waypointInputsContainer.insertBefore(swapButton, inputWrappers[1]);
-        }                      
-
-        //let firstInput = waypointInputsContainer.querySelector('input[type="text"]');
-        //waypointInputsContainer.insertBefore(swapButton, firstInput.nextSibling);
+        }                     
 
         const currentRouteDate = appState.routeDates[routeNumber] || '';
         const isDateRange = appState.routeDates[routeNumber] && appState.routeDates[routeNumber].includes(' to ');
@@ -154,7 +151,7 @@ const routeBox = {
             infoPaneContent.innerHTML = '';
             updateState('currentView', 'routeTable');
             buildRouteTable(routeNumber);
-        }
+        };
 
         let closeButton = document.createElement('span');
         closeButton.innerHTML = '✕';
@@ -188,7 +185,7 @@ const routeBox = {
         popup.style.left = `${leftPosition}px`;
         popup.style.top = `${iconRect.top + window.scrollY - popup.offsetHeight - 10}px`; // Position above the icon
     },
-}
+};
 
 document.addEventListener('click', function(event) {
     let routeBox = document.getElementById('routeBox');
@@ -225,6 +222,6 @@ function handleSwapButtonClick(routeNumber) {
         routeHandling.updateRoutesArray();
         updateUrl();
     }
-} 
+}
 
 export { routeBox };
