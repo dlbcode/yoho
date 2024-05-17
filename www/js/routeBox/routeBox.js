@@ -202,20 +202,15 @@ const routeBox = {
         const toInput = document.getElementById('waypoint-input-' + (routeNumber * 2 + 2));
         const fromClearSpan = document.querySelector('#from-tab .clear-span');
         const toClearSpan = document.querySelector('#to-tab .clear-span');
-        console.log('Tab Clicked:', tab);
-        console.log('From Input:', fromInput);
-        console.log('To Input:', toInput);
         if (tab === 'from') {
             setTimeout(() => {
                 fromInput.focus();
-                console.log('Focusing From Input');
                 fromClearSpan.style.display = fromInput.value ? 'block' : 'none';
                 toClearSpan.style.display = 'none';
             }, 100);
         } else {
             setTimeout(() => {
                 toInput.focus();
-                console.log('Focusing To Input');
                 toClearSpan.style.display = toInput.value ? 'block' : 'none';
                 fromClearSpan.style.display = 'none';
             }, 100);
