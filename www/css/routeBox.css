@@ -37,10 +37,31 @@
   width: 330px; /* Set a fixed width */
 }
 
+.tabs-container {
+  display: flex;
+  justify-content: space-around;
+  margin-top: 10px;
+  border-bottom: 1px solid #525252;
+}
+
+.tab {
+  padding: 5px 20px;
+  height: 24px;
+  width: 50%;
+  font-size: 12px;
+  cursor: pointer;
+  color: white;
+  transition: all 0.3s ease;
+}
+
+.tab.active {
+  background-color: #0268c7;
+}
+
 .waypoint-inputs-container {
   display: flex;
   flex-direction: row; /* Change from 'column' to 'row' */
-  margin-top: 10px; /* Space above the waypoint inputs */
+  margin-top: 0px; /* Space above the waypoint inputs */
   position: relative; /* Ensure inputs can be positioned absolutely */
 }
 
@@ -53,12 +74,9 @@
 
 .route-box-popup .waypoint-inputs-container .waypoint-input {
   background-color: #333; /* Dark background */
-  border: 1px solid #555; /* Border color */
-  border-radius: 3px;
   padding: 5px; /* Padding inside the input */
   width: 100%; /* Use 100% width of the input-wrapper */
   box-sizing: border-box; /* Include padding and border in the element's total width and height */
-  transition: all 0.3s; /* Smooth transition for width change */
 }
 
 .route-box-popup .waypoint-inputs-container .waypoint-input.focused {
@@ -66,7 +84,7 @@
   top: 0;
   left: 0;
   right: 0;
-  width: calc(100% - 10px); /* Full width minus padding */
+  width: 330px; /* Full width minus padding */
   z-index: 10; /* Ensure it appears above other elements */
 }
 
@@ -102,12 +120,12 @@
 }
 
 .route-box-popup .waypoint-inputs-container .waypoint-input:focus {
-  outline: 1px solid #0084ff !important;
+  outline: none !important;
   background-color: #292929 !important;
 }
 
 .route-box-popup .date-input:focus {
-  outline: 1px solid #0084ff !important;
+  outline: none !important;
   background-color: #292929 !important;
 }
 

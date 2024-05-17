@@ -35,14 +35,26 @@ const routeBox = {
         const travelersDropdown = travelersPicker(routeNumber);
         topRow.appendChild(travelersDropdown);
 
-        if (routeNumber > 0 && !appState.waypoints[(routeNumber * 2)]) {
-            let previousDestinationIndex = (routeNumber * 2) - 1;
-            let previousDestination = appState.waypoints[previousDestinationIndex];
-            if (previousDestination) {
-                appState.waypoints[routeNumber * 2] = previousDestination;  // Set the previous destination as the current origin
-            }
-        }        
+        // Create "From" and "To" tabs
+        const tabsContainer = document.createElement('div');
+        tabsContainer.className = 'tabs-container';
+        const fromTab = document.createElement('div');
+        fromTab.className = 'tab';
+        fromTab.id = 'from-tab';
+        fromTab.innerText = 'From';
+        const toTab = document.createElement('div');
+        toTab.className = 'tab';
+        toTab.id = 'to-tab';
+        toTab.innerText = 'To';
 
+        tabsContainer.appendChild(fromTab);
+        tabsContainer.appendChild(toTab);
+        routeBox.appendChild(tabsContainer);
+
+        fromTab.addEventListener('click', () => this.handleTabClick('from', routeNumber));
+        toTab.addEventListener('click', () => this.handleTabClick('to', routeNumber));
+
+        // Existing code to create input fields
         let waypointInputsContainer = document.createElement('div');
         waypointInputsContainer.className = 'waypoint-inputs-container';
         routeBox.appendChild(waypointInputsContainer);
@@ -50,13 +62,13 @@ const routeBox = {
         let placeholders = ['From', 'To'];
 
         let waypointsOrder = appState.routeDirection === 'to' ? [1, 0] : [0, 1];
-    
+
         for (let i = 0; i < 2; i++) {
             let index = (routeNumber) * 2 + waypointsOrder[i];
             let waypoint = appState.waypoints[index];
             let inputWrapper = document.createElement('div');
             inputWrapper.className = 'input-wrapper';
-        
+
             let input = document.createElement('input');
             input.type = 'text';
             input.id = `waypoint-input-${index + 1}`;
@@ -69,57 +81,67 @@ const routeBox = {
             clearSpan.className = 'clear-span';
 
             clearSpan.onclick = function() {
-            input.value = '';
-            clearSpan.style.display = 'none'; // Hide clear button when input is cleared
-            input.focus();
+                input.value = '';
+                clearSpan.style.display = 'none'; // Hide clear button when input is cleared
+                input.focus();
             };
 
             input.oninput = function() { // Update visibility on input change
-            clearSpan.style.display = input.value ? 'block' : 'none';
+                clearSpan.style.display = input.value ? 'block' : 'none';
             };
 
             // Add focus and blur event listeners to expand and collapse the input field
             input.addEventListener('focus', function() {
-            input.classList.add('focused');
-            clearSpan.style.display = input.value ? 'block' : 'none'; // Show clear button if input has value
+                input.classList.add('focused');
+                clearSpan.style.display = input.value ? 'block' : 'none'; // Show clear button if input has value
+                if (i === 0) {
+                    fromTab.classList.add('active');
+                    toTab.classList.remove('active');
+                } else {
+                    toTab.classList.add('active');
+                    fromTab.classList.remove('active');
+                }
             });
 
             input.addEventListener('blur', function() {
-            input.classList.remove('focused');
-            clearSpan.style.display = 'none'; // Hide clear button when input loses focus
+                input.classList.remove('focused');
+                clearSpan.style.display = 'none'; // Hide clear button when input loses focus
+                fromTab.classList.remove('active');
+                toTab.classList.remove('active');
             });
 
             inputWrapper.appendChild(input);
             inputWrapper.appendChild(clearSpan);
             waypointInputsContainer.appendChild(inputWrapper);
-            
+
             const suggestionsDiv = document.createElement('div');
             suggestionsDiv.id = `waypoint-input-${index + 1}Suggestions`;
             suggestionsDiv.className = 'suggestions';
             waypointInputsContainer.appendChild(suggestionsDiv);
         }
 
+        // Existing code to set up autocomplete and other elements
         for (let i = 0; i < 2; i++) {
             let index = (routeNumber) * 2 + i;
             setupAutocompleteForField(`waypoint-input-${index + 1}`);
         }
-        
+
         // Adjust the swap button positioning
         let swapButton = document.createElement('button');
         swapButton.innerHTML = '&#8646;'; // Double-headed arrow symbol
         swapButton.className = 'swap-route-button';
         swapButton.onclick = () => handleSwapButtonClick(routeNumber);
         swapButton.title = 'Swap waypoints'; // Tooltip for accessibility
-        
+
         // Place swap button between the two input wrappers
         let inputWrappers = waypointInputsContainer.querySelectorAll('.input-wrapper');
         if (inputWrappers.length === 2) {
             waypointInputsContainer.insertBefore(swapButton, inputWrappers[1]);
-        }                     
+        }
 
         const currentRouteDate = appState.routeDates[routeNumber] || '';
         const isDateRange = appState.routeDates[routeNumber] && appState.routeDates[routeNumber].includes(' to ');
-        
+
         const dateInputId = 'date-input';
         let dateInput = document.createElement('input');
         dateInput.type = 'date';
@@ -168,6 +190,16 @@ const routeBox = {
 
         this.positionPopup(routeBox, event);
         routeBox.style.display = 'block';
+    },
+
+    handleTabClick: function(tab, routeNumber) {
+        const fromInput = document.getElementById('waypoint-input-' + (routeNumber * 2 + 1));
+        const toInput = document.getElementById('waypoint-input-' + (routeNumber * 2 + 2));
+        if (tab === 'from') {
+            fromInput.focus();
+        } else {
+            toInput.focus();
+        }
     },
 
     positionPopup: function(popup, event) {
