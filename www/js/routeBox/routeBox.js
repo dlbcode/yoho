@@ -66,34 +66,31 @@ const routeBox = {
         for (let i = 0; i < 2; i++) {
             let index = (routeNumber) * 2 + waypointsOrder[i];
             let waypoint = appState.waypoints[index];
-            let inputWrapper = document.createElement('div');
-            inputWrapper.className = 'input-wrapper';
-
+        
             let input = document.createElement('input');
             input.type = 'text';
             input.id = `waypoint-input-${index + 1}`;
-            input.classList.add('waypoint-input'); // Ensure this class is applied
+            input.classList.add('waypoint-input');
             input.placeholder = placeholders[i];
             input.value = waypoint ? waypoint.city + ', ' + waypoint.country + ' (' + waypoint.iata_code + ')' : '';
-
+        
             let clearSpan = document.createElement('span');
             clearSpan.innerHTML = '✕';
             clearSpan.className = 'clear-span';
-
+        
             clearSpan.onclick = function() {
                 input.value = '';
-                clearSpan.style.display = 'none'; // Hide clear button when input is cleared
+                clearSpan.style.display = 'none'; 
                 input.focus();
             };
-
-            input.oninput = function() { // Update visibility on input change
+        
+            input.oninput = function() { 
                 clearSpan.style.display = input.value ? 'block' : 'none';
             };
-
-            // Add focus and blur event listeners to expand and collapse the input field
+        
             input.addEventListener('focus', function() {
                 input.classList.add('focused');
-                clearSpan.style.display = input.value ? 'block' : 'none'; // Show clear button if input has value
+                clearSpan.style.display = input.value ? 'block' : 'none'; 
                 if (i === 0) {
                     fromTab.classList.add('active');
                     toTab.classList.remove('active');
@@ -102,23 +99,22 @@ const routeBox = {
                     fromTab.classList.remove('active');
                 }
             });
-
+        
             input.addEventListener('blur', function() {
                 input.classList.remove('focused');
-                clearSpan.style.display = 'none'; // Hide clear button when input loses focus
+                clearSpan.style.display = 'none';
                 fromTab.classList.remove('active');
                 toTab.classList.remove('active');
             });
-
-            inputWrapper.appendChild(input);
-            inputWrapper.appendChild(clearSpan);
-            waypointInputsContainer.appendChild(inputWrapper);
-
+        
+            waypointInputsContainer.appendChild(input);
+            waypointInputsContainer.appendChild(clearSpan);
+        
             const suggestionsDiv = document.createElement('div');
             suggestionsDiv.id = `waypoint-input-${index + 1}Suggestions`;
             suggestionsDiv.className = 'suggestions';
             waypointInputsContainer.appendChild(suggestionsDiv);
-        }
+        }        
 
         // Existing code to set up autocomplete and other elements
         for (let i = 0; i < 2; i++) {
