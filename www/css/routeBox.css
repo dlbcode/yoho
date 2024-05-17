@@ -70,13 +70,13 @@
 .route-box-popup .waypoint-inputs-container .waypoint-input {
   background-color: #333;
   padding: 5px;
-  width: calc(50% - 5px); /* Adjust width to 50% minus the desired left offset */
+  width: 159px; /* Adjust width to 50% minus the desired left offset */
   box-sizing: border-box;
   position: relative;
 }
 
 .route-box-popup .waypoint-inputs-container .waypoint-input.focused {
-  width: calc(100% - 10px); /* Full width minus padding/margin */
+  width: 330px;; /* Full width minus padding/margin */
   z-index: 10;
   position: absolute;
   left: 0;
@@ -85,7 +85,12 @@
 
 .route-box-popup .waypoint-inputs-container .waypoint-input.focused + .clear-span {
   display: block;
-  right: 5px;
+  left: 150px;
+  top: -10px;
+  bottom: 0;
+  height: 100%;
+  line-height: normal;
+  margin-right: 10px;
 }
 
 .clear-span {
