@@ -130,8 +130,11 @@ const routeBox = {
         const clearSpan = document.createElement('span');
         clearSpan.innerHTML = '✕';
         clearSpan.className = 'clear-span';
+        clearSpan.style.zIndex = '10'; // Ensure it appears as intended
         clearSpan.style.display = 'none'; // Only show when input is focused
-        clearSpan.onclick = () => {
+        clearSpan.onclick = (e) => {
+            console.log('clearSpan clicked');
+            e.stopPropagation(); // Prevent input from losing focus
             input.value = '';
             clearSpan.style.display = 'none';
             input.focus();
@@ -143,12 +146,6 @@ const routeBox = {
             input.classList.add('focused');
             clearSpan.style.display = input.value ? 'block' : 'none';
             this.updateActiveTab(order === 0 ? 'from' : 'to');
-            this.updateInputVisibility();
-        });
-
-        input.addEventListener('blur', () => {
-            input.classList.remove('focused');
-            clearSpan.style.display = 'none';
             this.updateInputVisibility();
         });
 

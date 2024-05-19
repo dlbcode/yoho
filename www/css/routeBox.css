@@ -110,7 +110,7 @@
   transform: translateY(-50%);
   cursor: pointer;
   display: none; /* Hide by default */
-  z-index: 10;
+  z-index: 10; /* Ensure it appears above other elements */
 }
 
 .route-box-popup .waypoint-inputs-container .waypoint-input:focus + .clear-span {
