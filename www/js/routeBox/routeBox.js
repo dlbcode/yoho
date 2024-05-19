@@ -36,9 +36,9 @@ const routeBox = {
 
         const tabsContainer = document.createElement('div');
         tabsContainer.className = 'tabs-container';
-        const fromTab = this.createTab('From', 'from-tab', 'from-clear-span');
-        const toTab = this.createTab('To', 'to-tab', 'to-clear-span');
-        tabsContainer.append(fromTab.tab, toTab.tab);
+        const fromTab = this.createTab('From', 'from-tab');
+        const toTab = this.createTab('To', 'to-tab');
+        tabsContainer.append(fromTab, toTab);
         routeBox.appendChild(tabsContainer);
 
         this.setupTabSwitching(routeNumber);
@@ -53,8 +53,8 @@ const routeBox = {
         waypointsOrder.forEach((order, i) => {
             const index = routeNumber * 2 + order;
             const waypoint = appState.waypoints[index];
-            const input = this.createWaypointInput(index, placeholders[i], waypoint, i === 0 ? fromTab.clearSpan : toTab.clearSpan);
-            waypointInputsContainer.append(input.input, input.suggestionsDiv);
+            const input = this.createWaypointInput(index, placeholders[i], waypoint, i);
+            waypointInputsContainer.appendChild(input);
         });
 
         Array.from({ length: 2 }, (_, i) => setupAutocompleteForField(`waypoint-input-${routeNumber * 2 + i + 1}`));
@@ -114,22 +114,18 @@ const routeBox = {
         }
     },
 
-    createTab(text, tabId, clearSpanId) {
+    createTab(text, tabId) {
         const tab = document.createElement('div');
         tab.className = 'tab';
         tab.id = tabId;
         tab.innerText = text;
-
-        const clearSpan = document.createElement('span');
-        clearSpan.innerHTML = '✕';
-        clearSpan.className = 'clear-span';
-        clearSpan.id = clearSpanId;
-        tab.appendChild(clearSpan);
-
-        return { tab, clearSpan };
+        return tab;
     },
 
-    createWaypointInput(index, placeholder, waypoint, clearSpan) {
+    createWaypointInput(index, placeholder, waypoint, order) {
+        const inputWrapper = document.createElement('div');
+        inputWrapper.className = 'input-wrapper';
+
         const input = document.createElement('input');
         input.type = 'text';
         input.id = `waypoint-input-${index + 1}`;
@@ -137,42 +133,49 @@ const routeBox = {
         input.placeholder = placeholder;
         input.value = waypoint ? `${waypoint.city}, ${waypoint.country} (${waypoint.iata_code})` : '';
 
+        const clearSpan = document.createElement('span');
+        clearSpan.innerHTML = '✕';
+        clearSpan.className = 'clear-span';
+        clearSpan.style.display = input.value ? 'block' : 'none';
+        clearSpan.onclick = () => {
+            input.value = '';
+            clearSpan.style.display = 'none';
+            input.focus();
+        };
+
         input.oninput = () => clearSpan.style.display = input.value ? 'block' : 'none';
 
         input.addEventListener('focus', () => {
             input.classList.add('focused');
             clearSpan.style.display = input.value ? 'block' : 'none';
-            this.updateActiveTab(input.id.includes('from') ? 'from' : 'to');
+            this.updateActiveTab(order === 0 ? 'from' : 'to');
         });
 
         input.addEventListener('blur', () => {
             input.classList.remove('focused');
-            clearSpan.style.display = 'none';
+            clearSpan.style.display = input.value ? 'block' : 'none';
             this.updateActiveTab();
         });
+
+        inputWrapper.append(input, clearSpan);
 
         const suggestionsDiv = document.createElement('div');
         suggestionsDiv.id = `waypoint-input-${index + 1}Suggestions`;
         suggestionsDiv.className = 'suggestions';
+        inputWrapper.appendChild(suggestionsDiv);
 
-        return { input, suggestionsDiv };
+        return inputWrapper;
     },
 
     handleTabClick(tab, routeNumber) {
         const fromInput = document.getElementById(`waypoint-input-${routeNumber * 2 + 1}`);
         const toInput = document.getElementById(`waypoint-input-${routeNumber * 2 + 2}`);
-        const fromClearSpan = document.getElementById('from-clear-span');
-        const toClearSpan = document.getElementById('to-clear-span');
 
         if (tab === 'from') {
             fromInput.focus();
-            fromClearSpan.style.display = fromInput.value ? 'block' : 'none';
-            toClearSpan.style.display = 'none';
             this.updateActiveTab('from');
         } else {
             toInput.focus();
-            toClearSpan.style.display = toInput.value ? 'block' : 'none';
-            fromClearSpan.style.display = 'none';
             this.updateActiveTab('to');
         }
     },
