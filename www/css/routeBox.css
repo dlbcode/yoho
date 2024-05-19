@@ -60,27 +60,31 @@
 
 .waypoint-inputs-container {
   display: flex;
-  flex-direction: column;
-  margin-top: 10px;
+  flex-direction: row;
+  margin-top: 0; /* No margin between tabs and input fields */
   position: relative;
   width: 100%;
 }
 
 .input-wrapper {
   position: relative;
+  flex: 1; /* Make input wrappers flex items */
   margin-bottom: 10px; /* Adjust as needed */
+  display: flex;
 }
 
 .route-box-popup .waypoint-inputs-container .waypoint-input {
   background-color: #333;
   padding: 5px;
-  width: calc(100% - 30px); /* Adjust width to account for clear button */
+  width: 100%; /* Full width within the wrapper */
   box-sizing: border-box;
+  display: block; /* Default display is block */
 }
 
 .route-box-popup .waypoint-inputs-container .waypoint-input.focused {
-  width: 100%; /* Full width */
+  width: 100%; /* Full width when focused */
   z-index: 10;
+  position: absolute;
 }
 
 .route-box-popup .waypoint-inputs-container .waypoint-input:focus {

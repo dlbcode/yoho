@@ -104,14 +104,7 @@ const routeBox = {
         this.positionPopup(routeBox, event);
         routeBox.style.display = 'block';
 
-        const fromInput = document.getElementById(`waypoint-input-${routeNumber * 2 + 1}`);
-        const toInput = document.getElementById(`waypoint-input-${routeNumber * 2 + 2}`);
-
-        if (!fromInput.value) {
-            fromInput.focus();
-        } else if (!toInput.value) {
-            toInput.focus();
-        }
+        this.updateInputVisibility();
     },
 
     createTab(text, tabId) {
@@ -136,7 +129,7 @@ const routeBox = {
         const clearSpan = document.createElement('span');
         clearSpan.innerHTML = '✕';
         clearSpan.className = 'clear-span';
-        clearSpan.style.display = input.value ? 'block' : 'none';
+        clearSpan.style.display = 'none'; // Only show when input is focused
         clearSpan.onclick = () => {
             input.value = '';
             clearSpan.style.display = 'none';
@@ -149,12 +142,13 @@ const routeBox = {
             input.classList.add('focused');
             clearSpan.style.display = input.value ? 'block' : 'none';
             this.updateActiveTab(order === 0 ? 'from' : 'to');
+            this.updateInputVisibility();
         });
 
         input.addEventListener('blur', () => {
             input.classList.remove('focused');
-            clearSpan.style.display = input.value ? 'block' : 'none';
-            this.updateActiveTab();
+            clearSpan.style.display = 'none';
+            this.updateInputVisibility();
         });
 
         inputWrapper.append(input, clearSpan);
@@ -172,12 +166,13 @@ const routeBox = {
         const toInput = document.getElementById(`waypoint-input-${routeNumber * 2 + 2}`);
 
         if (tab === 'from') {
-            fromInput.focus();
+            setTimeout(() => fromInput.focus(), 0);  // Ensure the input is focused
             this.updateActiveTab('from');
         } else {
-            toInput.focus();
+            setTimeout(() => toInput.focus(), 0);  // Ensure the input is focused
             this.updateActiveTab('to');
         }
+        this.updateInputVisibility();
     },
 
     setupTabSwitching(routeNumber) {
@@ -188,6 +183,28 @@ const routeBox = {
     updateActiveTab(activeTab = '') {
         document.getElementById('from-tab').classList.toggle('active', activeTab === 'from');
         document.getElementById('to-tab').classList.toggle('active', activeTab === 'to');
+    },
+
+    updateInputVisibility() {
+        const fromTab = document.getElementById('from-tab');
+        const toTab = document.getElementById('to-tab');
+        const fromInputWrapper = document.getElementById('waypoint-input-1').parentElement;
+        const toInputWrapper = document.getElementById('waypoint-input-2').parentElement;
+
+        if (fromTab.classList.contains('active')) {
+            fromInputWrapper.style.display = 'block';
+            fromInputWrapper.style.width = '100%';
+            toInputWrapper.style.display = 'none';
+        } else if (toTab.classList.contains('active')) {
+            fromInputWrapper.style.display = 'none';
+            toInputWrapper.style.display = 'block';
+            toInputWrapper.style.width = '100%';
+        } else {
+            fromInputWrapper.style.display = 'block';
+            fromInputWrapper.style.width = '50%';
+            toInputWrapper.style.display = 'block';
+            toInputWrapper.style.width = '50%';
+        }
     },
 
     positionPopup(popup, event) {
