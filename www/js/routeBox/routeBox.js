@@ -35,6 +35,14 @@ const routeBox = {
         const travelersDropdown = travelersPicker(routeNumber);
         topRow.appendChild(travelersDropdown);
 
+        if (routeNumber > 0 && !appState.waypoints[(routeNumber * 2)]) {
+            let previousDestinationIndex = (routeNumber * 2) - 1;
+            let previousDestination = appState.waypoints[previousDestinationIndex];
+            if (previousDestination) {
+                appState.waypoints[routeNumber * 2] = previousDestination;  // Set the previous destination as the current origin
+            }
+        } 
+
         // Create "From" and "To" tabs
         const tabsContainer = document.createElement('div');
         tabsContainer.className = 'tabs-container';
@@ -62,8 +70,7 @@ const routeBox = {
         tabsContainer.appendChild(toTab);
         routeBox.appendChild(tabsContainer);
 
-        fromTab.addEventListener('click', () => this.handleTabClick('from', routeNumber));
-        toTab.addEventListener('click', () => this.handleTabClick('to', routeNumber));
+        this.setupTabSwitching(routeNumber); // Setup tab switching
 
         // Create input fields
         let waypointInputsContainer = document.createElement('div');
@@ -202,19 +209,29 @@ const routeBox = {
         const toInput = document.getElementById('waypoint-input-' + (routeNumber * 2 + 2));
         const fromClearSpan = document.querySelector('#from-tab .clear-span');
         const toClearSpan = document.querySelector('#to-tab .clear-span');
+        
+        // Direct focus without delay
         if (tab === 'from') {
-            setTimeout(() => {
-                fromInput.focus();
-                fromClearSpan.style.display = fromInput.value ? 'block' : 'none';
-                toClearSpan.style.display = 'none';
-            }, 100);
+            fromInput.focus();
+            fromClearSpan.style.display = fromInput.value ? 'block' : 'none';
+            toClearSpan.style.display = 'none';
+            document.getElementById('from-tab').classList.add('active');
+            document.getElementById('to-tab').classList.remove('active');
         } else {
-            setTimeout(() => {
-                toInput.focus();
-                toClearSpan.style.display = toInput.value ? 'block' : 'none';
-                fromClearSpan.style.display = 'none';
-            }, 100);
+            toInput.focus();
+            toClearSpan.style.display = toInput.value ? 'block' : 'none';
+            fromClearSpan.style.display = 'none';
+            document.getElementById('to-tab').classList.add('active');
+            document.getElementById('from-tab').classList.remove('active');
         }
+    },
+
+    setupTabSwitching: function(routeNumber) {
+        const fromTab = document.getElementById('from-tab');
+        const toTab = document.getElementById('to-tab');
+
+        fromTab.addEventListener('click', () => this.handleTabClick('from', routeNumber));
+        toTab.addEventListener('click', () => this.handleTabClick('to', routeNumber));
     },
 
     positionPopup: function(popup, event) {
