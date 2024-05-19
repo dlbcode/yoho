@@ -164,10 +164,10 @@ const routeBox = {
         const toInput = document.getElementById(`waypoint-input-${routeNumber * 2 + 2}`);
 
         if (tab === 'from') {
-            setTimeout(() => fromInput.focus(), 0);  // Ensure the input is focused
+            fromInput.focus();
             this.updateActiveTab('from');
         } else {
-            setTimeout(() => toInput.focus(), 0);  // Ensure the input is focused
+            toInput.focus();
             this.updateActiveTab('to');
         }
         this.updateInputVisibility();
