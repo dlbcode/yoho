@@ -41,12 +41,13 @@
   justify-content: space-around;
   margin-top: 10px;
   border-bottom: 1px solid #525252;
+  align-items: center; /* Center align the swap button vertically */
 }
 
 .tab {
   padding: 5px 20px;
   height: 24px;
-  width: 50%;
+  width: calc(50% - 15px); /* Adjust width to account for swap button */
   font-size: 12px;
   cursor: pointer;
   color: #999;
@@ -56,6 +57,16 @@
 .tab.active {
   background-color: #0268c7;
   color: #fff;
+}
+
+.swap-route-button {
+  margin: 0 5px; /* Space around the button */
+  padding: 0px;
+  cursor: pointer;
+  font-size: 16px;
+  background: none;
+  border: none;
+  color: #999;
 }
 
 .waypoint-inputs-container {
@@ -84,7 +95,7 @@
 .route-box-popup .waypoint-inputs-container .waypoint-input.focused {
   width: 100%; /* Full width when focused */
   z-index: 10;
-  position: absolute;
+  position: relative;
 }
 
 .route-box-popup .waypoint-inputs-container .waypoint-input:focus {
@@ -99,6 +110,11 @@
   transform: translateY(-50%);
   cursor: pointer;
   display: none; /* Hide by default */
+  z-index: 10;
+}
+
+.route-box-popup .waypoint-inputs-container .waypoint-input:focus + .clear-span {
+  display: block; /* Show clear button when input is focused */
 }
 
 .route-box-popup .date-input {

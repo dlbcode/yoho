@@ -38,7 +38,8 @@ const routeBox = {
         tabsContainer.className = 'tabs-container';
         const fromTab = this.createTab('From', 'from-tab');
         const toTab = this.createTab('To', 'to-tab');
-        tabsContainer.append(fromTab, toTab);
+        const swapButton = this.createSwapButton(routeNumber);
+        tabsContainer.append(fromTab, swapButton, toTab);
         routeBox.appendChild(tabsContainer);
 
         this.setupTabSwitching(routeNumber);
@@ -58,15 +59,6 @@ const routeBox = {
         });
 
         Array.from({ length: 2 }, (_, i) => setupAutocompleteForField(`waypoint-input-${routeNumber * 2 + i + 1}`));
-
-        const swapButton = document.createElement('button');
-        swapButton.innerHTML = '&#8646;';
-        swapButton.className = 'swap-route-button';
-        swapButton.title = 'Swap waypoints';
-        swapButton.onclick = () => this.handleSwapButtonClick(routeNumber);
-
-        const inputWrappers = waypointInputsContainer.querySelectorAll('.input-wrapper');
-        if (inputWrappers.length === 2) waypointInputsContainer.insertBefore(swapButton, inputWrappers[1]);
 
         const currentRouteDate = appState.routeDates[routeNumber] || '';
         const dateInput = document.createElement('input');
@@ -113,6 +105,15 @@ const routeBox = {
         tab.id = tabId;
         tab.innerText = text;
         return tab;
+    },
+
+    createSwapButton(routeNumber) {
+        const swapButton = document.createElement('button');
+        swapButton.innerHTML = '&#8646;';
+        swapButton.className = 'swap-route-button';
+        swapButton.title = 'Swap waypoints';
+        swapButton.onclick = () => this.handleSwapButtonClick(routeNumber);
+        return swapButton;
     },
 
     createWaypointInput(index, placeholder, waypoint, order) {
