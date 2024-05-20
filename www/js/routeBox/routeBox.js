@@ -21,6 +21,7 @@ const createElement = (tag, id, className, content) => {
 };
 
 const setupInputEvents = (input, clearSpan, index, order) => {
+    input.setAttribute('tabindex', '0');
     input.addEventListener('input', () => {
         clearSpan.style.display = input.value ? 'block' : 'none';
         routeBox.updateTabLabels();
@@ -40,14 +41,47 @@ const setupInputEvents = (input, clearSpan, index, order) => {
         routeBox.updateInputVisibility();
     });
     input.addEventListener('keydown', (e) => {
+    if (e.key === 'Tab') {
+        const nextInput = e.shiftKey
+            ? (order === 1 ? document.getElementById('waypoint-input-1') : document.getElementById('from-tab'))
+            : (order === 0 ? document.getElementById('waypoint-input-2') : document.getElementById('to-tab'));
+
+        if (nextInput) {
+            e.preventDefault();
+            nextInput.focus();
+        }
+
+        // If the Tab key is pressed and the order is 0 (first input field)
+        if (!e.shiftKey && order === 0) {
+            // Make the second tab active
+            routeBox.updateActiveTab('to');
+            // Hide the first input field and show the second input field
+            routeBox.updateInputVisibility();
+        }
+
+        // If the Shift + Tab keys are pressed and the order is 1 (second input field)
+        if (e.shiftKey && order === 1) {
+            // Make the first tab active
+            routeBox.updateActiveTab('from');
+            // Hide the second input field and show the first input field
+            routeBox.updateInputVisibility();
+        }
+    }
+});
+};
+
+const setupTabEvents = (tab, order) => {
+    tab.setAttribute('tabindex', '0');
+    tab.addEventListener('keydown', (e) => {
         if (e.key === 'Tab') {
-            e.preventDefault();
-            const nextInput = document.getElementById(`waypoint-input-${order === 0 ? index + 2 : index}`);
-            if (nextInput) nextInput.focus();
-        } else if (e.key === 'Shift' && e.shiftKey && e.key === 'Tab') {
-            e.preventDefault();
-            const prevInput = document.getElementById(`waypoint-input-${order === 1 ? index : index - 2}`);
-            if (prevInput) prevInput.focus();
+            const nextTab = e.shiftKey
+                ? (order === 1 ? document.getElementById('from-tab') : null)
+                : (order === 0 ? document.getElementById('to-tab') : null);
+
+            if (nextTab) {
+                e.preventDefault();
+                nextTab.focus();
+            }
         }
     });
 };
@@ -63,11 +97,12 @@ const routeBox = {
         routeBox.append(topRow);
 
         const tabsContainer = createElement('div', null, 'tabs-container');
-        tabsContainer.append(
-            this.createTab('From', 'from-tab', routeNumber * 2),
-            this.createSwapButton(routeNumber),
-            this.createTab('To', 'to-tab', routeNumber * 2 + 1)
-        );
+        const fromTab = this.createTab('From', 'from-tab', routeNumber * 2);
+        const toTab = this.createTab('To', 'to-tab', routeNumber * 2 + 1);
+        setupTabEvents(fromTab, 0);
+        setupTabEvents(toTab, 1);
+
+        tabsContainer.append(fromTab, this.createSwapButton(routeNumber), toTab);
         routeBox.append(tabsContainer);
         this.setupTabSwitching(routeNumber);
 
@@ -202,6 +237,7 @@ const routeBox = {
         fromTab.innerText = this.getTabLabelText('From', 0);
         toTab.innerText = this.getTabLabelText('To', 1);
         document.getElementById('waypoint-input-2').placeholder = appState.waypoints[0] && !appState.waypoints[1] ? 'Any' : 'To';
+        this.updateInputVisibility();
     },
 
     updateInputVisibility() {
