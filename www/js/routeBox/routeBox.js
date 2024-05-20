@@ -42,7 +42,12 @@ const setupInputEvents = (input, clearSpan, index, order) => {
     input.addEventListener('keydown', (e) => {
         if (e.key === 'Tab') {
             e.preventDefault();
-            document.getElementById(`waypoint-input-${order === 0 ? index + 2 : index}`).focus();
+            const nextInput = document.getElementById(`waypoint-input-${order === 0 ? index + 2 : index}`);
+            if (nextInput) nextInput.focus();
+        } else if (e.key === 'Shift' && e.shiftKey && e.key === 'Tab') {
+            e.preventDefault();
+            const prevInput = document.getElementById(`waypoint-input-${order === 1 ? index : index - 2}`);
+            if (prevInput) prevInput.focus();
         }
     });
 };
