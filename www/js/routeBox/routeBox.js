@@ -41,33 +41,33 @@ const setupInputEvents = (input, clearSpan, index, order) => {
         routeBox.updateInputVisibility();
     });
     input.addEventListener('keydown', (e) => {
-    if (e.key === 'Tab') {
-        const nextInput = e.shiftKey
-            ? (order === 1 ? document.getElementById('waypoint-input-1') : document.getElementById('from-tab'))
-            : (order === 0 ? document.getElementById('waypoint-input-2') : document.getElementById('to-tab'));
+        if (e.key === 'Tab') {
+            const nextInput = e.shiftKey
+                ? (order === 1 ? document.getElementById('waypoint-input-1') : document.getElementById('from-tab'))
+                : (order === 0 ? document.getElementById('waypoint-input-2') : document.getElementById('to-tab'));
 
-        if (nextInput) {
-            e.preventDefault();
-            nextInput.focus();
-        }
+            if (nextInput) {
+                e.preventDefault();
+                nextInput.focus();
+            }
 
-        // If the Tab key is pressed and the order is 0 (first input field)
-        if (!e.shiftKey && order === 0) {
-            // Make the second tab active
-            routeBox.updateActiveTab('to');
-            // Hide the first input field and show the second input field
-            routeBox.updateInputVisibility();
-        }
+            // If the Tab key is pressed and the order is 0 (first input field)
+            if (!e.shiftKey && order === 0) {
+                // Make the second tab active
+                routeBox.updateActiveTab('to');
+                // Hide the first input field and show the second input field
+                routeBox.updateInputVisibility();
+            }
 
-        // If the Shift + Tab keys are pressed and the order is 1 (second input field)
-        if (e.shiftKey && order === 1) {
-            // Make the first tab active
-            routeBox.updateActiveTab('from');
-            // Hide the second input field and show the first input field
-            routeBox.updateInputVisibility();
+            // If the Shift + Tab keys are pressed and the order is 1 (second input field)
+            if (e.shiftKey && order === 1) {
+                // Make the first tab active
+                routeBox.updateActiveTab('from');
+                // Hide the second input field and show the first input field
+                routeBox.updateInputVisibility();
+            }
         }
-    }
-});
+    });
 };
 
 const setupTabEvents = (tab, order) => {
