@@ -36,8 +36,8 @@ const routeBox = {
 
         const tabsContainer = document.createElement('div');
         tabsContainer.className = 'tabs-container';
-        const fromTab = this.createTab('From', 'from-tab');
-        const toTab = this.createTab('To', 'to-tab');
+        const fromTab = this.createTab('From', 'from-tab', routeNumber * 2);
+        const toTab = this.createTab('To', 'to-tab', routeNumber * 2 + 1);
         const swapButton = this.createSwapButton(routeNumber);
         tabsContainer.append(fromTab, swapButton, toTab);
         routeBox.appendChild(tabsContainer);
@@ -99,11 +99,12 @@ const routeBox = {
         this.updateInputVisibility();
     },
 
-    createTab(text, tabId) {
+    createTab(text, tabId, waypointIndex) {
         const tab = document.createElement('div');
         tab.className = 'tab';
         tab.id = tabId;
-        tab.innerText = text;
+        const waypoint = appState.waypoints[waypointIndex];
+        tab.innerText = waypoint ? `${text} ${waypoint.iata_code}` : text;
         return tab;
     },
 
@@ -125,7 +126,7 @@ const routeBox = {
         input.id = `waypoint-input-${index + 1}`;
         input.classList.add('waypoint-input');
         input.placeholder = placeholder;
-        input.value = waypoint ? `${waypoint.city}, ${waypoint.country} (${waypoint.iata_code})` : '';
+        input.value = waypoint ? `${waypoint.city}` : '';
 
         const clearSpan = document.createElement('span');
         clearSpan.innerHTML = '✕';
@@ -138,9 +139,13 @@ const routeBox = {
             input.value = '';
             clearSpan.style.display = 'none';
             input.focus();
+            this.updateTabLabels();
         };
 
-        input.oninput = () => clearSpan.style.display = input.value ? 'block' : 'none';
+        input.oninput = () => {
+            clearSpan.style.display = input.value ? 'block' : 'none';
+            this.updateTabLabels();
+        };
 
         input.addEventListener('focus', () => {
             input.classList.add('focused');
@@ -181,6 +186,16 @@ const routeBox = {
     updateActiveTab(activeTab = '') {
         document.getElementById('from-tab').classList.toggle('active', activeTab === 'from');
         document.getElementById('to-tab').classList.toggle('active', activeTab === 'to');
+    },
+
+    updateTabLabels() {
+        const fromTab = document.getElementById('from-tab');
+        const toTab = document.getElementById('to-tab');
+        const fromWaypoint = appState.waypoints[0];
+        const toWaypoint = appState.waypoints[1];
+
+        fromTab.innerText = fromWaypoint ? `From ${fromWaypoint.iata_code}` : 'From';
+        toTab.innerText = toWaypoint ? `To ${toWaypoint.iata_code}` : 'To';
     },
 
     updateInputVisibility() {
@@ -227,6 +242,7 @@ const routeBox = {
                 [appState.waypoints[waypointIndex + 1], appState.waypoints[waypointIndex]];
             routeHandling.updateRoutesArray();
             updateUrl();
+            this.updateTabLabels();
         }
     },
 };
