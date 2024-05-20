@@ -1,6 +1,7 @@
 import { appState, updateState } from './stateManager.js';
 import { map } from './map.js';
 import { uiHandling } from './uiHandling.js';
+import { routeBox } from './routeBox/routeBox.js'; // Ensure to import routeBox
 
 async function fetchAirports(query) {
     try {
@@ -87,7 +88,7 @@ function setupAutocompleteForField(fieldId) {
         if (!inputField.contains(e.target) && !suggestionBox.contains(e.target)) {
             toggleSuggestionBox(false);
         }
-    };    
+    };
 
     // Add event listeners for focus, keydown, and blur
     inputField.addEventListener('focus', () => toggleSuggestionBox(true));
@@ -139,7 +140,7 @@ function setupAutocompleteForField(fieldId) {
                 inline: 'start'
             });
         }
-    }         
+    }
 }
 
 let lastFetchedAirports = [];
@@ -148,9 +149,9 @@ function updateSuggestions(inputId, airports, setSelectionMade) {
     const suggestionBox = document.getElementById(inputId + 'Suggestions');
     suggestionBox.innerHTML = '';
     lastFetchedAirports = airports;
-    
+
     let selectionHandledByTouch = false; // Flag to track if selection was handled by touch
-    
+
     document.querySelectorAll('.waypointTooltip').forEach(tooltip => {
         tooltip.remove(); // Remove any existing tooltips
     });
@@ -182,13 +183,19 @@ function updateSuggestions(inputId, airports, setSelectionMade) {
                 }));
                 inputField.setAttribute('data-selected-iata', airport.iata_code);
                 setSelectionMade(true);
+                
+                // Call updateTabLabels from routeBox to update the tab labels
+                routeBox.updateTabLabels();
+
+                // Blur the input field after selection
+                inputField.blur();
             }
         }
-        
+
         div.addEventListener('touchstart', (e) => {
             touchStartY = e.touches[0].clientY;
         }, { passive: true });
-        
+
         div.addEventListener('touchmove', (e) => {
             touchEndY = e.touches[0].clientY;
         }, { passive: true });
@@ -205,7 +212,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const { airport, fieldId } = event.detail;
         const waypointIndex = parseInt(fieldId.replace('waypoint-input-', '')) - 1;
         const iata = airport.iata_code;
-    
+
         // Check if the origin is empty and destination has a selection
         if (appState.routeDirection == 'from') {
             if (waypointIndex <= 1 && !document.getElementById('waypoint-input-1').value) {
@@ -248,23 +255,23 @@ document.addEventListener('DOMContentLoaded', () => {
             });          
         }
         uiHandling.setFocusToNextUnsetInput();
-    });    
-    
+    });
+
     function adjustLatLngForShortestPath(currentLatLng, targetLatLng) {
         let currentLng = currentLatLng.lng;
         let targetLng = targetLatLng.lng;
         let lngDifference = targetLng - currentLng;
-    
+
         // Check if crossing the antimeridian offers a shorter path
         if (lngDifference > 180) {
             targetLng -= 360;
         } else if (lngDifference < -180) {
             targetLng += 360;
         }
-    
+
         return L.latLng(targetLatLng.lat, targetLng);
-    }                                            
-     
+    }
+
     document.addEventListener('stateChange', (event) => {
         if (event.detail.key === 'waypoints') {
             event.detail.value.forEach((_, index) => {

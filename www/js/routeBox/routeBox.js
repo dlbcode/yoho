@@ -97,6 +97,7 @@ const routeBox = {
         routeBox.style.display = 'block';
 
         this.updateInputVisibility();
+        this.updateTabLabels();
     },
 
     createTab(text, tabId, waypointIndex) {
@@ -126,7 +127,7 @@ const routeBox = {
         input.id = `waypoint-input-${index + 1}`;
         input.classList.add('waypoint-input');
         input.placeholder = placeholder;
-        input.value = waypoint ? `${waypoint.city}` : '';
+        input.value = waypoint ? `${waypoint.city}, ${waypoint.country} (${waypoint.iata_code})` : '';
 
         const clearSpan = document.createElement('span');
         clearSpan.innerHTML = '✕';
@@ -134,18 +135,33 @@ const routeBox = {
         clearSpan.style.zIndex = '10'; // Ensure it appears as intended
         clearSpan.style.display = 'none'; // Only show when input is focused
         clearSpan.onclick = (e) => {
-            console.log('clearSpan clicked');
             e.stopPropagation(); // Prevent input from losing focus
             input.value = '';
             clearSpan.style.display = 'none';
-            input.focus();
+            const waypointIndex = parseInt(input.id.replace('waypoint-input-', '')) - 1;
+            updateState('removeWaypoint', waypointIndex);
             this.updateTabLabels();
+            input.focus();
         };
 
-        input.oninput = () => {
+        input.addEventListener('input', () => {
             clearSpan.style.display = input.value ? 'block' : 'none';
             this.updateTabLabels();
-        };
+        });
+
+        input.addEventListener('change', () => {
+            this.updateTabLabels();
+        });
+
+        input.addEventListener('blur', () => {
+            setTimeout(() => {
+                if (input.value === '') {
+                    const waypointIndex = parseInt(input.id.replace('waypoint-input-', '')) - 1;
+                    updateState('removeWaypoint', waypointIndex);
+                    this.updateTabLabels(); // Ensure labels are updated after waypoint removal
+                }
+            }, 300); // Delay to allow for selection
+        });
 
         input.addEventListener('focus', () => {
             input.classList.add('focused');
@@ -169,11 +185,11 @@ const routeBox = {
         const toInput = document.getElementById(`waypoint-input-${routeNumber * 2 + 2}`);
 
         if (tab === 'from') {
-            fromInput.focus();
             this.updateActiveTab('from');
+            fromInput.focus({ preventScroll: true });
         } else {
-            toInput.focus();
             this.updateActiveTab('to');
+            toInput.focus({ preventScroll: true });
         }
         this.updateInputVisibility();
     },
@@ -195,7 +211,14 @@ const routeBox = {
         const toWaypoint = appState.waypoints[1];
 
         fromTab.innerText = fromWaypoint ? `From ${fromWaypoint.iata_code}` : 'From';
-        toTab.innerText = toWaypoint ? `To ${toWaypoint.iata_code}` : 'To';
+        toTab.innerText = toWaypoint ? `To ${toWaypoint.iata_code}` : (fromWaypoint ? 'To Any' : 'To');
+
+        const toInput = document.getElementById('waypoint-input-2');
+        if (fromWaypoint && !toWaypoint) {
+            toInput.placeholder = 'Any';
+        } else {
+            toInput.placeholder = 'To';
+        }
     },
 
     updateInputVisibility() {
