@@ -130,12 +130,14 @@ const routeBox = {
         const inputId = activeTab === 'from' ? 'waypoint-input-1' : 'waypoint-input-2';
         const input = document.getElementById(inputId);
         setTimeout(() => input.focus({ preventScroll: true }), 0);
-
+    
         const waypointInputs = document.querySelectorAll('.waypoint-inputs-container .input-wrapper');
         waypointInputs.forEach(wrapper => {
             wrapper.style.width = wrapper.contains(input) ? '100%' : '50%';
         });
-    },
+    
+        this.updateInputVisibility();
+    },    
 
     updateActiveTab(activeTab) {
         document.getElementById('from-tab').classList.toggle('active', activeTab === 'from');
