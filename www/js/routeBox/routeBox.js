@@ -63,6 +63,10 @@ const routeBox = {
         const waypointInputsContainer = createElement('div', null, 'waypoint-inputs-container');
         ['From', 'To'].forEach((placeholder, i) => {
             const index = routeNumber * 2 + i;
+            // Set the previous destination as the next origin waypoint
+            if (i === 0 && appState.waypoints[index - 1]) {
+                appState.waypoints[index] = appState.waypoints[index - 1];
+            }
             waypointInputsContainer.append(this.createWaypointInput(index, placeholder, appState.waypoints[index], i, routeNumber));
         });
         routeBox.append(waypointInputsContainer);
