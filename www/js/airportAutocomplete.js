@@ -35,11 +35,6 @@ function setupAutocompleteForField(fieldId) {
     inputField.setAttribute('autocomplete', 'new-password');
     inputField.setAttribute('name', 'waypoint-input-' + Date.now());
     inputField.setAttribute('readonly', true);
-    inputField.addEventListener('focus', () => {
-        inputField.removeAttribute('readonly');
-        toggleSuggestionBox(true);
-        initialInputValue = inputField.value;
-    });
 
     inputField.addEventListener('focus', async () => {
         inputField.removeAttribute('readonly');
