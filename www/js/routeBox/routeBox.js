@@ -112,10 +112,12 @@ const routeBox = {
     },
 
     createSwapButton(routeNumber) {
+        const swapButtonWrapper = createElement('div', null, 'swap-button-wrapper');
         const swapButton = createElement('button', null, 'swap-route-button', '&#8646;');
         swapButton.title = 'Swap waypoints';
         swapButton.onclick = () => this.handleSwapButtonClick(routeNumber);
-        return swapButton;
+        swapButtonWrapper.appendChild(swapButton);
+        return swapButtonWrapper;
     },
 
     setupTabSwitching(routeNumber) {
