@@ -48,7 +48,7 @@
 .tab {
   padding: 5px 20px;
   height: 24px;
-  width: calc(50% - 15px);
+  width: 50%;
   font-size: 12px;
   cursor: pointer;
   color: #999;
@@ -348,7 +348,7 @@
 .tab {
   padding: 5px 20px;
   height: 24px;
-  width: 50%px;
+  width: 50%;
   font-size: 12px;
   cursor: pointer;
   color: #999;
