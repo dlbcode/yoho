@@ -40,29 +40,11 @@ const setupInputEvents = (input, clearSpan, index, order) => {
         routeBox.updateActiveTab(order === 0 ? 'from' : 'to');
         routeBox.updateInputVisibility();
 
-        // If the first waypoint input field is focused, make the second waypoint input field visible
-        if (order === 0) {
-            const secondWaypointInputWrapper = document.querySelector('.waypoint-inputs-container .input-wrapper:nth-child(2)');
-            if (secondWaypointInputWrapper) {
-                secondWaypointInputWrapper.style.display = 'block';
-            }
-        }
-    });
-};
-
-const setupTabEvents = (tab, order) => {
-    tab.setAttribute('tabindex', '0');
-    tab.addEventListener('keydown', (e) => {
-        if (e.key === 'Tab') {
-            const nextTab = e.shiftKey
-                ? (order === 1 ? document.getElementById('from-tab') : null)
-                : (order === 0 ? document.getElementById('to-tab') : null);
-
-            if (nextTab) {
-                e.preventDefault();
-                nextTab.focus();
-            }
-        }
+        // Ensure the other input is visible for seamless tabbing
+        const waypointInputs = document.querySelectorAll('.waypoint-inputs-container .input-wrapper');
+        waypointInputs.forEach(wrapper => {
+            wrapper.style.display = 'block';
+        });
     });
 };
 
@@ -79,8 +61,6 @@ const routeBox = {
         const tabsContainer = createElement('div', null, 'tabs-container');
         const fromTab = this.createTab('From', 'from-tab', routeNumber * 2);
         const toTab = this.createTab('To', 'to-tab', routeNumber * 2 + 1);
-        setupTabEvents(fromTab, 0);
-        setupTabEvents(toTab, 1);
 
         tabsContainer.append(fromTab, this.createSwapButton(routeNumber), toTab);
         routeBox.append(tabsContainer);
@@ -128,6 +108,7 @@ const routeBox = {
 
     createTab(text, tabId, waypointIndex) {
         const tab = createElement('div', tabId, 'tab', this.getTabLabelText(text, waypointIndex));
+        tab.setAttribute('tabindex', '-1'); // Exclude tabs from tab order
         return tab;
     },
 
