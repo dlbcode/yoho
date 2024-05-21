@@ -5,14 +5,14 @@
   border-radius: 5px;
   border: 1px solid #525252;
   padding: 10px;
-  width: 340px; /* Adjust width as needed */
+  width: 340px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
 }
 
 .route-box-popup button {
-  margin-top: 5px; /* Space above the button */
+  margin-top: 5px;
 }
 
 .route-box-popup .button-container {
@@ -28,12 +28,12 @@
 }
 
 #depart-date-input {
-  display: block; /* Ensures the input is on a new line */
-  margin-top: 10px; /* Space above the date input */
-  background-color: #333; /* Dark background */
-  border: 1px solid #555; /* Border color */
-  padding: 5px; /* Padding inside the input */
-  width: 330px; /* Set a fixed width */
+  display: block;
+  margin-top: 10px;
+  background-color: #333;
+  border: 1px solid #555;
+  padding: 5px;
+  width: 330px;
 }
 
 .tabs-container {
@@ -41,17 +41,17 @@
   justify-content: space-around;
   margin-top: 10px;
   border-bottom: 1px solid #525252;
-  align-items: center; /* Center align the swap button vertically */
+  align-items: center;
 }
 
 .tab {
   padding: 5px 20px;
   height: 24px;
-  width: calc(50% - 15px); /* Adjust width to account for swap button */
+  width: calc(50% - 15px);
   font-size: 12px;
   cursor: pointer;
   color: #999;
-  position: relative; /* Ensure the clear button can be positioned inside */
+  position: relative;
 }
 
 .tab.active {
@@ -60,7 +60,7 @@
 }
 
 .swap-route-button {
-  margin: 0 5px; /* Space around the button */
+  margin: 0 5px;
   padding: 0px;
   cursor: pointer;
   font-size: 16px;
@@ -72,30 +72,24 @@
 .waypoint-inputs-container {
   display: flex;
   flex-direction: row;
-  margin-top: 0; /* No margin between tabs and input fields */
+  margin-top: 0;
   position: relative;
   width: 100%;
 }
 
 .input-wrapper {
   position: relative;
-  flex: 1; /* Make input wrappers flex items */
-  margin-bottom: 10px; /* Adjust as needed */
+  flex: 1;
+  margin-bottom: 10px;
   display: flex;
 }
 
 .route-box-popup .waypoint-inputs-container .waypoint-input {
   background-color: #333;
   padding: 5px;
-  width: 100%; /* Full width within the wrapper */
+  width: 100%;
   box-sizing: border-box;
-  display: block; /* Default display is block */
-}
-
-.route-box-popup .waypoint-inputs-container .waypoint-input.focused {
-  width: 100%; /* Full width when focused */
-  z-index: 10;
-  position: relative;
+  display: block;
 }
 
 .route-box-popup .waypoint-inputs-container .waypoint-input:focus {
@@ -109,34 +103,33 @@
   top: 50%;
   transform: translateY(-50%);
   cursor: pointer;
-  display: none; /* Hide by default */
-  z-index: 10; /* Ensure it appears above other elements */
+  display: none;
+  z-index: 10;
 }
 
 .route-box-popup .waypoint-inputs-container .waypoint-input:focus + .clear-span {
-  display: block; /* Show clear button when input is focused */
+  display: block;
 }
 
 .route-box-popup .date-input {
-  background-color: #333 !important; /* Dark background */
-  border: 1px solid #555 !important; /* Border color */
+  background-color: #333 !important;
+  border: 1px solid #555 !important;
   border-radius: 3px !important;
-  padding: 5px !important; /* Padding inside the input */
-  width: 330px !important; /* Set a fixed width */
-  margin-top: 10px !important; /* Space above the date input */
+  padding: 5px !important;
+  width: 330px !important;
+  margin-top: 10px !important;
 }
 
 .search-button,
 .remove-button {
-  color: #fff; /* White text */
-  border: none; /* No border */
-  padding: 5px; /* Padding inside the button */
-  margin-top: 10px; /* Space above the button */
-  /* Set a fixed width */
+  color: #fff;
+  border: none;
+  padding: 5px;
+  margin-top: 10px;
 }
 
 .search-button {
-  background-color: #0060bb; /* Blue background */
+  background-color: #0060bb;
   width: 265px;
   margin-right: 5px;
 }
@@ -148,15 +141,15 @@
 }
 
 #topRow {
-  display: flex; /* This will line up the children horizontally */
-  align-items: center; /* Aligns children vertically in the middle */
-  justify-content: flex-start; /* Aligns children to the start of the row */
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
 }
 
 .travelers-dropdown-btn,
 .trip-type-dropdown-btn {
   height: 23px;
-  padding: 5px; /* Combined padding rules */
+  padding: 5px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -223,7 +216,6 @@
   background-color: #555;
 }
 
-/* Styling for any suggestions container related to waypoint fields */
 [id$='Suggestions'] {
   background-color: #333;
   border: 1px solid #525252;
@@ -237,20 +229,17 @@
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
 }
 
-/* Styling individual suggestion items within any suggestions container */
 [id$='Suggestions'] div {
   padding: 5px;
   border-bottom: 1px solid #525252;
   cursor: pointer;
 }
 
-/* Highlighting items on hover within any suggestions container */
 [id$='Suggestions'] div:hover,
 .autocomplete-active {
   background-color: #555;
 }
 
-/* Base Flatpickr styling for a dark theme */
 .flatpickr-calendar,
 .flatpickr-weekdays,
 .flatpickr-weekday,
@@ -260,27 +249,24 @@
 .flatpickr-year,
 .flatpickr-current-month,
 .flathpickr-monthDropdown-months {
-  background: #333 !important; /* Dark background */
-  color: #ccc !important; /* Light text */
+  background: #333 !important;
+  color: #ccc !important;
 }
 
-/* Days */
 .flatpickr-day,
 .flatpickr-day.today {
-  background: #444; /* Dark background for days */
-  color: #fff; /* White text for days */
+  background: #444;
+  color: #fff;
 }
 
-/* Hover and Focus Styles for Days */
 .flatpickr-day:hover,
 .flatpickr-day:focus,
 .flatpickr-day:not(.selected):hover,
 .flatpickr-day.inRange:hover {
-  background: #3b74d5 !important; /* Consistent hover background */
-  color: #ffffff !important; /* White text on hover */
+  background: #3b74d5 !important;
+  color: #ffffff !important;
 }
 
-/* Selected and Range Days */
 .flatpickr-day.selected,
 .flatpickr-day.startRange,
 .flatpickr-day.endRange,
@@ -288,46 +274,42 @@
 .flatpickr-day.startRange.inRange,
 .flatpickr-day.endRange.inRange,
 .flatpickr-day.inRange {
-  background: #135dbe !important; /* Highlight color for selected and range days */
-  color: #fff !important; /* White text for selected and range days */
+  background: #135dbe !important;
+  color: #fff !important;
   border: none;
 }
 
-/* Navigation buttons */
 .flatpickr-prev-month,
 .flatpickr-next-month,
 .flatpickr-prev-month:hover,
 .flatpickr-next-month:hover {
   position: static !important;
-  background: #333; /* Dark background for buttons */
-  color: #ccc; /* Light text for buttons */
+  background: #333;
+  color: #ccc;
 }
 
-/* Extend the background color of days in the range to cover gaps */
 .flatpickr-day.inRange::before {
   content: '';
   position: absolute;
   top: 0;
-  left: -8px; /* Extend to the left to cover the gap */
+  left: -8px;
   height: 100%;
-  width: calc(100% + 16px); /* Original width plus gap on both sides */
-  background-color: #135dbe; /* Match the day range highlight color */
+  width: calc(100% + 16px);
+  background-color: #135dbe;
   z-index: -1;
 }
 
 .flatpickr-day.inRange {
-  position: relative; /* Ensure the pseudo-element is positioned relative to the day cell */
-  z-index: 1; /* Make sure the day cell text appears above the extended background */
+  position: relative;
+  z-index: 1;
 }
 
-/* Week numbers */
 .flatpickr-weekwrapper {
-  background: #222; /* Dark background for week number column */
-  color: #ccc; /* Light text for week numbers */
+  background: #222;
+  color: #ccc;
 }
 
-/* Option elements - limited support */
 .flatpickr-monthDropdown-months option {
-  background: #2f2f2f !important; /* Dark background */
-  color: #ccc !important; /* Light text */
+  background: #2f2f2f !important;
+  color: #ccc !important;
 }

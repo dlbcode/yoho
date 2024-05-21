@@ -20,7 +20,7 @@ const createElement = (tag, id, className, content) => {
     return element;
 };
 
-const setupInputEvents = (input, clearSpan, index, order) => {
+const setupInputEvents = (input, clearSpan, index) => {
     input.setAttribute('tabindex', '0');
     input.addEventListener('input', () => {
         clearSpan.style.display = input.value ? 'block' : 'none';
@@ -34,22 +34,11 @@ const setupInputEvents = (input, clearSpan, index, order) => {
                 routeBox.updateTabLabels();
             }
         }, 300);
-        input.parentElement.style.width = '50%'; // Reset width on blur
     });
     input.addEventListener('focus', () => {
         clearSpan.style.display = input.value ? 'block' : 'none';
-        routeBox.updateActiveTab(order === 0 ? 'from' : 'to');
+        routeBox.updateActiveTab(index === 0 ? 'from' : 'to');
         routeBox.updateInputVisibility();
-        input.parentElement.style.width = '100%'; // Set full width on focus
-
-        // Ensure the other input is visible and half width for seamless tabbing
-        const waypointInputs = document.querySelectorAll('.waypoint-inputs-container .input-wrapper');
-        waypointInputs.forEach(wrapper => {
-            if (wrapper !== input.parentElement) {
-                wrapper.style.display = 'block';
-                wrapper.style.width = '50%';
-            }
-        });
     });
 };
 
@@ -98,7 +87,6 @@ const routeBox = {
         this.updateInputVisibility();
         this.updateTabLabels();
 
-        // Ensure elements exist before setting up autocomplete
         ['waypoint-input-1', 'waypoint-input-2'].forEach(id => setupAutocompleteForField(id));
     },
 
@@ -113,7 +101,7 @@ const routeBox = {
 
     createTab(text, tabId, waypointIndex) {
         const tab = createElement('div', tabId, 'tab', this.getTabLabelText(text, waypointIndex));
-        tab.setAttribute('tabindex', '-1'); // Exclude tabs from tab order
+        tab.setAttribute('tabindex', '-1');
         tab.addEventListener('click', () => this.handleTabClick(tabId));
         return tab;
     },
@@ -131,7 +119,7 @@ const routeBox = {
     },
 
     setupTabSwitching(routeNumber) {
-        ['from-tab', 'to-tab'].forEach((tabId, index) => {
+        ['from-tab', 'to-tab'].forEach(tabId => {
             document.getElementById(tabId).addEventListener('click', () => this.handleTabClick(tabId));
         });
     },
@@ -143,22 +131,10 @@ const routeBox = {
         const input = document.getElementById(inputId);
         setTimeout(() => input.focus({ preventScroll: true }), 0);
 
-        // Ensure the input resizes correctly
         const waypointInputs = document.querySelectorAll('.waypoint-inputs-container .input-wrapper');
         waypointInputs.forEach(wrapper => {
-            if (wrapper.contains(input)) {
-                wrapper.style.width = '100%';
-            } else {
-                wrapper.style.width = '50%';
-            }
+            wrapper.style.width = wrapper.contains(input) ? '100%' : '50%';
         });
-    },
-
-    getWaypointInputs(routeNumber) {
-        return {
-            fromInput: document.getElementById(`waypoint-input-${routeNumber * 2 + 1}`),
-            toInput: document.getElementById(`waypoint-input-${routeNumber * 2 + 2}`)
-        };
     },
 
     updateActiveTab(activeTab) {
@@ -173,7 +149,6 @@ const routeBox = {
         input.placeholder = placeholder;
         input.value = waypoint ? `${waypoint.city}, ${waypoint.country} (${waypoint.iata_code})` : '';
         const clearSpan = createElement('span', null, 'clear-span', '✕');
-        clearSpan.style.zIndex = '10';
         clearSpan.style.display = 'none';
         clearSpan.onclick = (e) => {
             e.stopPropagation();
@@ -183,7 +158,7 @@ const routeBox = {
             this.updateTabLabels();
             input.focus();
         };
-        setupInputEvents(input, clearSpan, index, order);
+        setupInputEvents(input, clearSpan, index);
         inputWrapper.append(input, clearSpan, this.createSuggestionsDiv(index));
         return inputWrapper;
     },
