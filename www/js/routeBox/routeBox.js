@@ -61,13 +61,18 @@ const routeBox = {
         this.setupTabSwitching(routeNumber);
 
         const waypointInputsContainer = createElement('div', null, 'waypoint-inputs-container');
+        let firstEmptyInput = null;
         ['From', 'To'].forEach((placeholder, i) => {
             const index = routeNumber * 2 + i;
-            // Set the previous destination as the next origin waypoint
             if (i === 0 && appState.waypoints[index - 1]) {
                 appState.waypoints[index] = appState.waypoints[index - 1];
             }
-            waypointInputsContainer.append(this.createWaypointInput(index, placeholder, appState.waypoints[index], i, routeNumber));
+            const waypointInput = this.createWaypointInput(index, placeholder, appState.waypoints[index], i, routeNumber);
+            waypointInputsContainer.append(waypointInput);
+
+            if (!firstEmptyInput && !appState.waypoints[index]) {
+                firstEmptyInput = waypointInput.querySelector('input');
+            }
         });
         routeBox.append(waypointInputsContainer);
 
@@ -92,6 +97,10 @@ const routeBox = {
         this.updateTabLabels(routeNumber);
 
         [`waypoint-input-${routeNumber * 2 + 1}`, `waypoint-input-${routeNumber * 2 + 2}`].forEach(id => setupAutocompleteForField(id));
+
+        if (firstEmptyInput) {
+            firstEmptyInput.focus();
+        }
     },
 
     removeExistingRouteBox() {
