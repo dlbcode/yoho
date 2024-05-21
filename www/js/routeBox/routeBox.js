@@ -193,7 +193,8 @@ const routeBox = {
     
         if (fromTab && toTab) {
             fromTab.innerText = this.getTabLabelText('From', fromWaypointIndex);
-            toTab.innerText = this.getTabLabelText('To', toWaypointIndex);
+            const toWaypoint = appState.waypoints[toWaypointIndex];
+            toTab.innerText = toWaypoint ? `To ${toWaypoint.iata_code}` : 'To Any';
         }
     
         const toInput = document.getElementById(`waypoint-input-${toWaypointIndex + 1}`);
@@ -202,7 +203,7 @@ const routeBox = {
         }
     
         this.updateInputVisibility(routeNumber);
-    },    
+    },        
 
     updateInputVisibility(routeNumber) {
         const fromInput = document.getElementById(`waypoint-input-${routeNumber * 2 + 1}`);
