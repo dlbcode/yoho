@@ -186,10 +186,10 @@ const routeBox = {
     updateTabLabels() {
         const fromTab = document.getElementById('from-tab');
         const toTab = document.getElementById('to-tab');
-        fromTab.innerText = this.getTabLabelText('From', 0);
-        toTab.innerText = this.getTabLabelText('To', 1);
+        fromTab.innerText = routeBox.getTabLabelText('From', 0);
+        toTab.innerText = routeBox.getTabLabelText('To', 1);
         document.getElementById('waypoint-input-2').placeholder = appState.waypoints[0] && !appState.waypoints[1] ? 'Any' : 'To';
-        this.updateInputVisibility();
+        routeBox.updateInputVisibility();
     },
 
     updateInputVisibility() {
