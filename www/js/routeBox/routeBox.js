@@ -20,25 +20,25 @@ const createElement = (tag, id, className, content) => {
     return element;
 };
 
-const setupInputEvents = (input, clearSpan, index) => {
+const setupInputEvents = (input, clearSpan, index, routeNumber) => {
     input.setAttribute('tabindex', '0');
     input.addEventListener('input', () => {
         clearSpan.style.display = input.value ? 'block' : 'none';
-        routeBox.updateTabLabels();
+        routeBox.updateTabLabels(routeNumber);
     });
-    input.addEventListener('change', routeBox.updateTabLabels);
+    input.addEventListener('change', () => routeBox.updateTabLabels(routeNumber));
     input.addEventListener('blur', () => {
         setTimeout(() => {
             if (!input.value) {
                 updateState('removeWaypoint', index);
-                routeBox.updateTabLabels();
+                routeBox.updateTabLabels(routeNumber);
             }
         }, 300);
     });
     input.addEventListener('focus', () => {
         clearSpan.style.display = input.value ? 'block' : 'none';
-        routeBox.updateActiveTab(index === 0 ? 'from' : 'to');
-        routeBox.updateInputVisibility();
+        routeBox.updateActiveTab(index % 2 === 0 ? 'from' : 'to');
+        routeBox.updateInputVisibility(routeNumber);
     });
 };
 
@@ -53,8 +53,8 @@ const routeBox = {
         routeBox.append(topRow);
 
         const tabsContainer = createElement('div', null, 'tabs-container');
-        const fromTab = this.createTab('From', 'from-tab', routeNumber * 2);
-        const toTab = this.createTab('To', 'to-tab', routeNumber * 2 + 1);
+        const fromTab = this.createTab('From', 'from-tab', routeNumber * 2, routeNumber);
+        const toTab = this.createTab('To', 'to-tab', routeNumber * 2 + 1, routeNumber);
 
         tabsContainer.append(fromTab, this.createSwapButton(routeNumber), toTab);
         routeBox.append(tabsContainer);
@@ -63,7 +63,7 @@ const routeBox = {
         const waypointInputsContainer = createElement('div', null, 'waypoint-inputs-container');
         ['From', 'To'].forEach((placeholder, i) => {
             const index = routeNumber * 2 + i;
-            waypointInputsContainer.append(this.createWaypointInput(index, placeholder, appState.waypoints[index], i));
+            waypointInputsContainer.append(this.createWaypointInput(index, placeholder, appState.waypoints[index], i, routeNumber));
         });
         routeBox.append(waypointInputsContainer);
 
@@ -84,10 +84,10 @@ const routeBox = {
 
         this.positionPopup(routeBox, event);
         routeBox.style.display = 'block';
-        this.updateInputVisibility();
-        this.updateTabLabels();
+        this.updateInputVisibility(routeNumber);
+        this.updateTabLabels(routeNumber);
 
-        ['waypoint-input-1', 'waypoint-input-2'].forEach(id => setupAutocompleteForField(id));
+        [`waypoint-input-${routeNumber * 2 + 1}`, `waypoint-input-${routeNumber * 2 + 2}`].forEach(id => setupAutocompleteForField(id));
     },
 
     removeExistingRouteBox() {
@@ -99,10 +99,10 @@ const routeBox = {
         return createElement('div', 'routeBox', 'route-box-popup');
     },
 
-    createTab(text, tabId, waypointIndex) {
+    createTab(text, tabId, waypointIndex, routeNumber) {
         const tab = createElement('div', tabId, 'tab', this.getTabLabelText(text, waypointIndex));
         tab.setAttribute('tabindex', '-1');
-        tab.addEventListener('click', () => this.handleTabClick(tabId));
+        tab.addEventListener('click', () => this.handleTabClick(tabId, routeNumber));
         return tab;
     },
 
@@ -120,31 +120,31 @@ const routeBox = {
 
     setupTabSwitching(routeNumber) {
         ['from-tab', 'to-tab'].forEach(tabId => {
-            document.getElementById(tabId).addEventListener('click', () => this.handleTabClick(tabId));
+            document.getElementById(tabId).addEventListener('click', () => this.handleTabClick(tabId, routeNumber));
         });
     },
 
-    handleTabClick(tabId) {
+    handleTabClick(tabId, routeNumber) {
         const activeTab = tabId.includes('from') ? 'from' : 'to';
         this.updateActiveTab(activeTab);
-        const inputId = activeTab === 'from' ? 'waypoint-input-1' : 'waypoint-input-2';
+        const inputId = activeTab === 'from' ? `waypoint-input-${routeNumber * 2 + 1}` : `waypoint-input-${routeNumber * 2 + 2}`;
         const input = document.getElementById(inputId);
         setTimeout(() => input.focus({ preventScroll: true }), 0);
-    
+
         const waypointInputs = document.querySelectorAll('.waypoint-inputs-container .input-wrapper');
         waypointInputs.forEach(wrapper => {
             wrapper.style.width = wrapper.contains(input) ? '100%' : '50%';
         });
-    
-        this.updateInputVisibility();
-    },    
+
+        this.updateInputVisibility(routeNumber);
+    },
 
     updateActiveTab(activeTab) {
         document.getElementById('from-tab').classList.toggle('active', activeTab === 'from');
         document.getElementById('to-tab').classList.toggle('active', activeTab === 'to');
     },
 
-    createWaypointInput(index, placeholder, waypoint, order) {
+    createWaypointInput(index, placeholder, waypoint, order, routeNumber) {
         const inputWrapper = createElement('div', null, 'input-wrapper');
         const input = createElement('input', `waypoint-input-${index + 1}`, 'waypoint-input');
         input.type = 'text';
@@ -157,10 +157,10 @@ const routeBox = {
             input.value = '';
             clearSpan.style.display = 'none';
             updateState('removeWaypoint', index);
-            this.updateTabLabels();
+            this.updateTabLabels(routeNumber);
             input.focus();
         };
-        setupInputEvents(input, clearSpan, index);
+        setupInputEvents(input, clearSpan, index, routeNumber);
         inputWrapper.append(input, clearSpan, this.createSuggestionsDiv(index));
         return inputWrapper;
     },
@@ -185,24 +185,45 @@ const routeBox = {
         return closeButton;
     },
 
-    updateTabLabels() {
+    updateTabLabels(routeNumber) {
         const fromTab = document.getElementById('from-tab');
         const toTab = document.getElementById('to-tab');
-        fromTab.innerText = routeBox.getTabLabelText('From', 0);
-        toTab.innerText = routeBox.getTabLabelText('To', 1);
-        document.getElementById('waypoint-input-2').placeholder = appState.waypoints[0] && !appState.waypoints[1] ? 'Any' : 'To';
-        routeBox.updateInputVisibility();
-    },
+        const fromWaypointIndex = routeNumber * 2;
+        const toWaypointIndex = routeNumber * 2 + 1;
+    
+        if (fromTab && toTab) {
+            fromTab.innerText = this.getTabLabelText('From', fromWaypointIndex);
+            toTab.innerText = this.getTabLabelText('To', toWaypointIndex);
+        }
+    
+        const toInput = document.getElementById(`waypoint-input-${toWaypointIndex + 1}`);
+        if (toInput) {
+            toInput.placeholder = appState.waypoints[fromWaypointIndex] && !appState.waypoints[toWaypointIndex] ? 'Any' : 'To';
+        }
+    
+        this.updateInputVisibility(routeNumber);
+    },    
 
-    updateInputVisibility() {
-        const fromWrapper = document.getElementById('waypoint-input-1').parentElement;
-        const toWrapper = document.getElementById('waypoint-input-2').parentElement;
-        const fromActive = document.getElementById('from-tab').classList.contains('active');
-        const toActive = document.getElementById('to-tab').classList.contains('active');
-        fromWrapper.style.display = fromActive || !toActive ? 'block' : 'none';
-        fromWrapper.style.width = fromActive ? '100%' : '50%';
-        toWrapper.style.display = toActive || !fromActive ? 'block' : 'none';
-        toWrapper.style.width = toActive ? '100%' : '50%';
+    updateInputVisibility(routeNumber) {
+        const fromInput = document.getElementById(`waypoint-input-${routeNumber * 2 + 1}`);
+        const toInput = document.getElementById(`waypoint-input-${routeNumber * 2 + 2}`);
+
+        if (fromInput && toInput) {
+            const fromWrapper = fromInput.parentElement;
+            const toWrapper = toInput.parentElement;
+            const fromActive = document.getElementById('from-tab').classList.contains('active');
+            const toActive = document.getElementById('to-tab').classList.contains('active');
+
+            if (fromWrapper) {
+                fromWrapper.style.display = fromActive || !toActive ? 'block' : 'none';
+                fromWrapper.style.width = fromActive ? '100%' : '50%';
+            }
+
+            if (toWrapper) {
+                toWrapper.style.display = toActive || !fromActive ? 'block' : 'none';
+                toWrapper.style.width = toActive ? '100%' : '50%';
+            }
+        }
     },
 
     positionPopup(popup, event) {
@@ -222,7 +243,7 @@ const routeBox = {
             [appState.waypoints[idx], appState.waypoints[idx + 1]] = [appState.waypoints[idx + 1], appState.waypoints[idx]];
             routeHandling.updateRoutesArray();
             updateUrl();
-            this.updateTabLabels();
+            this.updateTabLabels(routeNumber);
         }
     },
 };
