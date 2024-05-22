@@ -36,7 +36,7 @@ const setupInputEvents = (input, clearSpan, index, routeNumber) => {
             if (!switchingTabs && !input.value) {
                 updateState('removeWaypoint', index);
                 routeBox.updateTabLabels(routeNumber);
-                clearSpan.style.display = 'none';  // Hide clear button when input loses focus
+                clearSpan.style.display = 'none';
                 routeBox.updateActiveTab('');
                 routeBox.updateInputVisibility(routeNumber);
             }
@@ -49,6 +49,27 @@ const setupInputEvents = (input, clearSpan, index, routeNumber) => {
         routeBox.updateActiveTab(index % 2 === 0 ? 'from' : 'to');
         routeBox.updateInputVisibility(routeNumber);
     });
+};
+
+const createWaypointInput = (index, placeholder, waypoint, routeNumber) => {
+    const inputWrapper = createElement('div', null, 'input-wrapper');
+    const input = createElement('input', `waypoint-input-${index + 1}`, 'waypoint-input');
+    input.type = 'text';
+    input.placeholder = placeholder;
+    input.value = waypoint ? `${waypoint.city}, ${waypoint.country} (${waypoint.iata_code})` : '';
+    const clearSpan = createElement('span', null, 'clear-span', '✕');
+    clearSpan.style.display = 'none';
+    clearSpan.onclick = (e) => {
+        e.stopPropagation();
+        input.value = '';
+        clearSpan.style.display = 'none';
+        updateState('removeWaypoint', index);
+        routeBox.updateTabLabels(routeNumber);
+        input.focus();
+    };
+    setupInputEvents(input, clearSpan, index, routeNumber);
+    inputWrapper.append(input, clearSpan, routeBox.createSuggestionsDiv(index));
+    return inputWrapper;
 };
 
 const routeBox = {
@@ -75,7 +96,7 @@ const routeBox = {
             if (i === 0 && appState.waypoints[index - 1]) {
                 appState.waypoints[index] = appState.waypoints[index - 1];
             }
-            const waypointInput = this.createWaypointInput(index, placeholder, appState.waypoints[index], routeNumber);
+            const waypointInput = createWaypointInput(index, placeholder, appState.waypoints[index], routeNumber);
             waypointInputsContainer.append(waypointInput);
 
             if (!firstEmptyInput && !appState.waypoints[index]) {
@@ -84,12 +105,13 @@ const routeBox = {
         });
         routeBox.append(waypointInputsContainer);
 
-        const dateInput = createElement('input', 'date-input', 'date-input');
-        dateInput.type = 'date';
+        const dateInput = createElement('input', `date-input-${routeNumber}`, 'date-input form-control input');
+        dateInput.type = 'text';
+        dateInput.readOnly = true;
+        dateInput.placeholder = 'Date';
         dateInput.value = routeNumber > 0 && appState.routeDates[routeNumber - 1] ? 
             appState.routeDates[routeNumber - 1] : appState.routeDates[routeNumber] || '';
-        appState.routeDates[routeNumber] = dateInput.value;
-        dateInput.placeholder = 'Date';
+        dateInput.name = `date-input-${routeNumber}`;
         dateInput.addEventListener('change', (e) => {
             appState.routeDates[routeNumber] = e.target.value;
         });
@@ -136,7 +158,7 @@ const routeBox = {
         const swapButtonWrapper = createElement('div', null, 'swap-button-wrapper');
         const swapButton = createElement('button', null, 'swap-route-button', '&#8646;');
         swapButton.title = 'Swap waypoints';
-        swapButton.classList.add('disabled'); // Initially disabled
+        swapButton.classList.add('disabled');
         swapButton.onclick = () => this.handleSwapButtonClick(routeNumber);
         swapButtonWrapper.appendChild(swapButton);
         return swapButtonWrapper;
@@ -180,27 +202,6 @@ const routeBox = {
         }
     },
 
-    createWaypointInput(index, placeholder, waypoint, routeNumber) {
-        const inputWrapper = createElement('div', null, 'input-wrapper');
-        const input = createElement('input', `waypoint-input-${index + 1}`, 'waypoint-input');
-        input.type = 'text';
-        input.placeholder = placeholder;
-        input.value = waypoint ? `${waypoint.city}, ${waypoint.country} (${waypoint.iata_code})` : '';
-        const clearSpan = createElement('span', null, 'clear-span', '✕');
-        clearSpan.style.display = 'none';
-        clearSpan.onclick = (e) => {
-            e.stopPropagation();
-            input.value = '';
-            clearSpan.style.display = 'none';
-            updateState('removeWaypoint', index);
-            this.updateTabLabels(routeNumber);
-            input.focus();
-        };
-        setupInputEvents(input, clearSpan, index, routeNumber);
-        inputWrapper.append(input, clearSpan, this.createSuggestionsDiv(index));
-        return inputWrapper;
-    },
-
     createSuggestionsDiv(index) {
         return createElement('div', `waypoint-input-${index + 1}Suggestions`, 'suggestions');
     },
@@ -239,7 +240,6 @@ const routeBox = {
 
         this.updateInputVisibility(routeNumber);
 
-        // Simplified logic to enable/disable swap button
         const swapButton = document.querySelector('.swap-route-button');
         const fromTabHasIata = fromTab && fromTab.innerText.split(' ').length > 1;
         const toTabHasIata = toTab && toTab.innerText.split(' ').length > 1;
