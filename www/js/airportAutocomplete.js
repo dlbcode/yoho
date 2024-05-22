@@ -30,15 +30,18 @@ function handleSelection(e, inputId, airport) {
     e.preventDefault();
     e.stopPropagation();
 
+    console.log('handleSelection called', airport, inputId); // Debugging
+
     inputField.value = `${airport.city}, ${airport.country} (${airport.iata_code})`;
     suggestionBox.style.display = 'none';
-    document.dispatchEvent(new CustomEvent('airportSelected', { 
+    document.dispatchEvent(new CustomEvent('airportSelected', {
         detail: { airport, fieldId: inputId }
     }));
     inputField.setAttribute('data-selected-iata', airport.iata_code);
 
-    // Call updateTabLabels from routeBox to update the tab labels
+    // Update tab labels for both waypoints and route box
     routeBox.updateTabLabels();
+    routeBox.updateInputVisibility();
 
     inputField.blur();
 }
@@ -165,36 +168,36 @@ function updateSuggestions(inputId, airports) {
     airports.forEach(airport => {
         const div = document.createElement('div');
         div.textContent = `${airport.name} (${airport.iata_code}) - ${airport.city}, ${airport.country}`;
-        let touchStartY = 0;
-        let touchEndY = 0;
-
-        // Event listener for both touch and click selection
-        const selectionHandler = (e) => handleSelection(e, inputId, airport);
-
+    
+        const selectionHandler = (e) => {
+            console.log('Selection Handler called', airport); // Debugging
+            setTimeout(() => {
+                handleSelection(e, inputId, airport);
+            }, 100); // Add a small delay
+        };
+    
         div.addEventListener('touchstart', (e) => {
-            touchStartY = e.touches[0].clientY;
+            console.log('Touch Start', e.touches[0].clientY); // Debugging
+            selectionHandledByTouch = false; // Reset flag on touch start
         }, { passive: true });
-
-        div.addEventListener('touchmove', (e) => {
-            touchEndY = e.touches[0].clientY;
-        }, { passive: true });
-
+    
         div.addEventListener('touchend', (e) => {
-            if (Math.abs(touchEndY - touchStartY) < 10) {
-                selectionHandledByTouch = true;
-                selectionHandler(e);
-            }
+            console.log('Touch End'); // Debugging
+            selectionHandledByTouch = true;
+            selectionHandler(e);
         });
-
+    
         div.addEventListener('click', (e) => {
+            console.log('Click', selectionHandledByTouch); // Debugging
             if (!selectionHandledByTouch) {
                 selectionHandler(e);
             }
-            selectionHandledByTouch = false;
+            selectionHandledByTouch = false; // Reset flag after handling click
         });
-
+    
         suggestionBox.appendChild(div);
     });
+                     
     if (airports.length > 0) suggestionBox.style.display = 'block';
 }
 
@@ -202,6 +205,8 @@ document.addEventListener('DOMContentLoaded', () => {
     document.addEventListener('airportSelected', (event) => {
         const { airport, fieldId } = event.detail;
         const waypointIndex = parseInt(fieldId.replace('waypoint-input-', '')) - 1;
+
+        console.log('airportSelected event triggered', airport, fieldId); // Debugging
 
         if (waypointIndex >= 0 && waypointIndex < appState.waypoints.length) {
             updateState('updateWaypoint', { index: waypointIndex, data: airport });
