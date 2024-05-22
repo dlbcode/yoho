@@ -33,13 +33,10 @@ const setupInputEvents = (input, clearSpan, index, routeNumber) => {
     input.addEventListener('blur', () => {
         clearTimeout(blurTimeout);
         blurTimeout = setTimeout(() => {
-            if (!switchingTabs) {
-                if (!input.value) {
-                    updateState('removeWaypoint', index);
-                    routeBox.updateTabLabels(routeNumber);
-                }
+            if (!switchingTabs && !input.value) {
+                updateState('removeWaypoint', index);
+                routeBox.updateTabLabels(routeNumber);
                 clearSpan.style.display = 'none';  // Hide clear button when input loses focus
-                // Revert to default state
                 routeBox.updateActiveTab('');
                 routeBox.updateInputVisibility(routeNumber);
             }
@@ -75,7 +72,6 @@ const routeBox = {
         let firstEmptyInput = null;
         ['From', 'To'].forEach((placeholder, i) => {
             const index = routeNumber * 2 + i;
-            // Set the previous destination as the next origin waypoint
             if (i === 0 && appState.waypoints[index - 1]) {
                 appState.waypoints[index] = appState.waypoints[index - 1];
             }
@@ -139,6 +135,7 @@ const routeBox = {
         const swapButtonWrapper = createElement('div', null, 'swap-button-wrapper');
         const swapButton = createElement('button', null, 'swap-route-button', '&#8646;');
         swapButton.title = 'Swap waypoints';
+        swapButton.classList.add('disabled'); // Initially disabled
         swapButton.onclick = () => this.handleSwapButtonClick(routeNumber);
         swapButtonWrapper.appendChild(swapButton);
         return swapButtonWrapper;
@@ -240,6 +237,17 @@ const routeBox = {
         }
 
         this.updateInputVisibility(routeNumber);
+
+        // Simplified logic to enable/disable swap button
+        const swapButton = document.querySelector('.swap-route-button');
+        const fromTabHasIata = fromTab && fromTab.innerText.split(' ').length > 1;
+        const toTabHasIata = toTab && toTab.innerText.split(' ').length > 1;
+        const fromTabIata = fromTabHasIata ? fromTab.innerText.split(' ')[1] : null;
+        const toTabIata = toTabHasIata ? toTab.innerText.split(' ')[1] : null;
+
+        const isEnabled = fromTabIata && toTabIata && fromTabIata !== 'Any' && toTabIata !== 'Any';
+        swapButton.disabled = !isEnabled;
+        swapButton.classList.toggle('disabled', !isEnabled);
     },
 
     updateInputVisibility(routeNumber) {

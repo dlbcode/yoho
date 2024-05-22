@@ -363,3 +363,9 @@
   background-color: #0268c7;
   color: #fff;
 }
+
+.swap-route-button.disabled {
+  color: #666; /* Darker grey color */
+  pointer-events: none; /* Disable hover effect */
+  cursor: default; /* Default cursor */
+}
