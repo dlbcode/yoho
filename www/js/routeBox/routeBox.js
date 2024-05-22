@@ -33,6 +33,7 @@ const setupInputEvents = (input, clearSpan, index, routeNumber) => {
                 updateState('removeWaypoint', index);
                 routeBox.updateTabLabels(routeNumber);
             }
+            clearSpan.style.display = 'none';  // Hide clear button when input loses focus
         }, 300);
     });
     input.addEventListener('focus', () => {
