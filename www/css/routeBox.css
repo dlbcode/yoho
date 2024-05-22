@@ -63,11 +63,13 @@
 
 #to-tab {
   border-top-right-radius: 5px;
+  border-left: 2px solid #333;
   right: 0px;
 }
 
 #from-tab {
   border-top-left-radius: 5px;
+  border-right: 2px solid #333;
   left: 0px;
 }
 
