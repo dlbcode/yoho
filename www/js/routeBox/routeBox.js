@@ -20,6 +20,9 @@ const createElement = (tag, id, className, content) => {
     return element;
 };
 
+let switchingTabs = false;
+let blurTimeout;
+
 const setupInputEvents = (input, clearSpan, index, routeNumber) => {
     input.setAttribute('tabindex', '0');
     input.addEventListener('input', () => {
@@ -28,15 +31,23 @@ const setupInputEvents = (input, clearSpan, index, routeNumber) => {
     });
     input.addEventListener('change', () => routeBox.updateTabLabels(routeNumber));
     input.addEventListener('blur', () => {
-        setTimeout(() => {
-            if (!input.value) {
-                updateState('removeWaypoint', index);
-                routeBox.updateTabLabels(routeNumber);
+        clearTimeout(blurTimeout);
+        blurTimeout = setTimeout(() => {
+            if (!switchingTabs) {
+                if (!input.value) {
+                    updateState('removeWaypoint', index);
+                    routeBox.updateTabLabels(routeNumber);
+                }
+                clearSpan.style.display = 'none';  // Hide clear button when input loses focus
+                // Revert to default state
+                routeBox.updateActiveTab('');
+                routeBox.updateInputVisibility(routeNumber);
             }
-            clearSpan.style.display = 'none';  // Hide clear button when input loses focus
         }, 300);
     });
     input.addEventListener('focus', () => {
+        clearTimeout(blurTimeout);
+        switchingTabs = false;
         clearSpan.style.display = input.value ? 'block' : 'none';
         routeBox.updateActiveTab(index % 2 === 0 ? 'from' : 'to');
         routeBox.updateInputVisibility(routeNumber);
@@ -151,11 +162,15 @@ const routeBox = {
     },
 
     handleTabClick(tabId, routeNumber) {
+        switchingTabs = true;
         const activeTab = tabId.includes('from') ? 'from' : 'to';
         this.updateActiveTab(activeTab);
         const inputId = activeTab === 'from' ? `waypoint-input-${routeNumber * 2 + 1}` : `waypoint-input-${routeNumber * 2 + 2}`;
         const input = document.getElementById(inputId);
-        setTimeout(() => input.focus({ preventScroll: true }), 0);
+        setTimeout(() => {
+            input.focus({ preventScroll: true });
+            switchingTabs = false;
+        }, 0);
 
         const waypointInputs = document.querySelectorAll('.waypoint-inputs-container .input-wrapper');
         waypointInputs.forEach(wrapper => {
@@ -166,8 +181,17 @@ const routeBox = {
     },
 
     updateActiveTab(activeTab) {
-        document.getElementById('from-tab').classList.toggle('active', activeTab === 'from');
-        document.getElementById('to-tab').classList.toggle('active', activeTab === 'to');
+        const fromTab = document.getElementById('from-tab');
+        const toTab = document.getElementById('to-tab');
+        if (fromTab && toTab) {
+            fromTab.classList.toggle('active', activeTab === 'from');
+            toTab.classList.toggle('active', activeTab === 'to');
+            // Revert to default state
+            if (!activeTab) {
+                fromTab.classList.remove('active');
+                toTab.classList.remove('active');
+            }
+        }
     },
 
     createWaypointInput(index, placeholder, waypoint, order, routeNumber) {
@@ -216,20 +240,20 @@ const routeBox = {
         const toTab = document.getElementById('to-tab');
         const fromWaypointIndex = routeNumber * 2;
         const toWaypointIndex = routeNumber * 2 + 1;
-    
+
         if (fromTab && toTab) {
             fromTab.innerText = this.getTabLabelText('From', fromWaypointIndex);
             const toWaypoint = appState.waypoints[toWaypointIndex];
             toTab.innerText = toWaypoint ? `To ${toWaypoint.iata_code}` : 'To Any';
         }
-    
+
         const toInput = document.getElementById(`waypoint-input-${toWaypointIndex + 1}`);
         if (toInput) {
             toInput.placeholder = appState.waypoints[fromWaypointIndex] && !appState.waypoints[toWaypointIndex] ? 'Any' : 'To';
         }
-    
+
         this.updateInputVisibility(routeNumber);
-    },        
+    },
 
     updateInputVisibility(routeNumber) {
         const fromInput = document.getElementById(`waypoint-input-${routeNumber * 2 + 1}`);
