@@ -16,7 +16,6 @@
 .route-box-popup .search-button,
 .route-box-popup .remove-button,
 .route-box-popup .popup-close-button {
-  margin-top: 5px;
   cursor: pointer;
   margin-right: 5px;
 }
