@@ -118,6 +118,7 @@ const routeBox = {
         dateInput.readOnly = true;
         dateInput.placeholder = 'Date';
         dateInput.value = appState.routeDates[routeNumber - 1] || appState.routeDates[routeNumber] || '';
+        appState.routeDates[routeNumber] = dateInput.value;
         dateInput.name = `date-input-${routeNumber}`;
         dateInput.addEventListener('change', (e) => appState.routeDates[routeNumber] = e.target.value);
         routeBox.append(dateInput);
