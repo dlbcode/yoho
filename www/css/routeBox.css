@@ -7,9 +7,11 @@
   border: 1px solid #525252;
   padding: 10px;
   width: 340px;
+  max-width: 90%;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
 .route-box-popup button,
@@ -22,6 +24,7 @@
 
 .route-box-popup .button-container {
   display: flex;
+  justify-content: space-between;
   margin: 0;
 }
 
@@ -31,8 +34,9 @@
   margin-top: 10px;
   background-color: #333;
   border: 1px solid #555;
-  padding: 5px;
+  padding: 10px; /* Increased padding for better touch interaction */
   width: 100%;
+  box-sizing: border-box;
 }
 
 .tabs-container {
@@ -45,10 +49,10 @@
 }
 
 .tab {
-  padding: 5px 20px;
-  height: 24px;
+  padding: 10px; /* Increased padding for better touch interaction */
+  height: auto;
   width: 50%;
-  font-size: 12px;
+  font-size: 14px; /* Increased font size for readability */
   cursor: pointer;
   color: #999;
   background: #444;
@@ -56,6 +60,7 @@
   border-top-left-radius: 5px;
   border-top-right-radius: 5px;
   z-index: 0;
+  text-align: center; /* Centered text for better appearance */
 }
 
 .tab.active {
@@ -66,7 +71,7 @@
 .swap-route-button {
   margin: 0 5px;
   padding: 0;
-  font-size: 16px;
+  font-size: 20px; /* Increased font size for better touch interaction */
   background: none;
   border: none;
   color: #999;
@@ -81,13 +86,12 @@
 }
 
 .swap-route-button:hover {
-  background-color: #333;
+  background-color: transparent;
   color: #ccc;
 }
 
 .waypoint-inputs-container {
   display: flex;
-  flex-direction: row;
   margin-top: 0;
   position: relative;
   width: 100%;
@@ -96,13 +100,12 @@
 .input-wrapper {
   position: relative;
   flex: 1;
-  margin-bottom: 10px;
   display: flex;
 }
 
 .route-box-popup .waypoint-input {
   background-color: #333;
-  padding: 5px;
+  padding: 10px; /* Increased padding for better touch interaction */
   width: 100%;
   box-sizing: border-box;
   display: block;
@@ -131,19 +134,18 @@
 .remove-button {
   color: #fff;
   border: none;
-  padding: 5px;
+  padding: 10px; /* Increased padding for better touch interaction */
   margin-top: 10px;
+  flex: 1; /* Allow buttons to grow equally */
 }
 
 .search-button {
   background-color: #0060bb;
-  width: 265px;
+  margin-right: 10px; /* Added margin for spacing */
 }
 
 .remove-button {
   background-color: #7e1103;
-  width: 65px;
-  margin-right: 0 !important;
 }
 
 #topRow {
@@ -154,8 +156,8 @@
 
 .travelers-dropdown-btn,
 .trip-type-dropdown-btn {
-  height: 23px;
-  padding: 5px;
+  height: 32px; /* Increased height for better touch interaction */
+  padding: 10px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -322,4 +324,33 @@
   border-radius: 50%;
   margin: 0 -20px;
   z-index: 1;
+}
+
+/* Additional Media Queries for Better Mobile Experience */
+@media (max-width: 600px) {
+  .route-box-popup {
+    width: 100%;
+    max-width: none;
+    left: 0;
+    right: 0;
+    margin: auto;
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+  }
+
+  .search-button,
+  .remove-button {
+    flex: 1;
+    width: 48%;
+  }
+
+  .waypoint-inputs-container {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .input-wrapper {
+    margin-bottom: 10px;
+  }
 }

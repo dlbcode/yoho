@@ -33,10 +33,13 @@ const setupInputEvents = (input, clearSpan, index, routeNumber) => {
     input.addEventListener('blur', () => {
         clearTimeout(blurTimeout);
         blurTimeout = setTimeout(() => {
-            if (!switchingTabs && !input.value) {
-                updateState('removeWaypoint', index);
-                routeBox.updateTabLabels(routeNumber);
-                clearSpan.style.display = 'none';
+            if (!switchingTabs) {
+                if (!input.value) {
+                    updateState('removeWaypoint', index);
+                    routeBox.updateTabLabels(routeNumber);
+                }
+                clearSpan.style.display = 'none';  // Hide clear button when input loses focus
+                // Revert to default state
                 routeBox.updateActiveTab('');
                 routeBox.updateInputVisibility(routeNumber);
             }
