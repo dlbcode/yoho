@@ -21,6 +21,7 @@ const createElement = (tag, id, className, content) => {
 };
 
 let switchingTabs = false;
+let isFocusing = false;
 
 const setupInputEvents = (input, clearSpan, index, routeNumber) => {
     input.setAttribute('tabindex', '0');
@@ -30,7 +31,7 @@ const setupInputEvents = (input, clearSpan, index, routeNumber) => {
     });
     input.addEventListener('change', () => routeBox.updateTabLabels(routeNumber));
     input.addEventListener('blur', () => {
-        if (!switchingTabs) {
+        if (!isFocusing && !switchingTabs) {
             if (!input.value) {
                 updateState('removeWaypoint', index);
                 routeBox.updateTabLabels(routeNumber);
@@ -41,7 +42,8 @@ const setupInputEvents = (input, clearSpan, index, routeNumber) => {
         }
     });
     input.addEventListener('focus', () => {
-        //clearTimeout(blurTimeout);
+        isFocusing = true;
+        setTimeout(() => isFocusing = false, 0);
         switchingTabs = false;
         hideAllClearButtons();
         clearSpan.style.display = 'block';
