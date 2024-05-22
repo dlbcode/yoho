@@ -21,7 +21,6 @@ const createElement = (tag, id, className, content) => {
 };
 
 let switchingTabs = false;
-let blurTimeout;
 
 const setupInputEvents = (input, clearSpan, index, routeNumber) => {
     input.setAttribute('tabindex', '0');
@@ -31,21 +30,18 @@ const setupInputEvents = (input, clearSpan, index, routeNumber) => {
     });
     input.addEventListener('change', () => routeBox.updateTabLabels(routeNumber));
     input.addEventListener('blur', () => {
-        clearTimeout(blurTimeout);
-        blurTimeout = setTimeout(() => {
-            if (!switchingTabs) {
-                if (!input.value) {
-                    updateState('removeWaypoint', index);
-                    routeBox.updateTabLabels(routeNumber);
-                }
-                clearSpan.style.display = 'none';
-                routeBox.updateActiveTab('');
-                routeBox.updateInputVisibility(routeNumber);
+        if (!switchingTabs) {
+            if (!input.value) {
+                updateState('removeWaypoint', index);
+                routeBox.updateTabLabels(routeNumber);
             }
-        }, 300);
+            clearSpan.style.display = 'none';
+            routeBox.updateActiveTab('');
+            routeBox.updateInputVisibility(routeNumber);
+        }
     });
     input.addEventListener('focus', () => {
-        clearTimeout(blurTimeout);
+        //clearTimeout(blurTimeout);
         switchingTabs = false;
         hideAllClearButtons();
         clearSpan.style.display = 'block';
@@ -182,11 +178,9 @@ const routeBox = {
         this.updateActiveTab(activeTab);
         const inputId = activeTab === 'from' ? `waypoint-input-${routeNumber * 2 + 1}` : `waypoint-input-${routeNumber * 2 + 2}`;
         const input = document.getElementById(inputId);
-        setTimeout(() => {
-            input.focus({ preventScroll: true });
-            switchingTabs = false;
-        }, 0);
-
+        input.focus({ preventScroll: true });
+        switchingTabs = false;
+        
         document.querySelectorAll('.waypoint-inputs-container .input-wrapper').forEach(wrapper => {
             wrapper.style.width = wrapper.contains(input) ? '100%' : '50%';
         });
