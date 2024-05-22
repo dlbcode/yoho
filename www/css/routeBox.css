@@ -1,3 +1,4 @@
+/* Consolidated CSS for route box popup */
 .route-box-popup {
   position: absolute;
   z-index: 1000;
@@ -11,23 +12,22 @@
   justify-content: space-between;
 }
 
-.route-box-popup button {
+.route-box-popup button,
+.route-box-popup .search-button,
+.route-box-popup .remove-button,
+.route-box-popup .popup-close-button {
   margin-top: 5px;
+  cursor: pointer;
+  margin-right: 5px;
 }
 
 .route-box-popup .button-container {
   display: flex;
-  margin: 0px;
+  margin: 0;
 }
 
-.route-box-popup .search-button,
-.route-box-popup .remove-button,
-.route-box-popup .popup-close-button {
-  margin-right: 5px;
-  cursor: pointer;
-}
-
-#depart-date-input {
+#depart-date-input,
+.route-box-popup .date-input {
   display: block;
   margin-top: 10px;
   background-color: #333;
@@ -56,6 +56,7 @@
   position: relative;
   border-top-left-radius: 5px;
   border-top-right-radius: 5px;
+  z-index: 0;
 }
 
 .tab.active {
@@ -65,12 +66,24 @@
 
 .swap-route-button {
   margin: 0 5px;
-  padding: 0px;
-  cursor: pointer;
+  padding: 0;
   font-size: 16px;
   background: none;
   border: none;
   color: #999;
+  cursor: pointer;
+  z-index: 2;
+}
+
+.swap-route-button.disabled {
+  color: #666;
+  pointer-events: none;
+  cursor: default;
+}
+
+.swap-route-button:hover {
+  background-color: #333;
+  color: #ccc;
 }
 
 .waypoint-inputs-container {
@@ -88,7 +101,7 @@
   display: flex;
 }
 
-.route-box-popup .waypoint-inputs-container .waypoint-input {
+.route-box-popup .waypoint-input {
   background-color: #333;
   padding: 5px;
   width: 100%;
@@ -96,7 +109,7 @@
   display: block;
 }
 
-.route-box-popup .waypoint-inputs-container .waypoint-input:focus {
+.route-box-popup .waypoint-input:focus {
   outline: none;
   background-color: #292929;
 }
@@ -111,17 +124,8 @@
   z-index: 10;
 }
 
-.route-box-popup .waypoint-inputs-container .waypoint-input:focus + .clear-span {
+.route-box-popup .waypoint-input:focus + .clear-span {
   display: block;
-}
-
-.route-box-popup .date-input {
-  background-color: #333 !important;
-  border: 1px solid #555 !important;
-  border-radius: 3px !important;
-  padding: 5px !important;
-  width: 330px !important;
-  margin-top: 10px !important;
 }
 
 .search-button,
@@ -135,13 +139,12 @@
 .search-button {
   background-color: #0060bb;
   width: 265px;
-  margin-right: 5px;
 }
 
 .remove-button {
   background-color: #7e1103;
   width: 65px;
-  margin-right: 0px !important;
+  margin-right: 0 !important;
 }
 
 #topRow {
@@ -163,7 +166,7 @@
   background-color: #333;
   color: white;
   cursor: pointer;
-  border-right: #666 1px solid;
+  border-right: 1px solid #666;
 }
 
 .travelers-container,
@@ -193,18 +196,6 @@
   margin-right: 5px;
 }
 
-.swap-route-button {
-  height:auto;
-  margin: 0px 0 0 0px !important;
-  padding: 0px;
-  cursor: pointer;
-}
-
-.swap-route-button:hover {
-  background-color: #333;
-  color: #ccc;
-}
-
 .travelers-dropdown,
 .trip-type-dropdown {
   position: absolute;
@@ -215,9 +206,7 @@
   padding: 5px;
   margin: 0;
   background-color: #333;
-  width: auto;
   min-width: 40px;
-  cursor: pointer;
   white-space: nowrap;
 }
 
@@ -233,7 +222,6 @@
   color: white;
   position: absolute;
   z-index: 1000;
-  width: auto;
   max-height: 200px;
   overflow-y: auto;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
@@ -274,7 +262,7 @@
 .flatpickr-day:not(.selected):hover,
 .flatpickr-day.inRange:hover {
   background: #3b74d5 !important;
-  color: #ffffff !important;
+  color: #fff !important;
 }
 
 .flatpickr-day.selected,
@@ -335,37 +323,4 @@
   border-radius: 50%;
   margin: 0 -20px;
   z-index: 1;
-}
-
-.swap-route-button {
-  position: relative;
-  background: none;
-  border: none;
-  color: #999;
-  font-size: 16px;
-  cursor: pointer;
-  z-index: 2;
-}
-
-.tab {
-  padding: 5px 20px;
-  height: 24px;
-  width: 50%;
-  font-size: 12px;
-  cursor: pointer;
-  color: #999;
-  background: #444;
-  position: relative;
-  z-index: 0;
-}
-
-.tab.active {
-  background-color: #0268c7;
-  color: #fff;
-}
-
-.swap-route-button.disabled {
-  color: #666; /* Darker grey color */
-  pointer-events: none; /* Disable hover effect */
-  cursor: default; /* Default cursor */
 }
