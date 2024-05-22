@@ -24,6 +24,25 @@ async function fetchAirportByIata(iata) {
     }
 }
 
+function handleSelection(e, inputId, airport) {
+    const inputField = document.getElementById(inputId);
+    const suggestionBox = document.getElementById(inputId + 'Suggestions');
+    e.preventDefault();
+    e.stopPropagation();
+
+    inputField.value = `${airport.city}, ${airport.country} (${airport.iata_code})`;
+    suggestionBox.style.display = 'none';
+    document.dispatchEvent(new CustomEvent('airportSelected', { 
+        detail: { airport, fieldId: inputId }
+    }));
+    inputField.setAttribute('data-selected-iata', airport.iata_code);
+
+    // Call updateTabLabels from routeBox to update the tab labels
+    routeBox.updateTabLabels();
+
+    inputField.blur();
+}
+
 function setupAutocompleteForField(fieldId) {
     const inputField = document.getElementById(fieldId);
     const suggestionBox = document.getElementById(fieldId + 'Suggestions');
@@ -56,7 +75,7 @@ function setupAutocompleteForField(fieldId) {
 
     inputField.addEventListener('input', async () => {
         const airports = await fetchAirports(inputField.value);
-        updateSuggestions(fieldId, airports, (value) => selectionMade = value);
+        updateSuggestions(fieldId, airports);
         selectionMade = false;
         currentFocus = -1; // Reset the focus so item selection starts from the top
     });
@@ -138,54 +157,19 @@ function setupAutocompleteForField(fieldId) {
     }
 }
 
-let lastFetchedAirports = [];
-
-function updateSuggestions(inputId, airports, setSelectionMade) {
+function updateSuggestions(inputId, airports) {
     const suggestionBox = document.getElementById(inputId + 'Suggestions');
     suggestionBox.innerHTML = '';
-    lastFetchedAirports = airports;
-
     let selectionHandledByTouch = false; // Flag to track if selection was handled by touch
 
-    document.querySelectorAll('.waypointTooltip').forEach(tooltip => {
-        tooltip.remove(); // Remove any existing tooltips
-    });
     airports.forEach(airport => {
         const div = document.createElement('div');
         div.textContent = `${airport.name} (${airport.iata_code}) - ${airport.city}, ${airport.country}`;
         let touchStartY = 0;
         let touchEndY = 0;
 
-        function handleSelection(e) {
-            if (e.type === 'click' && selectionHandledByTouch) {
-                // Reset the flag and return if the selection was already handled by touchend
-                selectionHandledByTouch = false;
-                return;
-            }
-            // Proceed with selection logic for click or if it was a tap (not scroll)
-            if (e.type === 'touchend' && Math.abs(touchEndY - touchStartY) < 10) {
-                selectionHandledByTouch = true; // Mark that selection was handled
-            }
-            if (selectionHandledByTouch || e.type === 'click') {
-                e.preventDefault();
-                e.stopPropagation();
-                
-                const inputField = document.getElementById(inputId);
-                inputField.value = `${airport.city}, ${airport.country} (${airport.iata_code})`;
-                suggestionBox.style.display = 'none';
-                document.dispatchEvent(new CustomEvent('airportSelected', { 
-                    detail: { airport, fieldId: inputId }
-                }));
-                inputField.setAttribute('data-selected-iata', airport.iata_code);
-                setSelectionMade(true);
-                
-                // Call updateTabLabels from routeBox to update the tab labels
-                routeBox.updateTabLabels();
-
-                // Blur the input field after selection
-                inputField.blur();
-            }
-        }
+        // Event listener for both touch and click selection
+        const selectionHandler = (e) => handleSelection(e, inputId, airport);
 
         div.addEventListener('touchstart', (e) => {
             touchStartY = e.touches[0].clientY;
@@ -195,8 +179,20 @@ function updateSuggestions(inputId, airports, setSelectionMade) {
             touchEndY = e.touches[0].clientY;
         }, { passive: true });
 
-        div.addEventListener('touchend', handleSelection);
-        div.addEventListener('click', handleSelection);
+        div.addEventListener('touchend', (e) => {
+            if (Math.abs(touchEndY - touchStartY) < 10) {
+                selectionHandledByTouch = true;
+                selectionHandler(e);
+            }
+        });
+
+        div.addEventListener('click', (e) => {
+            if (!selectionHandledByTouch) {
+                selectionHandler(e);
+            }
+            selectionHandledByTouch = false;
+        });
+
         suggestionBox.appendChild(div);
     });
     if (airports.length > 0) suggestionBox.style.display = 'block';
@@ -206,39 +202,13 @@ document.addEventListener('DOMContentLoaded', () => {
     document.addEventListener('airportSelected', (event) => {
         const { airport, fieldId } = event.detail;
         const waypointIndex = parseInt(fieldId.replace('waypoint-input-', '')) - 1;
-        const iata = airport.iata_code;
-
-        // Check if the origin is empty and destination has a selection
-        if (appState.routeDirection == 'from') {
-            if (waypointIndex <= 1 && !document.getElementById('waypoint-input-1').value) {
-            updateState('routeDirection', 'to');
-            }
-        }
-
-        if (appState.routeDirection == 'to') {
-            if (waypointIndex <= 1 && !document.getElementById('waypoint-input-2').value) {
-            updateState('routeDirection', 'from');
-            }
-        }
 
         if (waypointIndex >= 0 && waypointIndex < appState.waypoints.length) {
             updateState('updateWaypoint', { index: waypointIndex, data: airport });
         } else {
             updateState('addWaypoint', airport);
         }
-        const routeNumber = Math.floor(waypointIndex / 2);
 
-        // Calculate the index for selectedRoutes based on the routeNumber
-        let selectedRouteIndex = routeNumber;
-        let groupNumber = appState.selectedRoutes[selectedRouteIndex]?.group;
-
-        // Remove all selectedRoutes with the same group number
-        Object.keys(appState.selectedRoutes).forEach(key => {
-            if (appState.selectedRoutes[key].group === groupNumber) {
-                updateState('removeSelectedRoute', parseInt(key));
-            }
-        });
-        
         // Move map view to include the selected airport marker
         if (airport && airport.latitude && airport.longitude) {
             const latLng = L.latLng(airport.latitude, airport.longitude);
@@ -247,7 +217,7 @@ document.addEventListener('DOMContentLoaded', () => {
             map.flyTo(adjustedLatLng, 4, {
                 animate: true,
                 duration: 0.5 // Duration in seconds
-            });          
+            });
         }
         uiHandling.setFocusToNextUnsetInput();
     });
@@ -282,4 +252,4 @@ export function getIataFromField(inputId) {
     return iataCodeMatch ? iataCodeMatch[1] : null;
 }
 
-export { setupAutocompleteForField, fetchAirportByIata }
+export { setupAutocompleteForField, fetchAirportByIata };
