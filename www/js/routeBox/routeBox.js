@@ -38,8 +38,7 @@ const setupInputEvents = (input, clearSpan, index, routeNumber) => {
                     updateState('removeWaypoint', index);
                     routeBox.updateTabLabels(routeNumber);
                 }
-                clearSpan.style.display = 'none';  // Hide clear button when input loses focus
-                // Revert to default state
+                clearSpan.style.display = 'none';
                 routeBox.updateActiveTab('');
                 routeBox.updateInputVisibility(routeNumber);
             }
@@ -48,10 +47,15 @@ const setupInputEvents = (input, clearSpan, index, routeNumber) => {
     input.addEventListener('focus', () => {
         clearTimeout(blurTimeout);
         switchingTabs = false;
-        clearSpan.style.display = input.value ? 'block' : 'none';
+        hideAllClearButtons();
+        clearSpan.style.display = 'block';
         routeBox.updateActiveTab(index % 2 === 0 ? 'from' : 'to');
         routeBox.updateInputVisibility(routeNumber);
     });
+};
+
+const hideAllClearButtons = () => {
+    document.querySelectorAll('.clear-span').forEach(span => span.style.display = 'none');
 };
 
 const createWaypointInput = (index, placeholder, waypoint, routeNumber) => {
@@ -86,9 +90,11 @@ const routeBox = {
         routeBox.append(topRow);
 
         const tabsContainer = createElement('div', null, 'tabs-container');
-        const fromTab = this.createTab('From', 'from-tab', routeNumber * 2, routeNumber);
-        const toTab = this.createTab('To', 'to-tab', routeNumber * 2 + 1, routeNumber);
-        tabsContainer.append(fromTab, this.createSwapButton(routeNumber), toTab);
+        tabsContainer.append(
+            this.createTab('From', 'from-tab', routeNumber * 2, routeNumber),
+            this.createSwapButton(routeNumber),
+            this.createTab('To', 'to-tab', routeNumber * 2 + 1, routeNumber)
+        );
         routeBox.append(tabsContainer);
         this.setupTabSwitching(routeNumber);
 
@@ -101,7 +107,6 @@ const routeBox = {
             }
             const waypointInput = createWaypointInput(index, placeholder, appState.waypoints[index], routeNumber);
             waypointInputsContainer.append(waypointInput);
-
             if (!firstEmptyInput && !appState.waypoints[index]) {
                 firstEmptyInput = waypointInput.querySelector('input');
             }
@@ -112,12 +117,9 @@ const routeBox = {
         dateInput.type = 'text';
         dateInput.readOnly = true;
         dateInput.placeholder = 'Date';
-        dateInput.value = routeNumber > 0 && appState.routeDates[routeNumber - 1] ? 
-            appState.routeDates[routeNumber - 1] : appState.routeDates[routeNumber] || '';
+        dateInput.value = appState.routeDates[routeNumber - 1] || appState.routeDates[routeNumber] || '';
         dateInput.name = `date-input-${routeNumber}`;
-        dateInput.addEventListener('change', (e) => {
-            appState.routeDates[routeNumber] = e.target.value;
-        });
+        dateInput.addEventListener('change', (e) => appState.routeDates[routeNumber] = e.target.value);
         routeBox.append(dateInput);
         initDatePicker(dateInput.id, routeNumber);
 
@@ -184,8 +186,7 @@ const routeBox = {
             switchingTabs = false;
         }, 0);
 
-        const waypointInputs = document.querySelectorAll('.waypoint-inputs-container .input-wrapper');
-        waypointInputs.forEach(wrapper => {
+        document.querySelectorAll('.waypoint-inputs-container .input-wrapper').forEach(wrapper => {
             wrapper.style.width = wrapper.contains(input) ? '100%' : '50%';
         });
 
@@ -264,15 +265,11 @@ const routeBox = {
             const fromActive = document.getElementById('from-tab').classList.contains('active');
             const toActive = document.getElementById('to-tab').classList.contains('active');
 
-            if (fromWrapper) {
-                fromWrapper.style.display = fromActive || !toActive ? 'block' : 'none';
-                fromWrapper.style.width = fromActive ? '100%' : '50%';
-            }
+            fromWrapper.style.display = fromActive || !toActive ? 'block' : 'none';
+            fromWrapper.style.width = fromActive ? '100%' : '50%';
 
-            if (toWrapper) {
-                toWrapper.style.display = toActive || !fromActive ? 'block' : 'none';
-                toWrapper.style.width = toActive ? '100%' : '50%';
-            }
+            toWrapper.style.display = toActive || !fromActive ? 'block' : 'none';
+            toWrapper.style.width = toActive ? '100%' : '50%';
         }
     },
 
@@ -304,6 +301,7 @@ document.addEventListener('click', (event) => {
     if (routeBox && !routeBox.contains(event.target) && event.target !== routeButton &&
         !event.target.closest('.do-not-close-routebox')) {
         routeBox.style.display = 'none';
+        hideAllClearButtons();
     }
 }, true);
 
