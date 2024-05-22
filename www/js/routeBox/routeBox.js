@@ -67,7 +67,6 @@ const routeBox = {
         const tabsContainer = createElement('div', null, 'tabs-container');
         const fromTab = this.createTab('From', 'from-tab', routeNumber * 2, routeNumber);
         const toTab = this.createTab('To', 'to-tab', routeNumber * 2 + 1, routeNumber);
-
         tabsContainer.append(fromTab, this.createSwapButton(routeNumber), toTab);
         routeBox.append(tabsContainer);
         this.setupTabSwitching(routeNumber);
@@ -80,7 +79,7 @@ const routeBox = {
             if (i === 0 && appState.waypoints[index - 1]) {
                 appState.waypoints[index] = appState.waypoints[index - 1];
             }
-            const waypointInput = this.createWaypointInput(index, placeholder, appState.waypoints[index], i, routeNumber);
+            const waypointInput = this.createWaypointInput(index, placeholder, appState.waypoints[index], routeNumber);
             waypointInputsContainer.append(waypointInput);
 
             if (!firstEmptyInput && !appState.waypoints[index]) {
@@ -91,13 +90,8 @@ const routeBox = {
 
         const dateInput = createElement('input', 'date-input', 'date-input');
         dateInput.type = 'date';
-        // Default to the date of the previous route if available
-        if (routeNumber > 0 && appState.routeDates[routeNumber - 1]) {
-            dateInput.value = appState.routeDates[routeNumber - 1];
-            appState.routeDates[routeNumber] = appState.routeDates[routeNumber - 1];
-        } else {
-            dateInput.value = appState.routeDates[routeNumber] || '';
-        }
+        dateInput.value = routeNumber > 0 && appState.routeDates[routeNumber - 1] ? 
+            appState.routeDates[routeNumber - 1] : appState.routeDates[routeNumber] || '';
         dateInput.placeholder = 'Date';
         dateInput.addEventListener('change', (e) => {
             appState.routeDates[routeNumber] = e.target.value;
@@ -106,10 +100,7 @@ const routeBox = {
         initDatePicker(dateInput.id, routeNumber);
 
         const buttonContainer = createElement('div', null, 'button-container');
-        buttonContainer.append(
-            this.createSearchButton(routeNumber),
-            this.createCloseButton(routeBox)
-        );
+        buttonContainer.append(this.createSearchButton(routeNumber), this.createCloseButton(routeBox));
         removeRoute.removeRouteButton(buttonContainer, routeNumber);
         routeBox.append(buttonContainer);
 
@@ -120,9 +111,7 @@ const routeBox = {
 
         [`waypoint-input-${routeNumber * 2 + 1}`, `waypoint-input-${routeNumber * 2 + 2}`].forEach(id => setupAutocompleteForField(id));
 
-        if (firstEmptyInput) {
-            firstEmptyInput.focus();
-        }
+        if (firstEmptyInput) firstEmptyInput.focus();
     },
 
     removeExistingRouteBox() {
@@ -186,7 +175,6 @@ const routeBox = {
         if (fromTab && toTab) {
             fromTab.classList.toggle('active', activeTab === 'from');
             toTab.classList.toggle('active', activeTab === 'to');
-            // Revert to default state
             if (!activeTab) {
                 fromTab.classList.remove('active');
                 toTab.classList.remove('active');
@@ -194,7 +182,7 @@ const routeBox = {
         }
     },
 
-    createWaypointInput(index, placeholder, waypoint, order, routeNumber) {
+    createWaypointInput(index, placeholder, waypoint, routeNumber) {
         const inputWrapper = createElement('div', null, 'input-wrapper');
         const input = createElement('input', `waypoint-input-${index + 1}`, 'waypoint-input');
         input.type = 'text';
@@ -243,8 +231,7 @@ const routeBox = {
 
         if (fromTab && toTab) {
             fromTab.innerText = this.getTabLabelText('From', fromWaypointIndex);
-            const toWaypoint = appState.waypoints[toWaypointIndex];
-            toTab.innerText = toWaypoint ? `To ${toWaypoint.iata_code}` : 'To Any';
+            toTab.innerText = appState.waypoints[toWaypointIndex] ? `To ${appState.waypoints[toWaypointIndex].iata_code}` : 'To Any';
         }
 
         const toInput = document.getElementById(`waypoint-input-${toWaypointIndex + 1}`);
