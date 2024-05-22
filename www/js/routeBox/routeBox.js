@@ -64,6 +64,7 @@ const routeBox = {
         let firstEmptyInput = null;
         ['From', 'To'].forEach((placeholder, i) => {
             const index = routeNumber * 2 + i;
+            // Set the previous destination as the next origin waypoint
             if (i === 0 && appState.waypoints[index - 1]) {
                 appState.waypoints[index] = appState.waypoints[index - 1];
             }
@@ -78,8 +79,17 @@ const routeBox = {
 
         const dateInput = createElement('input', 'date-input', 'date-input');
         dateInput.type = 'date';
-        dateInput.value = appState.routeDates[routeNumber] || '';
+        // Default to the date of the previous route if available
+        if (routeNumber > 0 && appState.routeDates[routeNumber - 1]) {
+            dateInput.value = appState.routeDates[routeNumber - 1];
+            appState.routeDates[routeNumber] = appState.routeDates[routeNumber - 1];
+        } else {
+            dateInput.value = appState.routeDates[routeNumber] || '';
+        }
         dateInput.placeholder = 'Date';
+        dateInput.addEventListener('change', (e) => {
+            appState.routeDates[routeNumber] = e.target.value;
+        });
         routeBox.append(dateInput);
         initDatePicker(dateInput.id, routeNumber);
 
