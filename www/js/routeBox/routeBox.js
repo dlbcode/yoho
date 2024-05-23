@@ -33,20 +33,8 @@ const createWaypointInput = (index, placeholder, waypoint) => {
     input.placeholder = placeholder;
     input.value = waypoint ? `${waypoint.city}, (${waypoint.iata_code})` : '';
 
-    const clearSpan = createElement('span', { className: 'clear-span', content: '✕' });
 
-    const toggleClearSpan = () => clearSpan.style.display = input.value ? 'block' : 'none';
-    input.addEventListener('input', toggleClearSpan);
-    input.addEventListener('focus', toggleClearSpan);
-    input.addEventListener('blur', () => setTimeout(() => clearSpan.style.display = 'none', 200));
-    
-    clearSpan.onclick = (e) => {
-        e.stopPropagation();
-        input.value = '';
-        toggleClearSpan();
-    };
-
-    inputWrapper.append(input, clearSpan, routeBox.createSuggestionsDiv(index));
+    inputWrapper.append(input, routeBox.createSuggestionsDiv(index));
     return inputWrapper;
 };
 
@@ -62,7 +50,7 @@ const routeBox = {
 
         const waypointInputsContainer = createElement('div', { className: 'waypoint-inputs-container' });
         let firstEmptyInput = null;
-        ['From', 'To'].forEach((placeholder, i) => {
+        ['From', 'Where to?'].forEach((placeholder, i) => {
             const index = routeNumber * 2 + i;
             if (i === 0 && appState.waypoints[index - 1]) {
                 appState.waypoints[index] = appState.waypoints[index - 1];
