@@ -125,7 +125,8 @@ const routeBox = {
         dateInput.type = 'text';
         dateInput.readOnly = true;
         dateInput.placeholder = 'Date';
-        dateInput.value = appState.routeDates[routeNumber - 1] || appState.routeDates[routeNumber] || '';
+        let currentDate = new Date().toISOString().split('T')[0];
+        dateInput.value = appState.routeDates[routeNumber - 1] || appState.routeDates[routeNumber] || currentDate;
         appState.routeDates[routeNumber] = dateInput.value;
         dateInput.name = `date-input-${routeNumber}`;
         dateInput.addEventListener('change', (e) => appState.routeDates[routeNumber] = e.target.value);
