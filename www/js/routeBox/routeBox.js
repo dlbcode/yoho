@@ -35,7 +35,10 @@ const setupInputEvents = (input, clearSpan, index, routeNumber) => {
         blurTimeout = setTimeout(() => {
             if (!switchingTabs) {
                 if (!input.value) {
-                    updateState('removeWaypoint', index);
+                    // Only remove waypoint if it's the To field
+                    if (index % 2 !== 0) {
+                        updateState('removeWaypoint', index);
+                    }
                     routeBox.updateTabLabels(routeNumber);
                 }
                 clearSpan.style.display = 'none';
@@ -53,13 +56,10 @@ const setupInputEvents = (input, clearSpan, index, routeNumber) => {
         routeBox.updateInputVisibility(routeNumber);
     });
 
-    // Reattach clearSpan click listener every time setupInputEvents is called
     clearSpan.onclick = (e) => {
         e.stopPropagation();
         input.value = '';
         clearSpan.style.display = 'none';
-        updateState('removeWaypoint', index);
-        routeBox.updateTabLabels(routeNumber);
         input.focus();
     };
 };
@@ -80,9 +80,7 @@ const createWaypointInput = (index, placeholder, waypoint, routeNumber) => {
         e.stopPropagation();
         input.value = '';
         clearSpan.style.display = 'none';
-        updateState('removeWaypoint', index);
         routeBox.updateTabLabels(routeNumber);
-        input.focus();
     };
     setupInputEvents(input, clearSpan, index, routeNumber);
     inputWrapper.append(input, clearSpan, routeBox.createSuggestionsDiv(index));

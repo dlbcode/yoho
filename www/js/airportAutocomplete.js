@@ -171,25 +171,21 @@ function updateSuggestions(inputId, airports) {
         div.textContent = `${airport.name} (${airport.iata_code}) - ${airport.city}, ${airport.country}`;
     
         const selectionHandler = (e) => {
-            console.log('Selection Handler called', airport); // Debugging
             setTimeout(() => {
                 handleSelection(e, inputId, airport);
             }, 100); // Add a small delay
         };
     
         div.addEventListener('touchstart', (e) => {
-            console.log('Touch Start', e.touches[0].clientY); // Debugging
             selectionHandledByTouch = false; // Reset flag on touch start
         }, { passive: true });
     
         div.addEventListener('touchend', (e) => {
-            console.log('Touch End'); // Debugging
             selectionHandledByTouch = true;
             selectionHandler(e);
         });
     
         div.addEventListener('click', (e) => {
-            console.log('Click', selectionHandledByTouch); // Debugging
             if (!selectionHandledByTouch) {
                 selectionHandler(e);
             }
@@ -206,8 +202,6 @@ document.addEventListener('DOMContentLoaded', () => {
     document.addEventListener('airportSelected', (event) => {
         const { airport, fieldId } = event.detail;
         const waypointIndex = parseInt(fieldId.replace('waypoint-input-', '')) - 1;
-
-        console.log('airportSelected event triggered', airport, fieldId); // Debugging
 
         if (waypointIndex >= 0 && waypointIndex < appState.waypoints.length) {
             updateState('updateWaypoint', { index: waypointIndex, data: airport });
