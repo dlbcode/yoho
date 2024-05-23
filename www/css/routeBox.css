@@ -18,24 +18,32 @@
 .route-box-popup .remove-button,
 .route-box-popup .popup-close-button {
   cursor: pointer;
-  margin-right: 5px;
 }
 
 .route-box-popup .button-container {
   display: flex;
   justify-content: space-between;
   margin: 0;
+  width: 100%;
 }
 
 #depart-date-input,
 .route-box-popup .date-input {
   display: block;
-  margin-top: 10px;
-  background-color: #333;
-  border: 1px solid #555;
+  margin-top: 13px;
+  background-color: #444;
+  border: 1px solid #444;
+  border-radius: 5px;
   padding: 10px;
   width: 100%;
   box-sizing: border-box;
+}
+
+#depart-date-input,
+.route-box-popup .date-input:focus {
+  outline: none;
+  border: #395f8d;
+  background-color: #395f8d;
 }
 
 .swap-route-button {
@@ -118,14 +126,14 @@
 .search-button,
 .remove-button {
   border: none;
+  border-radius: 5px;
   padding: 10px; /* Increased padding for better touch interaction */
   margin-top: 10px;
-  flex: 1; /* Allow buttons to grow equally */
+  width: calc(50% - 4px);
 }
 
 .search-button {
   background-color: #0060bb;
-  margin-right: 10px;
 }
 
 .remove-button {
@@ -296,11 +304,5 @@
     border-radius: 0;
     border-left: none;
     border-right: none;
-  }
-
-  .search-button,
-  .remove-button {
-    flex: 1;
-    width: 48%;
   }
 }

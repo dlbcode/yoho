@@ -28,8 +28,11 @@ const createElement = (tag, { id, className, content } = {}) => {
 // Create waypoint input
 const createWaypointInput = (index, placeholder, waypoint) => {
     const inputWrapper = createElement('div', { className: 'input-wrapper' });
-    const input = createElement('input', { id: `waypoint-input-${index + 1}`, className: 'waypoint-input', placeholder, value: waypoint ? `${waypoint.city}, (${waypoint.iata_code})` : '' });
+    const input = createElement('input', { id: `waypoint-input-${index + 1}`, className: 'waypoint-input' });
     input.type = 'text';
+    input.placeholder = placeholder;
+    input.value = waypoint ? `${waypoint.city}, (${waypoint.iata_code})` : '';
+
     inputWrapper.append(input, routeBox.createSuggestionsDiv(index));
     return inputWrapper;
 };
