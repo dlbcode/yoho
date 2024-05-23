@@ -33,9 +33,28 @@ const createWaypointInput = (index, placeholder, waypoint) => {
     input.placeholder = placeholder;
     input.value = waypoint ? `${waypoint.city}, (${waypoint.iata_code})` : '';
 
-
     inputWrapper.append(input, routeBox.createSuggestionsDiv(index));
     return inputWrapper;
+};
+
+const enableSwapButtonIfNeeded = () => {
+    const fromInput = document.querySelector('.from-input input');
+    const toInput = document.querySelector('.to-input input');
+    const swapButton = document.querySelector('.swap-route-button');
+
+    const isEnabled = fromInput && toInput && fromInput.value.trim() !== '' && toInput.value.trim() !== '';
+    swapButton.disabled = !isEnabled;
+    swapButton.classList.toggle('disabled', !isEnabled);
+};
+
+const setupWaypointInputListeners = (routeNumber) => {
+    const fromInput = document.querySelector(`#waypoint-input-${routeNumber * 2 + 1}`);
+    const toInput = document.querySelector(`#waypoint-input-${routeNumber * 2 + 2}`);
+
+    fromInput.addEventListener('input', enableSwapButtonIfNeeded);
+    toInput.addEventListener('input', enableSwapButtonIfNeeded);
+
+    enableSwapButtonIfNeeded(); // Initial check
 };
 
 const routeBox = {
@@ -81,6 +100,9 @@ const routeBox = {
         [`waypoint-input-${routeNumber * 2 + 1}`, `waypoint-input-${routeNumber * 2 + 2}`].forEach(id => setupAutocompleteForField(id));
 
         if (firstEmptyInput) firstEmptyInput.focus();
+
+        // Set up event listeners for enabling swap button
+        setupWaypointInputListeners(routeNumber);
     },
 
     removeExistingRouteBox() {
