@@ -113,12 +113,12 @@ a {
 
 a:hover, button:hover, input:hover, select:hover, textarea:hover {
   background-color: #555;
-  color: #ccc;
+  color: #ddd;
 }
 
 a:active, button:active, input:focus, select:focus, textarea:focus {
   background-color: #294e7c;
-  color: #ccc;
+  color: #ddd;
 }
 
 /*input, button, select, textarea {

@@ -57,7 +57,7 @@
 
 .swap-route-button:hover {
   background-color: transparent;
-  color: #ccc;
+  color: #ddd;
 }
 
 .waypoint-inputs-container {
@@ -85,7 +85,7 @@
 .from-input {
   left: 0;
   border-radius: 5px;
-  background-color: #444;
+  background-color: #555;
 }
 
 .swap-button-wrapper {
