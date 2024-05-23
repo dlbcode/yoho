@@ -7,12 +7,17 @@ import { tripTypePicker } from './tripTypePicker.js';
 import { removeRoute } from './removeRoute.js';
 import { routeHandling } from '../routeHandling.js';
 
-const link = document.createElement('link');
-link.rel = 'stylesheet';
-link.href = 'css/routeBox.css';
-document.head.appendChild(link);
+// Load CSS
+const loadCSS = (href) => {
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = href;
+    document.head.appendChild(link);
+};
+loadCSS('css/routeBox.css');
 
-const createElement = (tag, id, className, content) => {
+// Create element helper
+const createElement = (tag, { id, className, content } = {}) => {
     const element = document.createElement(tag);
     if (id) element.id = id;
     if (className) element.className = className;
@@ -20,36 +25,27 @@ const createElement = (tag, id, className, content) => {
     return element;
 };
 
-let blurTimeout;
-
-const createWaypointInput = (index, placeholder, waypoint, routeNumber) => {
-    const inputWrapper = createElement('div', null, 'input-wrapper');
-    const input = createElement('input', `waypoint-input-${index + 1}`, 'waypoint-input');
+// Create waypoint input
+const createWaypointInput = (index, placeholder, waypoint) => {
+    const inputWrapper = createElement('div', { className: 'input-wrapper' });
+    const input = createElement('input', { id: `waypoint-input-${index + 1}`, className: 'waypoint-input' });
     input.type = 'text';
     input.placeholder = placeholder;
     input.value = waypoint ? `${waypoint.city}, (${waypoint.iata_code})` : '';
-    const clearSpan = createElement('span', null, 'clear-span', '✕');
-    input.addEventListener('input', () => {
-        if (input.value) {
-            clearSpan.style.display = 'block';
-        } else {
-            clearSpan.style.display = 'none';
-        }
-    });
-    input.addEventListener('focus', () => {
-        if (input.value) {
-            clearSpan.style.display = 'block';
-        }
-    });
-    input.addEventListener('blur', () => {
-        blurTimeout = setTimeout(() => {
-            clearSpan.style.display = 'none';
-        }, 200);
-    });
+
+    const clearSpan = createElement('span', { className: 'clear-span', content: '✕' });
+
+    const toggleClearSpan = () => clearSpan.style.display = input.value ? 'block' : 'none';
+    input.addEventListener('input', toggleClearSpan);
+    input.addEventListener('focus', toggleClearSpan);
+    input.addEventListener('blur', () => setTimeout(() => clearSpan.style.display = 'none', 200));
+    
     clearSpan.onclick = (e) => {
         e.stopPropagation();
         input.value = '';
+        toggleClearSpan();
     };
+
     inputWrapper.append(input, clearSpan, routeBox.createSuggestionsDiv(index));
     return inputWrapper;
 };
@@ -57,51 +53,42 @@ const createWaypointInput = (index, placeholder, waypoint, routeNumber) => {
 const routeBox = {
     showRouteBox(event, routeNumber) {
         this.removeExistingRouteBox();
-        const routeBox = this.createRouteBox();
-        document.body.appendChild(routeBox);
+        const routeBoxElement = this.createRouteBox();
+        document.body.appendChild(routeBoxElement);
 
-        const topRow = createElement('div', 'topRow', 'top-row');
+        const topRow = createElement('div', { id: 'topRow', className: 'top-row' });
         topRow.append(tripTypePicker(), travelersPicker(routeNumber));
-        routeBox.append(topRow);
-        
-        const waypointInputsContainer = createElement('div', null, 'waypoint-inputs-container');
+        routeBoxElement.append(topRow);
+
+        const waypointInputsContainer = createElement('div', { className: 'waypoint-inputs-container' });
         let firstEmptyInput = null;
         ['From', 'To'].forEach((placeholder, i) => {
             const index = routeNumber * 2 + i;
             if (i === 0 && appState.waypoints[index - 1]) {
                 appState.waypoints[index] = appState.waypoints[index - 1];
             }
-            const waypointInput = createWaypointInput(index, placeholder, appState.waypoints[index], routeNumber);
-            // add From or To class to the input
+            const waypointInput = createWaypointInput(index, placeholder, appState.waypoints[index]);
             waypointInput.classList.add(i === 0 ? 'from-input' : 'to-input');
             waypointInputsContainer.append(waypointInput);
             if (!firstEmptyInput && !appState.waypoints[index]) {
                 firstEmptyInput = waypointInput.querySelector('input');
             }
         });
-        routeBox.append(waypointInputsContainer);
+        routeBoxElement.append(waypointInputsContainer);
 
         waypointInputsContainer.insertBefore(this.createSwapButton(routeNumber), waypointInputsContainer.children[1]);
 
-        const dateInput = createElement('input', `date-input-${routeNumber}`, 'date-input form-control input');
-        dateInput.type = 'text';
-        dateInput.readOnly = true;
-        dateInput.placeholder = 'Date';
-        let currentDate = new Date().toISOString().split('T')[0];
-        dateInput.value = appState.routeDates[routeNumber - 1] || appState.routeDates[routeNumber] || currentDate;
-        appState.routeDates[routeNumber] = dateInput.value;
-        dateInput.name = `date-input-${routeNumber}`;
-        dateInput.addEventListener('change', (e) => appState.routeDates[routeNumber] = e.target.value);
-        routeBox.append(dateInput);
+        const dateInput = this.createDateInput(routeNumber);
+        routeBoxElement.append(dateInput);
         initDatePicker(dateInput.id, routeNumber);
 
-        const buttonContainer = createElement('div', null, 'button-container');
-        buttonContainer.append(this.createSearchButton(routeNumber), this.createCloseButton(routeBox));
+        const buttonContainer = createElement('div', { className: 'button-container' });
+        buttonContainer.append(this.createSearchButton(routeNumber), this.createCloseButton(routeBoxElement));
         removeRoute.removeRouteButton(buttonContainer, routeNumber);
-        routeBox.append(buttonContainer);
+        routeBoxElement.append(buttonContainer);
 
-        this.positionPopup(routeBox, event);
-        routeBox.style.display = 'block';
+        this.positionPopup(routeBoxElement, event);
+        routeBoxElement.style.display = 'block';
 
         [`waypoint-input-${routeNumber * 2 + 1}`, `waypoint-input-${routeNumber * 2 + 2}`].forEach(id => setupAutocompleteForField(id));
 
@@ -114,12 +101,12 @@ const routeBox = {
     },
 
     createRouteBox() {
-        return createElement('div', 'routeBox', 'route-box-popup');
+        return createElement('div', { id: 'routeBox', className: 'route-box-popup' });
     },
 
     createSwapButton(routeNumber) {
-        const swapButtonWrapper = createElement('div', null, 'swap-button-wrapper');
-        const swapButton = createElement('button', null, 'swap-route-button', '&#8646;');
+        const swapButtonWrapper = createElement('div', { className: 'swap-button-wrapper' });
+        const swapButton = createElement('button', { className: 'swap-route-button', content: '&#8646;' });
         swapButton.title = 'Swap waypoints';
         swapButton.classList.add('disabled');
         swapButton.onclick = () => this.handleSwapButtonClick(routeNumber);
@@ -128,11 +115,11 @@ const routeBox = {
     },
 
     createSuggestionsDiv(index) {
-        return createElement('div', `waypoint-input-${index + 1}Suggestions`, 'suggestions');
+        return createElement('div', { id: `waypoint-input-${index + 1}Suggestions`, className: 'suggestions' });
     },
 
     createSearchButton(routeNumber) {
-        const searchButton = createElement('button', null, 'search-button', 'Search');
+        const searchButton = createElement('button', { className: 'search-button', content: 'Search' });
         searchButton.onclick = () => {
             document.getElementById('infoPaneContent').innerHTML = '';
             updateState('currentView', 'routeTable');
@@ -142,9 +129,22 @@ const routeBox = {
     },
 
     createCloseButton(routeBox) {
-        const closeButton = createElement('span', null, 'popup-close-button', '✕');
+        const closeButton = createElement('span', { className: 'popup-close-button', content: '✕' });
         closeButton.onclick = () => routeBox.style.display = 'none';
         return closeButton;
+    },
+
+    createDateInput(routeNumber) {
+        const dateInput = createElement('input', { id: `date-input-${routeNumber}`, className: 'date-input form-control input' });
+        dateInput.type = 'text';
+        dateInput.readOnly = true;
+        dateInput.placeholder = 'Date';
+        const currentDate = new Date().toISOString().split('T')[0];
+        dateInput.value = appState.routeDates[routeNumber - 1] || appState.routeDates[routeNumber] || currentDate;
+        appState.routeDates[routeNumber] = dateInput.value;
+        dateInput.name = `date-input-${routeNumber}`;
+        dateInput.addEventListener('change', (e) => appState.routeDates[routeNumber] = e.target.value);
+        return dateInput;
     },
 
     positionPopup(popup, event) {
