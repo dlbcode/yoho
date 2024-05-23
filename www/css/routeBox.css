@@ -33,7 +33,7 @@
   margin-top: 10px;
   background-color: #333;
   border: 1px solid #555;
-  padding: 10px; /* Increased padding for better touch interaction */
+  padding: 10px;
   width: 100%;
   box-sizing: border-box;
 }
@@ -41,7 +41,7 @@
 .swap-route-button {
   margin: 0 5px;
   padding: 0;
-  font-size: 20px; /* Increased font size for better touch interaction */
+  font-size: 20px;
   background: none;
   border: none;
   color: #999;
@@ -77,13 +77,13 @@
 }
 
 .to-input {
-  right: 0px;
+  right: 0;
   border-radius: 5px;
   background-color: #555;
 }
 
 .from-input {
-  left: 0px;
+  left: 0;
   border-radius: 5px;
   background-color: #444;
 }
@@ -131,7 +131,6 @@
 
 .search-button,
 .remove-button {
-  color: #fff;
   border: none;
   padding: 10px; /* Increased padding for better touch interaction */
   margin-top: 10px;
@@ -140,7 +139,7 @@
 
 .search-button {
   background-color: #0060bb;
-  margin-right: 10px; /* Added margin for spacing */
+  margin-right: 10px;
 }
 
 .remove-button {
@@ -155,7 +154,7 @@
 
 .travelers-dropdown-btn,
 .trip-type-dropdown-btn {
-  height: 32px; /* Increased height for better touch interaction */
+  height: 32px;
   padding: 10px;
   white-space: nowrap;
   overflow: hidden;
@@ -211,7 +210,9 @@
 }
 
 .travelers-dropdown li:hover,
-.trip-type-dropdown li:hover {
+.trip-type-dropdown li:hover,
+[id$='Suggestions'] div:hover,
+.autocomplete-active {
   background-color: #555;
 }
 
@@ -233,11 +234,6 @@
   cursor: pointer;
 }
 
-[id$='Suggestions'] div:hover,
-.autocomplete-active {
-  background-color: #555;
-}
-
 .flatpickr-calendar,
 .flatpickr-weekdays,
 .flatpickr-weekday,
@@ -246,7 +242,26 @@
 .flatpickr-monthDropdown-months,
 .flatpickr-year,
 .flatpickr-current-month,
-.flathpickr-monthDropdown-months {
+.flathpickr-monthDropdown-months,
+.flatpickr-day,
+.flatpickr-day.today,
+.flatpickr-day:hover,
+.flatpickr-day:focus,
+.flatpickr-day:not(.selected):hover,
+.flatpickr-day.inRange:hover,
+.flatpickr-day.selected,
+.flatpickr-day.startRange,
+.flatpickr-day.endRange,
+.flatpickr-day.selected.inRange,
+.flatpickr-day.startRange.inRange,
+.flatpickr-day.endRange.inRange,
+.flatpickr-day.inRange,
+.flatpickr-prev-month,
+.flatpickr-next-month,
+.flatpickr-prev-month:hover,
+.flatpickr-next-month:hover,
+.flatpickr-weekwrapper,
+.flatpickr-monthDropdown-months option {
   background: #333 !important;
   color: #ccc !important;
 }
@@ -255,14 +270,6 @@
 .flatpickr-day.today {
   background: #444;
   color: #fff;
-}
-
-.flatpickr-day:hover,
-.flatpickr-day:focus,
-.flatpickr-day:not(.selected):hover,
-.flatpickr-day.inRange:hover {
-  background: #3b74d5 !important;
-  color: #fff !important;
 }
 
 .flatpickr-day.selected,
@@ -275,15 +282,6 @@
   background: #135dbe !important;
   color: #fff !important;
   border: none;
-}
-
-.flatpickr-prev-month,
-.flatpickr-next-month,
-.flatpickr-prev-month:hover,
-.flatpickr-next-month:hover {
-  position: static !important;
-  background: #333;
-  color: #ccc;
 }
 
 .flatpickr-day.inRange::before {
@@ -302,17 +300,6 @@
   z-index: 1;
 }
 
-.flatpickr-weekwrapper {
-  background: #222;
-  color: #ccc;
-}
-
-.flatpickr-monthDropdown-months option {
-  background: #2f2f2f !important;
-  color: #ccc !important;
-}
-
-/* Additional Media Queries for Better Mobile Experience */
 @media (max-width: 600px) {
   .route-box-popup {
     width: 100%;
