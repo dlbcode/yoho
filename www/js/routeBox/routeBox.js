@@ -63,8 +63,9 @@ const createWaypointInput = (index, placeholder, waypoint, routeNumber) => {
     input.placeholder = placeholder;
     input.value = waypoint ? `${waypoint.city}, ${waypoint.country} (${waypoint.iata_code})` : '';
     const clearSpan = createElement('span', null, 'clear-span', '✕');
-    clearSpan.style.display = 'none';
+    clearSpan.style.display = input.value ? 'block' : 'none';
     clearSpan.onclick = (e) => {
+        console.log('clearSpan.onclick');  // Debugging log
         e.stopPropagation();
         input.value = '';
         clearSpan.style.display = 'none';
@@ -182,7 +183,7 @@ const routeBox = {
         const input = document.getElementById(inputId);
         input.focus({ preventScroll: true });
         switchingTabs = false;
-        
+
         document.querySelectorAll('.waypoint-inputs-container .input-wrapper').forEach(wrapper => {
             wrapper.style.width = wrapper.contains(input) ? '100%' : '50%';
         });
