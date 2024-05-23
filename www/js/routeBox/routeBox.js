@@ -21,7 +21,7 @@ const createElement = (tag, id, className, content) => {
 };
 
 let switchingTabs = false;
-let isFocusing = false;
+let blurTimeout;
 
 const setupInputEvents = (input, clearSpan, index, routeNumber) => {
     input.setAttribute('tabindex', '0');
@@ -31,25 +31,37 @@ const setupInputEvents = (input, clearSpan, index, routeNumber) => {
     });
     input.addEventListener('change', () => routeBox.updateTabLabels(routeNumber));
     input.addEventListener('blur', () => {
-        if (!isFocusing && !switchingTabs) {
-            if (!input.value) {
-                updateState('removeWaypoint', index);
-                routeBox.updateTabLabels(routeNumber);
+        clearTimeout(blurTimeout);
+        blurTimeout = setTimeout(() => {
+            if (!switchingTabs) {
+                if (!input.value) {
+                    updateState('removeWaypoint', index);
+                    routeBox.updateTabLabels(routeNumber);
+                }
+                clearSpan.style.display = 'none';
+                routeBox.updateActiveTab('');
+                routeBox.updateInputVisibility(routeNumber);
             }
-            clearSpan.style.display = 'none';
-            routeBox.updateActiveTab('');
-            routeBox.updateInputVisibility(routeNumber);
-        }
+        }, 300);
     });
     input.addEventListener('focus', () => {
-        isFocusing = true;
-        setTimeout(() => isFocusing = false, 0);
+        clearTimeout(blurTimeout);
         switchingTabs = false;
         hideAllClearButtons();
         clearSpan.style.display = 'block';
         routeBox.updateActiveTab(index % 2 === 0 ? 'from' : 'to');
         routeBox.updateInputVisibility(routeNumber);
     });
+
+    // Reattach clearSpan click listener every time setupInputEvents is called
+    clearSpan.onclick = (e) => {
+        e.stopPropagation();
+        input.value = '';
+        clearSpan.style.display = 'none';
+        updateState('removeWaypoint', index);
+        routeBox.updateTabLabels(routeNumber);
+        input.focus();
+    };
 };
 
 const hideAllClearButtons = () => {
@@ -63,9 +75,8 @@ const createWaypointInput = (index, placeholder, waypoint, routeNumber) => {
     input.placeholder = placeholder;
     input.value = waypoint ? `${waypoint.city}, ${waypoint.country} (${waypoint.iata_code})` : '';
     const clearSpan = createElement('span', null, 'clear-span', '✕');
-    clearSpan.style.display = input.value ? 'block' : 'none';
+    clearSpan.style.display = 'none';
     clearSpan.onclick = (e) => {
-        console.log('clearSpan.onclick');  // Debugging log
         e.stopPropagation();
         input.value = '';
         clearSpan.style.display = 'none';
