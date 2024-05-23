@@ -86,6 +86,7 @@ function setupAutocompleteForField(fieldId) {
             const rect = inputField.getBoundingClientRect();
             suggestionBox.style.left = `10px`;
             suggestionBox.style.top = '35px';
+            suggestionBox.style.width = '300px'
         }
     };
 
