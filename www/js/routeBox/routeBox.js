@@ -20,69 +20,37 @@ const createElement = (tag, id, className, content) => {
     return element;
 };
 
-let switchingTabs = false;
 let blurTimeout;
-
-const setupInputEvents = (input, clearSpan, index, routeNumber) => {
-    input.setAttribute('tabindex', '0');
-    input.addEventListener('input', () => {
-        clearSpan.style.display = input.value ? 'block' : 'none';
-        routeBox.updateTabLabels(routeNumber);
-    });
-    input.addEventListener('change', () => routeBox.updateTabLabels(routeNumber));
-    input.addEventListener('blur', () => {
-        clearTimeout(blurTimeout);
-        blurTimeout = setTimeout(() => {
-            if (!switchingTabs) {
-                if (!input.value) {
-                    // Only remove waypoint if it's the To field
-                    if (index % 2 !== 0) {
-                        updateState('removeWaypoint', index);
-                    }
-                    routeBox.updateTabLabels(routeNumber);
-                }
-                clearSpan.style.display = 'none';
-                routeBox.updateActiveTab('');
-                routeBox.updateInputVisibility(routeNumber);
-            }
-        }, 300);
-    });
-    input.addEventListener('focus', () => {
-        clearTimeout(blurTimeout);
-        switchingTabs = false;
-        hideAllClearButtons();
-        clearSpan.style.display = 'block';
-        routeBox.updateActiveTab(index % 2 === 0 ? 'from' : 'to');
-        routeBox.updateInputVisibility(routeNumber);
-    });
-
-    clearSpan.onclick = (e) => {
-        e.stopPropagation();
-        input.value = '';
-        clearSpan.style.display = 'none';
-        input.focus();
-    };
-};
-
-const hideAllClearButtons = () => {
-    document.querySelectorAll('.clear-span').forEach(span => span.style.display = 'none');
-};
 
 const createWaypointInput = (index, placeholder, waypoint, routeNumber) => {
     const inputWrapper = createElement('div', null, 'input-wrapper');
     const input = createElement('input', `waypoint-input-${index + 1}`, 'waypoint-input');
     input.type = 'text';
     input.placeholder = placeholder;
-    input.value = waypoint ? `${waypoint.city}, ${waypoint.country} (${waypoint.iata_code})` : '';
+    input.value = waypoint ? `${waypoint.city}, (${waypoint.iata_code})` : '';
     const clearSpan = createElement('span', null, 'clear-span', '✕');
-    clearSpan.style.display = 'none';
+    input.addEventListener('input', () => {
+        if (input.value) {
+            clearSpan.style.display = 'block';
+        } else {
+            clearSpan.style.display = 'none';
+        }
+    });
+    input.addEventListener('focus', () => {
+        if (input.value) {
+            clearSpan.style.display = 'block';
+        }
+    });
+    input.addEventListener('blur', () => {
+        blurTimeout = setTimeout(() => {
+            clearSpan.style.display = 'none';
+        }, 200);
+    });
     clearSpan.onclick = (e) => {
         e.stopPropagation();
         input.value = '';
-        clearSpan.style.display = 'none';
-        routeBox.updateTabLabels(routeNumber);
+        //clearSpan.style.display = 'none';
     };
-    setupInputEvents(input, clearSpan, index, routeNumber);
     inputWrapper.append(input, clearSpan, routeBox.createSuggestionsDiv(index));
     return inputWrapper;
 };
@@ -96,16 +64,7 @@ const routeBox = {
         const topRow = createElement('div', 'topRow', 'top-row');
         topRow.append(tripTypePicker(), travelersPicker(routeNumber));
         routeBox.append(topRow);
-
-        const tabsContainer = createElement('div', null, 'tabs-container');
-        tabsContainer.append(
-            this.createTab('From', 'from-tab', routeNumber * 2, routeNumber),
-            this.createSwapButton(routeNumber),
-            this.createTab('To', 'to-tab', routeNumber * 2 + 1, routeNumber)
-        );
-        routeBox.append(tabsContainer);
-        this.setupTabSwitching(routeNumber);
-
+        
         const waypointInputsContainer = createElement('div', null, 'waypoint-inputs-container');
         let firstEmptyInput = null;
         ['From', 'To'].forEach((placeholder, i) => {
@@ -140,8 +99,6 @@ const routeBox = {
 
         this.positionPopup(routeBox, event);
         routeBox.style.display = 'block';
-        this.updateInputVisibility(routeNumber);
-        this.updateTabLabels(routeNumber);
 
         [`waypoint-input-${routeNumber * 2 + 1}`, `waypoint-input-${routeNumber * 2 + 2}`].forEach(id => setupAutocompleteForField(id));
 
@@ -157,18 +114,6 @@ const routeBox = {
         return createElement('div', 'routeBox', 'route-box-popup');
     },
 
-    createTab(text, tabId, waypointIndex, routeNumber) {
-        const tab = createElement('div', tabId, 'tab', this.getTabLabelText(text, waypointIndex));
-        tab.setAttribute('tabindex', '-1');
-        tab.addEventListener('click', () => this.handleTabClick(tabId, routeNumber));
-        return tab;
-    },
-
-    getTabLabelText(text, waypointIndex) {
-        const waypoint = appState.waypoints[waypointIndex];
-        return waypoint ? `${text} ${waypoint.iata_code}` : text;
-    },
-
     createSwapButton(routeNumber) {
         const swapButtonWrapper = createElement('div', null, 'swap-button-wrapper');
         const swapButton = createElement('button', null, 'swap-route-button', '&#8646;');
@@ -177,41 +122,6 @@ const routeBox = {
         swapButton.onclick = () => this.handleSwapButtonClick(routeNumber);
         swapButtonWrapper.appendChild(swapButton);
         return swapButtonWrapper;
-    },
-
-    setupTabSwitching(routeNumber) {
-        ['from-tab', 'to-tab'].forEach(tabId => {
-            document.getElementById(tabId).addEventListener('click', () => this.handleTabClick(tabId, routeNumber));
-        });
-    },
-
-    handleTabClick(tabId, routeNumber) {
-        switchingTabs = true;
-        const activeTab = tabId.includes('from') ? 'from' : 'to';
-        this.updateActiveTab(activeTab);
-        const inputId = activeTab === 'from' ? `waypoint-input-${routeNumber * 2 + 1}` : `waypoint-input-${routeNumber * 2 + 2}`;
-        const input = document.getElementById(inputId);
-        input.focus({ preventScroll: true });
-        switchingTabs = false;
-
-        document.querySelectorAll('.waypoint-inputs-container .input-wrapper').forEach(wrapper => {
-            wrapper.style.width = wrapper.contains(input) ? '100%' : '50%';
-        });
-
-        this.updateInputVisibility(routeNumber);
-    },
-
-    updateActiveTab(activeTab) {
-        const fromTab = document.getElementById('from-tab');
-        const toTab = document.getElementById('to-tab');
-        if (fromTab && toTab) {
-            fromTab.classList.toggle('active', activeTab === 'from');
-            toTab.classList.toggle('active', activeTab === 'to');
-            if (!activeTab) {
-                fromTab.classList.remove('active');
-                toTab.classList.remove('active');
-            }
-        }
     },
 
     createSuggestionsDiv(index) {
@@ -234,53 +144,6 @@ const routeBox = {
         return closeButton;
     },
 
-    updateTabLabels(routeNumber) {
-        const fromTab = document.getElementById('from-tab');
-        const toTab = document.getElementById('to-tab');
-        const fromWaypointIndex = routeNumber * 2;
-        const toWaypointIndex = routeNumber * 2 + 1;
-
-        if (fromTab && toTab) {
-            fromTab.innerText = this.getTabLabelText('From', fromWaypointIndex);
-            toTab.innerText = appState.waypoints[toWaypointIndex] ? `To ${appState.waypoints[toWaypointIndex].iata_code}` : 'To Any';
-        }
-
-        const toInput = document.getElementById(`waypoint-input-${toWaypointIndex + 1}`);
-        if (toInput) {
-            toInput.placeholder = appState.waypoints[fromWaypointIndex] && !appState.waypoints[toWaypointIndex] ? 'Any' : 'To';
-        }
-
-        this.updateInputVisibility(routeNumber);
-
-        const swapButton = document.querySelector('.swap-route-button');
-        const fromTabHasIata = fromTab && fromTab.innerText.split(' ').length > 1;
-        const toTabHasIata = toTab && toTab.innerText.split(' ').length > 1;
-        const fromTabIata = fromTabHasIata ? fromTab.innerText.split(' ')[1] : null;
-        const toTabIata = toTabHasIata ? toTab.innerText.split(' ')[1] : null;
-
-        const isEnabled = fromTabIata && toTabIata && fromTabIata !== 'Any' && toTabIata !== 'Any';
-        swapButton.disabled = !isEnabled;
-        swapButton.classList.toggle('disabled', !isEnabled);
-    },
-
-    updateInputVisibility(routeNumber) {
-        const fromInput = document.getElementById(`waypoint-input-${routeNumber * 2 + 1}`);
-        const toInput = document.getElementById(`waypoint-input-${routeNumber * 2 + 2}`);
-
-        if (fromInput && toInput) {
-            const fromWrapper = fromInput.parentElement;
-            const toWrapper = toInput.parentElement;
-            const fromActive = document.getElementById('from-tab').classList.contains('active');
-            const toActive = document.getElementById('to-tab').classList.contains('active');
-
-            fromWrapper.style.display = fromActive || !toActive ? 'block' : 'none';
-            fromWrapper.style.width = fromActive ? '100%' : '50%';
-
-            toWrapper.style.display = toActive || !fromActive ? 'block' : 'none';
-            toWrapper.style.width = toActive ? '100%' : '50%';
-        }
-    },
-
     positionPopup(popup, event) {
         const rect = event.target.getBoundingClientRect();
         const screenPadding = 10;
@@ -298,7 +161,6 @@ const routeBox = {
             [appState.waypoints[idx], appState.waypoints[idx + 1]] = [appState.waypoints[idx + 1], appState.waypoints[idx]];
             routeHandling.updateRoutesArray();
             updateUrl();
-            this.updateTabLabels(routeNumber);
         }
     },
 };
@@ -309,7 +171,6 @@ document.addEventListener('click', (event) => {
     if (routeBox && !routeBox.contains(event.target) && event.target !== routeButton &&
         !event.target.closest('.do-not-close-routebox')) {
         routeBox.style.display = 'none';
-        hideAllClearButtons();
     }
 }, true);
 

@@ -30,7 +30,7 @@ function handleSelection(e, inputId, airport) {
     e.preventDefault();
     e.stopPropagation();
 
-    inputField.value = `${airport.city}, ${airport.country} (${airport.iata_code})`;
+    inputField.value = `${airport.city}, (${airport.iata_code})`;
     suggestionBox.style.display = 'none';
     document.dispatchEvent(new CustomEvent('airportSelected', {
         detail: { airport, fieldId: inputId }
@@ -39,10 +39,6 @@ function handleSelection(e, inputId, airport) {
 
     // Extract routeNumber from inputId or another way
     const routeNumber = parseInt(inputId.split('-')[2]) - 1;
-
-    // Update tab labels for both waypoints and route box
-    routeBox.updateTabLabels(routeNumber);  // Ensure routeNumber is passed
-    routeBox.updateInputVisibility(routeNumber);
 
     inputField.blur();
 }
