@@ -28,11 +28,8 @@ const createElement = (tag, { id, className, content } = {}) => {
 // Create waypoint input
 const createWaypointInput = (index, placeholder, waypoint) => {
     const inputWrapper = createElement('div', { className: 'input-wrapper' });
-    const input = createElement('input', { id: `waypoint-input-${index + 1}`, className: 'waypoint-input' });
+    const input = createElement('input', { id: `waypoint-input-${index + 1}`, className: 'waypoint-input', placeholder, value: waypoint ? `${waypoint.city}, (${waypoint.iata_code})` : '' });
     input.type = 'text';
-    input.placeholder = placeholder;
-    input.value = waypoint ? `${waypoint.city}, (${waypoint.iata_code})` : '';
-
     inputWrapper.append(input, routeBox.createSuggestionsDiv(index));
     return inputWrapper;
 };
@@ -41,19 +38,20 @@ const enableSwapButtonIfNeeded = () => {
     const fromInput = document.querySelector('.from-input input');
     const toInput = document.querySelector('.to-input input');
     const swapButton = document.querySelector('.swap-route-button');
-
-    const isEnabled = fromInput && toInput && fromInput.value.trim() !== '' && toInput.value.trim() !== '';
+    const isEnabled = fromInput && toInput && fromInput.value.trim() && toInput.value.trim();
+    swapButton.disabled = !isEnabled;
     swapButton.classList.toggle('disabled', !isEnabled);
 };
 
-const setupWaypointInputListeners = () => {
-    const fromInput = document.querySelector('.from-input input');
-    const toInput = document.querySelector('.to-input input');
-
-    if (fromInput && toInput) {
-        fromInput.addEventListener('input', enableSwapButtonIfNeeded);
-        toInput.addEventListener('input', enableSwapButtonIfNeeded);
-    }
+const setupWaypointInputListeners = (routeNumber) => {
+    ['from-input', 'to-input'].forEach((className, i) => {
+        const input = document.querySelector(`#waypoint-input-${routeNumber * 2 + i + 1}`);
+        input.addEventListener('input', enableSwapButtonIfNeeded);
+        input.addEventListener('focus', (event) => {
+            event.target.select();
+        });
+    });
+    enableSwapButtonIfNeeded(); // Initial check
 };
 
 const routeBox = {
@@ -70,18 +68,13 @@ const routeBox = {
         let firstEmptyInput = null;
         ['From', 'Where to?'].forEach((placeholder, i) => {
             const index = routeNumber * 2 + i;
-            if (i === 0 && appState.waypoints[index - 1]) {
-                appState.waypoints[index] = appState.waypoints[index - 1];
-            }
+            if (i === 0 && appState.waypoints[index - 1]) appState.waypoints[index] = appState.waypoints[index - 1];
             const waypointInput = createWaypointInput(index, placeholder, appState.waypoints[index]);
             waypointInput.classList.add(i === 0 ? 'from-input' : 'to-input');
             waypointInputsContainer.append(waypointInput);
-            if (!firstEmptyInput && !appState.waypoints[index]) {
-                firstEmptyInput = waypointInput.querySelector('input');
-            }
+            if (!firstEmptyInput && !appState.waypoints[index]) firstEmptyInput = waypointInput.querySelector('input');
         });
         routeBoxElement.append(waypointInputsContainer);
-
         waypointInputsContainer.insertBefore(this.createSwapButton(routeNumber), waypointInputsContainer.children[1]);
 
         const dateInput = this.createDateInput(routeNumber);
@@ -97,12 +90,9 @@ const routeBox = {
         routeBoxElement.style.display = 'block';
 
         [`waypoint-input-${routeNumber * 2 + 1}`, `waypoint-input-${routeNumber * 2 + 2}`].forEach(id => setupAutocompleteForField(id));
-
         if (firstEmptyInput) firstEmptyInput.focus();
 
-        // Set up event listeners for enabling swap button
-        setupWaypointInputListeners();
-        enableSwapButtonIfNeeded(); // Initial check
+        setupWaypointInputListeners(routeNumber);
     },
 
     removeExistingRouteBox() {
@@ -116,8 +106,7 @@ const routeBox = {
 
     createSwapButton(routeNumber) {
         const swapButtonWrapper = createElement('div', { className: 'swap-button-wrapper' });
-        const swapButton = createElement('button', { className: 'swap-route-button', content: '&#8646;' });
-        swapButton.title = 'Swap waypoints';
+        const swapButton = createElement('button', { className: 'swap-route-button', content: '&#8646;', title: 'Swap waypoints', disabled: true });
         swapButton.classList.add('disabled');
         swapButton.onclick = () => this.handleSwapButtonClick(routeNumber);
         swapButtonWrapper.appendChild(swapButton);
@@ -145,10 +134,7 @@ const routeBox = {
     },
 
     createDateInput(routeNumber) {
-        const dateInput = createElement('input', { id: `date-input-${routeNumber}`, className: 'date-input form-control input' });
-        dateInput.type = 'text';
-        dateInput.readOnly = true;
-        dateInput.placeholder = 'Date';
+        const dateInput = createElement('input', { id: `date-input-${routeNumber}`, className: 'date-input form-control input', type: 'text', readOnly: true, placeholder: 'Date' });
         const currentDate = new Date().toISOString().split('T')[0];
         dateInput.value = appState.routeDates[routeNumber - 1] || appState.routeDates[routeNumber] || currentDate;
         appState.routeDates[routeNumber] = dateInput.value;
