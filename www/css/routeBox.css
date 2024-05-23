@@ -5,7 +5,7 @@
   border-radius: 5px;
   border: 1px solid #525252;
   padding: 10px;
-  width: 340px;
+  width: 400px;
   max-width: 90%;
   display: flex;
   flex-direction: column;
@@ -111,7 +111,7 @@
 
 .route-box-popup .waypoint-input:focus {
   outline: none;
-  background-color: #3669a8;
+  background-color: #274b77;
   border-radius: 5px;
 }
 
