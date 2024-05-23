@@ -49,7 +49,6 @@ const createWaypointInput = (index, placeholder, waypoint, routeNumber) => {
     clearSpan.onclick = (e) => {
         e.stopPropagation();
         input.value = '';
-        //clearSpan.style.display = 'none';
     };
     inputWrapper.append(input, clearSpan, routeBox.createSuggestionsDiv(index));
     return inputWrapper;
@@ -73,12 +72,16 @@ const routeBox = {
                 appState.waypoints[index] = appState.waypoints[index - 1];
             }
             const waypointInput = createWaypointInput(index, placeholder, appState.waypoints[index], routeNumber);
+            // add From or To class to the input
+            waypointInput.classList.add(i === 0 ? 'from-input' : 'to-input');
             waypointInputsContainer.append(waypointInput);
             if (!firstEmptyInput && !appState.waypoints[index]) {
                 firstEmptyInput = waypointInput.querySelector('input');
             }
         });
         routeBox.append(waypointInputsContainer);
+
+        waypointInputsContainer.insertBefore(this.createSwapButton(routeNumber), waypointInputsContainer.children[1]);
 
         const dateInput = createElement('input', `date-input-${routeNumber}`, 'date-input form-control input');
         dateInput.type = 'text';

@@ -62,19 +62,48 @@
 
 .waypoint-inputs-container {
   display: flex;
-  margin-top: 0;
+  justify-content: space-around;
+  margin-top: 10px;
+  align-items: center;
   position: relative;
   width: 100%;
 }
 
 .input-wrapper {
-  position: relative;
+  position: absolute;
   flex: 1;
   display: flex;
+  width: calc(50% - 5px);
+}
+
+.to-input {
+  right: 0px;
+  border: #999 1px solid;
+  border-radius: 5px;
+}
+
+.from-input {
+  left: 0px;
+  border: #999 1px solid;
+  border-radius: 5px;
+}
+
+.swap-button-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  background-color: #333;
+  border-radius: 50%;
+  margin: 5px -12px;
+  z-index: 1;
+  border: #999 1px solid;
 }
 
 .route-box-popup .waypoint-input {
-  background-color: #333;
+  background-color: transparent;
   padding: 10px; /* Increased padding for better touch interaction */
   width: 100%;
   box-sizing: border-box;
@@ -82,8 +111,8 @@
 }
 
 .route-box-popup .waypoint-input:focus {
-  outline: none;
   background-color: #292929;
+
 }
 
 .clear-span {
@@ -283,19 +312,6 @@
   color: #ccc !important;
 }
 
-.swap-button-wrapper {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 24px;
-  height: 24px;
-  background-color: #333;
-  border-radius: 50%;
-  margin: 4px -20px;
-  z-index: 1;
-}
-
 /* Additional Media Queries for Better Mobile Experience */
 @media (max-width: 600px) {
   .route-box-popup {
@@ -313,14 +329,5 @@
   .remove-button {
     flex: 1;
     width: 48%;
-  }
-
-  .waypoint-inputs-container {
-    display: flex;
-    flex-direction: column;
-  }
-
-  .input-wrapper {
-    margin-bottom: 10px;
   }
 }
