@@ -118,14 +118,21 @@ a:hover, button:hover, input:hover, select:hover, textarea:hover {
 
 a:active, button:active, input:focus, select:focus, textarea:focus {
   background-color: #294e7c;
-  color: #ddd;
+  color: #ccc;
 }
 
-/*input, button, select, textarea {
-  background-color: #1e1e1e;
-  color: #e0e0e0;
-  border: 1px solid #525252;
-}*/
+/* Chrome, Firefox, Opera, Safari 10.1+ */
+input::-webkit-input-placeholder {
+  color: #aaa;
+}
+/* Internet Explorer 10-11 */
+input:-ms-input-placeholder {
+  color: #aaa;
+}
+/* Microsoft Edge */
+input::-ms-input-placeholder {
+  color: #aaa;
+}
 
 .leaflet-popup {
   transition: none !important;
