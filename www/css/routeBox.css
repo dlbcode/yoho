@@ -258,10 +258,14 @@
   color: #ccc !important;
 }
 
+span.flatpickr-weekday {
+  font-weight: 500;
+}
+
 .flatpickr-day,
 .flatpickr-day.today {
-  background: #444;
-  color: #fff;
+  background: #2a2a2a !important;
+  color: #ccc;
 }
 
 .flatpickr-day.selected,
@@ -272,7 +276,7 @@
 .flatpickr-day.endRange.inRange,
 .flatpickr-day.inRange {
   background: #135dbe !important;
-  color: #fff !important;
+  color: #ccc !important;
   border: none;
 }
 
@@ -290,6 +294,13 @@
 .flatpickr-day.inRange {
   position: relative;
   z-index: 1;
+}
+
+.flatpickr-day.flatpickr-disabled {
+  background: #2a2a2a !important;
+  color: #888 !important;
+  cursor: not-allowed !important;
+  opacity: 0.6;
 }
 
 @media (max-width: 600px) {
