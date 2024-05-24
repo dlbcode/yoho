@@ -131,7 +131,11 @@ const routeBox = {
     },
 
     createCloseButton(routeBox) {
-        const closeButton = createElement('span', { className: 'popup-close-button', content: '✕' });
+        const closeButton = createElement('span', { className: 'popup-close-button' });
+        closeButton.innerHTML = `
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M4 8L12 16L20 8" stroke="#666" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>`;
         closeButton.onclick = () => routeBox.style.display = 'none';
         return closeButton;
     },

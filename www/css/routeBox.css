@@ -133,11 +133,19 @@
 }
 
 .search-button {
-  background-color: #0060bb;
+  background-color: #0f2f56;
+}
+
+.search-button:hover {
+  background-color: #2a4f7c;
 }
 
 .remove-button {
-  background-color: #7e1103;
+  background-color: #2d0500;
+}
+
+.remove-button:hover {
+  background-color: #5e0c01;
 }
 
 #topRow {
