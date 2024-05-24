@@ -8,7 +8,7 @@
 }
 
 #top-bar {
-  height: 30px;
+  height: 40px;
   display: flex;
   align-items: center;
   background-color: #333; /* Optional: to match the menu bar's background */
@@ -17,20 +17,34 @@
 
 #menu-bar {
   display: flex;
-  height: 30px;
+  height: 40px;
   align-items: center;
   flex-grow: 1; /* Allows the menu bar to take up remaining space */
 }
 
 .plus-button {
-  height: 28px;
-  width: 24px;
-  color: #ccc;
-  font-size: 20px;
-  font-weight: 100;
-  padding: 0px;
+  height: 32px;
+  width: 32px;
+  background-color: #444;
+  border-radius: 50%; /* Make the button circular */
+  display: flex;
+  align-items: center;
+  justify-content: center;
   border: none;
   cursor: pointer;
+}
+
+.plus-button svg {
+  width: 24px;
+  height: 24px;
+}
+
+.plus-button:hover {
+  background-color: #2a4f7c;
+}
+
+.plus-button:hover svg {
+  fill: #ccc; /* Change the color of the SVG on hover */
 }
 
 .route-info-button {

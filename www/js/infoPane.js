@@ -289,14 +289,22 @@ addPlusButton() {
   const menuBar = document.getElementById('menu-bar');
   const routeIndex = Math.floor(appState.routes.length);
   if (!document.getElementById('plus-button')) { // Check to avoid duplicates
-      let plusButton = document.createElement('button');
-      plusButton.innerHTML = '+';
-      plusButton.id = 'plus-button';
-      plusButton.className = 'plus-button';
-      plusButton.onclick = (event) => {
-        routeBox.showRouteBox(event, routeIndex);
-    };    
-      menuBar.appendChild(plusButton);
+    let plusButton = document.createElement('button');
+    plusButton.id = 'plus-button';
+    plusButton.className = 'plus-button';
+    plusButton.onclick = (event) => {
+      routeBox.showRouteBox(event, routeIndex);
+    };
+
+    // Create the SVG as a string and set it as the innerHTML of the button
+    plusButton.innerHTML = `
+      <svg height="32px" width="32px" viewBox="0 0 64 64" fill="#aaa">
+        <rect x="30" y="10" width="4" height="44"></rect>
+        <rect x="10" y="30" width="44" height="4"></rect>
+      </svg>
+    `;
+
+    menuBar.appendChild(plusButton);
   }
 }
 
