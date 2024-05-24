@@ -42,8 +42,8 @@
 #depart-date-input,
 .route-box-popup .date-input:focus {
   outline: none;
-  border: #395f8d;
-  background-color: #395f8d;
+  border: #2a4f7c;
+  background-color: #2a4f7c;
 }
 
 .swap-route-button {
@@ -119,7 +119,7 @@
 
 .route-box-popup .waypoint-input:focus {
   outline: none;
-  background-color: #395f8d;
+  background-color: #2a4f7c;
   border-radius: 5px;
 }
 
@@ -207,25 +207,22 @@
 .trip-type-dropdown li:hover,
 [id$='Suggestions'] div:hover,
 .autocomplete-active {
-  background-color: #555;
+  background-color: #346197;
 }
 
 [id$='Suggestions'] {
-  background-color: #333;
-  border: 1px solid #525252;
-  border-radius: 4px;
-  color: white;
+  background-color: #2a4f7c;
+  color: #ccc;
   position: absolute;
-  z-index: 1000;
+  z-index: 1;
   max-height: 200px;
   overflow-y: auto;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
   display: none;
 }
 
 [id$='Suggestions'] div {
   padding: 5px;
-  border-bottom: 1px solid #525252;
+  border-top: 1px solid #26303c;
   cursor: pointer;
 }
 

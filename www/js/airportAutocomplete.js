@@ -85,7 +85,7 @@ function setupAutocompleteForField(fieldId) {
         suggestionBox.style.display = display ? 'block' : 'none';
         if (display) {
             const rect = inputField.getBoundingClientRect();
-            suggestionBox.style.left = `10px`;
+            suggestionBox.style.left = `0px`;
             suggestionBox.style.top = '35px';
             suggestionBox.style.width = '300px'
         }
