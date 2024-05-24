@@ -102,15 +102,15 @@ function setupAutocompleteForField(fieldId) {
     const outsideClickListener = (e) => {
         if (!inputField.contains(e.target) && !suggestionBox.contains(e.target)) {
             toggleSuggestionBox(false);
+            clearInputField(inputField);
         }
     };
 
     // Add event listeners for focus, keydown, and blur
-    inputField.addEventListener('focus', () => toggleSuggestionBox(true));
     inputField.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
             toggleSuggestionBox(false);
-            clearInputField();
+            clearInputField(inputField);
         } else if (e.key === 'ArrowDown') {
             currentFocus++;
             updateActiveItem(suggestionBox.getElementsByTagName('div'));
@@ -124,16 +124,17 @@ function setupAutocompleteForField(fieldId) {
                 if (items) items[currentFocus].click();
             }
         }
-        inputField.addEventListener('blur', () => {
-            setTimeout(() => {
-                clearInputField(inputField);
-                toggleSuggestionBox(false);
-                if (inputField.value === '' && appState.waypoints.length > 0) {
-                   const waypointIndex = parseInt(inputField.id.replace('waypoint-input-', '')) - 1;
-                   updateState('removeWaypoint', waypointIndex);
-                }
-            }, 300); // Delay to allow for selection
-        });
+    });
+
+    inputField.addEventListener('blur', () => {
+        setTimeout(() => {
+            toggleSuggestionBox(false);
+            clearInputField(inputField);
+            if (inputField.value === '' && appState.waypoints.length > 0) {
+                const waypointIndex = parseInt(inputField.id.replace('waypoint-input-', '')) - 1;
+                updateState('removeWaypoint', waypointIndex);
+            }
+        }, 100); // Delay to allow for selection
     });
 
     if (!window.outsideClickListenerAdded) {
