@@ -18,26 +18,35 @@
 }
 
 .leaflet-popup-content-wrapper, .leaflet-popup-tip {
-  background-color: rgb(0, 0, 0) !important; /* Dark background for popup */
-  color: #a0a0a0; /* Light text color */
-  border: 1px solid #676767; /* Border color */
-  border-radius: 5px; /* Rounded corners */
-  box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.2); /* Box shadow for consistency */
+  background-color: rgb(0, 0, 0) !important;
+  color: #a0a0a0;
+  border: 1px solid #676767;
+  border-radius: 5px;
+  box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.2);
 }
 
+/* Zoom controls */
 .leaflet-control-zoom a {
-  background-color: #555555 !important;
+  background-color: rgba(85, 85, 85, 0.7) !important; /* Semi-opaque background */
   color: #bbbbbb !important;
   border: 1px solid #a5a5a5 !important;
   width: 40px !important;
   height: 40px !important;
   line-height: 40px !important;
   background-size: 20px 20px !important;
+  border-radius: 50% !important; /* Make the buttons circular */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.leaflet-control-zoom a.leaflet-control-zoom-in {
+  margin-bottom: 5px !important; /* Add vertical spacing */
 }
 
 .leaflet-control-zoom a:hover,
 .leaflet-control-zoom a:active {
-  background-color: #222222 !important;
+  background-color: rgba(34, 34, 34, 0.7) !important;
   color: #bbbbbb !important;
 }
 
@@ -46,17 +55,22 @@
   font-size: 22px !important;
 }
 
+.leaflet-touch .leaflet-control-layers, .leaflet-touch .leaflet-bar {
+  border: none;
+}
+
+/* Attribution control */
 .leaflet-control-attribution.leaflet-control {
-  color: #999 !important; /* Ensures light text color */
-  background: rgba(0, 0, 0, 0.2) !important; /* Ensures semi-transparent dark background */
-  font-size: 10px !important; /* Adjust as needed */
-  padding: 2px !important; /* Adjust padding */
+  color: #999 !important;
+  background: rgba(0, 0, 0, 0.2) !important;
+  font-size: 10px !important;
+  padding: 2px !important;
 }
 
 .leaflet-control-attribution.leaflet-control a {
-  color: #999 !important; /* Ensures light text color */
+  color: #999 !important;
 }
 
 .leaflet-control-attribution.leaflet-control a:hover {
-  color: #ccc !important; /* Ensures light text color */
+  color: #ccc !important;
 }
