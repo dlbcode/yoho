@@ -34,17 +34,19 @@
   cursor: pointer;
 }
 
-.plus-button svg {
-  width: 24px;
-  height: 24px;
+.plus-button img {
+  width: 22px;
+  height: 22px;
+  transform: translate(-1px, 1px); /* Move the image 2px left and 2px down */
 }
 
 .plus-button:hover {
   background-color: #2a4f7c;
+  border: 2px solid #ccc;
 }
 
-.plus-button:hover svg {
-  fill: #ccc; /* Change the color of the SVG on hover */
+.plus-button:hover img {
+  filter: brightness(0) invert(1); /* Change the color of the SVG on hover */
 }
 
 .route-info-button {
