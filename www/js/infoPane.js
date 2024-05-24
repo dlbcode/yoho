@@ -296,9 +296,12 @@ addPlusButton() {
       routeBox.showRouteBox(event, routeIndex);
     };
 
-    // Use the SVG file as an image source
+    // Create the SVG as a string and set it as the innerHTML of the button
     plusButton.innerHTML = `
-      <img src="../assets/yhplane.svg" height="20px" width="20px" alt="Plus Icon" />
+      <svg height="32px" width="32px" viewBox="0 0 64 64" fill="#aaa">
+        <rect x="30" y="10" width="4" height="44"></rect>
+        <rect x="10" y="30" width="44" height="4"></rect>
+      </svg>
     `;
 
     menuBar.appendChild(plusButton);
