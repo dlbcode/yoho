@@ -46,6 +46,7 @@ function handleSelection(e, inputId, airport) {
 function setupAutocompleteForField(fieldId) {
     const inputField = document.getElementById(fieldId);
     const suggestionBox = document.getElementById(fieldId + 'Suggestions');
+    suggestionBox.style.display = 'none'; // Ensure it is hidden initially
     let selectionMade = false; // Track if a selection has been made
     let initialInputValue = ""; // Store the initial input value on focus
     let currentFocus = -1; // Track the currently focused item in the suggestion box
