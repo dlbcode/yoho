@@ -15,6 +15,7 @@ const loadCSS = (href) => {
     document.head.appendChild(link);
 };
 loadCSS('css/routeBox.css');
+loadCSS('css/datePicker.css');
 
 // Create element helper
 const createElement = (tag, { id, className, content } = {}) => {
