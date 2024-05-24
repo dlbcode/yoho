@@ -296,8 +296,16 @@
   padding-right: 0 !important;
 }
 
+.flatpickr-prev-month {
+  margin-left: 110px !important;
+}
+
+.flatpickr-month {
+  margin-left: 25px !important;
+}
+
 .flatpickr-next-month {
-  margin-right: 5px !important;
+  margin-right: 10px !important;
 }
 
 .flatpickr-calendar,
