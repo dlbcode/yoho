@@ -70,11 +70,12 @@ const infoPane = {
         const buttonText = `${origin}-${destination}`;
 
         if (!button) {
-            button = document.createElement('button');
-            button.id = buttonId;
-            button.className = 'route-info-button';
-            menuBar.appendChild(button);
-        }
+          button = document.createElement('button');
+          button.id = buttonId;
+          button.className = 'route-info-button';
+          menuBar.appendChild(button);
+          button.textContent = buttonText; // Ensure text is set
+        }      
 
         button.textContent = buttonText;
 

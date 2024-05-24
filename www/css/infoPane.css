@@ -25,6 +25,7 @@
 .plus-button {
   height: 32px;
   width: 32px;
+  margin: 1px;
   background-color: #444;
   border-radius: 50%; /* Make the button circular */
   display: flex;
@@ -48,28 +49,39 @@
 }
 
 .route-info-button {
-  height: 28px;
-  border-right: #666 1px solid;
+  height: 32px; /* Match the height of the plus button */
+  width: 100px; /* Adjust width as needed */
+  margin: 1px;
+  background-color: #444; /* Same background color as plus button */
+  border-radius: 16px; /* Make the button circular like plus button */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  cursor: pointer;
+  color: #ccc; /* Ensure the text color matches */
+  font-size: 14px; /* Adjust the font size if necessary */
+}
+
+.route-info-button:hover {
+  background-color: #2a4f7c; /* Same hover background color as plus button */
+  color: #ddd; /* Change text color on hover */
 }
 
 .route-info-button:focus, .route-info-button:active {
-  height: 23px;
-  background-color: #3b7897;
-  border-right: #666 1px solid;
+  background-color: #3b7897; /* Active state background color */
+  color: #fff; /* Active state text color */
 }
 
 .selected-route-button {
-  height: 23px;
-  background-color: rgb(0, 70, 0);
+  background-color: rgb(0, 70, 0); /* Green background for selected state */
   color: #ccc;
-  border-right: #666 1px solid;
+  border: none; /* Remove border */
 }
 
 .selected-route-button:hover {
-  height: 23px;
-  background-color: #327935;
+  background-color: #327935; /* Darker green on hover */
   color: #ddd;
-  border-right: #666 1px solid;
 }
 
 #infoPaneContent {
