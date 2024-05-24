@@ -177,11 +177,18 @@ function updateSuggestions(inputId, airports) {
     
         div.addEventListener('touchstart', (e) => {
             selectionHandledByTouch = false; // Reset flag on touch start
+            div.style.pointerEvents = 'none'; // Disable pointer events during touch
+        }, { passive: true });
+    
+        div.addEventListener('touchmove', (e) => {
+            selectionHandledByTouch = true; // Set flag if touchmove is detected
         }, { passive: true });
     
         div.addEventListener('touchend', (e) => {
-            selectionHandledByTouch = true;
-            selectionHandler(e);
+            div.style.pointerEvents = 'auto'; // Re-enable pointer events after touch end
+            if (!selectionHandledByTouch) {
+                selectionHandler(e);
+            }
         });
     
         div.addEventListener('click', (e) => {
