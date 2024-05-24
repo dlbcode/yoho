@@ -74,7 +74,7 @@
 
 #infoPaneContent {
   position: absolute;
-  top: 28px; /* Adjust this value to account for any header or top bar inside infoPane */
+  top: 40px; /* Adjust this value to account for any header or top bar inside infoPane */
   left: 0;
   right: 0;
   bottom: 0; /* This makes infoPaneContent stretch to the bottom of infoPane */
