@@ -1,7 +1,7 @@
 .route-box-popup {
   position: absolute;
   z-index: 1000;
-  background-color: #333;
+  background-color: #222;
   border-radius: 5px;
   border: 1px solid #525252;
   padding: 10px;
@@ -18,6 +18,10 @@
 .route-box-popup .remove-button,
 .route-box-popup .popup-close-button {
   cursor: pointer;
+}
+
+.route-box-popup .popup-close-button:hover path {
+  stroke: #ccc;
 }
 
 .route-box-popup .button-container {
@@ -87,13 +91,13 @@
 .to-input {
   right: 0;
   border-radius: 5px;
-  background-color: #555;
+  background-color: #444;
 }
 
 .from-input {
   left: 0;
   border-radius: 5px;
-  background-color: #555;
+  background-color: #444;
 }
 
 .swap-button-wrapper {
@@ -103,7 +107,7 @@
   justify-content: center;
   width: 24px;
   height: 24px;
-  background-color: #333;
+  background-color: #222;
   border-radius: 50%;
   margin: 5px -12px;
   z-index: 1;
@@ -164,7 +168,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background-color: #333;
+  background-color: #222;
   color: white;
   cursor: pointer;
   border-right: 1px solid #666;
@@ -206,7 +210,7 @@
   list-style: none;
   padding: 5px;
   margin: 0;
-  background-color: #333;
+  background-color: #222;
   min-width: 40px;
   white-space: nowrap;
 }
@@ -234,6 +238,66 @@
   border-top: 1px solid #26303c;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent; /* Remove tap highlight on touch devices */
+}
+
+.select-wrapper {
+  position: relative;
+  display: inline-block;
+  background-color: #2a4f7c;
+  cursor: pointer;
+  width: 104px;
+  padding-bottom: 6px;
+  z-index: 1000;
+}
+
+.select-wrapper .date-mode-select, .select-wrapper .option, .select-wrapper .selected-option {
+  text-align: left;
+  background-color: #2a4f7c;
+  width: 100%;
+}
+
+.select-wrapper .date-mode-select {
+  position: absolute;
+  padding-top: 8px;
+  font-size: 1rem;
+  height: 38px;
+}
+
+
+.select-wrapper .option:hover {
+  background-color: #346197;
+  color: #fff;
+}
+
+.date-mode-select .options:not([style*="display: none"]) .option.hide {
+  display: none;
+}
+
+.flatpickr-monthDropdown-months, .numInput.cur-year {
+  font-size: 16px !important;
+  text-align: left !important;
+}
+
+.flatpickr-monthDropdown-months {
+  width: auto !important;
+  left: 0 !important;
+}
+
+.flatpickr-current-month {
+  display: flex;
+  align-items: center;
+  left: 0 !important;
+  width: 100% !important;
+}
+
+.flatpickr-prev-month, .flatpickr-next-month {
+  margin-right: 0 !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+
+.flatpickr-next-month {
+  margin-right: 5px !important;
 }
 
 .flatpickr-calendar,
@@ -285,7 +349,7 @@ span.flatpickr-weekday {
 .flatpickr-day.startRange.inRange,
 .flatpickr-day.endRange.inRange,
 .flatpickr-day.inRange {
-  background: #135dbe !important;
+  background: #2a4f7c !important;
   color: #ccc !important;
   border: none;
 }
@@ -297,7 +361,7 @@ span.flatpickr-weekday {
   left: -8px;
   height: 100%;
   width: calc(100% + 16px);
-  background-color: #135dbe;
+  background-color: #2a4f7c;
   z-index: -1;
 }
 
