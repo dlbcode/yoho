@@ -6,6 +6,7 @@ import { travelersPicker } from './travelersPicker.js';
 import { tripTypePicker } from './tripTypePicker.js';
 import { removeRoute } from './removeRoute.js';
 import { routeHandling } from '../routeHandling.js';
+import { handleTripTypeChange } from './tripTypePicker.js'; // Import the function to handle trip type changes
 
 // Load CSS
 const loadCSS = (href) => {
@@ -81,9 +82,8 @@ const routeBox = {
         routeBoxElement.append(waypointInputsContainer);
         waypointInputsContainer.insertBefore(this.createSwapButton(routeNumber), waypointInputsContainer.children[1]);
 
-        const dateInput = this.createDateInput(routeNumber);
-        routeBoxElement.append(dateInput);
-        initDatePicker(dateInput.id, routeNumber);
+        const dateInputsContainer = createElement('div', { className: 'date-inputs-container' });
+        routeBoxElement.append(dateInputsContainer);
 
         const buttonContainer = createElement('div', { className: 'button-container' });
         buttonContainer.append(this.createSearchButton(routeNumber), this.createCloseButton(routeBoxElement));
@@ -97,6 +97,9 @@ const routeBox = {
         if (firstEmptyInput) firstEmptyInput.focus();
 
         setupWaypointInputListeners(routeNumber);
+
+        // Handle the initial trip type to display the appropriate date input fields
+        handleTripTypeChange(appState.tripType);
     },
 
     removeExistingRouteBox() {
@@ -141,13 +144,13 @@ const routeBox = {
         return closeButton;
     },
 
-    createDateInput(routeNumber) {
-        const dateInput = createElement('input', { id: `date-input-${routeNumber}`, className: 'date-input form-control input', type: 'text', readOnly: true, placeholder: 'Date' });
+    createDateInput(routeNumber, dateType) {
+        const dateInput = createElement('input', { id: `${dateType}-date-input-${routeNumber}`, className: 'date-input form-control input', type: 'text', readOnly: true, placeholder: `${dateType.charAt(0).toUpperCase() + dateType.slice(1)} Date` });
         const currentDate = new Date().toISOString().split('T')[0];
-        dateInput.value = appState.routeDates[routeNumber - 1] || appState.routeDates[routeNumber] || currentDate;
-        appState.routeDates[routeNumber] = dateInput.value;
-        dateInput.name = `date-input-${routeNumber}`;
-        dateInput.addEventListener('change', (e) => appState.routeDates[routeNumber] = e.target.value);
+        dateInput.value = appState.routeDates[dateType] || currentDate;
+        appState.routeDates[dateType] = dateInput.value;
+        dateInput.name = `${dateType}-date-input-${routeNumber}`;
+        dateInput.addEventListener('change', (e) => appState.routeDates[dateType] = e.target.value);
         return dateInput;
     },
 

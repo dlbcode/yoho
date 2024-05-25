@@ -21,12 +21,13 @@ const appState = {
     currentGroupID: 0,
     highestGroupId: 0,
     routeDates: {
-        0: new Date().toISOString().split('T')[0],
+        departure: null,
+        return: null,
     },
     routeLines: [],
     invisibleRouteLines: [],
 };
-  
+
 function updateState(key, value) {
     switch (key) {
         case 'routeDirection': {
@@ -53,8 +54,8 @@ function updateState(key, value) {
                 appState.routes[routeNumber].travelers = parseInt(travelers);
             }
             break;
-        }        
-            
+        }
+
         case 'updateWaypoint':
             if (value.index >= 0 && value.index < appState.waypoints.length) {
             appState.waypoints[value.index] = {...appState.waypoints[value.index], ...value.data};
@@ -62,7 +63,7 @@ function updateState(key, value) {
             updateUrl();
             checkAndUpdateRoundTripStatus();
             break;
-            
+
         case 'addWaypoint':
             if (Array.isArray(value)) {
             value.forEach(waypoint => appState.waypoints.push(waypoint));
@@ -72,7 +73,7 @@ function updateState(key, value) {
             updateUrl();
             checkAndUpdateRoundTripStatus();
             break;
-    
+
         case 'removeWaypoint':
             appState.waypoints.splice(value, 1);
             updateUrl();
@@ -85,7 +86,7 @@ function updateState(key, value) {
             updateUrl();
             checkAndUpdateRoundTripStatus();
             break;
-    
+
         case 'updateRoutes':
             if (JSON.stringify(appState.routes) !== JSON.stringify(value)) {
                 // Ensure each route has at least 1 traveler
@@ -93,7 +94,7 @@ function updateState(key, value) {
                     ...route,
                     travelers: route.travelers || 1  // Set default travelers to 1 if not provided
                 }));
-        
+
                 // Only recalculate routeDates if necessary, otherwise preserve existing dates
                 const recalculatedRouteDates = { ...appState.routeDates };
                 appState.routes.forEach((route, index) => {
@@ -105,7 +106,7 @@ function updateState(key, value) {
                 appState.routeDates = recalculatedRouteDates;
             }
             break;
-                                             
+
         case 'clearData':
             appState.waypoints = [];
             appState.routes = [];
@@ -118,47 +119,44 @@ function updateState(key, value) {
         case 'updateSelectedRoute':
             const { routeIndex, routeDetails } = value;
             appState.selectedRoutes[routeIndex] = routeDetails;
-        
+
             // Ensure the routeDates match the selectedRoutes' dates
             appState.routeDates[routeIndex] = routeDetails.routeDates;
-        
+
             updateUrl();
             break;
-            
+
         case 'selectedAirport':
             appState.selectedAirport = value;
             break;
-        
+
         case 'removeSelectedRoute':
             delete appState.selectedRoutes[value];
+            updateUrl();
+            break;
+
+        case 'startDate':
+            appState.startDate = value;
+            updateUrl();
+            break;
+
+        case 'endDate':
+            appState.endDate = value;
+            updateUrl();
+            break;
+
+        case 'changeView':
+            appState.currentView = value;
             updateUrl();
             break;
 
         default:
             appState[key] = value;
             break;
-        
-        case 'startDate':
-            appState.startDate = value;
-            break;
-
-        case 'endDate':
-            appState.endDate = value;
-            break;
-
-        case 'changeView':
-            appState.currentView = value;
-            break;
     }
     document.dispatchEvent(new CustomEvent('stateChange', { detail: { key, value } }));
-    //console.log('appState update key and value: ', key, value);
-    //console.log('appState.routes: ', appState.routes);
-    //console.log('appState.routeDates:', appState.routeDates);
-    //console.log('appState.selectedRoutes: ', appState.selectedRoutes);
-    //console.log('appState.waypoints:', appState.waypoints);
-    //console.log('appState airportSelected: ', appState.selectedAirport);
 }
-  
+
 function updateUrl() {
     const params = new URLSearchParams(window.location.search);
     const waypointIatas = appState.waypoints.map(wp => wp.iata_code);
@@ -201,4 +199,3 @@ function checkAndUpdateRoundTripStatus() {
 }
 
 export { appState, updateState, updateUrl };
-  
