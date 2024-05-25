@@ -53,6 +53,7 @@
   justify-content: center;
   border: none;
   cursor: pointer;
+  flex-shrink: 0; /* Prevents the button from collapsing */
 }
 
 .plus-button svg {
@@ -81,6 +82,7 @@
   cursor: pointer;
   color: #ccc; /* Ensure the text color matches */
   font-size: 14px; /* Adjust the font size if necessary */
+  flex-shrink: 0; /* Prevents the button from collapsing */
 }
 
 .route-info-button:hover {
@@ -97,6 +99,7 @@
   background-color: rgb(0, 70, 0); /* Green background for selected state */
   color: #ccc;
   border: none; /* Remove border */
+  flex-shrink: 0; /* Prevents the button from collapsing */
 }
 
 .selected-route-button:hover {
