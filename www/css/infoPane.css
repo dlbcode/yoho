@@ -20,6 +20,26 @@
   height: 40px;
   align-items: center;
   flex-grow: 1; /* Allows the menu bar to take up remaining space */
+  overflow-x: auto; /* Enables horizontal scrolling */
+  overflow-y: none; /* Disables vertical scrolling */
+  white-space: nowrap; /* Prevents the content from wrapping to a new line */
+}
+
+#menu-bar::-webkit-scrollbar {
+  height: 4px; /* Adjust the height of the scrollbar */
+}
+
+#menu-bar::-webkit-scrollbar-track {
+  background: #333; /* Scrollbar track color */
+}
+
+#menu-bar::-webkit-scrollbar-thumb {
+  background: #888; /* Scrollbar thumb color */
+  border-radius: 2px; /* Rounded corners for the thumb */
+}
+
+#menu-bar::-webkit-scrollbar-thumb:hover {
+  background: #555; /* Color on hover */
 }
 
 .plus-button {
