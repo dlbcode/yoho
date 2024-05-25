@@ -71,7 +71,7 @@
 
 .route-info-button {
   height: 32px; /* Match the height of the plus button */
-  width: 100px; /* Adjust width as needed */
+  width: 90px; /* Adjust width as needed */
   margin: 1px;
   background-color: #444; /* Same background color as plus button */
   border-radius: 16px; /* Make the button circular like plus button */
