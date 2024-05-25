@@ -3,10 +3,9 @@ import { setupAutocompleteForField } from '../airportAutocomplete.js';
 import { buildRouteTable } from '../routeTable/routeTable.js';
 import { initDatePicker } from './datePicker.js';
 import { travelersPicker } from './travelersPicker.js';
-import { tripTypePicker } from './tripTypePicker.js';
+import { tripTypePicker, handleTripTypeChange } from './tripTypePicker.js';
 import { removeRoute } from './removeRoute.js';
 import { routeHandling } from '../routeHandling.js';
-import { handleTripTypeChange } from './tripTypePicker.js'; // Import the function to handle trip type changes
 
 // Load CSS
 const loadCSS = (href) => {

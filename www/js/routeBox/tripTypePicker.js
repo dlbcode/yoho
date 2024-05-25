@@ -1,4 +1,5 @@
 import { appState, updateState } from "../stateManager.js";
+import { initDatePicker } from "./datePicker.js";
 
 export function tripTypePicker() {
     const tripTypeContainer = document.createElement('div');
@@ -46,16 +47,18 @@ export function tripTypePicker() {
 export function handleTripTypeChange(tripType) {
     const dateInputsContainer = document.querySelector('.date-inputs-container');
     if (dateInputsContainer) {
+        dateInputsContainer.innerHTML = ''; // Clear existing date inputs
         if (tripType === 'oneWay') {
-            dateInputsContainer.innerHTML = ''; // Clear existing date inputs
             const dateInput = createDateInput('date');
             dateInputsContainer.appendChild(dateInput);
+            initDatePicker(`${dateType}-date-input`, appState.currentRouteIndex);
         } else {
-            dateInputsContainer.innerHTML = ''; // Clear existing date inputs
             const departureDateInput = createDateInput('departure');
             const returnDateInput = createDateInput('return');
             dateInputsContainer.appendChild(departureDateInput);
             dateInputsContainer.appendChild(returnDateInput);
+            initDatePicker(`departure-date-input`, appState.currentRouteIndex);
+            initDatePicker(`return-date-input`, appState.currentRouteIndex);
         }
     }
 }
