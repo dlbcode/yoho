@@ -49,10 +49,11 @@ export function handleTripTypeChange(tripType) {
     if (dateInputsContainer) {
         dateInputsContainer.innerHTML = ''; // Clear existing date inputs
         if (tripType === 'oneWay') {
-            const dateInput = createDateInput('date');
+            const dateInput = createDateInput('departure');
             dateInput.classList.add('full-width'); // Apply full-width class
             dateInputsContainer.appendChild(dateInput);
-            initDatePicker(`departure-date-input`, appState.currentRouteIndex);
+            initDatePicker('departure-date-input', appState.currentRouteIndex);
+            delete appState.routeDates.return; // Remove return date for one-way trips
         } else {
             const departureDateInput = createDateInput('departure');
             const returnDateInput = createDateInput('return');
@@ -61,8 +62,8 @@ export function handleTripTypeChange(tripType) {
             dateRow.appendChild(departureDateInput);
             dateRow.appendChild(returnDateInput);
             dateInputsContainer.appendChild(dateRow);
-            initDatePicker(`departure-date-input`, appState.currentRouteIndex);
-            initDatePicker(`return-date-input`, appState.currentRouteIndex);
+            initDatePicker('departure-date-input', appState.currentRouteIndex);
+            initDatePicker('return-date-input', appState.currentRouteIndex);
         }
     }
 }
