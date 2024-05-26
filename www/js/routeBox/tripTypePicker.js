@@ -52,7 +52,7 @@ export function handleTripTypeChange(tripType) {
             const dateInput = createDateInput('date');
             dateInput.classList.add('full-width'); // Apply full-width class
             dateInputsContainer.appendChild(dateInput);
-            initDatePicker(`date-date-input`, appState.currentRouteIndex);
+            initDatePicker(`departure-date-input`, appState.currentRouteIndex);
         } else {
             const departureDateInput = createDateInput('departure');
             const returnDateInput = createDateInput('return');
