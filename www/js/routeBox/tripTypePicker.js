@@ -55,8 +55,11 @@ export function handleTripTypeChange(tripType) {
         } else {
             const departureDateInput = createDateInput('departure');
             const returnDateInput = createDateInput('return');
-            dateInputsContainer.appendChild(departureDateInput);
-            dateInputsContainer.appendChild(returnDateInput);
+            const dateRow = document.createElement('div');
+            dateRow.className = 'date-row';
+            dateRow.appendChild(departureDateInput);
+            dateRow.appendChild(returnDateInput);
+            dateInputsContainer.appendChild(dateRow);
             initDatePicker(`departure-date-input`, appState.currentRouteIndex);
             initDatePicker(`return-date-input`, appState.currentRouteIndex);
         }
