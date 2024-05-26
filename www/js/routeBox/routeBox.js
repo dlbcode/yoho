@@ -158,8 +158,8 @@ const routeBox = {
         const screenPadding = 10;
         let left = rect.left + window.scrollX - (popup.offsetWidth / 2) + (rect.width / 2);
         left = Math.min(Math.max(left, screenPadding), window.innerWidth - popup.offsetWidth - screenPadding);
-        popup.style.left = `${left}px`;
-        popup.style.top = `${rect.top + window.scrollY - popup.offsetHeight - 10}px`;
+        popup.style.left = `${left - 10}px`;
+        popup.style.top = `${rect.top + window.scrollY - popup.offsetHeight - 55}px`;
     },
 
     handleSwapButtonClick(routeNumber) {
