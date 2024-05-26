@@ -143,16 +143,6 @@ const routeBox = {
         return closeButton;
     },
 
-    createDateInput(routeNumber, dateType) {
-        const dateInput = createElement('input', { id: `${dateType}-date-input-${routeNumber}`, className: 'date-input form-control input', type: 'text', readOnly: true, placeholder: `${dateType.charAt(0).toUpperCase() + dateType.slice(1)} Date` });
-        const currentDate = new Date().toISOString().split('T')[0];
-        dateInput.value = appState.routeDates[dateType] || currentDate;
-        appState.routeDates[dateType] = dateInput.value;
-        dateInput.name = `${dateType}-date-input-${routeNumber}`;
-        dateInput.addEventListener('change', (e) => appState.routeDates[dateType] = e.target.value);
-        return dateInput;
-    },
-
     positionPopup(popup, event) {
         const rect = event.target.getBoundingClientRect();
         const screenPadding = 10;
