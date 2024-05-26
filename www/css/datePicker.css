@@ -145,7 +145,7 @@ span.flatpickr-weekday {
 
 .date-row {
   display: flex;
-  gap: 10px;
+  gap: 8px;
 }
 
 .date-input {
