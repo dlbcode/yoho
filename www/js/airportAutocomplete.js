@@ -37,8 +37,34 @@ function handleSelection(e, inputId, airport) {
     }));
     inputField.setAttribute('data-selected-iata', airport.iata_code);
 
-    // Extract routeNumber from inputId or another way
     const routeNumber = parseInt(inputId.split('-')[2]) - 1;
+
+    if (appState.tripType === 'roundTrip' && routeNumber === 1) {
+        // Remove any previously added return waypoints
+        if (appState.waypoints.length > 2) {
+            appState.waypoints = appState.waypoints.slice(0, 2);
+        }
+
+        // Insert two waypoints for the newly selected waypoint (destination)
+        const returnWaypoint = [
+            { ...airport }, // as destination for the first route
+        ];
+        updateState('addWaypoint', returnWaypoint);
+
+        // Add the return destination (same as origin of the first route)
+        const originAirport = appState.waypoints[0];
+        updateState('addWaypoint', { ...originAirport });
+
+        // Update the return date in the appState
+        updateState('updateRouteDate', { routeNumber: 'return', date: appState.routeDates.departure });
+    } else {
+        const waypointIndex = parseInt(inputId.replace('waypoint-input-', '')) - 1;
+        if (waypointIndex >= 0 && waypointIndex < appState.waypoints.length) {
+            updateState('updateWaypoint', { index: waypointIndex, data: airport });
+        } else {
+            updateState('addWaypoint', airport);
+        }
+    }
 
     inputField.blur();
 }
@@ -61,7 +87,6 @@ function setupAutocompleteForField(fieldId) {
         toggleSuggestionBox(true);
         initialInputValue = inputField.value;
 
-        // New functionality to center map on airport
         const iataCode = inputField.getAttribute('data-selected-iata') || getIataFromField(fieldId);
         if (iataCode) {
             const airport = await fetchAirportByIata(iataCode);
@@ -107,7 +132,6 @@ function setupAutocompleteForField(fieldId) {
         }
     };
 
-    // Add event listeners for focus, keydown, and blur
     inputField.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
             toggleSuggestionBox(false);
@@ -163,44 +187,44 @@ function setupAutocompleteForField(fieldId) {
 function updateSuggestions(inputId, airports) {
     const suggestionBox = document.getElementById(inputId + 'Suggestions');
     suggestionBox.innerHTML = '';
-    let selectionHandledByTouch = false; // Flag to track if selection was handled by touch
+    let selectionHandledByTouch = false;
 
     airports.forEach(airport => {
         const div = document.createElement('div');
         div.textContent = `${airport.name} (${airport.iata_code}) - ${airport.city}, ${airport.country}`;
-    
+
         const selectionHandler = (e) => {
             setTimeout(() => {
                 handleSelection(e, inputId, airport);
             }, 100); // Add a small delay
         };
-    
+
         div.addEventListener('touchstart', (e) => {
-            selectionHandledByTouch = false; // Reset flag on touch start
-            div.style.pointerEvents = 'none'; // Disable pointer events during touch
+            selectionHandledByTouch = false;
+            div.style.pointerEvents = 'none';
         }, { passive: true });
-    
+
         div.addEventListener('touchmove', (e) => {
-            selectionHandledByTouch = true; // Set flag if touchmove is detected
+            selectionHandledByTouch = true;
         }, { passive: true });
-    
+
         div.addEventListener('touchend', (e) => {
-            div.style.pointerEvents = 'auto'; // Re-enable pointer events after touch end
+            div.style.pointerEvents = 'auto';
             if (!selectionHandledByTouch) {
                 selectionHandler(e);
             }
         });
-    
+
         div.addEventListener('click', (e) => {
             if (!selectionHandledByTouch) {
                 selectionHandler(e);
             }
-            selectionHandledByTouch = false; // Reset flag after handling click
+            selectionHandledByTouch = false;
         });
-    
+
         suggestionBox.appendChild(div);
     });
-                     
+
     if (airports.length > 0) suggestionBox.style.display = 'block';
 }
 
@@ -222,7 +246,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const adjustedLatLng = adjustLatLngForShortestPath(currentLatLng, latLng);
             map.flyTo(adjustedLatLng, 4, {
                 animate: true,
-                duration: 0.5 // Duration in seconds
+                duration: 0.5
             });
         }
         uiHandling.setFocusToNextUnsetInput();
@@ -233,7 +257,6 @@ document.addEventListener('DOMContentLoaded', () => {
         let targetLng = targetLatLng.lng;
         let lngDifference = targetLng - currentLng;
 
-        // Check if crossing the antimeridian offers a shorter path
         if (lngDifference > 180) {
             targetLng -= 360;
         } else if (lngDifference < -180) {
