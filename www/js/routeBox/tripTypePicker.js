@@ -50,8 +50,9 @@ export function handleTripTypeChange(tripType) {
         dateInputsContainer.innerHTML = ''; // Clear existing date inputs
         if (tripType === 'oneWay') {
             const dateInput = createDateInput('date');
+            dateInput.classList.add('full-width'); // Apply full-width class
             dateInputsContainer.appendChild(dateInput);
-            initDatePicker(`${dateType}-date-input`, appState.currentRouteIndex);
+            initDatePicker(`date-date-input`, appState.currentRouteIndex);
         } else {
             const departureDateInput = createDateInput('departure');
             const returnDateInput = createDateInput('return');
