@@ -1,6 +1,7 @@
 import { appState, updateState } from '../stateManager.js';
 
 export function initDatePicker(inputId, routeNumber) {
+    console.log('initDatePicker:', inputId, routeNumber);
   const currentRouteDate = appState.routeDates[routeNumber] || '';
   const isDateRange = appState.routeDates[routeNumber] && appState.routeDates[routeNumber].includes(' to ');
        

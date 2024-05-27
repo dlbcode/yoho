@@ -44,7 +44,7 @@ export function tripTypePicker() {
     return tripTypeContainer;
 }
 
-export function handleTripTypeChange(tripType) {
+export function handleTripTypeChange(tripType, routeNumber) {
     const dateInputsContainer = document.querySelector('.date-inputs-container');
     if (dateInputsContainer) {
         dateInputsContainer.innerHTML = ''; // Clear existing date inputs
@@ -52,7 +52,8 @@ export function handleTripTypeChange(tripType) {
             const dateInput = createDateInput('departure');
             dateInput.classList.add('full-width'); // Apply full-width class
             dateInputsContainer.appendChild(dateInput);
-            initDatePicker('departure-date-input', appState.currentRouteIndex);
+            console.log('handeTripType routeNumber:', routeNumber);
+            initDatePicker('departure-date-input', routeNumber);
             delete appState.routeDates.return; // Remove return date for one-way trips
         } else {
             const departureDateInput = createDateInput('departure');
@@ -68,18 +69,17 @@ export function handleTripTypeChange(tripType) {
     }
 }
 
-function createDateInput(dateType) {
+function createDateInput(dateType, routeNumber) {
     const dateInput = document.createElement('input');
-    const routeIndex = appState.currentRouteIndex;
     dateInput.id = `${dateType}-date-input`;
     dateInput.className = 'date-input form-control input';
     dateInput.type = 'text';
     dateInput.readOnly = true;
     dateInput.placeholder = `${dateType.charAt(0).toUpperCase() + dateType.slice(1)} Date`;
     const currentDate = new Date().toISOString().split('T')[0];
-    dateInput.value = appState.routeDates[routeIndex] || currentDate;
-    appState.routeDates[routeIndex] = dateInput.value;
+    dateInput.value = appState.routeDates[routeNumber] || currentDate;
+    //appState.routeDates[routeIndex] = dateInput.value;
     dateInput.name = `${dateType}-date-input`;
-    dateInput.addEventListener('change', (e) => appState.routeDates[routeIndex] = e.target.value);
+    //dateInput.addEventListener('change', (e) => appState.routeDates[routeIndex] = e.target.value); 
     return dateInput;
 }

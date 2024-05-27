@@ -36,6 +36,7 @@ function updateState(key, value) {
         }
 
         case 'updateRouteDate': {
+            console.log('updateRouteDate:', value);
             const { routeNumber, date } = value;
             appState.routeDates[routeNumber] = date;
             Object.keys(appState.selectedRoutes).forEach(key => {

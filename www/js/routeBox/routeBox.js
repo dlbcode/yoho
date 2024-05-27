@@ -98,7 +98,8 @@ const routeBox = {
         setupWaypointInputListeners(routeNumber);
 
         // Handle the initial trip type to display the appropriate date input fields
-        handleTripTypeChange(appState.tripType);
+        console.log('routeNumber:', routeNumber);
+        handleTripTypeChange(appState.tripType, routeNumber);
     },
 
     removeExistingRouteBox() {
