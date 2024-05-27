@@ -21,8 +21,7 @@ const appState = {
     currentGroupID: 0,
     highestGroupId: 0,
     routeDates: {
-        departure: null,
-        return: null,
+        0: new Date().toISOString().split('T')[0],
     },
     routeLines: [],
     invisibleRouteLines: [],

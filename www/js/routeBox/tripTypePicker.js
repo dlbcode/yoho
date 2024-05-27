@@ -70,15 +70,16 @@ export function handleTripTypeChange(tripType) {
 
 function createDateInput(dateType) {
     const dateInput = document.createElement('input');
+    const routeIndex = appState.currentRouteIndex;
     dateInput.id = `${dateType}-date-input`;
     dateInput.className = 'date-input form-control input';
     dateInput.type = 'text';
     dateInput.readOnly = true;
     dateInput.placeholder = `${dateType.charAt(0).toUpperCase() + dateType.slice(1)} Date`;
     const currentDate = new Date().toISOString().split('T')[0];
-    dateInput.value = appState.routeDates[dateType] || currentDate;
-    appState.routeDates[dateType] = dateInput.value;
+    dateInput.value = appState.routeDates[routeIndex] || currentDate;
+    appState.routeDates[routeIndex] = dateInput.value;
     dateInput.name = `${dateType}-date-input`;
-    dateInput.addEventListener('change', (e) => appState.routeDates[dateType] = e.target.value);
+    dateInput.addEventListener('change', (e) => appState.routeDates[routeIndex] = e.target.value);
     return dateInput;
 }
