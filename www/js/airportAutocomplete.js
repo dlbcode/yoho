@@ -40,23 +40,13 @@ function handleSelection(e, inputId, airport) {
     const routeNumber = parseInt(inputId.split('-')[2]) - 1;
 
     if (appState.tripType === 'roundTrip' && routeNumber === 1) {
-        // Remove any previously added return waypoints
-        if (appState.waypoints.length > 2) {
-            appState.waypoints = appState.waypoints.slice(0, 2);
-        }
-
-        // Insert two waypoints for the newly selected waypoint (destination)
         const returnWaypoint = [
             { ...airport }, // as destination for the first route
         ];
         updateState('addWaypoint', returnWaypoint);
 
-        // Add the return destination (same as origin of the first route)
-        const originAirport = appState.waypoints[0];
-        updateState('addWaypoint', { ...originAirport });
-
         // Update the return date in the appState
-        updateState('updateRouteDate', { routeNumber: 'return', date: appState.routeDates.departure });
+        updateState('updateRouteDate', { routeNumber: routeNumber, date: appState.routeDates.return });
     } else {
         const waypointIndex = parseInt(inputId.replace('waypoint-input-', '')) - 1;
         if (waypointIndex >= 0 && waypointIndex < appState.waypoints.length) {
