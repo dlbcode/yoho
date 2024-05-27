@@ -153,6 +153,9 @@ function updateState(key, value) {
             appState[key] = value;
             break;
     }
+    console.log('waypoints:', appState.waypoints);
+    console.log('routes:', appState.routes);
+    console.log('routeDates:', appState.routeDates);
     document.dispatchEvent(new CustomEvent('stateChange', { detail: { key, value } }));
 }
 
