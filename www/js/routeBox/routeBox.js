@@ -65,7 +65,7 @@ const routeBox = {
         document.body.appendChild(routeBoxElement);
 
         const topRow = createElement('div', { id: 'topRow', className: 'top-row' });
-        topRow.append(tripTypePicker(), travelersPicker(routeNumber));
+        topRow.append(tripTypePicker(routeNumber), travelersPicker(routeNumber));
         routeBoxElement.append(topRow);
 
         const waypointInputsContainer = createElement('div', { className: 'waypoint-inputs-container' });

@@ -1,7 +1,7 @@
 import { appState, updateState } from "../stateManager.js";
 import { initDatePicker } from "./datePicker.js";
 
-export function tripTypePicker() {
+export function tripTypePicker(routeNumber) {
     const tripTypeContainer = document.createElement('div');
     tripTypeContainer.className = 'trip-type-container';
 
@@ -27,7 +27,7 @@ export function tripTypePicker() {
             dropdownBtn.innerHTML = `${type} <span class="icon-dropdown"></span>`;
             dropdownList.classList.add('hidden');
             updateState('tripType', tripTypeValues[index]);
-            handleTripTypeChange(tripTypeValues[index]);
+            handleTripTypeChange(tripTypeValues[index], routeNumber);  // Ensure routeNumber is passed
             // Optionally dispatch a state change event if needed
             document.dispatchEvent(new CustomEvent('stateChange', { detail: { key: 'tripType', value: tripTypeValues[index] } }));
         });
@@ -45,6 +45,7 @@ export function tripTypePicker() {
 }
 
 export function handleTripTypeChange(tripType, routeNumber) {
+    console.log('handleTripType routeNumber a:', routeNumber);
     const dateInputsContainer = document.querySelector('.date-inputs-container');
     if (dateInputsContainer) {
         dateInputsContainer.innerHTML = ''; // Clear existing date inputs
@@ -52,7 +53,7 @@ export function handleTripTypeChange(tripType, routeNumber) {
             const dateInput = createDateInput('departure', routeNumber);
             dateInput.classList.add('full-width'); // Apply full-width class
             dateInputsContainer.appendChild(dateInput);
-            console.log('handeTripType routeNumber:', routeNumber);
+            console.log('handleTripType routeNumber:', routeNumber);
             initDatePicker('departure-date-input', routeNumber);
             delete appState.routeDates.return; // Remove return date for one-way trips
         } else {
@@ -63,7 +64,9 @@ export function handleTripTypeChange(tripType, routeNumber) {
             dateRow.appendChild(departureDateInput);
             dateRow.appendChild(returnDateInput);
             dateInputsContainer.appendChild(dateRow);
+            console.log('handleTripType routeNumber:', routeNumber);
             initDatePicker('departure-date-input', routeNumber);
+            console.log('handleTripType routeNumber+1:', routeNumber + 1);
             initDatePicker('return-date-input', routeNumber + 1);
         }
     }
