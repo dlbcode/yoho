@@ -40,23 +40,19 @@ function handleSelection(e, inputId, airport) {
     const routeNumber = parseInt(inputId.split('-')[2]) - 1;
 
     if (appState.tripType === 'roundTrip' && routeNumber === 1) {
-        // Remove any previously added return waypoints
-        if (appState.waypoints.length > 2) {
-            appState.waypoints = appState.waypoints.slice(0, 2);
+        // Remove any previously added waypoints beyond the first two
+        if (appState.waypoints.length > 1) {
+            appState.waypoints = appState.waypoints.slice(0, 1);
         }
-
-        // Insert two waypoints for the newly selected waypoint (destination)
-        const returnWaypoint = [
-            { ...airport }, // as destination for the first route
-        ];
-        updateState('addWaypoint', returnWaypoint);
-
-        // Add the return destination (same as origin of the first route)
-        const originAirport = appState.waypoints[0];
-        updateState('addWaypoint', { ...originAirport });
-
-        // Update the return date in the appState
-        updateState('updateRouteDate', { routeNumber: 'return', date: appState.routeDates.departure });
+    
+        // Update the first waypoint to be the selected destination
+        updateState('updateWaypoint', { index: 1, data: airport });
+    
+        // Update the return date in the appState to the departure date
+        console.log('appState.routeDates:', appState.routeDates)
+        const departureDate = appState.routeDates[0].departure || Date.now().toISOString().split('T')[0];
+        const returnDate = appState.routeDates[0].return || departureDate.setDate(departureDateObj.getDate() + 1);
+        updateState('updateRouteDate', { routeNumber: 0, dates: { departure: departureDate, return: returnDate } });
     } else {
         const waypointIndex = parseInt(inputId.replace('waypoint-input-', '')) - 1;
         if (waypointIndex >= 0 && waypointIndex < appState.waypoints.length) {

@@ -37,16 +37,20 @@ function updateState(key, value) {
         }
 
         case 'updateRouteDate': {
-            const { routeNumber, date } = value;
-            appState.routeDates[routeNumber] = date;
+            const { routeNumber, dates } = value;
+            if (!appState.routeDates[routeNumber]) {
+                appState.routeDates[routeNumber] = {};
+            }
+            appState.routeDates[routeNumber] = { ...appState.routeDates[routeNumber], ...dates };
+        
             Object.keys(appState.selectedRoutes).forEach(key => {
                 if (parseInt(key) >= routeNumber && appState.selectedRoutes[key]) {
-                    appState.selectedRoutes[key].routeDates = date;
+                    appState.selectedRoutes[key].routeDates = { ...appState.selectedRoutes[key].routeDates, ...dates };
                 }
             });
             updateUrl();
             break;
-        }
+        }        
 
         case 'updateTravelers': {
             const { routeNumber, travelers } = value;
