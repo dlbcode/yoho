@@ -29,6 +29,7 @@ export function initDatePicker(inputId, routeNumber) {
           } else {
               this.textContent = 'Select Date'; // Reset the button text or handle as needed
           }
+          console.log('datePicker updating date:', dateValue, 'for route:', routeNumber);
           updateState('updateRouteDate', { routeNumber: routeNumber, date: dateValue }); // Update the state accordingly
       }, 
       onReady: (selectedDates, dateStr, instance) => {

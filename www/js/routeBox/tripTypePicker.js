@@ -49,22 +49,22 @@ export function handleTripTypeChange(tripType, routeNumber) {
     if (dateInputsContainer) {
         dateInputsContainer.innerHTML = ''; // Clear existing date inputs
         if (tripType === 'oneWay') {
-            const dateInput = createDateInput('departure');
+            const dateInput = createDateInput('departure', routeNumber);
             dateInput.classList.add('full-width'); // Apply full-width class
             dateInputsContainer.appendChild(dateInput);
             console.log('handeTripType routeNumber:', routeNumber);
             initDatePicker('departure-date-input', routeNumber);
             delete appState.routeDates.return; // Remove return date for one-way trips
         } else {
-            const departureDateInput = createDateInput('departure');
-            const returnDateInput = createDateInput('return');
+            const departureDateInput = createDateInput('departure', routeNumber);
+            const returnDateInput = createDateInput('return', routeNumber + 1);
             const dateRow = document.createElement('div');
             dateRow.className = 'date-row';
             dateRow.appendChild(departureDateInput);
             dateRow.appendChild(returnDateInput);
             dateInputsContainer.appendChild(dateRow);
-            initDatePicker('departure-date-input', appState.currentRouteIndex);
-            initDatePicker('return-date-input', appState.currentRouteIndex);
+            initDatePicker('departure-date-input', routeNumber);
+            initDatePicker('return-date-input', routeNumber + 1);
         }
     }
 }
@@ -78,8 +78,6 @@ function createDateInput(dateType, routeNumber) {
     dateInput.placeholder = `${dateType.charAt(0).toUpperCase() + dateType.slice(1)} Date`;
     const currentDate = new Date().toISOString().split('T')[0];
     dateInput.value = appState.routeDates[routeNumber] || currentDate;
-    //appState.routeDates[routeIndex] = dateInput.value;
     dateInput.name = `${dateType}-date-input`;
-    //dateInput.addEventListener('change', (e) => appState.routeDates[routeIndex] = e.target.value); 
     return dateInput;
 }
