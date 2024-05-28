@@ -20,7 +20,7 @@ const appState = {
     currentGroupID: 0,
     highestGroupId: 0,
     routeDates: {
-        0: { depart: new Date().toISOString().split('T')[0], return: null },
+        0: { depart: new Date().toISOString().split('T')[0], return: new Date(new Date().getTime() + 24 * 60 * 60 * 1000).toISOString().split('T')[0] },
     },
     routeLines: [],
     invisibleRouteLines: [],
@@ -92,7 +92,18 @@ function updateState(key, value) {
                 const recalculatedRouteDates = { ...appState.routeDates };
                 appState.routes.forEach((route, index) => {
                     if (!recalculatedRouteDates.hasOwnProperty(index)) {
-                        recalculatedRouteDates[index] = { depart: new Date().toISOString().split('T')[0], return: null };
+                        if (index === 0) {
+                            recalculatedRouteDates[index] = {
+                                depart: new Date().toISOString().split('T')[0],
+                                return: new Date(new Date().getTime() + 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+                            };
+                        } else {
+                            const prevRouteDate = recalculatedRouteDates[index - 1].return || recalculatedRouteDates[index - 1].depart;
+                            recalculatedRouteDates[index] = {
+                                depart: prevRouteDate,
+                                return: new Date(new Date(prevRouteDate).getTime() + 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+                            };
+                        }
                     }
                 });
                 appState.routeDates = recalculatedRouteDates;

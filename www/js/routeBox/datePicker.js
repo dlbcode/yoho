@@ -18,21 +18,14 @@ export function initDatePicker(inputId, routeNumber) {
         altInput: true,
         altFormat: "D, d M", // This will display the date as 'Fri, 10 May'
         onValueUpdate: function(selectedDates, dateStr) {
-            let dateValue = null;
             console.log('dateStr:', dateStr);
-            if (selectedDates.length > 0 && selectedDates[0]) {
-                if (selectedDates.length > 1 && selectedDates[1]) {
-                    dateValue = `${selectedDates[0].toISOString().split('T')[0]} to ${selectedDates[1].toISOString().split('T')[0]}`;
-                } else {
-                    const formatter = new Intl.DateTimeFormat('en-US', { day: 'numeric', timeZone: 'UTC' });
-                    this.textContent = formatter.format(selectedDates[0]);
-                    dateValue = selectedDates[0].toISOString().split('T')[0];
-                }
-            } else {
-                this.textContent = 'Select Date'; // Reset the button text or handle as needed
+            if (dateType === 'depart') {
+                appState.routeDates[routeNumber].depart = selectedDates.length > 0 ? selectedDates[0].toISOString().split('T')[0] : null;
+            } else if (dateType === 'return') {
+                appState.routeDates[routeNumber].return = selectedDates.length > 0 ? selectedDates[0].toISOString().split('T')[0] : null;
             }
-            console.log('datePicker updating date:', dateValue, 'for route:', routeNumber);
-            updateState('updateRouteDate', { routeNumber, [dateType]: dateValue }); // Update the state accordingly
+            console.log('datePicker updating date:', appState.routeDates[routeNumber], 'for route:', routeNumber);
+            updateState('updateRouteDate', { routeNumber, ...appState.routeDates[routeNumber] }); // Update the state accordingly
         },
         onReady: (selectedDates, dateStr, instance) => {
             instance.calendarContainer.classList.add('do-not-close-routebox');

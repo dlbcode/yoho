@@ -81,7 +81,8 @@ function createDateInput(dateType, routeNumber) {
     dateInput.readOnly = true;
     dateInput.placeholder = `${dateType.charAt(0).toUpperCase() + dateType.slice(1)} Date`;
     const currentDate = new Date().toISOString().split('T')[0];
-    dateInput.value = appState.routeDates[routeNumber] ? appState.routeDates[routeNumber][dateType] : currentDate;
+    const returnDate = new Date(new Date().getTime() + 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+    dateInput.value = appState.routeDates[routeNumber] ? appState.routeDates[routeNumber][dateType] : (dateType === 'depart' ? currentDate : returnDate);
     dateInput.name = `${dateType}-date-input`;
     return dateInput;
 }
