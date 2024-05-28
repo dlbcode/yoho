@@ -53,7 +53,6 @@ function updateState(key, value) {
 
         case 'tripType': {
             const { routeNumber, tripType } = value;
-            console.log(`Updating trip type for route ${routeNumber} to ${tripType}`);
             if (appState.routes[routeNumber]) {
                 appState.routes[routeNumber].tripType = tripType;
             } else {
@@ -164,10 +163,7 @@ function updateState(key, value) {
             break;
     }
     document.dispatchEvent(new CustomEvent('stateChange', { detail: { key, value } }));
-    console.log('waypoints:', appState.waypoints);
-    console.log('routes:', appState.routes);
-    console.log('routeDates:', appState.routeDates);
-    console.log('routeTypes:', appState.routes.map(route => route.tripType));
+    console.log('appsState:', appState);
 }
 
 function updateUrl() {
@@ -191,15 +187,11 @@ function updateUrl() {
     const types = appState.routes
         ? appState.routes.map((route, index) => `${index}:${route.tripType}`).join(',')
         : '';
-    console.log('updateUrl types:', types); // Debugging statement
-
     if (types.length > 0) {
         params.set('types', types);
     } else {
         params.delete('types');
     }
-
-    console.log('params.toString():', params.toString()); // Debugging statement
 
     if (appState.routeDirection !== defaultDirection) {
         params.set('direction', appState.routeDirection);
