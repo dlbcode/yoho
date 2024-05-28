@@ -175,8 +175,8 @@ const infoPane = {
         const group = item.group;
         if (!groupData[group]) {
             groupData[group] = {
-                departure: item.displayData.departure, // First route's departure
-                arrival: item.displayData.arrival, // Last route's arrival (will be updated)
+                departure: appState.routeDates[item.routeNumber].depart, // Access new routeDates structure
+                arrival: appState.routeDates[item.routeNumber].return, // Access new routeDates structure
                 price: item.displayData.price,
                 airlines: [item.displayData.airline],
                 stops: new Set(), // Use a Set to ensure unique stops
@@ -184,7 +184,7 @@ const infoPane = {
                 deep_link: item.displayData.deep_link
             };
         } else {
-            groupData[group].arrival = item.displayData.arrival; // Update to last route's arrival
+            groupData[group].arrival = appState.routeDates[item.routeNumber].return; // Update to last route's arrival
             groupData[group].airlines.push(item.displayData.airline);
         }
         // Always add the destination to the route
@@ -243,7 +243,7 @@ const infoPane = {
         // Only add price if this group has not been processed yet
         if (!processedGroups.has(item.group)) {
             processedGroups.add(item.group); // Mark this group as processed
-            let price = parseFloat(item.displayData.price.replace(/[^\d.-]/g, ''));
+            let price = parseFloat(item.displayData.price.replace(/[^\\d.-]/g, ''));
             price = isNaN(price) ? 0 : price; // Use 0 if the price is not a valid number
             totalPrice += price; // Add price to total
         }
@@ -269,8 +269,7 @@ const infoPane = {
         pathDrawing.drawLines(); // Redraw all active routes if necessary
       });
     }
-
-},
+  },
 
 formatPrice: function(price) {
   const numericPrice = parseFloat(price.replace(/[^\d.-]/g, ''));

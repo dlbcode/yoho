@@ -6,7 +6,6 @@ import { flightMap } from '../flightMap.js';
 import { routeInfoRow, highlightSelectedRowForRouteIndex } from './routeInfoRow.js';
 
 function buildRouteTable(routeIndex) {
-
   appState.filterState = {
     departure: { start: 0, end: 24 },
     arrival: { start: 0, end: 24 }
@@ -33,19 +32,22 @@ function buildRouteTable(routeIndex) {
     let fromDate;
     let toDate;
   
-    if (dateRange.includes(' to ')) {
+    if (typeof dateRange === 'string' && dateRange.includes(' to ')) {
       const dateRangeParts = dateRange.split(' to ');
       fromDate = dateRangeParts[0];
       toDate = dateRangeParts[1];
+    } else if (dateRange) {
+      fromDate = dateRange.depart;
+      toDate = dateRange.return;
     } else {
-      fromDate = dateRange;
-      toDate = dateRange;
+      fromDate = '';
+      toDate = '';
     }
   }
 
   let tableType = 'single';
   if (dateRange) {
-    if (dateRange.includes(' to ') || dateRange.includes('any')) {
+    if ((typeof dateRange === 'string' && dateRange.includes(' to ')) || dateRange === 'any') {
         tableType = 'range';
         endPoint = 'range';
     }
@@ -60,12 +62,14 @@ function buildRouteTable(routeIndex) {
   }
   
   if (!currentRoute) {
-    if (tableType === 'range') {
+    if (tableType === 'range' && dateRange && typeof dateRange === 'string') {
       [startDate, endDate] = dateRange.split(' to ');
       currentRoute = appState.routes[routeIndex];
-    } else {
-      departureDate = appState.routeDates[routeIndex];
+    } else if (dateRange) {
+      departureDate = dateRange.depart;
       currentRoute = appState.routes && appState.routes.length > routeIndex ? appState.routes[routeIndex] : undefined;  // Assign to already declared currentRoute
+    } else {
+      departureDate = '';
     }
   }
 
@@ -76,7 +80,7 @@ function buildRouteTable(routeIndex) {
   topBar.classList.add('loading');
   if (destination === 'Any') {
     endPoint = 'cheapestFlights';
-    origin = origin = appState.waypoints[routeIndex * 2]?.iata_code;
+    origin = appState.waypoints[routeIndex * 2]?.iata_code;
   } else {
     origin = currentRoute.originAirport.iata_code;
   }
@@ -115,7 +119,7 @@ function buildRouteTable(routeIndex) {
       const thead = document.createElement('thead');
       let headerRow = `<tr>
                     <th data-column="departure">
-                        <span class="headerText" " data-column="departure">
+                        <span class="headerText" data-column="departure">
                         <span class="filteredHeader" data-column="departure">Departure</span>
                         <img class="filterIcon" id="departureFilter" data-column="departure" src="/assets/filter-icon.svg" alt="Filter">
                         <span class="resetIcon" id="resetDepartureFilter" data-column="departure" style="display:none; cursor:pointer;">✕</span>
@@ -248,7 +252,7 @@ function buildRouteTable(routeIndex) {
             case 'price':
                 const priceCells = document.querySelectorAll('.route-info-table tbody tr td:nth-child(' + (getColumnIndex('price') + 1) + ')');
                 const prices = Array.from(priceCells).map(cell => {
-                    const priceText = cell.textContent.replace(/[^\d.]/g, ''); // Remove any non-numeric characters, including the dollar sign
+                    const priceText = cell.textContent.replace(/[^\\d.]/g, ''); // Remove any non-numeric characters, including the dollar sign
                     return parseFloat(priceText);
                 }).filter(price => !isNaN(price)); // Ensure only valid numbers are included
     
