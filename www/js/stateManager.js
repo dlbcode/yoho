@@ -7,8 +7,6 @@ const appState = {
     roundTrip: false,
     travelers: 1,
     routeDirection: defaultDirection,
-    startDate: null,
-    endDate: null,
     waypoints: [],
     routes: [],
     trips: [],
@@ -140,17 +138,7 @@ function updateState(key, value) {
             delete appState.selectedRoutes[value];
             updateUrl();
             break;
-
-        case 'startDate':
-            appState.startDate = value;
-            updateUrl();
-            break;
-
-        case 'endDate':
-            appState.endDate = value;
-            updateUrl();
-            break;
-
+            
         case 'changeView':
             appState.currentView = value;
             updateUrl();
