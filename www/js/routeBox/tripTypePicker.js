@@ -30,9 +30,10 @@ export function tripTypePicker(routeNumber) {
         listItem.textContent = type;
         listItem.addEventListener('click', () => {
             appState.routes[routeNumber].tripType = tripTypeValues[index];
+            appState.routeTypes[routeNumber] = tripTypeValues[index];
             dropdownBtn.innerHTML = `${type} <span class="icon-dropdown"></span>`;
             dropdownList.classList.add('hidden');
-            updateState('tripType', tripTypeValues[index]);
+            updateState('tripType', { routeNumber, tripType: tripTypeValues[index] });
             handleTripTypeChange(tripTypeValues[index], routeNumber);
             document.dispatchEvent(new CustomEvent('stateChange', { detail: { key: 'tripType', value: tripTypeValues[index] } }));
         });

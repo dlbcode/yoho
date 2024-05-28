@@ -4,6 +4,9 @@ export function initDatePicker(inputId, routeNumber) {
     console.log('initDatePicker:', inputId, routeNumber);
 
     const dateType = inputId.split('-')[0]; // 'depart' or 'return'
+    if (!appState.routeDates[routeNumber]) {
+        appState.routeDates[routeNumber] = { depart: null, return: null };
+    }
     const currentRouteDate = appState.routeDates[routeNumber] ? appState.routeDates[routeNumber][dateType] : '';
     const isDateRange = appState.routeDates[routeNumber] && appState.routeDates[routeNumber].depart && appState.routeDates[routeNumber].return;
 

@@ -35,6 +35,9 @@ function updateState(key, value) {
         case 'updateRouteDate': {
             console.log('appState.updateRouteDate:', value);
             const { routeNumber, depart, return: returnDate } = value;
+            if (!appState.routeDates[routeNumber]) {
+                appState.routeDates[routeNumber] = { depart: null, return: null };
+            }
             appState.routeDates[routeNumber] = {
                 depart: depart || appState.routeDates[routeNumber].depart,
                 return: returnDate || appState.routeDates[routeNumber].return
@@ -48,9 +51,20 @@ function updateState(key, value) {
             break;
         }
 
+        case 'tripType': {
+            const { routeNumber, tripType } = value;
+            if (appState.routes[routeNumber]) {
+                appState.routes[routeNumber].tripType = tripType;
+            } else {
+                appState.routes[routeNumber] = { tripType };
+            }
+            updateUrl();
+            break;
+        }
+
         case 'updateTravelers': {
             const { routeNumber, travelers } = value;
-            if (routeNumber != null && appState.routes[routeNumber]) { // Check if the route exists
+            if (routeNumber != null && appState.routes[routeNumber]) {
                 appState.routes[routeNumber].travelers = parseInt(travelers);
             }
             break;
@@ -58,16 +72,16 @@ function updateState(key, value) {
 
         case 'updateWaypoint':
             if (value.index >= 0 && value.index < appState.waypoints.length) {
-            appState.waypoints[value.index] = {...appState.waypoints[value.index], ...value.data};
+                appState.waypoints[value.index] = { ...appState.waypoints[value.index], ...value.data };
             }
             updateUrl();
             break;
 
         case 'addWaypoint':
             if (Array.isArray(value)) {
-            value.forEach(waypoint => appState.waypoints.push(waypoint));
+                value.forEach(waypoint => appState.waypoints.push(waypoint));
             } else {
-            appState.waypoints.push(value);
+                appState.waypoints.push(value);
             }
             updateUrl();
             break;
@@ -138,7 +152,7 @@ function updateState(key, value) {
             delete appState.selectedRoutes[value];
             updateUrl();
             break;
-            
+
         case 'changeView':
             appState.currentView = value;
             updateUrl();
@@ -163,11 +177,22 @@ function updateUrl() {
         params.delete('waypoints');
     }
 
-    const dates = Object.entries(appState.routeDates).map(([key, value]) => `${key}:depart:${value.depart},return:${value.return}`).join(',');
+    const dates = appState.routeDates
+        ? Object.entries(appState.routeDates).map(([key, value]) => `${key}:depart:${value.depart},return:${value.return || 'null'}`).join(',')
+        : '';
     if (dates.length > 0) {
         params.set('dates', dates);
     } else {
         params.delete('dates');
+    }
+
+    const types = appState.routes
+        ? appState.routes.map((route, index) => `${index}:type:${route.tripType}`).join(',')
+        : '';
+    if (types.length > 0) {
+        params.set('types', types);
+    } else {
+        params.delete('types');
     }
 
     if (appState.routeDirection !== defaultDirection) {
