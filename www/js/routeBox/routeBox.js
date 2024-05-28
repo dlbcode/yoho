@@ -64,6 +64,11 @@ const routeBox = {
         const routeBoxElement = this.createRouteBox();
         document.body.appendChild(routeBoxElement);
 
+        // Ensure the route is initialized
+        if (!appState.routes[routeNumber]) {
+            appState.routes[routeNumber] = { tripType: 'oneWay' };
+        }
+
         const topRow = createElement('div', { id: 'topRow', className: 'top-row' });
         topRow.append(tripTypePicker(routeNumber), travelersPicker(routeNumber));
         routeBoxElement.append(topRow);
@@ -99,7 +104,7 @@ const routeBox = {
 
         // Handle the initial trip type to display the appropriate date input fields
         console.log('routeNumber:', routeNumber);
-        handleTripTypeChange(appState.tripType, routeNumber);
+        handleTripTypeChange(appState.routes[routeNumber].tripType, routeNumber);
     },
 
     removeExistingRouteBox() {
