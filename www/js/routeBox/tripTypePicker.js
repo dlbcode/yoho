@@ -29,8 +29,14 @@ export function tripTypePicker(routeNumber) {
         const listItem = document.createElement('li');
         listItem.textContent = type;
         listItem.addEventListener('click', () => {
+            if (!appState.routes[routeNumber]) {
+                appState.routes[routeNumber] = {};
+            }
+            if (!appState.routeTypes) {
+                appState.routeTypes = {};
+            }
             appState.routes[routeNumber].tripType = tripTypeValues[index];
-            appState.routeTypes[routeNumber] = tripTypeValues[index];
+            appState.routeTypes[routeNumber] = tripTypeValues[index]; // Line 36
             dropdownBtn.innerHTML = `${type} <span class="icon-dropdown"></span>`;
             dropdownList.classList.add('hidden');
             updateState('tripType', { routeNumber, tripType: tripTypeValues[index] });
@@ -38,7 +44,7 @@ export function tripTypePicker(routeNumber) {
             document.dispatchEvent(new CustomEvent('stateChange', { detail: { key: 'tripType', value: tripTypeValues[index] } }));
         });
         dropdownList.appendChild(listItem);
-    });
+    });        
 
     tripTypeContainer.appendChild(dropdownList);
 
