@@ -5,11 +5,17 @@ export function tripTypePicker(routeNumber) {
     const tripTypeContainer = document.createElement('div');
     tripTypeContainer.className = 'trip-type-container';
 
+    // Ensure the route and tripType are defined
+    if (!appState.routes[routeNumber]) {
+        appState.routes[routeNumber] = { tripType: 'oneWay' }; // Initialize route with default tripType
+    }
+    const tripType = appState.routes[routeNumber].tripType;
+
     // Create dropdown button
     const dropdownBtn = document.createElement('button');
     dropdownBtn.id = 'tripTypeDropdownBtn';
     dropdownBtn.className = 'trip-type-dropdown-btn';
-    dropdownBtn.innerHTML = `${appState.tripType.charAt(0).toUpperCase() + appState.tripType.slice(1)} <span class="icon-dropdown"></span>`;
+    dropdownBtn.innerHTML = `${tripType.charAt(0).toUpperCase() + tripType.slice(1)} <span class="icon-dropdown"></span>`;
     tripTypeContainer.appendChild(dropdownBtn);
 
     // Create dropdown list
@@ -23,12 +29,11 @@ export function tripTypePicker(routeNumber) {
         const listItem = document.createElement('li');
         listItem.textContent = type;
         listItem.addEventListener('click', () => {
-            appState.tripType = tripTypeValues[index];
+            appState.routes[routeNumber].tripType = tripTypeValues[index];
             dropdownBtn.innerHTML = `${type} <span class="icon-dropdown"></span>`;
             dropdownList.classList.add('hidden');
             updateState('tripType', tripTypeValues[index]);
-            handleTripTypeChange(tripTypeValues[index], routeNumber);  // Ensure routeNumber is passed
-            // Optionally dispatch a state change event if needed
+            handleTripTypeChange(tripTypeValues[index], routeNumber);
             document.dispatchEvent(new CustomEvent('stateChange', { detail: { key: 'tripType', value: tripTypeValues[index] } }));
         });
         dropdownList.appendChild(listItem);
@@ -45,17 +50,15 @@ export function tripTypePicker(routeNumber) {
 }
 
 export function handleTripTypeChange(tripType, routeNumber) {
-    console.log('handleTripType routeNumber a:', routeNumber);
     const dateInputsContainer = document.querySelector('.date-inputs-container');
     if (dateInputsContainer) {
-        dateInputsContainer.innerHTML = ''; // Clear existing date inputs
+        dateInputsContainer.innerHTML = '';
         if (tripType === 'oneWay') {
             const dateInput = createDateInput('departure', routeNumber);
-            dateInput.classList.add('full-width'); // Apply full-width class
+            dateInput.classList.add('full-width');
             dateInputsContainer.appendChild(dateInput);
-            console.log('handleTripType routeNumber:', routeNumber);
             initDatePicker('departure-date-input', routeNumber);
-            delete appState.routeDates.return; // Remove return date for one-way trips
+            delete appState.routeDates.return;
         } else {
             const departureDateInput = createDateInput('departure', routeNumber);
             const returnDateInput = createDateInput('return', routeNumber + 1);
@@ -64,9 +67,7 @@ export function handleTripTypeChange(tripType, routeNumber) {
             dateRow.appendChild(departureDateInput);
             dateRow.appendChild(returnDateInput);
             dateInputsContainer.appendChild(dateRow);
-            console.log('handleTripType routeNumber:', routeNumber);
             initDatePicker('departure-date-input', routeNumber);
-            console.log('handleTripType routeNumber+1:', routeNumber + 1);
             initDatePicker('return-date-input', routeNumber + 1);
         }
     }
