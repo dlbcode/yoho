@@ -185,7 +185,7 @@ function updateUrl() {
     }
 
     const dates = appState.routeDates
-        ? Object.entries(appState.routeDates).map(([key, value]) => `${key}:depart:${value.depart},return:${value.return || 'null'}`).join(',')
+        ? Object.entries(appState.routeDates).map(([key, value]) => `${key}:depart:${value.depart},${key}:return:${value.return || 'null'}`).join(',')
         : '';
     if (dates.length > 0) {
         params.set('dates', dates);

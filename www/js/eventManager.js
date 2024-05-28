@@ -42,8 +42,15 @@ const eventManager = {
             if (params.has('dates')) {
                 let datesParam = params.get('dates').split(',');
                 datesParam.forEach(pair => {
-                    let [routeNumber, dateRange] = pair.split(':');
-                    appState.routeDates[routeNumber] = dateRange;
+                    let [routeNumber, type, date] = pair.split(':');
+                    if (!appState.routeDates[routeNumber]) {
+                        appState.routeDates[routeNumber] = { depart: null, return: null };
+                    }
+                    if (type === 'depart') {
+                        appState.routeDates[routeNumber].depart = date;
+                    } else if (type === 'return') {
+                        appState.routeDates[routeNumber].return = date;
+                    }
                 });
             }
             console.log('eventManager.js - Updated routeDates:', appState.routeDates);
