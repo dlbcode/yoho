@@ -98,6 +98,9 @@ function updateState(key, value) {
             break;
 
         case 'updateRoutes':
+            if (value.length === 0) {
+                break; // Do not update if value is an empty array
+            }
             if (JSON.stringify(appState.routes) !== JSON.stringify(value)) {
                 appState.routes = value.map(route => ({
                     ...route,
@@ -123,6 +126,7 @@ function updateState(key, value) {
                 });
                 appState.routeDates = recalculatedRouteDates;
             }
+            updateUrl();
             break;
 
         case 'clearData':
@@ -160,10 +164,12 @@ function updateState(key, value) {
 
         default:
             appState[key] = value;
+            updateUrl(); // Ensure URL update for any other state changes
             break;
     }
     document.dispatchEvent(new CustomEvent('stateChange', { detail: { key, value } }));
-    console.log('appsState:', appState);
+    console.log('State updated:', key, value);
+    console.log('appState:', appState);
 }
 
 function updateUrl() {
@@ -204,6 +210,8 @@ function updateUrl() {
     if (window.location.search !== newUrl) {
         window.history.pushState({}, '', newUrl);
     }
+
+    console.log('URL updated:', newUrl);
 
     document.dispatchEvent(new CustomEvent('routeDatesUpdated'));
 }

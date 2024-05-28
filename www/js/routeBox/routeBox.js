@@ -54,6 +54,15 @@ const setupWaypointInputListeners = (routeNumber) => {
         input.addEventListener('focus', (event) => {
             event.target.select();
         });
+        input.addEventListener('blur', () => {
+            setTimeout(() => {
+                if (input.value === '' && appState.waypoints.length > 0) {
+                    const waypointIndex = parseInt(input.id.replace('waypoint-input-', '')) - 1;
+                    updateState('removeWaypoint', waypointIndex);
+                }
+                updateUrl(); // Explicitly update the URL on blur
+            }, 100); // Delay to allow for selection
+        });
     });
     enableSwapButtonIfNeeded(); // Initial check
 };

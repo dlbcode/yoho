@@ -30,7 +30,7 @@ const infoPane = {
 
   handleStateChange(event) {
     this.updateRouteButtons();
-    if (event.detail.key === 'updateSelectedRoute' || event.detail.key === 'removeSelectedRoute' || event.detail.key === 'changeView' || event.detail.key === 'updateRoutes' || event.detail.key === 'updateRoutes') {
+    if (event.detail.key === 'updateSelectedRoute' || event.detail.key === 'removeSelectedRoute' || event.detail.key === 'changeView' || event.detail.key === 'updateRoutes') {
       //appState.currentView = 'trip';
       this.displayContent();
     }

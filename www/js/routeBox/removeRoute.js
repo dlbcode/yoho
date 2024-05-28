@@ -26,9 +26,8 @@ const removeRoute = {
         // Remove the waypoints for the route being removed
         let waypointsIndex = (routeNumber) * 2;
         if (appState.waypoints.length > waypointsIndex) {
-            appState.waypoints.splice(waypointsIndex, 2); // Remove 2 waypoints starting from the calculated index
-            updateState('updateWaypoint', appState.waypoints); // Update the state to reflect the change
-        }
+            updateState('removeWaypoints', routeNumber);
+        }          
 
         // Remove the route date for the removed route
         delete appState.routeDates[routeNumber];

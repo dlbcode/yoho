@@ -1,4 +1,4 @@
-import { appState, updateState } from './stateManager.js';
+import { appState, updateState, updateUrl } from './stateManager.js';
 import { map } from './map.js';
 import { uiHandling } from './uiHandling.js';
 import { routeBox } from './routeBox/routeBox.js'; // Ensure to import routeBox
@@ -91,7 +91,7 @@ function setupAutocompleteForField(fieldId) {
             const rect = inputField.getBoundingClientRect();
             suggestionBox.style.left = `0px`;
             suggestionBox.style.top = '35px';
-            suggestionBox.style.width = '300px'
+            suggestionBox.style.width = '300px';
         }
     };
 
@@ -138,6 +138,7 @@ function setupAutocompleteForField(fieldId) {
                 const waypointIndex = parseInt(inputField.id.replace('waypoint-input-', '')) - 1;
                 updateState('removeWaypoint', waypointIndex);
             }
+            updateUrl(); // Explicitly update the URL on blur
         }, 100); // Delay to allow for selection
     });
 
