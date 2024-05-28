@@ -20,7 +20,7 @@ const appState = {
     currentGroupID: 0,
     highestGroupId: 0,
     routeDates: {
-        0: new Date().toISOString().split('T')[0],
+        0: { depart: new Date().toISOString().split('T')[0], return: null },
     },
     routeLines: [],
     invisibleRouteLines: [],
@@ -36,11 +36,11 @@ function updateState(key, value) {
 
         case 'updateRouteDate': {
             console.log('appState.updateRouteDate:', value);
-            const { routeNumber, date } = value;
-            appState.routeDates[routeNumber] = date;
+            const { routeNumber, depart, return: returnDate } = value;
+            appState.routeDates[routeNumber] = { depart, return: returnDate };
             Object.keys(appState.selectedRoutes).forEach(key => {
                 if (parseInt(key) >= routeNumber && appState.selectedRoutes[key]) {
-                    appState.selectedRoutes[key].routeDates = date;
+                    appState.selectedRoutes[key].routeDates = { depart, return: returnDate };
                 }
             });
             updateUrl();
@@ -92,7 +92,7 @@ function updateState(key, value) {
                 const recalculatedRouteDates = { ...appState.routeDates };
                 appState.routes.forEach((route, index) => {
                     if (!recalculatedRouteDates.hasOwnProperty(index)) {
-                        recalculatedRouteDates[index] = new Date().toISOString().split('T')[0];
+                        recalculatedRouteDates[index] = { depart: new Date().toISOString().split('T')[0], return: null };
                     }
                 });
                 appState.routeDates = recalculatedRouteDates;
@@ -161,7 +161,7 @@ function updateUrl() {
         params.delete('waypoints');
     }
 
-    const dates = Object.entries(appState.routeDates).map(([key, value]) => `${key}:${value}`).join(',');
+    const dates = Object.entries(appState.routeDates).map(([key, value]) => `${key}:depart:${value.depart},return:${value.return}`).join(',');
     if (dates.length > 0) {
         params.set('dates', dates);
     } else {

@@ -54,21 +54,21 @@ export function handleTripTypeChange(tripType, routeNumber) {
     if (dateInputsContainer) {
         dateInputsContainer.innerHTML = '';
         if (tripType === 'oneWay') {
-            const dateInput = createDateInput('departure', routeNumber);
+            const dateInput = createDateInput('depart', routeNumber);
             dateInput.classList.add('full-width');
             dateInputsContainer.appendChild(dateInput);
-            initDatePicker('departure-date-input', routeNumber);
-            delete appState.routeDates.return;
+            initDatePicker('depart-date-input', routeNumber);
+            delete appState.routeDates[routeNumber].return;
         } else {
-            const departureDateInput = createDateInput('departure', routeNumber);
-            const returnDateInput = createDateInput('return', routeNumber + 1);
+            const departDateInput = createDateInput('depart', routeNumber);
+            const returnDateInput = createDateInput('return', routeNumber);
             const dateRow = document.createElement('div');
             dateRow.className = 'date-row';
-            dateRow.appendChild(departureDateInput);
+            dateRow.appendChild(departDateInput);
             dateRow.appendChild(returnDateInput);
             dateInputsContainer.appendChild(dateRow);
-            initDatePicker('departure-date-input', routeNumber);
-            initDatePicker('return-date-input', routeNumber + 1);
+            initDatePicker('depart-date-input', routeNumber);
+            initDatePicker('return-date-input', routeNumber);
         }
     }
 }
@@ -81,7 +81,7 @@ function createDateInput(dateType, routeNumber) {
     dateInput.readOnly = true;
     dateInput.placeholder = `${dateType.charAt(0).toUpperCase() + dateType.slice(1)} Date`;
     const currentDate = new Date().toISOString().split('T')[0];
-    dateInput.value = appState.routeDates[routeNumber] || currentDate;
+    dateInput.value = appState.routeDates[routeNumber] ? appState.routeDates[routeNumber][dateType] : currentDate;
     dateInput.name = `${dateType}-date-input`;
     return dateInput;
 }
