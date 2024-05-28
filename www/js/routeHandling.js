@@ -1,19 +1,30 @@
 import { appState, updateState } from './stateManager.js';
 import { flightMap } from './flightMap.js';
 import { pathDrawing } from './pathDrawing.js';
-const routeHandling = {           
 
+const routeHandling = {
     updateRoutesArray: async function () {
         let newRoutes = [];
         let fetchPromises = [];
 
         const waypoints = appState.routeDirection === 'to' ? [...appState.waypoints].reverse() : appState.waypoints;
+        console.log('routeHandling.js - Waypoints:', waypoints);
+
+        if (waypoints.length < 2) {
+            console.log('Not enough waypoints to form routes');
+            updateState('updateRoutes', newRoutes);
+            return;
+        }
 
         for (let i = 0; i < waypoints.length - 1; i += 2) {
             const fromWaypoint = waypoints[i];
             const toWaypoint = waypoints[i + 1];
+            console.log('routeHandling.js - Processing fromWaypoint:', fromWaypoint, 'toWaypoint:', toWaypoint);
 
-            // Fetch and cache routes if not already done
+            if (!fromWaypoint || !toWaypoint) {
+                continue;
+            }
+
             if (!appState.directRoutes[fromWaypoint.iata_code]) {
                 fetchPromises.push(flightMap.fetchAndCacheRoutes(fromWaypoint.iata_code));
             }
@@ -24,7 +35,6 @@ const routeHandling = {
 
         await Promise.all(fetchPromises);
 
-        // Now find and add routes
         for (let i = 0; i < waypoints.length - 1; i += 2) {
             const fromWaypoint = waypoints[i];
             const toWaypoint = waypoints[i + 1];
@@ -34,20 +44,17 @@ const routeHandling = {
                 route.isDirect = true;
                 newRoutes.push(route);
             } else {
-                // Fetch airport data for both origin and destination
                 const [originAirport, destinationAirport] = await Promise.all([
                     flightMap.getAirportDataByIata(fromWaypoint.iata_code),
                     flightMap.getAirportDataByIata(toWaypoint.iata_code)
                 ]);
 
-                // Create an indirect route with full airport information and additional fields
                 const indirectRoute = {
                     origin: fromWaypoint.iata_code,
                     destination: toWaypoint.iata_code,
                     originAirport: originAirport,
                     destinationAirport: destinationAirport,
                     isDirect: false,
-                    // Set default values for missing fields if necessary
                     price: null,
                     source: 'indirect',
                     timestamp: new Date().toISOString()
@@ -56,10 +63,13 @@ const routeHandling = {
             }
         }
 
+        console.log('routeHandling.js - New Routes:', newRoutes);
+
         updateState('updateRoutes', newRoutes);
         pathDrawing.clearLines(true);
         pathDrawing.drawLines();
         document.dispatchEvent(new CustomEvent('routesArrayUpdated'));
     }
-}
-export { routeHandling }
+};
+
+export { routeHandling };

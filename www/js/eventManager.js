@@ -8,11 +8,10 @@ import { mapHandling } from './mapHandling.js';
 
 function handleStateChange(event) {
     const { key, value } = event.detail;
+    console.log('eventManager.js - handleStateChange:', key, value);
 
     if (key === 'addWaypoint' || key === 'removeWaypoint' || key === 'updateWaypoint') {
-        //const container = document.querySelector('.airport-selection');
-        //container.innerHTML = '';
-
+        console.log('eventManager.js - Updating marker icons and routes array');
         mapHandling.updateMarkerIcons();
         routeHandling.updateRoutesArray();
         appState.currentView = 'trip';
@@ -32,10 +31,12 @@ const eventManager = {
         document.addEventListener('stateChange', handleStateChange);
         window.onpopstate = function(event) {
             const params = new URLSearchParams(window.location.search);
+            console.log('eventManager.js - onpopstate params:', params.toString());
         
             // Update app state based on URL parameters
             appState.waypoints = params.get('waypoints') ? params.get('waypoints').split(',').map(iata => ({ iata_code: iata })) : [];
             appState.routeDates = {};
+            console.log('eventManager.js - Updated waypoints:', appState.waypoints);
 
             // Parse the 'dates' parameter
             if (params.has('dates')) {
@@ -45,6 +46,7 @@ const eventManager = {
                     appState.routeDates[routeNumber] = dateRange;
                 });
             }
+            console.log('eventManager.js - Updated routeDates:', appState.routeDates);
                         
             const container = document.querySelector('.airport-selection');
             container.innerHTML = '';
