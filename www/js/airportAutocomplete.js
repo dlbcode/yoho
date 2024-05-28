@@ -38,22 +38,11 @@ function handleSelection(e, inputId, airport) {
     inputField.setAttribute('data-selected-iata', airport.iata_code);
 
     const routeNumber = parseInt(inputId.split('-')[2]) - 1;
-
-    if (appState.tripType === 'roundTrip' && routeNumber === 1) {
-        const returnWaypoint = [
-            { ...airport }, // as destination for the first route
-        ];
-        updateState('addWaypoint', returnWaypoint);
-
-        // Update the return date in the appState
-        updateState('updateRouteDate', { routeNumber: routeNumber, date: appState.routeDates.return });
+    const waypointIndex = parseInt(inputId.replace('waypoint-input-', '')) - 1;
+    if (waypointIndex >= 0 && waypointIndex < appState.waypoints.length) {
+        updateState('updateWaypoint', { index: waypointIndex, data: airport });
     } else {
-        const waypointIndex = parseInt(inputId.replace('waypoint-input-', '')) - 1;
-        if (waypointIndex >= 0 && waypointIndex < appState.waypoints.length) {
-            updateState('updateWaypoint', { index: waypointIndex, data: airport });
-        } else {
-            updateState('addWaypoint', airport);
-        }
+        updateState('addWaypoint', airport);
     }
 
     inputField.blur();

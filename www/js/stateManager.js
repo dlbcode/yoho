@@ -150,6 +150,8 @@ function updateState(key, value) {
             break;
     }
     document.dispatchEvent(new CustomEvent('stateChange', { detail: { key, value } }));
+    console.log('waypoints:', appState.waypoints);
+    console.log('routes:', appState.routes);
     console.log('routeDates:', appState.routeDates);
 }
 
