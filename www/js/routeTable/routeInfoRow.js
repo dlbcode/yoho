@@ -237,7 +237,7 @@ function routeInfoRow(rowElement, fullFlightData, routeIds, routeIndex) {
         const routeString = routeIATAs.trim(); // Assuming the IATA codes are in the 9th column
         const iataCodes = routeString.split(' > ');
         replaceWaypointsForCurrentRoute(iataCodes, routeIndex);
-        updateState('updateRouteDate: ', routeIndex, departureDate);
+        updateState('updateRouteDate', { routeNumber: routeIndex, depart: departureDate });
         updateState('changeView', 'trip');
         highlightSelectedRowForRouteIndex(routeIndex);
     });
