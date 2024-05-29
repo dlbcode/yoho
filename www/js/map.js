@@ -8,6 +8,7 @@ async function initMapFunctions() {
     let waypoints = null;
     let routeDirection = null;
     let routeDates = [];
+    let tripTypes = {};
 
     const waypointParam = params.get('waypoints');
     if (waypointParam) {
@@ -32,9 +33,17 @@ async function initMapFunctions() {
         const datePairs = routeDatesParam.split(',');
         datePairs.forEach(pair => {
             const [key, value] = pair.split(':');
-            const routeNumber = parseInt(key, 10); 
+            const routeNumber = parseInt(key, 10);
             const date = value;
             routeDates.push({ routeNumber: routeNumber, date: date });
+        });
+    }
+
+    const typesParam = params.get('types');
+    if (typesParam) {
+        typesParam.split(',').forEach(pair => {
+            const [routeNumber, tripType] = pair.split(':');
+            tripTypes[parseInt(routeNumber, 10)] = tripType;
         });
     }
 
@@ -48,7 +57,11 @@ async function initMapFunctions() {
     if (waypoints) {
         updateState('addWaypoint', waypoints);
     }
+    Object.entries(tripTypes).forEach(([routeNumber, tripType]) => {
+        updateState('tripType', { routeNumber: parseInt(routeNumber, 10), tripType });
+    });
 }
+
 
 var map = L.map('map', { 
     zoomControl: false, 

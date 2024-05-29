@@ -107,10 +107,11 @@ const routeBox = {
         const routeBoxElement = this.createRouteBox();
         document.body.appendChild(routeBoxElement);
 
-        // Ensure the route is initialized
+        // Ensure the route is initialized with the correct tripType
         if (!appState.routes[routeNumber]) {
-            appState.routes[routeNumber] = { tripType: 'oneWay' };
+            appState.routes[routeNumber] = { tripType: 'oneWay' }; // Default to oneWay if not set
         }
+        console.log('Trip Type:', appState.routes[routeNumber].tripType);
 
         const topRow = createElement('div', { id: 'topRow', className: 'top-row' });
         topRow.append(tripTypePicker(routeNumber), travelersPicker(routeNumber));

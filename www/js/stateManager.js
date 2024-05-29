@@ -4,7 +4,6 @@ const defaultDirection = params.get('direction') || 'from';
 const appState = {
     eurToUsd: 1.13,
     selectedAirport: null,
-    roundTrip: false,
     travelers: 1,
     routeDirection: defaultDirection,
     waypoints: [],
@@ -98,39 +97,21 @@ function updateState(key, value) {
             break;
 
             case 'updateRoutes':
-                if (value.length === 0) {
-                    break; // Do not update if value is an empty array
-                }
-                const updatedRoutes = value.map((route, index) => {
-                    const existingRoute = appState.routes[index] || {};
-                    return {
-                        ...existingRoute,
-                        ...route,
-                        travelers: route.travelers || 1,  // Set default travelers to 1 if not provided
-                        tripType: existingRoute.tripType || route.tripType || 'oneWay' // Preserve existing tripType or default to 'oneWay'
-                    };
-                });
-                appState.routes = updatedRoutes;
-                const recalculatedRouteDates = { ...appState.routeDates };
-                appState.routes.forEach((route, index) => {
-                    if (!recalculatedRouteDates.hasOwnProperty(index)) {
-                        if (index === 0) {
-                            recalculatedRouteDates[index] = {
-                                depart: new Date().toISOString().split('T')[0],
-                                return: new Date(new Date().getTime() + 24 * 60 * 60 * 1000).toISOString().split('T')[0]
-                            };
-                        } else {
-                            const prevRouteDate = recalculatedRouteDates[index - 1].return || recalculatedRouteDates[index - 1].depart;
-                            recalculatedRouteDates[index] = {
-                                depart: prevRouteDate,
-                                return: new Date(new Date(prevRouteDate).getTime() + 24 * 60 * 60 * 1000).toISOString().split('T')[0]
-                            };
-                        }
-                    }
-                });
-                appState.routeDates = recalculatedRouteDates;
-                updateUrl();
-                break;            
+            if (value.length === 0) {
+                break; // Do not update if value is an empty array
+            }
+            const updatedRoutes = value.map((route, index) => {
+                const existingRoute = appState.routes[index] || {};
+                return {
+                    ...existingRoute,
+                    ...route,
+                    travelers: route.travelers || 1,  // Set default travelers to 1 if not provided
+                    tripType: route.tripType || existingRoute.tripType || 'oneWay' // Use provided tripType or existing tripType
+                };
+            });
+            appState.routes = updatedRoutes;
+            updateUrl();
+            break;           
 
         case 'clearData':
             appState.waypoints = [];
