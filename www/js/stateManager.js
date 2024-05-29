@@ -39,16 +39,19 @@ function updateState(key, value) {
             }
             appState.routeDates[routeNumber] = {
                 depart: depart || appState.routeDates[routeNumber].depart,
-                return: returnDate || appState.routeDates[routeNumber].return
+                return: (returnDate === null || returnDate === 'undefined') ? null : returnDate || appState.routeDates[routeNumber].return // Ensure return is null if explicitly set to null or undefined
             };
             Object.keys(appState.selectedRoutes).forEach(key => {
                 if (parseInt(key) >= routeNumber && appState.selectedRoutes[key]) {
-                    appState.selectedRoutes[key].routeDates = { depart, return: returnDate };
+                    appState.selectedRoutes[key].routeDates = { 
+                        depart, 
+                        return: (returnDate === null || returnDate === 'undefined') ? null : returnDate 
+                    };
                 }
             });
             updateUrl();
             break;
-        }
+        }                     
 
         case 'tripType':
             const { routeNumber: tripRouteNumber, tripType } = value;
@@ -164,8 +167,8 @@ function updateUrl() {
     }
 
     const dates = appState.routeDates
-        ? Object.entries(appState.routeDates).map(([key, value]) => `${key}:depart:${value.depart},${key}:return:${value.return || 'null'}`).join(',')
-        : '';
+    ? Object.entries(appState.routeDates).map(([key, value]) => `${key}:depart:${value.depart},${key}:return:${value.return === null ? 'null' : value.return}`).join(',')
+    : '';
     if (dates.length > 0) {
         params.set('dates', dates);
     } else {

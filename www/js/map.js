@@ -32,15 +32,15 @@ async function initMapFunctions() {
     if (routeDatesParam) {
         const datePairs = routeDatesParam.split(',');
         datePairs.forEach(pair => {
-            const [key, value] = pair.split(':');
+            const [key, type, value] = pair.split(':');
             const routeNumber = parseInt(key, 10);
-            const date = value === 'null' ? null : value;
+            const date = (value === 'null' || value === 'undefined') ? null : value;
             if (!routeDates[routeNumber]) {
                 routeDates[routeNumber] = { routeNumber, depart: null, return: null };
             }
-            if (key.includes('depart')) {
+            if (type === 'depart') {
                 routeDates[routeNumber].depart = date;
-            } else if (key.includes('return')) {
+            } else if (type === 'return') {
                 routeDates[routeNumber].return = date;
             }
         });
