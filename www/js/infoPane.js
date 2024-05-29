@@ -175,8 +175,8 @@ const infoPane = {
         const group = item.group;
         if (!groupData[group]) {
             groupData[group] = {
-                departure: appState.routeDates[item.routeNumber].depart, // Access new routeDates structure
-                arrival: appState.routeDates[item.routeNumber].return, // Access new routeDates structure
+                departure: appState.routes[item.routeNumber].dates.depart, // Access new routeDates structure
+                arrival: appState.routes[item.routeNumber].dates.return, // Access new routeDates structure
                 price: item.displayData.price,
                 airlines: [item.displayData.airline],
                 stops: new Set(), // Use a Set to ensure unique stops
@@ -184,7 +184,7 @@ const infoPane = {
                 deep_link: item.displayData.deep_link
             };
         } else {
-            groupData[group].arrival = appState.routeDates[item.routeNumber].return; // Update to last route's arrival
+            groupData[group].arrival = appState.routes[item.routeNumber].dates.return; // Update to last route's arrival
             groupData[group].airlines.push(item.displayData.airline);
         }
         // Always add the destination to the route
@@ -222,7 +222,7 @@ const infoPane = {
             const iataCodes = routeString.split(' > ');
             infoPane.highlightRoute(iataCodes);
           });
-  
+
           // Attach mouseout event to clear the route
           row.addEventListener('mouseout', function() {
               pathDrawing.clearLines();
@@ -248,7 +248,7 @@ const infoPane = {
             totalPrice += price; // Add price to total
         }
     });
-    
+
     const tripButton = document.getElementById('tripButton');
     tripButton.textContent = totalPrice > 0 ? `$${totalPrice.toFixed(2)}` : '$0.00'; // Update button text with total price or $0.00
     tripButton.classList.add('green-button'); // Apply green styling class

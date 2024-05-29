@@ -34,8 +34,15 @@ async function initMapFunctions() {
         datePairs.forEach(pair => {
             const [key, value] = pair.split(':');
             const routeNumber = parseInt(key, 10);
-            const date = value;
-            routeDates.push({ routeNumber: routeNumber, date: date });
+            const date = value === 'null' ? null : value;
+            if (!routeDates[routeNumber]) {
+                routeDates[routeNumber] = { routeNumber, depart: null, return: null };
+            }
+            if (key.includes('depart')) {
+                routeDates[routeNumber].depart = date;
+            } else if (key.includes('return')) {
+                routeDates[routeNumber].return = date;
+            }
         });
     }
 
@@ -61,7 +68,6 @@ async function initMapFunctions() {
         updateState('tripType', { routeNumber: parseInt(routeNumber, 10), tripType });
     });
 }
-
 
 var map = L.map('map', { 
     zoomControl: false, 

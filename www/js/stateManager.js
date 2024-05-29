@@ -34,32 +34,33 @@ function updateState(key, value) {
         case 'updateRouteDate': {
             console.log('appState.updateRouteDate:', value);
             const { routeNumber, depart, return: returnDate } = value;
-            if (!appState.routeDates[routeNumber]) {
-                appState.routeDates[routeNumber] = { depart: null, return: null };
+            if (!appState.routes[routeNumber]) {
+                appState.routes[routeNumber] = { dates: { depart: null, return: null } };
             }
-            appState.routeDates[routeNumber] = {
-                depart: depart || appState.routeDates[routeNumber].depart,
-                return: returnDate || appState.routeDates[routeNumber].return
-            };
+            appState.routes[routeNumber].dates.depart = depart || appState.routes[routeNumber].dates.depart;
+            if (returnDate !== undefined) {
+                appState.routes[routeNumber].dates.return = returnDate;
+            }
             Object.keys(appState.selectedRoutes).forEach(key => {
                 if (parseInt(key) >= routeNumber && appState.selectedRoutes[key]) {
-                    appState.selectedRoutes[key].routeDates = { depart, return: returnDate };
+                    appState.selectedRoutes[key].routeDates = { 
+                        depart, 
+                        return: returnDate !== undefined ? returnDate : appState.selectedRoutes[key].routeDates.return 
+                    };
                 }
             });
             updateUrl();
             break;
         }
 
-        case 'tripType': {
-            const { routeNumber, tripType } = value;
-            if (appState.routes[routeNumber]) {
-                appState.routes[routeNumber].tripType = tripType;
-            } else {
-                appState.routes[routeNumber] = { tripType };
+        case 'tripType':
+            const { routeNumber: tripRouteNumber, tripType } = value;
+            if (!appState.routes[tripRouteNumber]) {
+                appState.routes[tripRouteNumber] = {};
             }
+            appState.routes[tripRouteNumber].tripType = tripType;
             updateUrl();
             break;
-        }
 
         case 'updateTravelers': {
             const { routeNumber, travelers } = value;
@@ -96,7 +97,7 @@ function updateState(key, value) {
             updateUrl();
             break;
 
-            case 'updateRoutes':
+        case 'updateRoutes':
             if (value.length === 0) {
                 break; // Do not update if value is an empty array
             }
@@ -111,7 +112,7 @@ function updateState(key, value) {
             });
             appState.routes = updatedRoutes;
             updateUrl();
-            break;           
+            break;          
 
         case 'clearData':
             appState.waypoints = [];
