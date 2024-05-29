@@ -32,10 +32,7 @@ const createWaypointInput = (index, placeholder, waypoint) => {
     input.type = 'text';
     input.placeholder = placeholder;
     input.value = waypoint ? `${waypoint.city}, (${waypoint.iata_code})` : '';
-    console.log(`Creating input for index: ${index}, placeholder: ${placeholder}, value: ${input.value}`);
-
     inputWrapper.append(input, routeBox.createSuggestionsDiv(index));
-    console.log(`Input for index ${index} created and appended to wrapper.`);
     return inputWrapper;
 };
 
@@ -71,10 +68,6 @@ const setupWaypointInputListeners = (routeNumber) => {
 const inspectDOM = () => {
     const fromInput = document.getElementById('waypoint-input-1');
     const toInput = document.getElementById('waypoint-input-2');
-    console.log('DOM inspection - From Input element:', fromInput);
-    console.log('DOM inspection - From Input value:', fromInput ? fromInput.value : 'N/A');
-    console.log('DOM inspection - To Input element:', toInput);
-    console.log('DOM inspection - To Input value:', toInput ? toInput.value : 'N/A');
 };
 
 const setWaypointInputs = () => {
@@ -86,7 +79,6 @@ const setWaypointInputs = () => {
         if (fromWaypoint) {
             fromInput.value = `${fromWaypoint.city}, (${fromWaypoint.iata_code})`;
         }
-        console.log('Explicitly setting From Input value:', fromInput.value);
     }
 
     if (toInput) {
@@ -94,15 +86,11 @@ const setWaypointInputs = () => {
         if (toWaypoint) {
             toInput.value = `${toWaypoint.city}, (${toWaypoint.iata_code})`;
         }
-        console.log('Explicitly setting To Input value:', toInput.value);
     }
 };
 
 const routeBox = {
     showRouteBox(event, routeNumber) {
-        console.log('showRouteBox called for routeNumber:', routeNumber);
-        console.log('Initial appState.waypoints:', appState.waypoints);
-
         this.removeExistingRouteBox();
         const routeBoxElement = this.createRouteBox();
         document.body.appendChild(routeBoxElement);
@@ -111,8 +99,6 @@ const routeBox = {
         if (!appState.routes[routeNumber]) {
             appState.routes[routeNumber] = { tripType: 'oneWay' }; // Default to oneWay if not set
         }
-        console.log('Trip Type:', appState.routes[routeNumber].tripType);
-
         const topRow = createElement('div', { id: 'topRow', className: 'top-row' });
         topRow.append(tripTypePicker(routeNumber), travelersPicker(routeNumber));
         routeBoxElement.append(topRow);
@@ -121,13 +107,9 @@ const routeBox = {
         let firstEmptyInput = null;
         ['From', 'Where to?'].forEach((placeholder, i) => {
             const index = routeNumber * 2 + i;
-            console.log(`Processing waypoint index: ${index}, i: ${i}`);
-            console.log('Current waypoint:', appState.waypoints[index]);
-
             const waypointInput = createWaypointInput(index, placeholder, appState.waypoints[index]);
             waypointInput.classList.add(i === 0 ? 'from-input' : 'to-input');
             waypointInputsContainer.append(waypointInput);
-            console.log(`Waypoint input for index ${index} appended to container.`);
             if (!firstEmptyInput && !appState.waypoints[index]) firstEmptyInput = waypointInput.querySelector('input');
         });
         routeBoxElement.append(waypointInputsContainer);
@@ -151,8 +133,6 @@ const routeBox = {
 
         // Handle the initial trip type to display the appropriate date input fields
         handleTripTypeChange(appState.routes[routeNumber].tripType, routeNumber);
-
-        console.log('Final appState.waypoints:', appState.waypoints);
 
         // Inspect the DOM elements
         setTimeout(inspectDOM, 100); // Use a timeout to ensure elements are rendered

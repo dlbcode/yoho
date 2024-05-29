@@ -8,10 +8,9 @@ const routeHandling = {
         let fetchPromises = [];
 
         const waypoints = appState.routeDirection === 'to' ? [...appState.waypoints].reverse() : appState.waypoints;
-        console.log('routeHandling.js - Waypoints:', waypoints);
 
         if (waypoints.length < 2) {
-            console.log('Not enough waypoints to form routes');
+            // console.log('Not enough waypoints to form routes');
             updateState('updateRoutes', newRoutes);
             return;
         }
@@ -19,8 +18,7 @@ const routeHandling = {
         for (let i = 0; i < waypoints.length - 1; i += 2) {
             const fromWaypoint = waypoints[i];
             const toWaypoint = waypoints[i + 1];
-            console.log('routeHandling.js - Processing fromWaypoint:', fromWaypoint, 'toWaypoint:', toWaypoint);
-
+            
             if (!fromWaypoint || !toWaypoint) {
                 continue;
             }

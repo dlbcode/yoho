@@ -32,7 +32,6 @@ function updateState(key, value) {
         }
 
         case 'updateRouteDate': {
-            console.log('appState.updateRouteDate:', value);
             const { routeNumber, depart, return: returnDate } = value;
             if (!appState.routeDates[routeNumber]) {
                 appState.routeDates[routeNumber] = { depart: null, return: null };
