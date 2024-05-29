@@ -34,19 +34,16 @@ function updateState(key, value) {
         case 'updateRouteDate': {
             console.log('appState.updateRouteDate:', value);
             const { routeNumber, depart, return: returnDate } = value;
-            if (!appState.routes[routeNumber]) {
-                appState.routes[routeNumber] = { dates: { depart: null, return: null } };
+            if (!appState.routeDates[routeNumber]) {
+                appState.routeDates[routeNumber] = { depart: null, return: null };
             }
-            appState.routes[routeNumber].dates.depart = depart || appState.routes[routeNumber].dates.depart;
-            if (returnDate !== undefined) {
-                appState.routes[routeNumber].dates.return = returnDate;
-            }
+            appState.routeDates[routeNumber] = {
+                depart: depart || appState.routeDates[routeNumber].depart,
+                return: returnDate || appState.routeDates[routeNumber].return
+            };
             Object.keys(appState.selectedRoutes).forEach(key => {
                 if (parseInt(key) >= routeNumber && appState.selectedRoutes[key]) {
-                    appState.selectedRoutes[key].routeDates = { 
-                        depart, 
-                        return: returnDate !== undefined ? returnDate : appState.selectedRoutes[key].routeDates.return 
-                    };
+                    appState.selectedRoutes[key].routeDates = { depart, return: returnDate };
                 }
             });
             updateUrl();
