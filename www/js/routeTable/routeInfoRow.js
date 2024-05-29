@@ -289,37 +289,37 @@ function flyToLocation(iata) {
 }
 
 function replaceWaypointsForCurrentRoute(intermediaryIatas, routeIndex) {
-  // Adjust startIndex for round trips to ensure the entire waypoints array is considered
-  const startIndex = appState.roundTrip ? 0 : routeIndex * 2;
-  let before = appState.waypoints.slice(0, startIndex);
-  let after = appState.roundTrip ? [] : appState.waypoints.slice((routeIndex + 1) * 2);
+    const tripType = appState.routes[routeIndex] ? appState.routes[routeIndex].tripType : 'oneWay'; // Default to oneWay if not set
+    const startIndex = tripType === 'roundTrip' ? 0 : routeIndex * 2;
+    let before = appState.waypoints.slice(0, startIndex);
+    let after = tripType === 'roundTrip' ? [] : appState.waypoints.slice((routeIndex + 1) * 2);
 
-  let updatedSegment = [flightMap.airportDataCache[intermediaryIatas[0]]];
+    let updatedSegment = [flightMap.airportDataCache[intermediaryIatas[0]]];
 
-  for (let i = 1; i < intermediaryIatas.length; i++) {
-      let airportData = flightMap.airportDataCache[intermediaryIatas[i]];
-      updatedSegment.push(airportData);
-      if (i < intermediaryIatas.length - 1) {
-          updatedSegment.push(airportData);
-      }
-  }
+    for (let i = 1; i < intermediaryIatas.length; i++) {
+        let airportData = flightMap.airportDataCache[intermediaryIatas[i]];
+        updatedSegment.push(airportData);
+        if (i < intermediaryIatas.length - 1) {
+            updatedSegment.push(airportData);
+        }
+    }
 
-  // For round trips, ensure the return to the origin is explicitly handled
-  if (appState.roundTrip) {
-      const originIata = intermediaryIatas[0];
-      if (updatedSegment[updatedSegment.length - 1].iata_code !== originIata) {
-          updatedSegment.push(flightMap.airportDataCache[originIata]);
-      }
-  } else {
-      // For non-round trips, ensure the final destination is added if not already present
-      const finalDestinationIata = intermediaryIatas[intermediaryIatas.length - 1];
-      if (updatedSegment[updatedSegment.length - 1].iata_code !== finalDestinationIata) {
-          updatedSegment.push(flightMap.airportDataCache[finalDestinationIata]);
-      }
-  }
+    // For round trips, ensure the return to the origin is explicitly handled
+    if (tripType === 'roundTrip') {
+        const originIata = intermediaryIatas[0];
+        if (updatedSegment[updatedSegment.length - 1].iata_code !== originIata) {
+            updatedSegment.push(flightMap.airportDataCache[originIata]);
+        }
+    } else {
+        // For non-round trips, ensure the final destination is added if not already present
+        const finalDestinationIata = intermediaryIatas[intermediaryIatas.length - 1];
+        if (updatedSegment[updatedSegment.length - 1].iata_code !== finalDestinationIata) {
+            updatedSegment.push(flightMap.airportDataCache[finalDestinationIata]);
+        }
+    }
 
-  appState.waypoints = [...before, ...updatedSegment, ...after];
-  updateState('updateWaypoint', appState.waypoints);
+    appState.waypoints = [...before, ...updatedSegment, ...after];
+    updateState('updateWaypoint', appState.waypoints);
 }
 
 export { routeInfoRow, highlightSelectedRowForRouteIndex };
