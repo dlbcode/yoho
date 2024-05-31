@@ -6,6 +6,7 @@ const routeHandling = {
     updateRoutesArray: async function () {
         let newRoutes = [];
         let fetchPromises = [];
+        let partialRoutes = [];
 
         const waypoints = appState.routeDirection === 'to' ? [...appState.waypoints].reverse() : appState.waypoints;
 
@@ -16,13 +17,17 @@ const routeHandling = {
 
         console.log('Fetching routes for waypoints:', waypoints);
 
-        for (let i = 0; i < waypoints.length - 1; i += 2) {
+        for (let i = 0; i < waypoints.length; i++) {
             const fromWaypoint = waypoints[i];
             const toWaypoint = waypoints[i + 1];
 
-            if (!fromWaypoint || !toWaypoint) {
-                console.log('Incomplete waypoint pair:', fromWaypoint, toWaypoint);
-                continue; // Skip if either waypoint is not defined
+            if (!toWaypoint) {
+                // If there's no destination waypoint yet, retain this partial route
+                partialRoutes.push({
+                    origin: fromWaypoint.iata_code,
+                    tripType: appState.routes.length > i ? appState.routes[i].tripType : 'roundTrip'
+                });
+                continue;
             }
 
             if (!appState.directRoutes[fromWaypoint.iata_code]) {
@@ -35,7 +40,7 @@ const routeHandling = {
 
         await Promise.all(fetchPromises);
 
-        for (let i = 0; i < waypoints.length - 1; i += 2) {
+        for (let i = 0; i < waypoints.length - 1; i++) {
             const fromWaypoint = waypoints[i];
             const toWaypoint = waypoints[i + 1];
             let route = flightMap.findRoute(fromWaypoint.iata_code, toWaypoint.iata_code);
