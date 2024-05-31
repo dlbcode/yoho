@@ -72,7 +72,7 @@ const setupWaypointInputListeners = (routeNumber) => {
                     }
                 }
                 updateUrl(); // Explicitly update the URL on blur
-            }, 100); // Delay to allow for selection
+            }, 300); // Added delay to ensure selection is processed
         });
     });
     enableSwapButtonIfNeeded(); // Initial check

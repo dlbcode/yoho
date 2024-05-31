@@ -68,6 +68,13 @@ const routeHandling = {
         // Only update the state if newRoutes is not empty and different from the current state
         if (newRoutes.length > 0 && JSON.stringify(newRoutes) !== JSON.stringify(appState.routes)) {
             console.log('routeHandling.js: Updating routes array with new routes:', newRoutes);
+
+            // Preserve tripType from the existing routes
+            newRoutes = newRoutes.map((route, index) => ({
+                ...route,
+                tripType: appState.routes[index]?.tripType || 'oneWay'
+            }));
+
             updateState('updateRoutes', newRoutes);
             pathDrawing.clearLines(true);
             pathDrawing.drawLines();

@@ -103,22 +103,22 @@ function updateState(key, value) {
             updateUrl();
             break;
 
-        case 'updateRoutes':
-            if (value.length === 0) {
-                break; // Do not update if value is an empty array
-            }
-            const updatedRoutes = value.map((route, index) => {
-                const existingRoute = appState.routes[index] || {};
-                return {
-                    ...existingRoute,
-                    ...route,
-                    travelers: route.travelers || 1,  // Set default travelers to 1 if not provided
-                    tripType: route.tripType || existingRoute.tripType || 'oneWay' // Use provided tripType or existing tripType
-                };
-            });
-            appState.routes = updatedRoutes;
-            updateUrl();
-            break;
+            case 'updateRoutes':
+                if (value.length === 0) {
+                    break; // Do not update if value is an empty array
+                }
+                const updatedRoutes = value.map((route, index) => {
+                    const existingRoute = appState.routes[index] || {};
+                    return {
+                        ...existingRoute,
+                        ...route,
+                        travelers: route.travelers || 1,  // Set default travelers to 1 if not provided
+                        tripType: route.tripType || existingRoute.tripType || 'oneWay' // Use provided tripType or existing tripType
+                    };
+                });
+                appState.routes = updatedRoutes;
+                updateUrl();
+                break;
             
         case 'clearData':
             appState.waypoints = [];
