@@ -10,17 +10,19 @@ const routeHandling = {
         const waypoints = appState.routeDirection === 'to' ? [...appState.waypoints].reverse() : appState.waypoints;
 
         if (waypoints.length < 2) {
-            // console.log('Not enough waypoints to form routes');
-            updateState('updateRoutes', newRoutes);
-            return;
+            console.log('Insufficient waypoints to form a route.');
+            return; // Exit if there are not enough waypoints to form a route
         }
+
+        console.log('Fetching routes for waypoints:', waypoints);
 
         for (let i = 0; i < waypoints.length - 1; i += 2) {
             const fromWaypoint = waypoints[i];
             const toWaypoint = waypoints[i + 1];
-            
+
             if (!fromWaypoint || !toWaypoint) {
-                continue;
+                console.log('Incomplete waypoint pair:', fromWaypoint, toWaypoint);
+                continue; // Skip if either waypoint is not defined
             }
 
             if (!appState.directRoutes[fromWaypoint.iata_code]) {
@@ -47,26 +49,32 @@ const routeHandling = {
                     flightMap.getAirportDataByIata(toWaypoint.iata_code)
                 ]);
 
-                const indirectRoute = {
-                    origin: fromWaypoint.iata_code,
-                    destination: toWaypoint.iata_code,
-                    originAirport: originAirport,
-                    destinationAirport: destinationAirport,
-                    isDirect: false,
-                    price: null,
-                    source: 'indirect',
-                    timestamp: new Date().toISOString()
-                };
-                newRoutes.push(indirectRoute);
+                // Ensure originAirport and destinationAirport have necessary properties
+                if (originAirport && destinationAirport && originAirport.latitude && destinationAirport.latitude) {
+                    const indirectRoute = {
+                        origin: fromWaypoint.iata_code,
+                        destination: toWaypoint.iata_code,
+                        originAirport: originAirport,
+                        destinationAirport: destinationAirport,
+                        isDirect: false,
+                        price: null,
+                        source: 'indirect',
+                        timestamp: new Date().toISOString()
+                    };
+                    newRoutes.push(indirectRoute);
+                }
             }
         }
-
-        console.log('routeHandling.js - New Routes:', newRoutes);
-
-        updateState('updateRoutes', newRoutes);
-        pathDrawing.clearLines(true);
-        pathDrawing.drawLines();
-        document.dispatchEvent(new CustomEvent('routesArrayUpdated'));
+        // Only update the state if newRoutes is not empty and different from the current state
+        if (newRoutes.length > 0 && JSON.stringify(newRoutes) !== JSON.stringify(appState.routes)) {
+            console.log('routeHandling.js: Updating routes array with new routes:', newRoutes);
+            updateState('updateRoutes', newRoutes);
+            pathDrawing.clearLines(true);
+            pathDrawing.drawLines();
+            document.dispatchEvent(new CustomEvent('routesArrayUpdated'));
+        } else {
+            console.log('No valid routes found to update or routes are the same as current state.');
+        }
     }
 };
 

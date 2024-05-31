@@ -48,15 +48,28 @@ const enableSwapButtonIfNeeded = () => {
 const setupWaypointInputListeners = (routeNumber) => {
     ['from-input', 'to-input'].forEach((className, i) => {
         const input = document.querySelector(`#waypoint-input-${routeNumber * 2 + i + 1}`);
-        input.addEventListener('input', enableSwapButtonIfNeeded);
+        input.addEventListener('input', () => {
+            enableSwapButtonIfNeeded();
+            const fromInput = document.querySelector(`#waypoint-input-${routeNumber * 2 + 1}`);
+            const toInput = document.querySelector(`#waypoint-input-${routeNumber * 2 + 2}`);
+            if (fromInput.value.trim() && toInput.value.trim()) {
+                routeHandling.updateRoutesArray(); // Only update routes when both inputs have values
+            }
+        });
         input.addEventListener('focus', (event) => {
             event.target.select();
         });
         input.addEventListener('blur', () => {
             setTimeout(() => {
-                if (input.value === '' && appState.waypoints.length > 0) {
+                const fromInput = document.querySelector(`#waypoint-input-${routeNumber * 2 + 1}`);
+                const toInput = document.querySelector(`#waypoint-input-${routeNumber * 2 + 2}`);
+                // Ensure that both fromInput and toInput have values before removing a waypoint
+                if (input.value === '' && fromInput.value !== '' && toInput.value !== '' && appState.waypoints.length > 0) {
                     const waypointIndex = parseInt(input.id.replace('waypoint-input-', '')) - 1;
-                    updateState('removeWaypoint', waypointIndex);
+                    console.log('Removing waypoint at index:', waypointIndex);
+                    if (waypointIndex >= 0 && waypointIndex < appState.waypoints.length) {
+                        updateState('removeWaypoint', waypointIndex);
+                    }
                 }
                 updateUrl(); // Explicitly update the URL on blur
             }, 100); // Delay to allow for selection
@@ -198,7 +211,9 @@ const routeBox = {
             [inputs[0].value, inputs[1].value] = [inputs[1].value, inputs[0].value];
             const idx = routeNumber * 2;
             [appState.waypoints[idx], appState.waypoints[idx + 1]] = [appState.waypoints[idx + 1], appState.waypoints[idx]];
-            routeHandling.updateRoutesArray();
+            if (appState.waypoints[idx] && appState.waypoints[idx + 1]) {
+                routeHandling.updateRoutesArray(); // Only update routes when both waypoints are valid
+            }
             updateUrl();
         }
     },

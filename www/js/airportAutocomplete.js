@@ -45,7 +45,7 @@ function handleSelection(e, inputId, airport) {
         updateState('addWaypoint', airport);
     }
 
-    inputField.blur();
+//    inputField.blur();
 }
 
 function setupAutocompleteForField(fieldId) {
@@ -130,17 +130,17 @@ function setupAutocompleteForField(fieldId) {
         }
     });
 
-    inputField.addEventListener('blur', () => {
-        setTimeout(() => {
-            toggleSuggestionBox(false);
-            clearInputField(inputField);
-            if (inputField.value === '' && appState.waypoints.length > 0) {
-                const waypointIndex = parseInt(inputField.id.replace('waypoint-input-', '')) - 1;
-                updateState('removeWaypoint', waypointIndex);
-            }
-            updateUrl(); // Explicitly update the URL on blur
-        }, 100); // Delay to allow for selection
-    });
+   //inputField.addEventListener('blur', () => {
+   //    setTimeout(() => {
+   //        toggleSuggestionBox(false);
+   //        clearInputField(inputField);
+   //        if (inputField.value === '' && appState.waypoints.length > 0) {
+   //            const waypointIndex = parseInt(inputField.id.replace('waypoint-input-', '')) - 1;
+   //            updateState('removeWaypoint', waypointIndex);
+   //        }
+   //        updateUrl(); // Explicitly update the URL on blur
+   //    }, 100); // Delay to allow for selection
+   //});
 
     if (!window.outsideClickListenerAdded) {
         document.addEventListener('click', outsideClickListener);

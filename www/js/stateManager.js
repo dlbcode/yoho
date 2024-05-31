@@ -24,6 +24,8 @@ const appState = {
 };
 
 function updateState(key, value) {
+    console.log(`updateState - Key: ${key}, Value:`, value);
+
     switch (key) {
         case 'routeDirection': {
             appState.routeDirection = value;
@@ -82,11 +84,16 @@ function updateState(key, value) {
             } else {
                 appState.waypoints.push(value);
             }
+            appState.isEditingWaypoint = true;
             updateUrl();
             break;
 
         case 'removeWaypoint':
-            appState.waypoints.splice(value, 1);
+            if (value >= 0 && value < appState.waypoints.length) {
+                appState.waypoints.splice(value, 1);
+                console.log(`Waypoint removed at index ${value}`);
+            }
+            appState.isEditingWaypoint = false;
             updateUrl();
             break;
 
@@ -111,8 +118,8 @@ function updateState(key, value) {
             });
             appState.routes = updatedRoutes;
             updateUrl();
-            break;          
-
+            break;
+            
         case 'clearData':
             appState.waypoints = [];
             appState.routes = [];
