@@ -10,12 +10,10 @@ const routeHandling = {
 
         const waypoints = appState.routeDirection === 'to' ? [...appState.waypoints].reverse() : appState.waypoints;
 
-        if (waypoints.length < 2) {
-            console.log('Insufficient waypoints to form a route.');
-            return; // Exit if there are not enough waypoints to form a route
-        }
-
-        console.log('Fetching routes for waypoints:', waypoints);
+        //if (waypoints.length < 2) {
+        //    console.log('Insufficient waypoints to form a route.');
+        //    return; // Exit if there are not enough waypoints to form a route
+        //}
 
         for (let i = 0; i < waypoints.length; i++) {
             const fromWaypoint = waypoints[i];
@@ -72,7 +70,6 @@ const routeHandling = {
         }
         // Only update the state if newRoutes is not empty and different from the current state
         if (newRoutes.length > 0 && JSON.stringify(newRoutes) !== JSON.stringify(appState.routes)) {
-            console.log('routeHandling.js: Updating routes array with new routes:', newRoutes);
 
             // Preserve tripType from the existing routes
             newRoutes = newRoutes.map((route, index) => ({
@@ -80,6 +77,7 @@ const routeHandling = {
                 tripType: appState.routes[index]?.tripType || 'oneWay'
             }));
 
+            console.log('routeHandling.js updateState - Updated routes array:', newRoutes);
             updateState('updateRoutes', newRoutes);
             pathDrawing.clearLines(true);
             pathDrawing.drawLines();

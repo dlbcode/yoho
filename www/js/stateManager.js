@@ -24,8 +24,6 @@ const appState = {
 };
 
 function updateState(key, value) {
-    console.log(`updateState - Key: ${key}, Value:`, value);
-
     switch (key) {
         case 'routeDirection': {
             appState.routeDirection = value;
@@ -91,7 +89,6 @@ function updateState(key, value) {
         case 'removeWaypoint':
             if (value >= 0 && value < appState.waypoints.length) {
                 appState.waypoints.splice(value, 1);
-                console.log(`Waypoint removed at index ${value}`);
             }
             appState.isEditingWaypoint = false;
             updateUrl();

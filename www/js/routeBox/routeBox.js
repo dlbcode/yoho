@@ -66,8 +66,8 @@ const setupWaypointInputListeners = (routeNumber) => {
                 // Ensure that both fromInput and toInput have values before removing a waypoint
                 if (input.value === '' && fromInput.value !== '' && toInput.value !== '' && appState.waypoints.length > 0) {
                     const waypointIndex = parseInt(input.id.replace('waypoint-input-', '')) - 1;
-                    console.log('Removing waypoint at index:', waypointIndex);
                     if (waypointIndex >= 0 && waypointIndex < appState.waypoints.length) {
+                        console.log('routeBox.js: upddateState - removeWaypoint:', waypointIndex);
                         updateState('removeWaypoint', waypointIndex);
                     }
                 }

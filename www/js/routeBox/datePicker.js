@@ -1,8 +1,6 @@
 import { appState, updateState } from '../stateManager.js';
 
 export function initDatePicker(inputId, routeNumber) {
-    console.log('initDatePicker:', inputId, routeNumber);
-
     const dateType = inputId.split('-')[0]; // 'depart' or 'return'
     if (!appState.routeDates[routeNumber]) {
         appState.routeDates[routeNumber] = { depart: null, return: null };
@@ -21,13 +19,12 @@ export function initDatePicker(inputId, routeNumber) {
         altInput: true,
         altFormat: "D, d M", // This will display the date as 'Fri, 10 May'
         onValueUpdate: function(selectedDates, dateStr) {
-            console.log('dateStr:', dateStr);
             if (dateType === 'depart') {
                 appState.routeDates[routeNumber].depart = selectedDates.length > 0 ? selectedDates[0].toISOString().split('T')[0] : null;
             } else if (dateType === 'return') {
                 appState.routeDates[routeNumber].return = selectedDates.length > 0 ? selectedDates[0].toISOString().split('T')[0] : null;
             }
-            console.log('datePicker updating date:', appState.routeDates[routeNumber], 'for route:', routeNumber);
+            console.log('datePicker.js: updateState - routes: ', appState.routeDates[routeNumber], 'for route:', routeNumber);
             updateState('updateRouteDate', { routeNumber, ...appState.routeDates[routeNumber] }); // Update the state accordingly
         },
         onReady: (selectedDates, dateStr, instance) => {
