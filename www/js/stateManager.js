@@ -33,24 +33,26 @@ function updateState(key, value) {
 
         case 'updateRouteDate': {
             const { routeNumber, depart, return: returnDate } = value;
-            if (!appState.routeDates[routeNumber]) {
-                appState.routeDates[routeNumber] = { depart: null, return: null };
-            }
-            appState.routeDates[routeNumber] = {
-                depart: depart || appState.routeDates[routeNumber].depart,
-                return: (returnDate === null || returnDate === 'undefined') ? null : returnDate || appState.routeDates[routeNumber].return // Ensure return is null if explicitly set to null or undefined
-            };
-            Object.keys(appState.selectedRoutes).forEach(key => {
-                if (parseInt(key) >= routeNumber && appState.selectedRoutes[key]) {
-                    appState.selectedRoutes[key].routeDates = { 
-                        depart, 
-                        return: (returnDate === null || returnDate === 'undefined') ? null : returnDate 
-                    };
+            if (!appState.routeDates[routeNumber] || appState.routeDates[routeNumber].depart !== depart || appState.routeDates[routeNumber].return !== returnDate) {
+                if (!appState.routeDates[routeNumber]) {
+                    appState.routeDates[routeNumber] = { depart: null, return: null };
                 }
-            });
-            updateUrl();
+                appState.routeDates[routeNumber] = {
+                    depart: depart || appState.routeDates[routeNumber].depart,
+                    return: (returnDate === null || returnDate === 'undefined') ? null : returnDate || appState.routeDates[routeNumber].return
+                };
+                Object.keys(appState.selectedRoutes).forEach(key => {
+                    if (parseInt(key) >= routeNumber && appState.selectedRoutes[key]) {
+                        appState.selectedRoutes[key].routeDates = { 
+                            depart, 
+                            return: (returnDate === null || returnDate === 'undefined') ? null : returnDate 
+                        };
+                    }
+                });
+                updateUrl();
+            }
             break;
-        }                     
+        }
 
         case 'tripType':
             const { routeNumber: tripRouteNumber, tripType } = value;
@@ -100,23 +102,23 @@ function updateState(key, value) {
             updateUrl();
             break;
 
-            case 'updateRoutes':
-                if (value.length === 0) {
-                    break; // Do not update if value is an empty array
-                }
-                const updatedRoutes = value.map((route, index) => {
-                    const existingRoute = appState.routes[index] || {};
-                    return {
-                        ...existingRoute,
-                        ...route,
-                        travelers: route.travelers || 1,  // Set default travelers to 1 if not provided
-                        tripType: route.tripType || existingRoute.tripType || 'oneWay' // Use provided tripType or existing tripType
-                    };
-                });
-                appState.routes = updatedRoutes;
-                updateUrl();
-                break;
-            
+        case 'updateRoutes':
+            if (value.length === 0) {
+                break; // Do not update if value is an empty array
+            }
+            const updatedRoutes = value.map((route, index) => {
+                const existingRoute = appState.routes[index] || {};
+                return {
+                    ...existingRoute,
+                    ...route,
+                    travelers: route.travelers || 1,  // Set default travelers to 1 if not provided
+                    tripType: route.tripType || existingRoute.tripType || 'oneWay' // Use provided tripType or existing tripType
+                };
+            });
+            appState.routes = updatedRoutes;
+            updateUrl();
+            break;
+
         case 'clearData':
             appState.waypoints = [];
             appState.routes = [];
@@ -130,7 +132,6 @@ function updateState(key, value) {
             const { routeIndex, routeDetails } = value;
             appState.selectedRoutes[routeIndex] = routeDetails;
 
-            // Ensure the routeDates match the selectedRoutes' dates
             appState.routeDates[routeIndex] = routeDetails.routeDates;
 
             updateUrl();
@@ -152,7 +153,7 @@ function updateState(key, value) {
 
         default:
             appState[key] = value;
-            updateUrl(); // Ensure URL update for any other state changes
+            updateUrl();
             break;
     }
     document.dispatchEvent(new CustomEvent('stateChange', { detail: { key, value } }));

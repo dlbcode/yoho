@@ -40,12 +40,12 @@ function handleSelection(e, inputId, airport) {
     const routeNumber = parseInt(inputId.split('-')[2]) - 1;
     const waypointIndex = parseInt(inputId.replace('waypoint-input-', '')) - 1;
     if (waypointIndex >= 0 && waypointIndex < appState.waypoints.length) {
-        updateState('updateWaypoint', { index: waypointIndex, data: airport });
+        if (appState.waypoints[waypointIndex].iata_code !== airport.iata_code) {
+            updateState('updateWaypoint', { index: waypointIndex, data: airport });
+        }
     } else {
         updateState('addWaypoint', airport);
     }
-
-//    inputField.blur();
 }
 
 function setupAutocompleteForField(fieldId) {
@@ -130,18 +130,6 @@ function setupAutocompleteForField(fieldId) {
         }
     });
 
-   //inputField.addEventListener('blur', () => {
-   //    setTimeout(() => {
-   //        toggleSuggestionBox(false);
-   //        clearInputField(inputField);
-   //        if (inputField.value === '' && appState.waypoints.length > 0) {
-   //            const waypointIndex = parseInt(inputField.id.replace('waypoint-input-', '')) - 1;
-   //            updateState('removeWaypoint', waypointIndex);
-   //        }
-   //        updateUrl(); // Explicitly update the URL on blur
-   //    }, 100); // Delay to allow for selection
-   //});
-
     if (!window.outsideClickListenerAdded) {
         document.addEventListener('click', outsideClickListener);
         window.outsideClickListenerAdded = true;
@@ -219,7 +207,6 @@ document.addEventListener('DOMContentLoaded', () => {
             updateState('addWaypoint', airport);
         }
 
-        // Move map view to include the selected airport marker
         if (airport && airport.latitude && airport.longitude) {
             const latLng = L.latLng(airport.latitude, airport.longitude);
             const currentLatLng = map.getCenter();

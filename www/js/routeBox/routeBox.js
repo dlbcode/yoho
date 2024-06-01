@@ -67,8 +67,9 @@ const setupWaypointInputListeners = (routeNumber) => {
                 if (input.value === '' && fromInput.value !== '' && toInput.value !== '' && appState.waypoints.length > 0) {
                     const waypointIndex = parseInt(input.id.replace('waypoint-input-', '')) - 1;
                     if (waypointIndex >= 0 && waypointIndex < appState.waypoints.length) {
-                        console.log('routeBox.js: upddateState - removeWaypoint:', waypointIndex);
-                        updateState('removeWaypoint', waypointIndex);
+                        if (appState.waypoints[waypointIndex].iata_code !== '') {
+                            updateState('removeWaypoint', waypointIndex);
+                        }
                     }
                 }
                 updateUrl(); // Explicitly update the URL on blur
@@ -180,7 +181,9 @@ const routeBox = {
         const searchButton = createElement('button', { className: 'search-button', content: 'Search' });
         searchButton.onclick = () => {
             document.getElementById('infoPaneContent').innerHTML = '';
-            updateState('currentView', 'routeTable');
+            if (appState.currentView !== 'routeTable') {
+                updateState('currentView', 'routeTable');
+            }
             buildRouteTable(routeNumber);
         };
         return searchButton;

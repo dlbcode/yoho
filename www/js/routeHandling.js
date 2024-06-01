@@ -10,17 +10,11 @@ const routeHandling = {
 
         const waypoints = appState.routeDirection === 'to' ? [...appState.waypoints].reverse() : appState.waypoints;
 
-        //if (waypoints.length < 2) {
-        //    console.log('Insufficient waypoints to form a route.');
-        //    return; // Exit if there are not enough waypoints to form a route
-        //}
-
         for (let i = 0; i < waypoints.length; i++) {
             const fromWaypoint = waypoints[i];
             const toWaypoint = waypoints[i + 1];
 
             if (!toWaypoint) {
-                // If there's no destination waypoint yet, retain this partial route
                 partialRoutes.push({
                     origin: fromWaypoint.iata_code,
                     tripType: appState.routes.length > i ? appState.routes[i].tripType : 'roundTrip'
@@ -52,7 +46,6 @@ const routeHandling = {
                     flightMap.getAirportDataByIata(toWaypoint.iata_code)
                 ]);
 
-                // Ensure originAirport and destinationAirport have necessary properties
                 if (originAirport && destinationAirport && originAirport.latitude && destinationAirport.latitude) {
                     const indirectRoute = {
                         origin: fromWaypoint.iata_code,
@@ -68,16 +61,12 @@ const routeHandling = {
                 }
             }
         }
-        // Only update the state if newRoutes is not empty and different from the current state
-        if (newRoutes.length > 0 && JSON.stringify(newRoutes) !== JSON.stringify(appState.routes)) {
 
-            // Preserve tripType from the existing routes
+        if (newRoutes.length > 0 && !arraysEqual(newRoutes, appState.routes)) {
             newRoutes = newRoutes.map((route, index) => ({
                 ...route,
                 tripType: appState.routes[index]?.tripType || 'oneWay'
             }));
-
-            console.log('routeHandling.js updateState - Updated routes array:', newRoutes);
             updateState('updateRoutes', newRoutes);
             pathDrawing.clearLines(true);
             pathDrawing.drawLines();
@@ -87,5 +76,13 @@ const routeHandling = {
         }
     }
 };
+
+function arraysEqual(arr1, arr2) {
+    if (arr1.length !== arr2.length) return false;
+    for (let i = 0; i < arr1.length; i++) {
+        if (JSON.stringify(arr1[i]) !== JSON.stringify(arr2[i])) return false;
+    }
+    return true;
+}
 
 export { routeHandling };

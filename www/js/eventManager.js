@@ -13,7 +13,9 @@ function handleStateChange(event) {
     if (key === 'addWaypoint' || key === 'removeWaypoint' || key === 'updateWaypoint') {
         mapHandling.updateMarkerIcons();
         routeHandling.updateRoutesArray();
-        appState.currentView = 'trip';
+        if (appState.currentView !== 'trip') {
+            appState.currentView = 'trip';
+        }
     }
 
     if (key === 'changeView') {
@@ -31,11 +33,9 @@ const eventManager = {
         window.onpopstate = function(event) {
             const params = new URLSearchParams(window.location.search);
             
-            // Update app state based on URL parameters
             appState.waypoints = params.get('waypoints') ? params.get('waypoints').split(',').map(iata => ({ iata_code: iata })) : [];
             appState.routeDates = {};
             
-            // Parse the 'dates' parameter
             if (params.has('dates')) {
                 let datesParam = params.get('dates').split(',');
                 datesParam.forEach(pair => {
@@ -69,12 +69,10 @@ const eventManager = {
         };
     },
 
-    // Use debounce for map 'moveend' and 'zoomend' events
     setupMapEventListeners: function() {
         map.on('click', () => {
             Object.values(flightMap.markers).forEach(marker => marker.closePopup());
             const selectedAirportIata = appState.selectedAirport ? appState.selectedAirport.iata_code : null;
-            // Check if a waypoint in appState.waypoints has the IATA code
             const waypoint = appState.waypoints.find(wp => wp.iata_code === selectedAirportIata);
             if (waypoint) {
                 const selectedMarker = flightMap.markers[waypoint.iata_code];
