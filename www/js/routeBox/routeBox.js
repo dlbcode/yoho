@@ -67,14 +67,14 @@ const setupWaypointInputListeners = (routeNumber) => {
                 if (input.value === '' && fromInput.value !== '' && toInput.value !== '' && appState.waypoints.length > 0) {
                     const waypointIndex = parseInt(input.id.replace('waypoint-input-', '')) - 1;
                     if (waypointIndex >= 0 && waypointIndex < appState.waypoints.length) {
-                        console.log('routeBox.js: upddateState - removeWaypoint:', waypointIndex);
-                        updateState('removeWaypoint', waypointIndex);
+                        if (appState.waypoints[waypointIndex].iata_code !== '') {
+                            updateState('removeWaypoint', waypointIndex);
+                        }
                     }
                 }
                 updateUrl(); // Explicitly update the URL on blur
             }, 300); // Added delay to ensure selection is processed
         });
-    });
     enableSwapButtonIfNeeded(); // Initial check
 };
 
