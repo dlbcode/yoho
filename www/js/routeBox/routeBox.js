@@ -7,7 +7,6 @@ import { tripTypePicker, handleTripTypeChange } from './tripTypePicker.js';
 import { removeRoute } from './removeRoute.js';
 import { routeHandling } from '../routeHandling.js';
 
-// Load CSS
 const loadCSS = (href) => {
     const link = document.createElement('link');
     link.rel = 'stylesheet';
@@ -17,7 +16,6 @@ const loadCSS = (href) => {
 loadCSS('css/routeBox.css');
 loadCSS('css/datePicker.css');
 
-// Create element helper
 const createElement = (tag, { id, className, content } = {}) => {
     const element = document.createElement(tag);
     if (id) element.id = id;
@@ -50,11 +48,6 @@ const setupWaypointInputListeners = (routeNumber) => {
         const input = document.querySelector(`#waypoint-input-${routeNumber * 2 + i + 1}`);
         input.addEventListener('input', () => {
             enableSwapButtonIfNeeded();
-            const fromInput = document.querySelector(`#waypoint-input-${routeNumber * 2 + 1}`);
-            const toInput = document.querySelector(`#waypoint-input-${routeNumber * 2 + 2}`);
-            if (fromInput.value.trim() && toInput.value.trim()) {
-                routeHandling.updateRoutesArray(); // Only update routes when both inputs have values
-            }
         });
         input.addEventListener('focus', (event) => {
             event.target.select();
@@ -63,12 +56,12 @@ const setupWaypointInputListeners = (routeNumber) => {
             setTimeout(() => {
                 const fromInput = document.querySelector(`#waypoint-input-${routeNumber * 2 + 1}`);
                 const toInput = document.querySelector(`#waypoint-input-${routeNumber * 2 + 2}`);
-                // Ensure that both fromInput and toInput have values before removing a waypoint
                 if (input.value === '' && fromInput.value !== '' && toInput.value !== '' && appState.waypoints.length > 0) {
                     const waypointIndex = parseInt(input.id.replace('waypoint-input-', '')) - 1;
                     if (waypointIndex >= 0 && waypointIndex < appState.waypoints.length) {
                         if (appState.waypoints[waypointIndex].iata_code !== '') {
                             updateState('removeWaypoint', waypointIndex, 'routeBox.setupWaypointInputListeners');
+                            routeHandling.updateRoutesArray();
                         }
                     }
                 }
@@ -109,7 +102,6 @@ const routeBox = {
         const routeBoxElement = this.createRouteBox();
         document.body.appendChild(routeBoxElement);
 
-        // Ensure the route is initialized with the correct tripType
         if (!appState.routes[routeNumber]) {
             appState.routes[routeNumber] = { tripType: 'oneWay' }; // Default to oneWay if not set
         }
@@ -145,13 +137,10 @@ const routeBox = {
 
         setupWaypointInputListeners(routeNumber);
 
-        // Handle the initial trip type to display the appropriate date input fields
         handleTripTypeChange(appState.routes[routeNumber].tripType, routeNumber);
 
-        // Inspect the DOM elements
         setTimeout(inspectDOM, 100); // Use a timeout to ensure elements are rendered
 
-        // Explicitly set waypoint input values
         setTimeout(setWaypointInputs, 200); // Use a slightly longer timeout to ensure inputs are rendered
     },
 

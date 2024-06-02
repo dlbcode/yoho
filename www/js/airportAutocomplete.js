@@ -1,7 +1,6 @@
-import { appState, updateState, updateUrl } from './stateManager.js';
+import { appState, updateState } from './stateManager.js';
 import { map } from './map.js';
 import { uiHandling } from './uiHandling.js';
-import { routeBox } from './routeBox/routeBox.js'; // Ensure to import routeBox
 
 async function fetchAirports(query) {
     try {
@@ -39,7 +38,6 @@ function handleSelection(e, inputId, airport) {
     }));
     inputField.setAttribute('data-selected-iata', airport.iata_code);
 
-    const routeNumber = parseInt(inputId.split('-')[2]) - 1;
     const waypointIndex = parseInt(inputId.replace('waypoint-input-', '')) - 1;
     if (waypointIndex >= 0 && waypointIndex < appState.waypoints.length) {
         if (appState.waypoints[waypointIndex].iata_code !== airport.iata_code) {
@@ -56,12 +54,11 @@ function handleSelection(e, inputId, airport) {
 function setupAutocompleteForField(fieldId) {
     const inputField = document.getElementById(fieldId);
     const suggestionBox = document.getElementById(fieldId + 'Suggestions');
-    suggestionBox.style.display = 'none'; // Ensure it is hidden initially
-    let selectionMade = false; // Track if a selection has been made
-    let initialInputValue = ""; // Store the initial input value on focus
-    let currentFocus = -1; // Track the currently focused item in the suggestion box
+    suggestionBox.style.display = 'none';
+    let selectionMade = false;
+    let initialInputValue = "";
+    let currentFocus = -1;
 
-    // Disable browser autofill
     inputField.setAttribute('autocomplete', 'new-password');
     inputField.setAttribute('name', 'waypoint-input-' + Date.now());
     inputField.setAttribute('readonly', true);
@@ -87,7 +84,7 @@ function setupAutocompleteForField(fieldId) {
         const airports = await fetchAirports(inputField.value);
         updateSuggestions(fieldId, airports);
         selectionMade = false;
-        currentFocus = -1; // Reset the focus so item selection starts from the top
+        currentFocus = -1;
     });
 
     const toggleSuggestionBox = (display) => {
@@ -106,6 +103,8 @@ function setupAutocompleteForField(fieldId) {
         const isCurrentIataValid = currentInputValue.includes(selectedIata);
         if (!selectionMade && !isCurrentIataValid && initialInputValue !== currentInputValue) {
             inputField.value = '';
+            updateState('updateWaypoint', { index: parseInt(fieldId.replace('waypoint-input-', '')) - 1, data: { iata_code: '', city: '', country: '' } }, 'airportAutocomplete.clearInputField');
+            routeHandling.updateRoutesArray();
         }
     };
 
@@ -169,7 +168,7 @@ function updateSuggestions(inputId, airports) {
         const selectionHandler = (e) => {
             setTimeout(() => {
                 handleSelection(e, inputId, airport);
-            }, 100); // Add a small delay
+            }, 100);
         };
 
         div.addEventListener('touchstart', (e) => {
