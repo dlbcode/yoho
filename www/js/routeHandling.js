@@ -37,6 +37,7 @@ const routeHandling = {
                     isDirect: false,
                     price: null,
                     source: 'placeholder',
+                    tripType: appState.routes[i / 2]?.tripType || 'oneWay',
                     timestamp: new Date().toISOString()
                 });
                 break;
@@ -47,7 +48,10 @@ const routeHandling = {
             if (route) {
                 route.isDirect = true;
                 if (!newRoutes.some(r => r.origin === route.origin && r.destination === route.destination)) {
-                    newRoutes.push(route);
+                    newRoutes.push({
+                        ...route,
+                        tripType: appState.routes[i / 2]?.tripType || 'oneWay'
+                    });
                 }
             } else {
                 const [originAirport, destinationAirport] = await Promise.all([
@@ -64,6 +68,7 @@ const routeHandling = {
                         isDirect: false,
                         price: null,
                         source: 'indirect',
+                        tripType: appState.routes[i / 2]?.tripType || 'oneWay',
                         timestamp: new Date().toISOString()
                     };
                     if (!newRoutes.some(r => r.origin === indirectRoute.origin && r.destination === indirectRoute.destination)) {
@@ -82,7 +87,7 @@ const routeHandling = {
         if (newRoutes.length > 0 && !arraysEqual(newRoutes, appState.routes)) {
             newRoutes = newRoutes.map((route, index) => ({
                 ...route,
-                tripType: appState.routes[index]?.tripType || 'oneWay'
+                tripType: appState.routes[index]?.tripType || route.tripType || 'oneWay'
             }));
             updateState('updateRoutes', newRoutes, 'routeHandling.updateRoutesArray');
             pathDrawing.clearLines(true);
