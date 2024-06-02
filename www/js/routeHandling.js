@@ -32,12 +32,11 @@ const routeHandling = {
 
         await Promise.all(fetchPromises);
 
-        for (let i = 0; i < waypoints.length - 1; i++) {
-            const fromWaypoint = waypoints[i];
-            const toWaypoint = waypoints[i + 1];
+        const waypointPairs = (waypoints.length === 4) ? [[0, 1], [2, 3]] : waypoints.map((_, index) => [index, index + 1]).slice(0, -1);
 
-            // Stop after the first segment if there are only three waypoints
-            if (i > 0 && waypoints.length === 3) break;
+        for (const [i, j] of waypointPairs) {
+            const fromWaypoint = waypoints[i];
+            const toWaypoint = waypoints[j];
 
             let route = flightMap.findRoute(fromWaypoint.iata_code, toWaypoint.iata_code);
 
