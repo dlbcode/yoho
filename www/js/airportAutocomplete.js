@@ -47,7 +47,6 @@ function handleSelection(e, inputId, airport) {
         }
     } else {
         if (lastAddedWaypoint !== airport.iata_code) {
-            console.log('airportAutocomplete.js: Adding waypoint', airport);
             updateState('addWaypoint', airport, 'airportAutocomplete.handleSelection2');
             lastAddedWaypoint = airport.iata_code;
         }
@@ -211,7 +210,6 @@ document.addEventListener('DOMContentLoaded', () => {
             updateState('updateWaypoint', { index: waypointIndex, data: airport }, 'airportAutocomplete.addEventListener1');
         } else {
             if (lastAddedWaypoint !== airport.iata_code) {
-                console.log('airportAutocomplete.js: Adding waypoint', airport);
                 updateState('addWaypoint', airport, 'airportAutocomplete.addEventListener2');
                 lastAddedWaypoint = airport.iata_code;
             }
