@@ -46,7 +46,22 @@ const pathDrawing = {
         } catch (error) {
             console.error('Error drawing path between airports:', error);
         }
-    },        
+    },
+
+    drawDashedLine(originAirport, destinationAirport) {
+        const worldCopies = [-720, -360, 0, 360, 720]; // Define world copies
+        worldCopies.forEach(offset => {
+            const adjustedOrigin = L.latLng(originAirport.latitude, originAirport.longitude + offset);
+            const adjustedDestination = L.latLng(destinationAirport.latitude, destinationAirport.longitude + offset);
+            const geodesicLine = new L.Geodesic([adjustedOrigin, adjustedDestination], {
+                weight: 2, opacity: 1.0, color: 'grey', dashArray: '5, 10', wrap: false
+            }).addTo(map);
+    
+            const routeId = `${originAirport.iata_code}-${destinationAirport.iata_code}`;
+            this.dashedRoutePathCache[routeId] = this.dashedRoutePathCache[routeId] || [];
+            this.dashedRoutePathCache[routeId].push(geodesicLine);
+        });
+    },         
 
     adjustLatLng(latLng) {
         var currentBounds = map.getBounds();
@@ -296,40 +311,22 @@ const pathDrawing = {
         return decoratedLine;
     },
 
-    drawDashedLine: function (ctx, points) {
-        ctx.setLineDash([5, 15]);
-        ctx.beginPath();
-        points.forEach((point, index) => {
-            if (point && point.latitude !== undefined && point.longitude !== undefined) { // Add checks for undefined properties
-                const x = point.longitude;
-                const y = point.latitude;
-                if (index === 0) {
-                    ctx.moveTo(x, y);
-                } else {
-                    ctx.lineTo(x, y);
-                }
-            }
-        });
-        ctx.stroke();
-    },
-
-    drawLines: function () {
-        const canvas = document.getElementById('flightMapCanvas');
-        if (!canvas) return;
-
-        const ctx = canvas.getContext('2d');
-        this.clearLines(false);
+    drawLines() {
+        this.clearLines();
 
         appState.routes.forEach(route => {
-            const points = [
-                route.originAirport,
-                ...route.stops.map(stop => stop.airport),
-                route.destinationAirport
-            ];
-            this.drawDashedLine(ctx, points);
+            if (route.isDirect) {
+                this.createRoutePath(route.originAirport, route.destinationAirport, route);
+            } else {
+                this.drawDashedLine(route.originAirport, route.destinationAirport);
+            }
         });
-    },
 
+        if (appState.selectedAirport) {
+            this.drawRoutePaths(appState.selectedAirport.iata_code, appState.directRoutes, appState.routeDirection);
+        }
+    },                
+    
     drawPaths(route) {
         this.createRoutePath(route.originAirport, route.destinationAirport, route, 0);
     },       
