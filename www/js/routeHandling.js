@@ -35,11 +35,17 @@ const routeHandling = {
         for (let i = 0; i < waypoints.length - 1; i++) {
             const fromWaypoint = waypoints[i];
             const toWaypoint = waypoints[i + 1];
+
+            // Stop after the first segment if there are only three waypoints
+            if (i > 0 && waypoints.length === 3) break;
+
             let route = flightMap.findRoute(fromWaypoint.iata_code, toWaypoint.iata_code);
 
             if (route) {
                 route.isDirect = true;
-                newRoutes.push(route);
+                if (!newRoutes.some(r => r.origin === route.origin && r.destination === route.destination)) {
+                    newRoutes.push(route);
+                }
             } else {
                 const [originAirport, destinationAirport] = await Promise.all([
                     flightMap.getAirportDataByIata(fromWaypoint.iata_code),
@@ -57,9 +63,23 @@ const routeHandling = {
                         source: 'indirect',
                         timestamp: new Date().toISOString()
                     };
-                    newRoutes.push(indirectRoute);
+                    if (!newRoutes.some(r => r.origin === indirectRoute.origin && r.destination === indirectRoute.destination)) {
+                        newRoutes.push(indirectRoute);
+                    }
                 }
             }
+        }
+
+        // Add placeholder for any destination if only three waypoints are present
+        if (waypoints.length === 3) {
+            newRoutes.push({
+                origin: waypoints[2].iata_code,
+                destination: 'Any',
+                isDirect: false,
+                price: null,
+                source: 'placeholder',
+                timestamp: new Date().toISOString()
+            });
         }
 
         // Remove routes with no corresponding waypoints
