@@ -24,6 +24,8 @@ async function fetchAirportByIata(iata) {
     }
 }
 
+let lastAddedWaypoint = null;
+
 function handleSelection(e, inputId, airport) {
     const inputField = document.getElementById(inputId);
     const suggestionBox = document.getElementById(inputId + 'Suggestions');
@@ -44,7 +46,11 @@ function handleSelection(e, inputId, airport) {
             updateState('updateWaypoint', { index: waypointIndex, data: airport });
         }
     } else {
-        updateState('addWaypoint', airport);
+        if (lastAddedWaypoint !== airport.iata_code) {
+            console.log('airportAutocomplete.js: Adding waypoint', airport);
+            updateState('addWaypoint', airport);
+            lastAddedWaypoint = airport.iata_code;
+        }
     }
 }
 
@@ -204,7 +210,11 @@ document.addEventListener('DOMContentLoaded', () => {
         if (waypointIndex >= 0 && waypointIndex < appState.waypoints.length) {
             updateState('updateWaypoint', { index: waypointIndex, data: airport });
         } else {
-            updateState('addWaypoint', airport);
+            if (lastAddedWaypoint !== airport.iata_code) {
+                console.log('airportAutocomplete.js: Adding waypoint', airport);
+                updateState('addWaypoint', airport);
+                lastAddedWaypoint = airport.iata_code;
+            }
         }
 
         if (airport && airport.latitude && airport.longitude) {
