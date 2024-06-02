@@ -6,21 +6,15 @@ const routeHandling = {
     updateRoutesArray: async function () {
         let newRoutes = [];
         let fetchPromises = [];
-        let partialRoutes = [];
 
         const waypoints = appState.routeDirection === 'to' ? [...appState.waypoints].reverse() : appState.waypoints;
 
-        for (let i = 0; i < waypoints.length; i++) {
+        // Fetch routes for waypoints
+        for (let i = 0; i < waypoints.length; i += 2) {
             const fromWaypoint = waypoints[i];
             const toWaypoint = waypoints[i + 1];
 
-            if (!toWaypoint) {
-                partialRoutes.push({
-                    origin: fromWaypoint.iata_code,
-                    tripType: appState.routes.length > i ? appState.routes[i].tripType : 'roundTrip'
-                });
-                continue;
-            }
+            if (!toWaypoint) continue;
 
             if (!appState.directRoutes[fromWaypoint.iata_code]) {
                 fetchPromises.push(flightMap.fetchAndCacheRoutes(fromWaypoint.iata_code));
@@ -32,11 +26,21 @@ const routeHandling = {
 
         await Promise.all(fetchPromises);
 
-        const waypointPairs = (waypoints.length === 4) ? [[0, 1], [2, 3]] : waypoints.map((_, index) => [index, index + 1]).slice(0, -1);
-
-        for (const [i, j] of waypointPairs) {
+        for (let i = 0; i < waypoints.length; i += 2) {
             const fromWaypoint = waypoints[i];
-            const toWaypoint = waypoints[j];
+            const toWaypoint = waypoints[i + 1];
+
+            if (!toWaypoint) {
+                newRoutes.push({
+                    origin: fromWaypoint.iata_code,
+                    destination: 'Any',
+                    isDirect: false,
+                    price: null,
+                    source: 'placeholder',
+                    timestamp: new Date().toISOString()
+                });
+                break;
+            }
 
             let route = flightMap.findRoute(fromWaypoint.iata_code, toWaypoint.iata_code);
 
@@ -67,18 +71,6 @@ const routeHandling = {
                     }
                 }
             }
-        }
-
-        // Add placeholder for any destination if only three waypoints are present
-        if (waypoints.length === 3) {
-            newRoutes.push({
-                origin: waypoints[2].iata_code,
-                destination: 'Any',
-                isDirect: false,
-                price: null,
-                source: 'placeholder',
-                timestamp: new Date().toISOString()
-            });
         }
 
         // Remove routes with no corresponding waypoints
