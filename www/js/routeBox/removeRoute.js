@@ -19,14 +19,14 @@ const removeRoute = {
         // Remove all selectedRoutes with the same group number
         Object.keys(appState.selectedRoutes).forEach(key => {
             if (appState.selectedRoutes[key].group === groupNumber) {
-                updateState('removeSelectedRoute', parseInt(key));
+                updateState('removeSelectedRoute', parseInt(key), 'removeRoute.removeRouteButton2');
             }
         });
 
         // Remove the waypoints for the route being removed
         let waypointsIndex = (routeNumber) * 2;
         if (appState.waypoints.length > waypointsIndex) {
-            updateState('removeWaypoints', routeNumber);
+            updateState('removeWaypoint', routeNumber, 'removeRoute.removeRouteButton2');
         }          
 
         // Remove the route date for the removed route
@@ -114,7 +114,7 @@ const removeRoute = {
         }
     }
 
-    updateState('updateRoutes', newRoutes);
+    updateState('updateRoutes', newRoutes, 'removeRoute.updateRoutesArray');
     pathDrawing.clearLines(true);
     pathDrawing.drawLines();
     //routeList.updateEstPrice();

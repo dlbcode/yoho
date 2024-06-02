@@ -56,16 +56,16 @@ async function initMapFunctions() {
 
     // Make the updateState function calls
     if (routeDirection) {
-        updateState('routeDirection', routeDirection);
+        updateState('routeDirection', routeDirection, 'map.initMapFunctions1');
     }
     routeDates.forEach(routeDate => {
-        updateState('updateRouteDate', routeDate);
+        updateState('updateRouteDate', routeDate, 'map.initMapFunctions2');
     });
     if (waypoints) {
-        updateState('addWaypoint', waypoints);
+        updateState('addWaypoint', waypoints, 'map.initMapFunctions3');
     }
     Object.entries(tripTypes).forEach(([routeNumber, tripType]) => {
-        updateState('tripType', { routeNumber: parseInt(routeNumber, 10), tripType });
+        updateState('tripType', { routeNumber: parseInt(routeNumber, 10), tripType }, 'map.initMapFunctions4');
     });
 }
 

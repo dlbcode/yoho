@@ -23,7 +23,7 @@ const appState = {
     invisibleRouteLines: [],
 };
 
-function updateState(key, value) {
+function updateState(key, value, calledFrom) {
     switch (key) {
         case 'routeDirection': {
             appState.routeDirection = value;
@@ -157,7 +157,7 @@ function updateState(key, value) {
             break;
     }
     document.dispatchEvent(new CustomEvent('stateChange', { detail: { key, value } }));
-    console.log('State updated:', key, value);
+    console.log('State updated:', key, value, calledFrom);
     console.log('appState:', appState);
 }
 

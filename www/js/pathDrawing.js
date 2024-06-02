@@ -213,13 +213,13 @@ const pathDrawing = {
                                             before.push(origin, destination);
                                             
                                             appState.waypoints = [...before, ...after];
-                                            updateState('updateWaypoint', appState.waypoints);
+                                            updateState('updateWaypoint', appState.waypoints, 'pathDrawing.createRoutePath1');
                                         }
                                     } else {
-                                        updateState('addWaypoint', [origin, destination]);
+                                        updateState('addWaypoint', [origin, destination], 'pathDrawing.createRoutePath2');
                                     }
                                 } else {
-                                    updateState('addWaypoint', [origin, destination]);
+                                    updateState('addWaypoint', [origin, destination], 'pathDrawing.createRoutePath3');
                                 }
                                 map.closePopup();
                             };                                                                                                                                            
@@ -237,7 +237,7 @@ const pathDrawing = {
                             });
                         }
                     });
-                    updateState('removeRouteLine', routeLineId);
+                    updateState('removeRouteLine', routeLineId, 'pathDrawing.createRoutePath4');
                 };
 
                 // Attach common event handlers to both lines

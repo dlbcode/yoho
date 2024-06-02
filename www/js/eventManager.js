@@ -8,8 +8,6 @@ import { mapHandling } from './mapHandling.js';
 
 function handleStateChange(event) {
     const { key, value } = event.detail;
-    console.log('eventManager.js - handleStateChange:', key, value);
-
     if (key === 'addWaypoint' || key === 'removeWaypoint' || key === 'updateWaypoint') {
         mapHandling.updateMarkerIcons();
         routeHandling.updateRoutesArray();
@@ -81,8 +79,7 @@ const eventManager = {
                 }
             }
             flightMap.selectedMarker = null;
-            console.log('eventManager.js: updateState - map click:', appState.selectedAirport);
-            updateState('selectedAirport', null);
+            updateState('selectedAirport', null, 'eventManager.setupEventListeners');
             pathDrawing.clearLines();
             pathDrawing.drawLines();
         });

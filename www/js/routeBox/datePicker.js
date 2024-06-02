@@ -24,8 +24,7 @@ export function initDatePicker(inputId, routeNumber) {
             } else if (dateType === 'return') {
                 appState.routeDates[routeNumber].return = selectedDates.length > 0 ? selectedDates[0].toISOString().split('T')[0] : null;
             }
-            console.log('datePicker.js: updateState - routes: ', appState.routeDates[routeNumber], 'for route:', routeNumber);
-            updateState('updateRouteDate', { routeNumber, ...appState.routeDates[routeNumber] }); // Update the state accordingly
+            updateState('updateRouteDate', { routeNumber, ...appState.routeDates[routeNumber] }, 'datePicker.initDatePicker'); // Update the state accordingly
         },
         onReady: (selectedDates, dateStr, instance) => {
             instance.calendarContainer.classList.add('do-not-close-routebox');
@@ -91,7 +90,7 @@ export function initDatePicker(inputId, routeNumber) {
 
                 if (isAnyDates) {
                     const altInput = instance.altInput || document.getElementById('date-input');
-                    updateState('updateRouteDate', { routeNumber, [dateType]: 'any' });
+                    updateState('updateRouteDate', { routeNumber, [dateType]: 'any' }, 'datePicker.initDatePicker');
                     instance.clear(); // Clear any selected dates in flatpickr
                     instance.close(); // Optionally close the flatpickr calendar
                     altInput.value = 'Any Dates';  // Directly set the displayed input value

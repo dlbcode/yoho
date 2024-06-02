@@ -67,7 +67,7 @@ const routeHandling = {
                 ...route,
                 tripType: appState.routes[index]?.tripType || 'oneWay'
             }));
-            updateState('updateRoutes', newRoutes);
+            updateState('updateRoutes', newRoutes, 'routeHandling.updateRoutesArray');
             pathDrawing.clearLines(true);
             pathDrawing.drawLines();
             document.dispatchEvent(new CustomEvent('routesArrayUpdated'));

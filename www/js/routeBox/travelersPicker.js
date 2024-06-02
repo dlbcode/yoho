@@ -24,7 +24,7 @@ export function travelersPicker(routeNumber) {
         dropdownList.appendChild(listItem);
 
         listItem.addEventListener('click', function() {
-            updateState('updateTravelers', { routeNumber, travelers: this.textContent });
+            updateState('updateTravelers', { routeNumber, travelers: this.textContent }, 'travelersPicker.travelersPicker');
             dropdownBtn.innerHTML = `<img src="assets/person.svg" alt="" class="icon-person"> ${this.textContent} <span class="icon-dropdown"></span>`;
             dropdownList.classList.add('hidden');
         });

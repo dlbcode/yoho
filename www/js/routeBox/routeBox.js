@@ -68,7 +68,7 @@ const setupWaypointInputListeners = (routeNumber) => {
                     const waypointIndex = parseInt(input.id.replace('waypoint-input-', '')) - 1;
                     if (waypointIndex >= 0 && waypointIndex < appState.waypoints.length) {
                         if (appState.waypoints[waypointIndex].iata_code !== '') {
-                            updateState('removeWaypoint', waypointIndex);
+                            updateState('removeWaypoint', waypointIndex, 'routeBox.setupWaypointInputListeners');
                         }
                     }
                 }
@@ -182,7 +182,7 @@ const routeBox = {
         searchButton.onclick = () => {
             document.getElementById('infoPaneContent').innerHTML = '';
             if (appState.currentView !== 'routeTable') {
-                updateState('currentView', 'routeTable');
+                updateState('currentView', 'routeTable', 'routeBox.createSearchButton');
             }
             buildRouteTable(routeNumber);
         };

@@ -35,7 +35,7 @@ export function tripTypePicker(routeNumber) {
             appState.routes[routeNumber].tripType = tripTypeValues[index];
             dropdownBtn.innerHTML = `${type} <span class="icon-dropdown"></span>`;
             dropdownList.classList.add('hidden');
-            updateState('tripType', { routeNumber, tripType: tripTypeValues[index] });
+            updateState('tripType', { routeNumber, tripType: tripTypeValues[index] }, 'tripTypePicker.tripTypePicker');
             handleTripTypeChange(tripTypeValues[index], routeNumber);
             document.dispatchEvent(new CustomEvent('stateChange', { detail: { key: 'tripType', value: tripTypeValues[index] } }));
         });

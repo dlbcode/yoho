@@ -80,14 +80,14 @@ const flightMap = {
         const handleAddButtonClick = () => {
             const lastWaypoint = appState.waypoints[appState.waypoints.length - 1];
             if (appState.waypoints.length >= 2 && appState.waypoints.length % 2 === 0){
-                updateState('addWaypoint', lastWaypoint);
-                updateState('addWaypoint', airport);
+                updateState('addWaypoint', lastWaypoint, 'flightMap.handleMarkerClick1');
+                updateState('addWaypoint', airport, 'flightMap.handleMarkerClick2');
             } else {
-                updateState('addWaypoint', airport);
+                updateState('addWaypoint', airport, 'flightMap.handleMarkerClick3');
             }
             clickedMarker.setIcon(magentaDotIcon);
             //appState.selectedAirport = null;
-            updateState('selectedAirport', null);
+            updateState('selectedAirport', null, 'flightMap.handleMarkerClick4');
             popupContent.removeChild(addButton);
             clickedMarker.closePopup();
         };
@@ -96,11 +96,11 @@ const flightMap = {
             console.table(appState.waypoints);
             const waypointIndex = appState.waypoints.findIndex(wp => wp.iata_code === airport.iata_code);
             if (appState.selectedAirport && appState.selectedAirport.iata_code === airport.iata_code) {
-                updateState('removeWaypoint', waypointIndex + 1);
-                updateState('removeWaypoint', waypointIndex);
+                updateState('removeWaypoint', waypointIndex + 1, 'flightMap.handleRemoveButtonClick1');
+                updateState('removeWaypoint', waypointIndex, 'flightMap.handleRemoveButtonClick2');
                 clickedMarker.setIcon(blueDotIcon);
                 //appState.selectedAirport = null;
-                updateState('selectedAirport', null);
+                updateState('selectedAirport', null, 'flightMap.handleRemoveButtonClick3');
                 popupContent.removeChild(removeButton);
                 clickedMarker.closePopup();
             }
