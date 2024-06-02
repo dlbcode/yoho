@@ -49,6 +49,10 @@ const pathDrawing = {
     },
 
     drawDashedLine(originAirport, destinationAirport) {
+        if (!originAirport || !destinationAirport) {
+            // No set destination or origin
+            return;
+        }
         const worldCopies = [-720, -360, 0, 360, 720]; // Define world copies
         worldCopies.forEach(offset => {
             const adjustedOrigin = L.latLng(originAirport.latitude, originAirport.longitude + offset);
