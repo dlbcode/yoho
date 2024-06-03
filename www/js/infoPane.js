@@ -293,6 +293,12 @@ addPlusButton() {
     plusButton.id = 'plus-button';
     plusButton.className = 'plus-button';
     plusButton.onclick = (event) => {
+      // Duplicate the last waypoint as the default origin for the new route
+      if (appState.waypoints.length > 0) {
+        const lastWaypoint = appState.waypoints[appState.waypoints.length - 1];
+        const newWaypoint = { ...lastWaypoint }; // Create a copy of the last waypoint
+        updateState('addWaypoint', newWaypoint, 'infoPane.addPlusButton'); // Use updateState to add the duplicated waypoint
+      }
       routeBox.showRouteBox(event, routeIndex);
     };
 
