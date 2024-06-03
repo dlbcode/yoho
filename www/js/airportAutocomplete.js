@@ -1,6 +1,7 @@
 import { appState, updateState } from './stateManager.js';
 import { map } from './map.js';
 import { uiHandling } from './uiHandling.js';
+import { routeHandling } from './routeHandling.js';
 
 async function fetchAirports(query) {
     try {
