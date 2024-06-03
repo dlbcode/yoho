@@ -97,8 +97,10 @@ function updateState(key, value, calledFrom) {
             break;
 
         case 'removeWaypoints':
-            let startIndex = (value.routeNumber - 1) * 2;
-            appState.waypoints.splice(startIndex, 2);
+            let startIndex = value.routeNumber * 2;
+            if (startIndex < appState.waypoints.length) {
+                appState.waypoints.splice(startIndex, 2);
+            }
             updateUrl();
             break;
 
