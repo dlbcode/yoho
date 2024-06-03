@@ -12,7 +12,8 @@ function buildRouteTable(routeIndex) {
     };
 
     const dateRange = appState.routeDates[routeIndex];
-    let origin, destination, departDate, returnDate, apiUrl, endpoint;
+    let origin, destination, currentRoute, departDate, returnDate, apiUrl, endpoint;
+    currentRoute = appState.routes[routeIndex];
 
     if (appState.routes[routeIndex] && appState.routes[routeIndex].originAirport && appState.routes[routeIndex].destinationAirport) {
         origin = appState.routes[routeIndex].originAirport.iata_code;
