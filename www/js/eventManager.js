@@ -21,6 +21,13 @@ function handleStateChange(event) {
             pathDrawing.clearLines(true);
         }
     }
+
+    // New logic to handle view change after route removal
+    if (key === 'updateRoutes') {
+        if (appState.waypoints.length === 0 || !appState.selectedRoutes[0]) {
+            appState.currentView = 'trip';
+        }
+    }
 }
 
 const eventManager = {
