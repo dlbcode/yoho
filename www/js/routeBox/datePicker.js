@@ -2,31 +2,35 @@ import { appState, updateState } from '../stateManager.js';
 
 export function initDatePicker(inputId, routeNumber) {
     const dateType = inputId.split('-')[0]; // 'depart' or 'return'
-    const lastRouteKey = Object.keys(appState.routeDates)[Object.keys(appState.routeDates).length - 1];
-    const lastRouteDate = appState.routeDates[lastRouteKey].depart;
     if (!appState.routeDates[routeNumber]) {
-        appState.routeDates[routeNumber] = { depart: lastRouteDate, return: null };
+        appState.routeDates[routeNumber] = { depart: null, return: null };
     }
-    const currentRouteDate = appState.routeDates[routeNumber] ? appState.routeDates[routeNumber][dateType] : '';
-    const isDateRange = appState.routeDates[routeNumber] && appState.routeDates[routeNumber].depart && appState.routeDates[routeNumber].return;
+    const currentRouteDate = appState.routeDates[routeNumber][dateType] || '';
+    const isDateRange = currentRouteDate.includes(' to ');
 
     const dateInput = document.getElementById(inputId);
     let fp = flatpickr(dateInput, {
         disableMobile: true,
         enableTime: false,
         dateFormat: "Y-m-d",
-        defaultDate: currentRouteDate,
-        minDate: routeNumber === 0 ? "today" : appState.routeDates[routeNumber - 1].depart,
+        defaultDate: currentRouteDate.split(' to '),
+        minDate: routeNumber === 0 ? "today" : appState.routeDates[routeNumber - 1]?.depart || "today",
         mode: currentRouteDate === 'any' ? 'any' : (isDateRange ? 'range' : 'single'),
         altInput: true,
         altFormat: "D, d M", // This will display the date as 'Fri, 10 May'
         onValueUpdate: function(selectedDates, dateStr) {
-            if (dateType === 'depart') {
-                appState.routeDates[routeNumber].depart = selectedDates.length > 0 ? selectedDates[0].toISOString().split('T')[0] : null;
-            } else if (dateType === 'return') {
-                appState.routeDates[routeNumber].return = selectedDates.length > 0 ? selectedDates[0].toISOString().split('T')[0] : null;
+            let dateValue = null;
+            if (selectedDates.length > 0) {
+                if (selectedDates.length > 1) {
+                    dateValue = `${selectedDates[0].toISOString().split('T')[0]} to ${selectedDates[1].toISOString().split('T')[0]}`;
+                } else {
+                    dateValue = selectedDates[0].toISOString().split('T')[0];
+                }
+            } else {
+                dateValue = 'any';
             }
-            updateState('updateRouteDate', { routeNumber, ...appState.routeDates[routeNumber] }, 'datePicker.initDatePicker'); // Update the state accordingly
+            appState.routeDates[routeNumber][dateType] = dateValue;
+            updateState('updateRouteDate', { routeNumber, ...appState.routeDates[routeNumber] }, 'datePicker.initDatePicker');
         },
         onReady: (selectedDates, dateStr, instance) => {
             instance.calendarContainer.classList.add('do-not-close-routebox');
@@ -92,7 +96,8 @@ export function initDatePicker(inputId, routeNumber) {
 
                 if (isAnyDates) {
                     const altInput = instance.altInput || document.getElementById('date-input');
-                    updateState('updateRouteDate', { routeNumber, [dateType]: 'any' }, 'datePicker.initDatePicker');
+                    appState.routeDates[routeNumber][dateType] = 'any';
+                    updateState('updateRouteDate', { routeNumber, ...appState.routeDates[routeNumber] }, 'datePicker.initDatePicker');
                     instance.clear(); // Clear any selected dates in flatpickr
                     instance.close(); // Optionally close the flatpickr calendar
                     altInput.value = 'Any Dates';  // Directly set the displayed input value
