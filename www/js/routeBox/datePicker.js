@@ -2,8 +2,12 @@ import { appState, updateState } from '../stateManager.js';
 
 export function initDatePicker(inputId, routeNumber) {
     const dateType = inputId.split('-')[0]; // 'depart' or 'return'
+    const lastRouteKey = Object.keys(appState.routeDates)[Object.keys(appState.routeDates).length - 1];
+    console.log('LastRouteKey:', lastRouteKey);
+    const lastRouteDate = appState.routeDates[lastRouteKey].depart;
+    console.log('LastRouteDate:', lastRouteDate);
     if (!appState.routeDates[routeNumber]) {
-        appState.routeDates[routeNumber] = { depart: null, return: null };
+        appState.routeDates[routeNumber] = { depart: lastRouteDate, return: null };
     }
     const currentRouteDate = appState.routeDates[routeNumber] ? appState.routeDates[routeNumber][dateType] : '';
     const isDateRange = appState.routeDates[routeNumber] && appState.routeDates[routeNumber].depart && appState.routeDates[routeNumber].return;
