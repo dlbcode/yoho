@@ -103,9 +103,6 @@ function updateState(key, value, calledFrom) {
             break;
 
         case 'updateRoutes':
-            if (value.length === 0) {
-                break; // Do not update if value is an empty array
-            }
             const updatedRoutes = value.map((route, index) => {
                 const existingRoute = appState.routes[index] || {};
                 return {

@@ -83,28 +83,15 @@ const routeHandling = {
 
         // Ensure all routes with no corresponding waypoints are removed, including current route or route 0
         appState.routes = appState.routes.filter(route => appState.waypoints.some(waypoint => waypoint.iata_code === route.origin));
-
-        if (newRoutes.length > 0 && !arraysEqual(newRoutes, appState.routes)) {
-            newRoutes = newRoutes.map((route, index) => ({
-                ...route,
-                tripType: appState.routes[index]?.tripType || route.tripType || 'oneWay'
-            }));
-            updateState('updateRoutes', newRoutes, 'routeHandling.updateRoutesArray');
-            pathDrawing.clearLines(true);
-            pathDrawing.drawLines();
-            document.dispatchEvent(new CustomEvent('routesArrayUpdated'));
-        } else {
-            console.log('No valid routes found to update or routes are the same as current state.');
-        }
+        newRoutes = newRoutes.map((route, index) => ({
+            ...route,
+            tripType: appState.routes[index]?.tripType || route.tripType || 'oneWay'
+        }));
+        updateState('updateRoutes', newRoutes, 'routeHandling.updateRoutesArray');
+        pathDrawing.clearLines(true);
+        pathDrawing.drawLines();
+        document.dispatchEvent(new CustomEvent('routesArrayUpdated'));
     }
 };
-
-function arraysEqual(arr1, arr2) {
-    if (arr1.length !== arr2.length) return false;
-    for (let i = 0; i < arr1.length; i++) {
-        if (JSON.stringify(arr1[i]) !== JSON.stringify(arr2[i])) return false;
-    }
-    return true;
-}
 
 export { routeHandling };
