@@ -22,6 +22,8 @@ function buildRouteTable(routeIndex) {
         destination = appState.waypoints[(routeIndex * 2) + 1]?.iata_code || 'Any';
     }
 
+    document.head.appendChild(Object.assign(document.createElement('link'), {rel: 'stylesheet', type: 'text/css', href: '../css/routeTable.css'}));
+
     // Start the loading animation
     const topBar = document.getElementById('top-bar');
     topBar.classList.add('loading');

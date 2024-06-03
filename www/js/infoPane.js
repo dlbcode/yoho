@@ -175,8 +175,8 @@ const infoPane = {
         const group = item.group;
         if (!groupData[group]) {
             groupData[group] = {
-                departure: appState.routeDates[item.routeNumber].depart, // Access new routeDates structure
-                arrival: appState.routeDates[item.routeNumber].return, // Access new routeDates structure
+                departure: appState.routeDates[item.routeNumber]?.depart, // Access new routeDates structure
+                arrival: appState.routeDates[item.routeNumber]?.return, // Access new routeDates structure
                 price: item.displayData.price,
                 airlines: [item.displayData.airline],
                 stops: new Set(), // Use a Set to ensure unique stops
@@ -184,7 +184,7 @@ const infoPane = {
                 deep_link: item.displayData.deep_link
             };
         } else {
-            groupData[group].arrival = appState.routeDates[item.routeNumber].return; // Update to last route's arrival
+            groupData[group].arrival = appState.routeDates[item.routeNumber]?.return; // Update to last route's arrival
             groupData[group].airlines.push(item.displayData.airline);
         }
         // Always add the destination to the route
@@ -217,17 +217,17 @@ const infoPane = {
             <td>${data.route.join(' > ')}</td>
             <td><a href="${data.deep_link}" target="_blank"><button>Book Flight</button></a></td>`;
 
-          row.addEventListener('mouseover', function() {
+        row.addEventListener('mouseover', function() {
             const routeString = data.route.join(' > ');
             const iataCodes = routeString.split(' > ');
             infoPane.highlightRoute(iataCodes);
-          });
+        });
 
-          // Attach mouseout event to clear the route
-          row.addEventListener('mouseout', function() {
-              pathDrawing.clearLines();
-              pathDrawing.drawLines(); // Redraw all active routes if necessary
-          });
+        // Attach mouseout event to clear the route
+        row.addEventListener('mouseout', function() {
+            pathDrawing.clearLines();
+            pathDrawing.drawLines(); // Redraw all active routes if necessary
+        });
 
         tbody.appendChild(row);
     });
