@@ -12,8 +12,8 @@ function buildRouteTable(routeIndex) {
     };
 
     const dateRange = appState.routeDates[routeIndex];
-    let origin, destination, currentRoute, departDate, returnDate, apiUrl, endpoint;
-    currentRoute = appState.routes[routeIndex];
+    let origin, destination, departDate, returnDate, apiUrl, endpoint;
+
     if (appState.routes[routeIndex] && appState.routes[routeIndex].originAirport && appState.routes[routeIndex].destinationAirport) {
         origin = appState.routes[routeIndex].originAirport.iata_code;
         destination = appState.routes[routeIndex].destinationAirport.iata_code;
@@ -42,8 +42,15 @@ function buildRouteTable(routeIndex) {
     returnDate = dateRange.return || '';
 
     if (destination === 'Any') {
-        endpoint = 'range';
-        apiUrl = `https://yonderhop.com/api/${endpoint}?flyFrom=${origin}`;
+        endpoint = 'cheapestFlights';
+        if (departDate === 'any') {
+            apiUrl = `https://yonderhop.com/api/${endpoint}?origin=${origin}`;
+        } else if (departDate.includes(' to ')) {
+            const [dateFrom, dateTo] = departDate.split(' to ');
+            apiUrl = `https://yonderhop.com/api/${endpoint}?origin=${origin}&date_from=${dateFrom}&date_to=${dateTo}`;
+        } else {
+            apiUrl = `https://yonderhop.com/api/${endpoint}?origin=${origin}&date_from=${departDate}&date_to=${departDate}`;
+        }
     } else {
         if (departDate === 'any' || returnDate === 'any') {
             endpoint = 'range';
