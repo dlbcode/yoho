@@ -25,11 +25,12 @@ function buildRouteTable(routeIndex) {
     // Start the loading animation
     const topBar = document.getElementById('top-bar');
     topBar.classList.add('loading');
+    
     if (destination === 'Any') {
-      endPoint = 'cheapestFlights';
-      origin = appState.waypoints[routeIndex * 2]?.iata_code;
+        endpoint = 'cheapestFlights';
+        origin = appState.waypoints[routeIndex * 2]?.iata_code;
     } else {
-      origin = currentRoute.originAirport.iata_code;
+        origin = currentRoute.originAirport.iata_code;
     }
 
     if (!dateRange) {
