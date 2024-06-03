@@ -37,24 +37,25 @@ function handleSelection(e, inputId, airport) {
     }));
     inputField.setAttribute('data-selected-iata', airport.iata_code);
 
-    const waypointIndex = parseInt(inputId.replace('waypoint-input-', '')) - 1;
-    if (waypointIndex >= 0 && waypointIndex < appState.waypoints.length) {
-        if (appState.waypoints[waypointIndex].iata_code !== airport.iata_code) {
-            updateState('updateWaypoint', { index: waypointIndex, data: airport }, 'airportAutocomplete.handleSelection1');
-        }
+    // Extract routeNumber from inputId or another way
+    const routeNumber = parseInt(inputId.split('-')[2]) - 1;
+    if (!isNaN(routeNumber)) {
+        updateState('updateWaypoint', { index: routeNumber, data: airport });
     } else {
-        updateState('addWaypoint', airport, 'airportAutocomplete.handleSelection2');
+        updateState('addWaypoint', airport);
     }
+
+    inputField.blur();
 }
 
 function setupAutocompleteForField(fieldId) {
     const inputField = document.getElementById(fieldId);
     const suggestionBox = document.getElementById(fieldId + 'Suggestions');
-    suggestionBox.style.display = 'none';
-    let selectionMade = false;
-    let initialInputValue = "";
-    let currentFocus = -1;
+    let selectionMade = false; // Track if a selection has been made
+    let initialInputValue = ""; // Store the initial input value on focus
+    let currentFocus = -1; // Track the currently focused item in the suggestion box
 
+    // Disable browser autofill
     inputField.setAttribute('autocomplete', 'new-password');
     inputField.setAttribute('name', 'waypoint-input-' + Date.now());
     inputField.setAttribute('readonly', true);
@@ -64,6 +65,7 @@ function setupAutocompleteForField(fieldId) {
         toggleSuggestionBox(true);
         initialInputValue = inputField.value;
 
+        // New functionality to center map on airport
         const iataCode = inputField.getAttribute('data-selected-iata') || getIataFromField(fieldId);
         if (iataCode) {
             const airport = await fetchAirportByIata(iataCode);
@@ -80,7 +82,7 @@ function setupAutocompleteForField(fieldId) {
         const airports = await fetchAirports(inputField.value);
         updateSuggestions(fieldId, airports);
         selectionMade = false;
-        currentFocus = -1;
+        currentFocus = -1; // Reset the focus so item selection starts from the top
     });
 
     const toggleSuggestionBox = (display) => {
@@ -99,22 +101,21 @@ function setupAutocompleteForField(fieldId) {
         const isCurrentIataValid = currentInputValue.includes(selectedIata);
         if (!selectionMade && !isCurrentIataValid && initialInputValue !== currentInputValue) {
             inputField.value = '';
-            updateState('updateWaypoint', { index: parseInt(fieldId.replace('waypoint-input-', '')) - 1, data: { iata_code: '', city: '', country: '' } }, 'airportAutocomplete.clearInputField');
-            routeHandling.updateRoutesArray();
         }
     };
 
     const outsideClickListener = (e) => {
         if (!inputField.contains(e.target) && !suggestionBox.contains(e.target)) {
             toggleSuggestionBox(false);
-            clearInputField(inputField);
         }
     };
 
+    // Add event listeners for focus, keydown, and blur
+    inputField.addEventListener('focus', () => toggleSuggestionBox(true));
     inputField.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
             toggleSuggestionBox(false);
-            clearInputField(inputField);
+            clearInputField();
         } else if (e.key === 'ArrowDown') {
             currentFocus++;
             updateActiveItem(suggestionBox.getElementsByTagName('div'));
@@ -128,6 +129,16 @@ function setupAutocompleteForField(fieldId) {
                 if (items) items[currentFocus].click();
             }
         }
+        inputField.addEventListener('blur', () => {
+            setTimeout(() => {
+                clearInputField(inputField);
+                toggleSuggestionBox(false);
+                if (inputField.value === '' && appState.waypoints.length > 0) {
+                   const waypointIndex = parseInt(inputField.id.replace('waypoint-input-', '')) - 1;
+                   updateState('removeWaypoint', waypointIndex);
+                }
+            }, 300); // Delay to allow for selection
+        });
     });
 
     if (!window.outsideClickListenerAdded) {
@@ -155,18 +166,18 @@ function setupAutocompleteForField(fieldId) {
 function updateSuggestions(inputId, airports) {
     const suggestionBox = document.getElementById(inputId + 'Suggestions');
     suggestionBox.innerHTML = '';
-    let selectionHandledByTouch = false;
+    let selectionHandledByTouch = false; // Flag to track if selection was handled by touch
 
     airports.forEach(airport => {
         const div = document.createElement('div');
         div.textContent = `${airport.name} (${airport.iata_code}) - ${airport.city}, ${airport.country}`;
-
+    
         const selectionHandler = (e) => {
             setTimeout(() => {
                 handleSelection(e, inputId, airport);
-            }, 100);
+            }, 100); // Add a small delay
         };
-
+    
         div.addEventListener('touchstart', (e) => {
             selectionHandledByTouch = false;
             div.style.pointerEvents = 'none';
@@ -175,24 +186,24 @@ function updateSuggestions(inputId, airports) {
         div.addEventListener('touchmove', (e) => {
             selectionHandledByTouch = true;
         }, { passive: true });
-
+    
         div.addEventListener('touchend', (e) => {
             div.style.pointerEvents = 'auto';
             if (!selectionHandledByTouch) {
                 selectionHandler(e);
             }
         });
-
+    
         div.addEventListener('click', (e) => {
             if (!selectionHandledByTouch) {
                 selectionHandler(e);
             }
             selectionHandledByTouch = false;
         });
-
+    
         suggestionBox.appendChild(div);
     });
-
+                     
     if (airports.length > 0) suggestionBox.style.display = 'block';
 }
 
@@ -207,13 +218,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 updateState('addWaypoint', airport, 'airportAutocomplete.addEventListener2');
         }
 
+        // Move map view to include the selected airport marker
         if (airport && airport.latitude && airport.longitude) {
             const latLng = L.latLng(airport.latitude, airport.longitude);
             const currentLatLng = map.getCenter();
             const adjustedLatLng = adjustLatLngForShortestPath(currentLatLng, latLng);
             map.flyTo(adjustedLatLng, 4, {
                 animate: true,
-                duration: 0.5
+                duration: 0.5 // Duration in seconds
             });
         }
         uiHandling.setFocusToNextUnsetInput();
@@ -224,6 +236,7 @@ document.addEventListener('DOMContentLoaded', () => {
         let targetLng = targetLatLng.lng;
         let lngDifference = targetLng - currentLng;
 
+        // Check if crossing the antimeridian offers a shorter path
         if (lngDifference > 180) {
             targetLng -= 360;
         } else if (lngDifference < -180) {
