@@ -7,7 +7,6 @@ import { uiHandling } from './uiHandling.js';
 import { flightMap } from './flightMap.js';
 import { routeBox } from './routeBox/routeBox.js';
 
-
 const infoPane = {
   init() {
     const infoPaneContent = document.getElementById('infoPaneContent');
@@ -31,14 +30,13 @@ const infoPane = {
   handleStateChange(event) {
     this.updateRouteButtons();
     if (event.detail.key === 'updateSelectedRoute' || event.detail.key === 'removeSelectedRoute' || event.detail.key === 'changeView' || event.detail.key === 'updateRoutes') {
-      //appState.currentView = 'trip';
       this.displayContent();
     }
   },  
 
   displayContent() {
     const infoPaneContent = document.getElementById('infoPaneContent');
-    infoPaneContent.innerHTML = '';
+    infoPaneContent.innerHTML = ''; 
   
     const { currentView, currentRouteIndex, selectedRoutes } = appState;
   
@@ -79,7 +77,7 @@ const infoPane = {
 
         button.textContent = buttonText;
 
-        button.onclick = () => {
+        button.onclick = (event) => {
           pathDrawing.clearLines(true);
           pathDrawing.drawLines();
           if (appState.currentRouteIndex != routeIndex) {
@@ -109,7 +107,7 @@ const infoPane = {
           } else if (group.length === 1) {
               map.setView(group[0], 4);
           }
-      };
+        };
 
       if (appState.selectedRoutes.hasOwnProperty(routeIndex)) {
         button.classList.add('selected-route-button'); // Adds a class that you will style to make the background green
@@ -143,7 +141,7 @@ const infoPane = {
         });
       });            
     });
-    if (appState.waypoints.lenth === 0 || appState.waypoints.length % 2 === 0) {
+    if (appState.waypoints.length === 0 || appState.waypoints.length % 2 === 0) {
       this.addPlusButton();
     }
   },
@@ -271,48 +269,48 @@ const infoPane = {
     }
   },
 
-formatPrice: function(price) {
-  const numericPrice = parseFloat(price.replace(/[^\d.-]/g, ''));
-  return isNaN(numericPrice) ? "0.00" : numericPrice.toFixed(2);
-},
+  formatPrice: function(price) {
+    const numericPrice = parseFloat(price.replace(/[^\\d.-]/g, ''));
+    return isNaN(numericPrice) ? "0.00" : numericPrice.toFixed(2);
+  },
 
-highlightRoute: function(iataCodes) {
-  pathDrawing.clearLines();
-  iataCodes.forEach((code, index) => {
-      if (index < iataCodes.length - 1) {
-          pathDrawing.drawPathBetweenAirports(iataCodes[index], iataCodes[index + 1], flightMap.getAirportDataByIata);
-      }
-  });
-},
+  highlightRoute: function(iataCodes) {
+    pathDrawing.clearLines();
+    iataCodes.forEach((code, index) => {
+        if (index < iataCodes.length - 1) {
+            pathDrawing.drawPathBetweenAirports(iataCodes[index], iataCodes[index + 1], flightMap.getAirportDataByIata);
+        }
+    });
+  },
 
-addPlusButton() {
-  const menuBar = document.getElementById('menu-bar');
-  const routeIndex = Math.floor(appState.routes.length);
-  if (!document.getElementById('plus-button')) { // Check to avoid duplicates
-    let plusButton = document.createElement('button');
-    plusButton.id = 'plus-button';
-    plusButton.className = 'plus-button';
-    plusButton.onclick = (event) => {
-      // Duplicate the last waypoint as the default origin for the new route
-      if (appState.waypoints.length > 0) {
-        const lastWaypoint = appState.waypoints[appState.waypoints.length - 1];
-        const newWaypoint = { ...lastWaypoint }; // Create a copy of the last waypoint
-        updateState('addWaypoint', newWaypoint, 'infoPane.addPlusButton'); // Use updateState to add the duplicated waypoint
-      }
-      routeBox.showRouteBox(event, routeIndex);
-    };
+  addPlusButton() {
+    const menuBar = document.getElementById('menu-bar');
+    const routeIndex = Math.floor(appState.routes.length);
+    if (!document.getElementById('plus-button')) { // Check to avoid duplicates
+      let plusButton = document.createElement('button');
+      plusButton.id = 'plus-button';
+      plusButton.className = 'plus-button';
+      plusButton.onclick = (event) => {
+        // Duplicate the last waypoint as the default origin for the new route
+        if (appState.waypoints.length > 0) {
+          const lastWaypoint = appState.waypoints[appState.waypoints.length - 1];
+          const newWaypoint = { ...lastWaypoint }; // Create a copy of the last waypoint
+          updateState('addWaypoint', newWaypoint, 'infoPane.addPlusButton'); // Use updateState to add the duplicated waypoint
+        }
+        routeBox.showRouteBox(event, routeIndex);
+      };
 
-    // Create the SVG as a string and set it as the innerHTML of the button
-    plusButton.innerHTML = `
-      <svg height="32px" width="32px" viewBox="0 0 64 64" fill="#aaa">
-        <rect x="30" y="10" width="4" height="44"></rect>
-        <rect x="10" y="30" width="44" height="4"></rect>
-      </svg>
-    `;
+      // Create the SVG as a string and set it as the innerHTML of the button
+      plusButton.innerHTML = `
+        <svg height="32px" width="32px" viewBox="0 0 64 64" fill="#aaa">
+          <rect x="30" y="10" width="4" height="44"></rect>
+          <rect x="10" y="30" width="44" height="4"></rect>
+        </svg>
+      `;
 
-    menuBar.appendChild(plusButton);
+      menuBar.appendChild(plusButton);
+    }
   }
-}
 
 }
 

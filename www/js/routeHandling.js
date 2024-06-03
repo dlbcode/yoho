@@ -78,11 +78,6 @@ const routeHandling = {
             }
         }
 
-        // Remove routes with no corresponding waypoints
-        //newRoutes = newRoutes.filter(route => appState.waypoints.some(waypoint => waypoint.iata_code === route.origin));
-
-        // Ensure all routes with no corresponding waypoints are removed, including current route or route 0
-        //appState.routes = appState.routes.filter(route => appState.waypoints.some(waypoint => waypoint.iata_code === route.origin));
         newRoutes = newRoutes.map((route, index) => ({
             ...route,
             tripType: appState.routes[index]?.tripType || route.tripType || 'oneWay'
