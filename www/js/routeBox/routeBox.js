@@ -129,15 +129,9 @@ const routeBox = {
         removeRoute.removeRouteButton(buttonContainer, routeNumber);
         routeBoxElement.append(buttonContainer);
     
-        // Ensure the element is reflowed
-        routeBoxElement.offsetHeight;
-    
-        // Initial positioning
+        // Position the popup correctly before making it visible
         this.positionPopup(routeBoxElement, event, routeNumber);
         routeBoxElement.style.display = 'block';
-    
-        // Re-position after a short delay to ensure correct placement
-        setTimeout(() => this.positionPopup(routeBoxElement, event, routeNumber), 100);
     
         [`waypoint-input-${routeNumber * 2 + 1}`, `waypoint-input-${routeNumber * 2 + 2}`].forEach(id => setupAutocompleteForField(id));
         if (firstEmptyInput) firstEmptyInput.focus();
@@ -199,6 +193,12 @@ const routeBox = {
         const rect = event.target.getBoundingClientRect();
         const screenPadding = 10;
         const menuBar = document.getElementById('menu-bar');
+    
+        if (!menuBar) {
+            console.error('Menu bar not found!');
+            return;
+        }
+    
         const menuBarRect = menuBar.getBoundingClientRect();
         const menuBarTop = menuBarRect.top + window.scrollY;
     
@@ -210,10 +210,10 @@ const routeBox = {
         popup.style.left = `${left}px`;
     
         // Position the popup just above the menu-bar
-        let top = menuBarTop - popup.offsetHeight; // 10px offset above the menu-bar
+        let top = menuBarTop - popup.offsetHeight - 55; // 10px offset above the menu-bar
         top = Math.max(top, screenPadding); // Ensure it doesn't go off-screen at the top
         popup.style.top = `${top}px`;
-    },        
+    },            
 
     handleSwapButtonClick(routeNumber) {
         const inputs = document.querySelectorAll('.waypoint-inputs-container input[type="text"]');
