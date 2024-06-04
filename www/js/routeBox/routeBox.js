@@ -98,17 +98,17 @@ const setWaypointInputs = () => {
 
 const routeBox = {
     showRouteBox(event, routeNumber) {
-        this.removeExistingRouteBox();
+        this.removeExistingRouteBox(); // Ensure any existing routeBox is removed
         const routeBoxElement = this.createRouteBox();
-        document.body.appendChild(routeBoxElement);
-
+        document.body.appendChild(routeBoxElement); // Append the routeBox to the DOM
+    
         if (!appState.routes[routeNumber]) {
             appState.routes[routeNumber] = { tripType: 'oneWay' }; // Default to oneWay if not set
         }
         const topRow = createElement('div', { id: 'topRow', className: 'top-row' });
         topRow.append(tripTypePicker(routeNumber), travelersPicker(routeNumber));
         routeBoxElement.append(topRow);
-
+    
         const waypointInputsContainer = createElement('div', { className: 'waypoint-inputs-container' });
         let firstEmptyInput = null;
         ['From', 'Where to?'].forEach((placeholder, i) => {
@@ -120,27 +120,34 @@ const routeBox = {
         });
         routeBoxElement.append(waypointInputsContainer);
         waypointInputsContainer.insertBefore(this.createSwapButton(routeNumber), waypointInputsContainer.children[1]);
-
+    
         const dateInputsContainer = createElement('div', { className: 'date-inputs-container' });
         routeBoxElement.append(dateInputsContainer);
-
+    
         const buttonContainer = createElement('div', { className: 'button-container' });
         buttonContainer.append(this.createSearchButton(routeNumber), this.createCloseButton(routeBoxElement));
         removeRoute.removeRouteButton(buttonContainer, routeNumber);
         routeBoxElement.append(buttonContainer);
-
-        this.positionPopup(routeBoxElement, event);
+    
+        // Ensure the element is reflowed
+        routeBoxElement.offsetHeight;
+    
+        // Initial positioning
+        this.positionPopup(routeBoxElement, event, routeNumber);
         routeBoxElement.style.display = 'block';
-
+    
+        // Re-position after a short delay to ensure correct placement
+        setTimeout(() => this.positionPopup(routeBoxElement, event, routeNumber), 100);
+    
         [`waypoint-input-${routeNumber * 2 + 1}`, `waypoint-input-${routeNumber * 2 + 2}`].forEach(id => setupAutocompleteForField(id));
         if (firstEmptyInput) firstEmptyInput.focus();
-
+    
         setupWaypointInputListeners(routeNumber);
-
+    
         handleTripTypeChange(appState.routes[routeNumber].tripType, routeNumber);
-
+    
         setTimeout(inspectDOM, 100); // Use a timeout to ensure elements are rendered
-
+    
         setTimeout(setWaypointInputs, 200); // Use a slightly longer timeout to ensure inputs are rendered
     },
 
@@ -188,14 +195,25 @@ const routeBox = {
         return closeButton;
     },
 
-    positionPopup(popup, event) {
+    positionPopup(popup, event, routeNumber) {
         const rect = event.target.getBoundingClientRect();
         const screenPadding = 10;
-        let left = rect.left + window.scrollX - (popup.offsetWidth / 2) + (rect.width / 2);
+        const menuBar = document.getElementById('menu-bar');
+        const menuBarRect = menuBar.getBoundingClientRect();
+        const menuBarTop = menuBarRect.top + window.scrollY;
+    
+        // Calculate the left position based on routeNumber
+        let left = 90 * routeNumber;
+    
+        // Ensure the left position doesn't go off-screen
         left = Math.min(Math.max(left, screenPadding), window.innerWidth - popup.offsetWidth - screenPadding);
-        popup.style.left = `${left - 10}px`;
-        popup.style.top = `${rect.top + window.scrollY - popup.offsetHeight - 55}px`;
-    },
+        popup.style.left = `${left}px`;
+    
+        // Position the popup just above the menu-bar
+        let top = menuBarTop - popup.offsetHeight; // 10px offset above the menu-bar
+        top = Math.max(top, screenPadding); // Ensure it doesn't go off-screen at the top
+        popup.style.top = `${top}px`;
+    },        
 
     handleSwapButtonClick(routeNumber) {
         const inputs = document.querySelectorAll('.waypoint-inputs-container input[type="text"]');
