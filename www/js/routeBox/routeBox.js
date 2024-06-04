@@ -193,12 +193,6 @@ const routeBox = {
         const rect = event.target.getBoundingClientRect();
         const screenPadding = 10;
         const menuBar = document.getElementById('menu-bar');
-    
-        if (!menuBar) {
-            console.error('Menu bar not found!');
-            return;
-        }
-    
         const menuBarRect = menuBar.getBoundingClientRect();
         const menuBarTop = menuBarRect.top + window.scrollY;
     
