@@ -53,25 +53,25 @@ const setupWaypointInputListeners = (routeNumber) => {
             if (window.innerWidth <= 600) {
                 expandInput(event.target);
             }
+            setTimeout(() => event.target.select(), 0);
         });
         input.addEventListener('blur', (event) => {
+            console.log('blur');
             if (window.innerWidth <= 600) {
                 revertInput(event.target);
             }
-            setTimeout(() => {
-                const fromInput = document.querySelector(`#waypoint-input-${routeNumber * 2 + 1}`);
-                const toInput = document.querySelector(`#waypoint-input-${routeNumber * 2 + 2}`);
-                if (input.value === '' && fromInput.value !== '' && toInput.value !== '' && appState.waypoints.length > 0) {
-                    const waypointIndex = parseInt(input.id.replace('waypoint-input-', '')) - 1;
-                    if (waypointIndex >= 0 && waypointIndex < appState.waypoints.length) {
-                        if (appState.waypoints[waypointIndex].iata_code !== '') {
-                            updateState('removeWaypoint', waypointIndex, 'routeBox.setupWaypointInputListeners');
-                            routeHandling.updateRoutesArray();
-                        }
+            const fromInput = document.querySelector(`#waypoint-input-${routeNumber * 2 + 1}`);
+            const toInput = document.querySelector(`#waypoint-input-${routeNumber * 2 + 2}`);
+            if (input.value === '' && fromInput.value !== '' && toInput.value !== '' && appState.waypoints.length > 0) {
+                const waypointIndex = parseInt(input.id.replace('waypoint-input-', '')) - 1;
+                if (waypointIndex >= 0 && waypointIndex < appState.waypoints.length) {
+                    if (appState.waypoints[waypointIndex].iata_code !== '') {
+                        updateState('removeWaypoint', waypointIndex, 'routeBox.setupWaypointInputListeners');
+                        routeHandling.updateRoutesArray();
                     }
                 }
-                updateUrl(); // Explicitly update the URL on blur
-            }, 300); // Added delay to ensure selection is processed
+            }
+            updateUrl(); // Explicitly update the URL on blur
         });
     });
     enableSwapButtonIfNeeded(); // Initial check
