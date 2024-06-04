@@ -56,7 +56,6 @@ const setupWaypointInputListeners = (routeNumber) => {
             setTimeout(() => event.target.select(), 0);
         });
         input.addEventListener('blur', (event) => {
-            console.log('blur');
             if (window.innerWidth <= 600) {
                 revertInput(event.target);
             }
@@ -83,6 +82,21 @@ const expandInput = (input) => {
     if (suggestionsDiv) {
         suggestionsDiv.classList.add('expanded-suggestions');
     }
+    const inputWrapper = input.parentElement;
+    const backButton = document.createElement('button');
+    backButton.classList.add('back-button');
+    backButton.innerHTML = `
+        <svg viewBox="0 0 24 24">
+            <line x1="22" y1="12" x2="4" y2="12" />
+            <line x1="12" y1="3" x2="3" y2="12" />
+            <line x1="12" y1="21" x2="3" y2="12" />
+        </svg>
+    `;
+    backButton.onclick = () => {
+        //revertInput(input);
+        input.blur();
+    };
+    inputWrapper.appendChild(backButton);
 };
 
 const revertInput = (input) => {
@@ -90,6 +104,10 @@ const revertInput = (input) => {
     const suggestionsDiv = document.getElementById(`${input.id}Suggestions`);
     if (suggestionsDiv) {
         suggestionsDiv.classList.remove('expanded-suggestions');
+    }
+    const backButton = input.parentElement.querySelector('.back-button');
+    if (backButton) {
+        backButton.remove();
     }
 };
 
