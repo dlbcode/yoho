@@ -296,6 +296,14 @@ const infoPane = {
           const lastWaypoint = appState.waypoints[appState.waypoints.length - 1];
           const newWaypoint = { ...lastWaypoint }; // Create a copy of the last waypoint
           updateState('addWaypoint', newWaypoint, 'infoPane.addPlusButton'); // Use updateState to add the duplicated waypoint
+          // set the new depart date to the last return date, if it exists, or the last depart date 
+          const lastDepartDate = appState.routeDates[appState.routes.length - 1]?.depart;
+          const lastReturnDate = appState.routeDates[appState.routes.length - 1]?.return;
+          let newDepartDate = lastReturnDate || lastDepartDate;
+          newDepartDate = new Date(newDepartDate);
+          newDepartDate.setDate(newDepartDate.getDate() + 1);
+          newDepartDate = newDepartDate.toISOString().slice(0,10);
+          updateState('updateRouteDate', { routeNumber: appState.routes.length, depart: newDepartDate }, 'infoPane.addPlusButton');
         }
         routeBox.showRouteBox(event, routeIndex);
       };
