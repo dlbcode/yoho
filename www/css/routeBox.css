@@ -250,3 +250,29 @@
     border-right: none;
   }
 }
+
+@media (max-width: 600px) {
+  .waypoint-input:focus {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: auto;
+    background-color: #222;
+    z-index: 10000;
+    padding: 15px;
+    font-size: 18px;
+    box-sizing: border-box;
+  }
+
+  .suggestions:focus-within {
+    position: fixed;
+    top: 50px;
+    left: 0;
+    width: 100%;
+    max-height: calc(100vh - 50px);
+    background-color: #2a4f7c;
+    z-index: 10000;
+    overflow-y: auto;
+  }
+}

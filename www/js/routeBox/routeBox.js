@@ -50,9 +50,14 @@ const setupWaypointInputListeners = (routeNumber) => {
             enableSwapButtonIfNeeded();
         });
         input.addEventListener('focus', (event) => {
-            event.target.select();
+            if (window.innerWidth <= 600) {
+                expandInput(event.target);
+            }
         });
-        input.addEventListener('blur', () => {
+        input.addEventListener('blur', (event) => {
+            if (window.innerWidth <= 600) {
+                revertInput(event.target);
+            }
             setTimeout(() => {
                 const fromInput = document.querySelector(`#waypoint-input-${routeNumber * 2 + 1}`);
                 const toInput = document.querySelector(`#waypoint-input-${routeNumber * 2 + 2}`);
@@ -70,6 +75,22 @@ const setupWaypointInputListeners = (routeNumber) => {
         });
     });
     enableSwapButtonIfNeeded(); // Initial check
+};
+
+const expandInput = (input) => {
+    input.classList.add('expanded-input');
+    const suggestionsDiv = document.getElementById(`${input.id}Suggestions`);
+    if (suggestionsDiv) {
+        suggestionsDiv.classList.add('expanded-suggestions');
+    }
+};
+
+const revertInput = (input) => {
+    input.classList.remove('expanded-input');
+    const suggestionsDiv = document.getElementById(`${input.id}Suggestions`);
+    if (suggestionsDiv) {
+        suggestionsDiv.classList.remove('expanded-suggestions');
+    }
 };
 
 const inspectDOM = () => {

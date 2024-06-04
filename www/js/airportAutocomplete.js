@@ -88,10 +88,11 @@ function setupAutocompleteForField(fieldId) {
     const toggleSuggestionBox = (display) => {
         suggestionBox.style.display = display ? 'block' : 'none';
         if (display) {
-            const rect = inputField.getBoundingClientRect();
-            suggestionBox.style.left = `0px`;
-            suggestionBox.style.top = '35px';
-            suggestionBox.style.width = '300px';
+            const isMobile = window.innerWidth <= 600;
+            suggestionBox.style.position = isMobile ? 'fixed' : '';
+            suggestionBox.style.left = '0px';
+            suggestionBox.style.top = isMobile ? '50px' : '35px';
+            suggestionBox.style.width = isMobile ? '100%' : '300px';
         }
     };
 
