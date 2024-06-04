@@ -263,6 +263,7 @@
     padding: 15px;
     font-size: 18px;
     box-sizing: border-box;
+    border-radius: 0 !important;
   }
 
   .suggestions:focus-within {
