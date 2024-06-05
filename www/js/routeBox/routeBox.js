@@ -4,7 +4,7 @@ import { buildRouteTable } from '../routeTable/routeTable.js';
 import { initDatePicker } from './datePicker.js';
 import { travelersPicker } from './travelersPicker.js';
 import { tripTypePicker, handleTripTypeChange } from './tripTypePicker.js';
-import { removeRoute } from './removeRoute.js';
+import { removeRoute, removeRouteButton } from './removeRoute.js';
 import { routeHandling } from '../routeHandling.js';
 
 const loadCSS = (href) => {
@@ -156,15 +156,16 @@ const routeBox = {
     showRouteBox(event, routeNumber) {
         this.removeExistingRouteBox(); // Ensure any existing routeBox is removed
         const routeBoxElement = this.createRouteBox();
+        routeBoxElement.dataset.routeNumber = routeNumber; // Add routeNumber as a data attribute
         document.body.appendChild(routeBoxElement); // Append the routeBox to the DOM
-    
+        
         if (!appState.routes[routeNumber]) {
             appState.routes[routeNumber] = { tripType: 'oneWay' }; // Default to oneWay if not set
         }
         const topRow = createElement('div', { id: 'topRow', className: 'top-row' });
         topRow.append(tripTypePicker(routeNumber), travelersPicker(routeNumber));
         routeBoxElement.append(topRow);
-    
+        
         const waypointInputsContainer = createElement('div', { className: 'waypoint-inputs-container' });
         let firstEmptyInput = null;
         ['From', 'Where to?'].forEach((placeholder, i) => {
@@ -176,19 +177,19 @@ const routeBox = {
         });
         routeBoxElement.append(waypointInputsContainer);
         waypointInputsContainer.insertBefore(this.createSwapButton(routeNumber), waypointInputsContainer.children[1]);
-    
+        
         const dateInputsContainer = createElement('div', { className: 'date-inputs-container' });
         routeBoxElement.append(dateInputsContainer);
-    
+        
         const buttonContainer = createElement('div', { className: 'button-container' });
-        buttonContainer.append(this.createSearchButton(routeNumber), this.createCloseButton(routeBoxElement));
-        removeRoute.removeRouteButton(buttonContainer, routeNumber);
+        buttonContainer.append(this.createSearchButton(routeNumber), this.createCloseButton(routeBoxElement, routeNumber));
+        removeRouteButton(buttonContainer, routeNumber); // Assuming this is where the remove button is added
         routeBoxElement.append(buttonContainer);
-    
+        
         // Position the popup correctly before making it visible
         this.positionPopup(routeBoxElement, event, routeNumber);
         routeBoxElement.style.display = 'block';
-    
+        
         [`waypoint-input-${routeNumber * 2 + 1}`, `waypoint-input-${routeNumber * 2 + 2}`].forEach(id => setupAutocompleteForField(id));
         if (firstEmptyInput) {
             firstEmptyInput.focus();
@@ -196,13 +197,10 @@ const routeBox = {
                 expandInput(firstEmptyInput);
             }
         }
-    
+        
         setupWaypointInputListeners(routeNumber);
-    
         handleTripTypeChange(appState.routes[routeNumber].tripType, routeNumber);
-    
         setTimeout(inspectDOM, 100); // Use a timeout to ensure elements are rendered
-    
         setTimeout(setWaypointInputs, 200); // Use a slightly longer timeout to ensure inputs are rendered
     },
 
@@ -240,13 +238,20 @@ const routeBox = {
         return searchButton;
     },
 
-    createCloseButton(routeBox) {
+    createCloseButton(routeBoxElement, routeNumber) {
         const closeButton = createElement('span', { className: 'popup-close-button' });
         closeButton.innerHTML = `
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M4 8L12 16L20 8" stroke="#666" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>`;
-        closeButton.onclick = () => routeBox.style.display = 'none';
+        closeButton.onclick = () => {
+            const fromInput = document.querySelector('.from-input input');
+            const toInput = document.querySelector('.to-input input');
+            if (!fromInput.value.trim() && !toInput.value.trim()) {
+                removeRoute(routeNumber);
+            }
+            routeBoxElement.style.display = 'none';
+        };
         return closeButton;
     },
 
@@ -286,9 +291,14 @@ const routeBox = {
 
 document.addEventListener('click', (event) => {
     const routeBox = document.getElementById('routeBox');
-    const routeButton = document.getElementById(`route-button-${appState.currentRouteIndex}`);
-    if (routeBox && !routeBox.contains(event.target) && event.target !== routeButton &&
+    if (routeBox && !routeBox.contains(event.target) &&
         !event.target.closest('.do-not-close-routebox')) {
+        const routeNumber = parseInt(routeBox.dataset.routeNumber);
+        const fromInput = document.querySelector('.from-input input');
+        const toInput = document.querySelector('.to-input input');
+        if (!fromInput.value.trim() && !toInput.value.trim()) {
+            removeRoute(routeNumber);
+        }
         routeBox.style.display = 'none';
     }
 }, true);
