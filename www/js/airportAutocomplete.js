@@ -37,14 +37,11 @@ function handleSelection(e, inputId, airport) {
     }));
     inputField.setAttribute('data-selected-iata', airport.iata_code);
 
-    // Extract routeNumber from inputId or another way
     const routeNumber = parseInt(inputId.split('-')[2]) - 1;
-    if (!isNaN(routeNumber)) {
-        updateState('updateWaypoint', { index: routeNumber, data: airport });
-    } else {
-        updateState('addWaypoint', airport);
-    }
-
+    const updateKey = !isNaN(routeNumber) ? 'updateWaypoint' : 'addWaypoint';
+    const updateData = !isNaN(routeNumber) ? { index: routeNumber, data: airport } : airport;
+    
+    updateState(updateKey, updateData, 'airportAutocomplete.handleSelection1');
     inputField.blur();
 }
 
