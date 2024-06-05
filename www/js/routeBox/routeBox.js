@@ -49,13 +49,15 @@ const setupWaypointInputListeners = (routeNumber) => {
         input.addEventListener('input', () => {
             enableSwapButtonIfNeeded();
         });
+
         input.addEventListener('focus', (event) => {
             if (window.innerWidth <= 600) {
                 expandInput(event.target);
             }
             setTimeout(() => event.target.select(), 0);
         });
-        input.addEventListener('blur', (event) => {
+
+        input.addEventListener('blur', async (event) => {
             if (window.innerWidth <= 600) {
                 revertInput(event.target);
             }
@@ -70,7 +72,11 @@ const setupWaypointInputListeners = (routeNumber) => {
                     }
                 }
             }
+            input.disabled = true; // Temporarily disable the input
             updateUrl(); // Explicitly update the URL on blur
+            setTimeout(() => {
+                input.disabled = false; // Re-enable the input
+            }, 300); // Delay to ensure the URL update is fully processed
         });
     });
     enableSwapButtonIfNeeded(); // Initial check
@@ -92,10 +98,21 @@ const expandInput = (input) => {
             <line x1="12" y1="21" x2="3" y2="12" />
         </svg>
     `;
-    backButton.onclick = () => {
-        //revertInput(input);
+
+    let backButtonClicked = false;
+
+    backButton.onclick = (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        backButtonClicked = true;
+        input.disabled = true; // Temporarily disable the input
         input.blur();
+        setTimeout(() => {
+            input.disabled = false; // Re-enable the input
+            backButtonClicked = false;
+        }, 500); // Delay to ensure the blur event is fully processed
     };
+
     inputWrapper.appendChild(backButton);
 };
 
@@ -173,7 +190,12 @@ const routeBox = {
         routeBoxElement.style.display = 'block';
     
         [`waypoint-input-${routeNumber * 2 + 1}`, `waypoint-input-${routeNumber * 2 + 2}`].forEach(id => setupAutocompleteForField(id));
-        if (firstEmptyInput) firstEmptyInput.focus();
+        if (firstEmptyInput) {
+            firstEmptyInput.focus();
+            if (window.innerWidth <= 600) {
+                expandInput(firstEmptyInput);
+            }
+        }
     
         setupWaypointInputListeners(routeNumber);
     
@@ -246,7 +268,7 @@ const routeBox = {
         let top = menuBarTop - popup.offsetHeight - 55; // 10px offset above the menu-bar
         top = Math.max(top, screenPadding); // Ensure it doesn't go off-screen at the top
         popup.style.top = `${top}px`;
-    },            
+    },
 
     handleSwapButtonClick(routeNumber) {
         const inputs = document.querySelectorAll('.waypoint-inputs-container input[type="text"]');
