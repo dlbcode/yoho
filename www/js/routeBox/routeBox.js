@@ -234,6 +234,22 @@ const routeBox = {
                 updateState('currentView', 'routeTable', 'routeBox.createSearchButton');
             }
             buildRouteTable(routeNumber);
+    
+            // Hide the routeBox
+            const routeBoxElement = document.getElementById('routeBox');
+            if (routeBoxElement) {
+                routeBoxElement.style.display = 'none';
+            }
+    
+            // Adjust the height of infoPane
+            const infoPaneElement = document.getElementById('infoPane');
+            if (infoPaneElement) {
+                const viewHeight = window.innerHeight;
+                const infoPaneHeight = infoPaneElement.offsetHeight;
+                if (infoPaneHeight < (0.5 * viewHeight)) {
+                    infoPaneElement.style.height = `${0.5 * viewHeight}px`;
+                }
+            }
         };
         return searchButton;
     },
