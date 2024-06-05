@@ -17,12 +17,11 @@ function handleStateChange(event) {
     }
 
     if (key === 'changeView') {
-        if (value != 'routeTable') {
+        if (value !== 'routeTable') {
             pathDrawing.clearLines(true);
         }
     }
 
-    // New logic to handle view change after route removal
     if (key === 'updateRoutes') {
         if (appState.waypoints.length === 0 || !appState.selectedRoutes[0]) {
             appState.currentView = 'trip';
@@ -37,10 +36,8 @@ const eventManager = {
         document.addEventListener('stateChange', handleStateChange);
         window.onpopstate = function(event) {
             const params = new URLSearchParams(window.location.search);
-            
             appState.waypoints = params.get('waypoints') ? params.get('waypoints').split(',').map(iata => ({ iata_code: iata })) : [];
             appState.routeDates = {};
-            
             if (params.has('dates')) {
                 let datesParam = params.get('dates').split(',');
                 datesParam.forEach(pair => {
@@ -55,10 +52,8 @@ const eventManager = {
                     }
                 });
             }
-                        
             const container = document.querySelector('.airport-selection');
             container.innerHTML = '';
-
             mapHandling.updateMarkerIcons();
             routeHandling.updateRoutesArray();
             appState.currentView = 'trip';
@@ -135,3 +130,4 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 export { eventManager };
+

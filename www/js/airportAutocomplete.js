@@ -38,10 +38,17 @@ function handleSelection(e, inputId, airport) {
     inputField.setAttribute('data-selected-iata', airport.iata_code);
 
     const routeNumber = parseInt(inputId.split('-')[2]) - 1;
-    const updateKey = !isNaN(routeNumber) ? 'updateWaypoint' : 'addWaypoint';
-    const updateData = !isNaN(routeNumber) ? { index: routeNumber, data: airport } : airport;
-    
-    updateState(updateKey, updateData, 'airportAutocomplete.handleSelection1');
+    const existingWaypointIndex = appState.waypoints.findIndex(wp => wp.iata_code === airport.iata_code);
+
+    // Ensure only one state update occurs
+    if (existingWaypointIndex !== -1) {
+        updateState('updateWaypoint', { index: existingWaypointIndex, data: airport }, 'airportAutocomplete.handleSelection1');
+    } else if (!isNaN(routeNumber)) {
+        updateState('updateWaypoint', { index: routeNumber, data: airport }, 'airportAutocomplete.handleSelection1');
+    } else {
+        updateState('addWaypoint', airport, 'airportAutocomplete.handleSelection1');
+    }
+
     inputField.blur();
 }
 
@@ -213,7 +220,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (waypointIndex >= 0 && waypointIndex < appState.waypoints.length) {
             updateState('updateWaypoint', { index: waypointIndex, data: airport }, 'airportAutocomplete.addEventListener1');
         } else {
-                updateState('addWaypoint', airport, 'airportAutocomplete.addEventListener2');
+            updateState('addWaypoint', airport, 'airportAutocomplete.addEventListener2');
         }
 
         // Move map view to include the selected airport marker
