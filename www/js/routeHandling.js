@@ -85,7 +85,6 @@ const routeHandling = {
         updateState('updateRoutes', newRoutes, 'routeHandling.updateRoutesArray');
         pathDrawing.clearLines(true);
         pathDrawing.drawLines();
-        document.dispatchEvent(new CustomEvent('routesArrayUpdated'));
     }
 };
 

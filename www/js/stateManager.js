@@ -200,8 +200,6 @@ function updateUrl() {
     }
 
     console.log('URL updated:', newUrl);
-
-    document.dispatchEvent(new CustomEvent('routeDatesUpdated'));
 }
 
 export { appState, updateState, updateUrl };
