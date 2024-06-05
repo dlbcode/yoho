@@ -24,58 +24,50 @@ const appState = {
 };
 
 function updateState(key, value, calledFrom) {
+    let shouldUpdateUrl = true;
     switch (key) {
-        case 'routeDirection': {
+        case 'routeDirection':
             appState.routeDirection = value;
-            updateUrl();
             break;
-        }
 
-        case 'updateRouteDate': {
-            const { routeNumber, depart, return: returnDate } = value;
-            if (!appState.routeDates[routeNumber] || appState.routeDates[routeNumber].depart !== depart || appState.routeDates[routeNumber].return !== returnDate) {
-                if (!appState.routeDates[routeNumber]) {
-                    appState.routeDates[routeNumber] = { depart: null, return: null };
+        case 'updateRouteDate':
+            if (!appState.routeDates[value.routeNumber] || appState.routeDates[value.routeNumber].depart !== value.depart || appState.routeDates[value.routeNumber].return !== value.return) {
+                if (!appState.routeDates[value.routeNumber]) {
+                    appState.routeDates[value.routeNumber] = { depart: null, return: null };
                 }
-                appState.routeDates[routeNumber] = {
-                    depart: depart || appState.routeDates[routeNumber].depart,
-                    return: (returnDate === null || returnDate === 'undefined') ? null : returnDate || appState.routeDates[routeNumber].return
+                appState.routeDates[value.routeNumber] = {
+                    depart: value.depart || appState.routeDates[value.routeNumber].depart,
+                    return: (value.return === null || value.return === 'undefined') ? null : value.return || appState.routeDates[value.routeNumber].return
                 };
                 Object.keys(appState.selectedRoutes).forEach(key => {
-                    if (parseInt(key) >= routeNumber && appState.selectedRoutes[key]) {
+                    if (parseInt(key) >= value.routeNumber && appState.selectedRoutes[key]) {
                         appState.selectedRoutes[key].routeDates = { 
-                            depart, 
-                            return: (returnDate === null || returnDate === 'undefined') ? null : returnDate 
+                            depart: value.depart, 
+                            return: (value.return === null || value.return === 'undefined') ? null : value.return 
                         };
                     }
                 });
-                updateUrl();
             }
             break;
-        }
 
         case 'tripType':
-            const { routeNumber: tripRouteNumber, tripType } = value;
-            if (!appState.routes[tripRouteNumber]) {
-                appState.routes[tripRouteNumber] = {};
+            if (!appState.routes[value.routeNumber]) {
+                appState.routes[value.routeNumber] = {};
             }
-            appState.routes[tripRouteNumber].tripType = tripType;
-            updateUrl();
+            appState.routes[value.routeNumber].tripType = value.tripType;
             break;
 
-        case 'updateTravelers': {
-            const { routeNumber, travelers } = value;
-            if (routeNumber != null && appState.routes[routeNumber]) {
-                appState.routes[routeNumber].travelers = parseInt(travelers);
+        case 'updateTravelers':
+            if (value.routeNumber != null && appState.routes[value.routeNumber]) {
+                appState.routes[value.routeNumber].travelers = parseInt(value.travelers);
             }
+            shouldUpdateUrl = false;
             break;
-        }
 
         case 'updateWaypoint':
             if (value.index >= 0 && value.index < appState.waypoints.length) {
                 appState.waypoints[value.index] = { ...appState.waypoints[value.index], ...value.data };
             }
-            updateUrl();
             break;
 
         case 'addWaypoint':
@@ -85,7 +77,6 @@ function updateState(key, value, calledFrom) {
                 appState.waypoints.push(value);
             }
             appState.isEditingWaypoint = true;
-            updateUrl();
             break;
 
         case 'removeWaypoint':
@@ -93,29 +84,25 @@ function updateState(key, value, calledFrom) {
                 appState.waypoints.splice(value, 1);
             }
             appState.isEditingWaypoint = false;
-            updateUrl();
             break;
 
         case 'removeWaypoints':
-            let startIndex = value.routeNumber * 2;
+            const startIndex = value.routeNumber * 2;
             if (startIndex < appState.waypoints.length) {
                 appState.waypoints.splice(startIndex, 2);
             }
-            updateUrl();
             break;
 
         case 'updateRoutes':
-            const updatedRoutes = value.map((route, index) => {
+            appState.routes = value.map((route, index) => {
                 const existingRoute = appState.routes[index] || {};
                 return {
                     ...existingRoute,
                     ...route,
-                    travelers: route.travelers || 1,  // Set default travelers to 1 if not provided
-                    tripType: route.tripType || existingRoute.tripType || 'oneWay' // Use provided tripType or existing tripType
+                    travelers: route.travelers || 1,
+                    tripType: route.tripType || existingRoute.tripType || 'oneWay'
                 };
             });
-            appState.routes = updatedRoutes;
-            updateUrl();
             break;
 
         case 'clearData':
@@ -124,40 +111,37 @@ function updateState(key, value, calledFrom) {
             appState.trips = [];
             appState.selectedRoutes = {};
             appState.routeDates = {};
-            updateUrl();
             break;
 
         case 'updateSelectedRoute':
-            const { routeIndex, routeDetails } = value;
-            appState.selectedRoutes[routeIndex] = routeDetails;
-
-            appState.routeDates[routeIndex] = routeDetails.routeDates;
-
-            updateUrl();
+            appState.selectedRoutes[value.routeIndex] = value.routeDetails;
+            appState.routeDates[value.routeIndex] = value.routeDetails.routeDates;
             break;
 
         case 'selectedAirport':
             appState.selectedAirport = value;
+            shouldUpdateUrl = false;
             break;
 
         case 'removeSelectedRoute':
             delete appState.selectedRoutes[value];
-            updateUrl();
             break;
 
         case 'changeView':
             appState.currentView = value;
-            updateUrl();
             break;
 
         default:
             appState[key] = value;
-            updateUrl();
             break;
     }
     document.dispatchEvent(new CustomEvent('stateChange', { detail: { key, value } }));
     console.log('State updated:', key, value, calledFrom);
     console.log('appState:', appState);
+
+    if (shouldUpdateUrl) {
+        updateUrl();
+    }
 }
 
 function updateUrl() {
