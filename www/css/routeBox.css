@@ -225,7 +225,6 @@
   color: #ccc;
   position: absolute;
   z-index: 1;
-  max-height: 200px;
   overflow-y: auto;
   display: none;
   -webkit-overflow-scrolling: touch; /* Enable smooth scrolling for touch devices */
