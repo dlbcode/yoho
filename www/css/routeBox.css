@@ -225,6 +225,7 @@
   color: #ccc;
   position: absolute;
   z-index: 1;
+  max-height: 200px;
   overflow-y: auto;
   display: none;
   -webkit-overflow-scrolling: touch; /* Enable smooth scrolling for touch devices */
@@ -270,7 +271,7 @@
     top: 50px;
     left: 0;
     width: 100%;
-    max-height: calc(100vh - 50px);
+    height: 100%;
     background-color: #2a4f7c;
     z-index: 10000;
     overflow-y: auto;
