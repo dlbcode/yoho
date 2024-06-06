@@ -103,6 +103,7 @@ function updateState(key, value, calledFrom) {
                     tripType: route.tripType || existingRoute.tripType || 'oneWay'
                 };
             });
+            shouldUpdateUrl = false;
             break;
 
         case 'clearData':
@@ -181,9 +182,8 @@ function updateUrl() {
     const newUrl = paramString ? `${window.location.pathname}?${paramString}` : window.location.pathname;
     if (window.location.search !== newUrl) {
         window.history.pushState({}, '', newUrl);
+        console.log('URL updated:', newUrl);
     }
-
-    console.log('URL updated:', newUrl);
 }
 
 export { appState, updateState, updateUrl };

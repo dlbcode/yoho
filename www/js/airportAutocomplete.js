@@ -41,13 +41,13 @@ function handleSelection(e, inputId, airport) {
     const existingWaypointIndex = appState.waypoints.findIndex(wp => wp.iata_code === airport.iata_code);
 
     // Ensure only one state update occurs
-    if (existingWaypointIndex !== -1) {
-        updateState('updateWaypoint', { index: existingWaypointIndex, data: airport }, 'airportAutocomplete.handleSelection1');
-    } else if (!isNaN(routeNumber)) {
-        updateState('updateWaypoint', { index: routeNumber, data: airport }, 'airportAutocomplete.handleSelection1');
-    } else {
-        updateState('addWaypoint', airport, 'airportAutocomplete.handleSelection1');
-    }
+    //if (existingWaypointIndex !== -1) {
+    //    updateState('updateWaypoint', { index: existingWaypointIndex, data: airport }, 'airportAutocomplete.handleSelection1');
+    //} else if (!isNaN(routeNumber)) {
+    //    updateState('updateWaypoint', { index: routeNumber, data: airport }, 'airportAutocomplete.handleSelection1');
+    //} else {
+    //    updateState('addWaypoint', airport, 'airportAutocomplete.handleSelection1');
+    //}
 
     inputField.blur();
 }
@@ -140,7 +140,7 @@ function setupAutocompleteForField(fieldId) {
                 toggleSuggestionBox(false);
                 if (inputField.value === '' && appState.waypoints.length > 0) {
                    const waypointIndex = parseInt(inputField.id.replace('waypoint-input-', '')) - 1;
-                   updateState('removeWaypoint', waypointIndex);
+                   updateState('removeWaypoint', waypointIndex, 'airportAutocomplete.addEventListener3');
                 }
             }, 300); // Delay to allow for selection
         });

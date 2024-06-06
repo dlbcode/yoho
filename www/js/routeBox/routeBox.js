@@ -72,11 +72,6 @@ const setupWaypointInputListeners = (routeNumber) => {
                     }
                 }
             }
-            input.disabled = true; // Temporarily disable the input
-            updateUrl(); // Explicitly update the URL on blur
-            setTimeout(() => {
-                input.disabled = false; // Re-enable the input
-            }, 300); // Delay to ensure the URL update is fully processed
         });
     });
     enableSwapButtonIfNeeded(); // Initial check
@@ -105,13 +100,11 @@ const expandInput = (input) => {
         event.preventDefault();
         event.stopPropagation();
         backButtonClicked = true;
-        input.disabled = true; // Temporarily disable the input
         input.blur();
         setTimeout(() => {
-            input.disabled = false; // Re-enable the input
             backButtonClicked = false;
         }, 500); // Delay to ensure the blur event is fully processed
-    };
+    }
 
     inputWrapper.appendChild(backButton);
 };
