@@ -46,7 +46,8 @@ const uiHandling = {
 
         const clientY = e.touches ? e.touches[0].clientY : e.clientY;
         const newHeight = startHeight - (clientY - startY);
-        infoPane.style.height = `${newHeight}px`;
+        const maxHeight = window.innerHeight; // Adjust based on your layout
+        infoPane.style.height = `${Math.min(Math.max(40, newHeight), maxHeight)}px`;
         requestAnimationFrame(adjustMapSize);
     };
 
