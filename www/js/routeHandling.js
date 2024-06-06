@@ -5,26 +5,21 @@ import { pathDrawing } from './pathDrawing.js';
 const routeHandling = {
     updateRoutesArray: async function () {
         let newRoutes = [];
-        let fetchPromises = [];
 
         const waypoints = appState.routeDirection === 'to' ? [...appState.waypoints].reverse() : appState.waypoints;
 
-        // Fetch routes for waypoints
-        for (let i = 0; i < waypoints.length; i += 2) {
-            const fromWaypoint = waypoints[i];
-            const toWaypoint = waypoints[i + 1];
-
-            if (!toWaypoint) continue;
-
-            if (!appState.directRoutes[fromWaypoint.iata_code]) {
-                fetchPromises.push(flightMap.fetchAndCacheRoutes(fromWaypoint.iata_code));
-            }
-            if (!appState.directRoutes[toWaypoint.iata_code]) {
-                fetchPromises.push(flightMap.fetchAndCacheRoutes(toWaypoint.iata_code));
-            }
-        }
-
-        await Promise.all(fetchPromises);
+        // Collect IATA codes for batch fetching
+        const iataCodes = waypoints.map(waypoint => waypoint.iata_code);
+        const uniqueIataCodes = [...new Set(iataCodes)];
+        
+        // Batch fetch routes for all unique IATA codes
+        const fetchPromises = uniqueIataCodes.map(iataCode => {
+          if (!appState.directRoutes[iataCode]) {
+            return flightMap.fetchAndCacheRoutes(iataCode);
+          }
+        });
+        
+        await Promise.all(fetchPromises.filter(Boolean));        
 
         for (let i = 0; i < waypoints.length; i += 2) {
             const fromWaypoint = waypoints[i];
