@@ -29,27 +29,27 @@ const pathDrawing = {
         });
     },
     
-    async drawPathBetweenAirports(originIata, destinationIata, getAirportDataByIata) {
-        try {
-            // Fetch airport data in parallel
-            const [originAirportData, destinationAirportData] = await Promise.all([
-                getAirportDataByIata(originIata),
-                getAirportDataByIata(destinationIata)
-            ]);
-    
-            if (!originAirportData || !destinationAirportData) {
-                console.error('Airport data not found for one or both IATAs:', originIata, destinationIata);
-                return;
-            }
-    
-            this.createRoutePath(originAirportData, destinationAirportData, {
-                originAirport: originAirportData,
-                destinationAirport: destinationAirportData,
-            }, 'white');
-        } catch (error) {
-            console.error('Error drawing path between airports:', error);
-        }
-    },    
+    async drawPathBetweenAirports(originIata, destinationIata) {
+      try {
+          // Fetch airport data in parallel
+          const [originAirportData, destinationAirportData] = await Promise.all([
+              flightMap.getAirportDataByIata(originIata),
+              flightMap.getAirportDataByIata(destinationIata)
+          ]);
+  
+          if (!originAirportData || !destinationAirportData) {
+              console.error('Airport data not found for one or both IATAs:', originIata, destinationIata);
+              return;
+          }
+  
+          this.createRoutePath(originAirportData, destinationAirportData, {
+              originAirport: originAirportData,
+              destinationAirport: destinationAirportData,
+          }, 'white');
+      } catch (error) {
+          console.error('Error drawing path between airports:', error);
+      }
+  },     
 
     drawDashedLine(originAirport, destinationAirport) {
         if (!originAirport || !destinationAirport) {
