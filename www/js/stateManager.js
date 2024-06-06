@@ -103,7 +103,6 @@ function updateState(key, value, calledFrom) {
                     tripType: route.tripType || existingRoute.tripType || 'oneWay'
                 };
             });
-            shouldUpdateUrl = false;
             break;
 
         case 'clearData':
@@ -155,8 +154,8 @@ function updateUrl() {
     }
 
     const dates = appState.routeDates
-    ? Object.entries(appState.routeDates).map(([key, value]) => `${key}:depart:${value.depart},${key}:return:${value.return === null ? 'null' : value.return}`).join(',')
-    : '';
+        ? Object.entries(appState.routeDates).map(([key, value]) => `${key}:depart:${value.depart},${key}:return:${value.return === null ? 'null' : value.return}`).join(',')
+        : '';
     if (dates.length > 0) {
         params.set('dates', dates);
     } else {
@@ -180,7 +179,9 @@ function updateUrl() {
 
     const paramString = params.toString();
     const newUrl = paramString ? `${window.location.pathname}?${paramString}` : window.location.pathname;
-    if (window.location.search !== newUrl) {
+
+    // Check if the current URL is different from the new URL
+    if (window.location.search !== `?${paramString}`) {
         window.history.pushState({}, '', newUrl);
         console.log('URL updated:', newUrl);
     }

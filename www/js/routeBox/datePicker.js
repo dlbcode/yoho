@@ -3,7 +3,7 @@ import { appState, updateState } from '../stateManager.js';
 export function initDatePicker(inputId, routeNumber) {
     const dateType = inputId.split('-')[0]; // 'depart' or 'return'
     if (!appState.routeDates[routeNumber]) {
-        appState.routeDates[routeNumber] = { depart: null, return: null };
+        appState.routeDates[routeNumber] = { depart: new Date().toISOString().split('T')[0], return: null };
     }
     const currentRouteDate = appState.routeDates[routeNumber][dateType] || '';
     const isDateRange = currentRouteDate.includes(' to ');
