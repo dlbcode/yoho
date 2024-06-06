@@ -15,7 +15,18 @@ const flightMap = {
     cacheDuration: 600000, // 10 minutes in milliseconds 
 
     init: function() {
-        this.getAirportDataByIata = this.getAirportDataByIata.bind(this);
+        // Ensure the map is initialized before attaching event listeners
+        if (typeof map !== 'undefined') {
+            this.getAirportDataByIata = this.getAirportDataByIata.bind(this);
+            this.updateVisibleMarkers = this.updateVisibleMarkers.bind(this);
+
+            map.on('zoomend', this.updateVisibleMarkers);
+            map.on('moveend', this.updateVisibleMarkers);
+
+            this.fetchAndDisplayAirports();
+        } else {
+            console.error('Map is not defined');
+        }
     },
 
     addMarker(airport) {
@@ -23,39 +34,35 @@ const flightMap = {
             console.error('Incomplete airport data:', airport);
             return;
         }
-
-        // Do not add a marker if the airport type is 'country'
-        if (airport.type === 'country') {
-            return;
-        }
-
+    
         let iata = airport.iata_code;
         if (this.markers[iata]) return;
-
-        let icon = airport.type === 'city' ? greenDotIcon : 
+    
+        let icon = airport.type === 'city' ? greenDotIcon :
                    appState.waypoints.some(wp => wp.iata_code === iata) ? magentaDotIcon : blueDotIcon;
-
+    
         const latLng = L.latLng(airport.latitude, airport.longitude);
-        const marker = L.marker(latLng, { icon: icon }).addTo(map);
+        const marker = L.marker(latLng, { icon: icon });
         marker.airportWeight = airport.weight;
         marker.iata_code = iata;
         marker.hovered = false;
-
+    
         let popupContent = `<div style="text-align: center; color: #bababa;"><b>${airport.city}</b>`;
         if (airport.type === 'airport') {
             popupContent += `<div>${airport.name}</div>`; 
         }
         popupContent += '</div>';
-        
+    
         marker.bindPopup(popupContent, { maxWidth: 'auto' });
-
+    
         eventManager.attachMarkerEventListeners(iata, marker, airport);
         this.markers[iata] = marker;
 
-        // Ensure waypoints are always visible
-        this.updateVisibleMarkersForWaypoints(iata);
+        if (this.shouldDisplayAirport(marker.airportWeight, map.getZoom())) {
+            marker.addTo(map);
+        }
     },
-    
+
     updateVisibleMarkersForWaypoints(iata) {
         const isWaypoint = appState.waypoints.some(wp => wp.iata_code === iata);
         if (isWaypoint && this.markers[iata]) {
@@ -137,28 +144,26 @@ const flightMap = {
 
     async fetchAndDisplayAirports() {
         try {
-            const airports = await this.fetchAndCacheAirports();
-            Object.values(airports).forEach(airport => {
-                this.addMarker(airport);
-            });
+            const currentZoom = map?.getZoom();
+            if (currentZoom !== undefined) {
+                const airports = await this.fetchAndCacheAirports(currentZoom);
+                this.updateVisibleMarkers();
+            } else {
+                console.error('Map is not ready');
+            }
         } catch (error) {
             console.error('Error fetching airports:', error);
         }
     },
 
-    async fetchAndCacheAirports() {
-        if (this.airportDataCache && Object.keys(this.airportDataCache).length > 0) {
-            return Promise.resolve(this.airportDataCache);
-        }
-
+    async fetchAndCacheAirports(currentZoom) {
         try {
-            const response = await fetch('https://yonderhop.com/api/airports');
+            const response = await fetch(`https://yonderhop.com/api/airports?zoom=${currentZoom}`);
             const data = await response.json();
             this.airportDataCache = data.reduce((acc, airport) => {
                 acc[airport.iata_code] = airport;
                 return acc;
             }, {});
-            this.updateVisibleMarkers(); // Call updateVisibleMarkers after data is fetched
             return this.airportDataCache;
         } catch (error) {
             console.error('Error fetching airports:', error);
@@ -171,7 +176,7 @@ const flightMap = {
             return Promise.resolve(this.airportDataCache[iata]);
         }
 
-        return this.fetchAndCacheAirports().then(cache => cache[iata] || null);
+        return this.fetchAndCacheAirports(map?.getZoom()).then(cache => cache[iata] || null);
     },
 
     getColorBasedOnPrice(price) {
@@ -247,20 +252,23 @@ const flightMap = {
     shouldDisplayAirport(airportWeight, currentZoom) {
         return airportWeight <= currentZoom - 1;
     },
-
+    
     updateVisibleMarkers() {
         const currentZoom = map.getZoom();
         const currentBounds = map.getBounds();
-
+    
         // Check and add markers for airports that should be visible at the current zoom level
         Object.values(this.airportDataCache).forEach(airport => {
             if (this.shouldDisplayAirport(airport.weight, currentZoom) &&
                 currentBounds.contains(L.latLng(airport.latitude, airport.longitude)) &&
                 !this.markers[airport.iata_code]) {
                 this.addMarker(airport);
+                if (this.markers[airport.iata_code]) {
+                    this.markers[airport.iata_code].addTo(map);
+                }
             }
         });
-
+    
         // Update visibility of existing markers
         Object.keys(this.markers).forEach(iata => {
             const marker = this.markers[iata];
@@ -277,9 +285,7 @@ const flightMap = {
                 map.removeLayer(marker);
             }
         });
-    },
+    }
 };
-
-flightMap.init();
 
 export { flightMap };
