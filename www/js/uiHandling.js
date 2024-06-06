@@ -46,7 +46,7 @@ const uiHandling = {
 
         const clientY = e.touches ? e.touches[0].clientY : e.clientY;
         const newHeight = startHeight - (clientY - startY);
-        const maxHeight = window.innerHeight - 100; // Adjust to leave space for OS menu
+        const maxHeight = window.innerHeight; // Adjust to leave space for OS menu
         infoPane.style.height = `${Math.min(Math.max(140, newHeight), maxHeight)}px`;
         requestAnimationFrame(adjustMapSize);
     };
