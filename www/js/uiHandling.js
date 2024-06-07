@@ -1,8 +1,28 @@
 import { appState, updateState } from "./stateManager.js";
 import { adjustMapSize } from "./map.js";
 
-const uiHandling = {
+let estimatedBottomBarHeight = 0;
 
+const estimateBottomBarHeight = () => {
+  const input = document.createElement('input');
+  input.style.position = 'absolute';
+  input.style.bottom = '0';
+  input.style.opacity = '0';
+  document.body.appendChild(input);
+
+  const initialViewportHeight = window.visualViewport.height;
+
+  input.focus();
+
+  setTimeout(() => {
+    const focusedViewportHeight = window.visualViewport.height;
+    estimatedBottomBarHeight = initialViewportHeight - focusedViewportHeight;
+
+    document.body.removeChild(input);
+  }, 500);
+};
+
+const uiHandling = {
   setFocusToNextUnsetInput: function() {
     const waypointInputs = document.querySelectorAll('.waypoint-input[type="text"]');
     requestAnimationFrame(() => {
@@ -47,13 +67,12 @@ const uiHandling = {
       const clientY = e.touches ? e.touches[0].clientY : e.clientY;
       const newHeight = startHeight - (clientY - startY);
     
-      // Use the visualViewport height to account for OS elements and subtract a buffer for the bottom bar
-      const bottomBarHeight = 50; // Adjust this value based on the height of the browser's bottom bar
-      const maxHeight = (window.visualViewport ? window.visualViewport.height : window.innerHeight) - bottomBarHeight;
+      // Use the visualViewport height to account for OS elements and subtract the estimated height of the bottom bar
+      const maxHeight = (window.visualViewport ? window.visualViewport.height : window.innerHeight) - estimatedBottomBarHeight;
     
       infoPane.style.height = `${Math.min(Math.max(40, newHeight), maxHeight)}px`;
       requestAnimationFrame(adjustMapSize);
-    };       
+    };    
 
     const stopDrag = function() {
         document.documentElement.removeEventListener('mousemove', doDrag, false);
@@ -119,6 +138,7 @@ const uiHandling = {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+  estimateBottomBarHeight();
   uiHandling.initInfoPaneDragButton();
 });
 
