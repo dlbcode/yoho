@@ -66,18 +66,18 @@ const uiHandling = {
 
     const doDrag = function(e) {
       if (e.cancelable) {
-        e.preventDefault();
+          e.preventDefault();
       }
-
+  
       const clientY = e.touches ? e.touches[0].clientY : e.clientY;
       const newHeight = startHeight - (clientY - startY);
-
+  
       const bottomBarHeight = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--bottom-bar-height'));
       const maxHeight = (window.visualViewport ? window.visualViewport.height : window.innerHeight) - bottomBarHeight;
-
+  
       infoPane.style.height = `${Math.min(Math.max(40, newHeight), maxHeight)}px`;
-      requestAnimationFrame(adjustMapSize);
-    };
+      requestAnimationFrame(adjustMapSize);  // Ensure this is called to adjust map size
+  };    
 
     const stopDrag = function() {
       document.documentElement.removeEventListener('mousemove', doDrag, false);
@@ -146,6 +146,7 @@ document.addEventListener('DOMContentLoaded', () => {
   estimateBottomBarHeight();
   setBottomBarHeight();
   uiHandling.initInfoPaneDragButton();
+  adjustMapSize();
 });
 
 export { uiHandling }

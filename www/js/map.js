@@ -115,12 +115,11 @@ function adjustMapSize() {
 
     if (window.map) {
         map.invalidateSize();
-    }    
+    }
 }
 
 window.addEventListener('resize', adjustMapSize);
 window.addEventListener('orientationchange', adjustMapSize);
-
 document.addEventListener('DOMContentLoaded', adjustMapSize);
 
 var blueDotIcon = L.divIcon({
