@@ -47,12 +47,13 @@ const uiHandling = {
       const clientY = e.touches ? e.touches[0].clientY : e.clientY;
       const newHeight = startHeight - (clientY - startY);
     
-      // Use the visualViewport height to account for OS elements
-      const maxHeight = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+      // Use the visualViewport height to account for OS elements and subtract a buffer for the bottom bar
+      const bottomBarHeight = 50; // Adjust this value based on the height of the browser's bottom bar
+      const maxHeight = (window.visualViewport ? window.visualViewport.height : window.innerHeight) - bottomBarHeight;
     
       infoPane.style.height = `${Math.min(Math.max(40, newHeight), maxHeight)}px`;
       requestAnimationFrame(adjustMapSize);
-    };    
+    };       
 
     const stopDrag = function() {
         document.documentElement.removeEventListener('mousemove', doDrag, false);
