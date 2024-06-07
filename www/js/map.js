@@ -108,9 +108,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
 function adjustMapSize() {
     const mapElement = document.getElementById('map');
-    const infoPaneHeight = document.getElementById('infoPane').offsetHeight;
+    const infoPane = document.getElementById('infoPane');
+    if (!mapElement || !infoPane) return;
+
+    const infoPaneHeight = infoPane.offsetHeight;
     const windowHeight = window.innerHeight;
     const newMapHeight = windowHeight - infoPaneHeight;
+    
     mapElement.style.height = `${newMapHeight}px`;
 
     if (window.map) {

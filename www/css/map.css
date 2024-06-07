@@ -6,9 +6,10 @@
 }
 
 #map {
-  flex-grow: 1; /* Allow the map to fill the available space */
-  width: 100%; /* Fill the width of its parent */
-  height: 100%; /* This should be adjusted by JS if not filling */
+  position: absolute; /* or relative based on your layout */
+  top: 0;
+  left: 0;
+  width: 100%;
 }
 
 .flight-details {
