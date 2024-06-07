@@ -100,8 +100,13 @@ const flightMap = {
         const handleRemoveButtonClick = () => {
             const waypointIndex = appState.waypoints.findIndex(wp => wp.iata_code === airport.iata_code);
             if (appState.selectedAirport && appState.selectedAirport.iata_code === airport.iata_code) {
-                updateState('removeWaypoint', waypointIndex + 1, 'flightMap.handleRemoveButtonClick1');
-                updateState('removeWaypoint', waypointIndex, 'flightMap.handleRemoveButtonClick2');
+                if (waypointIndex === appState.waypoints.length - 1 && waypointIndex > 1) {
+                    updateState('removeWaypoint', waypointIndex, 'flightMap.handleRemoveButtonClick1');
+                    updateState('removeWaypoint', waypointIndex - 1, 'flightMap.handleRemoveButtonClick2');
+                } else {
+                    updateState('removeWaypoint', waypointIndex + 1, 'flightMap.handleRemoveButtonClick1');
+                    updateState('removeWaypoint', waypointIndex, 'flightMap.handleRemoveButtonClick2');
+                }
                 clickedMarker.setIcon(blueDotIcon);
                 updateState('selectedAirport', null, 'flightMap.handleRemoveButtonClick3');
                 popupContent.removeChild(removeButton);
