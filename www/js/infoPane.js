@@ -2,7 +2,7 @@ import { appState, updateState } from './stateManager.js';
 import { pathDrawing } from './pathDrawing.js';
 import { buildRouteTable } from './routeTable/routeTable.js';
 import { selectedRoute } from './routeTable/selectedRoute.js';
-import { map } from './map.js';
+import { adjustMapSize, map } from './map.js';
 import { uiHandling } from './uiHandling.js';
 import { flightMap } from './flightMap.js';
 import { routeBox } from './routeBox/routeBox.js';
@@ -80,6 +80,7 @@ const infoPane = {
         button.onclick = (event) => {
           pathDrawing.clearLines(true);
           pathDrawing.drawLines();
+          adjustMapSize();
           if (appState.currentRouteIndex != routeIndex) {
             appState.currentRouteIndex = routeIndex;
             if (appState.selectedRoutes.hasOwnProperty(routeIndex)) {
