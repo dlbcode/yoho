@@ -136,8 +136,8 @@ function updateState(key, value, calledFrom) {
             break;
     }
     document.dispatchEvent(new CustomEvent('stateChange', { detail: { key, value } }));
-    console.log('State updated:', key, value, calledFrom);
-    console.log('appState:', appState);
+    //console.log('State updated:', key, value, calledFrom);
+    //console.log('appState:', appState);
 
     if (shouldUpdateUrl) {
         updateUrl();
@@ -183,7 +183,6 @@ function updateUrl() {
     // Check if the current URL is different from the new URL
     if (window.location.search !== `?${paramString}`) {
         window.history.pushState({}, '', newUrl);
-        console.log('URL updated:', newUrl);
     }
 }
 

@@ -39,7 +39,6 @@ const removeRoute = (routeNumber) => {
   routeHandling.updateRoutesArray();
 
   // Close the route box after operation
-  console.log('Closing route box');
   document.getElementById('routeBox').style.display = 'none';
 };
 
