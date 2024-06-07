@@ -43,13 +43,16 @@ const uiHandling = {
       if (e.cancelable) {
         e.preventDefault();
       }
-
-        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-        const newHeight = startHeight - (clientY - startY);
-        const maxHeight = window.innerHeight - 50; // Adjust to leave space for OS menu
-        infoPane.style.height = `${Math.min(Math.max(40, newHeight), maxHeight)}px`;
-        requestAnimationFrame(adjustMapSize);
-    };
+    
+      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+      const newHeight = startHeight - (clientY - startY);
+    
+      // Use the visualViewport height to account for OS elements
+      const maxHeight = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+    
+      infoPane.style.height = `${Math.min(Math.max(40, newHeight), maxHeight)}px`;
+      requestAnimationFrame(adjustMapSize);
+    };    
 
     const stopDrag = function() {
         document.documentElement.removeEventListener('mousemove', doDrag, false);
