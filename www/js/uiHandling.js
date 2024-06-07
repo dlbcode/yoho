@@ -146,7 +146,6 @@ document.addEventListener('DOMContentLoaded', () => {
   estimateBottomBarHeight();
   setBottomBarHeight();
   uiHandling.initInfoPaneDragButton();
-  adjustMapSize();
 });
 
 export { uiHandling }
