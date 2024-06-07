@@ -115,10 +115,6 @@ function adjustMapSize() {
     const viewportHeight = window.visualViewport ? window.visualViewport.height : window.innerHeight;
     const newMapHeight = viewportHeight - infoPaneHeight;
 
-    console.log(`Viewport Height: ${viewportHeight}`);
-    console.log(`InfoPane Height: ${infoPaneHeight}`);
-    console.log(`New Map Height: ${newMapHeight}`);
-
     mapElement.style.height = `${newMapHeight}px`;
 
     if (window.map) {
