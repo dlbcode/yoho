@@ -108,9 +108,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
 function adjustMapSize() {
     const mapElement = document.getElementById('map');
-    const infoPaneHeight = document.getElementById('infoPane').offsetHeight;
-    const windowHeight = window.innerHeight;
-    const newMapHeight = windowHeight - infoPaneHeight;
+    const infoPane = document.getElementById('infoPane');
+    if (!mapElement || !infoPane) return;
+
+    const infoPaneHeight = infoPane.offsetHeight;
+    const viewportHeight = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+    const newMapHeight = viewportHeight - infoPaneHeight;
+
+    console.log(`Viewport Height: ${viewportHeight}`);
+    console.log(`InfoPane Height: ${infoPaneHeight}`);
+    console.log(`New Map Height: ${newMapHeight}`);
+
     mapElement.style.height = `${newMapHeight}px`;
 
     if (window.map) {
@@ -121,6 +129,10 @@ function adjustMapSize() {
 window.addEventListener('resize', adjustMapSize);
 window.addEventListener('orientationchange', adjustMapSize);
 document.addEventListener('DOMContentLoaded', adjustMapSize);
+
+if (window.visualViewport) {
+    window.visualViewport.addEventListener('resize', adjustMapSize);
+}
 
 var blueDotIcon = L.divIcon({
     className: 'custom-div-icon',
