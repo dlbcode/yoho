@@ -142,10 +142,19 @@ const uiHandling = {
 
 window.addEventListener('resize', setBottomBarHeight);
 window.addEventListener('orientationchange', setBottomBarHeight);
+
+if (window.visualViewport) {
+  window.visualViewport.addEventListener('resize', () => {
+    setBottomBarHeight();
+    adjustMapSize();
+  });
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   estimateBottomBarHeight();
   setBottomBarHeight();
   uiHandling.initInfoPaneDragButton();
+  adjustMapSize();
 });
 
 export { uiHandling }
