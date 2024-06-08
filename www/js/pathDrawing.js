@@ -5,8 +5,9 @@ import { showRoutePopup } from './routePopup.js';
 
 const pathDrawing = {
     currentLines: [],
+    hoverLines: [],
+    hoverLinePairs: [], // To track line pairs (visible and invisible)
     invisibleLines: [],
-    invisibleRouteLines: [],
     routePathCache: [],
     dashedRoutePathCache: [],
     popupFromClick: false,
@@ -46,7 +47,7 @@ const pathDrawing = {
             this.createRoutePath(originAirportData, destinationAirportData, {
                 originAirport: originAirportData,
                 destinationAirport: destinationAirportData,
-            }, 'white');
+            }, 'white', false);
         } catch (error) {
             console.error('Error drawing path between airports:', error);
         }
@@ -80,7 +81,7 @@ const pathDrawing = {
         return L.latLng(latLng.lat, newLng);
     },
 
-    async createRoutePath(origin, destination, route, lineColor = null, routeLineId) {
+    async createRoutePath(origin, destination, route, lineColor = null, isTableRoute = false) {
         let routeData = route;
         let selectedRoutesArray = Array.isArray(appState.selectedRoutes) ? appState.selectedRoutes : Object.values(appState.selectedRoutes);
 
@@ -139,18 +140,18 @@ const pathDrawing = {
                     opacity: 1,
                     color: determinedLineColor,
                     wrap: false,
-                    zIndex: -1
+                    zIndex: -1,
+                    isTableRoute: isTableRoute
                 }).addTo(map);
                 geodesicLine.routeId = routeId;
-                geodesicLine.routeLineId = routeLineId;
                 geodesicLine.originalColor = determinedLineColor;
 
                 var invisibleLine = new L.Geodesic([adjustedOrigin, adjustedDestination], {
                     weight: 10,
-                    opacity: 0.2,
-                    wrap: false
+                    opacity: 0.1,
+                    wrap: false,
+                    isTableRoute: isTableRoute
                 }).addTo(map);
-                invisibleLine.routeLineId = routeLineId;
 
                 const onMouseOver = (e) => {
                     if (!this.popupFromClick) {
@@ -158,13 +159,13 @@ const pathDrawing = {
                         geodesicLine.setStyle({ color: 'white' });
 
                         let displayPrice = Math.round(routeData.price);
-                        let content = `<div style=\"line-height: 1.2; margin: 0;\">${destination.city}<br><span><strong><span style=\"color: #ccc; font-size: 14px;\">$${displayPrice}</span></strong></span>`;
+                        let content = `<div style="line-height: 1.2; margin: 0;">${destination.city}<br><span><strong><span style="color: #ccc; font-size: 14px;">$${displayPrice}</span></strong></span>`;
 
                         if (routeData.date) {
                             let lowestDate = new Date(routeData.date).toLocaleDateString("en-US", {
                                 year: 'numeric', month: 'long', day: 'numeric'
                             });
-                            content += `<br><span style=\"line-height: 1; display: block; color: #666\">on ${lowestDate}</span>`;
+                            content += `<br><span style="line-height: 1; display: block; color: #666">on ${lowestDate}</span>`;
                         }
 
                         content += `</div>`;
@@ -183,6 +184,13 @@ const pathDrawing = {
                     if (!this.popupFromClick) {
                         geodesicLine.setStyle({ color: geodesicLine.originalColor });
                         map.closePopup();
+
+                        if (!geodesicLine.options.isTableRoute) {
+                            // Only remove lines not associated with the table
+                            map.removeLayer(geodesicLine);
+                            map.removeLayer(invisibleLine);
+                            this.hoverLinePairs = this.hoverLinePairs.filter(pair => pair.geodesicLine !== geodesicLine && pair.invisibleLine !== invisibleLine);
+                        }
                     }
                 };
 
@@ -195,12 +203,14 @@ const pathDrawing = {
                     line.on('click', onRouteLineClick);
                 });
 
-                if (routeLineId) {
+                if (isTableRoute) {
                     appState.routeLines.push(geodesicLine);
                     appState.invisibleRouteLines.push(invisibleLine);
                 } else {
                     newPaths.push(geodesicLine);
                     this.invisibleLines.push(invisibleLine);
+                    this.hoverLines.push(geodesicLine);
+                    this.hoverLinePairs.push({ geodesicLine, invisibleLine });
                 }
 
                 this.routePathCache[routeId].push(geodesicLine);
@@ -265,7 +275,7 @@ const pathDrawing = {
     },
 
     async drawLines() {
-        this.clearLines(false); // Modified to not clear route table lines
+        this.clearLines(false); // Ensure all lines are cleared properly except for table lines
 
         const drawPromises = appState.routes.map(route => {
             if (route.isDirect) {
@@ -283,7 +293,7 @@ const pathDrawing = {
     },
 
     drawPaths(route) {
-        this.createRoutePath(route.originAirport, route.destinationAirport, route, 0);
+        this.createRoutePath(route.originAirport, route.destinationAirport, route, 0, false);
     },
 
     getColorBasedOnPrice(price) {
@@ -295,9 +305,17 @@ const pathDrawing = {
     },
 
     clearLines(all = false) {
-        const routeTableExists = document.querySelector('.route-info-table tbody tr'); // Check for route table presence
+        // Always clear hover lines
+        this.hoverLinePairs.forEach(pair => {
+            if (map.hasLayer(pair.geodesicLine)) {
+                map.removeLayer(pair.geodesicLine);
+            }
+            if (map.hasLayer(pair.invisibleLine)) {
+                map.removeLayer(pair.invisibleLine);
+            }
+        });
 
-        if (!routeTableExists) {
+        if (all) {
             [...Object.values(this.routePathCache).flat(), 
             ...Object.values(this.dashedRoutePathCache).flat()].forEach(line => {
                 if (map.hasLayer(line)) {
@@ -311,33 +329,27 @@ const pathDrawing = {
                 }
             });
 
-            this.invisibleLines.forEach(invisibleLine => {
+            appState.routeLines.forEach(line => {
+                if (map.hasLayer(line)) {
+                    map.removeLayer(line);
+                }
+            });
+            appState.invisibleRouteLines.forEach(invisibleLine => {
                 if (map.hasLayer(invisibleLine)) {
                     map.removeLayer(invisibleLine);
                 }
             });
-
-            if (all) {
-                appState.routeLines.forEach(line => {
-                    if (map.hasLayer(line)) {
-                        map.removeLayer(line);
-                    }
-                });
-                appState.invisibleRouteLines.forEach(invisibleLine => {
-                    if (map.hasLayer(invisibleLine)) {
-                        map.removeLayer(invisibleLine);
-                    }
-                });
-            }
-
-            map.closePopup();
-
-            this.routePathCache = {};
-            this.dashedRoutePathCache = {};
-            this.currentLines = [];
-            this.invisibleLines = [];
-            this.invisibleRouteLines = [];
         }
+
+        map.closePopup();
+
+        this.routePathCache = {};
+        this.dashedRoutePathCache = {};
+        this.currentLines = [];
+        this.hoverLines = [];
+        this.hoverLinePairs = [];
+        this.invisibleLines = [];
+        this.invisibleRouteLines = [];
     },
 
     drawRouteLines: async function() {
@@ -389,7 +401,7 @@ const pathDrawing = {
                         originAirport: originAirportData,
                         destinationAirport: destinationAirportData,
                         price: price,
-                    }, color, routeLineId);
+                    }, color, true); // Mark these as table routes
                 } catch (error) {
                     console.error('Error fetching airport data for segment:', error);
                 }
