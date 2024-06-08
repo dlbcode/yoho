@@ -2,15 +2,17 @@ import { map } from './map.js';
 import { appState, updateState } from './stateManager.js';
 import { flightMap } from './flightMap.js';
 import { showRoutePopup } from './routePopup.js';
+import LineSet from './lineSet.js';
 
 const pathDrawing = {
     currentLines: [],
     hoverLines: [],
     hoverLinePairs: [], // To track line pairs (visible and invisible)
     invisibleLines: [],
-    routePathCache: [],
-    dashedRoutePathCache: [],
+    routePathCache: {},
+    dashedRoutePathCache: {},
     popupFromClick: false,
+    lineSets: [], // Track line sets
 
     drawRoutePaths(iata, directRoutes) {
         let cacheKey = appState.routeDirection + '_' + iata;
@@ -106,7 +108,6 @@ const pathDrawing = {
             return;
         }
 
-        this.routeLines = this.routeLines || [];
         let routeId = `${routeData.originAirport.iata_code}-${routeData.destinationAirport.iata_code}`;
         let newPaths = [];
 
@@ -154,34 +155,34 @@ const pathDrawing = {
                 }).addTo(map);
 
                 const onMouseOver = (e) => {
-                  if (!this.popupFromClick) {
-                      geodesicLine.originalColor = geodesicLine.options.color;
-                      geodesicLine.setStyle({ color: 'white' });
-              
-                      // Define the content for the popup
-                      let displayPrice = Math.round(routeData.price);
-                      let content = `<div style="line-height: 1.2; margin: 0;">${destination.city}<br><span><strong><span style="color: #ccc; font-size: 14px;">$${displayPrice}</span></strong></span>`;
-                      if (routeData.date) {
-                          let lowestDate = new Date(routeData.date).toLocaleDateString("en-US", {
-                              year: 'numeric', month: 'long', day: 'numeric'
-                          });
-                          content += `<br><span style="line-height: 1; display: block; color: #666">on ${lowestDate}</span>`;
-                      }
-                      content += `</div>`;
-              
-                      const mouseoverPopup = L.popup({ autoClose: false, closeOnClick: false })
-                          .setLatLng(e.latlng)
-                          .setContent(content)
-                          .openOn(map);
-                  }
-              };
-              
-              const onMouseOut = () => {
-                if (!this.popupFromClick) {
-                    geodesicLine.setStyle({ color: geodesicLine.originalColor });
-                    map.closePopup();
-                }
-              };                                   
+                    if (!this.popupFromClick) {
+                        geodesicLine.originalColor = geodesicLine.options.color;
+                        geodesicLine.setStyle({ color: 'white' });
+
+                        // Define the content for the popup
+                        let displayPrice = Math.round(routeData.price);
+                        let content = `<div style="line-height: 1.2; margin: 0;">${destination.city}<br><span><strong><span style="color: #ccc; font-size: 14px;">$${displayPrice}</span></strong></span>`;
+                        if (routeData.date) {
+                            let lowestDate = new Date(routeData.date).toLocaleDateString("en-US", {
+                                year: 'numeric', month: 'long', day: 'numeric'
+                            });
+                            content += `<br><span style="line-height: 1; display: block; color: #666">on ${lowestDate}</span>`;
+                        }
+                        content += `</div>`;
+
+                        const mouseoverPopup = L.popup({ autoClose: false, closeOnClick: false })
+                            .setLatLng(e.latlng)
+                            .setContent(content)
+                            .openOn(map);
+                    }
+                };
+
+                const onMouseOut = () => {
+                    if (!this.popupFromClick) {
+                        geodesicLine.setStyle({ color: geodesicLine.originalColor });
+                        map.closePopup();
+                    }
+                };
 
                 const onRouteLineClick = (e) => {
                     onClick(e, geodesicLine);
@@ -192,13 +193,14 @@ const pathDrawing = {
                     line.on('click', onRouteLineClick);
                 });
 
+                const decoratedLine = this.addDecoratedLine(geodesicLine, routeData, onRouteLineClick);
+                const lineSet = new LineSet(geodesicLine, invisibleLine, decoratedLine);
+
                 if (isTableRoute) {
-                    appState.routeLines.push(geodesicLine);
-                    appState.invisibleRouteLines.push(invisibleLine);
+                    appState.routeLines.push(lineSet);
                 } else {
                     newPaths.push(geodesicLine);
-                    this.invisibleLines.push(invisibleLine);
-                    this.hoverLines.push(geodesicLine);
+                    this.lineSets.push(lineSet);
                     this.hoverLinePairs.push({ geodesicLine, invisibleLine });
                 }
 
@@ -225,50 +227,44 @@ const pathDrawing = {
     },
 
     addDecoratedLine(geodesicLine, route, onClick) {
-      var planeIcon = L.icon({
-          iconUrl: '../assets/plane_icon.png',
-          iconSize: [16, 16],
-          iconAnchor: [8, 12]
-      });
-  
-      var planeSymbol = L.Symbol.marker({
-          rotate: true,
-          markerOptions: {
-              icon: planeIcon
-          }
-      });
-  
-      var decoratedLine = L.polylineDecorator(geodesicLine, {
-          patterns: [
-              {offset: '50%', repeat: 0, symbol: planeSymbol}
-          ]
-      }).addTo(map);
-  
-      decoratedLine.on('mouseover', (e) => {
-          L.popup()
-          .setLatLng(e.latlng)
-          .setContent(`Price: $${Math.round(route.price)}`)
-          .openOn(map);
-      });
-  
-      decoratedLine.on('mouseout', () => {
-          if (!this.popupFromClick) {
-              map.closePopup();
-          }
-      });
-  
-      decoratedLine.on('click', onClick);
-  
-      geodesicLine.decoratedLine = decoratedLine; // Track the decorated line on the geodesic line
-  
-      // Ensure tracking in appState
-      if (route.isTableRoute) {
-          appState.routeLines.push({ geodesicLine, decoratedLine, isTableRoute: true }); // Track both lines for table routes
-      } else {
-          this.currentLines.push({ geodesicLine, decoratedLine }); // Track both lines for normal routes
-      }
-      return decoratedLine;
-  },   
+        var planeIcon = L.icon({
+            iconUrl: '../assets/plane_icon.png',
+            iconSize: [16, 16],
+            iconAnchor: [8, 12]
+        });
+
+        var planeSymbol = L.Symbol.marker({
+            rotate: true,
+            markerOptions: {
+                icon: planeIcon
+            }
+        });
+
+        var decoratedLine = L.polylineDecorator(geodesicLine, {
+            patterns: [
+                { offset: '50%', repeat: 0, symbol: planeSymbol }
+            ]
+        }).addTo(map);
+
+        decoratedLine.on('mouseover', (e) => {
+            L.popup()
+                .setLatLng(e.latlng)
+                .setContent(`Price: $${Math.round(route.price)}`)
+                .openOn(map);
+        });
+
+        decoratedLine.on('mouseout', () => {
+            if (!this.popupFromClick) {
+                map.closePopup();
+            }
+        });
+
+        decoratedLine.on('click', onClick);
+
+        geodesicLine.decoratedLine = decoratedLine; // Track the decorated line on the geodesic line
+
+        return decoratedLine;
+    },
 
     async drawLines() {
         this.clearLines(false); // Ensure all lines are cleared properly except for table lines
@@ -301,63 +297,55 @@ const pathDrawing = {
     },
 
     clearLines(all = false) {
-      // Always clear hover lines
-      this.hoverLinePairs.forEach(pair => {
-          if (map.hasLayer(pair.geodesicLine)) {
-              map.removeLayer(pair.geodesicLine);
-          }
-          if (map.hasLayer(pair.invisibleLine)) {
-              map.removeLayer(pair.invisibleLine);
-          }
-      });
-  
-      if (all) {
-          [...Object.values(this.routePathCache).flat(), 
-          ...Object.values(this.dashedRoutePathCache).flat()].forEach(line => {
-              if (map.hasLayer(line)) {
-                  map.removeLayer(line);
-              }
-          });
-  
-          this.currentLines.forEach(decoratedLine => {
-              if (map.hasLayer(decoratedLine)) {
-                  map.removeLayer(decoratedLine);
-              }
-          });
-  
-          appState.routeLines.forEach(line => {
-              if (map.hasLayer(line)) {
-                  map.removeLayer(line);
-              }
-              // Remove decorated lines associated with route lines
-              if (line.decoratedLine && map.hasLayer(line.decoratedLine)) {
-                  map.removeLayer(line.decoratedLine);
-              }
-          });
-          appState.invisibleRouteLines.forEach(invisibleLine => {
-              if (map.hasLayer(invisibleLine)) {
-                  map.removeLayer(invisibleLine);
-              }
-          });
-  
-          // Clear decorated lines explicitly
-          this.currentLines.forEach(line => {
-              if (line.decoratedLine && map.hasLayer(line.decoratedLine)) {
-                  map.removeLayer(line.decoratedLine);
-              }
-          });
-      }
-  
-      map.closePopup();
-  
-      this.routePathCache = {};
-      this.dashedRoutePathCache = {};
-      this.currentLines = [];
-      this.hoverLines = [];
-      this.hoverLinePairs = [];
-      this.invisibleLines = [];
-      this.invisibleRouteLines = [];
-  },   
+        // Always clear hover lines
+        this.hoverLinePairs.forEach(pair => {
+            if (map.hasLayer(pair.geodesicLine)) {
+                map.removeLayer(pair.geodesicLine);
+            }
+            if (map.hasLayer(pair.invisibleLine)) {
+                map.removeLayer(pair.invisibleLine);
+            }
+        });
+
+        if (all) {
+            [...Object.values(this.routePathCache).flat(),
+            ...Object.values(this.dashedRoutePathCache).flat()].forEach(line => {
+                if (map.hasLayer(line)) {
+                    map.removeLayer(line);
+                }
+            });
+
+            appState.routeLines.forEach(lineSet => {
+                lineSet.removeFromMap(map);
+            });
+
+            appState.invisibleRouteLines.forEach(lineSet => {
+                lineSet.removeFromMap(map);
+            });
+
+            // Clear decorated lines explicitly
+            this.currentLines.forEach(line => {
+                if (map.hasLayer(line)) {
+                    map.removeLayer(line);
+                }
+            });
+
+            this.lineSets.forEach(lineSet => {
+                lineSet.removeFromMap(map);
+            });
+        }
+
+        map.closePopup();
+
+        this.routePathCache = {};
+        this.dashedRoutePathCache = {};
+        this.currentLines = [];
+        this.hoverLines = [];
+        this.hoverLinePairs = [];
+        this.invisibleLines = [];
+        this.invisibleRouteLines = [];
+        this.lineSets = [];
+    },
 
     drawRouteLines: async function() {
         const rows = document.querySelectorAll('.route-info-table tbody tr');
