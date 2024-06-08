@@ -68,7 +68,7 @@ const pathDrawing = {
             this.dashedRoutePathCache[routeId] = this.dashedRoutePathCache[routeId] || [];
             this.dashedRoutePathCache[routeId].push(geodesicLine);
         });
-    },    
+    },
     
     adjustLatLng(latLng) {
         var currentBounds = map.getBounds();
@@ -110,9 +110,9 @@ const pathDrawing = {
         let newPaths = [];
 
         const onClick = (e, geodesicLine) => {
-            this.popupFromClick = true; // Set flag on click
+            this.popupFromClick = true;
             console.log('Route line clicked', routeData);
-            showRoutePopup(e, routeData, geodesicLine); // Pass the clicked line to showRoutePopup
+            showRoutePopup(e, routeData, geodesicLine);
         };
 
         if (this.routePathCache[routeId]) {
@@ -153,7 +153,7 @@ const pathDrawing = {
                 invisibleLine.routeLineId = routeLineId;
 
                 const onMouseOver = (e) => {
-                    if (!this.popupFromClick) { // Only change color if not clicked
+                    if (!this.popupFromClick) {
                         geodesicLine.originalColor = geodesicLine.options.color;
                         geodesicLine.setStyle({ color: 'white' });
 
@@ -180,7 +180,7 @@ const pathDrawing = {
 
                 const onMouseOut = (e) => {
                     console.log('Mouse out of route line', geodesicLine);
-                    if (!this.popupFromClick) { // Only close if not clicked
+                    if (!this.popupFromClick) {
                         geodesicLine.setStyle({ color: geodesicLine.originalColor });
                         map.closePopup();
                     }
@@ -245,25 +245,22 @@ const pathDrawing = {
             ]
         }).addTo(map);
 
-        // Add mouseover event listener to the planeSymbol
         decoratedLine.on('mouseover', (e) => {
             L.popup()
             .setLatLng(e.latlng)
-            .setContent(`Price: $${Math.round(route.price)}`) // Use Math.round to round the price
+            .setContent(`Price: $${Math.round(route.price)}`)
             .openOn(map);
         });
 
-        // Add mouseout event listener to close the popup
         decoratedLine.on('mouseout', () => {
             if (!this.popupFromClick) {
                 map.closePopup();
             }
         });
 
-        // Add click event listener to show the detailed popup
         decoratedLine.on('click', onClick);
 
-        this.currentLines.push(decoratedLine); // Track the decorated line for later removal
+        this.currentLines.push(decoratedLine);
         return decoratedLine;
     },
 
@@ -283,7 +280,7 @@ const pathDrawing = {
         if (appState.selectedAirport) {
           this.drawRoutePaths(appState.selectedAirport.iata_code, appState.directRoutes, appState.routeDirection);
         }
-      },
+    },
     
     drawPaths(route) {
         this.createRoutePath(route.originAirport, route.destinationAirport, route, 0);
