@@ -157,7 +157,6 @@ const pathDrawing = {
                   if (!this.popupFromClick) {
                       geodesicLine.originalColor = geodesicLine.options.color;
                       geodesicLine.setStyle({ color: 'white' });
-                      map.closePopup();
               
                       // Define the content for the popup
                       let displayPrice = Math.round(routeData.price);
@@ -175,20 +174,22 @@ const pathDrawing = {
                           .setContent(content)
                           .openOn(map);
                   }
-              };              
+              };
               
               const onMouseOut = (e) => {
                   if (!this.popupFromClick) {
                       geodesicLine.setStyle({ color: geodesicLine.originalColor });
                       map.closePopup();
-                      if (!geodesicLine.options.isTableRoute) {
-                          // Only remove lines not associated with the table
-                          map.removeLayer(geodesicLine);
-                          map.removeLayer(invisibleLine);
-                          this.hoverLinePairs = this.hoverLinePairs.filter(pair => pair.geodesicLine !== geodesicLine && pair.invisibleLine !== invisibleLine);
-                      }
+              
+                      // Remove the geodesicLine and invisibleLine from the map
+                      map.removeLayer(geodesicLine);
+                      map.removeLayer(invisibleLine);
+              
+                      // Remove lines from the hoverLinePairs array
+                      this.hoverLinePairs = this.hoverLinePairs.filter(pair => pair.geodesicLine !== geodesicLine && pair.invisibleLine !== invisibleLine);
                   }
-              };              
+              };
+                        
 
                 const onRouteLineClick = (e) => {
                     onClick(e, geodesicLine);

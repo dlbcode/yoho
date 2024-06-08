@@ -270,7 +270,7 @@ function buildRouteTable(routeIndex) {
                 pathDrawing.clearLines();  // Clear the highlighted route path
                 pathDrawing.drawLines();  // Optionally redraw other paths if needed
             });
-        });        
+        });                
     }
 
     function resetSortIcons(headers, currentIcon, newSortState) {
