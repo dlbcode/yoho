@@ -109,7 +109,7 @@ const pathDrawing = {
       let routeId = `${routeData.originAirport.iata_code}-${routeData.destinationAirport.iata_code}`;
       let newPaths = [];
 
-      const onClick = (e) => {
+      const onClick = (e, geodesicLine) => {
           console.log('Route line clicked', routeData);
           showRoutePopup(e, routeData, geodesicLine); // Pass the clicked line to showRoutePopup
       };
