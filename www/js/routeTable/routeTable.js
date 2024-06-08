@@ -163,6 +163,7 @@ function buildRouteTable(routeIndex) {
             table.appendChild(tbody);
             infoPaneContent.appendChild(table);
             topBar.classList.remove('loading');
+            pathDrawing.drawRouteLines();
             highlightSelectedRowForRouteIndex(routeIndex);
             attachEventListeners(table, data, routeIndex);
         })
