@@ -163,8 +163,6 @@ function buildRouteTable(routeIndex) {
             table.appendChild(tbody);
             infoPaneContent.appendChild(table);
             topBar.classList.remove('loading');
-            pathDrawing.drawRouteLines();
-
             highlightSelectedRowForRouteIndex(routeIndex);
             attachEventListeners(table, data, routeIndex);
         })
@@ -186,7 +184,7 @@ function buildRouteTable(routeIndex) {
                     resetSortIcons(headers, sortIcon, isAscending ? 'asc' : 'desc');
                 }
             });
-        });  
+        });
 
         headers.forEach(header => {
             const filteredHeader = header.querySelector('.filteredHeader');
@@ -213,7 +211,7 @@ function buildRouteTable(routeIndex) {
             if (filterIcon) {
                 filterIcon.addEventListener('click', handleFilterClick);
             }
-        });       
+        });
 
         function fetchDataForColumn(column) {
             const getPriceRange = () => {
@@ -221,18 +219,18 @@ function buildRouteTable(routeIndex) {
                 const prices = Array.from(priceCells)
                     .map(cell => parseFloat(cell.textContent.replace(/[^0-9.]/g, '')))
                     .filter(price => !isNaN(price));
-        
+
                 if (prices.length === 0) {
                     console.error('No valid prices found in the column');
                     return { min: 0, max: 0 };
                 }
-        
+
                 const min = Math.min(...prices);
                 const max = min === Math.max(...prices) ? min + 1 : Math.max(...prices);
-        
+
                 return { min, max };
             };
-        
+
             switch (column) {
                 case 'price':
                     return getPriceRange();
@@ -243,7 +241,7 @@ function buildRouteTable(routeIndex) {
                     console.error('Unsupported column:', column);
                     return null;
             }
-        }                                       
+        }
 
         document.querySelectorAll('.route-info-table tbody tr').forEach((row, index) => {
             row.addEventListener('click', function() {
@@ -252,7 +250,7 @@ function buildRouteTable(routeIndex) {
                 const fullFlightData = data[index];
                 routeInfoRow(this, fullFlightData, routeIds, routeIndex);
             });
-        });    
+        });
 
         document.querySelectorAll('.route-info-table tbody tr').forEach(row => {
             row.addEventListener('mouseover', function() {
@@ -262,7 +260,7 @@ function buildRouteTable(routeIndex) {
                 for (let i = 0; i < iataCodes.length - 1; i++) {
                     const originIata = iataCodes[i];
                     const destinationIata = iataCodes[i + 1];
-                    pathDrawing.drawPathBetweenAirports(originIata, destinationIata, flightMap.getAirportDataByIata);
+                    pathDrawing.drawPathBetweenAirports(originIata, destinationIata);
                 }
             });
 
@@ -271,7 +269,7 @@ function buildRouteTable(routeIndex) {
                 pathDrawing.drawLines();
             });
         });
-    } 
+    }
 
     function resetSortIcons(headers, currentIcon, newSortState) {
         headers.forEach(header => {
