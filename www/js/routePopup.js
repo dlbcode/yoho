@@ -1,4 +1,5 @@
 import { map } from './map.js';
+import { pathDrawing } from './pathDrawing.js'; // Import pathDrawing
 
 function showRoutePopup(event, routeData, line) {
     const { originAirport, destinationAirport, price, date } = routeData;
@@ -33,6 +34,7 @@ function showRoutePopup(event, routeData, line) {
             if (line) {
                 map.removeLayer(line);
             }
+            pathDrawing.popupFromClick = false; // Reset flag on popup removal
         })
         .on('add', function () {
             console.log('Popup added');
