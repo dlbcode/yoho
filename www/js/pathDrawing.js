@@ -158,12 +158,24 @@ const pathDrawing = {
                       geodesicLine.originalColor = geodesicLine.options.color;
                       geodesicLine.setStyle({ color: 'white' });
                       map.closePopup();
+              
+                      // Define the content for the popup
+                      let displayPrice = Math.round(routeData.price);
+                      let content = `<div style="line-height: 1.2; margin: 0;">${destination.city}<br><span><strong><span style="color: #ccc; font-size: 14px;">$${displayPrice}</span></strong></span>`;
+                      if (routeData.date) {
+                          let lowestDate = new Date(routeData.date).toLocaleDateString("en-US", {
+                              year: 'numeric', month: 'long', day: 'numeric'
+                          });
+                          content += `<br><span style="line-height: 1; display: block; color: #666">on ${lowestDate}</span>`;
+                      }
+                      content += `</div>`;
+              
                       const mouseoverPopup = L.popup({ autoClose: false, closeOnClick: false })
                           .setLatLng(e.latlng)
                           .setContent(content)
                           .openOn(map);
                   }
-              };
+              };              
               
               const onMouseOut = (e) => {
                   if (!this.popupFromClick) {
