@@ -264,11 +264,6 @@ function buildRouteTable(routeIndex) {
                     pathDrawing.drawPathBetweenAirports(originIata, destinationIata);
                 }
             });
-
-            row.addEventListener('mouseout', function() {
-                pathDrawing.clearLines(true);
-                pathDrawing.drawRouteLines();
-            });
         });
     }
 
