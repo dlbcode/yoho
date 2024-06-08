@@ -176,20 +176,12 @@ const pathDrawing = {
                   }
               };
               
-              const onMouseOut = (e) => {
-                  if (!this.popupFromClick) {
-                      geodesicLine.setStyle({ color: geodesicLine.originalColor });
-                      map.closePopup();
-              
-                      // Remove the geodesicLine and invisibleLine from the map
-                      map.removeLayer(geodesicLine);
-                      map.removeLayer(invisibleLine);
-              
-                      // Remove lines from the hoverLinePairs array
-                      this.hoverLinePairs = this.hoverLinePairs.filter(pair => pair.geodesicLine !== geodesicLine && pair.invisibleLine !== invisibleLine);
-                  }
-              };
-                        
+              const onMouseOut = () => {
+                if (!this.popupFromClick) {
+                    geodesicLine.setStyle({ color: geodesicLine.originalColor });
+                    map.closePopup();
+                }
+              };                                   
 
                 const onRouteLineClick = (e) => {
                     onClick(e, geodesicLine);
