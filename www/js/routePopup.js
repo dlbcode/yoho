@@ -1,6 +1,6 @@
 import { map } from './map.js';
 
-function showRoutePopup(event, routeData) {
+function showRoutePopup(event, routeData, line) {
     const { originAirport, destinationAirport, price, date } = routeData;
 
     let content = `<div style="line-height: 1.5;">
@@ -30,9 +30,16 @@ function showRoutePopup(event, routeData) {
         .setContent(content)
         .on('remove', function () {
             console.log('Popup removed');
+            if (line) {
+                map.removeLayer(line);
+            }
         })
         .on('add', function () {
             console.log('Popup added');
+            // Ensure the line remains visible when the popup is added
+            if (line && !map.hasLayer(line)) {
+                line.addTo(map);
+            }
         });
 
     // Open the popup on the map

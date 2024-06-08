@@ -111,7 +111,7 @@ const pathDrawing = {
 
       const onClick = (e) => {
           console.log('Route line clicked', routeData);
-          showRoutePopup(e, routeData); // Call the new popup function
+          showRoutePopup(e, routeData, geodesicLine); // Pass the clicked line to showRoutePopup
       };
 
       if (this.routePathCache[routeId]) {
@@ -185,7 +185,7 @@ const pathDrawing = {
 
               const onRouteLineClick = (e) => {
                   console.log('Route line clicked', routeData);
-                  showRoutePopup(e, routeData);
+                  showRoutePopup(e, routeData, geodesicLine);
               };
 
               [geodesicLine, invisibleLine].forEach(line => {
