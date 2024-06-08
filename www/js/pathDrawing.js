@@ -154,45 +154,29 @@ const pathDrawing = {
                 }).addTo(map);
 
                 const onMouseOver = (e) => {
-                    if (!this.popupFromClick) {
-                        geodesicLine.originalColor = geodesicLine.options.color;
-                        geodesicLine.setStyle({ color: 'white' });
-
-                        let displayPrice = Math.round(routeData.price);
-                        let content = `<div style="line-height: 1.2; margin: 0;">${destination.city}<br><span><strong><span style="color: #ccc; font-size: 14px;">$${displayPrice}</span></strong></span>`;
-
-                        if (routeData.date) {
-                            let lowestDate = new Date(routeData.date).toLocaleDateString("en-US", {
-                                year: 'numeric', month: 'long', day: 'numeric'
-                            });
-                            content += `<br><span style="line-height: 1; display: block; color: #666">on ${lowestDate}</span>`;
-                        }
-
-                        content += `</div>`;
-
-                        const mouseoverPopup = L.popup({ autoClose: false, closeOnClick: false })
-                            .setLatLng(e.latlng)
-                            .setContent(content)
-                            .openOn(map);
-
-                        console.log('Mouseover popup created:', mouseoverPopup);
-                    }
-                };
-
-                const onMouseOut = (e) => {
-                    console.log('Mouse out of route line', geodesicLine);
-                    if (!this.popupFromClick) {
-                        geodesicLine.setStyle({ color: geodesicLine.originalColor });
-                        map.closePopup();
-
-                        if (!geodesicLine.options.isTableRoute) {
-                            // Only remove lines not associated with the table
-                            map.removeLayer(geodesicLine);
-                            map.removeLayer(invisibleLine);
-                            this.hoverLinePairs = this.hoverLinePairs.filter(pair => pair.geodesicLine !== geodesicLine && pair.invisibleLine !== invisibleLine);
-                        }
-                    }
-                };
+                  if (!this.popupFromClick) {
+                      geodesicLine.originalColor = geodesicLine.options.color;
+                      geodesicLine.setStyle({ color: 'white' });
+                      map.closePopup();
+                      const mouseoverPopup = L.popup({ autoClose: false, closeOnClick: false })
+                          .setLatLng(e.latlng)
+                          .setContent(content)
+                          .openOn(map);
+                  }
+              };
+              
+              const onMouseOut = (e) => {
+                  if (!this.popupFromClick) {
+                      geodesicLine.setStyle({ color: geodesicLine.originalColor });
+                      map.closePopup();
+                      if (!geodesicLine.options.isTableRoute) {
+                          // Only remove lines not associated with the table
+                          map.removeLayer(geodesicLine);
+                          map.removeLayer(invisibleLine);
+                          this.hoverLinePairs = this.hoverLinePairs.filter(pair => pair.geodesicLine !== geodesicLine && pair.invisibleLine !== invisibleLine);
+                      }
+                  }
+              };              
 
                 const onRouteLineClick = (e) => {
                     onClick(e, geodesicLine);

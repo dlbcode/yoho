@@ -257,14 +257,20 @@ function buildRouteTable(routeIndex) {
             row.addEventListener('mouseover', function() {
                 const routeString = this.cells[8].textContent.trim();
                 const iataCodes = routeString.split(' > ');
-
+        
                 for (let i = 0; i < iataCodes.length - 1; i++) {
                     const originIata = iataCodes[i];
                     const destinationIata = iataCodes[i + 1];
                     pathDrawing.drawPathBetweenAirports(originIata, destinationIata);
                 }
             });
-        });
+        
+            row.addEventListener('mouseout', function() {
+                // Revert color of the route lines back to original
+                pathDrawing.clearLines();  // Clear the highlighted route path
+                pathDrawing.drawLines();  // Optionally redraw other paths if needed
+            });
+        });        
     }
 
     function resetSortIcons(headers, currentIcon, newSortState) {
