@@ -265,7 +265,7 @@ const pathDrawing = {
     },
 
     async drawLines() {
-        this.clearLines();
+        this.clearLines(false); // Modified to not clear route table lines
 
         const drawPromises = appState.routes.map(route => {
             if (route.isDirect) {
@@ -295,45 +295,49 @@ const pathDrawing = {
     },
 
     clearLines(all = false) {
-        [...Object.values(this.routePathCache).flat(), 
-         ...Object.values(this.dashedRoutePathCache).flat()].forEach(line => {
-            if (map.hasLayer(line)) {
-                map.removeLayer(line);
-            }
-        });
+        const routeTableExists = document.querySelector('.route-info-table tbody tr'); // Check for route table presence
 
-        this.currentLines.forEach(decoratedLine => {
-            if (map.hasLayer(decoratedLine)) {
-                map.removeLayer(decoratedLine);
-            }
-        });
-
-        this.invisibleLines.forEach(invisibleLine => {
-            if (map.hasLayer(invisibleLine)) {
-                map.removeLayer(invisibleLine);
-            }
-        });
-
-        if (all) {
-            appState.routeLines.forEach(line => {
+        if (!routeTableExists) {
+            [...Object.values(this.routePathCache).flat(), 
+            ...Object.values(this.dashedRoutePathCache).flat()].forEach(line => {
                 if (map.hasLayer(line)) {
                     map.removeLayer(line);
                 }
             });
-            appState.invisibleRouteLines.forEach(invisibleLine => {
+
+            this.currentLines.forEach(decoratedLine => {
+                if (map.hasLayer(decoratedLine)) {
+                    map.removeLayer(decoratedLine);
+                }
+            });
+
+            this.invisibleLines.forEach(invisibleLine => {
                 if (map.hasLayer(invisibleLine)) {
                     map.removeLayer(invisibleLine);
                 }
             });
+
+            if (all) {
+                appState.routeLines.forEach(line => {
+                    if (map.hasLayer(line)) {
+                        map.removeLayer(line);
+                    }
+                });
+                appState.invisibleRouteLines.forEach(invisibleLine => {
+                    if (map.hasLayer(invisibleLine)) {
+                        map.removeLayer(invisibleLine);
+                    }
+                });
+            }
+
+            map.closePopup();
+
+            this.routePathCache = {};
+            this.dashedRoutePathCache = {};
+            this.currentLines = [];
+            this.invisibleLines = [];
+            this.invisibleRouteLines = [];
         }
-
-        map.closePopup();
-
-        this.routePathCache = {};
-        this.dashedRoutePathCache = {};
-        this.currentLines = [];
-        this.invisibleLines = [];
-        this.invisibleRouteLines = [];
     },
 
     drawRouteLines: async function() {
