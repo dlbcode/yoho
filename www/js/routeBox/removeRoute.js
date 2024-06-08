@@ -9,9 +9,9 @@ const removeRoute = (routeNumber) => {
 
   // Remove all selectedRoutes with the same group number
   Object.keys(appState.selectedRoutes).forEach(key => {
-    if (appState.selectedRoutes[key].group === groupNumber) {
-      updateState('removeSelectedRoute', parseInt(key), 'removeRoute.removeRouteButton2');
-    }
+      if (appState.selectedRoutes[key].group === groupNumber) {
+          updateState('removeSelectedRoute', parseInt(key), 'removeRoute.removeRouteButton2');
+      }
   });
 
   // Remove the waypoints associated with the route
@@ -23,16 +23,16 @@ const removeRoute = (routeNumber) => {
   // Re-index routeDates to fill the gap left by the removed route
   const newRouteDates = {};
   Object.keys(appState.routeDates).forEach((key, index) => {
-    if (parseInt(key) < routeNumber) {
-      newRouteDates[key] = appState.routeDates[key];
-    } else if (parseInt(key) > routeNumber) {
-      // Shift the dates down to fill the gap left by the removed route
-      newRouteDates[parseInt(key) - 1] = appState.routeDates[key];
-    }
+      if (parseInt(key) < routeNumber) {
+          newRouteDates[key] = appState.routeDates[key];
+      } else if (parseInt(key) > routeNumber) {
+          // Shift the dates down to fill the gap left by the removed route
+          newRouteDates[parseInt(key) - 1] = appState.routeDates[key];
+      }
   });
   appState.routeDates = newRouteDates;
 
-  // Additional logic to update the UI and application state as needed
+  // Clear all lines and redraw
   pathDrawing.clearLines(true);
   pathDrawing.drawLines();
   mapHandling.updateMarkerIcons();

@@ -261,9 +261,14 @@ const pathDrawing = {
   
       geodesicLine.decoratedLine = decoratedLine; // Track the decorated line on the geodesic line
   
-      this.currentLines.push(decoratedLine);
+      // Ensure tracking in appState
+      if (route.isTableRoute) {
+          appState.routeLines.push({ geodesicLine, decoratedLine, isTableRoute: true }); // Track both lines for table routes
+      } else {
+          this.currentLines.push({ geodesicLine, decoratedLine }); // Track both lines for normal routes
+      }
       return decoratedLine;
-  },  
+  },   
 
     async drawLines() {
         this.clearLines(false); // Ensure all lines are cleared properly except for table lines
@@ -324,6 +329,10 @@ const pathDrawing = {
               if (map.hasLayer(line)) {
                   map.removeLayer(line);
               }
+              // Remove decorated lines associated with route lines
+              if (line.decoratedLine && map.hasLayer(line.decoratedLine)) {
+                  map.removeLayer(line.decoratedLine);
+              }
           });
           appState.invisibleRouteLines.forEach(invisibleLine => {
               if (map.hasLayer(invisibleLine)) {
@@ -348,7 +357,7 @@ const pathDrawing = {
       this.hoverLinePairs = [];
       this.invisibleLines = [];
       this.invisibleRouteLines = [];
-  },    
+  },   
 
     drawRouteLines: async function() {
         const rows = document.querySelectorAll('.route-info-table tbody tr');
