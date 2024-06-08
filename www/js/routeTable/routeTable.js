@@ -266,8 +266,8 @@ function buildRouteTable(routeIndex) {
             });
 
             row.addEventListener('mouseout', function() {
-                pathDrawing.clearLines();
-                pathDrawing.drawLines();
+                pathDrawing.clearLines(true);
+                pathDrawing.drawRouteLines();
             });
         });
     }
