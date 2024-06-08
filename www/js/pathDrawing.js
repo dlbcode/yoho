@@ -23,14 +23,14 @@ const pathDrawing = {
             this.drawRoutePathsGeneric(iata, directRoutes, appState.routeDirection);
         }
     },
-    
+
     drawRoutePathsGeneric(iata, directRoutes, direction) {
         const routes = directRoutes[iata] || [];
         routes.forEach(route => {
             this.drawPaths(route);
         });
     },
-    
+
     async drawPathBetweenAirports(originIata, destinationIata) {
         try {
             const [originAirportData, destinationAirportData] = await Promise.all([
@@ -51,7 +51,7 @@ const pathDrawing = {
             console.error('Error drawing path between airports:', error);
         }
     },
-    
+
     drawDashedLine(originAirport, destinationAirport) {
         if (!originAirport || !destinationAirport) {
             return;
@@ -63,13 +63,13 @@ const pathDrawing = {
             const geodesicLine = new L.Geodesic([adjustedOrigin, adjustedDestination], {
                 weight: 2, opacity: 1.0, color: 'grey', dashArray: '5, 10', wrap: false
             }).addTo(map);
-    
+
             const routeId = `${originAirport.iata_code}-${destinationAirport.iata_code}`;
             this.dashedRoutePathCache[routeId] = this.dashedRoutePathCache[routeId] || [];
             this.dashedRoutePathCache[routeId].push(geodesicLine);
         });
     },
-    
+
     adjustLatLng(latLng) {
         var currentBounds = map.getBounds();
         var newLng = latLng.lng;
@@ -79,7 +79,7 @@ const pathDrawing = {
 
         return L.latLng(latLng.lat, newLng);
     },
-    
+
     async createRoutePath(origin, destination, route, lineColor = null, routeLineId) {
         let routeData = route;
         let selectedRoutesArray = Array.isArray(appState.selectedRoutes) ? appState.selectedRoutes : Object.values(appState.selectedRoutes);
@@ -158,13 +158,13 @@ const pathDrawing = {
                         geodesicLine.setStyle({ color: 'white' });
 
                         let displayPrice = Math.round(routeData.price);
-                        let content = `<div style="line-height: 1.2; margin: 0;">${destination.city}<br><span><strong><span style="color: #ccc; font-size: 14px;">$${displayPrice}</span></strong></span>`;
+                        let content = `<div style=\"line-height: 1.2; margin: 0;\">${destination.city}<br><span><strong><span style=\"color: #ccc; font-size: 14px;\">$${displayPrice}</span></strong></span>`;
 
                         if (routeData.date) {
                             let lowestDate = new Date(routeData.date).toLocaleDateString("en-US", {
                                 year: 'numeric', month: 'long', day: 'numeric'
                             });
-                            content += `<br><span style="line-height: 1; display: block; color: #666">on ${lowestDate}</span>`;
+                            content += `<br><span style=\"line-height: 1; display: block; color: #666\">on ${lowestDate}</span>`;
                         }
 
                         content += `</div>`;
@@ -224,7 +224,7 @@ const pathDrawing = {
             });
         }
     },
-    
+
     addDecoratedLine(geodesicLine, route, onClick) {
         var planeIcon = L.icon({
             iconUrl: '../assets/plane_icon.png',
@@ -266,26 +266,26 @@ const pathDrawing = {
 
     async drawLines() {
         this.clearLines();
-      
+
         const drawPromises = appState.routes.map(route => {
-          if (route.isDirect) {
-            return this.createRoutePath(route.originAirport, route.destinationAirport, route);
-          } else {
-            return this.drawDashedLine(route.originAirport, route.destinationAirport);
-          }
+            if (route.isDirect) {
+                return this.createRoutePath(route.originAirport, route.destinationAirport, route);
+            } else {
+                return this.drawDashedLine(route.originAirport, route.destinationAirport);
+            }
         });
-      
+
         await Promise.all(drawPromises);
-      
+
         if (appState.selectedAirport) {
-          this.drawRoutePaths(appState.selectedAirport.iata_code, appState.directRoutes, appState.routeDirection);
+            this.drawRoutePaths(appState.selectedAirport.iata_code, appState.directRoutes, appState.routeDirection);
         }
     },
-    
+
     drawPaths(route) {
         this.createRoutePath(route.originAirport, route.destinationAirport, route, 0);
     },
-    
+
     getColorBasedOnPrice(price) {
         if (price === null || price === undefined || isNaN(parseFloat(price))) {
             return 'grey';
@@ -293,7 +293,7 @@ const pathDrawing = {
         price = parseFloat(price);
         return price < 100 ? '#0099ff' : price < 200 ? 'green' : price < 300 ? '#abb740' : price < 400 ? 'orange' : price < 500 ? '#da4500' : '#c32929';
     },
-    
+
     clearLines(all = false) {
         [...Object.values(this.routePathCache).flat(), 
          ...Object.values(this.dashedRoutePathCache).flat()].forEach(line => {
@@ -335,7 +335,7 @@ const pathDrawing = {
         this.invisibleLines = [];
         this.invisibleRouteLines = [];
     },
-    
+
     drawRouteLines: async function() {
         const rows = document.querySelectorAll('.route-info-table tbody tr');
         let minPrice = Infinity, maxPrice = -Infinity;
