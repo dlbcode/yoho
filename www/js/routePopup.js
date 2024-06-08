@@ -25,7 +25,7 @@ function showRoutePopup(event, routeData) {
     map.closePopup();
 
     // Create the popup and add event listeners after initialization
-    const popup = L.popup({ autoClose: false, closeOnClick: false })
+    const popup = L.popup({ autoClose: false, closeOnClick: true })
         .setLatLng(event.latlng)
         .setContent(content)
         .on('remove', function () {
