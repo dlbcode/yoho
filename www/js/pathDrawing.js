@@ -340,22 +340,19 @@ const pathDrawing = {
                     map.removeLayer(line);
                 }
             });
+    
+            // Clear decorated lines array
+            this.decoratedLines = [];
         }
     
         map.closePopup();
-
     
-        // Clear all arrays
-        this.routePathCache = {};
-        this.dashedRoutePathCache = {};
-        this.currentLines = [];
-        this.hoverLines = [];
+        // Clear hover lines arrays
         this.hoverLinePairs = [];
+        this.hoverLines = [];
         this.invisibleLines = [];
-        this.decoratedLines = []; // Clear the new array
-        this.invisibleRouteLines = [];
         console.log('clearLines - decorated after', this.decoratedLines);
-    },        
+    },               
 
     drawRouteLines: async function() {
         const rows = document.querySelectorAll('.route-info-table tbody tr');
