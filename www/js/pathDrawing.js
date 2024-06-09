@@ -9,8 +9,8 @@ const pathDrawing = {
     hoverLinePairs: [], // To track line pairs (visible and invisible)
     invisibleLines: [],
     decoratedLines: [], // New array for managing decorated lines
-    routePathCache: [],
-    dashedRoutePathCache: [],
+    routePathCache: {},
+    dashedRoutePathCache: {},
     popupFromClick: false,
 
     drawRoutePaths(iata, directRoutes) {
@@ -155,34 +155,34 @@ const pathDrawing = {
                 }).addTo(map);
     
                 const onMouseOver = (e) => {
-                  if (!this.popupFromClick) {
-                      geodesicLine.originalColor = geodesicLine.options.color;
-                      geodesicLine.setStyle({ color: 'white' });
-              
-                      // Define the content for the popup
-                      let displayPrice = Math.round(routeData.price);
-                      let content = `<div style="line-height: 1.2; margin: 0;">${destination.city}<br><span><strong><span style="color: #ccc; font-size: 14px;">$${displayPrice}</span></strong></span>`;
-                      if (routeData.date) {
-                          let lowestDate = new Date(routeData.date).toLocaleDateString("en-US", {
-                              year: 'numeric', month: 'long', day: 'numeric'
-                          });
-                          content += `<br><span style="line-height: 1; display: block; color: #666">on ${lowestDate}</span>`;
-                      }
-                      content += `</div>`;
-              
-                      const mouseoverPopup = L.popup({ autoClose: false, closeOnClick: false })
-                          .setLatLng(e.latlng)
-                          .setContent(content)
-                          .openOn(map);
-                  }
-              };
-              
-              const onMouseOut = () => {
-                if (!this.popupFromClick) {
-                    geodesicLine.setStyle({ color: geodesicLine.originalColor });
-                    map.closePopup();
-                }
-              };                                  
+                    if (!this.popupFromClick) {
+                        geodesicLine.originalColor = geodesicLine.options.color;
+                        geodesicLine.setStyle({ color: 'white' });
+                
+                        // Define the content for the popup
+                        let displayPrice = Math.round(routeData.price);
+                        let content = `<div style="line-height: 1.2; margin: 0;">${destination.city}<br><span><strong><span style="color: #ccc; font-size: 14px;">$${displayPrice}</span></strong></span>`;
+                        if (routeData.date) {
+                            let lowestDate = new Date(routeData.date).toLocaleDateString("en-US", {
+                                year: 'numeric', month: 'long', day: 'numeric'
+                            });
+                            content += `<br><span style="line-height: 1; display: block; color: #666">on ${lowestDate}</span>`;
+                        }
+                        content += `</div>`;
+                
+                        const mouseoverPopup = L.popup({ autoClose: false, closeOnClick: false })
+                            .setLatLng(e.latlng)
+                            .setContent(content)
+                            .openOn(map);
+                    }
+                };
+                
+                const onMouseOut = () => {
+                    if (!this.popupFromClick) {
+                        geodesicLine.setStyle({ color: geodesicLine.originalColor });
+                        map.closePopup();
+                    }
+                };                                  
     
                 const onRouteLineClick = (e) => {
                     onClick(e, geodesicLine);
@@ -223,7 +223,7 @@ const pathDrawing = {
                 this.currentLines.push(decoratedLine);
             });
         }
-    },    
+    },
 
     addDecoratedLine(geodesicLine, originIata, destinationIata, route, onClick) {
         var planeIcon = L.icon({
@@ -298,7 +298,7 @@ const pathDrawing = {
 
     clearLines(all = false) {
         console.log('clearLines - decorated before', all, this.decoratedLines);
-
+    
         // Always clear hover lines
         this.hoverLinePairs.forEach(pair => {
             if (map.hasLayer(pair.geodesicLine)) {
@@ -352,7 +352,7 @@ const pathDrawing = {
         this.hoverLines = [];
         this.invisibleLines = [];
         console.log('clearLines - decorated after', this.decoratedLines);
-    },               
+    },                   
 
     drawRouteLines: async function() {
         const rows = document.querySelectorAll('.route-info-table tbody tr');
@@ -390,7 +390,7 @@ const pathDrawing = {
             const price = parseFloat(priceText.replace('$', ''));
             const color = getColorForPrice(price);
 
-            for (let i = 0; i < iataCodes.length - 1; i++) {
+            for (let i = 0; iataCodes.length - 1; i++) {
                 const originIata = iataCodes[i];
                 const destinationIata = iataCodes[i + 1];
 

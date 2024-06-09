@@ -267,13 +267,13 @@ function highlightSelectedRowForRouteIndex(routeIndex) {
 }
 
 function highlightRoutePath(route) {
-  pathDrawing.clearLines();
-  const iataCodes = route.map(r => r.flyFrom).concat(route[route.length - 1].flyTo);
-  for (let i = 0; i < iataCodes.length - 1; i++) {
-      const originIata = iataCodes[i];
-      const destinationIata = iataCodes[i + 1];
-      pathDrawing.drawPathBetweenAirports(originIata, destinationIata, flightMap.getAirportDataByIata);
-  }
+    pathDrawing.clearLines(); // Clear only hover lines, keep the others
+    const iataCodes = route.map(r => r.flyFrom).concat(route[route.length - 1].flyTo);
+    for (let i = 0; i < iataCodes.length - 1; i++) {
+        const originIata = iataCodes[i];
+        const destinationIata = iataCodes[i + 1];
+        pathDrawing.drawPathBetweenAirports(originIata, destinationIata);
+    }
 }
 
 function flyToLocation(iata) {
