@@ -8,6 +8,7 @@ const pathDrawing = {
     hoverLines: [],
     hoverLinePairs: [], // To track line pairs (visible and invisible)
     invisibleLines: [],
+    decoratedLines: [],  // Add this line to store decorated lines
     routePathCache: [],
     dashedRoutePathCache: [],
     popupFromClick: false,
@@ -181,7 +182,7 @@ const pathDrawing = {
                     geodesicLine.setStyle({ color: geodesicLine.originalColor });
                     map.closePopup();
                 }
-              };                                   
+              };                                  
 
                 const onRouteLineClick = (e) => {
                     onClick(e, geodesicLine);
@@ -259,7 +260,7 @@ const pathDrawing = {
 
         decoratedLine.on('click', onClick);
 
-        this.currentLines.push(decoratedLine);
+        this.decoratedLines.push(decoratedLine);  // Store the decorated line
         return decoratedLine;
     },
 
@@ -318,6 +319,12 @@ const pathDrawing = {
                 }
             });
 
+            this.decoratedLines.forEach(line => {  // Remove decorated lines
+                if (map.hasLayer(line)) {
+                    map.removeLayer(line);
+                }
+            });
+
             appState.routeLines.forEach(line => {
                 if (map.hasLayer(line)) {
                     map.removeLayer(line);
@@ -339,6 +346,7 @@ const pathDrawing = {
         this.hoverLinePairs = [];
         this.invisibleLines = [];
         this.invisibleRouteLines = [];
+        this.decoratedLines = [];  // Clear decorated lines array
     },
 
     drawRouteLines: async function() {
