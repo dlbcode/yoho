@@ -8,6 +8,7 @@ const pathDrawing = {
     hoverLines: [],
     hoverLinePairs: [], // To track line pairs (visible and invisible)
     invisibleLines: [],
+    decoratedLines: [], // New array for managing decorated lines
     routePathCache: [],
     dashedRoutePathCache: [],
     popupFromClick: false,
@@ -225,45 +226,45 @@ const pathDrawing = {
     },
 
     addDecoratedLine(geodesicLine, route, onClick) {
-      var planeIcon = L.icon({
-          iconUrl: '../assets/plane_icon.png',
-          iconSize: [16, 16],
-          iconAnchor: [8, 12]
-      });
-  
-      var planeSymbol = L.Symbol.marker({
-          rotate: true,
-          markerOptions: {
-              icon: planeIcon
-          }
-      });
-  
-      var decoratedLine = L.polylineDecorator(geodesicLine, {
-          patterns: [
-              {offset: '50%', repeat: 0, symbol: planeSymbol}
-          ]
-      }).addTo(map);
-  
-      decoratedLine.on('mouseover', (e) => {
-          L.popup()
-          .setLatLng(e.latlng)
-          .setContent(`Price: $${Math.round(route.price)}`)
-          .openOn(map);
-      });
-  
-      decoratedLine.on('mouseout', () => {
-          if (!this.popupFromClick) {
-              map.closePopup();
-          }
-      });
-  
-      decoratedLine.on('click', onClick);
-  
-      geodesicLine.decoratedLine = decoratedLine; // Track the decorated line on the geodesic line
-  
-      this.currentLines.push(decoratedLine);
-      return decoratedLine;
-  },  
+        var planeIcon = L.icon({
+            iconUrl: '../assets/plane_icon.png',
+            iconSize: [16, 16],
+            iconAnchor: [8, 12]
+        });
+
+        var planeSymbol = L.Symbol.marker({
+            rotate: true,
+            markerOptions: {
+                icon: planeIcon
+            }
+        });
+
+        var decoratedLine = L.polylineDecorator(geodesicLine, {
+            patterns: [
+                {offset: '50%', repeat: 0, symbol: planeSymbol}
+            ]
+        }).addTo(map);
+
+        decoratedLine.on('mouseover', (e) => {
+            L.popup()
+            .setLatLng(e.latlng)
+            .setContent(`Price: $${Math.round(route.price)}`)
+            .openOn(map);
+        });
+
+        decoratedLine.on('mouseout', () => {
+            if (!this.popupFromClick) {
+                map.closePopup();
+            }
+        });
+
+        decoratedLine.on('click', onClick);
+
+        geodesicLine.decoratedLine = decoratedLine; // Track the decorated line on the geodesic line
+
+        this.decoratedLines.push(decoratedLine); // Add to the new array
+        return decoratedLine;
+    },  
 
     async drawLines() {
         this.clearLines(false); // Ensure all lines are cleared properly except for table lines
@@ -296,59 +297,60 @@ const pathDrawing = {
     },
 
     clearLines(all = false) {
-      // Always clear hover lines
-      this.hoverLinePairs.forEach(pair => {
-          if (map.hasLayer(pair.geodesicLine)) {
-              map.removeLayer(pair.geodesicLine);
-          }
-          if (map.hasLayer(pair.invisibleLine)) {
-              map.removeLayer(pair.invisibleLine);
-          }
-      });
-  
-      if (all) {
-          [...Object.values(this.routePathCache).flat(), 
-          ...Object.values(this.dashedRoutePathCache).flat()].forEach(line => {
-              if (map.hasLayer(line)) {
-                  map.removeLayer(line);
-              }
-          });
-  
-          this.currentLines.forEach(decoratedLine => {
-              if (map.hasLayer(decoratedLine)) {
-                  map.removeLayer(decoratedLine);
-              }
-          });
-  
-          appState.routeLines.forEach(line => {
-              if (map.hasLayer(line)) {
-                  map.removeLayer(line);
-              }
-          });
-          appState.invisibleRouteLines.forEach(invisibleLine => {
-              if (map.hasLayer(invisibleLine)) {
-                  map.removeLayer(invisibleLine);
-              }
-          });
-  
-          // Clear decorated lines explicitly
-          this.currentLines.forEach(line => {
-              if (line.decoratedLine && map.hasLayer(line.decoratedLine)) {
-                  map.removeLayer(line.decoratedLine);
-              }
-          });
-      }
-  
-      map.closePopup();
-  
-      this.routePathCache = {};
-      this.dashedRoutePathCache = {};
-      this.currentLines = [];
-      this.hoverLines = [];
-      this.hoverLinePairs = [];
-      this.invisibleLines = [];
-      this.invisibleRouteLines = [];
-  },    
+        // Always clear hover lines
+        this.hoverLinePairs.forEach(pair => {
+            if (map.hasLayer(pair.geodesicLine)) {
+                map.removeLayer(pair.geodesicLine);
+            }
+            if (map.hasLayer(pair.invisibleLine)) {
+                map.removeLayer(pair.invisibleLine);
+            }
+        });
+
+        if (all) {
+            [...Object.values(this.routePathCache).flat(), 
+            ...Object.values(this.dashedRoutePathCache).flat()].forEach(line => {
+                if (map.hasLayer(line)) {
+                    map.removeLayer(line);
+                }
+            });
+
+            this.currentLines.forEach(decoratedLine => {
+                if (map.hasLayer(decoratedLine)) {
+                    map.removeLayer(decoratedLine);
+                }
+            });
+
+            appState.routeLines.forEach(line => {
+                if (map.hasLayer(line)) {
+                    map.removeLayer(line);
+                }
+            });
+            appState.invisibleRouteLines.forEach(invisibleLine => {
+                if (map.hasLayer(invisibleLine)) {
+                    map.removeLayer(invisibleLine);
+                }
+            });
+
+            // Clear decorated lines explicitly
+            this.decoratedLines.forEach(line => { // Updated to use new array
+                if (map.hasLayer(line)) {
+                    map.removeLayer(line);
+                }
+            });
+        }
+
+        map.closePopup();
+
+        this.routePathCache = {};
+        this.dashedRoutePathCache = {};
+        this.currentLines = [];
+        this.hoverLines = [];
+        this.hoverLinePairs = [];
+        this.invisibleLines = [];
+        this.decoratedLines = []; // Clear the new array
+        this.invisibleRouteLines = [];
+    },    
 
     drawRouteLines: async function() {
         const rows = document.querySelectorAll('.route-info-table tbody tr');
