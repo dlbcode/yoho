@@ -231,38 +231,40 @@ const pathDrawing = {
             iconSize: [16, 16],
             iconAnchor: [8, 12]
         });
-
+    
         var planeSymbol = L.Symbol.marker({
             rotate: true,
             markerOptions: {
                 icon: planeIcon
             }
         });
-
+    
         var decoratedLine = L.polylineDecorator(geodesicLine, {
             patterns: [
                 {offset: '50%', repeat: 0, symbol: planeSymbol}
             ]
         }).addTo(map);
-
+    
         decoratedLine.on('mouseover', (e) => {
             L.popup()
             .setLatLng(e.latlng)
             .setContent(`Price: $${Math.round(route.price)}`)
             .openOn(map);
         });
-
+    
         decoratedLine.on('mouseout', () => {
             if (!this.popupFromClick) {
                 map.closePopup();
             }
         });
-
+    
         decoratedLine.on('click', onClick);
-
+    
+        decoratedLine.routeId = route.routeNumber; // Assign routeId to the decorated line
+    
         this.decoratedLines.push(decoratedLine);  // Store the decorated line
         return decoratedLine;
-    },
+    },    
 
     async drawLines() {
         this.clearLines(false); // Ensure all lines are cleared properly except for table lines
@@ -304,7 +306,7 @@ const pathDrawing = {
                 map.removeLayer(pair.invisibleLine);
             }
         });
-
+    
         if (all) {
             [...Object.values(this.routePathCache).flat(), 
             ...Object.values(this.dashedRoutePathCache).flat()].forEach(line => {
@@ -312,19 +314,19 @@ const pathDrawing = {
                     map.removeLayer(line);
                 }
             });
-
+    
             this.currentLines.forEach(decoratedLine => {
                 if (map.hasLayer(decoratedLine)) {
                     map.removeLayer(decoratedLine);
                 }
             });
-
+    
             this.decoratedLines.forEach(line => {  // Remove decorated lines
                 if (map.hasLayer(line)) {
                     map.removeLayer(line);
                 }
             });
-
+    
             appState.routeLines.forEach(line => {
                 if (map.hasLayer(line)) {
                     map.removeLayer(line);
@@ -336,9 +338,9 @@ const pathDrawing = {
                 }
             });
         }
-
+    
         map.closePopup();
-
+    
         this.routePathCache = {};
         this.dashedRoutePathCache = {};
         this.currentLines = [];
@@ -347,7 +349,7 @@ const pathDrawing = {
         this.invisibleLines = [];
         this.invisibleRouteLines = [];
         this.decoratedLines = [];  // Clear decorated lines array
-    },
+    },    
 
     drawRouteLines: async function() {
         const rows = document.querySelectorAll('.route-info-table tbody tr');
