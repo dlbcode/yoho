@@ -61,7 +61,7 @@ class LineSet {
                   }
                   content += `</div>`;
         
-                  const mouseoverPopup = L.popup({ autoClose: false, closeOnClick: false })
+                  const mouseoverPopup = L.popup({ autoClose: false, closeOnClick: true })
                     .setLatLng(e.latlng)
                     .setContent(content)
                     .openOn(this.map);
