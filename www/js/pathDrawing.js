@@ -39,12 +39,27 @@ class LineSet {
                 isTableRoute: this.isTableRoute
             }).addTo(this.map);
 
+            visibleLine.routeData = this.routeData;
+            invisibleLine.routeData = this.routeData;
+            visibleLine.originalColor = lineColor; // Store the original color
+
             visibleLine.on('click', (e) => this.onClick(e, visibleLine));
             invisibleLine.on('click', (e) => this.onClick(e, invisibleLine));
+
+            invisibleLine.on('mouseover', () => this.highlightLine(visibleLine));
+            invisibleLine.on('mouseout', () => this.resetLine(visibleLine));
 
             lines.push({ visibleLine, invisibleLine });
         });
         return lines;
+    }
+
+    highlightLine(line) {
+        line.setStyle({ color: 'white' });
+    }
+
+    resetLine(line) {
+        line.setStyle({ color: line.originalColor }); // Reset to the original color
     }
 
     addDecoratedLine() {
@@ -249,8 +264,12 @@ const pathDrawing = {
 
     onClick(e, geodesicLine) {
         this.popupFromClick = true;
-        console.log('Route line clicked', geodesicLine.routeData);
-        showRoutePopup(e, geodesicLine.routeData, geodesicLine);
+        if (geodesicLine.routeData) {
+            console.log('Route line clicked', geodesicLine.routeData);
+            showRoutePopup(e, geodesicLine.routeData, geodesicLine);
+        } else {
+            console.error('Route data is undefined for the clicked line.');
+        }
     }
 };
 

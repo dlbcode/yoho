@@ -214,36 +214,6 @@ function buildRouteTable(routeIndex) {
             }
         });
 
-        function fetchDataForColumn(column) {
-            const getPriceRange = () => {
-                const priceCells = document.querySelectorAll('.route-info-table tbody tr td:nth-child(' + (getColumnIndex('price') + 1) + ')');
-                const prices = Array.from(priceCells)
-                    .map(cell => parseFloat(cell.textContent.replace(/[^0-9.]/g, '')))
-                    .filter(price => !isNaN(price));
-
-                if (prices.length === 0) {
-                    console.error('No valid prices found in the column');
-                    return { min: 0, max: 0 };
-                }
-
-                const min = Math.min(...prices);
-                const max = min === Math.max(...prices) ? min + 1 : Math.max(...prices);
-
-                return { min, max };
-            };
-
-            switch (column) {
-                case 'price':
-                    return getPriceRange();
-                case 'departure':
-                case 'arrival':
-                    return { min: 0, max: 24 };
-                default:
-                    console.error('Unsupported column:', column);
-                    return null;
-            }
-        }
-
         document.querySelectorAll('.route-info-table tbody tr').forEach((row, index) => {
             row.addEventListener('click', function() {
                 const routeIdString = this.getAttribute('data-route-id');
@@ -299,6 +269,36 @@ function buildRouteTable(routeIndex) {
             'route': 8
         };
         return columnMap[columnIdentifier];
+    }
+
+    function fetchDataForColumn(column) {
+        const getPriceRange = () => {
+            const priceCells = document.querySelectorAll('.route-info-table tbody tr td:nth-child(' + (getColumnIndex('price') + 1) + ')');
+            const prices = Array.from(priceCells)
+                .map(cell => parseFloat(cell.textContent.replace(/[^0-9.]/g, '')))
+                .filter(price => !isNaN(price));
+
+            if (prices.length === 0) {
+                console.error('No valid prices found in the column');
+                return { min: 0, max: 0 };
+            }
+
+            const min = Math.min(...prices);
+            const max = min === Math.max(...prices) ? min + 1 : Math.max(...prices);
+
+            return { min, max };
+        };
+
+        switch (column) {
+            case 'price':
+                return getPriceRange();
+            case 'departure':
+            case 'arrival':
+                return { min: 0, max: 24 };
+            default:
+                console.error('Unsupported column:', column);
+                return null;
+        }
     }
 }
 
