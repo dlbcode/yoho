@@ -294,7 +294,6 @@ const pathDrawing = {
     onClick(e, geodesicLine) {
         this.popupFromClick = true;
         if (geodesicLine.routeData) {
-            console.log('Route line clicked', geodesicLine.routeData);
             showRoutePopup(e, geodesicLine.routeData, geodesicLine);
         } else {
             console.error('Route data is undefined for the clicked line.');

@@ -19,9 +19,6 @@ function showRoutePopup(event, routeData, line) {
 
     content += `</div>`;
 
-    console.log('Creating popup at', event.latlng, 'with content', content);
-    console.log('Map instance:', map);
-
     // Ensure no other popups are open before creating a new one
     map.closePopup();
 
@@ -30,14 +27,12 @@ function showRoutePopup(event, routeData, line) {
         .setLatLng(event.latlng)
         .setContent(content)
         .on('remove', function () {
-            console.log('Popup removed');
             if (line) {
                 map.removeLayer(line);
             }
             pathDrawing.popupFromClick = false; // Reset flag on popup removal
         })
         .on('add', function () {
-            console.log('Popup added');
             // Ensure the line remains visible when the popup is added
             if (line && !map.hasLayer(line)) {
                 line.addTo(map);
@@ -48,10 +43,7 @@ function showRoutePopup(event, routeData, line) {
     // Open the popup on the map
     setTimeout(() => {
         popup.openOn(map);
-        console.log('Popup created and added to map');
     }, 100); // Delay to avoid immediate closure by other events
-
-    console.log('Map after adding popup:', map);
 }
 
 export { showRoutePopup };
