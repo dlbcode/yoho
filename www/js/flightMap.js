@@ -34,27 +34,27 @@ const flightMap = {
             console.error('Incomplete airport data:', airport);
             return;
         }
-    
+
         let iata = airport.iata_code;
         if (this.markers[iata]) return;
-    
+
         let icon = airport.type === 'city' ? greenDotIcon :
                    appState.waypoints.some(wp => wp.iata_code === iata) ? magentaDotIcon : blueDotIcon;
-    
+
         const latLng = L.latLng(airport.latitude, airport.longitude);
         const marker = L.marker(latLng, { icon: icon });
         marker.airportWeight = airport.weight;
         marker.iata_code = iata;
         marker.hovered = false;
-    
+
         let popupContent = `<div style="text-align: center; color: #bababa;"><b>${airport.city}</b>`;
         if (airport.type === 'airport') {
             popupContent += `<div>${airport.name}</div>`; 
         }
         popupContent += '</div>';
-    
+
         marker.bindPopup(popupContent, { maxWidth: 'auto' });
-    
+
         eventManager.attachMarkerEventListeners(iata, marker, airport);
         this.markers[iata] = marker;
 

@@ -18,7 +18,7 @@ const infoPane = {
       this.displayContent();
 
       const waypointsLatLng = appState.waypoints.map(waypoint => [waypoint.latitude, waypoint.longitude]);
-  
+
       if (waypointsLatLng.length > 0) {
           const bounds = L.latLngBounds(waypointsLatLng);
           map.fitBounds(bounds, { padding: [50, 50] }); // Adjust padding as needed
@@ -120,25 +120,31 @@ const infoPane = {
 
       button.addEventListener('mouseover', () => {
         const routeId = `${origin}-${destination}`;
-        const pathLines = pathDrawing.routePathCache[routeId] || pathDrawing.dashedRoutePathCache[routeId] || [];
-        pathLines.forEach(path => path.setStyle({ color: 'white' }));
+        const lineSets = pathDrawing.routePathCache[routeId] || pathDrawing.dashedRoutePathCache[routeId] || [];
+        lineSets.forEach(lineSet => {
+            lineSet.lines.forEach(linePair => {
+                linePair.visibleLine.setStyle({ color: 'white' });
+            });
+        });
       });
       
       button.addEventListener('mouseout', () => {
         const routeId = `${origin}-${destination}`;
-        let pathLines = pathDrawing.routePathCache[routeId] || [];
-        let dashedPathLines = pathDrawing.dashedRoutePathCache[routeId] || [];
+        const lineSets = pathDrawing.routePathCache[routeId] || [];
+        const dashedLineSets = pathDrawing.dashedRoutePathCache[routeId] || [];
 
-        dashedPathLines.forEach(path => {
-            path.setStyle({ color: '#999' });
+        dashedLineSets.forEach(lineSet => {
+            lineSet.setStyle({ color: '#999' });
         });
 
-        pathLines.forEach(path => {
-            if (path.originalColor) {
-                path.setStyle({ color: path.originalColor });
-            } else {
-                path.setStyle({ color: 'grey' });
-            }
+        lineSets.forEach(lineSet => {
+            lineSet.lines.forEach(linePair => {
+                if (linePair.visibleLine.options.originalColor) {
+                    linePair.visibleLine.setStyle({ color: linePair.visibleLine.options.originalColor });
+                } else {
+                    linePair.visibleLine.setStyle({ color: 'grey' });
+                }
+            });
         });
       });            
     });
