@@ -42,6 +42,7 @@ function showRoutePopup(event, routeData, line) {
             if (line && !map.hasLayer(line)) {
                 line.addTo(map);
             }
+            pathDrawing.popupFromClick = true; // Set flag on popup addition
         });
 
     // Open the popup on the map

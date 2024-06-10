@@ -48,45 +48,36 @@ class LineSet {
 
             const onMouseOver = (e) => {
                 if (!pathDrawing.popupFromClick) {
-                    visibleLine.originalColor = visibleLine.options.color;
-                    visibleLine.setStyle({ color: 'white' });
-
-                    let displayPrice = Math.round(this.routeData.price);
-                    let content = `<div style=\"line-height: 1.2; margin: 0;\">${this.destination.city}<br><span><strong><span style=\"color: #ccc; font-size: 14px;\">$${displayPrice}</span></strong></span>`;
-                    if (this.routeData.date) {
-                        let lowestDate = new Date(this.routeData.date).toLocaleDateString("en-US", {
-                            year: 'numeric', month: 'long', day: 'numeric'
-                        });
-                        content += `<br><span style=\"line-height: 1; display: block; color: #666\">on ${lowestDate}</span>`;
-                    }
-                    content += `</div>`;
-
-                    if (pathDrawing.mouseoverPopup) {
-                        map.closePopup(pathDrawing.mouseoverPopup);
-                    }
-
-                    pathDrawing.mouseoverPopup = L.popup({ autoClose: false, closeOnClick: false })
-                        .setLatLng(e.latlng)
-                        .setContent(content)
-                        .openOn(this.map);
-
-                    // Add event listener to close popup on outside click
-                    map.on('click', this.closePopup);
+                  visibleLine.originalColor = visibleLine.options.color;
+                  visibleLine.setStyle({ color: 'white' });
+        
+                  let displayPrice = Math.round(this.routeData.price);
+                  let content = `<div style=\"line-height: 1.2; margin: 0;\">${this.destination.city}<br><span><strong><span style=\"color: #ccc; font-size: 14px;\">$${displayPrice}</span></strong></span>`;
+                  if (this.routeData.date) {
+                    let lowestDate = new Date(this.routeData.date).toLocaleDateString("en-US", {
+                      year: 'numeric', month: 'long', day: 'numeric'
+                    });
+                    content += `<br><span style=\"line-height: 1; display: block; color: #666\">on ${lowestDate}</span>`;
+                  }
+                  content += `</div>`;
+        
+                  const mouseoverPopup = L.popup({ autoClose: false, closeOnClick: false })
+                    .setLatLng(e.latlng)
+                    .setContent(content)
+                    .openOn(this.map);
                 }
-            };
-
-            const onMouseOut = () => {
+              };
+        
+              const onMouseOut = () => {
                 if (!pathDrawing.popupFromClick) {
-                    visibleLine.setStyle({ color: visibleLine.originalColor });
-                    map.closePopup(pathDrawing.mouseoverPopup);
-                    pathDrawing.mouseoverPopup = null;
-                    map.off('click', this.closePopup);
+                  visibleLine.setStyle({ color: visibleLine.originalColor });
+                  this.map.closePopup();
                 }
-            };
-
-            invisibleLine.on('mouseover', onMouseOver);
-            invisibleLine.on('mouseout', onMouseOut);
-
+              };
+        
+              invisibleLine.on('mouseover', onMouseOver);
+              invisibleLine.on('mouseout', onMouseOut);
+        
             lines.push({ visibleLine, invisibleLine });
         });
         return lines;
@@ -128,12 +119,6 @@ class LineSet {
         });
         if (this.decoratedLine && this.map.hasLayer(this.decoratedLine)) this.map.removeLayer(this.decoratedLine);
     }
-
-    closePopup = () => {
-        map.closePopup(pathDrawing.mouseoverPopup);
-        pathDrawing.mouseoverPopup = null;
-        map.off('click', this.closePopup);
-    }
 }
 
 const pathDrawing = {
@@ -145,7 +130,6 @@ const pathDrawing = {
     routePathCache: {},
     dashedRoutePathCache: {},
     popupFromClick: false,
-    mouseoverPopup: null,
 
     drawRoutePaths(iata, directRoutes) {
         let cacheKey = appState.routeDirection + '_' + iata;
@@ -277,7 +261,7 @@ const pathDrawing = {
         this.invisibleLines = [];
     },
 
-    drawLines: async function () {
+    drawLines: async function() {
         this.clearLines(false); // Ensure all lines are cleared properly except for table lines
 
         const drawPromises = appState.routes.map(route => {
