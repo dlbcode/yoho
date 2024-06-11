@@ -123,11 +123,7 @@ class LineSet {
 
 const pathDrawing = {
     currentLines: [],
-    hoverLines: [],
-    hoverLinePairs: [],
-    invisibleLines: [],
-    decoratedLines: [],
-    routePathCache: {},
+       routePathCache: {},
     dashedRoutePathCache: {},
     popupFromClick: false,
 
@@ -245,6 +241,7 @@ const pathDrawing = {
     },
 
     clearLines(all = false) {
+        console.log('Clearing lines all:', all);
         Object.values(this.routePathCache).forEach(lineSetArray => {
             lineSetArray.forEach(lineSet => lineSet.removeAllLines());
         });
@@ -255,10 +252,6 @@ const pathDrawing = {
         }
 
         map.closePopup();
-
-        this.hoverLinePairs = [];
-        this.hoverLines = [];
-        this.invisibleLines = [];
     },
 
     drawLines: async function() {
