@@ -35,7 +35,7 @@ class LineSet {
             const adjustedOrigin = L.latLng(this.origin.latitude, this.origin.longitude + offset);
             const adjustedDestination = L.latLng(this.destination.latitude, this.destination.longitude + offset);
             const lineColor = pathDrawing.getColorBasedOnPrice(this.routeData.price);
-    
+
             const visibleLine = new L.Geodesic([adjustedOrigin, adjustedDestination], {
                 weight: 1,
                 opacity: 1,
@@ -43,16 +43,15 @@ class LineSet {
                 wrap: false,
                 zIndex: -1,
                 isTableRoute: this.isTableRoute
-            }).addTo(this.map);
-    
+            }).addTo(this.map); // Ensure line is added to the map
+
             const invisibleLine = new L.Geodesic([adjustedOrigin, adjustedDestination], {
                 weight: 10,
                 opacity: 0.1,
                 wrap: false,
                 isTableRoute: this.isTableRoute
-            }).addTo(this.map);
-    
-            // Adding decorated line conditionally
+            }).addTo(this.map); // Ensure line is added to the map
+
             let decoratedLine = null;
             if (shouldDecorate) {
                 const planeIcon = L.icon({
@@ -60,21 +59,21 @@ class LineSet {
                     iconSize: [16, 16],
                     iconAnchor: [8, 12]
                 });
-    
+
                 const planeSymbol = L.Symbol.marker({
                     rotate: true,
                     markerOptions: {
                         icon: planeIcon
                     }
                 });
-    
+
                 decoratedLine = L.polylineDecorator(visibleLine, {
                     patterns: [
                         { offset: '50%', repeat: 0, symbol: planeSymbol }
                     ]
-                }).addTo(this.map);
+                }).addTo(this.map); // Ensure line is added to the map
             }
-    
+
             visibleLine.routeData = this.routeData;
             invisibleLine.routeData = this.routeData;
             visibleLine.originalColor = lineColor; // Store the original color
@@ -133,7 +132,7 @@ class LineSet {
             lines.push({ visibleLine, invisibleLine, decoratedLine });
         });
         return lines;
-    }            
+    }
 
     highlightLine(line) {
         line.setStyle({ color: 'white' });
@@ -309,6 +308,66 @@ const pathDrawing = {
         this.createRoutePath(route.originAirport, route.destinationAirport, route, 0, false);
     },
 
+    drawRouteLines: async function() {
+        const rows = document.querySelectorAll('.route-info-table tbody tr');
+        let minPrice = Infinity, maxPrice = -Infinity;
+
+        // First, determine the min and max prices
+        rows.forEach(row => {
+            if (row.style.display !== 'none') {
+                const priceText = row.cells[2].textContent.trim();
+                const price = parseFloat(priceText.replace('$', ''));
+                if (price < minPrice) minPrice = price;
+                if (price > maxPrice) maxPrice = price;
+            }
+        });
+
+        const priceRange = maxPrice - minPrice;
+        const quartile = priceRange / 4;
+
+        // Function to determine color based on price
+        const getColorForPrice = (price) => {
+            const relativePrice = price - minPrice;
+            if (relativePrice <= quartile) return 'green';
+            if (relativePrice <= quartile * 2) return 'yellow';
+            if (relativePrice <= quartile * 3) return 'orange';
+            return 'red';
+        };
+
+        for (const row of rows) {
+            if (row.style.display === 'none') continue;
+
+            const routeLineId = row.getAttribute('data-route-id'); // Get the routeLineId from the row
+            const routeString = row.cells[row.cells.length - 1].textContent.trim();
+            const iataCodes = routeString.split(' > ');
+            if (iataCodes.length < 2) continue;
+
+            const priceText = row.cells[2].textContent.trim();
+            const price = parseFloat(priceText.replace('$', ''));
+            const color = getColorForPrice(price);
+
+            for (let i = 0; i < iataCodes.length - 1; i++) {
+                const originIata = iataCodes[i];
+                const destinationIata = iataCodes[i + 1];
+
+                try {
+                    const originAirportData = await flightMap.getAirportDataByIata(originIata);
+                    const destinationAirportData = await flightMap.getAirportDataByIata(destinationIata);
+                    if (!originAirportData || !destinationAirportData) continue;
+
+                    // Pass the routeLineId to createRoutePath
+                    this.createRoutePath(originAirportData, destinationAirportData, {
+                        originAirport: originAirportData,
+                        destinationAirport: destinationAirportData,
+                        price: price, // Pass the parsed numeric price
+                    }, color, routeLineId); // Pass the determined color and routeLineId
+                } catch (error) {
+                    console.error('Error fetching airport data for segment:', error);
+                }
+            }
+        }
+    },
+
     getColorBasedOnPrice(price) {
         if (price === null || price === undefined || isNaN(parseFloat(price))) {
             return 'grey';
@@ -326,5 +385,9 @@ const pathDrawing = {
         }
     }
 };
+
+document.addEventListener('DOMContentLoaded', () => {
+    pathDrawing.drawRouteLines();
+});
 
 export { pathDrawing };

@@ -163,7 +163,7 @@ function buildRouteTable(routeIndex) {
             table.appendChild(tbody);
             infoPaneContent.appendChild(table);
             topBar.classList.remove('loading');
-            pathDrawing.drawLines();
+            pathDrawing.drawRouteLines();
             highlightSelectedRowForRouteIndex(routeIndex);
             attachEventListeners(table, data, routeIndex);
         })
@@ -240,7 +240,7 @@ function buildRouteTable(routeIndex) {
                 pathDrawing.clearLines();  // Clear the highlighted route path
                 pathDrawing.drawLines();  // Optionally redraw other paths if needed
             });
-        });                
+        });
     }
 
     function resetSortIcons(headers, currentIcon, newSortState) {
