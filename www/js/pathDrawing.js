@@ -35,7 +35,7 @@ class LineSet {
             const adjustedOrigin = L.latLng(this.origin.latitude, this.origin.longitude + offset);
             const adjustedDestination = L.latLng(this.destination.latitude, this.destination.longitude + offset);
             const lineColor = pathDrawing.getColorBasedOnPrice(this.routeData.price);
-
+    
             const visibleLine = new L.Geodesic([adjustedOrigin, adjustedDestination], {
                 weight: 1,
                 opacity: 1,
@@ -44,14 +44,14 @@ class LineSet {
                 zIndex: -1,
                 isTableRoute: this.isTableRoute
             }).addTo(this.map);
-
+    
             const invisibleLine = new L.Geodesic([adjustedOrigin, adjustedDestination], {
                 weight: 10,
                 opacity: 0.1,
                 wrap: false,
                 isTableRoute: this.isTableRoute
             }).addTo(this.map);
-
+    
             // Adding decorated line conditionally
             let decoratedLine = null;
             if (shouldDecorate) {
@@ -60,38 +60,40 @@ class LineSet {
                     iconSize: [16, 16],
                     iconAnchor: [8, 12]
                 });
-
+    
                 const planeSymbol = L.Symbol.marker({
                     rotate: true,
                     markerOptions: {
                         icon: planeIcon
                     }
                 });
-
+    
                 decoratedLine = L.polylineDecorator(visibleLine, {
                     patterns: [
                         { offset: '50%', repeat: 0, symbol: planeSymbol }
                     ]
                 }).addTo(this.map);
             }
-
+    
             visibleLine.routeData = this.routeData;
             invisibleLine.routeData = this.routeData;
             visibleLine.originalColor = lineColor; // Store the original color
-
-            visibleLine.on('click', (e) => this.onClick(e, visibleLine));
-            invisibleLine.on('click', (e) => this.onClick(e, invisibleLine));
-
+    
+            const onClickHandler = (e, line) => this.onClick(e, line);
+    
+            visibleLine.on('click', (e) => onClickHandler(e, visibleLine));
+            invisibleLine.on('click', (e) => onClickHandler(e, invisibleLine));
+    
             const onMouseOver = throttle((e) => {
                 if (!pathDrawing.popupFromClick) {
                     if (this.hoveredLine && this.hoveredLine !== visibleLine) {
                         this.hoveredLine.setStyle({ color: this.hoveredLine.originalColor });
                         this.map.closePopup(this.currentPopup);
                     }
-
+    
                     this.hoveredLine = visibleLine;
                     visibleLine.setStyle({ color: 'white' });
-
+    
                     let displayPrice = Math.round(this.routeData.price);
                     let content = `<div style="line-height: 1.2; margin: 0;">${this.destination.city}<br><span><strong><span style="color: #ccc; font-size: 14px;">$${displayPrice}</span></strong></span>`;
                     if (this.routeData.date) {
@@ -101,14 +103,14 @@ class LineSet {
                         content += `<br><span style="line-height: 1; display: block; color: #666">on ${lowestDate}</span>`;
                     }
                     content += `</div>`;
-
+    
                     this.currentPopup = L.popup({ autoClose: false, closeOnClick: true })
                         .setLatLng(e.latlng)
                         .setContent(content)
                         .openOn(this.map);
                 }
             }, 100);
-
+    
             const onMouseOut = throttle(() => {
                 if (!pathDrawing.popupFromClick && this.hoveredLine === visibleLine) {
                     visibleLine.setStyle({ color: visibleLine.originalColor });
@@ -117,14 +119,21 @@ class LineSet {
                     this.currentPopup = null;
                 }
             }, 100);
-
+    
             invisibleLine.on('mouseover', onMouseOver);
             invisibleLine.on('mouseout', onMouseOut);
-
+    
+            // Add event listeners for decorated line
+            if (decoratedLine) {
+                decoratedLine.on('click', (e) => invisibleLine.fire('click', e)); // Simulate click on invisible line
+                decoratedLine.on('mouseover', onMouseOver);
+                decoratedLine.on('mouseout', onMouseOut);
+            }
+    
             lines.push({ visibleLine, invisibleLine, decoratedLine });
         });
         return lines;
-    }
+    }            
 
     highlightLine(line) {
         line.setStyle({ color: 'white' });
