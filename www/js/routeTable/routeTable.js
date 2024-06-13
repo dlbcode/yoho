@@ -1,7 +1,7 @@
 import { appState, updateState } from '../stateManager.js';
 import { sliderFilter } from './sliderFilter.js';
 import { sortTableByColumn } from './sortTable.js';
-import { pathDrawing } from '../pathDrawing.js';
+import { pathDrawing, lineSet } from '../pathDrawing.js';
 import { flightMap } from '../flightMap.js';
 import { routeInfoRow, highlightSelectedRowForRouteIndex } from './routeInfoRow.js';
 
@@ -171,77 +171,93 @@ function buildRouteTable(routeIndex) {
             infoPaneContent.textContent = 'Error loading data: ' + error.message;
         });
 
-    function attachEventListeners(table, data, routeIndex) {
-        const headers = table.querySelectorAll('th');
-        headers.forEach(header => {
-            header.style.cursor = 'pointer';
-            header.addEventListener('click', function(event) {
-                const sortIcon = event.target.closest('.sortIcon');
-                if (sortIcon) {  // This checks if the clicked element is the sortIcon itself
-                    const columnIdentifier = sortIcon.getAttribute('data-column');
-                    const columnIndex = getColumnIndex(columnIdentifier);
-                    const isAscending = sortIcon.getAttribute('data-sort') !== 'asc';
-                    sortTableByColumn(table, columnIndex, isAscending);
-                    resetSortIcons(headers, sortIcon, isAscending ? 'asc' : 'desc');
+        function attachEventListeners(table, data, routeIndex) {
+            const headers = table.querySelectorAll('th');
+            headers.forEach(header => {
+                header.style.cursor = 'pointer';
+                header.addEventListener('click', function(event) {
+                    const sortIcon = event.target.closest('.sortIcon');
+                    if (sortIcon) {
+                        const columnIdentifier = sortIcon.getAttribute('data-column');
+                        const columnIndex = getColumnIndex(columnIdentifier);
+                        const isAscending = sortIcon.getAttribute('data-sort') !== 'asc';
+                        sortTableByColumn(table, columnIndex, isAscending);
+                        resetSortIcons(headers, sortIcon, isAscending ? 'asc' : 'desc');
+                    }
+                });
+            });
+        
+            headers.forEach(header => {
+                const filteredHeader = header.querySelector('.filteredHeader');
+                const filterIcon = header.querySelector('.filterIcon');
+                const handleFilterClick = function(event) {
+                    event.stopPropagation();
+                    const column = this.getAttribute('data-column');
+                    if (!column) {
+                        console.error('Column attribute is missing on the icon:', this);
+                        return;
+                    }
+                    const data = fetchDataForColumn(column);
+                    if (data) {
+                        sliderFilter.createFilterPopup(column, data, event);
+                    } else {
+                        console.error('Failed to fetch data for column:', column);
+                    }
+                };
+        
+                if (filteredHeader) {
+                    filteredHeader.addEventListener('click', handleFilterClick);
+                }
+                if (filterIcon) {
+                    filterIcon.addEventListener('click', handleFilterClick);
                 }
             });
-        });
-
-        headers.forEach(header => {
-            const filteredHeader = header.querySelector('.filteredHeader');
-            const filterIcon = header.querySelector('.filterIcon');
-            const handleFilterClick = function(event) {
-                event.stopPropagation();
-                const column = this.getAttribute('data-column');
-                if (!column) {
-                    console.error('Column attribute is missing on the icon:', this);
-                    return;
-                }
-                const data = fetchDataForColumn(column);
-                if (data) {
-                    sliderFilter.createFilterPopup(column, data, event);
-                } else {
-                    console.error('Failed to fetch data for column:', column);
-                }
-            };
-
-            // Attach listener to button area and filterIcon
-            if (filteredHeader) {
-                filteredHeader.addEventListener('click', handleFilterClick);
-            }
-            if (filterIcon) {
-                filterIcon.addEventListener('click', handleFilterClick);
-            }
-        });
-
-        document.querySelectorAll('.route-info-table tbody tr').forEach((row, index) => {
-            row.addEventListener('click', function() {
-                const routeIdString = this.getAttribute('data-route-id');
-                const routeIds = routeIdString.split('|');
-                const fullFlightData = data[index];
-                routeInfoRow(this, fullFlightData, routeIds, routeIndex);
+        
+            document.querySelectorAll('.route-info-table tbody tr').forEach((row, index) => {
+                row.addEventListener('click', function() {
+                    const routeIdString = this.getAttribute('data-route-id');
+                    const routeIds = routeIdString.split('|');
+                    const fullFlightData = data[index];
+                    routeInfoRow(this, fullFlightData, routeIds, routeIndex);
+                });
             });
-        });
-
-        document.querySelectorAll('.route-info-table tbody tr').forEach(row => {
-            row.addEventListener('mouseover', function() {
-                const routeString = this.cells[8].textContent.trim();
-                const iataCodes = routeString.split(' > ');
-
-                for (let i = 0; i < iataCodes.length - 1; i++) {
-                    const originIata = iataCodes[i];
-                    const destinationIata = iataCodes[i + 1];
-                    pathDrawing.drawPathBetweenAirports(originIata, destinationIata);
-                }
+        
+            document.querySelectorAll('.route-info-table tbody tr').forEach(row => {
+                row.addEventListener('mouseover', function() {
+                    const routeString = this.cells[8].textContent.trim();
+                    const iataCodes = routeString.split(' > ');
+                    for (let i = 0; i < iataCodes.length - 1; i++) {
+                        const originIata = iataCodes[i];
+                        const destinationIata = iataCodes[i + 1];
+                        const routeLine = pathDrawing.routePathCache[`${originIata}-${destinationIata}`];
+        
+                        if (routeLine && routeLine.length > 0) {
+                            const lineSet = routeLine[0];
+                            lineSet.lines.forEach(linePair => {
+                                lineSet.highlightLine(linePair.visibleLine);
+                            });
+                        }
+                    }
+                });
+        
+                row.addEventListener('mouseout', function() {
+                    const routeString = this.cells[8].textContent.trim();
+                    const iataCodes = routeString.split(' > ');
+                    for (let i = 0; i < iataCodes.length - 1; i++) {
+                        const originIata = iataCodes[i];
+                        const destinationIata = iataCodes[i + 1];
+                        const routeLine = pathDrawing.routePathCache[`${originIata}-${destinationIata}`];
+        
+                        if (routeLine && routeLine.length > 0) {
+                            const lineSet = routeLine[0];
+                            lineSet.lines.forEach(linePair => {
+                                lineSet.resetLine(linePair.visibleLine);
+                            });
+                        }
+                    }
+                });
             });
-
-            row.addEventListener('mouseout', function() {
-                // Revert color of the route lines back to original
-                pathDrawing.clearLines();  // Clear the highlighted route path
-                pathDrawing.drawLines();  // Optionally redraw other paths if needed
-            });
-        });
-    }
+        }             
 
     function resetSortIcons(headers, currentIcon, newSortState) {
         headers.forEach(header => {

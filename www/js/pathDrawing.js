@@ -14,7 +14,7 @@ function throttle(fn, wait) {
     };
 }
 
-class LineSet {
+class lineSet {
     constructor(map, origin, destination, routeData, onClick, isTableRoute = false) {
         this.map = map;
         this.origin = origin;
@@ -151,6 +151,8 @@ class LineSet {
     }
 }
 
+export { lineSet };
+
 const pathDrawing = {
     currentLines: [],
     routePathCache: {},
@@ -259,14 +261,14 @@ const pathDrawing = {
             r.destination === route.destinationAirport.iata_code
         );
 
-        let newLineSet = new LineSet(map, origin, destination, routeData, this.onClick, isTableRoute);
-        newLineSet.lines = newLineSet.createLines(shouldDecorate);
+        let newlineSet = new lineSet(map, origin, destination, routeData, this.onClick, isTableRoute);
+        newlineSet.lines = newlineSet.createLines(shouldDecorate);
 
         this.routePathCache[routeId] = this.routePathCache[routeId] || [];
-        this.routePathCache[routeId].push(newLineSet);
+        this.routePathCache[routeId].push(newlineSet);
 
         if (shouldDecorate) {
-            this.currentLines.push(newLineSet);
+            this.currentLines.push(newlineSet);
         }
     },
 
