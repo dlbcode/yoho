@@ -1,7 +1,6 @@
 import { map } from './map.js';
 import { appState, updateState } from './stateManager.js';
 import { flightMap } from './flightMap.js';
-import { showRoutePopup } from './routePopup.js';
 import { lineEvents } from './lineEvents.js';
 
 class lineSet {
@@ -68,8 +67,8 @@ class lineSet {
             invisibleLine.routeData = this.routeData;
             visibleLine.originalColor = lineColor;
 
-            visibleLine.on('click', (e) => lineEvents.onClickHandler(e, visibleLine, this.onClick));
-            invisibleLine.on('click', (e) => lineEvents.onClickHandler(e, invisibleLine, this.onClick));
+            visibleLine.on('click', (e) => lineEvents.onClickHandler(e, visibleLine, pathDrawing.onClick.bind(pathDrawing)));
+            invisibleLine.on('click', (e) => lineEvents.onClickHandler(e, invisibleLine, pathDrawing.onClick.bind(pathDrawing)));
 
             invisibleLine.on('mouseover', (e) => lineEvents.onMouseOver(e, visibleLine, this.map, this.hoveredLine, this.hoverPopup, this.routeData, pathDrawing));
             invisibleLine.on('mouseout', () => lineEvents.onMouseOut(visibleLine, this.map, this.hoveredLine, this.hoverPopup, pathDrawing));
@@ -212,7 +211,7 @@ const pathDrawing = {
             r.destination === route.destinationAirport.iata_code
         );
 
-        let newlineSet = new lineSet(map, origin, destination, routeData, this.onClick, isTableRoute);
+        let newlineSet = new lineSet(map, origin, destination, routeData, this.onClick.bind(this), isTableRoute);
         newlineSet.lines = newlineSet.createLines(shouldDecorate);
 
         this.routePathCache[routeId] = this.routePathCache[routeId] || [];
@@ -329,7 +328,7 @@ const pathDrawing = {
     onClick(e, geodesicLine) {
         this.popupFromClick = true;
         if (geodesicLine.routeData) {
-            showRoutePopup(e, geodesicLine.routeData, geodesicLine);
+            lineEvents.showRoutePopup(e, geodesicLine.routeData, geodesicLine);
         } else {
             console.error('Route data is undefined for the clicked line.');
         }
