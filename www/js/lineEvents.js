@@ -46,7 +46,7 @@ const lineEvents = {
             popup.openOn(map);
         }, 100); // Delay to avoid immediate closure by other events
     },
-
+    
     onMouseOver: (e, visibleLine, map, hoveredLine, hoverPopup, routeData, pathDrawing) => {
         if (!pathDrawing.popupFromClick) {
             if (hoveredLine && hoveredLine !== visibleLine) {
