@@ -2,17 +2,7 @@ import { map } from './map.js';
 import { appState, updateState } from './stateManager.js';
 import { flightMap } from './flightMap.js';
 import { showRoutePopup } from './routePopup.js';
-
-// Utility function to throttle events
-function throttle(fn, wait) {
-    let time = Date.now();
-    return function (...args) {
-        if ((time + wait - Date.now()) < 0) {
-            fn(...args);
-            time = Date.now();
-        }
-    };
-}
+import { lineEvents } from './lineEvents.js';
 
 class lineSet {
     constructor(map, origin, destination, routeData, onClick, isTableRoute = false) {
@@ -24,8 +14,8 @@ class lineSet {
         this.isTableRoute = isTableRoute;
         this.lines = [];
         this.decoratedLine = null;
-        this.currentPopup = null; // Track the current popup
-        this.hoveredLine = null; // Track the current hovered line
+        this.currentPopup = null;
+        this.hoveredLine = null;
     }
 
     createLines(shouldDecorate) {
@@ -43,14 +33,14 @@ class lineSet {
                 wrap: false,
                 zIndex: -1,
                 isTableRoute: this.isTableRoute
-            }).addTo(this.map); // Ensure line is added to the map
+            }).addTo(this.map);
 
             const invisibleLine = new L.Geodesic([adjustedOrigin, adjustedDestination], {
                 weight: 10,
                 opacity: 0.1,
                 wrap: false,
                 isTableRoute: this.isTableRoute
-            }).addTo(this.map); // Ensure line is added to the map
+            }).addTo(this.map);
 
             let decoratedLine = null;
             if (shouldDecorate) {
@@ -71,64 +61,25 @@ class lineSet {
                     patterns: [
                         { offset: '50%', repeat: 0, symbol: planeSymbol }
                     ]
-                }).addTo(this.map); // Ensure line is added to the map
+                }).addTo(this.map);
             }
 
             visibleLine.routeData = this.routeData;
             invisibleLine.routeData = this.routeData;
-            visibleLine.originalColor = lineColor; // Store the original color
-    
-            const onClickHandler = (e, line) => this.onClick(e, line);
-    
-            visibleLine.on('click', (e) => onClickHandler(e, visibleLine));
-            invisibleLine.on('click', (e) => onClickHandler(e, invisibleLine));
-    
-            const onMouseOver = throttle((e) => {
-                if (!pathDrawing.popupFromClick) {
-                    if (this.hoveredLine && this.hoveredLine !== visibleLine) {
-                        this.hoveredLine.setStyle({ color: this.hoveredLine.originalColor });
-                        this.map.closePopup(this.currentPopup);
-                    }
-    
-                    this.hoveredLine = visibleLine;
-                    visibleLine.setStyle({ color: 'white' });
-    
-                    let displayPrice = Math.round(this.routeData.price);
-                    let content = `<div style="line-height: 1.2; margin: 0;">${this.destination.city}<br><span><strong><span style="color: #ccc; font-size: 14px;">$${displayPrice}</span></strong></span>`;
-                    if (this.routeData.date) {
-                        let lowestDate = new Date(this.routeData.date).toLocaleDateString("en-US", {
-                            year: 'numeric', month: 'long', day: 'numeric'
-                        });
-                        content += `<br><span style="line-height: 1; display: block; color: #666">on ${lowestDate}</span>`;
-                    }
-                    content += `</div>`;
-    
-                    this.currentPopup = L.popup({ autoClose: false, closeOnClick: true })
-                        .setLatLng(e.latlng)
-                        .setContent(content)
-                        .openOn(this.map);
-                }
-            }, 100);
-    
-            const onMouseOut = throttle(() => {
-                if (!pathDrawing.popupFromClick && this.hoveredLine === visibleLine) {
-                    visibleLine.setStyle({ color: visibleLine.originalColor });
-                    this.map.closePopup(this.currentPopup);
-                    this.hoveredLine = null;
-                    this.currentPopup = null;
-                }
-            }, 100);
-    
-            invisibleLine.on('mouseover', onMouseOver);
-            invisibleLine.on('mouseout', onMouseOut);
-    
-            // Add event listeners for decorated line
+            visibleLine.originalColor = lineColor;
+
+            visibleLine.on('click', (e) => lineEvents.onClickHandler(e, visibleLine, this.onClick));
+            invisibleLine.on('click', (e) => lineEvents.onClickHandler(e, invisibleLine, this.onClick));
+
+            invisibleLine.on('mouseover', (e) => lineEvents.onMouseOver(e, visibleLine, this.map, this.hoveredLine, this.currentPopup, this.routeData, pathDrawing));
+            invisibleLine.on('mouseout', () => lineEvents.onMouseOut(visibleLine, this.map, this.hoveredLine, this.currentPopup, pathDrawing));
+
             if (decoratedLine) {
-                decoratedLine.on('click', (e) => invisibleLine.fire('click', e)); // Simulate click on invisible line
-                decoratedLine.on('mouseover', onMouseOver);
-                decoratedLine.on('mouseout', onMouseOut);
+                decoratedLine.on('click', (e) => invisibleLine.fire('click', e));
+                decoratedLine.on('mouseover', (e) => lineEvents.onMouseOver(e, visibleLine, this.map, this.hoveredLine, this.currentPopup, this.routeData, pathDrawing));
+                decoratedLine.on('mouseout', () => lineEvents.onMouseOut(visibleLine, this.map, this.hoveredLine, this.currentPopup, pathDrawing));
             }
-    
+
             lines.push({ visibleLine, invisibleLine, decoratedLine });
         });
         return lines;
@@ -139,7 +90,7 @@ class lineSet {
     }
 
     resetLine(line) {
-        line.setStyle({ color: line.originalColor }); // Reset to the original color
+        line.setStyle({ color: line.originalColor });
     }
 
     removeAllLines() {
@@ -289,7 +240,7 @@ const pathDrawing = {
     },
 
     drawLines: async function() {
-        this.clearLines(false); // Ensure all lines are cleared properly except for table lines
+        this.clearLines(false);
 
         const drawPromises = appState.routes.map(route => {
             if (route.isDirect) {
@@ -314,7 +265,6 @@ const pathDrawing = {
         const rows = document.querySelectorAll('.route-info-table tbody tr');
         let minPrice = Infinity, maxPrice = -Infinity;
 
-        // First, determine the min and max prices
         rows.forEach(row => {
             if (row.style.display !== 'none') {
                 const priceText = row.cells[2].textContent.trim();
@@ -327,7 +277,6 @@ const pathDrawing = {
         const priceRange = maxPrice - minPrice;
         const quartile = priceRange / 4;
 
-        // Function to determine color based on price
         const getColorForPrice = (price) => {
             const relativePrice = price - minPrice;
             if (relativePrice <= quartile) return 'green';
@@ -339,7 +288,7 @@ const pathDrawing = {
         for (const row of rows) {
             if (row.style.display === 'none') continue;
 
-            const routeLineId = row.getAttribute('data-route-id'); // Get the routeLineId from the row
+            const routeLineId = row.getAttribute('data-route-id');
             const routeString = row.cells[row.cells.length - 1].textContent.trim();
             const iataCodes = routeString.split(' > ');
             if (iataCodes.length < 2) continue;
@@ -357,12 +306,11 @@ const pathDrawing = {
                     const destinationAirportData = await flightMap.getAirportDataByIata(destinationIata);
                     if (!originAirportData || !destinationAirportData) continue;
 
-                    // Pass the routeLineId to createRoutePath
                     this.createRoutePath(originAirportData, destinationAirportData, {
                         originAirport: originAirportData,
                         destinationAirport: destinationAirportData,
-                        price: price, // Pass the parsed numeric price
-                    }, color, routeLineId); // Pass the determined color and routeLineId
+                        price: price,
+                    }, color, routeLineId);
                 } catch (error) {
                     console.error('Error fetching airport data for segment:', error);
                 }
