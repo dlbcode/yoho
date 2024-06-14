@@ -19,8 +19,9 @@ const lineEvents = {
           hoveredLine = visibleLine;
           visibleLine.setStyle({ color: 'white' });
 
-          let displayPrice = Math.round(routeData.price);
-          let content = `<div style="line-height: 1.2; margin: 0;">${routeData.destination.city}<br><span><strong><span style="color: #ccc; font-size: 14px;">$${displayPrice}</span></strong></span>`;
+          let displayPrice = Math.round(routeData.price || 0); // Ensure price is valid
+          let city = routeData.destinationAirport && routeData.destinationAirport.city ? routeData.destinationAirport.city : 'Unknown City'; // Ensure city is valid
+          let content = `<div style="line-height: 1.2; margin: 0;">${city}<br><span><strong><span style="color: #ccc; font-size: 14px;">$${displayPrice}</span></strong></span>`;
           if (routeData.date) {
               let lowestDate = new Date(routeData.date).toLocaleDateString("en-US", {
                   year: 'numeric', month: 'long', day: 'numeric'
