@@ -14,7 +14,7 @@ class lineSet {
         this.isTableRoute = isTableRoute;
         this.lines = [];
         this.decoratedLine = null;
-        this.currentPopup = null;
+        this.hoverPopup = null;
         this.hoveredLine = null;
     }
 
@@ -71,13 +71,13 @@ class lineSet {
             visibleLine.on('click', (e) => lineEvents.onClickHandler(e, visibleLine, this.onClick));
             invisibleLine.on('click', (e) => lineEvents.onClickHandler(e, invisibleLine, this.onClick));
 
-            invisibleLine.on('mouseover', (e) => lineEvents.onMouseOver(e, visibleLine, this.map, this.hoveredLine, this.currentPopup, this.routeData, pathDrawing));
-            invisibleLine.on('mouseout', () => lineEvents.onMouseOut(visibleLine, this.map, this.hoveredLine, this.currentPopup, pathDrawing));
+            invisibleLine.on('mouseover', (e) => lineEvents.onMouseOver(e, visibleLine, this.map, this.hoveredLine, this.hoverPopup, this.routeData, pathDrawing));
+            invisibleLine.on('mouseout', () => lineEvents.onMouseOut(visibleLine, this.map, this.hoveredLine, this.hoverPopup, pathDrawing));
 
             if (decoratedLine) {
                 decoratedLine.on('click', (e) => invisibleLine.fire('click', e));
-                decoratedLine.on('mouseover', (e) => lineEvents.onMouseOver(e, visibleLine, this.map, this.hoveredLine, this.currentPopup, this.routeData, pathDrawing));
-                decoratedLine.on('mouseout', () => lineEvents.onMouseOut(visibleLine, this.map, this.hoveredLine, this.currentPopup, pathDrawing));
+                decoratedLine.on('mouseover', (e) => lineEvents.onMouseOver(e, visibleLine, this.map, this.hoveredLine, this.hoverPopup, this.routeData, pathDrawing));
+                decoratedLine.on('mouseout', () => lineEvents.onMouseOut(visibleLine, this.map, this.hoveredLine, this.hoverPopup, pathDrawing));
             }
 
             lines.push({ visibleLine, invisibleLine, decoratedLine });
