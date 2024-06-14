@@ -9,7 +9,7 @@ function throttle(fn, wait) {
 }
 
 const lineEvents = {
-  onMouseOver: throttle((e, visibleLine, map, hoveredLine, hoverPopup, routeData, pathDrawing) => {
+  onMouseOver: (e, visibleLine, map, hoveredLine, hoverPopup, routeData, pathDrawing) => {
       if (!pathDrawing.popupFromClick) {
           if (hoveredLine && hoveredLine !== visibleLine) {
               hoveredLine.setStyle({ color: hoveredLine.originalColor });
@@ -35,16 +35,15 @@ const lineEvents = {
               .setContent(content)
               .openOn(map);
       }
-  }, 100),
+  },
 
-  onMouseOut: throttle((visibleLine, map, hoveredLine, hoverPopup, pathDrawing) => {
-      if (!pathDrawing.popupFromClick && hoveredLine === visibleLine) {
+  onMouseOut: (visibleLine, map, hoveredLine, hoverPopup, pathDrawing) => {
+    console.log('onMouseOut');
           visibleLine.setStyle({ color: visibleLine.originalColor });
           map.closePopup(hoverPopup);
           hoveredLine = null;
           hoverPopup = null;
-      }
-  }, 100),
+  },
 
   onClickHandler: (e, line, onClick) => {
       onClick(e, line);
