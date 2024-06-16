@@ -30,7 +30,7 @@ const lineEvents = {
         }
     },
 
-    showRoutePopup: (event, routeData, line) => {
+    showRoutePopup: (event, routeData, visibleLine, invisibleLine) => {
         const { originAirport, destinationAirport, price, date } = routeData;
 
         let content = `<div style="line-height: 1.5;">
@@ -52,19 +52,19 @@ const lineEvents = {
         lineEvents.clearPopups('route');
 
         // Create the popup and add event listeners after initialization
-        const popup = L.popup({ autoClose: false, closeOnClick: true })
+        const popup = L.popup({ autoClose: false, closeOnClick: false })
             .setLatLng(event.latlng)
             .setContent(content)
             .on('remove', function () {
-                if (line) {
-                    map.removeLayer(line);
-                }
                 pathDrawing.popupFromClick = false; // Reset flag on popup removal
             })
             .on('add', function () {
-                // Ensure the line remains visible when the popup is added
-                if (line && !map.hasLayer(line)) {
-                    line.addTo(map);
+                // Ensure the lines remain visible when the popup is added
+                if (visibleLine && !map.hasLayer(visibleLine)) {
+                    visibleLine.addTo(map);
+                }
+                if (invisibleLine && !map.hasLayer(invisibleLine)) {
+                    invisibleLine.addTo(map);
                 }
                 pathDrawing.popupFromClick = true; // Set flag on popup addition
             });
@@ -88,7 +88,7 @@ const lineEvents = {
             }
 
             hoveredLine = visibleLine;
-            visibleLine.setStyle({ color: 'white' });
+            visibleLine.setStyle({ color: 'white', weight: 2, opacity: 1 }); // Ensure the line is highlighted
 
             let displayPrice = Math.round(routeData.price || 0); // Ensure price is valid
             let city = routeData.destinationAirport && routeData.destinationAirport.city ? routeData.destinationAirport.city : 'Unknown City'; // Ensure city is valid
@@ -112,18 +112,32 @@ const lineEvents = {
     },
 
     onMouseOut: (visibleLine, map, hoveredLine, hoverPopup, pathDrawing) => {
-        console.log('onMouseOut');
-        visibleLine.setStyle({ color: visibleLine.originalColor });
-        map.closePopup(hoverPopup);
-        // Remove hover popup from the list
-        lineEvents.hoverPopups = lineEvents.hoverPopups.filter(p => p !== hoverPopup);
-        hoveredLine = null;
-        hoverPopup = null;
+        if (!pathDrawing.popupFromClick) {
+            visibleLine.setStyle({ color: visibleLine.originalColor });
+            map.closePopup(hoverPopup);
+            // Remove hover popup from the list
+            lineEvents.hoverPopups = lineEvents.hoverPopups.filter(p => p !== hoverPopup);
+            hoveredLine = null;
+            hoverPopup = null;
+        }
     },
 
-    onClickHandler: (e, line, onClick) => {
-        onClick(e, line);
-    }
+    onClickHandler: (e, visibleLine, invisibleLine, onClick) => {
+        if (typeof onClick === 'function') {
+            onClick(e, visibleLine, invisibleLine);
+        }
+        if (visibleLine && invisibleLine) {
+            // Ensure the visible and invisible lines are displayed
+            if (!map.hasLayer(visibleLine)) {
+                visibleLine.addTo(map);
+            }
+            if (!map.hasLayer(invisibleLine)) {
+                invisibleLine.addTo(map);
+            }
+            // Highlight the visible line
+            visibleLine.setStyle({ color: 'white', weight: 2, opacity: 1 });
+        }
+    },
 };
 
 export { lineEvents };

@@ -67,8 +67,8 @@ class lineSet {
             invisibleLine.routeData = this.routeData;
             visibleLine.originalColor = lineColor;
 
-            visibleLine.on('click', (e) => lineEvents.onClickHandler(e, visibleLine, pathDrawing.onClick.bind(pathDrawing)));
-            invisibleLine.on('click', (e) => lineEvents.onClickHandler(e, invisibleLine, pathDrawing.onClick.bind(pathDrawing)));
+            visibleLine.on('click', (e) => lineEvents.onClickHandler(e, visibleLine, invisibleLine, this.onClick.bind(this)));
+            invisibleLine.on('click', (e) => lineEvents.onClickHandler(e, visibleLine, invisibleLine, this.onClick.bind(this)));
 
             invisibleLine.on('mouseover', (e) => lineEvents.onMouseOver(e, visibleLine, this.map, this.hoveredLine, this.hoverPopup, this.routeData, pathDrawing));
             invisibleLine.on('mouseout', () => lineEvents.onMouseOut(visibleLine, this.map, this.hoveredLine, this.hoverPopup, pathDrawing));
@@ -325,10 +325,10 @@ const pathDrawing = {
         return price < 100 ? '#0099ff' : price < 200 ? 'green' : price < 300 ? '#abb740' : price < 400 ? 'orange' : price < 500 ? '#da4500' : '#c32929';
     },
 
-    onClick(e, geodesicLine) {
+    onClick(e, visibleLine, invisibleLine) {
         this.popupFromClick = true;
-        if (geodesicLine.routeData) {
-            lineEvents.showRoutePopup(e, geodesicLine.routeData, geodesicLine);
+        if (visibleLine.routeData) {
+            lineEvents.showRoutePopup(e, visibleLine.routeData, visibleLine, invisibleLine);
         } else {
             console.error('Route data is undefined for the clicked line.');
         }
