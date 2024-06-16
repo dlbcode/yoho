@@ -2,6 +2,34 @@ import { map } from './map.js';
 import { pathDrawing } from './pathDrawing.js';
 
 const lineEvents = {
+    // Keep track of different types of popups
+    routePopups: [],
+    hoverPopups: [],
+
+    clearPopups: (type) => {
+        let popups;
+        switch (type) {
+            case 'route':
+                popups = lineEvents.routePopups;
+                break;
+            case 'hover':
+                popups = lineEvents.hoverPopups;
+                break;
+            case 'all':
+                popups = [...lineEvents.routePopups, ...lineEvents.hoverPopups];
+                break;
+            default:
+                popups = [];
+        }
+        popups.forEach(popup => map.closePopup(popup));
+        if (type !== 'all') {
+            lineEvents[type + 'Popups'] = [];
+        } else {
+            lineEvents.routePopups = [];
+            lineEvents.hoverPopups = [];
+        }
+    },
+
     showRoutePopup: (event, routeData, line) => {
         const { originAirport, destinationAirport, price, date } = routeData;
 
@@ -20,8 +48,8 @@ const lineEvents = {
 
         content += `</div>`;
 
-        // Ensure no other popups are open before creating a new one
-        map.closePopup();
+        // Ensure no other route popups are open before creating a new one
+        lineEvents.clearPopups('route');
 
         // Create the popup and add event listeners after initialization
         const popup = L.popup({ autoClose: false, closeOnClick: true })
@@ -45,13 +73,18 @@ const lineEvents = {
         setTimeout(() => {
             popup.openOn(map);
         }, 100); // Delay to avoid immediate closure by other events
+
+        // Track this popup
+        lineEvents.routePopups.push(popup);
     },
-    
+
     onMouseOver: (e, visibleLine, map, hoveredLine, hoverPopup, routeData, pathDrawing) => {
         if (!pathDrawing.popupFromClick) {
             if (hoveredLine && hoveredLine !== visibleLine) {
                 hoveredLine.setStyle({ color: hoveredLine.originalColor });
                 map.closePopup(hoverPopup);
+                // Remove hover popup from the list
+                lineEvents.hoverPopups = lineEvents.hoverPopups.filter(p => p !== hoverPopup);
             }
 
             hoveredLine = visibleLine;
@@ -72,6 +105,9 @@ const lineEvents = {
                 .setLatLng(e.latlng)
                 .setContent(content)
                 .openOn(map);
+
+            // Track this popup
+            lineEvents.hoverPopups.push(hoverPopup);
         }
     },
 
@@ -79,6 +115,8 @@ const lineEvents = {
         console.log('onMouseOut');
         visibleLine.setStyle({ color: visibleLine.originalColor });
         map.closePopup(hoverPopup);
+        // Remove hover popup from the list
+        lineEvents.hoverPopups = lineEvents.hoverPopups.filter(p => p !== hoverPopup);
         hoveredLine = null;
         hoverPopup = null;
     },
