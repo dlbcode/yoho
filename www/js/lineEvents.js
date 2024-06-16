@@ -164,68 +164,55 @@ const lineEvents = {
     },
 
     onMouseOver: (e, visibleLine, map, hoveredLine, hoverPopup, routeData, pathDrawing) => {
-        if (!pathDrawing.popupFromClick) {
-            if (hoveredLine && hoveredLine !== visibleLine) {
-                hoveredLine.setStyle({ color: hoveredLine.originalColor });
-                map.closePopup(hoverPopup);
-                // Remove hover popup from the list
-                lineEvents.hoverPopups = lineEvents.hoverPopups.filter(p => p !== hoverPopup);
-            }
-
-            hoveredLine = visibleLine;
-            visibleLine.setStyle({ color: 'white', weight: 2, opacity: 1 }); // Ensure the line is highlighted
-            const tableRouteId = visibleLine.routeData.tableRouteId; // Get the table route ID
-            const linesToHighlight = pathDrawing.routePathCache[tableRouteId];
-
-            if (linesToHighlight) {
-                linesToHighlight.forEach(lineSet => {
-                    lineSet.lines.forEach(linePair => {
-                        lineSet.highlightLine(linePair.visibleLine);
-                    });
-                });
-            }
-
-            let displayPrice = Math.round(routeData.price || 0); // Ensure price is valid
-            let city = routeData.destinationAirport && routeData.destinationAirport.city ? routeData.destinationAirport.city : 'Unknown City'; // Ensure city is valid
-            let content = `<div style="line-height: 1.2; margin: 0;">${city}<br><span><strong><span style="color: #ccc; font-size: 14px;">$${displayPrice}</span></strong></span>`;
-            if (routeData.date) {
-                let lowestDate = new Date(routeData.date).toLocaleDateString("en-US", {
-                    year: 'numeric', month: 'long', day: 'numeric'
-                });
-                content += `<br><span style="line-height: 1; display: block; color: #666">on ${lowestDate}</span>`;
-            }
-            content += `</div>`;
-
-            hoverPopup = L.popup({ autoClose: false, closeOnClick: true })
-                .setLatLng(e.latlng)
-                .setContent(content)
-                .openOn(map);
-
-            // Track this popup
-            lineEvents.hoverPopups.push(hoverPopup);
-        }
-    },
+      if (pathDrawing.popupFromClick) return;
+  
+      if (hoveredLine && hoveredLine !== visibleLine) {
+          hoveredLine.setStyle({ color: hoveredLine.originalColor });
+          map.closePopup(hoverPopup);
+          lineEvents.hoverPopups = lineEvents.hoverPopups.filter(p => p !== hoverPopup);
+      }
+  
+      hoveredLine = visibleLine;
+      visibleLine.setStyle({ color: 'white', weight: 2, opacity: 1 });
+  
+      const tableRouteId = visibleLine.routeData.tableRouteId;
+      const linesToHighlight = pathDrawing.routePathCache[tableRouteId];
+  
+      linesToHighlight?.forEach(lineSet => {
+          lineSet.lines.forEach(linePair => lineSet.highlightLine(linePair.visibleLine));
+      });
+  
+      const displayPrice = Math.round(routeData.price || 0);
+      const city = routeData.destinationAirport?.city || 'Unknown City';
+      const dateContent = routeData.date ? `<br><span style="line-height: 1; display: block; color: #666">on ${new Date(routeData.date).toLocaleDateString("en-US", { year: 'numeric', month: 'long', day: 'numeric' })}</span>` : '';
+      const content = `<div style="line-height: 1.2; margin: 0;">${city}<br><span><strong><span style="color: #ccc; font-size: 14px;">$${displayPrice}</span></strong></span>${dateContent}</div>`;
+  
+      hoverPopup = L.popup({ autoClose: false, closeOnClick: true })
+          .setLatLng(e.latlng)
+          .setContent(content)
+          .openOn(map);
+  
+      lineEvents.hoverPopups.push(hoverPopup);
+  },  
 
     onMouseOut: (visibleLine, map, hoveredLine, hoverPopup, pathDrawing) => {
-        if (!pathDrawing.popupFromClick && !lineEvents.linesWithPopups.has(visibleLine)) { // Check if line has a popup
-            const tableRouteId = visibleLine.routeData.tableRouteId; // Get the table route ID
-            const linesToReset = pathDrawing.routePathCache[tableRouteId];
-
-            if (linesToReset) {
-                linesToReset.forEach(lineSet => {
-                    lineSet.lines.forEach(linePair => {
-                        lineSet.resetLine(linePair.visibleLine);
-                    });
-                });
-            }
-
-            map.closePopup(hoverPopup);
-            // Remove hover popup from the list
-            lineEvents.hoverPopups = lineEvents.hoverPopups.filter(p => p !== hoverPopup);
-            hoveredLine = null;
-            hoverPopup = null;
-        }
-    },
+      if (pathDrawing.popupFromClick || lineEvents.linesWithPopups.has(visibleLine)) return;
+  
+      const linesToReset = visibleLine.routeData.tableRouteId
+          ? pathDrawing.routePathCache[visibleLine.routeData.tableRouteId]
+          : [{ lines: [{ visibleLine }], resetLine: line => line.setStyle({ color: line.originalColor }) }];
+  
+      linesToReset.forEach(lineSet => {
+          lineSet.lines.forEach(linePair => {
+              lineSet.resetLine(linePair.visibleLine);
+          });
+      });
+  
+      map.closePopup(hoverPopup);
+      lineEvents.hoverPopups = lineEvents.hoverPopups.filter(p => p !== hoverPopup);
+      hoveredLine = null;
+      hoverPopup = null;
+  },   
 
     onClickHandler: (e, visibleLine, invisibleLine, onClick) => {
         if (typeof onClick === 'function') {
