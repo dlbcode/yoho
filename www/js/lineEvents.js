@@ -106,6 +106,9 @@ const lineEvents = {
                 lineEvents.linesWithPopups.delete(visibleLine); // Remove line from set when popup is closed
                 pathDrawing.popupFromClick = false; // Reset flag on popup removal
                 document.removeEventListener('click', lineEvents.outsideClickListener);
+                
+                // Reset the line's style
+                visibleLine.setStyle({ color: visibleLine.originalColor, weight: 1, opacity: 1 });
             })
             .on('add', function () {
                 // Ensure the lines remain visible when the popup is added
