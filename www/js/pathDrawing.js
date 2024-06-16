@@ -206,7 +206,7 @@ const pathDrawing = {
         }
     
         let routeId = `${routeData.originAirport.iata_code}-${routeData.destinationAirport.iata_code}`;
-        if (this.routePathCache[routeId]) {
+        if (this.routePathCache[routeId] && isTableRoute) {
             console.log(`Route ${routeId} already exists. Skipping creation.`);
             return;
         }
@@ -235,7 +235,7 @@ const pathDrawing = {
         if (shouldDecorate) {
             this.currentLines.push(newlineSet);
         }
-    },      
+    },
 
     drawLines: async function() {
         lineEvents.clearLines('route');
