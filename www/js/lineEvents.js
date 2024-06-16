@@ -59,6 +59,7 @@ const lineEvents = {
             .on('remove', function () {
                 lineEvents.linesWithPopups.delete(visibleLine); // Remove line from set when popup is closed
                 pathDrawing.popupFromClick = false; // Reset flag on popup removal
+                document.removeEventListener('click', lineEvents.outsideClickListener);
             })
             .on('add', function () {
                 // Ensure the lines remain visible when the popup is added
@@ -70,6 +71,7 @@ const lineEvents = {
                 }
                 lineEvents.linesWithPopups.add(visibleLine); // Add line to set when popup is open
                 pathDrawing.popupFromClick = true; // Set flag on popup addition
+                document.addEventListener('click', lineEvents.outsideClickListener);
             });
 
         // Open the popup on the map
@@ -79,6 +81,12 @@ const lineEvents = {
 
         // Track this popup
         lineEvents.routePopups.push(popup);
+    },
+
+    outsideClickListener: (event) => {
+        if (!event.target.closest('.leaflet-popup')) {
+            lineEvents.clearPopups('route');
+        }
     },
 
     onMouseOver: (e, visibleLine, map, hoveredLine, hoverPopup, routeData, pathDrawing) => {
