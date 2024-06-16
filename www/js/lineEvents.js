@@ -31,7 +31,7 @@ const lineEvents = {
         }
     },
 
-    clearLines: (type) => {
+    clearLines: (type, specificLines) => {
         switch (type) {
             case 'all':
                 Object.values(pathDrawing.routePathCache).forEach(lineSetArray => {
@@ -71,6 +71,21 @@ const lineEvents = {
                     lineEvents.hoverPopup = null;
                 }
                 break;
+            case 'specific':
+                if (specificLines) {
+                    specificLines.forEach(linePair => {
+                        if (map.hasLayer(linePair.visibleLine)) {
+                            map.removeLayer(linePair.visibleLine);
+                        }
+                        if (map.hasLayer(linePair.invisibleLine)) {
+                            map.removeLayer(linePair.invisibleLine);
+                        }
+                        if (linePair.decoratedLine && map.hasLayer(linePair.decoratedLine)) {
+                            map.removeLayer(linePair.decoratedLine);
+                        }
+                    });
+                }
+                break;
             default:
                 console.warn(`Unknown line type: ${type}`);
         }
@@ -107,13 +122,8 @@ const lineEvents = {
                 pathDrawing.popupFromClick = false; // Reset flag on popup removal
                 document.removeEventListener('click', lineEvents.outsideClickListener);
                 
-                // remove the lines when the popup is removed
-                if (visibleLine && map.hasLayer(visibleLine)) {
-                    map.removeLayer(visibleLine);
-                }
-                if (invisibleLine && map.hasLayer(invisibleLine)) {
-                    map.removeLayer(invisibleLine);
-                }
+                // Use clearLines to remove the specific lines when the popup is removed
+                lineEvents.clearLines('specific', [{ visibleLine, invisibleLine }]);
             })
             .on('add', function () {
                 // Ensure the lines remain visible when the popup is added
