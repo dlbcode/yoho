@@ -23,7 +23,7 @@ function buildRouteTable(routeIndex) {
         destination = appState.waypoints[(routeIndex * 2) + 1]?.iata_code || 'Any';
     }
 
-    document.head.appendChild(Object.assign(document.createElement('link'), { rel: 'stylesheet', type: 'text/css', href: '../css/routeTable.css'}));
+    document.head.appendChild(Object.assign(document.createElement('link'), { rel: 'stylesheet', type: 'text/css', href: '../css/routeTable.css' }));
 
     // Start the loading animation
     const topBar = document.getElementById('top-bar');
@@ -238,34 +238,6 @@ function buildRouteTable(routeIndex) {
                 const routeIds = routeIdString.split('|');
                 const fullFlightData = data[index];
                 routeInfoRow(this, fullFlightData, routeIds, routeIndex);
-            });
-        });
-    
-        document.querySelectorAll('.route-info-table tbody tr').forEach(row => {
-            row.addEventListener('mouseover', function() {
-                const routeIdString = this.getAttribute('data-route-id');
-                const linesToHighlight = pathDrawing.routePathCache[routeIdString];
-
-                if (linesToHighlight) {
-                    linesToHighlight.forEach(lineSet => {
-                        lineSet.lines.forEach(linePair => {
-                            lineSet.highlightLine(linePair.visibleLine);
-                        });
-                    });
-                }
-            });
-    
-            row.addEventListener('mouseout', function() {
-                const routeIdString = this.getAttribute('data-route-id');
-                const linesToReset = pathDrawing.routePathCache[routeIdString];
-
-                if (linesToReset) {
-                    linesToReset.forEach(lineSet => {
-                        lineSet.lines.forEach(linePair => {
-                            lineSet.resetLine(linePair.visibleLine);
-                        });
-                    });
-                }
             });
         });
     }             
