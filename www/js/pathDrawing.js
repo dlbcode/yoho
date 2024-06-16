@@ -25,8 +25,11 @@ class lineSet {
             const adjustedDestination = L.latLng(this.destination.latitude, this.destination.longitude + offset);
             const lineColor = pathDrawing.getColorBasedOnPrice(this.routeData.price);
 
+            // Determine the line thickness based on whether it's a table route
+            const lineWeight = this.isTableRoute ? 2 : 1;
+
             const visibleLine = new L.Geodesic([adjustedOrigin, adjustedDestination], {
-                weight: 1,
+                weight: lineWeight,
                 opacity: 1,
                 color: lineColor,
                 wrap: false,
@@ -183,12 +186,12 @@ const pathDrawing = {
     async createRoutePath(origin, destination, route, lineColor = null, isTableRoute = false, tableRouteId = null) {
         let routeData = route;
         let selectedRoutesArray = Array.isArray(appState.selectedRoutes) ? appState.selectedRoutes : Object.values(appState.selectedRoutes);
-    
+
         const selectedRoute = selectedRoutesArray.find(sr =>
             sr.fullData.flyFrom === route.originAirport.iata_code &&
             sr.fullData.flyTo === route.destinationAirport.iata_code
         );
-    
+
         if (selectedRoute) {
             routeData = {
                 ...route,
@@ -197,41 +200,40 @@ const pathDrawing = {
                 price: parseFloat(selectedRoute.displayData.price.replace('$', ''))
             };
         }
-    
+
         if (!routeData || !routeData.originAirport || !routeData.destinationAirport ||
             typeof routeData.originAirport.iata_code === 'undefined' ||
             typeof routeData.destinationAirport.iata_code === 'undefined') {
             console.error('Invalid route data:', routeData);
             return;
         }
-    
+
         let routeId = `${routeData.originAirport.iata_code}-${routeData.destinationAirport.iata_code}`;
         if (this.routePathCache[routeId] && isTableRoute) {
-            console.log(`Route ${routeId} already exists. Skipping creation.`);
             return;
         }
-    
+
         let shouldDecorate = appState.routes.some(r =>
             r.origin === route.originAirport.iata_code &&
             r.destination === route.destinationAirport.iata_code
         );
-    
+
         let newlineSet = new lineSet(map, origin, destination, routeData, this.onClick.bind(this), isTableRoute);
         newlineSet.lines = newlineSet.createLines(shouldDecorate);
-    
+
         newlineSet.lines.forEach(line => {
             line.visibleLine.routeData = routeData; // Ensure routeData is set
             line.visibleLine.routeData.tableRouteId = tableRouteId; // Set tableRouteId
         });
-    
+
         this.routePathCache[routeId] = this.routePathCache[routeId] || [];
         this.routePathCache[routeId].push(newlineSet);
-    
+
         if (tableRouteId) {
             this.routePathCache[tableRouteId] = this.routePathCache[tableRouteId] || [];
             this.routePathCache[tableRouteId].push(newlineSet);
         }
-    
+
         if (shouldDecorate) {
             this.currentLines.push(newlineSet);
         }
