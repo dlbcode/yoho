@@ -180,7 +180,7 @@ const pathDrawing = {
         return L.latLng(latLng.lat, newLng);
     },
 
-    async createRoutePath(origin, destination, route, lineColor = null, isTableRoute = false) {
+    async createRoutePath(origin, destination, route, lineColor = null, isTableRoute = false, tableRouteId = null) {
         let routeData = route;
         let selectedRoutesArray = Array.isArray(appState.selectedRoutes) ? appState.selectedRoutes : Object.values(appState.selectedRoutes);
     
@@ -207,7 +207,6 @@ const pathDrawing = {
     
         let routeId = `${routeData.originAirport.iata_code}-${routeData.destinationAirport.iata_code}`;
         if (this.routePathCache[routeId]) {
-            // Route already exists, do not create a new one
             console.log(`Route ${routeId} already exists. Skipping creation.`);
             return;
         }
@@ -220,13 +219,23 @@ const pathDrawing = {
         let newlineSet = new lineSet(map, origin, destination, routeData, this.onClick.bind(this), isTableRoute);
         newlineSet.lines = newlineSet.createLines(shouldDecorate);
     
+        newlineSet.lines.forEach(line => {
+            line.visibleLine.routeData = routeData; // Ensure routeData is set
+            line.visibleLine.routeData.tableRouteId = tableRouteId; // Set tableRouteId
+        });
+    
         this.routePathCache[routeId] = this.routePathCache[routeId] || [];
         this.routePathCache[routeId].push(newlineSet);
+    
+        if (tableRouteId) {
+            this.routePathCache[tableRouteId] = this.routePathCache[tableRouteId] || [];
+            this.routePathCache[tableRouteId].push(newlineSet);
+        }
     
         if (shouldDecorate) {
             this.currentLines.push(newlineSet);
         }
-    },       
+    },      
 
     drawLines: async function() {
         lineEvents.clearLines('route');

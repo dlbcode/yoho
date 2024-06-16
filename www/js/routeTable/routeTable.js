@@ -23,7 +23,7 @@ function buildRouteTable(routeIndex) {
         destination = appState.waypoints[(routeIndex * 2) + 1]?.iata_code || 'Any';
     }
 
-    document.head.appendChild(Object.assign(document.createElement('link'), {rel: 'stylesheet', type: 'text/css', href: '../css/routeTable.css'}));
+    document.head.appendChild(Object.assign(document.createElement('link'), { rel: 'stylesheet', type: 'text/css', href: '../css/routeTable.css'}));
 
     // Start the loading animation
     const topBar = document.getElementById('top-bar');
@@ -159,6 +159,25 @@ function buildRouteTable(routeIndex) {
                                  <td>${durationHours}h ${durationMinutes}m</td>
                                  <td>${routeIATAs}</td>`;
                 tbody.appendChild(row);
+
+                const tableRouteId = flight.id; // Get the table route ID from the data attribute
+
+                flight.route.forEach((segment, index) => {
+                    const originIata = segment.flyFrom;
+                    const destinationIata = segment.flyTo;
+                    
+                    flightMap.getAirportDataByIata(originIata).then(originAirportData => {
+                        flightMap.getAirportDataByIata(destinationIata).then(destinationAirportData => {
+                            if (!originAirportData || !destinationAirportData) return;
+            
+                            pathDrawing.createRoutePath(originAirportData, destinationAirportData, {
+                                originAirport: originAirportData,
+                                destinationAirport: destinationAirportData,
+                                price: price,
+                            }, null, true, tableRouteId);
+                        });
+                    });
+                });
             });
             table.appendChild(tbody);
             infoPaneContent.appendChild(table);
@@ -171,93 +190,85 @@ function buildRouteTable(routeIndex) {
             infoPaneContent.textContent = 'Error loading data: ' + error.message;
         });
 
-        function attachEventListeners(table, data, routeIndex) {
-            const headers = table.querySelectorAll('th');
-            headers.forEach(header => {
-                header.style.cursor = 'pointer';
-                header.addEventListener('click', function(event) {
-                    const sortIcon = event.target.closest('.sortIcon');
-                    if (sortIcon) {
-                        const columnIdentifier = sortIcon.getAttribute('data-column');
-                        const columnIndex = getColumnIndex(columnIdentifier);
-                        const isAscending = sortIcon.getAttribute('data-sort') !== 'asc';
-                        sortTableByColumn(table, columnIndex, isAscending);
-                        resetSortIcons(headers, sortIcon, isAscending ? 'asc' : 'desc');
-                    }
-                });
-            });
-        
-            headers.forEach(header => {
-                const filteredHeader = header.querySelector('.filteredHeader');
-                const filterIcon = header.querySelector('.filterIcon');
-                const handleFilterClick = function(event) {
-                    event.stopPropagation();
-                    const column = this.getAttribute('data-column');
-                    if (!column) {
-                        console.error('Column attribute is missing on the icon:', this);
-                        return;
-                    }
-                    const data = fetchDataForColumn(column);
-                    if (data) {
-                        sliderFilter.createFilterPopup(column, data, event);
-                    } else {
-                        console.error('Failed to fetch data for column:', column);
-                    }
-                };
-        
-                if (filteredHeader) {
-                    filteredHeader.addEventListener('click', handleFilterClick);
-                }
-                if (filterIcon) {
-                    filterIcon.addEventListener('click', handleFilterClick);
+    function attachEventListeners(table, data, routeIndex) {
+        const headers = table.querySelectorAll('th');
+        headers.forEach(header => {
+            header.style.cursor = 'pointer';
+            header.addEventListener('click', function(event) {
+                const sortIcon = event.target.closest('.sortIcon');
+                if (sortIcon) {
+                    const columnIdentifier = sortIcon.getAttribute('data-column');
+                    const columnIndex = getColumnIndex(columnIdentifier);
+                    const isAscending = sortIcon.getAttribute('data-sort') !== 'asc';
+                    sortTableByColumn(table, columnIndex, isAscending);
+                    resetSortIcons(headers, sortIcon, isAscending ? 'asc' : 'desc');
                 }
             });
-        
-            document.querySelectorAll('.route-info-table tbody tr').forEach((row, index) => {
-                row.addEventListener('click', function() {
-                    const routeIdString = this.getAttribute('data-route-id');
-                    const routeIds = routeIdString.split('|');
-                    const fullFlightData = data[index];
-                    routeInfoRow(this, fullFlightData, routeIds, routeIndex);
-                });
+        });
+    
+        headers.forEach(header => {
+            const filteredHeader = header.querySelector('.filteredHeader');
+            const filterIcon = header.querySelector('.filterIcon');
+            const handleFilterClick = function(event) {
+                event.stopPropagation();
+                const column = this.getAttribute('data-column');
+                if (!column) {
+                    console.error('Column attribute is missing on the icon:', this);
+                    return;
+                }
+                const data = fetchDataForColumn(column);
+                if (data) {
+                    sliderFilter.createFilterPopup(column, data, event);
+                } else {
+                    console.error('Failed to fetch data for column:', column);
+                }
+            };
+    
+            if (filteredHeader) {
+                filteredHeader.addEventListener('click', handleFilterClick);
+            }
+            if (filterIcon) {
+                filterIcon.addEventListener('click', handleFilterClick);
+            }
+        });
+    
+        document.querySelectorAll('.route-info-table tbody tr').forEach((row, index) => {
+            row.addEventListener('click', function() {
+                const routeIdString = this.getAttribute('data-route-id');
+                const routeIds = routeIdString.split('|');
+                const fullFlightData = data[index];
+                routeInfoRow(this, fullFlightData, routeIds, routeIndex);
             });
-        
-            document.querySelectorAll('.route-info-table tbody tr').forEach(row => {
-                row.addEventListener('mouseover', function() {
-                    const routeString = this.cells[8].textContent.trim();
-                    const iataCodes = routeString.split(' > ');
-                    for (let i = 0; i < iataCodes.length - 1; i++) {
-                        const originIata = iataCodes[i];
-                        const destinationIata = iataCodes[i + 1];
-                        const routeLine = pathDrawing.routePathCache[`${originIata}-${destinationIata}`];
-        
-                        if (routeLine && routeLine.length > 0) {
-                            const lineSet = routeLine[0];
-                            lineSet.lines.forEach(linePair => {
-                                lineSet.highlightLine(linePair.visibleLine);
-                            });
-                        }
-                    }
-                });
-        
-                row.addEventListener('mouseout', function() {
-                    const routeString = this.cells[8].textContent.trim();
-                    const iataCodes = routeString.split(' > ');
-                    for (let i = 0; i < iataCodes.length - 1; i++) {
-                        const originIata = iataCodes[i];
-                        const destinationIata = iataCodes[i + 1];
-                        const routeLine = pathDrawing.routePathCache[`${originIata}-${destinationIata}`];
-        
-                        if (routeLine && routeLine.length > 0) {
-                            const lineSet = routeLine[0];
-                            lineSet.lines.forEach(linePair => {
-                                lineSet.resetLine(linePair.visibleLine);
-                            });
-                        }
-                    }
-                });
+        });
+    
+        document.querySelectorAll('.route-info-table tbody tr').forEach(row => {
+            row.addEventListener('mouseover', function() {
+                const routeIdString = this.getAttribute('data-route-id');
+                const linesToHighlight = pathDrawing.routePathCache[routeIdString];
+
+                if (linesToHighlight) {
+                    linesToHighlight.forEach(lineSet => {
+                        lineSet.lines.forEach(linePair => {
+                            lineSet.highlightLine(linePair.visibleLine);
+                        });
+                    });
+                }
             });
-        }             
+    
+            row.addEventListener('mouseout', function() {
+                const routeIdString = this.getAttribute('data-route-id');
+                const linesToReset = pathDrawing.routePathCache[routeIdString];
+
+                if (linesToReset) {
+                    linesToReset.forEach(lineSet => {
+                        lineSet.lines.forEach(linePair => {
+                            lineSet.resetLine(linePair.visibleLine);
+                        });
+                    });
+                }
+            });
+        });
+    }             
 
     function resetSortIcons(headers, currentIcon, newSortState) {
         headers.forEach(header => {

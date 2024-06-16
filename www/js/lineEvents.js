@@ -174,6 +174,16 @@ const lineEvents = {
 
             hoveredLine = visibleLine;
             visibleLine.setStyle({ color: 'white', weight: 2, opacity: 1 }); // Ensure the line is highlighted
+            const tableRouteId = visibleLine.routeData.tableRouteId; // Get the table route ID
+            const linesToHighlight = pathDrawing.routePathCache[tableRouteId];
+
+            if (linesToHighlight) {
+                linesToHighlight.forEach(lineSet => {
+                    lineSet.lines.forEach(linePair => {
+                        lineSet.highlightLine(linePair.visibleLine);
+                    });
+                });
+            }
 
             let displayPrice = Math.round(routeData.price || 0); // Ensure price is valid
             let city = routeData.destinationAirport && routeData.destinationAirport.city ? routeData.destinationAirport.city : 'Unknown City'; // Ensure city is valid
