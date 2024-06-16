@@ -107,8 +107,13 @@ const lineEvents = {
                 pathDrawing.popupFromClick = false; // Reset flag on popup removal
                 document.removeEventListener('click', lineEvents.outsideClickListener);
                 
-                // Reset the line's style
-                visibleLine.setStyle({ color: visibleLine.originalColor, weight: 1, opacity: 1 });
+                // remove the lines when the popup is removed
+                if (visibleLine && map.hasLayer(visibleLine)) {
+                    map.removeLayer(visibleLine);
+                }
+                if (invisibleLine && map.hasLayer(invisibleLine)) {
+                    map.removeLayer(invisibleLine);
+                }
             })
             .on('add', function () {
                 // Ensure the lines remain visible when the popup is added
