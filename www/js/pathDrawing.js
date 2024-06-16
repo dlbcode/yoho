@@ -183,12 +183,12 @@ const pathDrawing = {
     async createRoutePath(origin, destination, route, lineColor = null, isTableRoute = false) {
         let routeData = route;
         let selectedRoutesArray = Array.isArray(appState.selectedRoutes) ? appState.selectedRoutes : Object.values(appState.selectedRoutes);
-
+    
         const selectedRoute = selectedRoutesArray.find(sr =>
             sr.fullData.flyFrom === route.originAirport.iata_code &&
             sr.fullData.flyTo === route.destinationAirport.iata_code
         );
-
+    
         if (selectedRoute) {
             routeData = {
                 ...route,
@@ -197,30 +197,30 @@ const pathDrawing = {
                 price: parseFloat(selectedRoute.displayData.price.replace('$', ''))
             };
         }
-
+    
         if (!routeData || !routeData.originAirport || !routeData.destinationAirport ||
             typeof routeData.originAirport.iata_code === 'undefined' ||
             typeof routeData.destinationAirport.iata_code === 'undefined') {
             console.error('Invalid route data:', routeData);
             return;
         }
-
+    
         let routeId = `${routeData.originAirport.iata_code}-${routeData.destinationAirport.iata_code}`;
         let shouldDecorate = appState.routes.some(r =>
             r.origin === route.originAirport.iata_code &&
             r.destination === route.destinationAirport.iata_code
         );
-
+    
         let newlineSet = new lineSet(map, origin, destination, routeData, this.onClick.bind(this), isTableRoute);
         newlineSet.lines = newlineSet.createLines(shouldDecorate);
-
+    
         this.routePathCache[routeId] = this.routePathCache[routeId] || [];
         this.routePathCache[routeId].push(newlineSet);
-
+    
         if (shouldDecorate) {
             this.currentLines.push(newlineSet);
         }
-    },
+    },    
 
     drawLines: async function() {
         lineEvents.clearLines('route');

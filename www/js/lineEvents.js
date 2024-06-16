@@ -32,65 +32,74 @@ const lineEvents = {
     },
 
     clearLines: (type, specificLines) => {
-        switch (type) {
-            case 'all':
-                Object.values(pathDrawing.routePathCache).forEach(lineSetArray => {
-                    lineSetArray.forEach(lineSet => {
-                        lineSet.removeAllLines();
-                    });
-                });
-                Object.values(pathDrawing.dashedRoutePathCache).forEach(lineSetArray => {
-                    lineSetArray.forEach(lineSet => {
-                        lineSet.removeAllLines();
-                    });
-                });
-                pathDrawing.routePathCache = {};
-                pathDrawing.dashedRoutePathCache = {};
-                break;
-            case 'dashed':
-                Object.values(pathDrawing.dashedRoutePathCache).forEach(lineSetArray => {
-                    lineSetArray.forEach(lineSet => {
-                        lineSet.removeAllLines();
-                    });
-                });
-                pathDrawing.dashedRoutePathCache = {};
-                break;
-            case 'route':
-                Object.values(pathDrawing.routePathCache).forEach(lineSetArray => {
-                    lineSetArray.forEach(lineSet => {
-                        lineSet.removeAllLines();
-                    });
-                });
-                pathDrawing.routePathCache = {};
-                break;
-            case 'hover':
-                if (lineEvents.hoveredLine) {
-                    lineEvents.hoveredLine.setStyle({ color: lineEvents.hoveredLine.originalColor });
-                    map.closePopup(lineEvents.hoverPopup);
-                    lineEvents.hoveredLine = null;
-                    lineEvents.hoverPopup = null;
-                }
-                break;
-            case 'specific':
-                if (specificLines) {
-                    specificLines.forEach(linePair => {
-                        if (map.hasLayer(linePair.visibleLine)) {
-                            map.removeLayer(linePair.visibleLine);
-                        }
-                        if (map.hasLayer(linePair.invisibleLine)) {
-                            map.removeLayer(linePair.invisibleLine);
-                        }
-                        if (linePair.decoratedLine && map.hasLayer(linePair.decoratedLine)) {
-                            map.removeLayer(linePair.decoratedLine);
-                        }
-                    });
-                }
-                break;
-            default:
-                console.warn(`Unknown line type: ${type}`);
-        }
-        map.closePopup();
-    },
+      switch (type) {
+          case 'all':
+              Object.values(pathDrawing.routePathCache).forEach(lineSetArray => {
+                  lineSetArray.forEach(lineSet => {
+                      lineSet.removeAllLines();
+                  });
+              });
+              Object.values(pathDrawing.dashedRoutePathCache).forEach(lineSetArray => {
+                  lineSetArray.forEach(lineSet => {
+                      lineSet.removeAllLines();
+                  });
+              });
+              pathDrawing.routePathCache = {};
+              pathDrawing.dashedRoutePathCache = {};
+              break;
+          case 'dashed':
+              Object.values(pathDrawing.dashedRoutePathCache).forEach(lineSetArray => {
+                  lineSetArray.forEach(lineSet => {
+                      lineSet.removeAllLines();
+                  });
+              });
+              pathDrawing.dashedRoutePathCache = {};
+              break;
+          case 'route':
+              Object.values(pathDrawing.routePathCache).forEach(lineSetArray => {
+                  lineSetArray.forEach(lineSet => {
+                      lineSet.removeAllLines();
+                  });
+              });
+              pathDrawing.routePathCache = {};
+              break;
+          case 'hover':
+              if (lineEvents.hoveredLine) {
+                  lineEvents.hoveredLine.setStyle({ color: lineEvents.hoveredLine.originalColor });
+                  map.closePopup(lineEvents.hoverPopup);
+                  lineEvents.hoveredLine = null;
+                  lineEvents.hoverPopup = null;
+              }
+              break;
+          case 'specific':
+              if (specificLines) {
+                  specificLines.forEach(linePair => {
+                      if (map.hasLayer(linePair.visibleLine)) {
+                          map.removeLayer(linePair.visibleLine);
+                      }
+                      if (map.hasLayer(linePair.invisibleLine)) {
+                          map.removeLayer(linePair.invisibleLine);
+                      }
+                      if (linePair.decoratedLine && map.hasLayer(linePair.decoratedLine)) {
+                          map.removeLayer(linePair.decoratedLine);
+                      }
+                  });
+              }
+              break;
+          case 'tableLines':
+              Object.values(pathDrawing.routePathCache).forEach(lineSetArray => {
+                  lineSetArray.forEach(lineSet => {
+                      if (lineSet.isTableRoute) {
+                          lineSet.removeAllLines();
+                      }
+                  });
+              });
+              break;
+          default:
+              console.warn(`Unknown line type: ${type}`);
+      }
+      map.closePopup();
+  },  
 
     showRoutePopup: (event, routeData, visibleLine, invisibleLine) => {
         const { originAirport, destinationAirport, price, date } = routeData;
