@@ -58,10 +58,11 @@ const lineEvents = {
           case 'route':
               Object.values(pathDrawing.routePathCache).forEach(lineSetArray => {
                   lineSetArray.forEach(lineSet => {
-                      lineSet.removeAllLines();
+                      if (!lineSet.isTableRoute) { // Ensure table routes are not cleared
+                          lineSet.removeAllLines();
+                      }
                   });
               });
-              pathDrawing.routePathCache = {};
               break;
           case 'hover':
               if (lineEvents.hoveredLine) {
@@ -99,7 +100,7 @@ const lineEvents = {
               console.warn(`Unknown line type: ${type}`);
       }
       map.closePopup();
-  },  
+  },   
 
     showRoutePopup: (event, routeData, visibleLine, invisibleLine) => {
         const { originAirport, destinationAirport, price, date } = routeData;

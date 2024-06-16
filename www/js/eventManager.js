@@ -83,19 +83,19 @@ const eventManager = {
             }
             flightMap.selectedMarker = null;
             updateState('selectedAirport', null, 'eventManager.setupEventListeners');
-            lineEvents.clearLines('route'); // Specify 'route' or 'all' as needed
+            lineEvents.clearLines('route'); // This will clear non-table route lines only
             pathDrawing.drawLines();
         });
-
+    
         map.on('moveend', this.debounce(() => {
             flightMap.redrawMarkers();
             flightMap.updateVisibleMarkers();
         }, 250));
-
+    
         map.on('zoomend', this.debounce(() => {
             flightMap.updateVisibleMarkers();
         }, 250));
-    },
+    },    
 
     setupAllPathsButtonEventListener: function () {
         document.addEventListener('click', function (event) {
