@@ -206,6 +206,12 @@ const pathDrawing = {
         }
     
         let routeId = `${routeData.originAirport.iata_code}-${routeData.destinationAirport.iata_code}`;
+        if (this.routePathCache[routeId]) {
+            // Route already exists, do not create a new one
+            console.log(`Route ${routeId} already exists. Skipping creation.`);
+            return;
+        }
+    
         let shouldDecorate = appState.routes.some(r =>
             r.origin === route.originAirport.iata_code &&
             r.destination === route.destinationAirport.iata_code
@@ -220,7 +226,7 @@ const pathDrawing = {
         if (shouldDecorate) {
             this.currentLines.push(newlineSet);
         }
-    },    
+    },       
 
     drawLines: async function() {
         lineEvents.clearLines('route');
