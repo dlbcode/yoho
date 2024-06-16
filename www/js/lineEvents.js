@@ -208,7 +208,17 @@ const lineEvents = {
 
     onMouseOut: (visibleLine, map, hoveredLine, hoverPopup, pathDrawing) => {
         if (!pathDrawing.popupFromClick && !lineEvents.linesWithPopups.has(visibleLine)) { // Check if line has a popup
-            visibleLine.setStyle({ color: visibleLine.originalColor });
+            const tableRouteId = visibleLine.routeData.tableRouteId; // Get the table route ID
+            const linesToReset = pathDrawing.routePathCache[tableRouteId];
+
+            if (linesToReset) {
+                linesToReset.forEach(lineSet => {
+                    lineSet.lines.forEach(linePair => {
+                        lineSet.resetLine(linePair.visibleLine);
+                    });
+                });
+            }
+
             map.closePopup(hoverPopup);
             // Remove hover popup from the list
             lineEvents.hoverPopups = lineEvents.hoverPopups.filter(p => p !== hoverPopup);
