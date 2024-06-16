@@ -222,24 +222,8 @@ const pathDrawing = {
         }
     },
 
-    clearLines(all = false) {
-        console.log('Clearing lines all:', all);
-        Object.values(this.routePathCache).forEach(lineSetArray => {
-            lineSetArray.forEach(lineSet => {
-                lineSet.removeAllLines();
-            });
-        });
-
-        if (all) {
-            this.routePathCache = {};
-            this.dashedRoutePathCache = {};
-        }
-
-        map.closePopup();
-    },
-
     drawLines: async function() {
-        this.clearLines(false);
+        lineEvents.clearLines('route');
 
         const drawPromises = appState.routes.map(route => {
             if (route.isDirect) {

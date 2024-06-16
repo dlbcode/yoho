@@ -5,6 +5,7 @@ import { drawAllRoutePaths } from './allPaths.js';
 import { appState, updateState } from './stateManager.js';
 import { routeHandling } from './routeHandling.js';
 import { mapHandling } from './mapHandling.js';
+import { lineEvents } from './lineEvents.js';
 
 function handleStateChange(event) {
     const { key, value } = event.detail;
@@ -18,7 +19,7 @@ function handleStateChange(event) {
 
     if (key === 'changeView') {
         if (value !== 'routeTable') {
-            pathDrawing.clearLines(true);
+            lineEvents.clearLines(true);
         }
     }
 
@@ -82,7 +83,7 @@ const eventManager = {
             }
             flightMap.selectedMarker = null;
             updateState('selectedAirport', null, 'eventManager.setupEventListeners');
-            pathDrawing.clearLines();
+            lineEvents.clearLines();
             pathDrawing.drawLines();
         });
 

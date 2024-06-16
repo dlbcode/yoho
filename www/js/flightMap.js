@@ -2,6 +2,7 @@ import { map, blueDotIcon, magentaDotIcon, greenDotIcon } from './map.js';
 import { pathDrawing } from './pathDrawing.js';
 import { eventManager } from './eventManager.js';
 import { appState, updateState } from './stateManager.js';
+import { lineEvents } from './lineEvents.js';
 
 const flightMap = {
     markers: {},
@@ -220,13 +221,13 @@ const flightMap = {
         } else if (event === 'mouseout') {
             if (!marker.hovered) {  // Delay only for the first hover
                 setTimeout(() => {
-                    pathDrawing.clearLines();
+                    lineEvents.clearLines();
                     pathDrawing.drawLines();
                     marker.closePopup();
                 }, 200);
                 marker.hovered = true; // Set the flag to true after the first hover
             } else {
-                pathDrawing.clearLines();
+                lineEvents.clearLines();
                 pathDrawing.drawLines();
                 marker.closePopup();
             }
