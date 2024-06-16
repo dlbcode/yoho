@@ -5,6 +5,7 @@ const lineEvents = {
     // Keep track of different types of popups
     routePopups: [],
     hoverPopups: [],
+    linesWithPopups: new Set(), // Track lines with open popups
 
     clearPopups: (type) => {
         let popups;
@@ -56,6 +57,7 @@ const lineEvents = {
             .setLatLng(event.latlng)
             .setContent(content)
             .on('remove', function () {
+                lineEvents.linesWithPopups.delete(visibleLine); // Remove line from set when popup is closed
                 pathDrawing.popupFromClick = false; // Reset flag on popup removal
             })
             .on('add', function () {
@@ -66,6 +68,7 @@ const lineEvents = {
                 if (invisibleLine && !map.hasLayer(invisibleLine)) {
                     invisibleLine.addTo(map);
                 }
+                lineEvents.linesWithPopups.add(visibleLine); // Add line to set when popup is open
                 pathDrawing.popupFromClick = true; // Set flag on popup addition
             });
 
@@ -112,7 +115,7 @@ const lineEvents = {
     },
 
     onMouseOut: (visibleLine, map, hoveredLine, hoverPopup, pathDrawing) => {
-        if (!pathDrawing.popupFromClick) {
+        if (!pathDrawing.popupFromClick && !lineEvents.linesWithPopups.has(visibleLine)) { // Check if line has a popup
             visibleLine.setStyle({ color: visibleLine.originalColor });
             map.closePopup(hoverPopup);
             // Remove hover popup from the list
