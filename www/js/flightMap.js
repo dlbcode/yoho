@@ -221,13 +221,13 @@ const flightMap = {
         } else if (event === 'mouseout') {
             if (!marker.hovered) {  // Delay only for the first hover
                 setTimeout(() => {
-                    lineEvents.clearLines();
+                    lineEvents.clearLines('hover');
                     pathDrawing.drawLines();
                     marker.closePopup();
                 }, 200);
                 marker.hovered = true; // Set the flag to true after the first hover
             } else {
-                lineEvents.clearLines();
+                lineEvents.clearLines('hover');
                 pathDrawing.drawLines();
                 marker.closePopup();
             }

@@ -83,7 +83,7 @@ const eventManager = {
             }
             flightMap.selectedMarker = null;
             updateState('selectedAirport', null, 'eventManager.setupEventListeners');
-            lineEvents.clearLines();
+            lineEvents.clearLines('route'); // Specify 'route' or 'all' as needed
             pathDrawing.drawLines();
         });
 
@@ -131,4 +131,3 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 export { eventManager };
-
