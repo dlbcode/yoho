@@ -24,10 +24,7 @@ class lineSet {
             const adjustedOrigin = L.latLng(this.origin.latitude, this.origin.longitude + offset);
             const adjustedDestination = L.latLng(this.destination.latitude, this.destination.longitude + offset);
             const lineColor = pathDrawing.getColorBasedOnPrice(this.routeData.price);
-
-            // Determine the line thickness based on whether it's a table route
-            const lineWeight = (this.isTableRoute || this.shouldDecorate) ? 2 : 1;
-
+            const lineWeight = (this.isTableRoute || shouldDecorate) ? 2 : 1;
             const visibleLine = new L.Geodesic([adjustedOrigin, adjustedDestination], {
                 weight: lineWeight,
                 opacity: 1,
