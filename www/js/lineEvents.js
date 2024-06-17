@@ -102,60 +102,62 @@ const lineEvents = {
       map.closePopup();
   },   
 
-    showRoutePopup: (event, routeData, visibleLine, invisibleLine) => {
-        const { originAirport, destinationAirport, price, date } = routeData;
+  showRoutePopup: (event, routeData, visibleLine, invisibleLine) => {
+    const { originAirport, destinationAirport, price, date } = routeData;
 
-        let content = `<div style="line-height: 1.5;">
-            <strong>Route Information</strong><br>
-            <strong>From:</strong> ${originAirport.name} (${originAirport.iata_code})<br>
-            <strong>To:</strong> ${destinationAirport.name} (${destinationAirport.iata_code})<br>
-            <strong>Price:</strong> $${price}<br>`;
+    let content = `<div style=\"line-height: 1.5;\">
+        <strong>Route Information</strong><br>
+        <strong>From:</strong> ${originAirport.name} (${originAirport.iata_code})<br>
+        <strong>To:</strong> ${destinationAirport.name} (${destinationAirport.iata_code})<br>
+        <strong>Price:</strong> $${price}<br>`;
 
-        if (date) {
-            let formattedDate = new Date(date).toLocaleDateString("en-US", {
-                year: 'numeric', month: 'long', day: 'numeric'
-            });
-            content += `<strong>Date:</strong> ${formattedDate}<br>`;
-        }
+    if (date) {
+        let formattedDate = new Date(date).toLocaleDateString("en-US", {
+            year: 'numeric', month: 'long', day: 'numeric'
+        });
+        content += `<strong>Date:</strong> ${formattedDate}<br>`;
+    }
 
-        content += `</div>`;
+    content += `</div>`;
 
-        // Ensure no other route popups are open before creating a new one
-        lineEvents.clearPopups('route');
+    // Ensure no other route popups are open before creating a new one
+    lineEvents.clearPopups('route');
 
-        // Create the popup and add event listeners after initialization
-        const popup = L.popup({ autoClose: false, closeOnClick: false })
-            .setLatLng(event.latlng)
-            .setContent(content)
-            .on('remove', function () {
-                lineEvents.linesWithPopups.delete(visibleLine); // Remove line from set when popup is closed
-                pathDrawing.popupFromClick = false; // Reset flag on popup removal
-                document.removeEventListener('click', lineEvents.outsideClickListener);
-                
-                // Use clearLines to remove the specific lines when the popup is removed
+    // Create the popup and add event listeners after initialization
+    const popup = L.popup({ autoClose: false, closeOnClick: false })
+        .setLatLng(event.latlng)
+        .setContent(content)
+        .on('remove', function () {
+            lineEvents.linesWithPopups.delete(visibleLine); // Remove line from set when popup is closed
+            pathDrawing.popupFromClick = false; // Reset flag on popup removal
+            document.removeEventListener('click', lineEvents.outsideClickListener);
+
+            // Use clearLines to remove the specific lines when the popup is removed, only if it is not for a route table row
+            if (!visibleLine.options.isTableRoute) {
                 lineEvents.clearLines('specific', [{ visibleLine, invisibleLine }]);
-            })
-            .on('add', function () {
-                // Ensure the lines remain visible when the popup is added
-                if (visibleLine && !map.hasLayer(visibleLine)) {
-                    visibleLine.addTo(map);
-                }
-                if (invisibleLine && !map.hasLayer(invisibleLine)) {
-                    invisibleLine.addTo(map);
-                }
-                lineEvents.linesWithPopups.add(visibleLine); // Add line to set when popup is open
-                pathDrawing.popupFromClick = true; // Set flag on popup addition
-                document.addEventListener('click', lineEvents.outsideClickListener);
-            });
+            }
+        })
+        .on('add', function () {
+            // Ensure the lines remain visible when the popup is added
+            if (visibleLine && !map.hasLayer(visibleLine)) {
+                visibleLine.addTo(map);
+            }
+            if (invisibleLine && !map.hasLayer(invisibleLine)) {
+                invisibleLine.addTo(map);
+            }
+            lineEvents.linesWithPopups.add(visibleLine); // Add line to set when popup is open
+            pathDrawing.popupFromClick = true; // Set flag on popup addition
+            document.addEventListener('click', lineEvents.outsideClickListener);
+        });
 
-        // Open the popup on the map
-        setTimeout(() => {
-            popup.openOn(map);
-        }, 100); // Delay to avoid immediate closure by other events
+    // Open the popup on the map
+    setTimeout(() => {
+        popup.openOn(map);
+    }, 100); // Delay to avoid immediate closure by other events
 
-        // Track this popup
-        lineEvents.routePopups.push(popup);
-    },
+    // Track this popup
+    lineEvents.routePopups.push(popup);
+  },
 
     outsideClickListener: (event) => {
         if (!event.target.closest('.leaflet-popup')) {
