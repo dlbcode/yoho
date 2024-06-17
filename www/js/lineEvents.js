@@ -240,10 +240,13 @@ const lineEvents = {
         }
 
         // Highlight the visible line
-        const highlightedRouteSegments = pathDrawing.routePathCache[visibleLine.routeData.tableRouteId];
-        highlightedRouteSegments.forEach(segment => {
-            segment.lines.forEach(line => line.visibleLine.setStyle({ color: 'white', weight: 2, opacity: 1 }));
-        });
+        if (visibleLine.routeData.tableRouteId) {
+            const highlightedRouteSegments = pathDrawing.routePathCache[visibleLine.routeData.tableRouteId];
+            console.log('tableRouteId', visibleLine.routeData.tableRouteId);
+            highlightedRouteSegments.forEach(segment => {
+                segment.lines.forEach(line => line.visibleLine.setStyle({ color: 'white', weight: 2, opacity: 1 }));
+            });
+        }
         
         // Update the current highlighted line
         pathDrawing.currentHighlightedLine = visibleLine;
