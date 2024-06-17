@@ -223,7 +223,12 @@ const lineEvents = {
     if (visibleLine && invisibleLine) {
         // Reset any previously highlighted lines
         if (pathDrawing.currentHighlightedLine) {
-            pathDrawing.currentHighlightedLine.setStyle({ color: pathDrawing.currentHighlightedLine.originalColor });
+            const highlightedRouteSegments = pathDrawing.routePathCache[pathDrawing.currentHighlightedLine.routeData.tableRouteId];
+            if (highlightedRouteSegments) {
+                highlightedRouteSegments.forEach(segment => {
+                    segment.lines.forEach(line => line.visibleLine.setStyle({ color: line.visibleLine.originalColor }));
+                });
+            }
         }
 
         // Ensure the visible and invisible lines are displayed
