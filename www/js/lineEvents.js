@@ -197,24 +197,28 @@ const lineEvents = {
       lineEvents.hoverPopups.push(hoverPopup);
   },  
 
-    onMouseOut: (visibleLine, map, hoveredLine, hoverPopup, pathDrawing) => {
-      if (pathDrawing.popupFromClick || lineEvents.linesWithPopups.has(visibleLine)) return;
-  
-      const linesToReset = visibleLine.routeData.tableRouteId
-          ? pathDrawing.routePathCache[visibleLine.routeData.tableRouteId]
-          : [{ lines: [{ visibleLine }], resetLine: line => line.setStyle({ color: line.originalColor }) }];
-  
-      linesToReset.forEach(lineSet => {
-          lineSet.lines.forEach(linePair => {
-              lineSet.resetLine(linePair.visibleLine);
-          });
-      });
-  
-      map.closePopup(hoverPopup);
-      lineEvents.hoverPopups = lineEvents.hoverPopups.filter(p => p !== hoverPopup);
-      hoveredLine = null;
-      hoverPopup = null;
-  },   
+  onMouseOut: (visibleLine, map, hoveredLine, hoverPopup, pathDrawing) => {
+    if (pathDrawing.popupFromClick || lineEvents.linesWithPopups.has(visibleLine)) return;
+
+    const linesToReset = visibleLine.routeData.tableRouteId
+        ? pathDrawing.routePathCache[visibleLine.routeData.tableRouteId]
+        : [{ lines: [{ visibleLine }], resetLine: line => line.setStyle({ color: line.originalColor }) }];
+
+    if (linesToReset && Array.isArray(linesToReset)) {
+        linesToReset.forEach(lineSet => {
+            lineSet.lines.forEach(linePair => {
+                lineSet.resetLine(linePair.visibleLine);
+            });
+        });
+    } else {
+        console.warn('No lines to reset for tableRouteId:', visibleLine.routeData.tableRouteId);
+    }
+
+    map.closePopup(hoverPopup);
+    lineEvents.hoverPopups = lineEvents.hoverPopups.filter(p => p !== hoverPopup);
+    hoveredLine = null;
+    hoverPopup = null;
+  },  
 
   onClickHandler: (e, visibleLine, invisibleLine, onClick) => {
     if (typeof onClick === 'function') {
@@ -246,6 +250,8 @@ const lineEvents = {
             highlightedRouteSegments.forEach(segment => {
                 segment.lines.forEach(line => line.visibleLine.setStyle({ color: 'white', weight: 2, opacity: 1 }));
             });
+        } else {
+            console.warn('No tableRouteId for line:', visibleLine);
         }
         
         // Update the current highlighted line
