@@ -216,22 +216,31 @@ const lineEvents = {
       hoverPopup = null;
   },   
 
-    onClickHandler: (e, visibleLine, invisibleLine, onClick) => {
-        if (typeof onClick === 'function') {
-            onClick(e, visibleLine, invisibleLine);
+  onClickHandler: (e, visibleLine, invisibleLine, onClick) => {
+    if (typeof onClick === 'function') {
+        onClick(e, visibleLine, invisibleLine);
+    }
+    if (visibleLine && invisibleLine) {
+        // Reset any previously highlighted lines
+        if (pathDrawing.currentHighlightedLine) {
+            pathDrawing.currentHighlightedLine.setStyle({ color: pathDrawing.currentHighlightedLine.originalColor });
         }
-        if (visibleLine && invisibleLine) {
-            // Ensure the visible and invisible lines are displayed
-            if (!map.hasLayer(visibleLine)) {
-                visibleLine.addTo(map);
-            }
-            if (!map.hasLayer(invisibleLine)) {
-                invisibleLine.addTo(map);
-            }
-            // Highlight the visible line
-            visibleLine.setStyle({ color: 'white', weight: 2, opacity: 1 });
+
+        // Ensure the visible and invisible lines are displayed
+        if (!map.hasLayer(visibleLine)) {
+            visibleLine.addTo(map);
         }
-    },
+        if (!map.hasLayer(invisibleLine)) {
+            invisibleLine.addTo(map);
+        }
+
+        // Highlight the visible line
+        visibleLine.setStyle({ color: 'white', weight: 2, opacity: 1 });
+
+        // Update the current highlighted line
+        pathDrawing.currentHighlightedLine = visibleLine;
+    }
+  },
 };
 
 export { lineEvents };
