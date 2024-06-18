@@ -123,31 +123,41 @@ const infoPane = {
         const routeId = `${origin}-${destination}`;
         const lineSets = pathDrawing.routePathCache[routeId] || pathDrawing.dashedRoutePathCache[routeId] || [];
         lineSets.forEach(lineSet => {
-            lineSet.lines.forEach(linePair => {
-                linePair.visibleLine.setStyle({ color: 'white' });
-            });
+            if (lineSet && lineSet.lines) {
+                lineSet.lines.forEach(linePair => {
+                    if (linePair.visibleLine) {
+                        linePair.visibleLine.setStyle({ color: 'white' });
+                    }
+                });
+            }
         });
-      });
-      
-      button.addEventListener('mouseout', () => {
+    });
+    
+    button.addEventListener('mouseout', () => {
         const routeId = `${origin}-${destination}`;
         const lineSets = pathDrawing.routePathCache[routeId] || [];
         const dashedLineSets = pathDrawing.dashedRoutePathCache[routeId] || [];
-
+    
         dashedLineSets.forEach(lineSet => {
-            lineSet.setStyle({ color: '#999' });
+            if (lineSet) {
+                lineSet.setStyle({ color: '#999' });
+            }
         });
-
+    
         lineSets.forEach(lineSet => {
-            lineSet.lines.forEach(linePair => {
-                if (linePair.visibleLine.options.originalColor) {
-                    linePair.visibleLine.setStyle({ color: linePair.visibleLine.options.originalColor });
-                } else {
-                    linePair.visibleLine.setStyle({ color: 'grey' });
-                }
-            });
+            if (lineSet && lineSet.lines) {
+                lineSet.lines.forEach(linePair => {
+                    if (linePair.visibleLine) {
+                        if (linePair.visibleLine.options.originalColor) {
+                            linePair.visibleLine.setStyle({ color: linePair.visibleLine.options.originalColor });
+                        } else {
+                            linePair.visibleLine.setStyle({ color: 'grey' });
+                        }
+                    }
+                });
+            }
         });
-      });            
+    });                
     });
     if (appState.waypoints.length === 0 || appState.waypoints.length % 2 === 0) {
       this.addPlusButton();
