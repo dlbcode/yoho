@@ -1,5 +1,5 @@
 import { map } from './map.js';
-import { pathDrawing } from './pathDrawing.js';
+import { pathDrawing, Line } from './pathDrawing.js'; // Correct import
 
 const lineEvents = {
     routePopups: [],
@@ -35,12 +35,16 @@ const lineEvents = {
             case 'all':
                 Object.values(pathDrawing.routePathCache).forEach(lineSetArray => {
                     lineSetArray.forEach(line => {
-                        line.remove();
+                        if (line instanceof Line) {
+                            line.remove();
+                        }
                     });
                 });
                 Object.values(pathDrawing.dashedRoutePathCache).forEach(lineSetArray => {
                     lineSetArray.forEach(line => {
-                        line.remove();
+                        if (line instanceof Line) {
+                            line.remove();
+                        }
                     });
                 });
                 pathDrawing.routePathCache = {};
@@ -49,7 +53,9 @@ const lineEvents = {
             case 'dashed':
                 Object.values(pathDrawing.dashedRoutePathCache).forEach(lineSetArray => {
                     lineSetArray.forEach(line => {
-                        line.remove();
+                        if (line instanceof Line) {
+                            line.remove();
+                        }
                     });
                 });
                 pathDrawing.dashedRoutePathCache = {};
@@ -57,7 +63,7 @@ const lineEvents = {
             case 'route':
                 Object.values(pathDrawing.routePathCache).forEach(lineSetArray => {
                     lineSetArray.forEach(line => {
-                        if (!line.isTableRoute) {
+                        if (line instanceof Line && !line.isTableRoute) {
                             line.remove();
                         }
                     });
@@ -65,7 +71,9 @@ const lineEvents = {
                 break;
             case 'hover':
                 if (lineEvents.hoveredLine) {
-                    lineEvents.hoveredLine.reset();
+                    if (lineEvents.hoveredLine instanceof Line) {
+                        lineEvents.hoveredLine.reset();
+                    }
                     map.closePopup(lineEvents.hoverPopup);
                     lineEvents.hoveredLine = null;
                     lineEvents.hoverPopup = null;
@@ -73,15 +81,17 @@ const lineEvents = {
                 break;
             case 'specific':
                 if (specificLines) {
-                    specificLines.forEach(linePair => {
-                        linePair.remove();
+                    specificLines.forEach(line => {
+                        if (line instanceof Line) {
+                            line.remove();
+                        }
                     });
                 }
                 break;
             case 'tableLines':
                 Object.values(pathDrawing.routePathCache).forEach(lineSetArray => {
                     lineSetArray.forEach(line => {
-                        if (line.isTableRoute) {
+                        if (line instanceof Line && line.isTableRoute) {
                             line.remove();
                         }
                     });
@@ -127,7 +137,9 @@ const lineEvents = {
                     const highlightedRouteSegments = pathDrawing.routePathCache[visibleLine.routeData.tableRouteId];
                     if (highlightedRouteSegments) {
                         highlightedRouteSegments.forEach(segment => {
-                            segment.visibleLine.setStyle({ color: segment.visibleLine.originalColor });
+                            if (segment instanceof Line) {
+                                segment.visibleLine.setStyle({ color: segment.visibleLine.originalColor });
+                            }
                         });
                     }
                 }
@@ -161,7 +173,9 @@ const lineEvents = {
         if (pathDrawing.popupFromClick) return;
 
         if (lineEvents.hoveredLine && lineEvents.hoveredLine !== visibleLine) {
-            lineEvents.hoveredLine.reset();
+            if (lineEvents.hoveredLine instanceof Line) {
+                lineEvents.hoveredLine.reset();
+            }
             map.closePopup(lineEvents.hoverPopup);
             lineEvents.hoverPopups = lineEvents.hoverPopups.filter(p => p !== lineEvents.hoverPopup);
         }
@@ -173,7 +187,9 @@ const lineEvents = {
         const linesToHighlight = pathDrawing.routePathCache[tableRouteId];
 
         linesToHighlight?.forEach(line => {
-            line.highlight();
+            if (line instanceof Line) {
+                line.highlight();
+            }
         });
 
         const displayPrice = Math.round(visibleLine.routeData.price || 0);
@@ -197,7 +213,9 @@ const lineEvents = {
             : [{ visibleLine }];
 
         linesToReset?.forEach(line => {
-            line.reset();
+            if (line && line.reset) {
+                line.reset();
+            }
         });
 
         map.closePopup(lineEvents.hoverPopup);

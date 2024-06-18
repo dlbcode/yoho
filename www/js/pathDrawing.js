@@ -335,4 +335,4 @@ document.addEventListener('DOMContentLoaded', () => {
     pathDrawing.drawRouteLines();
 });
 
-export { pathDrawing };
+export { pathDrawing, Line };
