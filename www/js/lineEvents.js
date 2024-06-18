@@ -2,10 +2,9 @@ import { map } from './map.js';
 import { pathDrawing } from './pathDrawing.js';
 
 const lineEvents = {
-    // Keep track of different types of popups
     routePopups: [],
     hoverPopups: [],
-    linesWithPopups: new Set(), // Track lines with open popups
+    linesWithPopups: new Set(),
 
     clearPopups: (type) => {
         let popups;
@@ -32,140 +31,125 @@ const lineEvents = {
     },
 
     clearLines: (type, specificLines) => {
-      switch (type) {
-          case 'all':
-              Object.values(pathDrawing.routePathCache).forEach(lineSetArray => {
-                  lineSetArray.forEach(lineSet => {
-                      lineSet.removeAllLines();
-                  });
-              });
-              Object.values(pathDrawing.dashedRoutePathCache).forEach(lineSetArray => {
-                  lineSetArray.forEach(lineSet => {
-                      lineSet.removeAllLines();
-                  });
-              });
-              pathDrawing.routePathCache = {};
-              pathDrawing.dashedRoutePathCache = {};
-              break;
-          case 'dashed':
-              Object.values(pathDrawing.dashedRoutePathCache).forEach(lineSetArray => {
-                  lineSetArray.forEach(lineSet => {
-                      lineSet.removeAllLines();
-                  });
-              });
-              pathDrawing.dashedRoutePathCache = {};
-              break;
-          case 'route':
-              Object.values(pathDrawing.routePathCache).forEach(lineSetArray => {
-                  lineSetArray.forEach(lineSet => {
-                      if (!lineSet.isTableRoute) { // Ensure table routes are not cleared
-                          lineSet.removeAllLines();
-                      }
-                  });
-              });
-              break;
-          case 'hover':
-              if (lineEvents.hoveredLine) {
-                  lineEvents.hoveredLine.setStyle({ color: lineEvents.hoveredLine.originalColor });
-                  map.closePopup(lineEvents.hoverPopup);
-                  lineEvents.hoveredLine = null;
-                  lineEvents.hoverPopup = null;
-              }
-              break;
-          case 'specific':
-              if (specificLines) {
-                  specificLines.forEach(linePair => {
-                      if (map.hasLayer(linePair.visibleLine)) {
-                          map.removeLayer(linePair.visibleLine);
-                      }
-                      if (map.hasLayer(linePair.invisibleLine)) {
-                          map.removeLayer(linePair.invisibleLine);
-                      }
-                      if (linePair.decoratedLine && map.hasLayer(linePair.decoratedLine)) {
-                          map.removeLayer(linePair.decoratedLine);
-                      }
-                  });
-              }
-              break;
-          case 'tableLines':
-              Object.values(pathDrawing.routePathCache).forEach(lineSetArray => {
-                  lineSetArray.forEach(lineSet => {
-                      if (lineSet.isTableRoute) {
-                          lineSet.removeAllLines();
-                      }
-                  });
-              });
-              break;
-          default:
-              console.warn(`Unknown line type: ${type}`);
-      }
-      map.closePopup();
-  },   
-
-  showRoutePopup: (event, routeData, visibleLine, invisibleLine) => {
-    const { originAirport, destinationAirport, price, date } = routeData;
-
-    let content = `<div style=\\\"line-height: 1.5;\\\">
-        <strong>Route Information</strong><br>
-        <strong>From:</strong> ${originAirport.name} (${originAirport.iata_code})<br>
-        <strong>To:</strong> ${destinationAirport.name} (${destinationAirport.iata_code})<br>
-        <strong>Price:</strong> $${price}<br>`;
-
-    if (date) {
-        let formattedDate = new Date(date).toLocaleDateString("en-US", {
-            year: 'numeric', month: 'long', day: 'numeric'
-        });
-        content += `<strong>Date:</strong> ${formattedDate}<br>`;
-    }
-
-    content += `</div>`;
-
-    // Ensure no other route popups are open before creating a new one
-    lineEvents.clearPopups('route');
-
-    // Create the popup and add event listeners after initialization
-    const popup = L.popup({ autoClose: false, closeOnClick: false })
-        .setLatLng(event.latlng)
-        .setContent(content)
-        .on('remove', function () {
-            lineEvents.linesWithPopups.delete(visibleLine); // Remove line from set when popup is closed
-            pathDrawing.popupFromClick = false; // Reset flag on popup removal
-            document.removeEventListener('click', lineEvents.outsideClickListener);
-
-            // Use clearLines to remove the specific lines when the popup is removed, only if it is not for a route table row
-            if (!visibleLine.options.isTableRoute) {
-                lineEvents.clearLines('specific', [{ visibleLine, invisibleLine }]);
-            } else {
-                // Reset color for all lines in the route
-                const highlightedRouteSegments = pathDrawing.routePathCache[visibleLine.routeData.tableRouteId];
-                if (highlightedRouteSegments) {
-                    highlightedRouteSegments.forEach(segment => {
-                        segment.lines.forEach(line => line.visibleLine.setStyle({ color: line.visibleLine.originalColor }));
+        switch (type) {
+            case 'all':
+                Object.values(pathDrawing.routePathCache).forEach(lineSetArray => {
+                    lineSetArray.forEach(line => {
+                        line.remove();
+                    });
+                });
+                Object.values(pathDrawing.dashedRoutePathCache).forEach(lineSetArray => {
+                    lineSetArray.forEach(line => {
+                        line.remove();
+                    });
+                });
+                pathDrawing.routePathCache = {};
+                pathDrawing.dashedRoutePathCache = {};
+                break;
+            case 'dashed':
+                Object.values(pathDrawing.dashedRoutePathCache).forEach(lineSetArray => {
+                    lineSetArray.forEach(line => {
+                        line.remove();
+                    });
+                });
+                pathDrawing.dashedRoutePathCache = {};
+                break;
+            case 'route':
+                Object.values(pathDrawing.routePathCache).forEach(lineSetArray => {
+                    lineSetArray.forEach(line => {
+                        if (!line.isTableRoute) {
+                            line.remove();
+                        }
+                    });
+                });
+                break;
+            case 'hover':
+                if (lineEvents.hoveredLine) {
+                    lineEvents.hoveredLine.reset();
+                    map.closePopup(lineEvents.hoverPopup);
+                    lineEvents.hoveredLine = null;
+                    lineEvents.hoverPopup = null;
+                }
+                break;
+            case 'specific':
+                if (specificLines) {
+                    specificLines.forEach(linePair => {
+                        linePair.remove();
                     });
                 }
-            }
-        })
-        .on('add', function () {
-            // Ensure the lines remain visible when the popup is added
-            if (visibleLine && !map.hasLayer(visibleLine)) {
-                visibleLine.addTo(map);
-            }
-            if (invisibleLine && !map.hasLayer(invisibleLine)) {
-                invisibleLine.addTo(map);
-            }
-            lineEvents.linesWithPopups.add(visibleLine); // Add line to set when popup is open
-            pathDrawing.popupFromClick = true; // Set flag on popup addition
-            document.addEventListener('click', lineEvents.outsideClickListener);
-        });
+                break;
+            case 'tableLines':
+                Object.values(pathDrawing.routePathCache).forEach(lineSetArray => {
+                    lineSetArray.forEach(line => {
+                        if (line.isTableRoute) {
+                            line.remove();
+                        }
+                    });
+                });
+                break;
+            default:
+                console.warn(`Unknown line type: ${type}`);
+        }
+        map.closePopup();
+    },
 
-    // Open the popup on the map
-    setTimeout(() => {
-        popup.openOn(map);
-    }, 100); // Delay to avoid immediate closure by other events
+    showRoutePopup: (event, routeData, visibleLine, invisibleLine) => {
+        const { originAirport, destinationAirport, price, date } = routeData;
 
-    // Track this popup
-    lineEvents.routePopups.push(popup);
-},
+        let content = `<div style="line-height: 1.5;">
+            <strong>Route Information</strong><br>
+            <strong>From:</strong> ${originAirport.name} (${originAirport.iata_code})<br>
+            <strong>To:</strong> ${destinationAirport.name} (${destinationAirport.iata_code})<br>
+            <strong>Price:</strong> $${price}<br>`;
+
+        if (date) {
+            let formattedDate = new Date(date).toLocaleDateString("en-US", {
+                year: 'numeric', month: 'long', day: 'numeric'
+            });
+            content += `<strong>Date:</strong> ${formattedDate}<br>`;
+        }
+
+        content += `</div>`;
+
+        lineEvents.clearPopups('route');
+
+        const popup = L.popup({ autoClose: false, closeOnClick: false })
+            .setLatLng(event.latlng)
+            .setContent(content)
+            .on('remove', function () {
+                lineEvents.linesWithPopups.delete(visibleLine);
+                pathDrawing.popupFromClick = false;
+                document.removeEventListener('click', lineEvents.outsideClickListener);
+
+                if (!visibleLine.options.isTableRoute) {
+                    lineEvents.clearLines('specific', [{ visibleLine, invisibleLine }]);
+                } else {
+                    const highlightedRouteSegments = pathDrawing.routePathCache[visibleLine.routeData.tableRouteId];
+                    if (highlightedRouteSegments) {
+                        highlightedRouteSegments.forEach(segment => {
+                            segment.visibleLine.setStyle({ color: segment.visibleLine.originalColor });
+                        });
+                    }
+                }
+            })
+            .on('add', function () {
+                if (visibleLine && !map.hasLayer(visibleLine)) {
+                    visibleLine.addTo(map);
+                }
+                if (invisibleLine && !map.hasLayer(invisibleLine)) {
+                    invisibleLine.addTo(map);
+                }
+                lineEvents.linesWithPopups.add(visibleLine);
+                pathDrawing.popupFromClick = true;
+                document.addEventListener('click', lineEvents.outsideClickListener);
+            });
+
+        setTimeout(() => {
+            popup.openOn(map);
+        }, 100);
+
+        lineEvents.routePopups.push(popup);
+    },
 
     outsideClickListener: (event) => {
         if (!event.target.closest('.leaflet-popup')) {
@@ -173,110 +157,62 @@ const lineEvents = {
         }
     },
 
-    onMouseOver: (e, visibleLine, map, hoveredLine, hoverPopup, routeData, pathDrawing) => {
-      if (pathDrawing.popupFromClick) return;
-  
-      if (hoveredLine && hoveredLine !== visibleLine) {
-          hoveredLine.setStyle({ color: hoveredLine.originalColor });
-          map.closePopup(hoverPopup);
-          lineEvents.hoverPopups = lineEvents.hoverPopups.filter(p => p !== hoverPopup);
-      }
-  
-      hoveredLine = visibleLine;
-      visibleLine.setStyle({ color: 'white', weight: 2, opacity: 1 });
-  
-      const tableRouteId = visibleLine.routeData.tableRouteId;
-      const linesToHighlight = pathDrawing.routePathCache[tableRouteId];
-  
-      linesToHighlight?.forEach(lineSet => {
-          lineSet.lines.forEach(linePair => lineSet.highlightLine(linePair.visibleLine));
-      });
-  
-      const displayPrice = Math.round(routeData.price || 0);
-      const city = routeData.destinationAirport?.city || 'Unknown City';
-      const dateContent = routeData.date ? `<br><span style="line-height: 1; display: block; color: #666">on ${new Date(routeData.date).toLocaleDateString("en-US", { year: 'numeric', month: 'long', day: 'numeric' })}</span>` : '';
-      const content = `<div style="line-height: 1.2; margin: 0;">${city}<br><span><strong><span style="color: #ccc; font-size: 14px;">$${displayPrice}</span></strong></span>${dateContent}</div>`;
-  
-      hoverPopup = L.popup({ autoClose: false, closeOnClick: true })
-          .setLatLng(e.latlng)
-          .setContent(content)
-          .openOn(map);
-  
-      lineEvents.hoverPopups.push(hoverPopup);
-  },  
+    onMouseOver: (e, visibleLine, map) => {
+        if (pathDrawing.popupFromClick) return;
 
-  onMouseOut: (visibleLine, map, hoveredLine, hoverPopup, pathDrawing) => {
-    if (pathDrawing.popupFromClick || lineEvents.linesWithPopups.has(visibleLine)) return;
+        if (lineEvents.hoveredLine && lineEvents.hoveredLine !== visibleLine) {
+            lineEvents.hoveredLine.reset();
+            map.closePopup(lineEvents.hoverPopup);
+            lineEvents.hoverPopups = lineEvents.hoverPopups.filter(p => p !== lineEvents.hoverPopup);
+        }
 
-    const linesToReset = visibleLine.routeData.tableRouteId
-        ? pathDrawing.routePathCache[visibleLine.routeData.tableRouteId]
-        : [{ lines: [{ visibleLine }], resetLine: line => line.setStyle({ color: line.originalColor }) }];
+        lineEvents.hoveredLine = visibleLine;
+        visibleLine.setStyle({ color: 'white', weight: 2, opacity: 1 });
 
-    if (linesToReset && Array.isArray(linesToReset)) {
-        linesToReset.forEach(lineSet => {
-            lineSet.lines.forEach(linePair => {
-                lineSet.resetLine(linePair.visibleLine);
-            });
+        const tableRouteId = visibleLine.routeData.tableRouteId;
+        const linesToHighlight = pathDrawing.routePathCache[tableRouteId];
+
+        linesToHighlight?.forEach(line => {
+            line.highlight();
         });
-    } else {
-        console.warn('No lines to reset for tableRouteId:', visibleLine.routeData.tableRouteId);
-    }
 
-    map.closePopup(hoverPopup);
-    lineEvents.hoverPopups = lineEvents.hoverPopups.filter(p => p !== hoverPopup);
-    hoveredLine = null;
-    hoverPopup = null;
-  },  
+        const displayPrice = Math.round(visibleLine.routeData.price || 0);
+        const city = visibleLine.routeData.destinationAirport?.city || 'Unknown City';
+        const dateContent = visibleLine.routeData.date ? `<br><span style="line-height: 1; display: block; color: #666">on ${new Date(visibleLine.routeData.date).toLocaleDateString("en-US", { year: 'numeric', month: 'long', day: 'numeric' })}</span>` : '';
+        const content = `<div style="line-height: 1.2; margin: 0;">${city}<br><span><strong><span style="color: #ccc; font-size: 14px;">$${displayPrice}</span></strong></span>${dateContent}</div>`;
 
-  onClickHandler: (e, visibleLine, invisibleLine, onClick) => {
-    if (typeof onClick === 'function') {
-        onClick(e, visibleLine, invisibleLine);
-    }
-    if (visibleLine && invisibleLine) {
-        // Reset any previously highlighted lines
-        if (pathDrawing.currentHighlightedLine && pathDrawing.currentHighlightedLine !== visibleLine) {
-            const highlightedRouteSegments = pathDrawing.routePathCache[pathDrawing.currentHighlightedLine.routeData.tableRouteId];
-            if (highlightedRouteSegments) {
-                highlightedRouteSegments.forEach(segment => {
-                    segment.lines.forEach(line => line.visibleLine.setStyle({ color: line.visibleLine.originalColor }));
-                });
-            }
-        }
+        lineEvents.hoverPopup = L.popup({ autoClose: false, closeOnClick: true })
+            .setLatLng(e.latlng)
+            .setContent(content)
+            .openOn(map);
 
-        // Check if the current line is already highlighted
-        const isCurrentlyHighlighted = pathDrawing.currentHighlightedLine === visibleLine;
+        lineEvents.hoverPopups.push(lineEvents.hoverPopup);
+    },
 
-        // Reset the style of the current line if it was already highlighted
-        if (isCurrentlyHighlighted) {
-            const highlightedRouteSegments = pathDrawing.routePathCache[visibleLine.routeData.tableRouteId];
-            highlightedRouteSegments.forEach(segment => {
-                segment.lines.forEach(line => line.visibleLine.setStyle({ color: line.visibleLine.originalColor }));
-            });
-            pathDrawing.currentHighlightedLine = null;
+    onMouseOut: (visibleLine, map) => {
+        if (pathDrawing.popupFromClick || lineEvents.linesWithPopups.has(visibleLine)) return;
+
+        const linesToReset = visibleLine.routeData.tableRouteId
+            ? pathDrawing.routePathCache[visibleLine.routeData.tableRouteId]
+            : [{ visibleLine }];
+
+        linesToReset?.forEach(line => {
+            line.reset();
+        });
+
+        map.closePopup(lineEvents.hoverPopup);
+        lineEvents.hoverPopups = lineEvents.hoverPopups.filter(p => p !== lineEvents.hoverPopup);
+        lineEvents.hoveredLine = null;
+        lineEvents.hoverPopup = null;
+    },
+
+    onClickHandler: (e, visibleLine, invisibleLine, routeId) => {
+        if (visibleLine.routeData) {
+            lineEvents.showRoutePopup(e, visibleLine.routeData, visibleLine, invisibleLine);
         } else {
-            // Ensure the visible and invisible lines are displayed
-            if (!map.hasLayer(visibleLine)) {
-                visibleLine.addTo(map);
-            }
-            if (!map.hasLayer(invisibleLine)) {
-                invisibleLine.addTo(map);
-            }
-
-            // Highlight the visible line
-            if (visibleLine.routeData.tableRouteId) {
-                const highlightedRouteSegments = pathDrawing.routePathCache[visibleLine.routeData.tableRouteId];
-                highlightedRouteSegments.forEach(segment => {
-                    segment.lines.forEach(line => line.visibleLine.setStyle({ color: 'white', weight: 2, opacity: 1 }));
-                });
-            } else {
-                console.warn('No tableRouteId for line:', visibleLine);
-            }
-
-            // Update the current highlighted line
-            pathDrawing.currentHighlightedLine = visibleLine;
+            console.error('Route data is undefined for the clicked line.');
         }
-    }
-  },
+    },
 };
 
 export { lineEvents };

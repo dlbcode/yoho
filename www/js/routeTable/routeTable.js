@@ -1,7 +1,7 @@
 import { appState, updateState } from '../stateManager.js';
 import { sliderFilter } from './sliderFilter.js';
 import { sortTableByColumn } from './sortTable.js';
-import { pathDrawing, lineSet } from '../pathDrawing.js';
+import { pathDrawing } from '../pathDrawing.js';
 import { flightMap } from '../flightMap.js';
 import { routeInfoRow, highlightSelectedRowForRouteIndex } from './routeInfoRow.js';
 
