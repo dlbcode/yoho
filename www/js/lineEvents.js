@@ -226,7 +226,7 @@ const lineEvents = {
     }
     if (visibleLine && invisibleLine) {
         // Reset any previously highlighted lines
-        if (pathDrawing.currentHighlightedLine) {
+        if (pathDrawing.currentHighlightedLine && pathDrawing.currentHighlightedLine !== visibleLine) {
             const highlightedRouteSegments = pathDrawing.routePathCache[pathDrawing.currentHighlightedLine.routeData.tableRouteId];
             if (highlightedRouteSegments) {
                 highlightedRouteSegments.forEach(segment => {
@@ -235,27 +235,38 @@ const lineEvents = {
             }
         }
 
-        // Ensure the visible and invisible lines are displayed
-        if (!map.hasLayer(visibleLine)) {
-            visibleLine.addTo(map);
-        }
-        if (!map.hasLayer(invisibleLine)) {
-            invisibleLine.addTo(map);
-        }
+        // Check if the current line is already highlighted
+        const isCurrentlyHighlighted = pathDrawing.currentHighlightedLine === visibleLine;
 
-        // Highlight the visible line
-        if (visibleLine.routeData.tableRouteId) {
+        // Reset the style of the current line if it was already highlighted
+        if (isCurrentlyHighlighted) {
             const highlightedRouteSegments = pathDrawing.routePathCache[visibleLine.routeData.tableRouteId];
-            console.log('tableRouteId', visibleLine.routeData.tableRouteId);
             highlightedRouteSegments.forEach(segment => {
-                segment.lines.forEach(line => line.visibleLine.setStyle({ color: 'white', weight: 2, opacity: 1 }));
+                segment.lines.forEach(line => line.visibleLine.setStyle({ color: line.visibleLine.originalColor }));
             });
+            pathDrawing.currentHighlightedLine = null;
         } else {
-            console.warn('No tableRouteId for line:', visibleLine);
+            // Ensure the visible and invisible lines are displayed
+            if (!map.hasLayer(visibleLine)) {
+                visibleLine.addTo(map);
+            }
+            if (!map.hasLayer(invisibleLine)) {
+                invisibleLine.addTo(map);
+            }
+
+            // Highlight the visible line
+            if (visibleLine.routeData.tableRouteId) {
+                const highlightedRouteSegments = pathDrawing.routePathCache[visibleLine.routeData.tableRouteId];
+                highlightedRouteSegments.forEach(segment => {
+                    segment.lines.forEach(line => line.visibleLine.setStyle({ color: 'white', weight: 2, opacity: 1 }));
+                });
+            } else {
+                console.warn('No tableRouteId for line:', visibleLine);
+            }
+
+            // Update the current highlighted line
+            pathDrawing.currentHighlightedLine = visibleLine;
         }
-        
-        // Update the current highlighted line
-        pathDrawing.currentHighlightedLine = visibleLine;
     }
   },
 };
