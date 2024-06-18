@@ -105,7 +105,7 @@ const lineEvents = {
   showRoutePopup: (event, routeData, visibleLine, invisibleLine) => {
     const { originAirport, destinationAirport, price, date } = routeData;
 
-    let content = `<div style=\"line-height: 1.5;\">
+    let content = `<div style=\\\"line-height: 1.5;\\\">
         <strong>Route Information</strong><br>
         <strong>From:</strong> ${originAirport.name} (${originAirport.iata_code})<br>
         <strong>To:</strong> ${destinationAirport.name} (${destinationAirport.iata_code})<br>
@@ -135,6 +135,14 @@ const lineEvents = {
             // Use clearLines to remove the specific lines when the popup is removed, only if it is not for a route table row
             if (!visibleLine.options.isTableRoute) {
                 lineEvents.clearLines('specific', [{ visibleLine, invisibleLine }]);
+            } else {
+                // Reset color for all lines in the route
+                const highlightedRouteSegments = pathDrawing.routePathCache[visibleLine.routeData.tableRouteId];
+                if (highlightedRouteSegments) {
+                    highlightedRouteSegments.forEach(segment => {
+                        segment.lines.forEach(line => line.visibleLine.setStyle({ color: line.visibleLine.originalColor }));
+                    });
+                }
             }
         })
         .on('add', function () {
@@ -157,7 +165,7 @@ const lineEvents = {
 
     // Track this popup
     lineEvents.routePopups.push(popup);
-  },
+},
 
     outsideClickListener: (event) => {
         if (!event.target.closest('.leaflet-popup')) {
