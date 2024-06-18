@@ -32,12 +32,16 @@ const removeRoute = (routeNumber) => {
     });
     appState.routeDates = newRouteDates;
 
-    // Remove route lines from pathDrawing using LineSet
+    // Remove route lines from pathDrawing using Line
     Object.keys(pathDrawing.routePathCache).forEach(routeId => {
         if (routeId.includes(`${routeNumber}`)) {
             const lineSet = pathDrawing.routePathCache[routeId];
             if (lineSet) {
-                lineSet.removeAllLines();
+                lineSet.forEach(line => {
+                    if (line && line.remove) {
+                        line.remove();
+                    }
+                });
                 delete pathDrawing.routePathCache[routeId];
             }
         }
