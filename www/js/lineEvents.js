@@ -1,5 +1,5 @@
 import { map } from './map.js';
-import { pathDrawing, Line } from './pathDrawing.js'; // Correct import
+import { pathDrawing, Line } from './pathDrawing.js';
 
 const lineEvents = {
     routePopups: [],
@@ -106,7 +106,7 @@ const lineEvents = {
     showRoutePopup: (event, routeData, visibleLine, invisibleLine) => {
         const { originAirport, destinationAirport, price, date } = routeData;
 
-        let content = `<div style="line-height: 1.5;">
+        let content = `<div style=\"line-height: 1.5;\">
             <strong>Route Information</strong><br>
             <strong>From:</strong> ${originAirport.name} (${originAirport.iata_code})<br>
             <strong>To:</strong> ${destinationAirport.name} (${destinationAirport.iata_code})<br>
@@ -183,19 +183,20 @@ const lineEvents = {
         lineEvents.hoveredLine = visibleLine;
         visibleLine.setStyle({ color: 'white', weight: 2, opacity: 1 });
 
-        const tableRouteId = visibleLine.routeData.tableRouteId;
-        const linesToHighlight = pathDrawing.routePathCache[tableRouteId];
+        const tableRouteId = visibleLine.routeData?.tableRouteId;
+        if (tableRouteId) {
+            const linesToHighlight = pathDrawing.routePathCache[tableRouteId];
+            linesToHighlight?.forEach(line => {
+                if (line instanceof Line) {
+                    line.highlight();
+                }
+            });
+        }
 
-        linesToHighlight?.forEach(line => {
-            if (line instanceof Line) {
-                line.highlight();
-            }
-        });
-
-        const displayPrice = Math.round(visibleLine.routeData.price || 0);
-        const city = visibleLine.routeData.destinationAirport?.city || 'Unknown City';
-        const dateContent = visibleLine.routeData.date ? `<br><span style="line-height: 1; display: block; color: #666">on ${new Date(visibleLine.routeData.date).toLocaleDateString("en-US", { year: 'numeric', month: 'long', day: 'numeric' })}</span>` : '';
-        const content = `<div style="line-height: 1.2; margin: 0;">${city}<br><span><strong><span style="color: #ccc; font-size: 14px;">$${displayPrice}</span></strong></span>${dateContent}</div>`;
+        const displayPrice = visibleLine.routeData?.price ? Math.round(visibleLine.routeData.price) : 'N/A';
+        const city = visibleLine.routeData?.destinationAirport?.city || 'Unknown City';
+        const dateContent = visibleLine.routeData?.date ? `<br><span style=\"line-height: 1; display: block; color: #666\">on ${new Date(visibleLine.routeData.date).toLocaleDateString("en-US", { year: 'numeric', month: 'long', day: 'numeric' })}</span>` : '';
+        const content = `<div style=\"line-height: 1.2; margin: 0;\">${city}<br><span><strong><span style=\"color: #ccc; font-size: 14px;\">$${displayPrice}</span></strong></span>${dateContent}</div>`;
 
         lineEvents.hoverPopup = L.popup({ autoClose: false, closeOnClick: true })
             .setLatLng(e.latlng)
@@ -208,8 +209,9 @@ const lineEvents = {
     onMouseOut: (visibleLine, map) => {
         if (pathDrawing.popupFromClick || lineEvents.linesWithPopups.has(visibleLine)) return;
 
-        const linesToReset = visibleLine.routeData.tableRouteId
-            ? pathDrawing.routePathCache[visibleLine.routeData.tableRouteId]
+        const tableRouteId = visibleLine.routeData?.tableRouteId;
+        const linesToReset = tableRouteId
+            ? pathDrawing.routePathCache[tableRouteId]
             : [{ visibleLine }];
 
         linesToReset?.forEach(line => {

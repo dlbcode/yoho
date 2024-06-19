@@ -48,7 +48,7 @@ const flightMap = {
         marker.iata_code = iata;
         marker.hovered = false;
 
-        let popupContent = `<div style="text-align: center; color: #bababa;"><b>${airport.city}</b>`;
+        let popupContent = `<div style=\"text-align: center; color: #bababa;\"><b>${airport.city}</b>`;
         if (airport.type === 'airport') {
             popupContent += `<div>${airport.name}</div>`; 
         }
@@ -206,15 +206,19 @@ const flightMap = {
         if (!marker) return;
         const airport = this.airportDataCache[iata];
         if (!airport) return;
-
+    
         // Skip handling hover events for other markers when a specific airport is selected
         if (appState.selectedAirport && appState.selectedAirport.iata_code !== iata) {
             return;
         }
-
+    
         if (event === 'mouseover') {
             this.fetchAndCacheRoutes(iata).then(() => {
-                pathDrawing.drawRoutePaths(iata, appState.directRoutes, appState.routeDirection);
+                if (!appState.directRoutes[iata]) {
+                    console.error('Direct routes not found for IATA:', iata);
+                    return;
+                }
+                pathDrawing.drawRoutePaths(iata, appState.directRoutes);
                 Object.values(self.markers).forEach(marker => marker.closePopup());
                 marker.openPopup();
             });
@@ -232,11 +236,11 @@ const flightMap = {
                 marker.closePopup();
             }
         }
-
+    
         if (appState.selectedAirport && appState.selectedAirport.iata_code === iata) {
             marker.openPopup();
         }
-    },
+    },         
 
     async fetchAndCacheRoutes(iata) {
         if (!iata) {
@@ -248,21 +252,25 @@ const flightMap = {
                 const direction = appState.routeDirection; // 'to' or 'from'
                 const response = await fetch(`https://yonderhop.com/api/directRoutes?origin=${iata}&direction=${direction}`);
                 const routes = await response.json();
+                if (!routes || !routes.length) {
+                    console.error('No routes found for IATA:', iata);
+                    return;
+                }
                 appState.directRoutes[iata] = routes;
             } catch (error) {
                 console.error('Error fetching routes:', error);
             }
         }
-    },
+    },    
 
     shouldDisplayAirport(airportWeight, currentZoom) {
         return airportWeight <= currentZoom - 1;
     },
-    
+
     updateVisibleMarkers() {
         const currentZoom = map.getZoom();
         const currentBounds = map.getBounds();
-    
+
         // Check and add markers for airports that should be visible at the current zoom level
         Object.values(this.airportDataCache).forEach(airport => {
             if (this.shouldDisplayAirport(airport.weight, currentZoom) &&
@@ -274,7 +282,7 @@ const flightMap = {
                 }
             }
         });
-    
+
         // Update visibility of existing markers
         Object.keys(this.markers).forEach(iata => {
             const marker = this.markers[iata];
