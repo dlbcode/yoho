@@ -33,20 +33,28 @@ const lineEvents = {
 
     clearLines: (type, specificLines) => {
       switch (type) {
-          case 'all':
-              Object.values(pathDrawing.routePathCache).forEach(lineSetArray => {
-                  lineSetArray.forEach(lineSet => {
-                      lineSet.removeAllLines();
-                  });
-              });
-              Object.values(pathDrawing.dashedRoutePathCache).forEach(lineSetArray => {
-                  lineSetArray.forEach(lineSet => {
-                      lineSet.removeAllLines();
-                  });
-              });
-              pathDrawing.routePathCache = {};
-              pathDrawing.dashedRoutePathCache = {};
-              break;
+        case 'all':
+            Object.values(pathDrawing.routePathCache).forEach(lineSetArray => {
+                lineSetArray.forEach(lineSet => {
+                    if (typeof lineSet.removeAllLines === 'function') {
+                        lineSet.removeAllLines();
+                    } else {
+                        console.warn('lineSet does not have removeAllLines method:', lineSet);
+                    }
+                });
+            });
+            Object.values(pathDrawing.dashedRoutePathCache).forEach(lineSetArray => {
+                lineSetArray.forEach(lineSet => {
+                    if (typeof lineSet.removeAllLines === 'function') {
+                        lineSet.removeAllLines();
+                    } else {
+                        console.warn('lineSet does not have removeAllLines method:', lineSet);
+                    }
+                });
+            });
+            pathDrawing.routePathCache = {};
+            pathDrawing.dashedRoutePathCache = {};
+            break;
           case 'dashed':
               Object.values(pathDrawing.dashedRoutePathCache).forEach(lineSetArray => {
                   lineSetArray.forEach(lineSet => {

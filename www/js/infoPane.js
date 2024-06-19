@@ -122,12 +122,16 @@ const infoPane = {
       button.addEventListener('mouseover', () => {
         const routeId = `${origin}-${destination}`;
         const lineSets = pathDrawing.routePathCache[routeId] || pathDrawing.dashedRoutePathCache[routeId] || [];
-        lineSets.forEach(lineSet => {
-            lineSet.lines.forEach(linePair => {
-                linePair.visibleLine.setStyle({ color: 'white' });
+        if (Array.isArray(lineSets)) {
+            lineSets.forEach(lineSet => {
+                if (lineSet.lines && Array.isArray(lineSet.lines)) {
+                    lineSet.lines.forEach(linePair => {
+                        linePair.visibleLine.setStyle({ color: 'white' });
+                    });
+                }
             });
-        });
-      });
+        }
+      });    
       
       button.addEventListener('mouseout', () => {
         const routeId = `${origin}-${destination}`;
