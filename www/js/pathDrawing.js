@@ -159,16 +159,16 @@ const pathDrawing = {
         const worldCopies = [-720, -360, 0, 360, 720];
         worldCopies.forEach(offset => {
             const adjustedOrigin = L.latLng(originAirport.latitude, originAirport.longitude + offset);
-            const adjustedDestination = L.latLng(destination.latitude, destination.longitude + offset);
+            const adjustedDestination = L.latLng(destinationAirport.latitude, destinationAirport.longitude + offset); // Corrected variable
             const geodesicLine = new L.Geodesic([adjustedOrigin, adjustedDestination], {
                 weight: 2, opacity: 1.0, color: 'grey', dashArray: '5, 10', wrap: false
             }).addTo(map);
-
+    
             const routeId = `${originAirport.iata_code}-${destinationAirport.iata_code}`;
             this.dashedRoutePathCache[routeId] = this.dashedRoutePathCache[routeId] || [];
             this.dashedRoutePathCache[routeId].push(geodesicLine);
         });
-    },
+    },    
 
     adjustLatLng(latLng) {
         var currentBounds = map.getBounds();
