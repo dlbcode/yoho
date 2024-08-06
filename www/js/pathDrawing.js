@@ -3,20 +3,17 @@ import { appState, updateState } from './stateManager.js';
 import { flightMap } from './flightMap.js';
 import { lineEvents } from './lineEvents.js';
 
-
 class Line {
     constructor(origin, destination, routeId, type, options = {}) {
         this.origin = origin;
         this.destination = destination;
         this.routeId = routeId;
         this.type = type;
-        this.map = map; // Make sure map is accessible within the class
+        this.map = map;
 
-        // Default settings
         this.defaultWeight = 1;
         this.defaultColor = this.getColorBasedOnPrice(options.price);
 
-        // Override default settings with options
         this.color = options.color || this.defaultColor;
         this.weight = options.weight || this.defaultWeight;
         this.highlight = options.highlight || false;
@@ -129,6 +126,14 @@ const pathDrawing = {
                 }
                 const line = new Line(originAirport, destinationAirport, routeId, type, options);
                 this.currentLines.push(line);
+                if (!this.routePathCache[originIata]) {
+                    this.routePathCache[originIata] = [];
+                }
+                this.routePathCache[originIata].push(line);
+                if (!this.routePathCache[destinationIata]) {
+                    this.routePathCache[destinationIata] = [];
+                }
+                this.routePathCache[destinationIata].push(line);
             });
         });
     },

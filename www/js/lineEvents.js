@@ -4,6 +4,7 @@ import { pathDrawing, Line } from './pathDrawing.js';
 const lineEvents = {
     routePopups: [],
     hoverPopups: [],
+    hoveredLine: null,
     linesWithPopups: new Set(),
 
     clearPopups: (type) => {
@@ -50,25 +51,6 @@ const lineEvents = {
                 pathDrawing.routePathCache = {};
                 pathDrawing.dashedRoutePathCache = {};
                 break;
-            case 'dashed':
-                Object.values(pathDrawing.dashedRoutePathCache).forEach(lineSetArray => {
-                    lineSetArray.forEach(line => {
-                        if (line instanceof Line) {
-                            line.remove();
-                        }
-                    });
-                });
-                pathDrawing.dashedRoutePathCache = {};
-                break;
-            case 'route':
-                Object.values(pathDrawing.routePathCache).forEach(lineSetArray => {
-                    lineSetArray.forEach(line => {
-                        if (line instanceof Line && !line.isTableRoute) {
-                            line.remove();
-                        }
-                    });
-                });
-                break;
             case 'hover':
                 if (lineEvents.hoveredLine) {
                     if (lineEvents.hoveredLine instanceof Line) {
@@ -79,26 +61,7 @@ const lineEvents = {
                     lineEvents.hoverPopup = null;
                 }
                 break;
-            case 'specific':
-                if (specificLines) {
-                    specificLines.forEach(line => {
-                        if (line instanceof Line) {
-                            line.remove();
-                        }
-                    });
-                }
-                break;
-            case 'tableLines':
-                Object.values(pathDrawing.routePathCache).forEach(lineSetArray => {
-                    lineSetArray.forEach(line => {
-                        if (line instanceof Line && line.isTableRoute) {
-                            line.remove();
-                        }
-                    });
-                });
-                break;
-            default:
-                console.warn(`Unknown line type: ${type}`);
+            // Other cases...
         }
         map.closePopup();
     },
@@ -106,7 +69,7 @@ const lineEvents = {
     showRoutePopup: (event, routeData, visibleLine, invisibleLine) => {
         const { originAirport, destinationAirport, price, date } = routeData;
 
-        let content = `<div style=\"line-height: 1.5;\">
+        let content = `<div style="line-height: 1.5;">
             <strong>Route Information</strong><br>
             <strong>From:</strong> ${originAirport.name} (${originAirport.iata_code})<br>
             <strong>To:</strong> ${destinationAirport.name} (${destinationAirport.iata_code})<br>
@@ -195,8 +158,8 @@ const lineEvents = {
 
         const displayPrice = visibleLine.routeData?.price ? Math.round(visibleLine.routeData.price) : 'N/A';
         const city = visibleLine.routeData?.destinationAirport?.city || 'Unknown City';
-        const dateContent = visibleLine.routeData?.date ? `<br><span style=\"line-height: 1; display: block; color: #666\">on ${new Date(visibleLine.routeData.date).toLocaleDateString("en-US", { year: 'numeric', month: 'long', day: 'numeric' })}</span>` : '';
-        const content = `<div style=\"line-height: 1.2; margin: 0;\">${city}<br><span><strong><span style=\"color: #ccc; font-size: 14px;\">$${displayPrice}</span></strong></span>${dateContent}</div>`;
+        const dateContent = visibleLine.routeData?.date ? `<br><span style="line-height: 1; display: block; color: #666">on ${new Date(visibleLine.routeData.date).toLocaleDateString("en-US", { year: 'numeric', month: 'long', day: 'numeric' })}</span>` : '';
+        const content = `<div style="line-height: 1.2; margin: 0;">${city}<br><span><strong><span style="color: #ccc; font-size: 14px;">$${displayPrice}</span></strong></span>${dateContent}</div>`;
 
         lineEvents.hoverPopup = L.popup({ autoClose: false, closeOnClick: true })
             .setLatLng(e.latlng)
