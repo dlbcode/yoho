@@ -53,9 +53,11 @@ const lineEvents = {
                 break;
             case 'hover':
                 if (lineEvents.hoveredLine) {
-                    if (lineEvents.hoveredLine instanceof Line) {
-                        lineEvents.hoveredLine.reset();
-                    }
+                    lineEvents.hoveredLine.forEach(line => {
+                        if (line instanceof Line) {
+                            line.reset();
+                        }
+                    });
                     map.closePopup(lineEvents.hoverPopup);
                     lineEvents.hoveredLine = null;
                     lineEvents.hoverPopup = null;

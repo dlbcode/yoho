@@ -126,14 +126,10 @@ const pathDrawing = {
                 }
                 const line = new Line(originAirport, destinationAirport, routeId, type, options);
                 this.currentLines.push(line);
-                if (!this.routePathCache[originIata]) {
-                    this.routePathCache[originIata] = [];
+                if (!this.routePathCache[routeId]) {
+                    this.routePathCache[routeId] = [];
                 }
-                this.routePathCache[originIata].push(line);
-                if (!this.routePathCache[destinationIata]) {
-                    this.routePathCache[destinationIata] = [];
-                }
-                this.routePathCache[destinationIata].push(line);
+                this.routePathCache[routeId].push(line);
             });
         });
     },
