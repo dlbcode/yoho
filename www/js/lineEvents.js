@@ -52,12 +52,43 @@ const lineEvents = {
                 pathDrawing.dashedRoutePathCache = {};
                 break;
             case 'hover':
-                if (lineEvents.hoveredLine) {
-                    lineEvents.hoveredLine.forEach(line => {
+                Object.values(pathDrawing.routePathCache).forEach(lineSetArray => {
+                    lineSetArray.forEach(line => {
+                        console.log(line);
+                        if (line instanceof Line) {
+                            line.remove();
+                        }
+                    });
+                });
+                break;
+            // Other cases...
+        }
+        map.closePopup();
+    },    
+
+    resetLines: (type, specificLines) => {
+        switch (type) {
+            case 'all':
+                Object.values(pathDrawing.routePathCache).forEach(lineSetArray => {
+                    lineSetArray.forEach(line => {
                         if (line instanceof Line) {
                             line.reset();
                         }
                     });
+                });
+                Object.values(pathDrawing.dashedRoutePathCache).forEach(lineSetArray => {
+                    lineSetArray.forEach(line => {
+                        if (line instanceof Line) {
+                            line.reset();
+                        }
+                    });
+                });
+                break;
+            case 'hover':
+                if (lineEvents.hoveredLine) {
+                    if (lineEvents.hoveredLine instanceof Line) {
+                        lineEvents.hoveredLine.reset();
+                    }
                     map.closePopup(lineEvents.hoverPopup);
                     lineEvents.hoveredLine = null;
                     lineEvents.hoverPopup = null;
@@ -67,6 +98,7 @@ const lineEvents = {
         }
         map.closePopup();
     },
+    
 
     showRoutePopup: (event, routeData, visibleLine, invisibleLine) => {
         const { originAirport, destinationAirport, price, date } = routeData;

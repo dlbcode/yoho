@@ -207,7 +207,6 @@ const flightMap = {
         const airport = this.airportDataCache[iata];
         if (!airport) return;
     
-        // Skip handling hover events for other markers when a specific airport is selected
         if (appState.selectedAirport && appState.selectedAirport.iata_code !== iata) {
             return;
         }
@@ -223,7 +222,6 @@ const flightMap = {
                 marker.openPopup();
                 marker.hovered = true; // Set the flag to true after the first hover
     
-                // Set hoveredLine for clearing
                 const linesToHighlight = pathDrawing.routePathCache[iata];
                 if (linesToHighlight && linesToHighlight.length > 0) {
                     lineEvents.hoveredLine = linesToHighlight[0]; // Assuming the first line, adjust as necessary
@@ -233,7 +231,7 @@ const flightMap = {
                 }
             });
         } else if (event === 'mouseout') {
-            if (!marker.hovered) {  // Delay only for the first hover
+            if (!marker.hovered) {
                 setTimeout(() => {
                     console.log('Clearing lines hover (delayed)');
                     lineEvents.clearLines('hover');
