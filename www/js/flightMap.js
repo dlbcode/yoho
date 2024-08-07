@@ -235,13 +235,13 @@ const flightMap = {
                 setTimeout(() => {
                     console.log('Clearing lines hover (delayed)');
                     lineEvents.clearLines('hover');
-                    pathDrawing.drawLines();
+                    // Ensure no drawLines call here if not needed
                     marker.closePopup();
                 }, 200);
             } else {
                 console.log('Clearing lines hover (immediate)');
                 lineEvents.clearLines('hover');
-                pathDrawing.drawLines();
+                // Ensure no drawLines call here if not needed
                 marker.closePopup();
             }
         }
