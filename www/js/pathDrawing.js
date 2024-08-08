@@ -1,7 +1,7 @@
 import { map } from './map.js';
 import { appState, updateState } from './stateManager.js';
 import { flightMap } from './flightMap.js';
-import { lineEvents } from './lineEvents.js';
+import { lineManager } from './lineManager.js';
 
 class Line {
     constructor(origin, destination, routeId, type, options = {}) {
@@ -78,16 +78,16 @@ class Line {
     }
 
     bindEvents() {
-        this.visibleLine.on('click', (e) => lineEvents.onClickHandler(e, this.visibleLine, this.invisibleLine, this.routeId));
-        this.invisibleLine.on('click', (e) => lineEvents.onClickHandler(e, this.visibleLine, this.invisibleLine, this.routeId));
+        this.visibleLine.on('click', (e) => lineManager.onClickHandler(e, this.visibleLine, this.invisibleLine, this.routeId));
+        this.invisibleLine.on('click', (e) => lineManager.onClickHandler(e, this.visibleLine, this.invisibleLine, this.routeId));
         
-        this.invisibleLine.on('mouseover', (e) => lineEvents.onMouseOver(e, this.visibleLine, this.map));
-        this.invisibleLine.on('mouseout', () => lineEvents.onMouseOut(this.visibleLine, this.map));
+        this.invisibleLine.on('mouseover', (e) => lineManager.onMouseOver(e, this.visibleLine, this.map));
+        this.invisibleLine.on('mouseout', () => lineManager.onMouseOut(this.visibleLine, this.map));
 
         if (this.decoratedLine) {
             this.decoratedLine.on('click', (e) => this.invisibleLine.fire('click', e));
-            this.decoratedLine.on('mouseover', (e) => lineEvents.onMouseOver(e, this.visibleLine, this.map));
-            this.decoratedLine.on('mouseout', () => lineEvents.onMouseOut(this.visibleLine, this.map));
+            this.decoratedLine.on('mouseover', (e) => lineManager.onMouseOver(e, this.visibleLine, this.map));
+            this.decoratedLine.on('mouseout', () => lineManager.onMouseOut(this.visibleLine, this.map));
         }
     }
 
@@ -113,6 +113,7 @@ const pathDrawing = {
     popupFromClick: false,
 
     drawLine: function(routeId, type, options) {
+        console.log('Drawing line:', routeId, type, options);
         const [originIata, destinationIata] = routeId.split('-');
         if (!originIata || !destinationIata) {
             console.error('Invalid routeId format:', routeId);
@@ -163,15 +164,24 @@ const pathDrawing = {
         return L.latLng(latLng.lat, newLng);
     },
 
-    drawLines: function() {
-        this.currentLines.forEach(line => {
-            line.visibleLine.addTo(map);
-            line.invisibleLine.addTo(map);
-            if (line.decoratedLine) {
-                line.decoratedLine.addTo(map);
+    drawLines: async function() {
+        lineManager.clearLines();
+      
+        const drawPromises = appState.routes.map(route => {
+            console.log('pathdrawing.drawLines - route:', route);
+            if (route.isDirect) {
+                return pathDrawing.drawLine(route.originAirport, route.destinationAirport, route);
+            } else {
+                return pathDrawing.drawDashedLine(route.originAirport, route.destinationAirport);
             }
         });
-    },
+    
+        await Promise.all(drawPromises);
+    
+        if (appState.selectedAirport) {
+            pathDrawing.drawRoutePaths(appState.selectedAirport.iata_code, appState.directRoutes, appState.routeDirection);
+        }
+    },       
 
     drawRouteLines: function() {
         this.currentLines.forEach(line => {
@@ -186,7 +196,7 @@ const pathDrawing = {
     onClick(e, visibleLine, invisibleLine) {
         this.popupFromClick = true;
         if (visibleLine.routeData) {
-            lineEvents.showRoutePopup(e, visibleLine.routeData, visibleLine, invisibleLine);
+            lineManager.showRoutePopup(e, visibleLine.routeData, visibleLine, invisibleLine);
         } else {
             console.error('Route data is undefined for the clicked line.');
         }

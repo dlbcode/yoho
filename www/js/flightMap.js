@@ -2,7 +2,7 @@ import { map, blueDotIcon, magentaDotIcon, greenDotIcon } from './map.js';
 import { pathDrawing } from './pathDrawing.js';
 import { eventManager } from './eventManager.js';
 import { appState, updateState } from './stateManager.js';
-import { lineEvents } from './lineEvents.js';
+import { lineManager } from './lineManager.js';
 
 const flightMap = {
     markers: {},
@@ -224,8 +224,8 @@ const flightMap = {
     
                 const linesToHighlight = pathDrawing.routePathCache[iata];
                 if (linesToHighlight && linesToHighlight.length > 0) {
-                    lineEvents.hoveredLine = linesToHighlight[0]; // Assuming the first line, adjust as necessary
-                    console.log('Set hovered line:', lineEvents.hoveredLine);
+                    lineManager.hoveredLine = linesToHighlight[0]; // Assuming the first line, adjust as necessary
+                    console.log('Set hovered line:', lineManager.hoveredLine);
                 } else {
                     console.log('No lines found for IATA:', iata);
                 }
@@ -234,13 +234,13 @@ const flightMap = {
             if (!marker.hovered) {
                 setTimeout(() => {
                     console.log('Clearing lines hover (delayed)');
-                    lineEvents.clearLines('hover');
+                    lineManager.clearLines('hover');
                     // Ensure no drawLines call here if not needed
                     marker.closePopup();
                 }, 200);
             } else {
                 console.log('Clearing lines hover (immediate)');
-                lineEvents.clearLines('hover');
+                lineManager.clearLines('hover');
                 // Ensure no drawLines call here if not needed
                 marker.closePopup();
             }

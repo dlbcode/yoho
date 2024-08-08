@@ -6,7 +6,7 @@ import { adjustMapSize, map } from './map.js';
 import { uiHandling } from './uiHandling.js';
 import { flightMap } from './flightMap.js';
 import { routeBox } from './routeBox/routeBox.js';
-import { lineEvents } from './lineEvents.js';
+import { lineManager } from './lineManager.js';
 
 const infoPane = {
   init() {
@@ -79,7 +79,7 @@ const infoPane = {
         button.textContent = buttonText;
 
         button.onclick = (event) => {
-          lineEvents.clearLines('all');
+          lineManager.clearLines('all');
           pathDrawing.drawLines();
           adjustMapSize();
           if (appState.currentRouteIndex != routeIndex) {
@@ -241,7 +241,7 @@ const infoPane = {
 
         // Attach mouseout event to clear the route
         row.addEventListener('mouseout', function() {
-            lineEvents.clearLines('all');
+            lineManager.clearLines('all');
             pathDrawing.drawLines(); // Redraw all active routes if necessary
         });
 
@@ -281,7 +281,7 @@ const infoPane = {
       });
 
       tripButton.addEventListener('mouseout', function() {
-        lineEvents.clearLines('all');
+        lineManager.clearLines('all');
         pathDrawing.drawLines(); // Redraw all active routes if necessary
       });
     }
@@ -293,7 +293,7 @@ const infoPane = {
   },
 
   highlightRoute: function(iataCodes) {
-    lineEvents.clearLines('all');
+    lineManager.clearLines('all');
     iataCodes.forEach((code, index) => {
         if (index < iataCodes.length - 1) {
             pathDrawing.drawPathBetweenAirports(iataCodes[index], iataCodes[index + 1], flightMap.getAirportDataByIata);

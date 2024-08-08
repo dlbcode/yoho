@@ -1,7 +1,7 @@
 import { map } from './map.js';
 import { pathDrawing, Line } from './pathDrawing.js';
 
-const lineEvents = {
+const lineManager = {
     routePopups: [],
     hoverPopups: [],
     hoveredLine: null,
@@ -11,23 +11,23 @@ const lineEvents = {
         let popups;
         switch (type) {
             case 'route':
-                popups = lineEvents.routePopups;
+                popups = lineManager.routePopups;
                 break;
             case 'hover':
-                popups = lineEvents.hoverPopups;
+                popups = lineManager.hoverPopups;
                 break;
             case 'all':
-                popups = [...lineEvents.routePopups, ...lineEvents.hoverPopups];
+                popups = [...lineManager.routePopups, ...lineManager.hoverPopups];
                 break;
             default:
                 popups = [];
         }
         popups.forEach(popup => map.closePopup(popup));
         if (type !== 'all') {
-            lineEvents[type + 'Popups'] = [];
+            lineManager[type + 'Popups'] = [];
         } else {
-            lineEvents.routePopups = [];
-            lineEvents.hoverPopups = [];
+            lineManager.routePopups = [];
+            lineManager.hoverPopups = [];
         }
     },
 
@@ -85,13 +85,13 @@ const lineEvents = {
                 });
                 break;
             case 'hover':
-                if (lineEvents.hoveredLine) {
-                    if (lineEvents.hoveredLine instanceof Line) {
-                        lineEvents.hoveredLine.reset();
+                if (lineManager.hoveredLine) {
+                    if (lineManager.hoveredLine instanceof Line) {
+                        lineManager.hoveredLine.reset();
                     }
-                    map.closePopup(lineEvents.hoverPopup);
-                    lineEvents.hoveredLine = null;
-                    lineEvents.hoverPopup = null;
+                    map.closePopup(lineManager.hoverPopup);
+                    lineManager.hoveredLine = null;
+                    lineManager.hoverPopup = null;
                 }
                 break;
             // Other cases...
@@ -118,18 +118,18 @@ const lineEvents = {
 
         content += `</div>`;
 
-        lineEvents.clearPopups('route');
+        lineManager.clearPopups('route');
 
         const popup = L.popup({ autoClose: false, closeOnClick: false })
             .setLatLng(event.latlng)
             .setContent(content)
             .on('remove', function () {
-                lineEvents.linesWithPopups.delete(visibleLine);
+                lineManager.linesWithPopups.delete(visibleLine);
                 pathDrawing.popupFromClick = false;
-                document.removeEventListener('click', lineEvents.outsideClickListener);
+                document.removeEventListener('click', lineManager.outsideClickListener);
 
                 if (!visibleLine.options.isTableRoute) {
-                    lineEvents.clearLines('specific', [{ visibleLine, invisibleLine }]);
+                    lineManager.clearLines('specific', [{ visibleLine, invisibleLine }]);
                 } else {
                     const highlightedRouteSegments = pathDrawing.routePathCache[visibleLine.routeData.tableRouteId];
                     if (highlightedRouteSegments) {
@@ -148,36 +148,36 @@ const lineEvents = {
                 if (invisibleLine && !map.hasLayer(invisibleLine)) {
                     invisibleLine.addTo(map);
                 }
-                lineEvents.linesWithPopups.add(visibleLine);
+                lineManager.linesWithPopups.add(visibleLine);
                 pathDrawing.popupFromClick = true;
-                document.addEventListener('click', lineEvents.outsideClickListener);
+                document.addEventListener('click', lineManager.outsideClickListener);
             });
 
         setTimeout(() => {
             popup.openOn(map);
         }, 100);
 
-        lineEvents.routePopups.push(popup);
+        lineManager.routePopups.push(popup);
     },
 
     outsideClickListener: (event) => {
         if (!event.target.closest('.leaflet-popup')) {
-            lineEvents.clearPopups('route');
+            lineManager.clearPopups('route');
         }
     },
 
     onMouseOver: (e, visibleLine, map) => {
         if (pathDrawing.popupFromClick) return;
 
-        if (lineEvents.hoveredLine && lineEvents.hoveredLine !== visibleLine) {
-            if (lineEvents.hoveredLine instanceof Line) {
-                lineEvents.hoveredLine.reset();
+        if (lineManager.hoveredLine && lineManager.hoveredLine !== visibleLine) {
+            if (lineManager.hoveredLine instanceof Line) {
+                lineManager.hoveredLine.reset();
             }
-            map.closePopup(lineEvents.hoverPopup);
-            lineEvents.hoverPopups = lineEvents.hoverPopups.filter(p => p !== lineEvents.hoverPopup);
+            map.closePopup(lineManager.hoverPopup);
+            lineManager.hoverPopups = lineManager.hoverPopups.filter(p => p !== lineManager.hoverPopup);
         }
 
-        lineEvents.hoveredLine = visibleLine;
+        lineManager.hoveredLine = visibleLine;
         visibleLine.setStyle({ color: 'white', weight: 2, opacity: 1 });
 
         const tableRouteId = visibleLine.routeData?.tableRouteId;
@@ -195,16 +195,16 @@ const lineEvents = {
         const dateContent = visibleLine.routeData?.date ? `<br><span style="line-height: 1; display: block; color: #666">on ${new Date(visibleLine.routeData.date).toLocaleDateString("en-US", { year: 'numeric', month: 'long', day: 'numeric' })}</span>` : '';
         const content = `<div style="line-height: 1.2; margin: 0;">${city}<br><span><strong><span style="color: #ccc; font-size: 14px;">$${displayPrice}</span></strong></span>${dateContent}</div>`;
 
-        lineEvents.hoverPopup = L.popup({ autoClose: false, closeOnClick: true })
+        lineManager.hoverPopup = L.popup({ autoClose: false, closeOnClick: true })
             .setLatLng(e.latlng)
             .setContent(content)
             .openOn(map);
 
-        lineEvents.hoverPopups.push(lineEvents.hoverPopup);
+        lineManager.hoverPopups.push(lineManager.hoverPopup);
     },
 
     onMouseOut: (visibleLine, map) => {
-        if (pathDrawing.popupFromClick || lineEvents.linesWithPopups.has(visibleLine)) return;
+        if (pathDrawing.popupFromClick || lineManager.linesWithPopups.has(visibleLine)) return;
 
         const tableRouteId = visibleLine.routeData?.tableRouteId;
         const linesToReset = tableRouteId
@@ -217,19 +217,19 @@ const lineEvents = {
             }
         });
 
-        map.closePopup(lineEvents.hoverPopup);
-        lineEvents.hoverPopups = lineEvents.hoverPopups.filter(p => p !== lineEvents.hoverPopup);
-        lineEvents.hoveredLine = null;
-        lineEvents.hoverPopup = null;
+        map.closePopup(lineManager.hoverPopup);
+        lineManager.hoverPopups = lineManager.hoverPopups.filter(p => p !== lineManager.hoverPopup);
+        lineManager.hoveredLine = null;
+        lineManager.hoverPopup = null;
     },
 
     onClickHandler: (e, visibleLine, invisibleLine, routeId) => {
         if (visibleLine.routeData) {
-            lineEvents.showRoutePopup(e, visibleLine.routeData, visibleLine, invisibleLine);
+            lineManager.showRoutePopup(e, visibleLine.routeData, visibleLine, invisibleLine);
         } else {
             console.error('Route data is undefined for the clicked line.');
         }
     },
 };
 
-export { lineEvents };
+export { lineManager };
