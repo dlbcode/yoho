@@ -217,16 +217,15 @@ const flightMap = {
                     console.error('Direct routes not found for IATA:', iata);
                     return;
                 }
-                pathDrawing.drawRoutePaths(iata, appState.directRoutes);
+                pathDrawing.drawRoutePaths(iata, appState.directRoutes, 'hover');  // Pass 'hover' type
                 Object.values(self.markers).forEach(marker => marker.closePopup());
                 marker.openPopup();
                 marker.hovered = true; // Set the flag to true after the first hover
     
-                const linesToHighlight = pathDrawing.routePathCache[iata];
+                const linesToHighlight = pathDrawing.hoverLines;
                 if (linesToHighlight && linesToHighlight.length > 0) {
                     lineManager.hoveredLine = linesToHighlight[0]; // Assuming the first line, adjust as necessary
                     lineManager.hoveredLine.setStyle({ color: 'white', weight: 2, opacity: 1 });
-                    lineManager.hoverLines = linesToHighlight; // Track all hover lines
                     console.log('Set hovered line:', lineManager.hoveredLine);
                 } else {
                     console.log('No lines found for IATA:', iata);

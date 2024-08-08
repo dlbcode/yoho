@@ -110,6 +110,7 @@ const pathDrawing = {
     currentLines: [],
     routePathCache: {},
     dashedRoutePathCache: {},
+    hoverLines: [],  // Track hover lines separately
     popupFromClick: false,
 
     drawLine: function(routeId, type, options) {
@@ -127,28 +128,37 @@ const pathDrawing = {
                 }
                 const line = new Line(originAirport, destinationAirport, routeId, type, options);
                 this.currentLines.push(line);
-                if (!this.routePathCache[routeId]) {
-                    this.routePathCache[routeId] = [];
+                if (type === 'route') {
+                    if (!this.routePathCache[routeId]) {
+                        this.routePathCache[routeId] = [];
+                    }
+                    this.routePathCache[routeId].push(line);
+                } else if (type === 'dashed') {
+                    if (!this.dashedRoutePathCache[routeId]) {
+                        this.dashedRoutePathCache[routeId] = [];
+                    }
+                    this.dashedRoutePathCache[routeId].push(line);
+                } else if (type === 'hover') {
+                    this.hoverLines.push(line);
                 }
-                this.routePathCache[routeId].push(line);
             });
         });
     },
 
-    drawRoutePaths(iata, directRoutes) {
+    drawRoutePaths(iata, directRoutes, type = 'route') {
         directRoutes[iata]?.forEach(route => {
             const routeId = `${route.origin}-${route.destination}`;
             if (!route.origin || !route.destination) {
                 console.error('Invalid route data:', route);
                 return;
             }
-            this.drawLine(routeId, 'route', { price: route.price });
+            this.drawLine(routeId, type, { price: route.price });
         });
     },
 
     drawDashedLine(origin, destination) {
         if (!origin || !destination) {
-            console.error('Invalid airport data for dashed line:', originAirport, destinationAirport);
+            console.error('Invalid airport data for dashed line:', origin, destination);
             return;
         }
         this.drawLine(`${origin}-${destination}`, 'dashed', {});
@@ -165,7 +175,7 @@ const pathDrawing = {
     },
 
     drawLines: async function() {
-        lineManager.clearLines();
+        lineManager.clearLines('route');  // Clear only route lines
         const drawPromises = appState.routes.map(route => {
             console.log('pathdrawing.drawLines - route:', route);
             const routeId = `${route.origin}-${route.destination}`;

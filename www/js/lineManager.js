@@ -50,17 +50,36 @@ const lineManager = {
                 });
                 pathDrawing.routePathCache = {};
                 pathDrawing.dashedRoutePathCache = {};
+                pathDrawing.hoverLines.forEach(line => {
+                    if (line instanceof Line) {
+                        line.remove();
+                    }
+                });
+                pathDrawing.hoverLines = [];
                 break;
             case 'hover':
-                if (lineManager.hoveredLine && lineManager.hoveredLine instanceof Line) {
-                    lineManager.hoveredLine.remove();
-                    lineManager.hoveredLine = null;
-                }
+                pathDrawing.hoverLines.forEach(line => {
+                    if (line instanceof Line) {
+                        line.remove();
+                    }
+                });
+                pathDrawing.hoverLines = [];
+                lineManager.hoveredLine = null;
+                break;
+            case 'route':
+                Object.values(pathDrawing.routePathCache).forEach(lineSetArray => {
+                    lineSetArray.forEach(line => {
+                        if (line instanceof Line) {
+                            line.remove();
+                        }
+                    });
+                });
+                pathDrawing.routePathCache = {};
                 break;
             // Other cases...
         }
         map.closePopup();
-    },    
+    },         
 
     resetLines: (type, specificLines) => {
         switch (type) {
