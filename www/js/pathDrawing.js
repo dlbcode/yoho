@@ -146,12 +146,12 @@ const pathDrawing = {
         });
     },
 
-    drawDashedLine(originAirport, destinationAirport) {
-        if (!originAirport.iata_code || !destinationAirport.iata_code) {
+    drawDashedLine(origin, destination) {
+        if (!origin || !destination) {
             console.error('Invalid airport data for dashed line:', originAirport, destinationAirport);
             return;
         }
-        this.drawLine(`${originAirport.iata_code}-${destinationAirport.iata_code}`, 'dashed', {});
+        this.drawLine(`${origin}-${destination}`, 'dashed', {});
     },
 
     adjustLatLng(latLng) {
@@ -172,7 +172,7 @@ const pathDrawing = {
             if (route.isDirect) {
                 return pathDrawing.drawLine(routeId, 'route', { price: route.price });
             } else {
-                return pathDrawing.drawDashedLine(route.originAirport, route.destinationAirport);
+                return pathDrawing.drawDashedLine(route.origin, route.destination);
             }
         });
         await Promise.all(drawPromises);
@@ -202,7 +202,7 @@ const pathDrawing = {
 };
 
 document.addEventListener('DOMContentLoaded', () => {
-    pathDrawing.drawRouteLines();
+    pathDrawing.drawLines();
 });
 
 export { pathDrawing, Line };

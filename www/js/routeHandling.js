@@ -82,7 +82,7 @@ const routeHandling = {
         
         // Use lineManager to clear lines instead of pathDrawing
         lineManager.clearLines('all');
-        pathDrawing.draw
+        pathDrawing.drawLines();
     }
 };
 
