@@ -225,6 +225,8 @@ const flightMap = {
                 const linesToHighlight = pathDrawing.routePathCache[iata];
                 if (linesToHighlight && linesToHighlight.length > 0) {
                     lineManager.hoveredLine = linesToHighlight[0]; // Assuming the first line, adjust as necessary
+                    lineManager.hoveredLine.setStyle({ color: 'white', weight: 2, opacity: 1 });
+                    lineManager.hoverLines = linesToHighlight; // Track all hover lines
                     console.log('Set hovered line:', lineManager.hoveredLine);
                 } else {
                     console.log('No lines found for IATA:', iata);
@@ -235,13 +237,11 @@ const flightMap = {
                 setTimeout(() => {
                     console.log('Clearing lines hover (delayed)');
                     lineManager.clearLines('hover');
-                    // Ensure no drawLines call here if not needed
                     marker.closePopup();
                 }, 200);
             } else {
                 console.log('Clearing lines hover (immediate)');
                 lineManager.clearLines('hover');
-                // Ensure no drawLines call here if not needed
                 marker.closePopup();
             }
         }
@@ -249,7 +249,7 @@ const flightMap = {
         if (appState.selectedAirport && appState.selectedAirport.iata_code === iata) {
             marker.openPopup();
         }
-    },                 
+    },               
 
     async fetchAndCacheRoutes(iata) {
         if (!iata) {

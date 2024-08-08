@@ -52,14 +52,10 @@ const lineManager = {
                 pathDrawing.dashedRoutePathCache = {};
                 break;
             case 'hover':
-                Object.values(pathDrawing.routePathCache).forEach(lineSetArray => {
-                    lineSetArray.forEach(line => {
-                        console.log(line);
-                        if (line instanceof Line) {
-                            line.remove();
-                        }
-                    });
-                });
+                if (lineManager.hoveredLine && lineManager.hoveredLine instanceof Line) {
+                    lineManager.hoveredLine.remove();
+                    lineManager.hoveredLine = null;
+                }
                 break;
             // Other cases...
         }

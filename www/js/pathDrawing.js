@@ -179,16 +179,6 @@ const pathDrawing = {
         if (appState.selectedAirport) {
             pathDrawing.drawRoutePaths(appState.selectedAirport.iata_code, appState.directRoutes, appState.routeDirection);
         }
-    },          
-
-    drawRouteLines: function() {
-        this.currentLines.forEach(line => {
-            line.visibleLine.addTo(map);
-            line.invisibleLine.addTo(map);
-            if (line.decoratedLine) {
-                line.decoratedLine.addTo(map);
-            }
-        });
     },
 
     onClick(e, visibleLine, invisibleLine) {
