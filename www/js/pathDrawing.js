@@ -166,22 +166,20 @@ const pathDrawing = {
 
     drawLines: async function() {
         lineManager.clearLines();
-      
         const drawPromises = appState.routes.map(route => {
             console.log('pathdrawing.drawLines - route:', route);
+            const routeId = `${route.origin}-${route.destination}`;
             if (route.isDirect) {
-                return pathDrawing.drawLine(route.originAirport, route.destinationAirport, route);
+                return pathDrawing.drawLine(routeId, 'route', { price: route.price });
             } else {
                 return pathDrawing.drawDashedLine(route.originAirport, route.destinationAirport);
             }
         });
-    
         await Promise.all(drawPromises);
-    
         if (appState.selectedAirport) {
             pathDrawing.drawRoutePaths(appState.selectedAirport.iata_code, appState.directRoutes, appState.routeDirection);
         }
-    },       
+    },          
 
     drawRouteLines: function() {
         this.currentLines.forEach(line => {
