@@ -81,40 +81,6 @@ const lineManager = {
         map.closePopup();
     },         
 
-    resetLines: (type, specificLines) => {
-        switch (type) {
-            case 'all':
-                Object.values(pathDrawing.routePathCache).forEach(lineSetArray => {
-                    lineSetArray.forEach(line => {
-                        if (line instanceof Line) {
-                            line.reset();
-                        }
-                    });
-                });
-                Object.values(pathDrawing.dashedRoutePathCache).forEach(lineSetArray => {
-                    lineSetArray.forEach(line => {
-                        if (line instanceof Line) {
-                            line.reset();
-                        }
-                    });
-                });
-                break;
-            case 'hover':
-                if (lineManager.hoveredLine) {
-                    if (lineManager.hoveredLine instanceof Line) {
-                        lineManager.hoveredLine.reset();
-                    }
-                    map.closePopup(lineManager.hoverPopup);
-                    lineManager.hoveredLine = null;
-                    lineManager.hoverPopup = null;
-                }
-                break;
-            // Other cases...
-        }
-        map.closePopup();
-    },
-    
-
     showRoutePopup: (event, routeData, visibleLine, invisibleLine) => {
         const { originAirport, destinationAirport, price, date } = routeData;
 
@@ -220,23 +186,31 @@ const lineManager = {
 
     onMouseOut: (visibleLine, map) => {
         if (pathDrawing.popupFromClick || lineManager.linesWithPopups.has(visibleLine)) return;
-
+    
         const tableRouteId = visibleLine.routeData?.tableRouteId;
         const linesToReset = tableRouteId
             ? pathDrawing.routePathCache[tableRouteId]
-            : [{ visibleLine }];
-
+            : [visibleLine];
+    
+        console.log('Lines to reset:', linesToReset);
+    
         linesToReset?.forEach(line => {
-            if (line && line.reset) {
+            console.log('Resetting line:', line.routeId, 'Is Line instance:', line instanceof Line);
+            if (line instanceof Line && line.reset) {
                 line.reset();
+            } else {
+                console.error('Not a Line instance, removing anyway:', line);
+                if (line.remove) {
+                    line.remove();
+                }
             }
         });
-
+    
         map.closePopup(lineManager.hoverPopup);
         lineManager.hoverPopups = lineManager.hoverPopups.filter(p => p !== lineManager.hoverPopup);
         lineManager.hoveredLine = null;
         lineManager.hoverPopup = null;
-    },
+    },         
 
     onClickHandler: (e, visibleLine, invisibleLine, routeId) => {
         if (visibleLine.routeData) {

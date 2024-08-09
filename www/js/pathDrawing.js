@@ -96,8 +96,13 @@ class Line {
     }
 
     reset() {
-        this.visibleLine.setStyle({ color: this.color });
-    }
+        console.log('Resetting line:', this.routeId);
+        this.visibleLine.setStyle({
+            color: this.color,
+            weight: this.weight,
+            opacity: 1
+        });
+    }    
 
     remove() {
         if (this.map.hasLayer(this.visibleLine)) this.map.removeLayer(this.visibleLine);
@@ -110,8 +115,7 @@ const pathDrawing = {
     currentLines: [],
     routePathCache: {},
     dashedRoutePathCache: {},
-    hoverLines: [],  // Track hover lines separately
-    popupFromClick: false,
+    hoverLines: [],
 
     drawLine: function(routeId, type, options) {
         console.log('Drawing line:', routeId, type, options);
@@ -126,8 +130,11 @@ const pathDrawing = {
                     console.error('Airport data not found for one or both IATAs:', originIata, destinationIata);
                     return;
                 }
+                // Create an instance of the Line class
                 const line = new Line(originAirport, destinationAirport, routeId, type, options);
-                this.currentLines.push(line);
+                this.currentLines.push(line);  // Ensure we store Line instances
+    
+                // Ensure correct storage
                 if (type === 'route') {
                     if (!this.routePathCache[routeId]) {
                         this.routePathCache[routeId] = [];
@@ -175,7 +182,7 @@ const pathDrawing = {
     },
 
     drawLines: async function() {
-        lineManager.clearLines('route');  // Clear only route lines
+        lineManager.clearLines('route');
         const drawPromises = appState.routes.map(route => {
             console.log('pathdrawing.drawLines - route:', route);
             const routeId = `${route.origin}-${route.destination}`;
