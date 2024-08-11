@@ -7,23 +7,20 @@ class Line {
     constructor(origin, destination, routeId, type, options = {}) {
         this.origin = origin;
         this.destination = destination;
-        this.routeId = routeId;
+        this.routeId = routeId; // Ensure routeId is stored in the Line instance
         this.type = type;
         this.map = map;
-
         this.defaultWeight = 1;
         this.defaultColor = this.getColorBasedOnPrice(options.price);
-
         this.color = options.color || this.defaultColor;
         this.weight = options.weight || this.defaultWeight;
         this.highlight = options.highlight || false;
         this.showPlane = options.showPlane || false;
-
         this.visibleLine = this.createVisibleLine();
         this.invisibleLine = this.createInvisibleLine();
         this.decoratedLine = this.showPlane ? this.createDecoratedLine() : null;
-
         this.bindEvents();
+        console.log(`Line created with routeId: ${this.routeId}`);
     }
 
     getColorBasedOnPrice(price) {
@@ -132,9 +129,9 @@ const pathDrawing = {
                 }
                 // Create an instance of the Line class
                 const line = new Line(originAirport, destinationAirport, routeId, type, options);
-                this.currentLines.push(line);  // Ensure we store Line instances
+                console.log('Created Line instance with routeId:', line.routeId);
     
-                // Ensure correct storage
+                // Store the Line instance
                 if (type === 'route') {
                     if (!this.routePathCache[routeId]) {
                         this.routePathCache[routeId] = [];
@@ -148,9 +145,11 @@ const pathDrawing = {
                 } else if (type === 'hover') {
                     this.hoverLines.push(line);
                 }
+    
+                console.log('Stored line in cache:', this.routePathCache);
             });
         });
-    },
+    },       
 
     drawRoutePaths(iata, directRoutes, type = 'route') {
         directRoutes[iata]?.forEach(route => {

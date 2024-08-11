@@ -187,30 +187,27 @@ const lineManager = {
     onMouseOut: (visibleLine, map) => {
         if (pathDrawing.popupFromClick || lineManager.linesWithPopups.has(visibleLine)) return;
     
-        const tableRouteId = visibleLine.routeData?.tableRouteId;
-        const linesToReset = tableRouteId
-            ? pathDrawing.routePathCache[tableRouteId]
-            : [visibleLine];
+        console.log('Resetting hovered line:', visibleLine);
+        console.log('Line: ', Line);
     
-        console.log('Lines to reset:', linesToReset);
+        // Check if the visibleLine is an instance of Line, otherwise treat it as a plain polyline
+        if (visibleLine instanceof Line) {
+            visibleLine.reset();
+        } else {
+            // If it's not a Line instance, reset it as a plain Leaflet polyline
+            visibleLine.setStyle({
+                color: 'white', // Reset to the desired default color
+                weight: 2, // Reset to the desired default thickness
+                opacity: 1
+            });
+        }
     
-        linesToReset?.forEach(line => {
-            console.log('Resetting line:', line.routeId, 'Is Line instance:', line instanceof Line);
-            if (line instanceof Line && line.reset) {
-                line.reset();
-            } else {
-                console.error('Not a Line instance, removing anyway:', line);
-                if (line.remove) {
-                    line.remove();
-                }
-            }
-        });
-    
+        // Clean up hover popup
         map.closePopup(lineManager.hoverPopup);
         lineManager.hoverPopups = lineManager.hoverPopups.filter(p => p !== lineManager.hoverPopup);
         lineManager.hoveredLine = null;
         lineManager.hoverPopup = null;
-    },         
+    },                        
 
     onClickHandler: (e, visibleLine, invisibleLine, routeId) => {
         if (visibleLine.routeData) {
