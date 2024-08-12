@@ -147,21 +147,30 @@ const lineManager = {
         }
     },
 
-    onMouseOver: (e, visibleLine, map) => {
+    onMouseOver: (e, line, map) => {
+        console.log("onMouseOver triggered");
+        console.log("Received line:", line);
+    
         if (pathDrawing.popupFromClick) return;
-
-        if (lineManager.hoveredLine && lineManager.hoveredLine !== visibleLine) {
+    
+        if (lineManager.hoveredLine && lineManager.hoveredLine !== line) {
+            console.log("Resetting previously hovered line:", lineManager.hoveredLine);
             if (lineManager.hoveredLine instanceof Line) {
                 lineManager.hoveredLine.reset();
             }
             map.closePopup(lineManager.hoverPopup);
             lineManager.hoverPopups = lineManager.hoverPopups.filter(p => p !== lineManager.hoverPopup);
         }
-
-        lineManager.hoveredLine = visibleLine;
-        visibleLine.setStyle({ color: 'white', weight: 2, opacity: 1 });
-
-        const tableRouteId = visibleLine.routeData?.tableRouteId;
+    
+        lineManager.hoveredLine = line;
+        if (line.visibleLine) {
+            console.log("Applying style to visibleLine");
+            line.visibleLine.setStyle({ color: 'white', weight: 2, opacity: 1 });
+        } else {
+            console.error("visibleLine is not defined on the line object");
+        }
+    
+        const tableRouteId = line.routeId;
         if (tableRouteId) {
             const linesToHighlight = pathDrawing.routePathCache[tableRouteId];
             linesToHighlight?.forEach(line => {
@@ -170,44 +179,36 @@ const lineManager = {
                 }
             });
         }
-
-        const displayPrice = visibleLine.routeData?.price ? Math.round(visibleLine.routeData.price) : 'N/A';
-        const city = visibleLine.routeData?.destinationAirport?.city || 'Unknown City';
-        const dateContent = visibleLine.routeData?.date ? `<br><span style="line-height: 1; display: block; color: #666">on ${new Date(visibleLine.routeData.date).toLocaleDateString("en-US", { year: 'numeric', month: 'long', day: 'numeric' })}</span>` : '';
+    
+        const displayPrice = line.routeData?.price ? Math.round(line.routeData.price) : 'N/A';
+        const city = line.routeData?.destinationAirport?.city || 'Unknown City';
+        const dateContent = line.routeData?.date ? `<br><span style="line-height: 1; display: block; color: #666">on ${new Date(line.routeData.date).toLocaleDateString("en-US", { year: 'numeric', month: 'long', day: 'numeric' })}</span>` : '';
         const content = `<div style="line-height: 1.2; margin: 0;">${city}<br><span><strong><span style="color: #ccc; font-size: 14px;">$${displayPrice}</span></strong></span>${dateContent}</div>`;
-
+    
         lineManager.hoverPopup = L.popup({ autoClose: false, closeOnClick: true })
             .setLatLng(e.latlng)
             .setContent(content)
             .openOn(map);
-
+    
         lineManager.hoverPopups.push(lineManager.hoverPopup);
-    },
+    },          
 
-    onMouseOut: (visibleLine, map) => {
-        if (pathDrawing.popupFromClick || lineManager.linesWithPopups.has(visibleLine)) return;
+    onMouseOut: (line) => {
+        if (pathDrawing.popupFromClick || lineManager.linesWithPopups.has(line.visibleLine)) return;
     
-        console.log('Resetting hovered line:', visibleLine);
-        console.log('Line: ', Line);
+        console.log('Resetting hovered line:', line);
     
-        // Check if the visibleLine is an instance of Line, otherwise treat it as a plain polyline
-        if (visibleLine instanceof Line) {
-            visibleLine.reset();
+        if (line instanceof Line) {
+            line.reset(); // Now line is a Line instance
         } else {
-            // If it's not a Line instance, reset it as a plain Leaflet polyline
-            visibleLine.setStyle({
-                color: 'white', // Reset to the desired default color
-                weight: 2, // Reset to the desired default thickness
-                opacity: 1
-            });
+            console.error('The line is not an instance of Line class:', line);
         }
     
-        // Clean up hover popup
         map.closePopup(lineManager.hoverPopup);
         lineManager.hoverPopups = lineManager.hoverPopups.filter(p => p !== lineManager.hoverPopup);
         lineManager.hoveredLine = null;
         lineManager.hoverPopup = null;
-    },                        
+    },                           
 
     onClickHandler: (e, visibleLine, invisibleLine, routeId) => {
         if (visibleLine.routeData) {

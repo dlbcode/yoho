@@ -75,18 +75,20 @@ class Line {
     }
 
     bindEvents() {
+        // Bind click events to the individual polylines
         this.visibleLine.on('click', (e) => lineManager.onClickHandler(e, this.visibleLine, this.invisibleLine, this.routeId));
         this.invisibleLine.on('click', (e) => lineManager.onClickHandler(e, this.visibleLine, this.invisibleLine, this.routeId));
-        
-        this.invisibleLine.on('mouseover', (e) => lineManager.onMouseOver(e, this.visibleLine, this.map));
-        this.invisibleLine.on('mouseout', () => lineManager.onMouseOut(this.visibleLine, this.map));
-
+    
+        // Pass the Line instance to the hover events
+        this.invisibleLine.on('mouseover', (e) => lineManager.onMouseOver(e, this, this.map)); // Pass the Line instance
+        this.invisibleLine.on('mouseout', () => lineManager.onMouseOut(this)); // Pass the Line instance
+    
         if (this.decoratedLine) {
             this.decoratedLine.on('click', (e) => this.invisibleLine.fire('click', e));
-            this.decoratedLine.on('mouseover', (e) => lineManager.onMouseOver(e, this.visibleLine, this.map));
-            this.decoratedLine.on('mouseout', () => lineManager.onMouseOut(this.visibleLine, this.map));
+            this.decoratedLine.on('mouseover', (e) => lineManager.onMouseOver(e, this, this.map)); // Pass the Line instance
+            this.decoratedLine.on('mouseout', () => lineManager.onMouseOut(this)); // Pass the Line instance
         }
-    }
+    }         
 
     highlight() {
         this.visibleLine.setStyle({ color: 'white' });
