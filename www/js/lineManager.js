@@ -170,14 +170,14 @@ const lineManager = {
             console.error("visibleLine is not defined on the line object");
         }
     
-        const tableRouteId = line.routeId;
-        if (tableRouteId) {
-            const linesToHighlight = pathDrawing.routePathCache[tableRouteId];
-            linesToHighlight?.forEach(line => {
-                if (line instanceof Line) {
-                    line.highlight();
-                }
-            });
+        console.log('Checking if highlight method exists on Line prototype:', Line.prototype.hasOwnProperty('highlight'));
+    
+        // Use the highlight method from the Line prototype
+        if (line instanceof Line) {
+            Line.prototype.highlight.call(line);
+        } else {
+            console.error('Line is not an instance of Line class:', line);
+            console.log('Line prototype:', Object.getPrototypeOf(line));
         }
     
         const displayPrice = line.routeData?.price ? Math.round(line.routeData.price) : 'N/A';
@@ -191,7 +191,7 @@ const lineManager = {
             .openOn(map);
     
         lineManager.hoverPopups.push(lineManager.hoverPopup);
-    },          
+    },      
 
     onMouseOut: (line) => {
         if (pathDrawing.popupFromClick || lineManager.linesWithPopups.has(line.visibleLine)) return;
