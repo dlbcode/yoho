@@ -5,6 +5,7 @@ import { lineManager } from './lineManager.js';
 
 class Line {
     constructor(origin, destination, routeId, type, options = {}) {
+        this.iata = options.iata;
         this.origin = origin;
         this.destination = destination;
         this.routeId = routeId; // Ensure routeId is stored in the Line instance
@@ -160,7 +161,7 @@ const pathDrawing = {
                 console.error('Invalid route data:', route);
                 return;
             }
-            this.drawLine(routeId, type, { price: route.price });
+            this.drawLine(routeId, type, { price: route.price, iata: iata });
         });
     },
 

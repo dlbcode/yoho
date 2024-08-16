@@ -131,6 +131,7 @@ const flightMap = {
         }
 
         clickedMarker.bindPopup(popupContent, { autoClose: false, closeOnClick: true }).openPopup();
+        console.log('Selected airport:', appState.selectedAirport);
     },
 
     findRoute(fromIata, toIata) {
@@ -200,55 +201,47 @@ const flightMap = {
         });
     },
 
-    markerHoverHandler(iata, event) {
-        let self = this;
-        const marker = this.markers[iata];
-        if (!marker) return;
-        const airport = this.airportDataCache[iata];
-        if (!airport) return;
-    
-        if (appState.selectedAirport && appState.selectedAirport.iata_code !== iata) {
-            return;
-        }
-    
-        if (event === 'mouseover') {
-            this.fetchAndCacheRoutes(iata).then(() => {
-                if (!appState.directRoutes[iata]) {
-                    console.error('Direct routes not found for IATA:', iata);
-                    return;
-                }
-                pathDrawing.drawRoutePaths(iata, appState.directRoutes, 'hover');  // Pass 'hover' type
-                Object.values(self.markers).forEach(marker => marker.closePopup());
-                marker.openPopup();
-                marker.hovered = true; // Set the flag to true after the first hover
-    
-                const linesToHighlight = pathDrawing.hoverLines;
-                if (linesToHighlight && linesToHighlight.length > 0) {
-                    lineManager.hoveredLine = linesToHighlight[0]; // Assuming the first line, adjust as necessary
-                    lineManager.hoveredLine.setStyle({ color: 'white', weight: 2, opacity: 1 });
-                    console.log('Set hovered line:', lineManager.hoveredLine);
-                } else {
-                    console.log('No lines found for IATA:', iata);
-                }
-            });
-        } else if (event === 'mouseout') {
-            if (!marker.hovered) {
-                setTimeout(() => {
-                    console.log('Clearing lines hover (delayed)');
-                    lineManager.clearLines('hover');
-                    marker.closePopup();
-                }, 200);
-            } else {
-                console.log('Clearing lines hover (immediate)');
-                lineManager.clearLines('hover');
-                marker.closePopup();
+markerHoverHandler(iata, event) {
+    let self = this;
+    const marker = this.markers[iata];
+    if (!marker) return;
+    const airport = this.airportDataCache[iata];
+    if (!airport) return;
+
+    if (event === 'mouseover') {
+        this.fetchAndCacheRoutes(iata).then(() => {
+            if (!appState.directRoutes[iata]) {
+                console.error('Direct routes not found for IATA:', iata);
+                return;
             }
-        }
-    
-        if (appState.selectedAirport && appState.selectedAirport.iata_code === iata) {
+            pathDrawing.drawRoutePaths(iata, appState.directRoutes, 'hover');
+            Object.values(self.markers).forEach(marker => marker.closePopup());
             marker.openPopup();
+            marker.hovered = true;
+
+            const linesToHighlight = pathDrawing.hoverLines;
+            if (linesToHighlight && linesToHighlight.length > 0) {
+                lineManager.hoveredLine = linesToHighlight[0];
+                lineManager.hoveredLine.setStyle({ color: 'white', weight: 2, opacity: 1 });
+                console.log('Set hovered line:', lineManager.hoveredLine);
+            } else {
+                console.log('No lines found for IATA:', iata);
+            }
+        });
+    } else if (event === 'mouseout') {
+        if (!appState.selectedAirport || appState.selectedAirport.iata_code !== iata) {
+            setTimeout(() => {
+                console.log('Clearing lines hover (delayed)');
+                lineManager.clearLines('hover', pathDrawing.hoverLines.filter(line => line.iata !== appState.selectedAirport?.iata_code));
+                marker.closePopup();
+            }, 200);
         }
-    },               
+    }
+
+    if (appState.selectedAirport && appState.selectedAirport.iata_code === iata) {
+        marker.openPopup();
+    }
+},
 
     async fetchAndCacheRoutes(iata) {
         if (!iata) {
