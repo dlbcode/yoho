@@ -83,7 +83,7 @@ const eventManager = {
             }
             flightMap.selectedMarker = null;
             updateState('selectedAirport', null, 'eventManager.setupEventListeners');
-            lineManager.clearLines('route'); // This will clear non-table route lines only
+            lineManager.clearLines('all'); // This will clear non-table route lines only
             console.log('map click');
             pathDrawing.drawLines();
         });
