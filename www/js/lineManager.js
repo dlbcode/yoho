@@ -143,7 +143,7 @@ const lineManager = {
                 pathDrawing.popupFromClick = false;
                 document.removeEventListener('click', lineManager.outsideClickListener);
 
-                if (!visibleLine.options.isTableRoute) {
+                if (!visibleLine.isTableRoute) {
                     this.clearLines('specific', [{ visibleLine, invisibleLine }]);
                 } else {
                     const highlightedRouteSegments = pathDrawing.routePathCache[visibleLine.routeData.tableRouteId];
@@ -179,9 +179,9 @@ const lineManager = {
     onMouseOver: function (e, line) {
         console.log("onMouseOver triggered");
         console.log("Received line:", line);
-
+    
         if (pathDrawing.popupFromClick) return;
-
+    
         if (this.hoveredLine && this.hoveredLine !== line) {
             console.log("Resetting previously hovered line:", this.hoveredLine);
             if (this.hoveredLine instanceof Line) {
@@ -190,8 +190,10 @@ const lineManager = {
             map.closePopup(this.hoverPopup);
             this.hoverPopups = this.hoverPopups.filter(p => p !== this.hoverPopup);
         }
-
+    
         this.hoveredLine = line;
+    
+        // Access the visibleLine property of the Line instance
         if (line.visibleLine) {
             console.log("Applying style to visibleLine");
             line.visibleLine.setStyle({ color: 'white', weight: 2, opacity: 1 });

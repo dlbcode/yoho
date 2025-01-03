@@ -4,7 +4,7 @@ import { sortTableByColumn } from './sortTable.js';
 import { pathDrawing } from '../pathDrawing.js';
 import { flightMap } from '../flightMap.js';
 import { routeInfoRow, highlightSelectedRowForRouteIndex } from './routeInfoRow.js';
-import { applyFilters, toggleFilterResetIcon, updateFilterHeaders } from './filterTable.js';
+import { applyFilters, toggleFilterResetIcon, updateFilterHeaders, constructFilterTags } from './filterTable.js';
 
 function buildRouteTable(routeIndex) {
     appState.filterState = {
@@ -73,137 +73,148 @@ function buildRouteTable(routeIndex) {
     }
 
     fetch(apiUrl)
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`Failed to fetch route data: ${response.statusText}`);
-            }
-            return response.json();
-        })
-        .then(data => {
-            const table = document.createElement('table');
-            table.className = 'route-info-table';
-            table.style.width = '100%';
-            table.setAttribute('data-route-index', routeIndex);
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`Failed to fetch route data: ${response.statusText}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        let flightsData = data;
+        if (endpoint === 'range' || destination === 'Any') {
+            flightsData = data.data;
+        }
 
-            const thead = document.createElement('thead');
-            let headerRow = `<tr>
-                                <th data-column="departure">
-                                    <span class="headerText" data-column="departure">
-                                    <span class="filteredHeader" data-column="departure">Departure</span>
-                                    <img class="filterIcon" id="departureFilter" data-column="departure" src="/assets/filter-icon.svg" alt="Filter">
-                                    <span class="resetIcon" id="resetDepartureFilter" data-column="departure" style="display:none; cursor:pointer;">✕</span>
-                                    </span>
-                                    <span class="sortIcon" data-column="departure">&#x21C5;</span>
-                                </th>
-                                <th data-column="arrival">
-                                    <span class="headerText" data-column="arrival">
-                                    <span class="filteredHeader" data-column="arrival">Arrival</span>
-                                    <img id="arrivalFilter" class="filterIcon" data-column="arrival" src="/assets/filter-icon.svg" alt="Filter">
-                                    <span class="resetIcon" id="resetArrivalFilter" data-column="arrival" style="display:none; cursor:pointer;">✕</span>
-                                    </span>
-                                    <span class="sortIcon" data-column="arrival">&#x21C5;</span>
-                                </th>
-                                <th data-column="price">
-                                    <span class="headerText" data-column="price">
-                                    <span class="filteredHeader" data-column="price" id="priceText">Price</span>
-                                    <img id="priceFilter" class="filterIcon" data-column="price" src="/assets/filter-icon.svg" alt="Filter">
-                                    <span class="resetIcon" id="resetPriceFilter" data-column="price" style="display:none; cursor:pointer;">✕</span>
-                                    </span>
-                                    <span class="sortIcon" data-column="price">&#x21C5;</span>
-                                </th>
-                                <th data-column="airlines"><span class="headerText">Airlines</span><span class="sortIcon" data-column="airlines">&#x21C5;</span></th>
-                                <th data-column="direct"><span class="headerText">Direct</span><span class="sortIcon" data-column="direct">&#x21C5;</span></th>
-                                <th data-column="stops"><span class="headerText">Stops</span><span class="sortIcon" data-column="stops">&#x21C5;</span></th>
-                                <th data-column="layovers"><span class="headerText">Layovers</span><span class="sortIcon" data-column="layovers">&#x21C5;</span></th>
-                                <th data-column="duration"><span class="headerText">Duration</span><span class="sortIcon" data-column="duration">&#x21C5;</span></th>
-                                <th data-column="route"><span class="headerText">Route</span><span class="sortIcon" data-column="route">&#x21C5;</span></th>
-                            </tr>`;
-            thead.innerHTML = headerRow;
-            table.appendChild(thead);
+        const infoPaneContent = document.getElementById('infoPaneContent');
+        if (!infoPaneContent) {
+            console.error('infoPaneContent element not found');
+            return;
+        }
 
-            const tbody = document.createElement('tbody');
+        infoPaneContent.innerHTML = ''; // Clear existing content
+        const table = document.createElement('table');
+        table.className = 'route-info-table';
+        table.style.width = '100%';
+        table.setAttribute('data-route-index', routeIndex);
+
+        const thead = document.createElement('thead');
+        thead.innerHTML = `<tr>
+            <th data-column="departure">
+                <span class="headerText" data-column="departure">
+                <span class="filteredHeader" data-column="departure">Departure</span>
+                <img class="filterIcon" id="departureFilter" data-column="departure" src="/assets/filter-icon.svg" alt="Filter">
+                <span class="resetIcon" id="resetDepartureFilter" data-column="departure" style="display:none; cursor:pointer;">✕</span>
+                </span>
+                <span class="sortIcon" data-column="departure">&#x21C5;</span>
+            </th>
+            <th data-column="arrival">
+                <span class="headerText" data-column="arrival">
+                <span class="filteredHeader" data-column="arrival">Arrival</span>
+                <img id="arrivalFilter" class="filterIcon" data-column="arrival" src="/assets/filter-icon.svg" alt="Filter">
+                <span class="resetIcon" id="resetArrivalFilter" data-column="arrival" style="display:none; cursor:pointer;">✕</span>
+                </span>
+                <span class="sortIcon" data-column="arrival">&#x21C5;</span>
+            </th>
+            <th data-column="price">
+                <span class="headerText" data-column="price">
+                <span class="filteredHeader" data-column="price" id="priceText">Price</span>
+                <img id="priceFilter" class="filterIcon" data-column="price" src="/assets/filter-icon.svg" alt="Filter">
+                <span class="resetIcon" id="resetPriceFilter" data-column="price" style="display:none; cursor:pointer;">✕</span>
+                </span>
+                <span class="sortIcon" data-column="price">&#x21C5;</span>
+            </th>
+            <th data-column="airlines"><span class="headerText">Airlines</span><span class="sortIcon" data-column="airlines">&#x21C5;</span></th>
+            <th data-column="direct"><span class="headerText">Direct</span><span class="sortIcon" data-column="direct">&#x21C5;</span></th>
+            <th data-column="stops"><span class="headerText">Stops</span><span class="sortIcon" data-column="stops">&#x21C5;</span></th>
+            <th data-column="layovers"><span class="headerText">Layovers</span><span class="sortIcon" data-column="layovers">&#x21C5;</span></th>
+            <th data-column="duration"><span class="headerText">Duration</span><span class="sortIcon" data-column="duration">&#x21C5;</span></th>
+            <th data-column="route"><span class="headerText">Route</span><span class="sortIcon" data-column="route">&#x21C5;</span></th>
+        </tr>`;
+        table.appendChild(thead);
+
+        const tbody = document.createElement('tbody');
+        flightsData.forEach(flight => {
+            let row = document.createElement('tr');
+            let departureDate, arrivalDate;
+            row.setAttribute('data-route-id', flight.id);
+            const directFlight = flight.route.length === 1;
+            const price = parseFloat(flight.price.toFixed(2));
+            const stops = flight.route.length - 1;
+            const layovers = flight.route.slice(0, -1).map(r => r.flyTo).join(", ");
+            const durationHours = Math.floor(flight.duration.total / 3600);
+            const durationMinutes = Math.floor((flight.duration.total % 3600) / 60);
+            const routeIATAs = flight.route.map(r => r.flyFrom).concat(flight.route[flight.route.length - 1].flyTo).join(" > ");
 
             if (endpoint === 'range' || destination === 'Any') {
-                data = data.data;
+                departureDate = new Date(flight.dTime * 1000);
+                arrivalDate = new Date(flight.aTime * 1000);
+            } else {
+                departureDate = new Date(flight.local_departure);
+                arrivalDate = new Date(flight.local_arrival);
             }
-            data.forEach(flight => {
-                let row = document.createElement('tr');
-                let departureDate, arrivalDate;
-                row.setAttribute('data-route-id', flight.id);
-                const directFlight = flight.route.length === 1;
-                const price = parseFloat(flight.price.toFixed(2));
-                const stops = flight.route.length - 1;
-                const layovers = flight.route.slice(0, -1).map(r => r.flyTo).join(", ");
-                const durationHours = Math.floor(flight.duration.total / 3600);
-                const durationMinutes = Math.floor((flight.duration.total % 3600) / 60);
-                const routeIATAs = flight.route.map(r => r.flyFrom).concat(flight.route[flight.route.length - 1].flyTo).join(" > ");
-                if (endpoint === 'range' || destination === 'Any') {
-                    departureDate = new Date(flight.dTime * 1000);
-                    arrivalDate = new Date(flight.aTime * 1000);
-                } else {
-                    departureDate = new Date(flight.local_departure);
-                    arrivalDate = new Date(flight.local_arrival);
-                }
-                const departureDayName = departureDate.toLocaleDateString('en-US', { weekday: 'short' });
-                const arrivalDayName = arrivalDate.toLocaleDateString('en-US', { weekday: 'short' });
 
-                const formattedDeparture = `${departureDayName} ${departureDate.toLocaleString()}`;
-                const formattedArrival = `${arrivalDayName} ${arrivalDate.toLocaleString()}`;
+            const departureDayName = departureDate.toLocaleDateString('en-US', { weekday: 'short' });
+            const arrivalDayName = arrivalDate.toLocaleDateString('en-US', { weekday: 'short' });
 
-                const departureTime = departureDate.getHours() + departureDate.getMinutes() / 60; // Convert time to decimal hours
-                const arrivalTime = arrivalDate.getHours() + arrivalDate.getMinutes() / 60; // Convert time to decimal hours
+            const formattedDeparture = `${departureDayName} ${departureDate.toLocaleString()}`;
+            const formattedArrival = `${arrivalDayName} ${arrivalDate.toLocaleString()}`;
 
-                row.innerHTML = `<td>${formattedDeparture}</td>
-                                <td>${formattedArrival}</td>
-                                <td>$${price}</td>
-                                <td>${flight.airlines.join(", ")}</td>
-                                <td>${directFlight ? '✓' : ''}</td>
-                                <td>${stops}</td>
-                                <td>${layovers}</td>
-                                <td>${durationHours}h ${durationMinutes}m</td>
-                                <td>${routeIATAs}</td>`;
+            // Convert time to decimal hours for filtering
+            const departureTime = departureDate.getHours() + departureDate.getMinutes() / 60;
+            const arrivalTime = arrivalDate.getHours() + arrivalDate.getMinutes() / 60;
 
-                // Add parsed data as data attributes
-                row.dataset.price = price;
-                row.dataset.departureTime = departureTime;
-                row.dataset.arrivalTime = arrivalTime;
-                
-                tbody.appendChild(row);
+            row.innerHTML = `<td>${formattedDeparture}</td>
+                            <td>${formattedArrival}</td>
+                            <td>$${price}</td>
+                            <td>${flight.airlines.join(", ")}</td>
+                            <td>${directFlight ? '✓' : ''}</td>
+                            <td>${stops}</td>
+                            <td>${layovers}</td>
+                            <td>${durationHours}h ${durationMinutes}m</td>
+                            <td>${routeIATAs}</td>`;
 
-                const tableRouteId = flight.id; // Get the table route ID from the data attribute
+            // Add parsed data as data attributes for filtering and sorting
+            row.dataset.price = price;
+            row.dataset.departureTime = departureTime;
+            row.dataset.arrivalTime = arrivalTime;
 
-                flight.route.forEach((segment, index) => {
-                    const originIata = segment.flyFrom;
-                    const destinationIata = segment.flyTo;
+            tbody.appendChild(row);
 
-                    flightMap.getAirportDataByIata(originIata).then(originAirportData => {
-                        flightMap.getAirportDataByIata(destinationIata).then(destinationAirportData => {
-                            if (!originAirportData || !destinationAirportData) return;
+            const tableRouteId = flight.id; // Get the table route ID from the data attribute
 
-                            pathDrawing.createRoutePath(originAirportData, destinationAirportData, {
-                                originAirport: originAirportData,
-                                destinationAirport: destinationAirportData,
-                                price: price,
-                                isDirect: directFlight,
-                                departureTime: departureTime,
-                                arrivalTime: arrivalTime,
-                                group: routeIndex + 1,
-                            }, null, true, tableRouteId);
+            flight.route.forEach((segment, index) => {
+                const originIata = segment.flyFrom;
+                const destinationIata = segment.flyTo;
+
+                flightMap.getAirportDataByIata(originIata).then(originAirportData => {
+                    flightMap.getAirportDataByIata(destinationIata).then(destinationAirportData => {
+                        if (!originAirportData || !destinationAirportData) return;
+
+                        pathDrawing.drawLine(`${originIata}-${destinationIata}`, 'route', {
+                            price: price,
+                            isDirect: directFlight,
+                            departureTime: departureTime,
+                            arrivalTime: arrivalTime,
+                            group: routeIndex + 1,
+                            isTableRoute: true,
+                            tableRouteId: tableRouteId
                         });
                     });
                 });
             });
-            table.appendChild(tbody);
-            infoPaneContent.appendChild(table);
-            topBar.classList.remove('loading');
-            pathDrawing.drawRouteLines();
-            highlightSelectedRowForRouteIndex(routeIndex);
-            attachEventListeners(table, data, routeIndex);
-            applyFilters();
-        })
-        .catch(error => {
-            infoPaneContent.textContent = 'Error loading data: ' + error.message;
         });
+
+        table.appendChild(tbody);
+        infoPaneContent.appendChild(table); // Append the table once all rows are added
+        topBar.classList.remove('loading');
+        pathDrawing.drawLines();
+        highlightSelectedRowForRouteIndex(routeIndex);
+        attachEventListeners(table, flightsData, routeIndex);
+        applyFilters();
+    })
+    .catch(error => {
+        infoPaneContent.textContent = 'Error loading data: ' + error.message;
+    });
 
     function attachEventListeners(table, data, routeIndex) {
         const headers = table.querySelectorAll('th');
