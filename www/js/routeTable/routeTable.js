@@ -12,7 +12,8 @@ function buildRouteTable(routeIndex) {
         arrival: { start: 0, end: 24 }
     };
 
-    const dateRange = appState.routeDates[routeIndex];
+    // Check if appState.routeDates[routeIndex] exists before accessing its properties
+    const dateRange = appState.routeDates[routeIndex] || {}; // Provide an empty object as a fallback
     let origin, destination, currentRoute, departDate, returnDate, apiUrl, endpoint;
     currentRoute = appState.routes[routeIndex];
 
@@ -30,20 +31,21 @@ function buildRouteTable(routeIndex) {
     const topBar = document.getElementById('top-bar');
     topBar.classList.add('loading');
 
-    if (destination === 'Any') {
-        endpoint = 'cheapestFlights';
-        origin = appState.waypoints[routeIndex * 2]?.iata_code;
-    } else {
-        origin = currentRoute.originAirport.iata_code;
+    // **Helper function to format dates to DD/MM/YYYY**
+    function formatDate(dateString) {
+        if (!dateString || dateString === 'any' || dateString.includes(' to ')) {
+            return dateString;
+        }
+        const date = new Date(dateString);
+        const day = date.getDate().toString().padStart(2, '0');
+        const month = (date.getMonth() + 1).toString().padStart(2, '0');
+        const year = date.getFullYear();
+        return `${day}/${month}/${year}`;
     }
 
-    if (!dateRange) {
-        console.error('No date range found');
-        return;
-    }
-
-    departDate = dateRange.depart || '';
-    returnDate = dateRange.return || '';
+    // Check if dateRange and its properties are defined before formatting
+    departDate = dateRange.depart ? formatDate(dateRange.depart) : 'any';
+    returnDate = dateRange.return ? formatDate(dateRange.return) : '';
 
     if (destination === 'Any') {
         endpoint = 'cheapestFlights';
@@ -72,149 +74,177 @@ function buildRouteTable(routeIndex) {
         }
     }
 
+    console.log("API URL:", apiUrl); // Log the generated API URL
+
     fetch(apiUrl)
-    .then(response => {
-        if (!response.ok) {
-            throw new Error(`Failed to fetch route data: ${response.statusText}`);
-        }
-        return response.json();
-    })
-    .then(data => {
-        let flightsData = data;
-        if (endpoint === 'range' || destination === 'Any') {
-            flightsData = data.data;
-        }
+        .then(response => {
+            console.log("API Response Status:", response.status); // Log the response status
+            if (!response.ok) {
+                throw new Error(`Failed to fetch route data: ${response.statusText}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log("API Response Data:", data); // Log the raw API response data
+            let flightsData;
 
-        const infoPaneContent = document.getElementById('infoPaneContent');
-        if (!infoPaneContent) {
-            console.error('infoPaneContent element not found');
-            return;
-        }
-
-        infoPaneContent.innerHTML = ''; // Clear existing content
-        const table = document.createElement('table');
-        table.className = 'route-info-table';
-        table.style.width = '100%';
-        table.setAttribute('data-route-index', routeIndex);
-
-        const thead = document.createElement('thead');
-        thead.innerHTML = `<tr>
-            <th data-column="departure">
-                <span class="headerText" data-column="departure">
-                <span class="filteredHeader" data-column="departure">Departure</span>
-                <img class="filterIcon" id="departureFilter" data-column="departure" src="/assets/filter-icon.svg" alt="Filter">
-                <span class="resetIcon" id="resetDepartureFilter" data-column="departure" style="display:none; cursor:pointer;">✕</span>
-                </span>
-                <span class="sortIcon" data-column="departure">&#x21C5;</span>
-            </th>
-            <th data-column="arrival">
-                <span class="headerText" data-column="arrival">
-                <span class="filteredHeader" data-column="arrival">Arrival</span>
-                <img id="arrivalFilter" class="filterIcon" data-column="arrival" src="/assets/filter-icon.svg" alt="Filter">
-                <span class="resetIcon" id="resetArrivalFilter" data-column="arrival" style="display:none; cursor:pointer;">✕</span>
-                </span>
-                <span class="sortIcon" data-column="arrival">&#x21C5;</span>
-            </th>
-            <th data-column="price">
-                <span class="headerText" data-column="price">
-                <span class="filteredHeader" data-column="price" id="priceText">Price</span>
-                <img id="priceFilter" class="filterIcon" data-column="price" src="/assets/filter-icon.svg" alt="Filter">
-                <span class="resetIcon" id="resetPriceFilter" data-column="price" style="display:none; cursor:pointer;">✕</span>
-                </span>
-                <span class="sortIcon" data-column="price">&#x21C5;</span>
-            </th>
-            <th data-column="airlines"><span class="headerText">Airlines</span><span class="sortIcon" data-column="airlines">&#x21C5;</span></th>
-            <th data-column="direct"><span class="headerText">Direct</span><span class="sortIcon" data-column="direct">&#x21C5;</span></th>
-            <th data-column="stops"><span class="headerText">Stops</span><span class="sortIcon" data-column="stops">&#x21C5;</span></th>
-            <th data-column="layovers"><span class="headerText">Layovers</span><span class="sortIcon" data-column="layovers">&#x21C5;</span></th>
-            <th data-column="duration"><span class="headerText">Duration</span><span class="sortIcon" data-column="duration">&#x21C5;</span></th>
-            <th data-column="route"><span class="headerText">Route</span><span class="sortIcon" data-column="route">&#x21C5;</span></th>
-        </tr>`;
-        table.appendChild(thead);
-
-        const tbody = document.createElement('tbody');
-        flightsData.forEach(flight => {
-            let row = document.createElement('tr');
-            let departureDate, arrivalDate;
-            row.setAttribute('data-route-id', flight.id);
-            const directFlight = flight.route.length === 1;
-            const price = parseFloat(flight.price.toFixed(2));
-            const stops = flight.route.length - 1;
-            const layovers = flight.route.slice(0, -1).map(r => r.flyTo).join(", ");
-            const durationHours = Math.floor(flight.duration.total / 3600);
-            const durationMinutes = Math.floor((flight.duration.total % 3600) / 60);
-            const routeIATAs = flight.route.map(r => r.flyFrom).concat(flight.route[flight.route.length - 1].flyTo).join(" > ");
-
+            console.log("Endpoint:", endpoint, "Destination:", destination);
             if (endpoint === 'range' || destination === 'Any') {
-                departureDate = new Date(flight.dTime * 1000);
-                arrivalDate = new Date(flight.aTime * 1000);
-            } else {
-                departureDate = new Date(flight.local_departure);
-                arrivalDate = new Date(flight.local_arrival);
+                if (data && data.data && Array.isArray(data.data)) {
+                    flightsData = data.data;
+                } else {
+                    console.error("Unexpected data format from API (range or Any):", data);
+                    // Handle the error, maybe set flightsData to an empty array or show an error message
+                    flightsData = []; // or handle the error in a way that makes sense for your application
+                }
+            } else { // Handle yhoneway and potentially yhreturn endpoints
+                if (Array.isArray(data)) { // Check if data is already an array
+                    flightsData = data;
+                } else if (data && data.data && Array.isArray(data.data)) { // Check if data.data is an array
+                    flightsData = data.data;
+                } else {
+                    console.error("Unexpected data format from API (yhoneway/yhreturn):", data);
+                    // Handle the error, maybe set flightsData to an empty array or show an error message
+                    flightsData = []; // or handle the error in a way that makes sense for your application
+                }
+            }
+            console.log("Flights Data:", flightsData); // Log flightsData
+
+            const infoPaneContent = document.getElementById('infoPaneContent');
+            if (!infoPaneContent) {
+                console.error('infoPaneContent element not found');
+                return;
             }
 
-            const departureDayName = departureDate.toLocaleDateString('en-US', { weekday: 'short' });
-            const arrivalDayName = arrivalDate.toLocaleDateString('en-US', { weekday: 'short' });
+            infoPaneContent.innerHTML = ''; // Clear existing content
+            const table = document.createElement('table');
+            table.className = 'route-info-table';
+            table.style.width = '100%';
+            table.setAttribute('data-route-index', routeIndex);
 
-            const formattedDeparture = `${departureDayName} ${departureDate.toLocaleString()}`;
-            const formattedArrival = `${arrivalDayName} ${arrivalDate.toLocaleString()}`;
+            const thead = document.createElement('thead');
+            thead.innerHTML = `<tr>
+                <th data-column="departure">
+                    <span class="headerText" data-column="departure">
+                    <span class="filteredHeader" data-column="departure">Departure</span>
+                    <img class="filterIcon" id="departureFilter" data-column="departure" src="/assets/filter-icon.svg" alt="Filter">
+                    <span class="resetIcon" id="resetDepartureFilter" data-column="departure" style="display:none; cursor:pointer;">✕</span>
+                    </span>
+                    <span class="sortIcon" data-column="departure">&#x21C5;</span>
+                </th>
+                <th data-column="arrival">
+                    <span class="headerText" data-column="arrival">
+                    <span class="filteredHeader" data-column="arrival">Arrival</span>
+                    <img id="arrivalFilter" class="filterIcon" data-column="arrival" src="/assets/filter-icon.svg" alt="Filter">
+                    <span class="resetIcon" id="resetArrivalFilter" data-column="arrival" style="display:none; cursor:pointer;">✕</span>
+                    </span>
+                    <span class="sortIcon" data-column="arrival">&#x21C5;</span>
+                </th>
+                <th data-column="price">
+                    <span class="headerText" data-column="price">
+                    <span class="filteredHeader" data-column="price" id="priceText">Price</span>
+                    <img id="priceFilter" class="filterIcon" data-column="price" src="/assets/filter-icon.svg" alt="Filter">
+                    <span class="resetIcon" id="resetPriceFilter" data-column="price" style="display:none; cursor:pointer;">✕</span>
+                    </span>
+                    <span class="sortIcon" data-column="price">&#x21C5;</span>
+                </th>
+                <th data-column="airlines"><span class="headerText">Airlines</span><span class="sortIcon" data-column="airlines">&#x21C5;</span></th>
+                <th data-column="direct"><span class="headerText">Direct</span><span class="sortIcon" data-column="direct">&#x21C5;</span></th>
+                <th data-column="stops"><span class="headerText">Stops</span><span class="sortIcon" data-column="stops">&#x21C5;</span></th>
+                <th data-column="layovers"><span class="headerText">Layovers</span><span class="sortIcon" data-column="layovers">&#x21C5;</span></th>
+                <th data-column="duration"><span class="headerText">Duration</span><span class="sortIcon" data-column="duration">&#x21C5;</span></th>
+                <th data-column="route"><span class="headerText">Route</span><span class="sortIcon" data-column="route">&#x21C5;</span></th>
+            </tr>`;
+            table.appendChild(thead);
 
-            // Convert time to decimal hours for filtering
-            const departureTime = departureDate.getHours() + departureDate.getMinutes() / 60;
-            const arrivalTime = arrivalDate.getHours() + arrivalDate.getMinutes() / 60;
+            const tbody = document.createElement('tbody');
+            console.log("Table:", table);
+            console.log("Tbody:", tbody);
+            flightsData.forEach(flight => {
+                let row = document.createElement('tr');
+                let departureDate, arrivalDate;
+                row.setAttribute('data-route-id', flight.id);
+                const directFlight = flight.route.length === 1;
+                const price = parseFloat(flight.price.toFixed(2));
+                const stops = flight.route.length - 1;
+                const layovers = flight.route.slice(0, -1).map(r => r.flyTo).join(", ");
+                const durationHours = Math.floor(flight.duration.total / 3600);
+                const durationMinutes = Math.floor((flight.duration.total % 3600) / 60);
+                const routeIATAs = flight.route.map(r => r.flyFrom).concat(flight.route[flight.route.length - 1].flyTo).join(" > ");
 
-            row.innerHTML = `<td>${formattedDeparture}</td>
-                            <td>${formattedArrival}</td>
-                            <td>$${price}</td>
-                            <td>${flight.airlines.join(", ")}</td>
-                            <td>${directFlight ? '✓' : ''}</td>
-                            <td>${stops}</td>
-                            <td>${layovers}</td>
-                            <td>${durationHours}h ${durationMinutes}m</td>
-                            <td>${routeIATAs}</td>`;
+                if (endpoint === 'range' || destination === 'Any') {
+                    departureDate = new Date(flight.dTime * 1000);
+                    arrivalDate = new Date(flight.aTime * 1000);
+                } else {
+                    departureDate = new Date(flight.local_departure);
+                    arrivalDate = new Date(flight.local_arrival);
+                }
 
-            // Add parsed data as data attributes for filtering and sorting
-            row.dataset.price = price;
-            row.dataset.departureTime = departureTime;
-            row.dataset.arrivalTime = arrivalTime;
+                const departureDayName = departureDate.toLocaleDateString('en-US', { weekday: 'short' });
+                const arrivalDayName = arrivalDate.toLocaleDateString('en-US', { weekday: 'short' });
 
-            tbody.appendChild(row);
+                const formattedDeparture = `${departureDayName} ${departureDate.toLocaleString()}`;
+                const formattedArrival = `${arrivalDayName} ${arrivalDate.toLocaleString()}`;
 
-            const tableRouteId = flight.id; // Get the table route ID from the data attribute
+                // Convert time to decimal hours for filtering
+                const departureTime = departureDate.getHours() + departureDate.getMinutes() / 60;
+                const arrivalTime = arrivalDate.getHours() + arrivalDate.getMinutes() / 60;
 
-            flight.route.forEach((segment, index) => {
-                const originIata = segment.flyFrom;
-                const destinationIata = segment.flyTo;
+                row.innerHTML = `<td>${formattedDeparture}</td>
+                                 <td>${formattedArrival}</td>
+                                 <td>$${price}</td>
+                                 <td>${flight.airlines.join(", ")}</td>
+                                 <td>${directFlight ? '✓' : ''}</td>
+                                 <td>${stops}</td>
+                                 <td>${layovers}</td>
+                                 <td>${durationHours}h ${durationMinutes}m</td>
+                                 <td>${routeIATAs}</td>`;
+                console.log("Row HTML:", row.innerHTML);
 
-                flightMap.getAirportDataByIata(originIata).then(originAirportData => {
-                    flightMap.getAirportDataByIata(destinationIata).then(destinationAirportData => {
-                        if (!originAirportData || !destinationAirportData) return;
+                // Add parsed data as data attributes for filtering and sorting
+                row.dataset.price = price;
+                row.dataset.departureTime = departureTime;
+                row.dataset.arrivalTime = arrivalTime;
 
-                        pathDrawing.drawLine(`${originIata}-${destinationIata}`, 'route', {
-                            price: price,
-                            isDirect: directFlight,
-                            departureTime: departureTime,
-                            arrivalTime: arrivalTime,
-                            group: routeIndex + 1,
-                            isTableRoute: true,
-                            tableRouteId: tableRouteId
+                tbody.appendChild(row);
+
+                const tableRouteId = flight.id; // Get the table route ID from the data attribute
+
+                flight.route.forEach((segment, index) => {
+                    const originIata = segment.flyFrom;
+                    const destinationIata = segment.flyTo;
+
+                    flightMap.getAirportDataByIata(originIata).then(originAirportData => {
+                        flightMap.getAirportDataByIata(destinationIata).then(destinationAirportData => {
+                            if (!originAirportData || !destinationAirportData) return;
+
+                            pathDrawing.drawLine(`${originIata}-${destinationIata}`, 'route', {
+                                price: price,
+                                isDirect: directFlight,
+                                departureTime: departureTime,
+                                arrivalTime: arrivalTime,
+                                group: routeIndex + 1, // Assuming each route is a separate group
+                                isTableRoute: true,
+                                tableRouteId: tableRouteId
+                            });
                         });
                     });
                 });
             });
-        });
 
-        table.appendChild(tbody);
-        infoPaneContent.appendChild(table); // Append the table once all rows are added
-        topBar.classList.remove('loading');
-        pathDrawing.drawLines();
-        highlightSelectedRowForRouteIndex(routeIndex);
-        attachEventListeners(table, flightsData, routeIndex);
-        applyFilters();
-    })
-    .catch(error => {
-        infoPaneContent.textContent = 'Error loading data: ' + error.message;
-    });
+            table.appendChild(tbody);
+            infoPaneContent.appendChild(table); // Append the table once all rows are added
+            topBar.classList.remove('loading');
+            pathDrawing.drawLines();
+            highlightSelectedRowForRouteIndex(routeIndex);
+            attachEventListeners(table, flightsData, routeIndex);
+            applyFilters();
+        })
+        .catch(error => {
+            console.error('Error loading data:', error);
+            console.error('Detailed error:', error);
+            infoPaneContent.textContent = 'Error loading data: ' + error.message;
+        });
 
     function attachEventListeners(table, data, routeIndex) {
         const headers = table.querySelectorAll('th');

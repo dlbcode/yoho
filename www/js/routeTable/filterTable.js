@@ -52,20 +52,19 @@ function constructFilterTags() {
 
 function applyFilters() {
     const tableRows = document.querySelectorAll('.route-info-table tbody tr');
-
-    // Construct filter tags using the new function
     const filterTags = constructFilterTags();
-
-    // Get the lines that match the filter tags
     const matchingLines = lineManager.getLinesByTags(filterTags, 'route');
 
-    // Show/hide rows based on matching lines
     tableRows.forEach(row => {
         const routeId = row.getAttribute('data-route-id');
-        const hasMatchingLine = matchingLines.some(line => {
-            return line.routeId === routeId
-        });
-        row.style.display = hasMatchingLine ? '' : 'none';
+
+        // Only hide if there are matching lines AND this row doesn't match
+        if (matchingLines.length > 0) {
+            const hasMatchingLine = matchingLines.some(line => line.routeId === routeId);
+            row.style.display = hasMatchingLine ? '' : 'none';
+        } else {
+            row.style.display = ''; // Show by default if no matching lines
+        }
     });
 }
 
