@@ -53,17 +53,37 @@ function constructFilterTags() {
 function applyFilters() {
     const tableRows = document.querySelectorAll('.route-info-table tbody tr');
     const filterTags = constructFilterTags();
-    const matchingLines = lineManager.getLinesByTags(filterTags, 'route');
 
     tableRows.forEach(row => {
-        const routeId = row.getAttribute('data-route-id');
+        const priceRange = row.dataset.priceRange;
+        const price = row.dataset.priceValue;
+        const departureTime = parseFloat(row.dataset.departureTime);
+        const arrivalTime = parseFloat(row.dataset.arrivalTime);
 
-        // Only hide if there are matching lines AND this row doesn't match
-        if (matchingLines.length > 0) {
-            const hasMatchingLine = matchingLines.some(line => line.routeId === routeId);
-            row.style.display = hasMatchingLine ? '' : 'none';
+        // Check if the row matches the price filter
+        const hasMatchingPrice = !filterTags.some(tag => tag.startsWith('price-range:')) ||
+            filterTags.some(tag => tag === priceRange || tag === `price:${price}`);
+
+        // Check if departure and arrival times match the filter
+        const hasMatchingDeparture = !filterTags.some(tag => tag.startsWith('departure-range:')) ||
+            filterTags.some(tag => {
+                if (!tag.startsWith('departure-range:')) return false;
+                const [start, end] = tag.replace('departure-range:', '').split('-').map(Number);
+                return departureTime >= start && departureTime <= end;
+            });
+
+        const hasMatchingArrival = !filterTags.some(tag => tag.startsWith('arrival-range:')) ||
+            filterTags.some(tag => {
+                if (!tag.startsWith('arrival-range:')) return false;
+                const [start, end] = tag.replace('arrival-range:', '').split('-').map(Number);
+                return arrivalTime >= start && arrivalTime <= end;
+            });
+
+        // Determine if the row should be displayed based on all filter criteria
+        if (hasMatchingPrice && hasMatchingDeparture && hasMatchingArrival) {
+            row.style.display = ''; // Show the row
         } else {
-            row.style.display = ''; // Show by default if no matching lines
+            row.style.display = 'none'; // Hide the row
         }
     });
 }

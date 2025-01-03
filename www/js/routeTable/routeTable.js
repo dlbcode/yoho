@@ -206,6 +206,14 @@ function buildRouteTable(routeIndex) {
                 row.dataset.departureTime = departureTime;
                 row.dataset.arrivalTime = arrivalTime;
 
+                row.dataset.priceRange = price < 100 ? 'price-range:0-100' :
+                    price < 200 ? 'price-range:100-200' :
+                    price < 300 ? 'price-range:200-300' :
+                    price < 400 ? 'price-range:300-400' :
+                    price < 500 ? 'price-range:400-500' :
+                    'price-range:500+';
+                row.dataset.priceValue = Math.round(price);
+
                 tbody.appendChild(row);
 
                 const tableRouteId = flight.id; // Get the table route ID from the data attribute

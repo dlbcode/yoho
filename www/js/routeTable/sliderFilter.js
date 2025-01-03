@@ -1,5 +1,5 @@
-import { appState } from '../stateManager.js'; // Assuming state manager handles global state
-import { logFilterState, applyFilters, toggleFilterResetIcon } from './filterTable.js';
+import { appState } from '../stateManager.js';
+import { logFilterState, applyFilters, toggleFilterResetIcon, updateFilterHeaders } from './filterTable.js';
 
 appState.filterState = {
     departure: { start: 0, end: 24 },
@@ -138,6 +138,8 @@ const sliderFilter = {
             handles.forEach(handle => handle.classList.add('slider-handle'));
             slider.noUiSlider.on('update', function (values) {
                 sliderFilter.updateFilterStateAndLabel(column, values, valueLabel);
+                applyFilters(); // Re-filter rows when the slider is updated
+                updateFilterHeaders(); //update headers
             });
             slider.addEventListener('touchend', function () {
                 toggleFilterResetIcon(column);
