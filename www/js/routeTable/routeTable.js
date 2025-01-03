@@ -4,6 +4,7 @@ import { sortTableByColumn } from './sortTable.js';
 import { pathDrawing } from '../pathDrawing.js';
 import { flightMap } from '../flightMap.js';
 import { routeInfoRow, highlightSelectedRowForRouteIndex } from './routeInfoRow.js';
+import { applyFilters, toggleFilterResetIcon, updateFilterHeaders } from './filterTable.js';
 
 function buildRouteTable(routeIndex) {
     appState.filterState = {
@@ -28,7 +29,7 @@ function buildRouteTable(routeIndex) {
     // Start the loading animation
     const topBar = document.getElementById('top-bar');
     topBar.classList.add('loading');
-    
+
     if (destination === 'Any') {
         endpoint = 'cheapestFlights';
         origin = appState.waypoints[routeIndex * 2]?.iata_code;
@@ -86,37 +87,37 @@ function buildRouteTable(routeIndex) {
 
             const thead = document.createElement('thead');
             let headerRow = `<tr>
-                        <th data-column="departure">
-                            <span class="headerText" data-column="departure">
-                            <span class="filteredHeader" data-column="departure">Departure</span>
-                            <img class="filterIcon" id="departureFilter" data-column="departure" src="/assets/filter-icon.svg" alt="Filter">
-                            <span class="resetIcon" id="resetDepartureFilter" data-column="departure" style="display:none; cursor:pointer;">✕</span>
-                            </span>
-                            <span class="sortIcon" data-column="departure">&#x21C5;</span>
-                        </th>
-                        <th data-column="arrival">
-                            <span class="headerText" data-column="arrival">
-                            <span class="filteredHeader" data-column="arrival">Arrival</span>
-                            <img id="arrivalFilter" class="filterIcon" data-column="arrival" src="/assets/filter-icon.svg" alt="Filter">
-                            <span class="resetIcon" id="resetArrivalFilter" data-column="arrival" style="display:none; cursor:pointer;">✕</span>
-                            </span>
-                            <span class="sortIcon" data-column="arrival">&#x21C5;</span>
-                        </th>
-                        <th data-column="price">
-                            <span class="headerText" data-column="price">
-                            <span class="filteredHeader" data-column="price" id="priceText">Price</span>
-                            <img id="priceFilter" class="filterIcon" data-column="price" src="/assets/filter-icon.svg" alt="Filter">
-                            <span class="resetIcon" id="resetPriceFilter" data-column="price" style="display:none; cursor:pointer;">✕</span>
-                            </span>
-                            <span class="sortIcon" data-column="price">&#x21C5;</span>
-                        </th>
-                        <th data-column="airlines"><span class="headerText">Airlines</span><span class="sortIcon" data-column="airlines">&#x21C5;</span></th>
-                        <th data-column="direct"><span class="headerText">Direct</span><span class="sortIcon" data-column="direct">&#x21C5;</span></th>
-                        <th data-column="stops"><span class="headerText">Stops</span><span class="sortIcon" data-column="stops">&#x21C5;</span></th>
-                        <th data-column="layovers"><span class="headerText">Layovers</span><span class="sortIcon" data-column="layovers">&#x21C5;</span></th>
-                        <th data-column="duration"><span class="headerText">Duration</span><span class="sortIcon" data-column="duration">&#x21C5;</span></th>
-                        <th data-column="route"><span class="headerText">Route</span><span class="sortIcon" data-column="route">&#x21C5;</span></th>
-                     </tr>`;
+                                <th data-column="departure">
+                                    <span class="headerText" data-column="departure">
+                                    <span class="filteredHeader" data-column="departure">Departure</span>
+                                    <img class="filterIcon" id="departureFilter" data-column="departure" src="/assets/filter-icon.svg" alt="Filter">
+                                    <span class="resetIcon" id="resetDepartureFilter" data-column="departure" style="display:none; cursor:pointer;">✕</span>
+                                    </span>
+                                    <span class="sortIcon" data-column="departure">&#x21C5;</span>
+                                </th>
+                                <th data-column="arrival">
+                                    <span class="headerText" data-column="arrival">
+                                    <span class="filteredHeader" data-column="arrival">Arrival</span>
+                                    <img id="arrivalFilter" class="filterIcon" data-column="arrival" src="/assets/filter-icon.svg" alt="Filter">
+                                    <span class="resetIcon" id="resetArrivalFilter" data-column="arrival" style="display:none; cursor:pointer;">✕</span>
+                                    </span>
+                                    <span class="sortIcon" data-column="arrival">&#x21C5;</span>
+                                </th>
+                                <th data-column="price">
+                                    <span class="headerText" data-column="price">
+                                    <span class="filteredHeader" data-column="price" id="priceText">Price</span>
+                                    <img id="priceFilter" class="filterIcon" data-column="price" src="/assets/filter-icon.svg" alt="Filter">
+                                    <span class="resetIcon" id="resetPriceFilter" data-column="price" style="display:none; cursor:pointer;">✕</span>
+                                    </span>
+                                    <span class="sortIcon" data-column="price">&#x21C5;</span>
+                                </th>
+                                <th data-column="airlines"><span class="headerText">Airlines</span><span class="sortIcon" data-column="airlines">&#x21C5;</span></th>
+                                <th data-column="direct"><span class="headerText">Direct</span><span class="sortIcon" data-column="direct">&#x21C5;</span></th>
+                                <th data-column="stops"><span class="headerText">Stops</span><span class="sortIcon" data-column="stops">&#x21C5;</span></th>
+                                <th data-column="layovers"><span class="headerText">Layovers</span><span class="sortIcon" data-column="layovers">&#x21C5;</span></th>
+                                <th data-column="duration"><span class="headerText">Duration</span><span class="sortIcon" data-column="duration">&#x21C5;</span></th>
+                                <th data-column="route"><span class="headerText">Route</span><span class="sortIcon" data-column="route">&#x21C5;</span></th>
+                            </tr>`;
             thead.innerHTML = headerRow;
             table.appendChild(thead);
 
@@ -149,15 +150,24 @@ function buildRouteTable(routeIndex) {
                 const formattedDeparture = `${departureDayName} ${departureDate.toLocaleString()}`;
                 const formattedArrival = `${arrivalDayName} ${arrivalDate.toLocaleString()}`;
 
+                const departureTime = departureDate.getHours() + departureDate.getMinutes() / 60; // Convert time to decimal hours
+                const arrivalTime = arrivalDate.getHours() + arrivalDate.getMinutes() / 60; // Convert time to decimal hours
+
                 row.innerHTML = `<td>${formattedDeparture}</td>
-                                 <td>${formattedArrival}</td>
-                                 <td>$${price}</td>
-                                 <td>${flight.airlines.join(", ")}</td>
-                                 <td>${directFlight ? '✓' : ''}</td>
-                                 <td>${stops}</td>
-                                 <td>${layovers}</td>
-                                 <td>${durationHours}h ${durationMinutes}m</td>
-                                 <td>${routeIATAs}</td>`;
+                                <td>${formattedArrival}</td>
+                                <td>$${price}</td>
+                                <td>${flight.airlines.join(", ")}</td>
+                                <td>${directFlight ? '✓' : ''}</td>
+                                <td>${stops}</td>
+                                <td>${layovers}</td>
+                                <td>${durationHours}h ${durationMinutes}m</td>
+                                <td>${routeIATAs}</td>`;
+
+                // Add parsed data as data attributes
+                row.dataset.price = price;
+                row.dataset.departureTime = departureTime;
+                row.dataset.arrivalTime = arrivalTime;
+                
                 tbody.appendChild(row);
 
                 const tableRouteId = flight.id; // Get the table route ID from the data attribute
@@ -165,15 +175,19 @@ function buildRouteTable(routeIndex) {
                 flight.route.forEach((segment, index) => {
                     const originIata = segment.flyFrom;
                     const destinationIata = segment.flyTo;
-                    
+
                     flightMap.getAirportDataByIata(originIata).then(originAirportData => {
                         flightMap.getAirportDataByIata(destinationIata).then(destinationAirportData => {
                             if (!originAirportData || !destinationAirportData) return;
-            
+
                             pathDrawing.createRoutePath(originAirportData, destinationAirportData, {
                                 originAirport: originAirportData,
                                 destinationAirport: destinationAirportData,
                                 price: price,
+                                isDirect: directFlight,
+                                departureTime: departureTime,
+                                arrivalTime: arrivalTime,
+                                group: routeIndex + 1,
                             }, null, true, tableRouteId);
                         });
                     });
@@ -185,6 +199,7 @@ function buildRouteTable(routeIndex) {
             pathDrawing.drawRouteLines();
             highlightSelectedRowForRouteIndex(routeIndex);
             attachEventListeners(table, data, routeIndex);
+            applyFilters();
         })
         .catch(error => {
             infoPaneContent.textContent = 'Error loading data: ' + error.message;
@@ -194,7 +209,7 @@ function buildRouteTable(routeIndex) {
         const headers = table.querySelectorAll('th');
         headers.forEach(header => {
             header.style.cursor = 'pointer';
-            header.addEventListener('click', function(event) {
+            header.addEventListener('click', function (event) {
                 const sortIcon = event.target.closest('.sortIcon');
                 if (sortIcon) {
                     const columnIdentifier = sortIcon.getAttribute('data-column');
@@ -205,11 +220,11 @@ function buildRouteTable(routeIndex) {
                 }
             });
         });
-    
+
         headers.forEach(header => {
             const filteredHeader = header.querySelector('.filteredHeader');
             const filterIcon = header.querySelector('.filterIcon');
-            const handleFilterClick = function(event) {
+            const handleFilterClick = function (event) {
                 event.stopPropagation();
                 const column = this.getAttribute('data-column');
                 if (!column) {
@@ -223,7 +238,7 @@ function buildRouteTable(routeIndex) {
                     console.error('Failed to fetch data for column:', column);
                 }
             };
-    
+
             if (filteredHeader) {
                 filteredHeader.addEventListener('click', handleFilterClick);
             }
@@ -231,16 +246,20 @@ function buildRouteTable(routeIndex) {
                 filterIcon.addEventListener('click', handleFilterClick);
             }
         });
-    
+
         document.querySelectorAll('.route-info-table tbody tr').forEach((row, index) => {
-            row.addEventListener('click', function() {
+            row.addEventListener('click', function () {
                 const routeIdString = this.getAttribute('data-route-id');
                 const routeIds = routeIdString.split('|');
                 const fullFlightData = data[index];
                 routeInfoRow(this, fullFlightData, routeIds, routeIndex);
             });
         });
-    }             
+        updateFilterHeaders();
+        toggleFilterResetIcon('price');
+        toggleFilterResetIcon('departure');
+        toggleFilterResetIcon('arrival');
+    }
 
     function resetSortIcons(headers, currentIcon, newSortState) {
         headers.forEach(header => {

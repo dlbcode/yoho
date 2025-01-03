@@ -100,6 +100,9 @@ const expandInput = (input) => {
         event.preventDefault();
         event.stopPropagation();
         backButtonClicked = true;
+        input.value = '';
+        updateState('removeWaypoint', parseInt(input.id.replace('waypoint-input-', '')) - 1, 'routeBox.expandInput');
+        routeHandling.updateRoutesArray();
         input.blur();
         setTimeout(() => {
             backButtonClicked = false;
@@ -151,14 +154,14 @@ const routeBox = {
         const routeBoxElement = this.createRouteBox();
         routeBoxElement.dataset.routeNumber = routeNumber; // Add routeNumber as a data attribute
         document.body.appendChild(routeBoxElement); // Append the routeBox to the DOM
-        
+
         if (!appState.routes[routeNumber]) {
             appState.routes[routeNumber] = { tripType: 'oneWay' }; // Default to oneWay if not set
         }
         const topRow = createElement('div', { id: 'topRow', className: 'top-row' });
         topRow.append(tripTypePicker(routeNumber), travelersPicker(routeNumber));
         routeBoxElement.append(topRow);
-        
+
         const waypointInputsContainer = createElement('div', { className: 'waypoint-inputs-container' });
         let firstEmptyInput = null;
         ['From', 'Where to?'].forEach((placeholder, i) => {
@@ -170,19 +173,19 @@ const routeBox = {
         });
         routeBoxElement.append(waypointInputsContainer);
         waypointInputsContainer.insertBefore(this.createSwapButton(routeNumber), waypointInputsContainer.children[1]);
-        
+
         const dateInputsContainer = createElement('div', { className: 'date-inputs-container' });
         routeBoxElement.append(dateInputsContainer);
-        
+
         const buttonContainer = createElement('div', { className: 'button-container' });
         buttonContainer.append(this.createSearchButton(routeNumber), this.createCloseButton(routeBoxElement, routeNumber));
         removeRouteButton(buttonContainer, routeNumber); // Assuming this is where the remove button is added
         routeBoxElement.append(buttonContainer);
-        
+
         // Position the popup correctly before making it visible
         this.positionPopup(routeBoxElement, event, routeNumber);
         routeBoxElement.style.display = 'block';
-        
+
         [`waypoint-input-${routeNumber * 2 + 1}`, `waypoint-input-${routeNumber * 2 + 2}`].forEach(id => setupAutocompleteForField(id));
         if (firstEmptyInput) {
             firstEmptyInput.focus();
@@ -227,13 +230,13 @@ const routeBox = {
                 updateState('currentView', 'routeTable', 'routeBox.createSearchButton');
             }
             buildRouteTable(routeNumber);
-    
+
             // Hide the routeBox
             const routeBoxElement = document.getElementById('routeBox');
             if (routeBoxElement) {
                 routeBoxElement.style.display = 'none';
             }
-    
+
             // Adjust the height of infoPane
             const infoPaneElement = document.getElementById('infoPane');
             if (infoPaneElement) {
@@ -270,14 +273,14 @@ const routeBox = {
         const menuBar = document.getElementById('menu-bar');
         const menuBarRect = menuBar.getBoundingClientRect();
         const menuBarTop = menuBarRect.top + window.scrollY;
-    
+
         // Calculate the left position based on routeNumber
         let left = 90 * routeNumber;
-    
+
         // Ensure the left position doesn't go off-screen
         left = Math.min(Math.max(left, screenPadding), window.innerWidth - popup.offsetWidth - screenPadding);
         popup.style.left = `${left}px`;
-    
+
         // Position the popup just above the menu-bar
         let top = menuBarTop - popup.offsetHeight - 55; // 10px offset above the menu-bar
         top = Math.max(top, screenPadding); // Ensure it doesn't go off-screen at the top

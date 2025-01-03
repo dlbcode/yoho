@@ -15,13 +15,75 @@ class Line {
         this.defaultColor = this.getColorBasedOnPrice(options.price);
         this.color = options.color || this.defaultColor;
         this.weight = options.weight || this.defaultWeight;
-        this.highlight = options.highlight || false;
-        this.showPlane = options.showPlane || false;
         this.visibleLine = this.createVisibleLine();
         this.invisibleLine = this.createInvisibleLine();
-        this.decoratedLine = this.showPlane ? this.createDecoratedLine() : null;
+        this.decoratedLine = options.showPlane ? this.createDecoratedLine() : null;
         this.bindEvents();
-        console.log(`Line created with routeId: ${this.routeId}`);
+        this.tags = new Set(); // Initialize tags as an empty Set
+        this.addTag(`route:${routeId}`);
+        this.addTag(`type:${type}`);
+        if (options.isTableRoute) {
+            this.addTag('type:table');
+        }
+        if (options.group) {
+            this.addTag(`group:${options.group}`);
+        }
+
+        // Add tags based on price
+        if (options.price !== undefined && options.price !== null) {
+            this.addTag(`price:${options.price}`);
+            if (options.price < 100) {
+                this.addTag('price-range:0-100');
+            } else if (options.price < 200) {
+                this.addTag('price-range:100-200');
+            } else if (options.price < 300) {
+                this.addTag('price-range:200-300');
+            } else if (options.price < 400) {
+                this.addTag('price-range:300-400');
+            } else if (options.price < 500) {
+                this.addTag('price-range:400-500');
+            } else {
+                this.addTag('price-range:500+');
+            }
+        }
+        // Add tags for departure and arrival time ranges
+        if (options.departureTime) {
+            if (options.departureTime < 6) {
+                this.addTag('departure-range:00-06');
+            } else if (options.departureTime < 12) {
+                this.addTag('departure-range:06-12');
+            } else if (options.departureTime < 18) {
+                this.addTag('departure-range:12-18');
+            } else {
+                this.addTag('departure-range:18-24');
+            }
+        }
+        if (options.arrivalTime) {
+            if (options.arrivalTime < 6) {
+                this.addTag('arrival-range:00-06');
+            } else if (options.arrivalTime < 12) {
+                this.addTag('arrival-range:06-12');
+            } else if (options.arrivalTime < 18) {
+                this.addTag('arrival-range:12-18');
+            } else {
+                this.addTag('arrival-range:18-24');
+            }
+        }
+        // Add tags for direct/indirect flights
+        if (options.isDirect) {
+            this.addTag('direct:true');
+        } else {
+            this.addTag('direct:false');
+        }
+        console.log(`Line created with routeId: ${this.routeId} and tags: `, this.tags);
+    }
+
+    addTag(tag) {
+        this.tags.add(tag);
+    }
+
+    removeTag(tag) {
+        this.tags.delete(tag);
     }
 
     getColorBasedOnPrice(price) {
@@ -76,20 +138,19 @@ class Line {
     }
 
     bindEvents() {
-        // Bind click events to the individual polylines
-        this.visibleLine.on('click', (e) => lineManager.onClickHandler(e, this.visibleLine, this.invisibleLine, this.routeId));
-        this.invisibleLine.on('click', (e) => lineManager.onClickHandler(e, this.visibleLine, this.invisibleLine, this.routeId));
-    
-        // Pass the Line instance to the hover events
-        this.invisibleLine.on('mouseover', (e) => lineManager.onMouseOver(e, this, this.map)); // Pass the Line instance
-        this.invisibleLine.on('mouseout', () => lineManager.onMouseOut(this)); // Pass the Line instance
-    
+        // Pass lineManager to the event handlers
+        this.visibleLine.on('click', (e) => lineManager.onClickHandler(e, this));
+        this.invisibleLine.on('click', (e) => lineManager.onClickHandler(e, this));
+
+        this.invisibleLine.on('mouseover', (e) => lineManager.onMouseOver(e, this, this.map));
+        this.invisibleLine.on('mouseout', () => lineManager.onMouseOut(this));
+
         if (this.decoratedLine) {
             this.decoratedLine.on('click', (e) => this.invisibleLine.fire('click', e));
-            this.decoratedLine.on('mouseover', (e) => lineManager.onMouseOver(e, this, this.map)); // Pass the Line instance
-            this.decoratedLine.on('mouseout', () => lineManager.onMouseOut(this)); // Pass the Line instance
+            this.decoratedLine.on('mouseover', (e) => lineManager.onMouseOver(e, this, this.map));
+            this.decoratedLine.on('mouseout', () => lineManager.onMouseOut(this));
         }
-    }         
+    }
 
     highlight() {
         this.visibleLine.setStyle({ color: 'white' });
@@ -102,7 +163,7 @@ class Line {
             weight: this.weight,
             opacity: 1
         });
-    }    
+    }
 
     remove() {
         if (this.map.hasLayer(this.visibleLine)) this.map.removeLayer(this.visibleLine);
@@ -117,7 +178,7 @@ const pathDrawing = {
     dashedRoutePathCache: {},
     hoverLines: [],
 
-    drawLine: function(routeId, type, options) {
+    drawLine: function (routeId, type, options) {
         console.log('Drawing line:', routeId, type, options);
         const [originIata, destinationIata] = routeId.split('-');
         if (!originIata || !destinationIata) {
@@ -133,7 +194,7 @@ const pathDrawing = {
                 // Create an instance of the Line class
                 const line = new Line(originAirport, destinationAirport, routeId, type, options);
                 console.log('Created Line instance with routeId:', line.routeId);
-    
+
                 // Store the Line instance
                 if (type === 'route') {
                     if (!this.routePathCache[routeId]) {
@@ -148,11 +209,11 @@ const pathDrawing = {
                 } else if (type === 'hover') {
                     this.hoverLines.push(line);
                 }
-    
+
                 console.log('Stored line in cache:', this.routePathCache);
             });
         });
-    },       
+    },
 
     drawRoutePaths(iata, directRoutes, type = 'route') {
         directRoutes[iata]?.forEach(route => {
@@ -183,15 +244,18 @@ const pathDrawing = {
         return L.latLng(latLng.lat, newLng);
     },
 
-    drawLines: async function() {
+    drawLines: async function () {
         lineManager.clearLines('route');
-        const drawPromises = appState.routes.map(route => {
+        const drawPromises = appState.routes.map((route, index) => {
             console.log('pathdrawing.drawLines - route:', route);
             const routeId = `${route.origin}-${route.destination}`;
             if (route.isDirect) {
-                return pathDrawing.drawLine(routeId, 'route', { price: route.price });
+                return this.drawLine(routeId, 'route', {
+                    price: route.price,
+                    group: index + 1, // Add group identifier here
+                });
             } else {
-                return pathDrawing.drawDashedLine(route.origin, route.destination);
+                return this.drawDashedLine(route.origin, route.destination);
             }
         });
         await Promise.all(drawPromises);

@@ -2,11 +2,12 @@ import { flightMap } from './flightMap.js';
 import { appState, updateState } from './stateManager.js';
 import { infoPane } from './infoPane.js';
 import { mapHandling } from './mapHandling.js';
+import { uiHandling } from './uiHandling.js';
 
 async function initMapFunctions() {
     const params = new URLSearchParams(window.location.search);
     let waypoints = null;
-    let routeDirection = null;
+    let routeDirection = params.get('direction');
     let routeDates = [];
     let tripTypes = {};
 
@@ -21,11 +22,6 @@ async function initMapFunctions() {
             }
         }
         waypoints = airports;
-    }
-
-    const directionParam = params.get('direction');
-    if (directionParam) {
-        routeDirection = directionParam;
     }
 
     const routeDatesParam = params.get('dates');
@@ -44,6 +40,9 @@ async function initMapFunctions() {
                 routeDates[routeNumber].return = date;
             }
         });
+    } else {
+        // Initialize with default dates if no date parameters are provided
+        routeDates[0] = { routeNumber: 0, depart: new Date().toISOString().split('T')[0], return: null };
     }
 
     const typesParam = params.get('types');
@@ -54,10 +53,13 @@ async function initMapFunctions() {
         });
     }
 
-    // Make the updateState function calls
-    if (routeDirection) {
-        updateState('routeDirection', routeDirection, 'map.initMapFunctions1');
+    // Set default direction to 'from' if not provided in URL parameters
+    if (!routeDirection) {
+        routeDirection = 'from';
     }
+
+    // Make the updateState function calls
+    updateState('routeDirection', routeDirection, 'map.initMapFunctions1');
     routeDates.forEach(routeDate => {
         updateState('updateRouteDate', routeDate, 'map.initMapFunctions2');
     });
@@ -69,11 +71,11 @@ async function initMapFunctions() {
     });
 }
 
-var map = L.map('map', { 
-    zoomControl: false, 
-    minZoom: 2, 
+var map = L.map('map', {
+    zoomControl: false,
+    minZoom: 2,
     maxZoom: 19,
-    worldCopyJump: true 
+    worldCopyJump: true
 });
 
 map.setView([0, 0], 4);
@@ -89,9 +91,9 @@ L.control.zoom({
 
 // Use HTML5 Geolocation API to fetch client's location
 if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition(function(position) {
+    navigator.geolocation.getCurrentPosition(function (position) {
         map.setView([position.coords.latitude, position.coords.longitude], 4);
-    }, function(error) {
+    }, function (error) {
         console.error('Geolocation API Error:', error);
     });
 } else {
@@ -120,14 +122,6 @@ function adjustMapSize() {
     if (window.map) {
         map.invalidateSize();
     }
-}
-
-window.addEventListener('resize', adjustMapSize);
-window.addEventListener('orientationchange', adjustMapSize);
-document.addEventListener('DOMContentLoaded', adjustMapSize);
-
-if (window.visualViewport) {
-    window.visualViewport.addEventListener('resize', adjustMapSize);
 }
 
 var blueDotIcon = L.divIcon({
