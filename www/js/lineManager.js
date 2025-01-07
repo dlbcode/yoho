@@ -56,8 +56,14 @@ const lineManager = {
         }
     },
 
-    clearLinesByTags: function (tags) {
-        const linesToClear = this.getLinesByTags(tags);
+    clearLinesByTags: function (tags, options = {}) {
+        const linesToClear = this.getLinesByTags(tags).filter(line => {
+            if (options.excludeTags) {
+                return !options.excludeTags.some(tag => line.tags.has(tag));
+            }
+            return true;
+        });
+
         linesToClear.forEach(line => {
             if (line instanceof Line) {
                 line.remove();
@@ -82,27 +88,18 @@ const lineManager = {
         pathDrawing.hoverLines = pathDrawing.hoverLines.filter(line => !linesToClear.includes(line));
     },
 
-    clearLines: function (type, specificLines) {
+    clearLines: function (type, options = {}) {
         switch (type) {
             case 'all':
-                this.clearLinesByTags(['type:route']);
-                this.clearLinesByTags(['type:dashed']);
-                this.clearLinesByTags(['type:hover']);
+                // Never clear table routes
+                this.clearLinesByTags(['type:route', 'type:hover'], { excludeTags: ['type:table'] });
                 break;
             case 'hover':
                 this.clearLinesByTags(['type:hover']);
                 break;
             case 'route':
-                this.clearLinesByTags(['type:route']);
-                break;
-            case 'specific':
-                if (specificLines) {
-                    specificLines.forEach(line => {
-                        if (line instanceof Line) {
-                            line.remove();
-                        }
-                    });
-                }
+                // Preserve table routes by default
+                this.clearLinesByTags(['type:route'], { excludeTags: ['type:table'] });
                 break;
         }
         map.closePopup();

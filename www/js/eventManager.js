@@ -83,9 +83,27 @@ const eventManager = {
             }
             flightMap.selectedMarker = null;
             updateState('selectedAirport', null, 'eventManager.setupEventListeners');
-            lineManager.clearLines('all'); // This will clear non-table route lines only
-            console.log('map click');
-            pathDrawing.drawLines();
+            
+            // Only clear non-table lines
+            lineManager.clearLines('hover');
+            
+            // Don't clear any route lines that are part of the table
+            const tableLines = lineManager.getLinesByTags(['type:table'], 'route');
+            const tableRouteIds = new Set(tableLines.map(line => line.routeId));
+            
+            Object.keys(pathDrawing.routePathCache).forEach(routeId => {
+                if (!tableRouteIds.has(routeId)) {
+                    const lines = pathDrawing.routePathCache[routeId];
+                    lines.forEach(line => {
+                        if (!line.tags.has('type:table')) {
+                            line.remove();
+                        }
+                    });
+                    delete pathDrawing.routePathCache[routeId];
+                }
+            });
+            
+            console.log('map click - preserved table routes');
         });
     
         map.on('moveend', this.debounce(() => {
