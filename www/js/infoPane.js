@@ -79,15 +79,14 @@ const infoPane = {
             button.textContent = buttonText;
 
             button.onclick = (event) => {
-                lineManager.clearLines('all');
-                pathDrawing.drawLines();
                 adjustMapSize();
                 if (appState.currentRouteIndex != routeIndex) {
                     appState.currentRouteIndex = routeIndex;
                     if (appState.selectedRoutes.hasOwnProperty(routeIndex)) {
+                        console.log('Selected route clicked');
                         appState.currentView = 'selectedRoute';
                     } else {
-                        appState.currentView = 'routeTable';
+                        console.log('Route clicked');
                         routeBox.showRouteBox(event, routeIndex);
                     }
                     this.displayContent();
