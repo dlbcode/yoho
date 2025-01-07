@@ -119,8 +119,8 @@ function buildRouteTable(routeIndex) {
             infoPaneContent.innerHTML = ''; // Clear existing content
             const table = document.createElement('table');
             table.className = 'route-info-table';
+            table.dataset.routeIndex = routeIndex;
             table.style.width = '100%';
-            table.setAttribute('data-route-index', routeIndex);
 
             const thead = document.createElement('thead');
             thead.innerHTML = `<tr>
@@ -163,7 +163,12 @@ function buildRouteTable(routeIndex) {
             flightsData.forEach(flight => {
                 let row = document.createElement('tr');
                 let departureDate, arrivalDate;
-                row.setAttribute('data-route-id', flight.id);
+                const routeId = `${flight.flyFrom}-${flight.flyTo}`; // Fix route ID creation
+                row.setAttribute('data-route-id', routeId); // Set the route ID as a plain string
+                
+                // Add debug logging
+                console.log('Setting route ID on row:', routeId);
+                
                 const directFlight = flight.route.length === 1;
                 const price = parseFloat(flight.price.toFixed(2));
                 const stops = flight.route.length - 1;

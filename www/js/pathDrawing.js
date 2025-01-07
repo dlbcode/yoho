@@ -21,6 +21,7 @@ class Line {
         this.bindEvents();
         this.tags = new Set(); // Initialize tags as an empty Set
         this.addTag(`route:${routeId}`);
+        this.addTag(`routeId:${routeId}`);
         this.addTag(`type:${type}`);
         if (options.isTableRoute) {
             this.addTag('type:table');
@@ -191,8 +192,10 @@ const pathDrawing = {
                     console.error('Airport data not found for one or both IATAs:', originIata, destinationIata);
                     return;
                 }
+
                 // Create an instance of the Line class
                 const line = new Line(originAirport, destinationAirport, routeId, type, options);
+                line.addTag(`routeId:${routeId}`);
                 console.log('Created Line instance with routeId:', line.routeId);
 
                 // Store the Line instance
@@ -273,6 +276,19 @@ const pathDrawing = {
         }
     }
 };
+
+function buildRouteTable(routeIndex) {
+    // ...
+    flightsData.forEach(flight => {
+        let row = document.createElement('tr');
+        // Change this line
+        const routeId = `${flight.flyFrom}-${flight.flyTo}`; // Create the route ID correctly
+        row.setAttribute('data-route-id', routeId); // Set it as a data attribute
+        
+        // Rest of the row creation code...
+    });
+    // ...
+}
 
 document.addEventListener('DOMContentLoaded', () => {
     pathDrawing.drawLines();

@@ -1,31 +1,22 @@
 import { appState, updateState } from '../stateManager.js';
 import { sliderFilter } from './sliderFilter.js';
+import { pathDrawing, Line } from '../pathDrawing.js';
 import { lineManager } from '../lineManager.js';
+import { map } from '../map.js';
 
 function logFilterState() {
-    //console.log('Current Filter State:', JSON.stringify(appState.filterState));
+    // You can add logging here if needed for debugging
 }
 
 function constructFilterTags() {
     const filterTags = [];
 
+    // Replace price range tags with exact price tag
     if (appState.filterState.price && appState.filterState.price.value) {
-        const maxPrice = appState.filterState.price.value;
-        if (maxPrice < 100) {
-            filterTags.push('price-range:0-100');
-        } else if (maxPrice < 200) {
-            filterTags.push('price-range:0-100', 'price-range:100-200');
-        } else if (maxPrice < 300) {
-            filterTags.push('price-range:0-100', 'price-range:100-200', 'price-range:200-300');
-        } else if (maxPrice < 400) {
-            filterTags.push('price-range:0-100', 'price-range:100-200', 'price-range:200-300', 'price-range:300-400');
-        } else if (maxPrice < 500) {
-            filterTags.push('price-range:0-100', 'price-range:100-200', 'price-range:200-300', 'price-range:300-400', 'price-range:400-500');
-        } else {
-            filterTags.push('price-range:0-100', 'price-range:100-200', 'price-range:200-300', 'price-range:300-400', 'price-range:400-500', 'price-range:500+');
-        }
+        filterTags.push(`price:${appState.filterState.price.value}`);
     }
 
+    // Keep existing time-based filters
     if (appState.filterState.departure) {
         const { start, end } = appState.filterState.departure;
         if (start < 6 && end > 0) filterTags.push('departure-range:00-06');
@@ -53,18 +44,21 @@ function constructFilterTags() {
 function applyFilters() {
     const tableRows = document.querySelectorAll('.route-info-table tbody tr');
     const filterTags = constructFilterTags();
+    const visibleRouteIds = new Set();
+    const maxPrice = appState.filterState.price?.value;
 
     tableRows.forEach(row => {
-        const priceRange = row.dataset.priceRange;
-        const price = row.dataset.priceValue;
+        const routeCell = row.querySelector('td:nth-child(9)');
+        if (!routeCell) return;
+        
+        const price = parseFloat(row.dataset.priceValue);
         const departureTime = parseFloat(row.dataset.departureTime);
         const arrivalTime = parseFloat(row.dataset.arrivalTime);
 
-        // Check if the row matches the price filter
-        const hasMatchingPrice = !filterTags.some(tag => tag.startsWith('price-range:')) ||
-            filterTags.some(tag => tag === priceRange || tag === `price:${price}`);
+        // Check exact price value
+        const hasMatchingPrice = !maxPrice || price <= maxPrice;
 
-        // Check if departure and arrival times match the filter
+        // Rest of the existing filter logic...
         const hasMatchingDeparture = !filterTags.some(tag => tag.startsWith('departure-range:')) ||
             filterTags.some(tag => {
                 if (!tag.startsWith('departure-range:')) return false;
@@ -79,11 +73,49 @@ function applyFilters() {
                 return arrivalTime >= start && arrivalTime <= end;
             });
 
-        // Determine if the row should be displayed based on all filter criteria
         if (hasMatchingPrice && hasMatchingDeparture && hasMatchingArrival) {
-            row.style.display = ''; // Show the row
+            row.style.display = '';
+            const routeSegments = routeCell.textContent.split(' > ');
+            for (let i = 0; i < routeSegments.length - 1; i++) {
+                visibleRouteIds.add(`${routeSegments[i]}-${routeSegments[i + 1]}`);
+            }
         } else {
-            row.style.display = 'none'; // Hide the row
+            row.style.display = 'none';
+        }
+    });
+
+    updateLineVisibility(visibleRouteIds, maxPrice);
+}
+
+function updateLineVisibility(visibleRouteIds, maxPrice) {
+    Object.keys(pathDrawing.routePathCache).forEach(routeId => {
+        const lineSet = pathDrawing.routePathCache[routeId];
+        if (lineSet) {
+            lineSet.forEach(line => {
+                if (line instanceof Line) {
+                    // Find price tag in the Set
+                    let price;
+                    for (let tag of line.tags) {
+                        if (tag.startsWith('price:')) {
+                            price = parseFloat(tag.split(':')[1]);
+                            break;
+                        }
+                    }
+                    
+                    const isVisible = visibleRouteIds.has(line.routeId) && 
+                                   (!maxPrice || (price && price <= maxPrice));
+                    
+                    if (isVisible) {
+                        line.visibleLine.setStyle({ opacity: 1 });
+                        map.addLayer(line.visibleLine);
+                        map.addLayer(line.invisibleLine);
+                    } else {
+                        line.visibleLine.setStyle({ opacity: 0 });
+                        map.removeLayer(line.visibleLine);
+                        map.removeLayer(line.invisibleLine);
+                    }
+                }
+            });
         }
     });
 }
