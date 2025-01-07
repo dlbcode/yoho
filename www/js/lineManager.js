@@ -105,6 +105,48 @@ const lineManager = {
         map.closePopup();
     },
 
+    clearLinesByRouteNumber: function(routeNumber) {
+        // Get all lines associated with this route number
+        const linesToClear = [];
+        
+        // Check both routePathCache and dashedRoutePathCache
+        const checkAndCollectLines = (cache) => {
+            Object.keys(cache).forEach(routeId => {
+                const lineSet = cache[routeId];
+                if (lineSet) {
+                    lineSet.forEach(line => {
+                        if (line instanceof Line && line.tags.has(`group:${routeNumber + 1}`)) {
+                            linesToClear.push(line);
+                        }
+                    });
+                }
+            });
+        };
+
+        checkAndCollectLines(pathDrawing.routePathCache);
+        checkAndCollectLines(pathDrawing.dashedRoutePathCache);
+
+        // Remove the lines and clean up caches
+        linesToClear.forEach(line => {
+            line.remove();
+            // Remove from appropriate cache
+            if (pathDrawing.routePathCache[line.routeId]) {
+                pathDrawing.routePathCache[line.routeId] = pathDrawing.routePathCache[line.routeId]
+                    .filter(l => l !== line);
+                if (pathDrawing.routePathCache[line.routeId].length === 0) {
+                    delete pathDrawing.routePathCache[line.routeId];
+                }
+            }
+            if (pathDrawing.dashedRoutePathCache[line.routeId]) {
+                pathDrawing.dashedRoutePathCache[line.routeId] = pathDrawing.dashedRoutePathCache[line.routeId]
+                    .filter(l => l !== line);
+                if (pathDrawing.dashedRoutePathCache[line.routeId].length === 0) {
+                    delete pathDrawing.dashedRoutePathCache[line.routeId];
+                }
+            }
+        });
+    },
+
     // Define outsideClickListener outside of showRoutePopup
     outsideClickListener: function (event) {
         if (!event.target.closest('.leaflet-popup')) {
