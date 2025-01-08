@@ -1,5 +1,4 @@
 import { appState, updateState } from '../stateManager.js';
-import { pathDrawing } from '../pathDrawing.js';
 import { mapHandling } from '../mapHandling.js';
 import { routeHandling } from '../routeHandling.js';
 import { lineManager } from '../lineManager.js';
