@@ -91,15 +91,19 @@ const lineManager = {
     clearLines: function (type, options = {}) {
         switch (type) {
             case 'all':
-                // Never clear table routes
-                this.clearLinesByTags(['type:route', 'type:hover'], { excludeTags: ['type:table'] });
+                // Never clear table routes or selected routes
+                this.clearLinesByTags(['type:route', 'type:hover'], { 
+                    excludeTags: ['type:table', 'status:selected'] 
+                });
                 break;
             case 'hover':
                 this.clearLinesByTags(['type:hover']);
                 break;
             case 'route':
-                // Preserve table routes by default
-                this.clearLinesByTags(['type:route'], { excludeTags: ['type:table'] });
+                // Preserve table routes and selected routes by default
+                this.clearLinesByTags(['type:route'], { 
+                    excludeTags: ['type:table', 'status:selected'] 
+                });
                 break;
         }
         map.closePopup();

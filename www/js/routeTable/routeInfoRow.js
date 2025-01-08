@@ -292,9 +292,31 @@ function routeInfoRow(rowElement, fullFlightData, routeIds, routeIndex) {
             return: null
         });
         
+        // Add 'status:selected' tag to the route lines
+        const routeSegments = fullFlightData.route;
+        for (let i = 0; i < routeSegments.length - 1; i++) {
+            const routeId = `${routeSegments[i].flyFrom}-${routeSegments[i+1].flyTo}`;
+            const lines = pathDrawing.routePathCache[routeId] || [];
+            lines.forEach(line => {
+                line.addTag('status:selected');
+            });
+        }
+
         // Update visuals
         pathDrawing.drawLines();
     });
+
+    // When deselecting a route (if applicable)
+    function deselectRoute() {
+        const routeSegments = fullFlightData.route;
+        for (let i = 0; i < routeSegments.length - 1; i++) {
+            const routeId = `${routeSegments[i].flyFrom}-${routeSegments[i+1].flyTo}`;
+            const lines = pathDrawing.routePathCache[routeId] || [];
+            lines.forEach(line => {
+                line.removeTag('status:selected');
+            });
+        }
+    }
 }
 
 function highlightSelectedRowForRouteIndex(routeIndex) {

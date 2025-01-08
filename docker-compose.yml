@@ -21,7 +21,7 @@ services:
       - ./services/certbot/www:/var/www/certbot
 
   mongodb:
-    image: mongo
+    image: mongo:6.0
     container_name: yh-db
     environment:
       MONGO_INITDB_ROOT_USERNAME: rsroot
