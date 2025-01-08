@@ -1,5 +1,5 @@
 import { appState } from '../stateManager.js';
-import { logFilterState, applyFilters, toggleFilterResetIcon, updateFilterHeaders } from './filterTable.js';
+import { applyFilters, toggleFilterResetIcon, updateFilterHeaders } from './filterTable.js';
 
 appState.filterState = {
     departure: { start: 0, end: 24 },
@@ -187,7 +187,6 @@ const sliderFilter = {
             appState.filterState[column] = { start, end: end || start };
             label.textContent = (start === 0 && end === 24) ? 'Anytime' : `${this.formatTime(start)} - ${this.formatTime(end)}`;
         }
-        logFilterState();
         applyFilters();
     }
 };
