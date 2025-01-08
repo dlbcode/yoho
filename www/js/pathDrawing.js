@@ -234,17 +234,6 @@ const pathDrawing = {
     }
 };
 
-function buildRouteTable(routeIndex) {
-    // ...
-    flightsData.forEach(flight => {
-        let row = document.createElement('tr');
-        const routeId = `${flight.flyFrom}-${flight.flyTo}`;
-        row.setAttribute('data-route-id', routeId);
-        // Rest of the row creation code...
-    });
-    // ...
-}
-
 document.addEventListener('DOMContentLoaded', () => {
     pathDrawing.drawLines();
 });
