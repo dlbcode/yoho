@@ -8,37 +8,38 @@ import { flightMap } from './flightMap.js';
 import { routeBox } from './routeBox/routeBox.js';
 import { lineManager } from './lineManager.js';
 
+function getEl(id) {
+    return document.getElementById(id);
+}
+
 const infoPane = {
     init() {
-        const infoPaneContent = document.getElementById('infoPaneContent');
-        const tripButton = document.getElementById('tripButton');
+        const tripButton = getEl('tripButton');
         document.addEventListener('stateChange', this.handleStateChange.bind(this));
 
         tripButton.addEventListener('click', () => {
             appState.currentView = 'trip';
             this.displayContent();
-
-            const waypointsLatLng = appState.waypoints.map(waypoint => [waypoint.latitude, waypoint.longitude]);
-
+            const waypointsLatLng = appState.waypoints.map(wp => [wp.latitude, wp.longitude]);
             if (waypointsLatLng.length > 0) {
                 const bounds = L.latLngBounds(waypointsLatLng);
-                map.fitBounds(bounds, { padding: [50, 50] }); // Adjust padding as needed
+                map.fitBounds(bounds, { padding: [50, 50] });
             }
         });
         this.addPlusButton();
     },
 
     handleStateChange(event) {
+        const keysToDisplay = ['updateSelectedRoute', 'removeSelectedRoute', 'changeView', 'updateRoutes'];
         this.updateRouteButtons();
-        if (event.detail.key === 'updateSelectedRoute' || event.detail.key === 'removeSelectedRoute' || event.detail.key === 'changeView' || event.detail.key === 'updateRoutes') {
+        if (keysToDisplay.includes(event.detail.key)) {
             this.displayContent();
         }
     },
 
     displayContent() {
-        const infoPaneContent = document.getElementById('infoPaneContent');
+        const infoPaneContent = getEl('infoPaneContent');
         infoPaneContent.innerHTML = '';
-
         const { currentView, currentRouteIndex, selectedRoutes } = appState;
 
         if (currentView === 'trip') {
@@ -56,13 +57,13 @@ const infoPane = {
     },
 
     updateRouteButtons() {
-        const menuBar = document.getElementById('menu-bar');
-        menuBar.innerHTML = ''; // Clear existing buttons
+        const menuBar = getEl('menu-bar');
+        menuBar.innerHTML = '';
 
         appState.waypoints.forEach((waypoint, index) => {
             const routeIndex = Math.floor(index / 2);
             const buttonId = `route-button-${routeIndex}`;
-            let button = document.getElementById(buttonId);
+            let button = getEl(buttonId);
 
             const origin = appState.waypoints[routeIndex * 2] ? appState.waypoints[routeIndex * 2].iata_code : 'Any';
             const destination = appState.waypoints[routeIndex * 2 + 1] ? appState.waypoints[routeIndex * 2 + 1].iata_code : 'Any';
@@ -73,14 +74,12 @@ const infoPane = {
                 button.id = buttonId;
                 button.className = 'route-info-button';
                 menuBar.appendChild(button);
-                button.textContent = buttonText; // Ensure text is set
             }
-
             button.textContent = buttonText;
 
             button.onclick = (event) => {
                 adjustMapSize();
-                if (appState.currentRouteIndex != routeIndex) {
+                if (appState.currentRouteIndex !== routeIndex) {
                     appState.currentRouteIndex = routeIndex;
                     if (appState.selectedRoutes.hasOwnProperty(routeIndex)) {
                         console.log('Selected route clicked');
@@ -91,135 +90,134 @@ const infoPane = {
                     }
                     this.displayContent();
                 } else {
-                    if (document.getElementById('routeBox').style.display === 'none') {
-                        routeBox.showRouteBox(event, routeIndex);
-                    } else {
-                        document.getElementById('routeBox').style.display = 'none';
-                    }
+                    const routeBoxEl = getEl('routeBox');
+                    routeBoxEl.style.display = (routeBoxEl.style.display === 'none') ? 'block' : 'none';
                 }
 
-                // Correctly calculate bounds based on the current waypoints for zooming
                 const originWaypoint = appState.waypoints[routeIndex * 2];
                 const destinationWaypoint = appState.waypoints[routeIndex * 2 + 1];
-                const group = [originWaypoint, destinationWaypoint].filter(wp => wp).map(airport => L.latLng(airport.latitude, airport.longitude));
-                const bounds = L.latLngBounds(group);
-                if (group.length > 1) {
+                const groupLatLng = [originWaypoint, destinationWaypoint].filter(Boolean)
+                    .map(airport => L.latLng(airport.latitude, airport.longitude));
+                const bounds = L.latLngBounds(groupLatLng);
+
+                if (groupLatLng.length > 1) {
                     map.fitBounds(bounds, { padding: [50, 50] });
-                } else if (group.length === 1) {
-                    map.setView(group[0], 4);
+                } else if (groupLatLng.length === 1) {
+                    map.setView(groupLatLng[0], 4);
                 }
             };
 
             if (appState.selectedRoutes.hasOwnProperty(routeIndex)) {
-                button.classList.add('selected-route-button'); // Adds a class that you will style to make the background green
+                button.classList.add('selected-route-button');
             } else {
-                button.classList.remove('selected-route-button'); // Removes the class, returning to the default style
+                button.classList.remove('selected-route-button');
             }
 
             uiHandling.attachDateTooltip(button, routeIndex);
 
+            const routeId = `${origin}-${destination}`;
             button.addEventListener('mouseover', () => {
-                const routeId = `${origin}-${destination}`;
-                const lineSets = pathDrawing.routePathCache[routeId] || pathDrawing.dashedRoutePathCache[routeId] || [];
-                lineSets.forEach(lineSet => {
-                    if (lineSet && lineSet.lines) {
-                        lineSet.lines.forEach(linePair => {
-                            if (linePair.visibleLine) {
-                                linePair.visibleLine.setStyle({ color: 'white' });
-                            }
-                        });
-                    }
-                });
+                this.highlightButtonLines(routeId, 'white');
             });
-
             button.addEventListener('mouseout', () => {
-                const routeId = `${origin}-${destination}`;
-                const lineSets = pathDrawing.routePathCache[routeId] || [];
-                const dashedLineSets = pathDrawing.dashedRoutePathCache[routeId] || [];
-
-                // Fix: Update for dashedLineSets
-                dashedLineSets.forEach(line => {
-                    if (line && line.visibleLine) {
-                        line.visibleLine.setStyle({ color: '#999' });
-                    }
-                });
-
-                // Fix: Update for regular lineSets 
-                lineSets.forEach(line => {
-                    if (line && line.visibleLine) {
-                        const color = line.visibleLine.options.originalColor || 'grey';
-                        line.visibleLine.setStyle({ color: color });
-                    }
-                });
+                this.restoreButtonLines(routeId);
             });
         });
+
         if (appState.waypoints.length === 0 || appState.waypoints.length % 2 === 0) {
             this.addPlusButton();
         }
     },
 
-    updateTripTable: function (selectedRoutesArray) {
-        const infoPaneContent = document.getElementById('infoPaneContent');
-        infoPaneContent.innerHTML = ''; // Clear existing content
+    highlightButtonLines(routeId, color) {
+        const lineSets = pathDrawing.routePathCache[routeId] || pathDrawing.dashedRoutePathCache[routeId] || [];
+        lineSets.forEach(lineSet => {
+            if (lineSet && lineSet.lines) {
+                lineSet.lines.forEach(linePair => {
+                    if (linePair.visibleLine) {
+                        linePair.visibleLine.setStyle({ color: color });
+                    }
+                });
+            } else if (lineSet && lineSet.visibleLine) {
+                lineSet.visibleLine.setStyle({ color: color });
+            }
+        });
+    },
+
+    restoreButtonLines(routeId) {
+        const lineSets = pathDrawing.routePathCache[routeId] || [];
+        const dashedLineSets = pathDrawing.dashedRoutePathCache[routeId] || [];
+
+        dashedLineSets.forEach(line => {
+            if (line && line.visibleLine) {
+                line.visibleLine.setStyle({ color: '#999' });
+            }
+        });
+        lineSets.forEach(line => {
+            if (line && line.visibleLine) {
+                const color = line.visibleLine.options.originalColor || 'grey';
+                line.visibleLine.setStyle({ color: color });
+            }
+        });
+    },
+
+    updateTripTable(selectedRoutesArray) {
+        const infoPaneContent = getEl('infoPaneContent');
+        infoPaneContent.innerHTML = '';
 
         const table = document.createElement('table');
         table.className = 'route-info-table';
 
         const thead = document.createElement('thead');
-        thead.innerHTML = `<tr>
-            <th>Departure</th>
-            <th>Arrival</th>
-            <th>Price</th>
-            <th>Airline</th>
-            <th>Stops</th>
-            <th>Route</th>
-            <th>Action</th>
-        </tr>`;
+        thead.innerHTML = `
+            <tr>
+                <th>Departure</th>
+                <th>Arrival</th>
+                <th>Price</th>
+                <th>Airline</th>
+                <th>Stops</th>
+                <th>Route</th>
+                <th>Action</th>
+            </tr>`;
         table.appendChild(thead);
 
         const tbody = document.createElement('tbody');
+        const groupData = {};
 
-        // Aggregate data for each group
-        let groupData = {};
         selectedRoutesArray.forEach((item, index) => {
             const group = item.group;
             if (!groupData[group]) {
                 groupData[group] = {
-                    departure: appState.routeDates[item.routeNumber]?.depart, // Access new routeDates structure
-                    arrival: appState.routeDates[item.routeNumber]?.return, // Access new routeDates structure
+                    departure: appState.routeDates[item.routeNumber]?.depart,
+                    arrival: appState.routeDates[item.routeNumber]?.return,
                     price: item.displayData.price,
                     airlines: [item.displayData.airline],
-                    stops: new Set(), // Use a Set to ensure unique stops
-                    route: [item.displayData.route.split(' > ')[0]], // Initialize with origin
+                    stops: new Set(),
+                    route: [item.displayData.route.split(' > ')[0]],
                     deep_link: item.displayData.deep_link
                 };
             } else {
-                groupData[group].arrival = appState.routeDates[item.routeNumber]?.return; // Update to last route's arrival
+                groupData[group].arrival = appState.routeDates[item.routeNumber]?.return;
                 groupData[group].airlines.push(item.displayData.airline);
             }
-            // Always add the destination to the route
             groupData[group].route.push(item.displayData.route.split(' > ')[1]);
-
-            // Add each stop to the Set, excluding the first origin and the last destination later
-            if (index > 0) { // Exclude the very first origin
+            if (index > 0) {
                 groupData[group].stops.add(item.displayData.route.split(' > ')[0]);
             }
         });
 
-        // Create table rows for each group
         Object.values(groupData).forEach(data => {
-            // Format departure and arrival dates to include the short day name
-            const departureDate = new Date(data.departure);
-            const arrivalDate = new Date(data.arrival);
-            const departureDayName = departureDate.toLocaleDateString('en-US', { weekday: 'short' });
-            const arrivalDayName = arrivalDate.toLocaleDateString('en-US', { weekday: 'short' });
+            const depDate = new Date(data.departure);
+            const arrDate = new Date(data.arrival);
+            const depDayName = depDate.toLocaleDateString('en-US', { weekday: 'short' });
+            const arrDayName = arrDate.toLocaleDateString('en-US', { weekday: 'short' });
+            const formattedDeparture = `${depDayName} ${depDate.toLocaleDateString('en-US')}`;
+            const formattedArrival = `${arrDayName} ${arrDate.toLocaleDateString('en-US')}`;
             const price = this.formatPrice(data.price);
 
-            const formattedDeparture = `${departureDayName} ${departureDate.toLocaleDateString('en-US')}`;
-            const formattedArrival = `${arrivalDayName} ${arrivalDate.toLocaleDateString('en-US')}`;
-
             const row = document.createElement('tr');
-            row.innerHTML = `<td>${formattedDeparture}</td>
+            row.innerHTML = `
+                <td>${formattedDeparture}</td>
                 <td>${formattedArrival}</td>
                 <td>${price}</td>
                 <td>${data.airlines.join(', ')}</td>
@@ -227,14 +225,12 @@ const infoPane = {
                 <td>${data.route.join(' > ')}</td>
                 <td><a href="${data.deep_link}" target="_blank"><button>Book Flight</button></a></td>`;
 
-            row.addEventListener('mouseover', function () {
+            row.addEventListener('mouseover', () => {
                 const routeString = data.route.join(' > ');
                 const iataCodes = routeString.split(' > ');
                 infoPane.highlightRoute(iataCodes, data.group);
             });
-
-            // Attach mouseout event to clear the route
-            row.addEventListener('mouseout', function () {
+            row.addEventListener('mouseout', () => {
                 lineManager.clearLinesByTags(['status:highlighted']);
             });
 
@@ -244,68 +240,55 @@ const infoPane = {
         table.appendChild(tbody);
         infoPaneContent.appendChild(table);
 
-        // Update the trip button with total price
-        let totalPrice = 0; // Initialize total price for all routes
-        let processedGroups = new Set(); // Set to track which groups have been processed
-
+        let totalPrice = 0;
+        const processedGroups = new Set();
         selectedRoutesArray.forEach(item => {
-            // Only add price if this group has not been processed yet
             if (!processedGroups.has(item.group)) {
-                processedGroups.add(item.group); // Mark this group as processed
-                
-                // Handle different price formats
-                let price = 0;
+                processedGroups.add(item.group);
+                let priceVal = 0;
                 if (typeof item.displayData.price === 'number') {
-                    price = item.displayData.price;
+                    priceVal = item.displayData.price;
                 } else if (typeof item.displayData.price === 'string') {
-                    price = parseFloat(item.displayData.price.replace(/[^\d.-]/g, ''));
+                    priceVal = parseFloat(item.displayData.price.replace(/[^\d.-]/g, ''));
                 }
-                
-                // Add valid price to total
-                if (!isNaN(price)) {
-                    totalPrice += price;
+                if (!isNaN(priceVal)) {
+                    totalPrice += priceVal;
                 }
             }
         });
 
-        // Update button with formatted total
-        const tripButton = document.getElementById('tripButton');
+        const tripButton = getEl('tripButton');
         tripButton.textContent = totalPrice > 0 ? `$${totalPrice.toFixed(2)}` : '$0.00';
         tripButton.classList.add('green-button');
+
         if (tripButton && appState.selectedRoutes.length > 0) {
-            tripButton.addEventListener('mouseover', function () {
+            tripButton.addEventListener('mouseover', () => {
                 const allIataCodes = [];
                 const tableRows = document.querySelectorAll('.route-info-table tbody tr');
                 tableRows.forEach(row => {
-                    const routeString = row.cells[5].textContent.trim(); // Adjust the index based on the 'Route' column in your table
-                    const iataCodes = routeString.split(' > ');
-                    allIataCodes.push(...iataCodes);
+                    const routeString = row.cells[5].textContent.trim();
+                    allIataCodes.push(...routeString.split(' > '));
                 });
                 infoPane.highlightRoute(allIataCodes);
             });
-
-            tripButton.addEventListener('mouseout', function () {
+            tripButton.addEventListener('mouseout', () => {
                 lineManager.clearLinesByTags(['status:highlighted']);
             });
         }
     },
 
-    formatPrice: function (price) {
-        // Handle price if it's already a number
+    formatPrice(price) {
         if (typeof price === 'number') {
             return price.toFixed(2);
         }
-        // Handle string price
         if (typeof price === 'string') {
-            const numericPrice = parseFloat(price.replace(/[^\d.-]/g, ''));
-            return isNaN(numericPrice) ? "0.00" : numericPrice.toFixed(2);
+            const numeric = parseFloat(price.replace(/[^\d.-]/g, ''));
+            return isNaN(numeric) ? '0.00' : numeric.toFixed(2);
         }
-        // Handle undefined/null/invalid input
-        return "0.00";
+        return '0.00';
     },
 
-    highlightRoute: function (iataCodes, group) {
-        // Add 'status:highlighted' tag to matching lines
+    highlightRoute(iataCodes, group) {
         if (iataCodes) {
             iataCodes.forEach((code, index) => {
                 if (index < iataCodes.length - 1) {
@@ -325,42 +308,40 @@ const infoPane = {
     },
 
     addPlusButton() {
-        const menuBar = document.getElementById('menu-bar');
-        const routeIndex = Math.floor(appState.routes.length);
-        if (!document.getElementById('plus-button')) { // Check to avoid duplicates
-            let plusButton = document.createElement('button');
-            plusButton.id = 'plus-button';
+        const menuBar = getEl('menu-bar');
+        const plusButtonId = 'plus-button';
+        if (!getEl(plusButtonId)) {
+            const plusButton = document.createElement('button');
+            plusButton.id = plusButtonId;
             plusButton.className = 'plus-button';
             plusButton.onclick = (event) => {
-                // Duplicate the last waypoint as the default origin for the new route
                 if (appState.waypoints.length > 0) {
                     const lastWaypoint = appState.waypoints[appState.waypoints.length - 1];
-                    const newWaypoint = { ...lastWaypoint }; // Create a copy of the last waypoint
-                    updateState('addWaypoint', newWaypoint, 'infoPane.addPlusButton'); // Use updateState to add the duplicated waypoint
-                    // set the new depart date to the last return date, if it exists, or the last depart date
-                    const lastDepartDate = appState.routeDates[appState.routes.length - 1]?.depart;
-                    const lastReturnDate = appState.routeDates[appState.routes.length - 1]?.return;
-                    let newDepartDate = lastReturnDate || lastDepartDate;
+                    const newWaypoint = { ...lastWaypoint };
+                    updateState('addWaypoint', newWaypoint, 'infoPane.addPlusButton');
+
+                    const lastRoute = appState.routes.length - 1;
+                    const lastDepartDate = appState.routeDates[lastRoute]?.depart;
+                    const lastReturnDate = appState.routeDates[lastRoute]?.return;
+                    let newDepartDate = lastReturnDate || lastDepartDate || new Date();
                     newDepartDate = new Date(newDepartDate);
                     newDepartDate.setDate(newDepartDate.getDate() + 1);
-                    newDepartDate = newDepartDate.toISOString().slice(0, 10);
-                    updateState('updateRouteDate', { routeNumber: appState.routes.length, depart: newDepartDate }, 'infoPane.addPlusButton');
+                    updateState(
+                        'updateRouteDate',
+                        { routeNumber: appState.routes.length, depart: newDepartDate.toISOString().slice(0, 10) },
+                        'infoPane.addPlusButton'
+                    );
                 }
-                routeBox.showRouteBox(event, routeIndex);
+                routeBox.showRouteBox(event, appState.routes.length);
             };
-
-            // Create the SVG as a string and set it as the innerHTML of the button
             plusButton.innerHTML = `
                 <svg height="32px" width="32px" viewBox="0 0 64 64" fill="#aaa">
                     <rect x="30" y="10" width="4" height="44"></rect>
                     <rect x="10" y="30" width="44" height="4"></rect>
-                </svg>
-            `;
-
+                </svg>`;
             menuBar.appendChild(plusButton);
         }
     }
-
-}
+};
 
 export { infoPane };
