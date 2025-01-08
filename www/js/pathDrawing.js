@@ -220,15 +220,15 @@ const pathDrawing = {
 
     drawRoutePaths(iata, directRoutes, type = 'route') {
         directRoutes[iata]?.forEach(route => {
-            const routeId = `${route.origin}-${route.destination}`;
-            if (!route.origin || !route.destination) {
+            const routeId = `${route.originAirport.iata_code}-${route.destinationAirport.iata_code}`;
+            if (!route.originAirport || !route.destinationAirport) {
                 console.error('Invalid route data:', route);
                 return;
             }
-            this.drawLine(`${originIata}-${destinationIata}`, 'route', {
-                // ...
-                isTableRoute: true,  // This adds the type:table tag
-                // ...
+            this.drawLine(routeId, type, {
+                price: route.price,
+                iata: iata,
+                isTableRoute: type === 'route'
             });
         });
     },
