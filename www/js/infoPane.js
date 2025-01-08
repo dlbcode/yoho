@@ -252,15 +252,26 @@ const infoPane = {
             // Only add price if this group has not been processed yet
             if (!processedGroups.has(item.group)) {
                 processedGroups.add(item.group); // Mark this group as processed
-                let price = parseFloat(item.displayData.price.replace(/[^\d.-]/g, ''));
-                price = isNaN(price) ? 0 : price; // Use 0 if the price is not a valid number
-                totalPrice += price; // Add price to total
+                
+                // Handle different price formats
+                let price = 0;
+                if (typeof item.displayData.price === 'number') {
+                    price = item.displayData.price;
+                } else if (typeof item.displayData.price === 'string') {
+                    price = parseFloat(item.displayData.price.replace(/[^\d.-]/g, ''));
+                }
+                
+                // Add valid price to total
+                if (!isNaN(price)) {
+                    totalPrice += price;
+                }
             }
         });
 
+        // Update button with formatted total
         const tripButton = document.getElementById('tripButton');
-        tripButton.textContent = totalPrice > 0 ? `$${totalPrice.toFixed(2)}` : '$0.00'; // Update button text with total price or $0.00
-        tripButton.classList.add('green-button'); // Apply green styling class
+        tripButton.textContent = totalPrice > 0 ? `$${totalPrice.toFixed(2)}` : '$0.00';
+        tripButton.classList.add('green-button');
         if (tripButton && appState.selectedRoutes.length > 0) {
             tripButton.addEventListener('mouseover', function () {
                 const allIataCodes = [];
@@ -280,8 +291,17 @@ const infoPane = {
     },
 
     formatPrice: function (price) {
-        const numericPrice = parseFloat(price.replace(/[^\d.-]/g, ''));
-        return isNaN(numericPrice) ? "0.00" : numericPrice.toFixed(2);
+        // Handle price if it's already a number
+        if (typeof price === 'number') {
+            return price.toFixed(2);
+        }
+        // Handle string price
+        if (typeof price === 'string') {
+            const numericPrice = parseFloat(price.replace(/[^\d.-]/g, ''));
+            return isNaN(numericPrice) ? "0.00" : numericPrice.toFixed(2);
+        }
+        // Handle undefined/null/invalid input
+        return "0.00";
     },
 
     highlightRoute: function (iataCodes, group) {

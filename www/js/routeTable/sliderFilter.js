@@ -65,8 +65,47 @@ const sliderFilter = {
     createAndShowPopup: function (column, data, event) {
         if (!data) {
             console.error('No data provided for filtering:', column);
-            return; // Abort if no data
+            return;
         }
+
+        // First remove any existing popup
+        const existingPopup = document.getElementById(`${column}FilterPopup`);
+        if (existingPopup) {
+            existingPopup.remove();
+        }
+
+        // Ensure filter icon exists
+        let filterIcon = document.getElementById(`${column}Filter`);
+        if (!filterIcon) {
+            // Create filter icon if missing
+            filterIcon = document.createElement('span');
+            filterIcon.id = `${column}Filter`;
+            filterIcon.className = 'filterIcon';
+            filterIcon.setAttribute('data-column', column);
+            
+            // Find header cell to append to
+            const headerCell = document.querySelector(`th[data-column="${column}"]`);
+            if (headerCell) {
+                headerCell.appendChild(filterIcon);
+            }
+        }
+
+        // Create reset icon if missing
+        let resetIcon = document.getElementById(`reset${column.charAt(0).toUpperCase() + column.slice(1)}Filter`);
+        if (!resetIcon) {
+            resetIcon = document.createElement('span');
+            resetIcon.id = `reset${column.charAt(0).toUpperCase() + column.slice(1)}Filter`;
+            resetIcon.className = 'resetIcon';
+            resetIcon.setAttribute('data-column', column);
+            resetIcon.style.display = 'none';
+            
+            const headerCell = document.querySelector(`th[data-column="${column}"]`);
+            if (headerCell) {
+                headerCell.appendChild(resetIcon);
+            }
+        }
+
+        // Continue with existing popup creation code...
         const filterPopup = document.createElement('div');
         filterPopup.id = `${column}FilterPopup`;
         filterPopup.className = 'filter-popup';
