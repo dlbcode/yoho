@@ -8,7 +8,7 @@ class Line {
         this.iata = options.iata;
         this.origin = origin;
         this.destination = destination;
-        this.routeId = routeId; // Ensure routeId is stored in the Line instance
+        this.routeId = routeId;
         this.type = type;
         this.map = map;
         this.defaultWeight = 1;
@@ -19,63 +19,8 @@ class Line {
         this.invisibleLine = this.createInvisibleLine();
         this.decoratedLine = options.showPlane ? this.createDecoratedLine() : null;
         this.bindEvents();
-        this.tags = new Set(); // Initialize tags as an empty Set
-        this.addTag(`route:${routeId}`);
-        this.addTag(`routeId:${routeId}`);
-        this.addTag(`type:${type}`);
-        if (options.isTableRoute) {
-            this.addTag('type:table');
-        }
-        if (options.group) {
-            this.addTag(`group:${options.group}`);
-        }
-
-        // Add tags based on price
-        if (options.price !== undefined && options.price !== null) {
-            this.addTag(`price:${options.price}`);
-            if (options.price < 100) {
-                this.addTag('price-range:0-100');
-            } else if (options.price < 200) {
-                this.addTag('price-range:100-200');
-            } else if (options.price < 300) {
-                this.addTag('price-range:200-300');
-            } else if (options.price < 400) {
-                this.addTag('price-range:300-400');
-            } else if (options.price < 500) {
-                this.addTag('price-range:400-500');
-            } else {
-                this.addTag('price-range:500+');
-            }
-        }
-        // Add tags for departure and arrival time ranges
-        if (options.departureTime) {
-            if (options.departureTime < 6) {
-                this.addTag('departure-range:00-06');
-            } else if (options.departureTime < 12) {
-                this.addTag('departure-range:06-12');
-            } else if (options.departureTime < 18) {
-                this.addTag('departure-range:12-18');
-            } else {
-                this.addTag('departure-range:18-24');
-            }
-        }
-        if (options.arrivalTime) {
-            if (options.arrivalTime < 6) {
-                this.addTag('arrival-range:00-06');
-            } else if (options.arrivalTime < 12) {
-                this.addTag('arrival-range:06-12');
-            } else if (options.arrivalTime < 18) {
-                this.addTag('arrival-range:12-18');
-            } else {
-                this.addTag('arrival-range:18-24');
-            }
-        }
-        // Add tags for direct/indirect flights
-        if (options.isDirect) {
-            this.addTag('direct:true');
-        } else {
-            this.addTag('direct:false');
-        }
+        this.tags = new Set();
+        this.addTags(options);
         console.log(`Line created with routeId: ${this.routeId} and tags: `, this.tags);
     }
 
@@ -83,14 +28,43 @@ class Line {
         this.tags.add(tag);
     }
 
-    removeTag(tag) {
-        this.tags.delete(tag);
+    addTags(options) {
+        this.addTag(`route:${this.routeId}`);
+        this.addTag(`routeId:${this.routeId}`);
+        this.addTag(`type:${this.type}`);
+        if (options.isTableRoute) this.addTag('type:table');
+        if (options.group) this.addTag(`group:${options.group}`);
+        if (options.price !== undefined && options.price !== null) {
+            this.addTag(`price:${options.price}`);
+            this.addTag(`price-range:${this.getPriceRange(options.price)}`);
+        }
+        if (options.departureTime !== undefined) {
+            this.addTag(`departure-range:${this.getTimeRange(options.departureTime)}`);
+        }
+        if (options.arrivalTime !== undefined) {
+            this.addTag(`arrival-range:${this.getTimeRange(options.arrivalTime)}`);
+        }
+        this.addTag(`direct:${options.isDirect ? 'true' : 'false'}`);
+    }
+
+    getPriceRange(price) {
+        if (price < 100) return '0-100';
+        if (price < 200) return '100-200';
+        if (price < 300) return '200-300';
+        if (price < 400) return '300-400';
+        if (price < 500) return '400-500';
+        return '500+';
+    }
+
+    getTimeRange(time) {
+        if (time < 6) return '00-06';
+        if (time < 12) return '06-12';
+        if (time < 18) return '12-18';
+        return '18-24';
     }
 
     getColorBasedOnPrice(price) {
-        if (price === null || price === undefined || isNaN(parseFloat(price))) {
-            return 'grey';
-        }
+        if (price === null || price === undefined || isNaN(parseFloat(price))) return 'grey';
         price = parseFloat(price);
         return price < 100 ? '#0099ff' : price < 200 ? 'green' : price < 300 ? '#abb740' : price < 400 ? 'orange' : price < 500 ? '#da4500' : '#c32929';
     }
@@ -139,13 +113,10 @@ class Line {
     }
 
     bindEvents() {
-        // Pass lineManager to the event handlers
         this.visibleLine.on('click', (e) => lineManager.onClickHandler(e, this));
         this.invisibleLine.on('click', (e) => lineManager.onClickHandler(e, this));
-
         this.invisibleLine.on('mouseover', (e) => lineManager.onMouseOver(e, this, this.map));
         this.invisibleLine.on('mouseout', () => lineManager.onMouseOut(this));
-
         if (this.decoratedLine) {
             this.decoratedLine.on('click', (e) => this.invisibleLine.fire('click', e));
             this.decoratedLine.on('mouseover', (e) => lineManager.onMouseOver(e, this, this.map));
@@ -182,63 +153,36 @@ const pathDrawing = {
     drawLine: function (routeId, type, options) {
         console.log('Drawing line:', routeId, type, options);
         const [originIata, destinationIata] = routeId.split('-');
-        
-        // Early return if origin is missing
-        if (!originIata) {
-            console.error('Invalid routeId format - missing origin:', routeId);
-            return;
-        }
+        if (!originIata || destinationIata === 'Any') return;
 
-        // Handle "Any" destination as special case
-        if (destinationIata === 'Any') {
-            return; // Silently return without drawing line for "Any" destination
-        }
-
-        // Normal flow for specific origin/destination pairs
         flightMap.getAirportDataByIata(originIata).then(originAirport => {
-            if (!originAirport) {
-                console.error('Origin airport data not found:', originIata);
-                return;
-            }
-
-            // Only fetch destination data if it's not "Any"
+            if (!originAirport) return console.error('Origin airport data not found:', originIata);
             if (destinationIata !== 'Any') {
                 flightMap.getAirportDataByIata(destinationIata).then(destinationAirport => {
-                    if (!destinationAirport) {
-                        console.error('Destination airport data not found:', destinationIata);
-                        return;
-                    }
-
-                    // Create line instance and continue with existing logic...
+                    if (!destinationAirport) return console.error('Destination airport data not found:', destinationIata);
                     const line = new Line(originAirport, destinationAirport, routeId, type, options);
-                    line.addTag(`routeId:${routeId}`);
-                    
-                    // Store the Line instance (existing caching logic...)
-                    if (type === 'route') {
-                        if (!this.routePathCache[routeId]) {
-                            this.routePathCache[routeId] = [];
-                        }
-                        this.routePathCache[routeId].push(line);
-                    } else if (type === 'dashed') {
-                        if (!this.dashedRoutePathCache[routeId]) {
-                            this.dashedRoutePathCache[routeId] = [];
-                        }
-                        this.dashedRoutePathCache[routeId].push(line);
-                    } else if (type === 'hover') {
-                        this.hoverLines.push(line);
-                    }
+                    this.cacheLine(routeId, type, line);
                 });
             }
         });
     },
 
+    cacheLine(routeId, type, line) {
+        if (type === 'route') {
+            this.routePathCache[routeId] = this.routePathCache[routeId] || [];
+            this.routePathCache[routeId].push(line);
+        } else if (type === 'dashed') {
+            this.dashedRoutePathCache[routeId] = this.dashedRoutePathCache[routeId] || [];
+            this.dashedRoutePathCache[routeId].push(line);
+        } else if (type === 'hover') {
+            this.hoverLines.push(line);
+        }
+    },
+
     drawRoutePaths(iata, directRoutes, type = 'route') {
         directRoutes[iata]?.forEach(route => {
             const routeId = `${route.originAirport.iata_code}-${route.destinationAirport.iata_code}`;
-            if (!route.originAirport || !route.destinationAirport) {
-                console.error('Invalid route data:', route);
-                return;
-            }
+            if (!route.originAirport || !route.destinationAirport) return console.error('Invalid route data:', route);
             this.drawLine(routeId, type, {
                 price: route.price,
                 iata: iata,
@@ -248,20 +192,15 @@ const pathDrawing = {
     },
 
     drawDashedLine(origin, destination) {
-        if (!origin || !destination) {
-            console.error('Invalid airport data for dashed line:', origin, destination);
-            return;
-        }
+        if (!origin || !destination) return console.error('Invalid airport data for dashed line:', origin, destination);
         this.drawLine(`${origin}-${destination}`, 'dashed', {});
     },
 
     adjustLatLng(latLng) {
         var currentBounds = map.getBounds();
         var newLng = latLng.lng;
-
         while (newLng < currentBounds.getWest()) newLng += 360;
         while (newLng > currentBounds.getEast()) newLng -= 360;
-
         return L.latLng(latLng.lat, newLng);
     },
 
@@ -273,7 +212,7 @@ const pathDrawing = {
             if (route.isDirect) {
                 return this.drawLine(routeId, 'route', {
                     price: route.price,
-                    group: index + 1, // Add group identifier here
+                    group: index + 1,
                 });
             } else {
                 return this.drawDashedLine(route.origin, route.destination);
@@ -281,7 +220,7 @@ const pathDrawing = {
         });
         await Promise.all(drawPromises);
         if (appState.selectedAirport) {
-            pathDrawing.drawRoutePaths(appState.selectedAirport.iata_code, appState.directRoutes, appState.routeDirection);
+            this.drawRoutePaths(appState.selectedAirport.iata_code, appState.directRoutes, appState.routeDirection);
         }
     },
 
@@ -299,10 +238,8 @@ function buildRouteTable(routeIndex) {
     // ...
     flightsData.forEach(flight => {
         let row = document.createElement('tr');
-        // Change this line
-        const routeId = `${flight.flyFrom}-${flight.flyTo}`; // Create the route ID correctly
-        row.setAttribute('data-route-id', routeId); // Set it as a data attribute
-        
+        const routeId = `${flight.flyFrom}-${flight.flyTo}`;
+        row.setAttribute('data-route-id', routeId);
         // Rest of the row creation code...
     });
     // ...
