@@ -137,23 +137,18 @@ const infoPane = {
                 const lineSets = pathDrawing.routePathCache[routeId] || [];
                 const dashedLineSets = pathDrawing.dashedRoutePathCache[routeId] || [];
 
-                dashedLineSets.forEach(lineSet => {
-                    if (lineSet) {
-                        lineSet.setStyle({ color: '#999' });
+                // Fix: Update for dashedLineSets
+                dashedLineSets.forEach(line => {
+                    if (line && line.visibleLine) {
+                        line.visibleLine.setStyle({ color: '#999' });
                     }
                 });
 
-                lineSets.forEach(lineSet => {
-                    if (lineSet && lineSet.lines) {
-                        lineSet.lines.forEach(linePair => {
-                            if (linePair.visibleLine) {
-                                if (linePair.visibleLine.options.originalColor) {
-                                    linePair.visibleLine.setStyle({ color: linePair.visibleLine.options.originalColor });
-                                } else {
-                                    linePair.visibleLine.setStyle({ color: 'grey' });
-                                }
-                            }
-                        });
+                // Fix: Update for regular lineSets 
+                lineSets.forEach(line => {
+                    if (line && line.visibleLine) {
+                        const color = line.visibleLine.options.originalColor || 'grey';
+                        line.visibleLine.setStyle({ color: color });
                     }
                 });
             });

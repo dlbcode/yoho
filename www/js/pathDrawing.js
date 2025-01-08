@@ -225,7 +225,11 @@ const pathDrawing = {
                 console.error('Invalid route data:', route);
                 return;
             }
-            this.drawLine(routeId, type, { price: route.price, iata: iata });
+            this.drawLine(`${originIata}-${destinationIata}`, 'route', {
+                // ...
+                isTableRoute: true,  // This adds the type:table tag
+                // ...
+            });
         });
     },
 

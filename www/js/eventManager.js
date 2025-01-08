@@ -9,9 +9,17 @@ import { lineManager } from './lineManager.js';
 
 function handleStateChange(event) {
     const { key, value } = event.detail;
+    
+    if (key === 'changeView' && value === 'routeTable') {
+        // Clear any existing table lines before showing new table
+        lineManager.clearLinesByTags(['type:table']);
+    }
+
     if (key === 'addWaypoint' || key === 'removeWaypoint' || key === 'updateWaypoint') {
         mapHandling.updateMarkerIcons();
         routeHandling.updateRoutesArray();
+        // Clear table lines when waypoints change
+        lineManager.clearLinesByTags(['type:table']);
         if (appState.currentView !== 'trip') {
             appState.currentView = 'trip';
         }
