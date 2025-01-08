@@ -1,40 +1,44 @@
 import { map, magentaDotIcon } from './map.js';
 import { flightMap } from './flightMap.js';
-import { pathDrawing } from './pathDrawing.js';
-import { drawAllRoutePaths } from './allPaths.js';
 import { appState, updateState } from './stateManager.js';
 import { routeHandling } from './routeHandling.js';
 import { mapHandling } from './mapHandling.js';
 import { lineManager } from './lineManager.js';
 
-function handleStateChange(event) {
-    const { key, value } = event.detail;
-    
-    if (key === 'changeView' && value === 'routeTable') {
-        // Clear any existing table lines before showing new table
-        lineManager.clearLinesByTags(['type:table']);
-    }
-
-    if (key === 'addWaypoint' || key === 'removeWaypoint' || key === 'updateWaypoint') {
-        mapHandling.updateMarkerIcons();
-        routeHandling.updateRoutesArray();
-        // Clear table lines when waypoints change
-        lineManager.clearLinesByTags(['type:table']);
-        if (appState.currentView !== 'trip') {
-            appState.currentView = 'trip';
-        }
-    }
-
-    if (key === 'changeView') {
-        if (value !== 'routeTable') {
+const stateHandlers = {
+    changeView: (value) => {
+        if (value === 'routeTable') {
+            lineManager.clearLinesByTags(['type:table']);
+        } else {
             lineManager.clearLines(true);
         }
-    }
+    },
 
-    if (key === 'updateRoutes') {
+    addWaypoint: handleWaypointChange,
+    removeWaypoint: handleWaypointChange,
+    updateWaypoint: handleWaypointChange,
+
+    updateRoutes: () => {
         if (appState.waypoints.length === 0 || !appState.selectedRoutes[0]) {
             appState.currentView = 'trip';
         }
+    }
+};
+
+function handleWaypointChange() {
+    mapHandling.updateMarkerIcons();
+    routeHandling.updateRoutesArray();
+    lineManager.clearLinesByTags(['type:table']);
+    
+    if (appState.currentView !== 'trip') {
+        appState.currentView = 'trip';
+    }
+}
+
+function handleStateChange(event) {
+    const { key, value } = event.detail;
+    if (stateHandlers[key]) {
+        stateHandlers[key](value);
     }
 }
 
