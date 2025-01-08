@@ -205,7 +205,7 @@ const infoPane = {
         infoPaneContent.appendChild(table);
 
         const totalPrice = selectedRoutesArray.reduce((total, item) => {
-            const priceVal = parseFloat(item.displayData.price.replace(/[^\d.-]/g, '')) || 0;
+            const priceVal = parseFloat(String(item.displayData.price).replace(/[^\d.-]/g, '')) || 0;
             return total + priceVal;
         }, 0);
 
@@ -224,7 +224,7 @@ const infoPane = {
     },
 
     formatPrice(price) {
-        const numeric = parseFloat(price.replace(/[^\d.-]/g, '')) || 0;
+        const numeric = parseFloat(String(price).replace(/[^\d.-]/g, '')) || 0;
         return numeric.toFixed(2);
     },
 
