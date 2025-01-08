@@ -87,6 +87,12 @@
 }
 
 .filter-popup {
+  position: absolute;
+  z-index: 1000;
+  background-color: #333;
+  border-radius: 5px;
+  border: 1px solid #525252;
+  padding: 10px;
   width: 220px;
   height: 90px;
   display: flex;
@@ -94,38 +100,42 @@
   justify-content: space-between;
 }
 
-.popup-label, .filter-value-label {
+.popup-label {
   position: absolute;
   color: #ddd;
   font-size: 15px;
   font-weight: 500;
-}
-
-.popup-label {
   top: 10px;
-  left: 10px;
+  left:10px;
 }
 
 .popup-close-button {
-  top: 0;
+  position: absolute;
+  top: 0px;
   right: 5px;
+  cursor: pointer;
 }
 
 .filter-value-label {
+  color: #ddd;
+  font-size: 15px;
   text-align: center;
   margin-top: 20px;
 }
 
 .noUi-target {
   margin-top: 5px;
-  width: calc(100% - 20px);
+  width: calc(100% - 20px); /* Adjust width considering the padding */
   margin-left: auto;
   margin-right: auto;
-  box-sizing: border-box;
+  box-sizing: border-box; /* Ensures padding and border are included in width calculation */
 }
 
 .slider-handle {
   background-color: #007bff;
+  width: 16px !important;
+  height: 16px !important;
+  left: 8px;
   border-radius: 50%;
   border: none;
   cursor: pointer;
@@ -165,14 +175,16 @@
 }
 
 .noUi-touch-area {
-  margin: -7px;
+  margin: -7px -7px 7px -7px;
   padding: 15px;
   background: rgba(0, 0, 0, 0);
   z-index: 1;
 }
 
 .filter-value-label {
+  color: #ddd;
   font-size: 12px;
+  text-align: center;
   margin-bottom: 5px;
 }
 
