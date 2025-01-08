@@ -182,39 +182,53 @@ const pathDrawing = {
     drawLine: function (routeId, type, options) {
         console.log('Drawing line:', routeId, type, options);
         const [originIata, destinationIata] = routeId.split('-');
-        if (!originIata || !destinationIata) {
-            console.error('Invalid routeId format:', routeId);
+        
+        // Early return if origin is missing
+        if (!originIata) {
+            console.error('Invalid routeId format - missing origin:', routeId);
             return;
         }
+
+        // Handle "Any" destination as special case
+        if (destinationIata === 'Any') {
+            return; // Silently return without drawing line for "Any" destination
+        }
+
+        // Normal flow for specific origin/destination pairs
         flightMap.getAirportDataByIata(originIata).then(originAirport => {
-            flightMap.getAirportDataByIata(destinationIata).then(destinationAirport => {
-                if (!originAirport || !destinationAirport) {
-                    console.error('Airport data not found for one or both IATAs:', originIata, destinationIata);
-                    return;
-                }
+            if (!originAirport) {
+                console.error('Origin airport data not found:', originIata);
+                return;
+            }
 
-                // Create an instance of the Line class
-                const line = new Line(originAirport, destinationAirport, routeId, type, options);
-                line.addTag(`routeId:${routeId}`);
-                console.log('Created Line instance with routeId:', line.routeId);
-
-                // Store the Line instance
-                if (type === 'route') {
-                    if (!this.routePathCache[routeId]) {
-                        this.routePathCache[routeId] = [];
+            // Only fetch destination data if it's not "Any"
+            if (destinationIata !== 'Any') {
+                flightMap.getAirportDataByIata(destinationIata).then(destinationAirport => {
+                    if (!destinationAirport) {
+                        console.error('Destination airport data not found:', destinationIata);
+                        return;
                     }
-                    this.routePathCache[routeId].push(line);
-                } else if (type === 'dashed') {
-                    if (!this.dashedRoutePathCache[routeId]) {
-                        this.dashedRoutePathCache[routeId] = [];
-                    }
-                    this.dashedRoutePathCache[routeId].push(line);
-                } else if (type === 'hover') {
-                    this.hoverLines.push(line);
-                }
 
-                console.log('Stored line in cache:', this.routePathCache);
-            });
+                    // Create line instance and continue with existing logic...
+                    const line = new Line(originAirport, destinationAirport, routeId, type, options);
+                    line.addTag(`routeId:${routeId}`);
+                    
+                    // Store the Line instance (existing caching logic...)
+                    if (type === 'route') {
+                        if (!this.routePathCache[routeId]) {
+                            this.routePathCache[routeId] = [];
+                        }
+                        this.routePathCache[routeId].push(line);
+                    } else if (type === 'dashed') {
+                        if (!this.dashedRoutePathCache[routeId]) {
+                            this.dashedRoutePathCache[routeId] = [];
+                        }
+                        this.dashedRoutePathCache[routeId].push(line);
+                    } else if (type === 'hover') {
+                        this.hoverLines.push(line);
+                    }
+                });
+            }
         });
     },
 
