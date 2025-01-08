@@ -224,61 +224,76 @@ function routeInfoRow(rowElement, fullFlightData, routeIds, routeIndex) {
 
     const selectRouteButton = detailCell.querySelector('#selectRoute');
     selectRouteButton.addEventListener('click', () => {
-        // Determine the group ID for the newly selected route
+        console.log('Selecting route:', fullFlightData);
+        
+        // Use same group ID for all segments
         appState.highestGroupId += 1;
-        let newRouteGroupId = appState.highestGroupId;
+        const newRouteGroupId = appState.highestGroupId;
+        
+        // Remove existing routes with same group if any
         const existingRouteDetails = appState.selectedRoutes[routeIndex];
         if (existingRouteDetails) {
-            // Logic to remove routes from the old group, if necessary
             Object.keys(appState.selectedRoutes).forEach(key => {
-                if (appState.selectedRoutes[key].group == existingRouteDetails.group) {
+                if (appState.selectedRoutes[key].group === existingRouteDetails.group) {
                     updateState('removeSelectedRoute', parseInt(key));
                 }
             });
         }
 
-        const departureDate = new Date((fullFlightData.local_departure || fullFlightData.dTime * 1000)).toISOString().split('T')[0];
+        // Get all IATA codes from the route for waypoint updating
+        const intermediaryIatas = fullFlightData.route.map(segment => segment.flyFrom);
+        intermediaryIatas.push(fullFlightData.route[fullFlightData.route.length - 1].flyTo);
+        console.log('Intermediate IATAs:', intermediaryIatas);
 
-        // Update appState for the selected route
-        routeIds.forEach((id, idx) => {
-            const segmentData = fullFlightData.route[idx];
-            const departureDate = new Date(segmentData.local_departure || segmentData.dTime).toISOString().split('T')[0];
-            const displayData = {
-                departure: new Date((segmentData.local_departure || segmentData.dTime * 1000)).toLocaleString(),
-                arrival: new Date((segmentData.local_arrival || segmentData.aTime * 1000)).toLocaleString(),
-                price: `$${fullFlightData.price}`,
-                airline: segmentData.airline,
-                stops: fullFlightData.route.length - 1,
-                route: `${segmentData.flyFrom} > ${segmentData.flyTo}`,
-                deep_link: fullFlightData.deep_link,
-            };
-
+        // Process each segment with the same group ID
+        fullFlightData.route.forEach((segmentData, idx) => {
             const selectedRouteIndex = routeIndex + idx;
-            if (!appState.routeDates[selectedRouteIndex]) {
-                appState.routeDates[selectedRouteIndex] = { depart: departureDate, return: null };
-            }
-
-            if (appState.selectedRoutes.hasOwnProperty(selectedRouteIndex)) {
-                const keys = Object.keys(appState.selectedRoutes).map(Number).filter(key => key >= selectedRouteIndex).sort((a, b) => b - a); // Sort keys in descending order to avoid overwriting
-                keys.forEach(key => {
-                    appState.selectedRoutes[key + 1] = appState.selectedRoutes[key]; // Shift each route up by one index
-                });
-            }
-
+            console.log('Processing segment:', idx, segmentData);
+            
+            // Extract departure and arrival times
+            const departureDate = segmentData.local_departure || 
+                                new Date(segmentData.dTime * 1000).toISOString();
+            const arrivalDate = segmentData.local_arrival || 
+                               new Date(segmentData.aTime * 1000).toISOString();
+            
+            // Update selected routes
             appState.selectedRoutes[selectedRouteIndex] = {
-                displayData: displayData,
+                displayData: {
+                    departure: departureDate,
+                    arrival: arrivalDate,
+                    price: fullFlightData.price,
+                    airline: segmentData.airline,
+                    route: `${segmentData.flyFrom} > ${segmentData.flyTo}`,
+                    deep_link: fullFlightData.deep_link
+                },
                 fullData: segmentData,
-                group: newRouteGroupId !== null ? newRouteGroupId : routeIndex,
-                routeDates: { depart: departureDate, return: null },
+                group: newRouteGroupId,
+                routeNumber: routeIndex,
+                routeDates: {
+                    depart: departureDate,
+                    return: null
+                }
             };
         });
-        const routeIATAs = fullFlightData.route.map(r => r.flyFrom).concat(fullFlightData.route[flight.route.length - 1].flyTo).join(" > ");
-        const routeString = routeIATAs.trim(); // Assuming the IATA codes are in the 9th column
-        const iataCodes = routeString.split(' > ');
-        replaceWaypointsForCurrentRoute(iataCodes, routeIndex);
-        updateState('updateRouteDate', { routeNumber: routeIndex, depart: departureDate });
-        updateState('changeView', 'trip');
-        highlightSelectedRowForRouteIndex(routeIndex);
+
+        // Update waypoints for the entire route
+        replaceWaypointsForCurrentRoute(intermediaryIatas, routeIndex);
+
+        // Update route dates in appState
+        if (!appState.routeDates[routeIndex]) {
+            appState.routeDates[routeIndex] = {};
+        }
+        appState.routeDates[routeIndex].depart = fullFlightData.route[0].local_departure;
+        
+        // Trigger necessary state updates
+        updateState('updateRouteDate', {
+            routeNumber: routeIndex,
+            depart: fullFlightData.route[0].local_departure,
+            return: null
+        });
+        
+        // Update visuals
+        pathDrawing.drawLines();
     });
 }
 
