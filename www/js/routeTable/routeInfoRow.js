@@ -51,39 +51,67 @@ function routeInfoRow(rowElement, fullFlightData, routeIds, routeIndex) {
             const departureTime = departureDate.toLocaleTimeString([], options);
             const arrivalTime = arrivalDate.toLocaleTimeString([], options);
             const duration = ((arrivalDate - departureDate) / 3600000).toFixed(1) + ' hrs';
-            const airlineCode = segment.airline; // Assuming `segment.airline` holds the airline code
-
+            const airlineCode = segment.airline;
             const airlineLogoUrl = `assets/airline_logos/70px/${airlineCode}.png`;
 
             if (idx === 0) {
                 // Origin Column
-                segmentsHtml.push(`<div class="departure" style="margin-right: 2px;" data-origin="<span class="math-inline">\{segment\.flyFrom\}"\><div\></span>{segment.flyFrom} (<span class="math-inline">\{segment\.cityFrom\}\)</div\><div style\="color\: \#999;"\>Depart\: <span style\="color\: \#ccc;"\></span>{departureTime}</span></div></div>`);
-                // First Duration Column
-                segmentsHtml.push(`<div class="duration" data-origin="<span class="math-inline">\{segment\.flyFrom\}" data\-destination\="</span>{segment.flyTo}"><div style="position: relative; margin-top: 12px; color: #ccc;">
-                <span class="math-inline">\{duration\}
-<svg style\="position\: absolute; bottom\: 12px; left\: 0px; width\: 100%; height\: 30px; overflow\: visible;"\>
-<path d\="M2,35 Q45,\-2 88,35" stroke\="\#666" fill\="transparent" stroke\-width\="2" stroke\-dasharray\="1,4" stroke\-dashoffset\="6" stroke\-linecap\="round"\></path\>
-</svg\></div\><img src\="</span>{airlineLogoUrl}" alt="${airlineCode} Logo" style="width: 60px; height: 60px; object-fit: contain; object-position: center; border-radius: 5px;"/></div>`);
+                segmentsHtml.push(`
+                    <div class="departure" style="margin-right: 2px;" data-origin="${segment.flyFrom}">
+                        <div>${segment.flyFrom} (${segment.cityFrom})</div>
+                        <div style="color: #999;">Depart: <span style="color: #ccc;">${departureTime}</span></div>
+                    </div>`);
+
+                // First Duration Column 
+                segmentsHtml.push(`
+                    <div class="duration" data-origin="${segment.flyFrom}" data-destination="${segment.flyTo}">
+                        <div style="position: relative; margin-top: 12px; color: #ccc;">
+                            ${duration}
+                            <svg style="position: absolute; bottom: 12px; left: 0px; width: 100%; height: 30px; overflow: visible;">
+                                <path d="M2,35 Q45,-2 88,35" stroke="#666" fill="transparent" stroke-width="2" stroke-dasharray="1,4" stroke-dashoffset="6" stroke-linecap="round"></path>
+                            </svg>
+                        </div>
+                        <img src="${airlineLogoUrl}" alt="${airlineCode} Logo" style="width: 60px; height: 60px; object-fit: contain; object-position: center; border-radius: 5px;"/>
+                    </div>`);
             }
 
             if (idx > 0) {
-                // Layover Column (for all segments except the first)
+                // Layover Column
                 const layoverDuration = formatLayover(flight, idx - 1);
                 const previousArrivalTime = flight.route[idx - 1].local_arrival ? new Date(flight.route[idx - 1].local_arrival).toLocaleTimeString() : new Date(flight.route[idx - 1].aTime * 1000).toLocaleTimeString();
                 const recheckBagsText = flight.route[idx - 1].bags_recheck_required ? '<div style="color: #FFBF00;">- Recheck bags</div>' : '';
-                segmentsHtml.push(`<div class="layover" data-layover="<span class="math-inline">\{flight\.route\[idx \- 1\]\.flyTo\}"\><div\></span>{flight.route[idx - 1].flyTo} (<span class="math-inline">\{segment\.cityFrom\}\)</div\><div style\="color\: \#999;"\>Arrive\: <span style\="color\: \#ccc;"\></span>{previousArrivalTime}</span></div><div style="text-align: center; color: #999;">&darr;</div><div style="color: #999;">Layover: <span style="color: #ccc;"><span class="math-inline">\{layoverDuration\}</span\></div\></span>{recheckBagsText}<div style="text-align: center; color: #999;">&darr;</div><div style="color: #999;">Depart: <span style="color: #ccc;">${departureTime}</span></div></div>`);
+                
+                segmentsHtml.push(`
+                    <div class="layover" data-layover="${flight.route[idx - 1].flyTo}">
+                        <div>${flight.route[idx - 1].flyTo} (${segment.cityFrom})</div>
+                        <div style="color: #999;">Arrive: <span style="color: #ccc;">${previousArrivalTime}</span></div>
+                        <div style="text-align: center; color: #999;">&darr;</div>
+                        <div style="color: #999;">Layover: <span style="color: #ccc;">${layoverDuration}</span></div>
+                        ${recheckBagsText}
+                        <div style="text-align: center; color: #999;">&darr;</div>
+                        <div style="color: #999;">Depart: <span style="color: #ccc;">${departureTime}</span></div>
+                    </div>`);
 
-                // Second Duration Column
-                segmentsHtml.push(`<div class="duration" data-origin="<span class="math-inline">\{flight\.route\[idx\]\.flyFrom\}" data\-destination\="</span>{flight.route[idx].flyTo}"><div style="position: relative; margin-top: 12px; color: #ccc;">
-                <span class="math-inline">\{duration\}
-<svg style\="position\: absolute; bottom\: 12px; left\: 0px; width\: 100%; height\: 30px; overflow\: visible;"\>
-<path d\="M2,35 Q45,\-2 88,35" stroke\="\#666" fill\="transparent" stroke\-width\="2" stroke\-dasharray\="1,4" stroke\-dashoffset\="6" stroke\-linecap\="round"\></path\>
-</svg\></div\><img src\="</span>{airlineLogoUrl}" alt="${airlineCode} Logo" style="width: 60px; height: 60px; object-fit: contain; object-position: center; border-radius: 5px;"/></div>`);
+                // Another Duration Column
+                segmentsHtml.push(`
+                    <div class="duration" data-origin="${flight.route[idx].flyFrom}" data-destination="${flight.route[idx].flyTo}">
+                        <div style="position: relative; margin-top: 12px; color: #ccc;">
+                            ${duration}
+                            <svg style="position: absolute; bottom: 12px; left: 0px; width: 100%; height: 30px; overflow: visible;">
+                                <path d="M2,35 Q45,-2 88,35" stroke="#666" fill="transparent" stroke-width="2" stroke-dasharray="1,4" stroke-dashoffset="6" stroke-linecap="round"></path>
+                            </svg>
+                        </div>
+                        <img src="${airlineLogoUrl}" alt="${airlineCode} Logo" style="width: 60px; height: 60px; object-fit: contain; object-position: center; border-radius: 5px;"/>
+                    </div>`);
             }
 
             if (idx === arr.length - 1) {
-                // Destination Column (for the last segment)
-                segmentsHtml.push(`<div class="destination" data-destination="<span class="math-inline">\{segment\.flyTo\}"\><div\></span>{segment.flyTo} (<span class="math-inline">\{segment\.cityTo\}\)</div\><div style\="color\: \#999;"\>Arrive\: <span style\="color\: \#ccc;"\></span>{arrivalTime}</span></div></div>`);
+                // Destination Column
+                segmentsHtml.push(`
+                    <div class="destination" data-destination="${segment.flyTo}">
+                        <div>${segment.flyTo} (${segment.cityTo})</div>
+                        <div style="color: #999;">Arrive: <span style="color: #ccc;">${arrivalTime}</span></div>
+                    </div>`);
             }
         });
 
@@ -96,24 +124,16 @@ function routeInfoRow(rowElement, fullFlightData, routeIds, routeIndex) {
         <div class='top-wrapper' style='display: flex; flex-direction: row; align-items: flex-start'>
             <div class='left-wrapper' style='display: flex; flex-direction: column; align-items: flex-start; margin-right: 20px;'>
                 <button id='selectRoute' class="select-button">
-                    <div style='font-size: 20px;'><span class="math-block">\{Math\.ceil\(flight\.price\)\}</div\>
-<div\>Select</div\>
-</button\>
-<div class\="info\-box" style\="display\: flex; flex\-direction\: row; margin\-top\: 4px; padding\-bottom\: 2px; width\: 100%;"\>
-<svg fill\="\#aaa" <0\>height\="20px" width\="20px" version\="1\.1" id\="Layer\_1" xmlns\="http\://www\.w3\.org/2000/svg" xmlns\:xlink\="http\://www\.w3\.org/1999/xlink" 
-viewBox\="0 0</0\> 248\.35 248\.35" xml\:space\="preserve"\>
-<g\>
-<g\>
-<path d\="M186\.057,66\.136h\-15\.314V19\.839C170\.743,8\.901,161\.844,0,150\.904,0H97\.448c\-10\.938,0\-19\.84,8\.901\-19\.84,19\.839v46\.296
-H62\.295c\-9\.567,0\-17\.324,7\.757\-17\.324,17\.324V214\.26c0,9\.571,7\.759,17\.326,17\.324,17\.326h2\.323v12\.576
-c0,2\.315,1\.876,4\.188,4\.186,4\.188h19\.811c2\.315,0,4\.188\-1\.876,4\.188\-4\.188v\-12\.576h62\.741v12\.576c0,2\.315,1\.878,4\.188,4\.188,4\.188
-h19\.809c2\.317,0,4\.188\-1\.876,4\.188\-4\.188v\-12\.576h2\.326c9\.567,0,17\.324\-7\.757,17\.324\-17\.326V83\.46
-C203\.381,73\.891,195\.624,66\.136,186\.057,66\.136z M157\.514,66\.135H90\.832V19\.839c0\-3\.646,2\.967\-6\.613,6\.613\-6\.613h53\.456
-c3\.646,0,6\.613,2\.967,6\.613,6\.613V66\.135z"/\>
-</g\>
-</g\>
-</svg\>
-<div style\="padding\: 2px 2px 4px 2px;font\-size\: 16px;color\: \#bbb;"\></span>{Math.ceil(flight.bags_price[1] * appState.eurToUsd)}</div>
+                    <div style='font-size: 20px;'>${Math.ceil(flight.price)}</div>
+                    <div>Select</div>
+                </button>
+                <div class="info-box" style="display: flex; flex-direction: row; margin-top: 4px; padding-bottom: 2px; width: 100%;">
+                    <svg fill="#aaa" height="20px" width="20px" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 248.35 248.35" xml:space="preserve">
+                        <g>
+                            <path d="M186.057,66.136h-15.314V19.839C170.743,8.901,161.844,0,150.904,0H97.448c-10.938,0-19.84,8.901-19.84,19.839v46.296H62.295c-9.567,0-17.324,7.757-17.324,17.324V214.26c0,9.571,7.759,17.326,17.324,17.326h2.323v12.576c0,2.315,1.876,4.188,4.186,4.188h19.811c2.315,0,4.188-1.876,4.188-4.188v-12.576h62.741v12.576c0,2.315,1.878,4.188,4.188,4.188h19.809c2.317,0,4.188-1.876,4.188-4.188v-12.576h2.326c9.567,0,17.324-7.757,17.324-17.326V83.46C203.381,73.891,195.624,66.136,186.057,66.136z M157.514,66.135H90.832V19.839c0-3.646,2.967-6.613,6.613-6.613h53.456c3.646,0,6.613,2.967,6.613,6.613V66.135z"/>
+                        </g>
+                    </svg>
+                    <div style="padding: 2px 2px 4px 2px;font-size: 16px;color: #bbb;">${Math.ceil(flight.bags_price[1] * appState.eurToUsd)}</div>
                 </div>
             </div>
             <div class='segments-wrapper' style='display: flex; flex-direction: column; align-items: flex-start;'>
@@ -151,8 +171,8 @@ c3\.646,0,6\.613,2\.967,6\.613,6\.613V66\.135z"/\>
     });
 
     detailRow.addEventListener('mouseout', () => {
-        pathDrawing.clearLines(); // Clear only hover lines, keep the others
-        pathDrawing.drawLines(); // Optionally redraw other paths if needed
+        lineManager.clearLines('hover'); // Use lineManager instead of pathDrawing
+        pathDrawing.drawLines(); // Keep this to redraw other paths
     });
 
     function addClickListener(element, attr, callback) {
