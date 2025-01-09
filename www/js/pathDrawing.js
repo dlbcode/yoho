@@ -22,19 +22,6 @@ class Line {
         this.tags = new Set();
         this.addTags(options);
         this.routeData = options.routeData; // Store routeData
-
-        // Create the visible and invisible lines
-        const coordinates = [[originAirport.latitude, originAirport.longitude], 
-                           [destinationAirport.latitude, destinationAirport.longitude]];
-        
-        this.visibleLine = L.geodesic([coordinates], {
-            weight: 1,
-            opacity: 0.7,
-            color: options.color || flightMap.getColorBasedOnPrice(options.price),
-            wrap: false
-        }).on('mouseover', (e) => lineManager.onMouseOver(e, this))
-          .on('mouseout', () => lineManager.onMouseOut(this))
-          .on('click', (e) => lineManager.onClickHandler(e, this));
     }
 
     addTag(tag) {
