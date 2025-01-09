@@ -204,9 +204,15 @@ const infoPane = {
 
         infoPaneContent.appendChild(table);
 
+        // Modify the total price calculation to only count once per group
+        const seenGroups = new Set();
         const totalPrice = selectedRoutesArray.reduce((total, item) => {
-            const priceVal = parseFloat(String(item.displayData.price).replace(/[^\d.-]/g, '')) || 0;
-            return total + priceVal;
+            if (!seenGroups.has(item.group)) {
+                seenGroups.add(item.group);
+                const priceVal = parseFloat(String(item.displayData.price).replace(/[^\d.-]/g, '')) || 0;
+                return total + priceVal;
+            }
+            return total;
         }, 0);
 
         const tripButton = getEl('tripButton');
