@@ -8,6 +8,8 @@ const flightMap = {
     markers: {},
     airportDataCache: {},
     cacheDuration: 600000, // 10 minutes in milliseconds 
+    hoverDisabled: false, // Add this flag
+    preservedMarker: null,  // Add tracking for preserved marker
 
     init() {
         if (typeof map !== 'undefined') {
@@ -57,6 +59,9 @@ const flightMap = {
     handleMarkerClick(airport, clickedMarker) {
         Object.values(this.markers).forEach(marker => marker.closePopup());
 
+        // Set hover disabled when selecting a waypoint
+        this.preservedMarker = clickedMarker;  // Track preserved marker
+        this.hoverDisabled = true;
         updateState('selectedAirport', airport);
 
         const createButton = (text, handler) => {
@@ -93,6 +98,7 @@ const flightMap = {
                 lineManager.clearLines('hover');
                 
                 clickedMarker.setIcon(blueDotIcon);
+                this.hoverDisabled = false; // Re-enable hovering
                 updateState('selectedAirport', null, 'flightMap.handleRemoveButtonClick3');
             }
         };
@@ -180,6 +186,11 @@ const flightMap = {
     },
 
     markerHoverHandler(iata, event) {
+        // Skip hover effects if there's a preserved marker and this isn't it
+        if (this.preservedMarker && this.markers[iata] !== this.preservedMarker) {
+            return;
+        }
+
         const marker = this.markers[iata];
         if (!marker) return;
         const airport = this.airportDataCache[iata];
@@ -191,26 +202,18 @@ const flightMap = {
                     console.error('Direct routes not found for IATA:', iata);
                     return;
                 }
-                pathDrawing.drawRoutePaths(iata, appState.directRoutes, 'hover');
-                Object.values(this.markers).forEach(marker => marker.closePopup());
+                // Only draw hover paths if no marker is preserved
+                if (!this.preservedMarker) {
+                    pathDrawing.drawRoutePaths(iata, appState.directRoutes, 'hover');
+                }
                 marker.openPopup();
                 marker.hovered = true;
-
-                const linesToHighlight = pathDrawing.hoverLines;
-                if (linesToHighlight && linesToHighlight.length > 0) {
-                    lineManager.hoveredLine = linesToHighlight[0];
-                    if (lineManager.hoveredLine.visibleLine) {
-                        lineManager.hoveredLine.visibleLine.setStyle({ color: 'white', weight: 2, opacity: 1 });
-                    }
-                }
             });
-        } else if (event === 'mouseout') {
-            if (!appState.selectedAirport || appState.selectedAirport.iata_code !== iata) {
-                setTimeout(() => {
-                    lineManager.clearLines('hover');
-                    marker.closePopup();
-                }, 200);
-            }
+        } else if (event === 'mouseout' && !this.preservedMarker) {
+            setTimeout(() => {
+                lineManager.clearLines('hover');
+                marker.closePopup();
+            }, 200);
         }
 
         if (appState.selectedAirport && appState.selectedAirport.iata_code === iata) {
@@ -273,6 +276,25 @@ const flightMap = {
                 map.removeLayer(marker);
             }
         });
+    },
+
+    handleMapClick() {
+        const selectedAirportIata = appState.selectedAirport?.iata_code;
+        if (selectedAirportIata) {
+            const marker = flightMap.markers[selectedAirportIata];
+            const isWaypoint = appState.waypoints.some(wp => wp.iata_code === selectedAirportIata);
+            if (!isWaypoint) {
+                marker?.setIcon(blueDotIcon);
+            }
+        }
+        
+        // Reset all state properly
+        flightMap.selectedMarker = null;
+        flightMap.preservedMarker = null;
+        flightMap.hoverDisabled = false;
+        updateState('selectedAirport', null, 'eventManager.handleMapClick');
+        lineManager.clearLines('hover');
+        lineManager.clearLines('all');
     }
 };
 
