@@ -94,7 +94,11 @@ const eventManager = {
     handleMapClick() {
         const selectedAirportIata = appState.selectedAirport?.iata_code;
         if (selectedAirportIata) {
-            flightMap.markers[selectedAirportIata]?.setIcon(magentaDotIcon);
+            const marker = flightMap.markers[selectedAirportIata];
+            const isWaypoint = appState.waypoints.some(wp => wp.iata_code === selectedAirportIata);
+            if (!isWaypoint) {
+                marker?.setIcon(blueDotIcon);
+            }
         }
         flightMap.selectedMarker = null;
         updateState('selectedAirport', null, 'eventManager.handleMapClick');
