@@ -12,30 +12,29 @@ body {
   font-family: 'Roboto', sans-serif;
 }
 
-/* Scrollbar styles for leftPane and suggestions containers */
-.body::-webkit-scrollbar-track, [id$='Suggestions']::-webkit-scrollbar-track {
+body::-webkit-scrollbar-track, [id$='Suggestions']::-webkit-scrollbar-track {
   background-color: #222;
 }
 
-.body::-webkit-scrollbar-thumb, [id$='Suggestions']::-webkit-scrollbar-thumb {
+body::-webkit-scrollbar-thumb, [id$='Suggestions']::-webkit-scrollbar-thumb {
   background-color: #555;
   border-radius: 2px;
 }
 
-.body::-webkit-scrollbar, [id$='Suggestions']::-webkit-scrollbar {
+body::-webkit-scrollbar, [id$='Suggestions']::-webkit-scrollbar {
   width: 5px;
 }
 
 .container {
   position: relative;
-  display: flex; /* Align leftPane and mapPane side by side */
-  flex-grow: 1; /* Take up remaining space */
+  display: flex;
+  flex-grow: 1;
   overflow: hidden;
 }
 
 .mapPane {
   position: relative;
-  flex-grow: 1; /* Take up remaining space */
+  flex-grow: 1;
   overflow: hidden;
   z-index: 1;
 }
@@ -65,38 +64,30 @@ a[href="https://yonderhop.com"]:hover {
   display: none;
 }
 
-/* Interactive Elements Style */
 button, input[type="number"], input[type="date"], input[type="text"] {
   background-color: #333;
-  color: #a9a9a9;
-  border: 0px solid;
-  padding: 10px;
-  font-size: 1rem;
+  color: #ccc;
+  border: 0;
+  padding: 2px;
+  font-size: 14px;
+  height: 40px;
 }
 
-
-button:hover {
-  background-color: #d3d3d3;
+button:hover, a:hover, input:hover, select:hover, textarea:hover {
+  background-color: #555;
+  color: #ddd;
 }
 
-button.active, button:focus {
+button.active, button:focus, a:active, button:active, input:focus, select:focus, textarea:focus {
   background-color: #294e7c;
   color: #fff;
 }
 
-button, input[type="number"], input[type="date"], input[type="text"] {
-  background-color: #333;
-  color: #ccc;
-  font-size: 14px;
-  padding: 2px;
-  height: 40px;
-}
-
 .tooltip-button {
-  border-radius: 50%; /* Make the button circular */
-  width: 30px; /* Set the width of the button */
-  height: 30px; /* Set the height of the button */
-  text-align: center; /* Center the '+' or '-' text */
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  text-align: center;
 }
 
 .leaflet-popup-content {
@@ -105,50 +96,20 @@ button, input[type="number"], input[type="date"], input[type="text"] {
   align-items: center;
   text-align: center;
   justify-content: center;
-}
-
-a {
-  color: #d3d3d3;
-}
-
-a:hover, button:hover, input:hover, select:hover, textarea:hover {
-  background-color: #555;
-  color: #ddd;
-}
-
-a:active, button:active, input:focus, select:focus, textarea:focus {
-  background-color: #294e7c;
-  color: #ccc;
-}
-
-/* Chrome, Firefox, Opera, Safari 10.1+ */
-input::-webkit-input-placeholder {
-  color: #aaa;
-}
-/* Internet Explorer 10-11 */
-input:-ms-input-placeholder {
-  color: #aaa;
-}
-/* Microsoft Edge */
-input::-ms-input-placeholder {
-  color: #aaa;
-}
-
-.leaflet-popup {
-  transition: none !important;
-  min-width: 0px;
-  min-height: 0px; /* Allow the popup height to shrink */
-}
-
-.leaflet-popup-close-button {
-  display: none;
-}
-
-.leaflet-popup-content {
   padding: 0;
   margin: 5px;
   box-sizing: border-box;
   white-space: nowrap;
+}
+
+.leaflet-popup {
+  transition: none !important;
+  min-width: 0;
+  min-height: 0;
+}
+
+.leaflet-popup-close-button {
+  display: none;
 }
 
 .leaflet-popup-content p, .leaflet-popup-content h1, .leaflet-popup-content div {
@@ -163,9 +124,9 @@ input::-ms-input-placeholder {
   color: #c7c7c7;
   padding: 5px;
   border-radius: 5px;
-  box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.2);
+  box-shadow: 0 0 10px rgba(0,0,0,0.2);
   z-index: 1000;
-  pointer-events: none; /* Prevents the tooltip from interfering with other mouse events */
+  pointer-events: none;
 }
 
 .floating-logo {
@@ -191,34 +152,34 @@ input::-ms-input-placeholder {
   left: 0;
   width: 180px;
   display: flex;
-  justify-content: space-between; /* Adjusted from space-between to space-around for better spacing */
+  justify-content: space-around;
   font-size: 10px;
   color: #525252;
   padding-left: 5px;
-  white-space: nowrap; /* Prevent wrapping of text */
+  white-space: nowrap;
 }
 
 #legalLinks a {
   color: #777;
-  text-decoration: none; /* Add this line to remove underline */
+  text-decoration: none;
 }
 
 #legalLinks a:hover {
   color: #999;
-  text-decoration: underline; /* Optionally add underline on hover if desired */
+  text-decoration: underline;
 }
 
 .info-box {
-  background-color: #272727; /* Dark grey background */
-  color: #888; /* White text color */
-  padding: 5px; /* Padding around the content */
+  background-color: #272727;
+  color: #888;
+  padding: 5px;
 }
 
 .info-icon {
-  color: #aaa; /* Light grey color for the icon */
-  margin-right: 5px; /* Space between the icon and text */
-  font-size: 1.2em; /* Relative size of the icon */
-  position: relative; /* Add this line if missing */
+  color: #aaa;
+  margin-right: 5px;
+  font-size: 1.2em;
+  position: relative;
   cursor: pointer;
 }
 
@@ -229,9 +190,21 @@ input::-ms-input-placeholder {
 
 #estPriceLabel {
   color: #aaa;
-} 
+}
 
 #estPriceValue {
-  margin: 0px; /* Margin for spacing, adjust as needed */
+  margin: 0;
   color: #ccc;
+}
+
+input::-webkit-input-placeholder {
+  color: #aaa;
+}
+
+input:-ms-input-placeholder {
+  color: #aaa;
+}
+
+input::-ms-input-placeholder {
+  color: #aaa;
 }

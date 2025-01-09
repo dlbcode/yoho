@@ -4,6 +4,7 @@ import { sortTableByColumn } from './sortTable.js';
 import { pathDrawing } from '../pathDrawing.js';
 import { flightMap } from '../flightMap.js';
 import { routeInfoRow, highlightSelectedRowForRouteIndex } from './routeInfoRow.js';
+import { applyFilters, toggleFilterResetIcon, updateFilterHeaders, constructFilterTags } from './filterTable.js';
 
 function buildRouteTable(routeIndex) {
     appState.filterState = {
@@ -11,7 +12,8 @@ function buildRouteTable(routeIndex) {
         arrival: { start: 0, end: 24 }
     };
 
-    const dateRange = appState.routeDates[routeIndex];
+    // Check if appState.routeDates[routeIndex] exists before accessing its properties
+    const dateRange = appState.routeDates[routeIndex] || {}; // Provide an empty object as a fallback
     let origin, destination, currentRoute, departDate, returnDate, apiUrl, endpoint;
     currentRoute = appState.routes[routeIndex];
 
@@ -23,26 +25,27 @@ function buildRouteTable(routeIndex) {
         destination = appState.waypoints[(routeIndex * 2) + 1]?.iata_code || 'Any';
     }
 
-    document.head.appendChild(Object.assign(document.createElement('link'), {rel: 'stylesheet', type: 'text/css', href: '../css/routeTable.css'}));
+    document.head.appendChild(Object.assign(document.createElement('link'), { rel: 'stylesheet', type: 'text/css', href: '../css/routeTable.css' }));
 
     // Start the loading animation
     const topBar = document.getElementById('top-bar');
     topBar.classList.add('loading');
-    
-    if (destination === 'Any') {
-        endpoint = 'cheapestFlights';
-        origin = appState.waypoints[routeIndex * 2]?.iata_code;
-    } else {
-        origin = currentRoute.originAirport.iata_code;
+
+    // **Helper function to format dates to DD/MM/YYYY**
+    function formatDate(dateString) {
+        if (!dateString || dateString === 'any' || dateString.includes(' to ')) {
+            return dateString;
+        }
+        const date = new Date(dateString);
+        const day = date.getDate().toString().padStart(2, '0');
+        const month = (date.getMonth() + 1).toString().padStart(2, '0');
+        const year = date.getFullYear();
+        return `${day}/${month}/${year}`;
     }
 
-    if (!dateRange) {
-        console.error('No date range found');
-        return;
-    }
-
-    departDate = dateRange.depart || '';
-    returnDate = dateRange.return || '';
+    // Check if dateRange and its properties are defined before formatting
+    departDate = dateRange.depart ? formatDate(dateRange.depart) : 'any';
+    returnDate = dateRange.return ? formatDate(dateRange.return) : '';
 
     if (destination === 'Any') {
         endpoint = 'cheapestFlights';
@@ -71,64 +74,101 @@ function buildRouteTable(routeIndex) {
         }
     }
 
+    console.log("API URL:", apiUrl); // Log the generated API URL
+
     fetch(apiUrl)
         .then(response => {
+            console.log("API Response Status:", response.status); // Log the response status
             if (!response.ok) {
                 throw new Error(`Failed to fetch route data: ${response.statusText}`);
             }
             return response.json();
         })
         .then(data => {
+            console.log("API Response Data:", data); // Log the raw API response data
+            let flightsData;
+
+            console.log("Endpoint:", endpoint, "Destination:", destination);
+            if (endpoint === 'range' || destination === 'Any') {
+                if (data && data.data && Array.isArray(data.data)) {
+                    flightsData = data.data;
+                } else {
+                    console.error("Unexpected data format from API (range or Any):", data);
+                    // Handle the error, maybe set flightsData to an empty array or show an error message
+                    flightsData = []; // or handle the error in a way that makes sense for your application
+                }
+            } else { // Handle yhoneway and potentially yhreturn endpoints
+                if (Array.isArray(data)) { // Check if data is already an array
+                    flightsData = data;
+                } else if (data && data.data && Array.isArray(data.data)) { // Check if data.data is an array
+                    flightsData = data.data;
+                } else {
+                    console.error("Unexpected data format from API (yhoneway/yhreturn):", data);
+                    // Handle the error, maybe set flightsData to an empty array or show an error message
+                    flightsData = []; // or handle the error in a way that makes sense for your application
+                }
+            }
+            console.log("Flights Data:", flightsData); // Log flightsData
+
+            const infoPaneContent = document.getElementById('infoPaneContent');
+            if (!infoPaneContent) {
+                console.error('infoPaneContent element not found');
+                return;
+            }
+
+            infoPaneContent.innerHTML = ''; // Clear existing content
             const table = document.createElement('table');
             table.className = 'route-info-table';
+            table.dataset.routeIndex = routeIndex;
             table.style.width = '100%';
-            table.setAttribute('data-route-index', routeIndex);
 
             const thead = document.createElement('thead');
-            let headerRow = `<tr>
-                        <th data-column="departure">
-                            <span class="headerText" data-column="departure">
-                            <span class="filteredHeader" data-column="departure">Departure</span>
-                            <img class="filterIcon" id="departureFilter" data-column="departure" src="/assets/filter-icon.svg" alt="Filter">
-                            <span class="resetIcon" id="resetDepartureFilter" data-column="departure" style="display:none; cursor:pointer;">✕</span>
-                            </span>
-                            <span class="sortIcon" data-column="departure">&#x21C5;</span>
-                        </th>
-                        <th data-column="arrival">
-                            <span class="headerText" data-column="arrival">
-                            <span class="filteredHeader" data-column="arrival">Arrival</span>
-                            <img id="arrivalFilter" class="filterIcon" data-column="arrival" src="/assets/filter-icon.svg" alt="Filter">
-                            <span class="resetIcon" id="resetArrivalFilter" data-column="arrival" style="display:none; cursor:pointer;">✕</span>
-                            </span>
-                            <span class="sortIcon" data-column="arrival">&#x21C5;</span>
-                        </th>
-                        <th data-column="price">
-                            <span class="headerText" data-column="price">
-                            <span class="filteredHeader" data-column="price" id="priceText">Price</span>
-                            <img id="priceFilter" class="filterIcon" data-column="price" src="/assets/filter-icon.svg" alt="Filter">
-                            <span class="resetIcon" id="resetPriceFilter" data-column="price" style="display:none; cursor:pointer;">✕</span>
-                            </span>
-                            <span class="sortIcon" data-column="price">&#x21C5;</span>
-                        </th>
-                        <th data-column="airlines"><span class="headerText">Airlines</span><span class="sortIcon" data-column="airlines">&#x21C5;</span></th>
-                        <th data-column="direct"><span class="headerText">Direct</span><span class="sortIcon" data-column="direct">&#x21C5;</span></th>
-                        <th data-column="stops"><span class="headerText">Stops</span><span class="sortIcon" data-column="stops">&#x21C5;</span></th>
-                        <th data-column="layovers"><span class="headerText">Layovers</span><span class="sortIcon" data-column="layovers">&#x21C5;</span></th>
-                        <th data-column="duration"><span class="headerText">Duration</span><span class="sortIcon" data-column="duration">&#x21C5;</span></th>
-                        <th data-column="route"><span class="headerText">Route</span><span class="sortIcon" data-column="route">&#x21C5;</span></th>
-                     </tr>`;
-            thead.innerHTML = headerRow;
+            thead.innerHTML = `<tr>
+                <th data-column="departure">
+                    <span class="headerText" data-column="departure">
+                    <span class="filteredHeader" data-column="departure">Departure</span>
+                    <img class="filterIcon" id="departureFilter" data-column="departure" src="/assets/filter-icon.svg" alt="Filter">
+                    <span class="resetIcon" id="resetDepartureFilter" data-column="departure" style="display:none; cursor:pointer;">✕</span>
+                    </span>
+                    <span class="sortIcon" data-column="departure">&#x21C5;</span>
+                </th>
+                <th data-column="arrival">
+                    <span class="headerText" data-column="arrival">
+                    <span class="filteredHeader" data-column="arrival">Arrival</span>
+                    <img id="arrivalFilter" class="filterIcon" data-column="arrival" src="/assets/filter-icon.svg" alt="Filter">
+                    <span class="resetIcon" id="resetArrivalFilter" data-column="arrival" style="display:none; cursor:pointer;">✕</span>
+                    </span>
+                    <span class="sortIcon" data-column="arrival">&#x21C5;</span>
+                </th>
+                <th data-column="price">
+                    <span class="headerText" data-column="price">
+                    <span class="filteredHeader" data-column="price" id="priceText">Price</span>
+                    <img id="priceFilter" class="filterIcon" data-column="price" src="/assets/filter-icon.svg" alt="Filter">
+                    <span class="resetIcon" id="resetPriceFilter" data-column="price" style="display:none; cursor:pointer;">✕</span>
+                    </span>
+                    <span class="sortIcon" data-column="price">&#x21C5;</span>
+                </th>
+                <th data-column="airlines"><span class="headerText">Airlines</span><span class="sortIcon" data-column="airlines">&#x21C5;</span></th>
+                <th data-column="direct"><span class="headerText">Direct</span><span class="sortIcon" data-column="direct">&#x21C5;</span></th>
+                <th data-column="stops"><span class="headerText">Stops</span><span class="sortIcon" data-column="stops">&#x21C5;</span></th>
+                <th data-column="layovers"><span class="headerText">Layovers</span><span class="sortIcon" data-column="layovers">&#x21C5;</span></th>
+                <th data-column="duration"><span class="headerText">Duration</span><span class="sortIcon" data-column="duration">&#x21C5;</span></th>
+                <th data-column="route"><span class="headerText">Route</span><span class="sortIcon" data-column="route">&#x21C5;</span></th>
+            </tr>`;
             table.appendChild(thead);
 
             const tbody = document.createElement('tbody');
-
-            if (endpoint === 'range' || destination === 'Any') {
-                data = data.data;
-            }
-            data.forEach(flight => {
+            console.log("Table:", table);
+            console.log("Tbody:", tbody);
+            flightsData.forEach(flight => {
                 let row = document.createElement('tr');
                 let departureDate, arrivalDate;
-                row.setAttribute('data-route-id', flight.id);
+                const routeId = `${flight.flyFrom}-${flight.flyTo}`; // Fix route ID creation
+                row.setAttribute('data-route-id', routeId); // Set the route ID as a plain string
+                
+                // Add debug logging
+                console.log('Setting route ID on row:', routeId);
+                
                 const directFlight = flight.route.length === 1;
                 const price = parseFloat(flight.price.toFixed(2));
                 const stops = flight.route.length - 1;
@@ -136,6 +176,7 @@ function buildRouteTable(routeIndex) {
                 const durationHours = Math.floor(flight.duration.total / 3600);
                 const durationMinutes = Math.floor((flight.duration.total % 3600) / 60);
                 const routeIATAs = flight.route.map(r => r.flyFrom).concat(flight.route[flight.route.length - 1].flyTo).join(" > ");
+
                 if (endpoint === 'range' || destination === 'Any') {
                     departureDate = new Date(flight.dTime * 1000);
                     arrivalDate = new Date(flight.aTime * 1000);
@@ -143,11 +184,16 @@ function buildRouteTable(routeIndex) {
                     departureDate = new Date(flight.local_departure);
                     arrivalDate = new Date(flight.local_arrival);
                 }
+
                 const departureDayName = departureDate.toLocaleDateString('en-US', { weekday: 'short' });
                 const arrivalDayName = arrivalDate.toLocaleDateString('en-US', { weekday: 'short' });
 
                 const formattedDeparture = `${departureDayName} ${departureDate.toLocaleString()}`;
                 const formattedArrival = `${arrivalDayName} ${arrivalDate.toLocaleString()}`;
+
+                // Convert time to decimal hours for filtering
+                const departureTime = departureDate.getHours() + departureDate.getMinutes() / 60;
+                const arrivalTime = arrivalDate.getHours() + arrivalDate.getMinutes() / 60;
 
                 row.innerHTML = `<td>${formattedDeparture}</td>
                                  <td>${formattedArrival}</td>
@@ -158,16 +204,58 @@ function buildRouteTable(routeIndex) {
                                  <td>${layovers}</td>
                                  <td>${durationHours}h ${durationMinutes}m</td>
                                  <td>${routeIATAs}</td>`;
+                console.log("Row HTML:", row.innerHTML);
+
+                // Add parsed data as data attributes for filtering and sorting
+                row.dataset.price = price;
+                row.dataset.departureTime = departureTime;
+                row.dataset.arrivalTime = arrivalTime;
+
+                row.dataset.priceRange = price < 100 ? 'price-range:0-100' :
+                    price < 200 ? 'price-range:100-200' :
+                    price < 300 ? 'price-range:200-300' :
+                    price < 400 ? 'price-range:300-400' :
+                    price < 500 ? 'price-range:400-500' :
+                    'price-range:500+';
+                row.dataset.priceValue = Math.round(price);
+
                 tbody.appendChild(row);
+
+                const tableRouteId = flight.id; // Get the table route ID from the data attribute
+
+                flight.route.forEach((segment, index) => {
+                    const originIata = segment.flyFrom;
+                    const destinationIata = segment.flyTo;
+
+                    flightMap.getAirportDataByIata(originIata).then(originAirportData => {
+                        flightMap.getAirportDataByIata(destinationIata).then(destinationAirportData => {
+                            if (!originAirportData || !destinationAirportData) return;
+
+                            pathDrawing.drawLine(`${originIata}-${destinationIata}`, 'route', {
+                                price: price,
+                                isDirect: directFlight,
+                                departureTime: departureTime,
+                                arrivalTime: arrivalTime,
+                                group: routeIndex + 1, // Assuming each route is a separate group
+                                isTableRoute: true,
+                                tableRouteId: tableRouteId
+                            });
+                        });
+                    });
+                });
             });
+
             table.appendChild(tbody);
-            infoPaneContent.appendChild(table);
+            infoPaneContent.appendChild(table); // Append the table once all rows are added
             topBar.classList.remove('loading');
-            pathDrawing.drawRouteLines();
+            pathDrawing.drawLines();
             highlightSelectedRowForRouteIndex(routeIndex);
-            attachEventListeners(table, data, routeIndex);
+            attachEventListeners(table, flightsData, routeIndex);
+            applyFilters();
         })
         .catch(error => {
+            console.error('Error loading data:', error);
+            console.error('Detailed error:', error);
             infoPaneContent.textContent = 'Error loading data: ' + error.message;
         });
 
@@ -175,9 +263,9 @@ function buildRouteTable(routeIndex) {
         const headers = table.querySelectorAll('th');
         headers.forEach(header => {
             header.style.cursor = 'pointer';
-            header.addEventListener('click', function(event) {
+            header.addEventListener('click', function (event) {
                 const sortIcon = event.target.closest('.sortIcon');
-                if (sortIcon) {  // This checks if the clicked element is the sortIcon itself
+                if (sortIcon) {
                     const columnIdentifier = sortIcon.getAttribute('data-column');
                     const columnIndex = getColumnIndex(columnIdentifier);
                     const isAscending = sortIcon.getAttribute('data-sort') !== 'asc';
@@ -190,7 +278,7 @@ function buildRouteTable(routeIndex) {
         headers.forEach(header => {
             const filteredHeader = header.querySelector('.filteredHeader');
             const filterIcon = header.querySelector('.filterIcon');
-            const handleFilterClick = function(event) {
+            const handleFilterClick = function (event) {
                 event.stopPropagation();
                 const column = this.getAttribute('data-column');
                 if (!column) {
@@ -205,7 +293,6 @@ function buildRouteTable(routeIndex) {
                 }
             };
 
-            // Attach listener to button area and filterIcon
             if (filteredHeader) {
                 filteredHeader.addEventListener('click', handleFilterClick);
             }
@@ -214,63 +301,18 @@ function buildRouteTable(routeIndex) {
             }
         });
 
-        function fetchDataForColumn(column) {
-            const getPriceRange = () => {
-                const priceCells = document.querySelectorAll('.route-info-table tbody tr td:nth-child(' + (getColumnIndex('price') + 1) + ')');
-                const prices = Array.from(priceCells)
-                    .map(cell => parseFloat(cell.textContent.replace(/[^0-9.]/g, '')))
-                    .filter(price => !isNaN(price));
-
-                if (prices.length === 0) {
-                    console.error('No valid prices found in the column');
-                    return { min: 0, max: 0 };
-                }
-
-                const min = Math.min(...prices);
-                const max = min === Math.max(...prices) ? min + 1 : Math.max(...prices);
-
-                return { min, max };
-            };
-
-            switch (column) {
-                case 'price':
-                    return getPriceRange();
-                case 'departure':
-                case 'arrival':
-                    return { min: 0, max: 24 };
-                default:
-                    console.error('Unsupported column:', column);
-                    return null;
-            }
-        }
-
         document.querySelectorAll('.route-info-table tbody tr').forEach((row, index) => {
-            row.addEventListener('click', function() {
+            row.addEventListener('click', function () {
                 const routeIdString = this.getAttribute('data-route-id');
                 const routeIds = routeIdString.split('|');
                 const fullFlightData = data[index];
                 routeInfoRow(this, fullFlightData, routeIds, routeIndex);
             });
         });
-
-        document.querySelectorAll('.route-info-table tbody tr').forEach(row => {
-            row.addEventListener('mouseover', function() {
-                const routeString = this.cells[8].textContent.trim();
-                const iataCodes = routeString.split(' > ');
-        
-                for (let i = 0; i < iataCodes.length - 1; i++) {
-                    const originIata = iataCodes[i];
-                    const destinationIata = iataCodes[i + 1];
-                    pathDrawing.drawPathBetweenAirports(originIata, destinationIata);
-                }
-            });
-        
-            row.addEventListener('mouseout', function() {
-                // Revert color of the route lines back to original
-                pathDrawing.clearLines();  // Clear the highlighted route path
-                pathDrawing.drawLines();  // Optionally redraw other paths if needed
-            });
-        });                
+        updateFilterHeaders();
+        toggleFilterResetIcon('price');
+        toggleFilterResetIcon('departure');
+        toggleFilterResetIcon('arrival');
     }
 
     function resetSortIcons(headers, currentIcon, newSortState) {
@@ -299,6 +341,36 @@ function buildRouteTable(routeIndex) {
             'route': 8
         };
         return columnMap[columnIdentifier];
+    }
+
+    function fetchDataForColumn(column) {
+        const getPriceRange = () => {
+            const priceCells = document.querySelectorAll('.route-info-table tbody tr td:nth-child(' + (getColumnIndex('price') + 1) + ')');
+            const prices = Array.from(priceCells)
+                .map(cell => parseFloat(cell.textContent.replace(/[^0-9.]/g, '')))
+                .filter(price => !isNaN(price));
+
+            if (prices.length === 0) {
+                console.error('No valid prices found in the column');
+                return { min: 0, max: 0 };
+            }
+
+            const min = Math.min(...prices);
+            const max = min === Math.max(...prices) ? min + 1 : Math.max(...prices);
+
+            return { min, max };
+        };
+
+        switch (column) {
+            case 'price':
+                return getPriceRange();
+            case 'departure':
+            case 'arrival':
+                return { min: 0, max: 24 };
+            default:
+                console.error('Unsupported column:', column);
+                return null;
+        }
     }
 }
 

@@ -1,6 +1,7 @@
 import { appState, updateState } from './stateManager.js';
 import { flightMap } from './flightMap.js';
 import { pathDrawing } from './pathDrawing.js';
+import { lineManager } from './lineManager.js';
 
 const routeHandling = {
     updateRoutesArray: async function () {
@@ -78,7 +79,9 @@ const routeHandling = {
             tripType: appState.routes[index]?.tripType || route.tripType || 'oneWay'
         }));
         updateState('updateRoutes', newRoutes, 'routeHandling.updateRoutesArray');
-        pathDrawing.clearLines(true);
+        
+        // Use lineManager to clear lines instead of pathDrawing
+        lineManager.clearLines('all');
         pathDrawing.drawLines();
     }
 };

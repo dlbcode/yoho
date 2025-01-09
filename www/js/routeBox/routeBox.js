@@ -13,8 +13,7 @@ const loadCSS = (href) => {
     link.href = href;
     document.head.appendChild(link);
 };
-loadCSS('css/routeBox.css');
-loadCSS('css/datePicker.css');
+['css/routeBox.css', 'css/datePicker.css'].forEach(loadCSS);
 
 const createElement = (tag, { id, className, content } = {}) => {
     const element = document.createElement(tag);
@@ -26,10 +25,8 @@ const createElement = (tag, { id, className, content } = {}) => {
 
 const createWaypointInput = (index, placeholder, waypoint) => {
     const inputWrapper = createElement('div', { className: 'input-wrapper' });
-    const input = createElement('input', { id: `waypoint-input-${index + 1}`, className: 'waypoint-input' });
+    const input = createElement('input', { id: `waypoint-input-${index + 1}`, className: 'waypoint-input', value: waypoint ? `${waypoint.city}, (${waypoint.iata_code})` : '', placeholder });
     input.type = 'text';
-    input.placeholder = placeholder;
-    input.value = waypoint ? `${waypoint.city}, (${waypoint.iata_code})` : '';
     inputWrapper.append(input, routeBox.createSuggestionsDiv(index));
     return inputWrapper;
 };
@@ -46,119 +43,77 @@ const enableSwapButtonIfNeeded = () => {
 const setupWaypointInputListeners = (routeNumber) => {
     ['from-input', 'to-input'].forEach((className, i) => {
         const input = document.querySelector(`#waypoint-input-${routeNumber * 2 + i + 1}`);
-        input.addEventListener('input', () => {
-            enableSwapButtonIfNeeded();
-        });
-
+        input.addEventListener('input', enableSwapButtonIfNeeded);
         input.addEventListener('focus', (event) => {
-            if (window.innerWidth <= 600) {
-                expandInput(event.target);
-            }
+            if (window.innerWidth <= 600) expandInput(event.target);
             setTimeout(() => event.target.select(), 0);
         });
-
         input.addEventListener('blur', async (event) => {
-            if (window.innerWidth <= 600) {
-                revertInput(event.target);
-            }
+            if (window.innerWidth <= 600) revertInput(event.target);
             const fromInput = document.querySelector(`#waypoint-input-${routeNumber * 2 + 1}`);
             const toInput = document.querySelector(`#waypoint-input-${routeNumber * 2 + 2}`);
             if (input.value === '' && fromInput.value !== '' && toInput.value !== '' && appState.waypoints.length > 0) {
                 const waypointIndex = parseInt(input.id.replace('waypoint-input-', '')) - 1;
-                if (waypointIndex >= 0 && waypointIndex < appState.waypoints.length) {
-                    if (appState.waypoints[waypointIndex].iata_code !== '') {
-                        updateState('removeWaypoint', waypointIndex, 'routeBox.setupWaypointInputListeners');
-                        routeHandling.updateRoutesArray();
-                    }
+                if (waypointIndex >= 0 && waypointIndex < appState.waypoints.length && appState.waypoints[waypointIndex].iata_code !== '') {
+                    updateState('removeWaypoint', waypointIndex, 'routeBox.setupWaypointInputListeners');
+                    routeHandling.updateRoutesArray();
                 }
             }
         });
     });
-    enableSwapButtonIfNeeded(); // Initial check
+    enableSwapButtonIfNeeded();
 };
 
 const expandInput = (input) => {
     input.classList.add('expanded-input');
     const suggestionsDiv = document.getElementById(`${input.id}Suggestions`);
-    if (suggestionsDiv) {
-        suggestionsDiv.classList.add('expanded-suggestions');
-    }
+    if (suggestionsDiv) suggestionsDiv.classList.add('expanded-suggestions');
     const inputWrapper = input.parentElement;
-    const backButton = document.createElement('button');
-    backButton.classList.add('back-button');
-    backButton.innerHTML = `
+    const backButton = createElement('button', { className: 'back-button', content: `
         <svg viewBox="0 0 24 24">
             <line x1="22" y1="12" x2="4" y2="12" />
             <line x1="12" y1="3" x2="3" y2="12" />
             <line x1="12" y1="21" x2="3" y2="12" />
         </svg>
-    `;
-
-    let backButtonClicked = false;
-
+    `});
     backButton.onclick = (event) => {
         event.preventDefault();
         event.stopPropagation();
-        backButtonClicked = true;
+        input.value = '';
+        updateState('removeWaypoint', parseInt(input.id.replace('waypoint-input-', '')) - 1, 'routeBox.expandInput');
+        routeHandling.updateRoutesArray();
         input.blur();
-        setTimeout(() => {
-            backButtonClicked = false;
-        }, 500); // Delay to ensure the blur event is fully processed
-    }
-
+    };
     inputWrapper.appendChild(backButton);
 };
 
 const revertInput = (input) => {
     input.classList.remove('expanded-input');
     const suggestionsDiv = document.getElementById(`${input.id}Suggestions`);
-    if (suggestionsDiv) {
-        suggestionsDiv.classList.remove('expanded-suggestions');
-    }
+    if (suggestionsDiv) suggestionsDiv.classList.remove('expanded-suggestions');
     const backButton = input.parentElement.querySelector('.back-button');
-    if (backButton) {
-        backButton.remove();
-    }
-};
-
-const inspectDOM = () => {
-    const fromInput = document.getElementById('waypoint-input-1');
-    const toInput = document.getElementById('waypoint-input-2');
+    if (backButton) backButton.remove();
 };
 
 const setWaypointInputs = () => {
     const fromInput = document.getElementById('waypoint-input-1');
     const toInput = document.getElementById('waypoint-input-2');
-
-    if (fromInput) {
-        const fromWaypoint = appState.waypoints[0];
-        if (fromWaypoint) {
-            fromInput.value = `${fromWaypoint.city}, (${fromWaypoint.iata_code})`;
-        }
-    }
-
-    if (toInput) {
-        const toWaypoint = appState.waypoints[1];
-        if (toWaypoint) {
-            toInput.value = `${toWaypoint.city}, (${toWaypoint.iata_code})`;
-        }
-    }
+    if (fromInput) fromInput.value = appState.waypoints[0] ? `${appState.waypoints[0].city}, (${appState.waypoints[0].iata_code})` : '';
+    if (toInput) toInput.value = appState.waypoints[1] ? `${appState.waypoints[1].city}, (${appState.waypoints[1].iata_code})` : '';
 };
 
 const routeBox = {
     showRouteBox(event, routeNumber) {
-        this.removeExistingRouteBox(); // Ensure any existing routeBox is removed
+        this.removeExistingRouteBox();
         const routeBoxElement = this.createRouteBox();
-        routeBoxElement.dataset.routeNumber = routeNumber; // Add routeNumber as a data attribute
-        document.body.appendChild(routeBoxElement); // Append the routeBox to the DOM
-        
-        if (!appState.routes[routeNumber]) {
-            appState.routes[routeNumber] = { tripType: 'oneWay' }; // Default to oneWay if not set
-        }
+        routeBoxElement.dataset.routeNumber = routeNumber;
+        document.body.appendChild(routeBoxElement);
+
+        if (!appState.routes[routeNumber]) appState.routes[routeNumber] = { tripType: 'oneWay' };
         const topRow = createElement('div', { id: 'topRow', className: 'top-row' });
         topRow.append(tripTypePicker(routeNumber), travelersPicker(routeNumber));
         routeBoxElement.append(topRow);
-        
+
         const waypointInputsContainer = createElement('div', { className: 'waypoint-inputs-container' });
         let firstEmptyInput = null;
         ['From', 'Where to?'].forEach((placeholder, i) => {
@@ -170,31 +125,27 @@ const routeBox = {
         });
         routeBoxElement.append(waypointInputsContainer);
         waypointInputsContainer.insertBefore(this.createSwapButton(routeNumber), waypointInputsContainer.children[1]);
-        
+
         const dateInputsContainer = createElement('div', { className: 'date-inputs-container' });
         routeBoxElement.append(dateInputsContainer);
-        
+
         const buttonContainer = createElement('div', { className: 'button-container' });
         buttonContainer.append(this.createSearchButton(routeNumber), this.createCloseButton(routeBoxElement, routeNumber));
-        removeRouteButton(buttonContainer, routeNumber); // Assuming this is where the remove button is added
+        removeRouteButton(buttonContainer, routeNumber);
         routeBoxElement.append(buttonContainer);
-        
-        // Position the popup correctly before making it visible
+
         this.positionPopup(routeBoxElement, event, routeNumber);
         routeBoxElement.style.display = 'block';
-        
+
         [`waypoint-input-${routeNumber * 2 + 1}`, `waypoint-input-${routeNumber * 2 + 2}`].forEach(id => setupAutocompleteForField(id));
         if (firstEmptyInput) {
             firstEmptyInput.focus();
-            if (window.innerWidth <= 600) {
-                expandInput(firstEmptyInput);
-            }
+            if (window.innerWidth <= 600) expandInput(firstEmptyInput);
         }
 
         setupWaypointInputListeners(routeNumber);
         handleTripTypeChange(appState.routes[routeNumber].tripType, routeNumber);
-        setTimeout(inspectDOM, 100); // Use a timeout to ensure elements are rendered
-        setTimeout(setWaypointInputs, 200); // Use a slightly longer timeout to ensure inputs are rendered
+        setTimeout(setWaypointInputs, 200);
     },
 
     removeExistingRouteBox() {
@@ -223,42 +174,25 @@ const routeBox = {
         const searchButton = createElement('button', { className: 'search-button', content: 'Search' });
         searchButton.onclick = () => {
             document.getElementById('infoPaneContent').innerHTML = '';
-            if (appState.currentView !== 'routeTable') {
-                updateState('currentView', 'routeTable', 'routeBox.createSearchButton');
-            }
+            if (appState.currentView !== 'routeTable') updateState('currentView', 'routeTable', 'routeBox.createSearchButton');
             buildRouteTable(routeNumber);
-    
-            // Hide the routeBox
             const routeBoxElement = document.getElementById('routeBox');
-            if (routeBoxElement) {
-                routeBoxElement.style.display = 'none';
-            }
-    
-            // Adjust the height of infoPane
+            if (routeBoxElement) routeBoxElement.style.display = 'none';
             const infoPaneElement = document.getElementById('infoPane');
-            if (infoPaneElement) {
-                const viewHeight = window.innerHeight;
-                const infoPaneHeight = infoPaneElement.offsetHeight;
-                if (infoPaneHeight < (0.5 * viewHeight)) {
-                    infoPaneElement.style.height = `${0.5 * viewHeight}px`;
-                }
-            }
+            if (infoPaneElement && infoPaneElement.offsetHeight < (0.5 * window.innerHeight)) infoPaneElement.style.height = `${0.5 * window.innerHeight}px`;
         };
         return searchButton;
     },
 
     createCloseButton(routeBoxElement, routeNumber) {
-        const closeButton = createElement('span', { className: 'popup-close-button' });
-        closeButton.innerHTML = `
+        const closeButton = createElement('span', { className: 'popup-close-button', content: `
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M4 8L12 16L20 8" stroke="#666" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>`;
+        </svg>` });
         closeButton.onclick = () => {
             const fromInput = document.querySelector('.from-input input');
             const toInput = document.querySelector('.to-input input');
-            if (!fromInput.value.trim() && !toInput.value.trim()) {
-                removeRoute(routeNumber);
-            }
+            if (!fromInput.value.trim() && !toInput.value.trim()) removeRoute(routeNumber);
             routeBoxElement.style.display = 'none';
         };
         return closeButton;
@@ -270,17 +204,9 @@ const routeBox = {
         const menuBar = document.getElementById('menu-bar');
         const menuBarRect = menuBar.getBoundingClientRect();
         const menuBarTop = menuBarRect.top + window.scrollY;
-    
-        // Calculate the left position based on routeNumber
-        let left = 90 * routeNumber;
-    
-        // Ensure the left position doesn't go off-screen
-        left = Math.min(Math.max(left, screenPadding), window.innerWidth - popup.offsetWidth - screenPadding);
+        let left = Math.min(Math.max(90 * routeNumber, screenPadding), window.innerWidth - popup.offsetWidth - screenPadding);
         popup.style.left = `${left}px`;
-    
-        // Position the popup just above the menu-bar
-        let top = menuBarTop - popup.offsetHeight - 55; // 10px offset above the menu-bar
-        top = Math.max(top, screenPadding); // Ensure it doesn't go off-screen at the top
+        let top = Math.max(menuBarTop - popup.offsetHeight - 55, screenPadding);
         popup.style.top = `${top}px`;
     },
 
@@ -290,9 +216,7 @@ const routeBox = {
             [inputs[0].value, inputs[1].value] = [inputs[1].value, inputs[0].value];
             const idx = routeNumber * 2;
             [appState.waypoints[idx], appState.waypoints[idx + 1]] = [appState.waypoints[idx + 1], appState.waypoints[idx]];
-            if (appState.waypoints[idx] && appState.waypoints[idx + 1]) {
-                routeHandling.updateRoutesArray(); // Only update routes when both waypoints are valid
-            }
+            if (appState.waypoints[idx] && appState.waypoints[idx + 1]) routeHandling.updateRoutesArray();
             updateUrl();
         }
     },
@@ -300,14 +224,11 @@ const routeBox = {
 
 document.addEventListener('click', (event) => {
     const routeBox = document.getElementById('routeBox');
-    if (routeBox && !routeBox.contains(event.target) &&
-        !event.target.closest('.do-not-close-routebox')) {
+    if (routeBox && !routeBox.contains(event.target) && !event.target.closest('.do-not-close-routebox')) {
         const routeNumber = parseInt(routeBox.dataset.routeNumber);
         const fromInput = document.querySelector('.from-input input');
         const toInput = document.querySelector('.to-input input');
-        if (!fromInput.value.trim() && !toInput.value.trim()) {
-            removeRoute(routeNumber);
-        }
+        if (!fromInput.value.trim() && !toInput.value.trim()) removeRoute(routeNumber);
         routeBox.style.display = 'none';
     }
 }, true);

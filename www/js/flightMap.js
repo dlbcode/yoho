@@ -2,20 +2,14 @@ import { map, blueDotIcon, magentaDotIcon, greenDotIcon } from './map.js';
 import { pathDrawing } from './pathDrawing.js';
 import { eventManager } from './eventManager.js';
 import { appState, updateState } from './stateManager.js';
+import { lineManager } from './lineManager.js';
 
 const flightMap = {
     markers: {},
-    currentLines: [],
-    selectedMarker: null,
-    routePathCache: {},
     airportDataCache: {},
-    clearMultiHopPaths: true,
-    cachedRoutes: [],
-    lastFetchTime: null,
     cacheDuration: 600000, // 10 minutes in milliseconds 
 
-    init: function() {
-        // Ensure the map is initialized before attaching event listeners
+    init() {
         if (typeof map !== 'undefined') {
             this.getAirportDataByIata = this.getAirportDataByIata.bind(this);
             this.updateVisibleMarkers = this.updateVisibleMarkers.bind(this);
@@ -34,39 +28,26 @@ const flightMap = {
             console.error('Incomplete airport data:', airport);
             return;
         }
-    
-        let iata = airport.iata_code;
+
+        const iata = airport.iata_code;
         if (this.markers[iata]) return;
-    
-        let icon = airport.type === 'city' ? greenDotIcon :
-                   appState.waypoints.some(wp => wp.iata_code === iata) ? magentaDotIcon : blueDotIcon;
-    
+
+        const icon = airport.type === 'city' ? greenDotIcon :
+                     appState.waypoints.some(wp => wp.iata_code === iata) ? magentaDotIcon : blueDotIcon;
+
         const latLng = L.latLng(airport.latitude, airport.longitude);
-        const marker = L.marker(latLng, { icon: icon });
+        const marker = L.marker(latLng, { icon });
         marker.airportWeight = airport.weight;
         marker.iata_code = iata;
-        marker.hovered = false;
-    
-        let popupContent = `<div style="text-align: center; color: #bababa;"><b>${airport.city}</b>`;
-        if (airport.type === 'airport') {
-            popupContent += `<div>${airport.name}</div>`; 
-        }
-        popupContent += '</div>';
-    
+
+        const popupContent = `<div style="text-align: center; color: #bababa;"><b>${airport.city}</b>${airport.type === 'airport' ? `<div>${airport.name}</div>` : ''}</div>`;
         marker.bindPopup(popupContent, { maxWidth: 'auto' });
-    
+
         eventManager.attachMarkerEventListeners(iata, marker, airport);
         this.markers[iata] = marker;
 
         if (this.shouldDisplayAirport(marker.airportWeight, map.getZoom())) {
             marker.addTo(map);
-        }
-    },
-
-    updateVisibleMarkersForWaypoints(iata) {
-        const isWaypoint = appState.waypoints.some(wp => wp.iata_code === iata);
-        if (isWaypoint && this.markers[iata]) {
-            this.markers[iata].addTo(map);
         }
     },
 
@@ -85,7 +66,7 @@ const flightMap = {
 
         const handleAddButtonClick = () => {
             const lastWaypoint = appState.waypoints[appState.waypoints.length - 1];
-            if (appState.waypoints.length >= 2 && appState.waypoints.length % 2 === 0){
+            if (appState.waypoints.length >= 2 && appState.waypoints.length % 2 === 0) {
                 updateState('addWaypoint', lastWaypoint, 'flightMap.handleMarkerClick1');
                 updateState('addWaypoint', airport, 'flightMap.handleMarkerClick2');
             } else {
@@ -130,6 +111,7 @@ const flightMap = {
         }
 
         clickedMarker.bindPopup(popupContent, { autoClose: false, closeOnClick: true }).openPopup();
+        console.log('Selected airport:', appState.selectedAirport);
     },
 
     findRoute(fromIata, toIata) {
@@ -151,7 +133,7 @@ const flightMap = {
         try {
             const currentZoom = map?.getZoom();
             if (currentZoom !== undefined) {
-                const airports = await this.fetchAndCacheAirports(currentZoom);
+                await this.fetchAndCacheAirports(currentZoom);
                 this.updateVisibleMarkers();
             } else {
                 console.error('Map is not ready');
@@ -194,41 +176,46 @@ const flightMap = {
 
     redrawMarkers() {
         Object.values(this.markers).forEach(marker => {
-            var newLatLng = pathDrawing.adjustLatLng(marker.getLatLng());
+            const newLatLng = pathDrawing.adjustLatLng(marker.getLatLng());
             marker.setLatLng(newLatLng);
         });
     },
 
     markerHoverHandler(iata, event) {
-        let self = this;
         const marker = this.markers[iata];
         if (!marker) return;
         const airport = this.airportDataCache[iata];
         if (!airport) return;
 
-        // Skip handling hover events for other markers when a specific airport is selected
-        if (appState.selectedAirport && appState.selectedAirport.iata_code !== iata) {
-            return;
-        }
-
         if (event === 'mouseover') {
             this.fetchAndCacheRoutes(iata).then(() => {
-                pathDrawing.drawRoutePaths(iata, appState.directRoutes, appState.routeDirection);
-                Object.values(self.markers).forEach(marker => marker.closePopup());
+                if (!appState.directRoutes[iata]) {
+                    console.error('Direct routes not found for IATA:', iata);
+                    return;
+                }
+                pathDrawing.drawRoutePaths(iata, appState.directRoutes, 'hover');
+                Object.values(this.markers).forEach(marker => marker.closePopup());
                 marker.openPopup();
+                marker.hovered = true;
+
+                const linesToHighlight = pathDrawing.hoverLines;
+                if (linesToHighlight && linesToHighlight.length > 0) {
+                    lineManager.hoveredLine = linesToHighlight[0];
+                    if (lineManager.hoveredLine.visibleLine) {
+                        lineManager.hoveredLine.visibleLine.setStyle({ color: 'white', weight: 2, opacity: 1 });
+                    }
+                    console.log('Set hovered line:', lineManager.hoveredLine);
+                } else {
+                    console.log('No lines found for IATA:', iata);
+                }
             });
         } else if (event === 'mouseout') {
-            if (!marker.hovered) {  // Delay only for the first hover
+            if (!appState.selectedAirport || appState.selectedAirport.iata_code !== iata) {
                 setTimeout(() => {
-                    pathDrawing.clearLines();
-                    pathDrawing.drawLines();
+                    console.log('Clearing lines hover (delayed)');
+                    lineManager.clearLines('hover', pathDrawing.hoverLines.filter(line => line.iata !== appState.selectedAirport?.iata_code));
                     marker.closePopup();
                 }, 200);
-                marker.hovered = true; // Set the flag to true after the first hover
-            } else {
-                pathDrawing.clearLines();
-                pathDrawing.drawLines();
-                marker.closePopup();
             }
         }
 
@@ -247,6 +234,10 @@ const flightMap = {
                 const direction = appState.routeDirection; // 'to' or 'from'
                 const response = await fetch(`https://yonderhop.com/api/directRoutes?origin=${iata}&direction=${direction}`);
                 const routes = await response.json();
+                if (!routes || !routes.length) {
+                    console.error('No routes found for IATA:', iata);
+                    return;
+                }
                 appState.directRoutes[iata] = routes;
             } catch (error) {
                 console.error('Error fetching routes:', error);
@@ -257,12 +248,11 @@ const flightMap = {
     shouldDisplayAirport(airportWeight, currentZoom) {
         return airportWeight <= currentZoom - 1;
     },
-    
+
     updateVisibleMarkers() {
         const currentZoom = map.getZoom();
         const currentBounds = map.getBounds();
-    
-        // Check and add markers for airports that should be visible at the current zoom level
+
         Object.values(this.airportDataCache).forEach(airport => {
             if (this.shouldDisplayAirport(airport.weight, currentZoom) &&
                 currentBounds.contains(L.latLng(airport.latitude, airport.longitude)) &&
@@ -273,8 +263,7 @@ const flightMap = {
                 }
             }
         });
-    
-        // Update visibility of existing markers
+
         Object.keys(this.markers).forEach(iata => {
             const marker = this.markers[iata];
             const isWaypoint = appState.waypoints.some(wp => wp.iata_code === iata);

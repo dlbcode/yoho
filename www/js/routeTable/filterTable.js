@@ -1,100 +1,124 @@
-import { appState } from '../stateManager.js';
-import { sliderFilter } from './sliderFilter.js';
+import { appState, updateState } from '../stateManager.js';
+import { pathDrawing, Line } from '../pathDrawing.js';
+import { map } from '../map.js';
 
-function logFilterState() {
-    //console.log('Current Filter State:', JSON.stringify(appState.filterState));
+function addTimeFilterTags(type, filterTags) {
+    const time = appState.filterState[type];
+    if (!time) return;
+    const { start, end } = time;
+    if (start < 6 && end > 0) filterTags.push(`${type}-range:00-06`);
+    if (start < 12 && end > 6) filterTags.push(`${type}-range:06-12`);
+    if (start < 18 && end > 12) filterTags.push(`${type}-range:12-18`);
+    if (end > 18) filterTags.push(`${type}-range:18-24`);
+}
+
+function constructFilterTags() {
+    const filterTags = [];
+    const priceState = appState.filterState.price;
+    if (priceState && priceState.value) {
+        filterTags.push(`price:${priceState.value}`);
+    }
+    addTimeFilterTags('departure', filterTags);
+    addTimeFilterTags('arrival', filterTags);
+
+    const currentRouteIndex = appState.currentRouteIndex;
+    if (currentRouteIndex != null) {
+        filterTags.push(`group:${currentRouteIndex + 1}`);
+    }
+    return filterTags;
+}
+
+function checkTimeRange(tagPrefix, timeValue, filterTags) {
+    const relevantTags = filterTags.filter(tag => tag.startsWith(tagPrefix));
+    if (!relevantTags.length) return true;
+    return relevantTags.some(tag => {
+        const [start, end] = tag.replace(tagPrefix, '').split('-').map(Number);
+        return timeValue >= start && timeValue <= end;
+    });
 }
 
 function applyFilters() {
-    const table = document.querySelector('.route-info-table');
-    const rows = table.querySelectorAll('tbody tr');
+    const tableRows = document.querySelectorAll('.route-info-table tbody tr');
+    const filterTags = constructFilterTags();
+    const visibleRouteIds = new Set();
+    const maxPrice = appState.filterState.price?.value;
 
-    resetLineVisibility();
+    tableRows.forEach(row => {
+        const routeCell = row.querySelector('td:nth-child(9)');
+        if (!routeCell) return;
 
-    rows.forEach(row => {
-        if (row.classList.contains('route-info-row')) {
-            return;
-        }
+        const price = parseFloat(row.dataset.priceValue);
+        const departureTime = parseFloat(row.dataset.departureTime);
+        const arrivalTime = parseFloat(row.dataset.arrivalTime);
 
-        const priceText = row.cells[getColumnIndex('price')].textContent;
-        const departureText = row.cells[getColumnIndex('departure')].textContent;
-        const arrivalText = row.cells[getColumnIndex('arrival')].textContent;
+        const hasMatchingPrice = !maxPrice || price <= maxPrice;
+        const hasMatchingDeparture = checkTimeRange('departure-range:', departureTime, filterTags);
+        const hasMatchingArrival = checkTimeRange('arrival-range:', arrivalTime, filterTags);
 
-        const price = parseFloat(priceText.replace(/[$,]/g, ''));
-        const departureTime = parseTime(departureText);
-        const arrivalTime = parseTime(arrivalText);
-
-        const priceVisible = appState.filterState.price && price <= appState.filterState.price.value;
-        const departureVisible = departureTime >= appState.filterState.departure.start && departureTime <= appState.filterState.departure.end;
-        const arrivalVisible = arrivalTime >= appState.filterState.arrival.start && arrivalTime <= appState.filterState.arrival.end;
-
-        const isVisible = (appState.filterState.price ? priceVisible : true) && departureVisible && arrivalVisible;
-        row.style.display = isVisible ? '' : 'none';
-
-        updateLineVisibility(isVisible, row);
-    });
-    updateFilterHeaders();
-}
-
-function updateLineVisibility(isVisible, row) {
-    const routeLineId = row.getAttribute('data-route-id');
-
-    const linesToUpdate = isVisible ? [...appState.routeLines, ...appState.invisibleRouteLines] : appState.invisibleRouteLines;
-
-    linesToUpdate.forEach(line => {
-    if (line.routeLineId === routeLineId) {
-        const isLineInvisible = appState.invisibleRouteLines.includes(line);
-        let opacity;
-        if (isLineInvisible && isVisible) {
-            opacity = 0;
-        } else if (!isLineInvisible && isVisible) {
-            opacity = 1;
+        if (hasMatchingPrice && hasMatchingDeparture && hasMatchingArrival) {
+            row.style.display = '';
+            const routeSegments = routeCell.textContent.split(' > ');
+            for (let i = 0; i < routeSegments.length - 1; i++) {
+                visibleRouteIds.add(`${routeSegments[i]}-${routeSegments[i + 1]}`);
+            }
         } else {
-            opacity = 0;
+            row.style.display = 'none';
         }
-        line.setStyle({opacity: opacity, fillOpacity: isVisible ? 1 : 0});
-        line._path.style.pointerEvents = isVisible ? '' : 'none';
-    }
-});
+    });
+    updateLineVisibility(visibleRouteIds, maxPrice);
 }
 
-function resetLineVisibility() {
-    if (appState.routeLines) {
-        appState.routeLines.forEach(line => {
-            let opacity = 0;  // Since resetting visibility should hide lines, set opacity to 0
-            let isVisible = false;  // We assume lines are not visible when reset
-            line.setStyle({ opacity: opacity, fillOpacity: isVisible ? 1 : 0 });
-            line._path.style.pointerEvents = 'none';
+function updateLineVisibility(visibleRouteIds, maxPrice) {
+    Object.keys(pathDrawing.routePathCache).forEach(routeId => {
+        const lineSet = pathDrawing.routePathCache[routeId];
+        if (!lineSet) return;
+        lineSet.forEach(line => {
+            if (!(line instanceof Line)) return;
+            let price;
+            for (let tag of line.tags) {
+                if (tag.startsWith('price:')) {
+                    price = parseFloat(tag.split(':')[1]);
+                    break;
+                }
+            }
+            const isVisible = visibleRouteIds.has(line.routeId) && (!maxPrice || (price && price <= maxPrice));
+            if (isVisible) {
+                line.visibleLine.setStyle({ opacity: 1 });
+                map.addLayer(line.visibleLine);
+                map.addLayer(line.invisibleLine);
+            } else {
+                line.visibleLine.setStyle({ opacity: 0 });
+                map.removeLayer(line.visibleLine);
+                map.removeLayer(line.invisibleLine);
+            }
         });
-    }
-}
-
-function parseTime(timeStr) {
-    const timePart = timeStr.split(', ')[1]; // Gets the "7:30:00 AM" part
-    let [time, modifier] = timePart.split(' ');
-    let [hours, minutes] = time.split(':').map(Number);
-
-    hours = modifier === 'PM' && hours < 12 ? hours + 12 : hours;
-    hours = modifier === 'AM' && hours === 12 ? 0 : hours; // Convert 12 AM to 0 hours
-
-    return hours + minutes / 60; // Converts time to decimal hours
+    });
 }
 
 function updateFilterHeaders() {
     const filterTypes = ['price', 'departure', 'arrival'];
     filterTypes.forEach(type => {
         const filterIcon = document.getElementById(`${type}Filter`);
-        if (!filterIcon) {
-            console.error(`Filter icon for ${type} not found.`);
-            return;
-        }
-
+        if (!filterIcon) return;
         const filterValue = appState.filterState[type];
         const filterTextElement = document.getElementById(`${type}Text`);
-        if (filterTextElement) {
-            filterTextElement.textContent = filterValue ? `$${filterValue.value}` : `${type.charAt(0).toUpperCase() + type.slice(1)}`;
+        if (!filterTextElement) return;
+        if (!filterValue) {
+            filterTextElement.textContent = `${type.charAt(0).toUpperCase()}${type.slice(1)}`;
+        } else if (type === 'price') {
+            filterTextElement.textContent = filterValue.value ? `$${filterValue.value}` : 'Price';
+        } else {
+            filterTextElement.textContent = `${formatTime(filterValue.start)} - ${formatTime(filterValue.end)}`;
         }
     });
+}
+
+function formatTime(decimalTime) {
+    const hours = Math.floor(decimalTime);
+    const minutes = Math.round((decimalTime - hours) * 60);
+    const period = hours < 12 ? 'AM' : 'PM';
+    const displayHours = hours % 12 || 12;
+    return `${displayHours}:${minutes.toString().padStart(2, '0')} ${period}`;
 }
 
 function getColumnIndex(columnIdentifier) {
@@ -114,30 +138,17 @@ function getColumnIndex(columnIdentifier) {
 
 function toggleFilterResetIcon(column) {
     const filterIcon = document.getElementById(`${column}Filter`);
-    if (!filterIcon) {
-        console.error(`Filter icon for ${column} not found.`);
-        return; // Exit if the icon is not found
-    }
-
+    if (!filterIcon) return;
     const resetIcon = document.getElementById(`reset${column.charAt(0).toUpperCase() + column.slice(1)}Filter`);
-    if (!resetIcon) {
-        console.error(`Reset icon for ${column} not found.`);
-        return; // Exit if the reset icon is not found
-    }
+    if (!resetIcon) return;
 
     let filterButtonSpan = filterIcon.closest('.headerText') || filterIcon.closest('.filterButton');
-    if (!filterButtonSpan) {
-        console.error('Parent span with class .headerText not found for filterIcon.');
-        filterButtonSpan = filterIcon.closest('.filterButton'); // Backup option
-        if (!filterButtonSpan) {
-            console.error('Backup parent span with class .filterButton not found.');
-            return; // Exit if no appropriate parent is found
-        }
-    }
+    if (!filterButtonSpan) return;
 
     const filterValue = appState.filterState[column];
-    const isNonDefault = filterValue && ((column === 'price' && filterValue.value) ||
-        (column === 'departure' || column === 'arrival') && (filterValue.start !== 0 || filterValue.end !== 24));
+    const isNonDefault = filterValue &&
+        ((column === 'price' && filterValue.value !== undefined) ||
+         ((column === 'departure' || column === 'arrival') && (filterValue.start !== 0 || filterValue.end !== 24)));
 
     if (isNonDefault) {
         filterIcon.style.display = 'none';
@@ -156,19 +167,25 @@ document.addEventListener('click', function (e) {
     if (e.target.classList.contains('resetIcon')) {
         const column = e.target.getAttribute('data-column');
         const filterIcon = document.querySelector(`#${column}Filter`);
-        const filterButtonSpan = filterIcon.closest('.filterButton');
+        const filterButtonSpan = filterIcon?.closest('.filterButton');
         const resetIcon = e.target;
+
         if (column === 'departure' || column === 'arrival') {
             appState.filterState[column] = { start: 0, end: 24 };
-        } else {
-            appState.filterState[column] = null;
+        } else if (column === 'price') {
+            appState.filterState[column] = { value: null };
         }
-        filterIcon.style.display = 'inline';
+
+        if (filterIcon) filterIcon.style.display = 'inline';
         resetIcon.style.display = 'none';
-        filterButtonSpan.classList.remove('filterButton');
-        filterButtonSpan.classList.add('headerText');
+        if (filterButtonSpan) {
+            filterButtonSpan.classList.remove('filterButton');
+            filterButtonSpan.classList.add('headerText');
+        }
+
         applyFilters();
+        updateFilterHeaders();
     }
 });
 
-export { logFilterState, applyFilters, toggleFilterResetIcon };
+export { applyFilters, toggleFilterResetIcon, updateFilterHeaders, constructFilterTags };
