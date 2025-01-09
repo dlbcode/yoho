@@ -276,25 +276,6 @@ const flightMap = {
                 map.removeLayer(marker);
             }
         });
-    },
-
-    handleMapClick() {
-        const selectedAirportIata = appState.selectedAirport?.iata_code;
-        if (selectedAirportIata) {
-            const marker = flightMap.markers[selectedAirportIata];
-            const isWaypoint = appState.waypoints.some(wp => wp.iata_code === selectedAirportIata);
-            if (!isWaypoint) {
-                marker?.setIcon(blueDotIcon);
-            }
-        }
-        
-        // Reset all state properly
-        flightMap.selectedMarker = null;
-        flightMap.preservedMarker = null;
-        flightMap.hoverDisabled = false;
-        updateState('selectedAirport', null, 'eventManager.handleMapClick');
-        lineManager.clearLines('hover');
-        lineManager.clearLines('all');
     }
 };
 

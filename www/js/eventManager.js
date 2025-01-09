@@ -91,7 +91,7 @@ const eventManager = {
         map.on('click', () => this.handleMapClick());
     },
 
-        handleMapClick() {
+    handleMapClick() {
         const selectedAirportIata = appState.selectedAirport?.iata_code;
         if (selectedAirportIata) {
             const marker = flightMap.markers[selectedAirportIata];
@@ -100,10 +100,17 @@ const eventManager = {
                 marker?.setIcon(blueDotIcon);
             }
         }
+        
+        // Reset all state properly
         flightMap.selectedMarker = null;
+        flightMap.preservedMarker = null;
+        flightMap.hoverDisabled = false; // Ensure hover is enabled
         updateState('selectedAirport', null, 'eventManager.handleMapClick');
         lineManager.clearLines('hover');
         lineManager.clearLines('all');
+        
+        // Ensure lines can be drawn on subsequent hovers and clicks
+        flightMap.hoverDisabled = false;
     },
 
     setupAllPathsButtonEventListener() {
