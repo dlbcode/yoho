@@ -204,16 +204,12 @@ const flightMap = {
                     if (lineManager.hoveredLine.visibleLine) {
                         lineManager.hoveredLine.visibleLine.setStyle({ color: 'white', weight: 2, opacity: 1 });
                     }
-                    console.log('Set hovered line:', lineManager.hoveredLine);
-                } else {
-                    console.log('No lines found for IATA:', iata);
                 }
             });
         } else if (event === 'mouseout') {
             if (!appState.selectedAirport || appState.selectedAirport.iata_code !== iata) {
                 setTimeout(() => {
-                    console.log('Clearing lines hover (delayed)');
-                    lineManager.clearLines('hover', pathDrawing.hoverLines.filter(line => line.iata !== appState.selectedAirport?.iata_code));
+                    lineManager.clearLines('hover');
                     marker.closePopup();
                 }, 200);
             }
