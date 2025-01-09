@@ -86,9 +86,12 @@ const flightMap = {
                     updateState('removeWaypoint', waypointIndex, 'flightMap.handleRemoveButtonClick1');
                     updateState('removeWaypoint', waypointIndex - 1, 'flightMap.handleRemoveButtonClick2');
                 } else {
-                    updateState('removeWaypoint', waypointIndex + 1, 'flightMap.handleRemoveButtonClick1');
+                    updateState('removeWaypoint', waypointIndex + 1, 'flightMap.handleRemoveButtonClick1'); 
                     updateState('removeWaypoint', waypointIndex, 'flightMap.handleRemoveButtonClick2');
                 }
+                // Add this line to clear hover lines
+                lineManager.clearLines('hover');
+                
                 clickedMarker.setIcon(blueDotIcon);
                 updateState('selectedAirport', null, 'flightMap.handleRemoveButtonClick3');
             }
