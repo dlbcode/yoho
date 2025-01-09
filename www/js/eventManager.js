@@ -1,4 +1,4 @@
-import { map, magentaDotIcon } from './map.js';
+import { map, blueDotIcon } from './map.js';
 import { flightMap } from './flightMap.js';
 import { appState, updateState } from './stateManager.js';
 import { routeHandling } from './routeHandling.js';

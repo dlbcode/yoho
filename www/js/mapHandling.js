@@ -1,5 +1,5 @@
 import { blueDotIcon, magentaDotIcon, map } from './map.js';
-import { appState, updateState } from './stateManager.js';
+import { appState } from './stateManager.js';
 import { flightMap } from './flightMap.js';
 
 const mapHandling = {
@@ -7,32 +7,23 @@ const mapHandling = {
         const waypointIataCodes = new Set(appState.waypoints.map(waypoint => waypoint.iata_code));
 
         Object.entries(flightMap.markers).forEach(([iata, marker]) => {
-            if (waypointIataCodes.has(iata)) {
-                marker.setIcon(magentaDotIcon);
-                this.addOrUpdateMarkerTag(marker, 'marker-type:waypoint');
-            } else {
-                marker.setIcon(blueDotIcon);
-                this.removeMarkerTag(marker, 'marker-type:waypoint');
-            }
+            const icon = waypointIataCodes.has(iata) ? magentaDotIcon : blueDotIcon;
+            marker.setIcon(icon);
+            this.updateMarkerTag(marker, waypointIataCodes.has(iata));
         });
     },
 
-    addOrUpdateMarkerTag: function (marker, tag) {
+    updateMarkerTag: function (marker, isWaypoint) {
         if (!marker.tags) {
             marker.tags = new Set();
         }
-        // Remove any existing marker-type tag
-        marker.tags.forEach(existingTag => {
-            if (existingTag.startsWith('marker-type:')) {
-                marker.tags.delete(existingTag);
+        marker.tags.forEach(tag => {
+            if (tag.startsWith('marker-type:')) {
+                marker.tags.delete(tag);
             }
         });
-        marker.tags.add(tag);
-    },
-
-    removeMarkerTag: function (marker, tagToRemove) {
-        if (marker.tags) {
-            marker.tags.delete(tagToRemove);
+        if (isWaypoint) {
+            marker.tags.add('marker-type:waypoint');
         }
     },
 

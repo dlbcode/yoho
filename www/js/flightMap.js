@@ -32,9 +32,7 @@ const flightMap = {
         const iata = airport.iata_code;
         if (this.markers[iata]) return;
 
-        const icon = airport.type === 'city' ? greenDotIcon :
-                     appState.waypoints.some(wp => wp.iata_code === iata) ? magentaDotIcon : blueDotIcon;
-
+        const icon = this.getMarkerIcon(iata, airport.type);
         const latLng = L.latLng(airport.latitude, airport.longitude);
         const marker = L.marker(latLng, { icon });
         marker.airportWeight = airport.weight;
@@ -49,6 +47,11 @@ const flightMap = {
         if (this.shouldDisplayAirport(marker.airportWeight, map.getZoom())) {
             marker.addTo(map);
         }
+    },
+
+    getMarkerIcon(iata, type) {
+        if (type === 'city') return greenDotIcon;
+        return appState.waypoints.some(wp => wp.iata_code === iata) ? magentaDotIcon : blueDotIcon;
     },
 
     handleMarkerClick(airport, clickedMarker) {
@@ -74,8 +77,6 @@ const flightMap = {
             }
             clickedMarker.setIcon(magentaDotIcon);
             updateState('selectedAirport', null, 'flightMap.handleMarkerClick4');
-            popupContent.removeChild(addButton);
-            clickedMarker.closePopup();
         };
 
         const handleRemoveButtonClick = () => {
@@ -90,13 +91,8 @@ const flightMap = {
                 }
                 clickedMarker.setIcon(blueDotIcon);
                 updateState('selectedAirport', null, 'flightMap.handleRemoveButtonClick3');
-                popupContent.removeChild(removeButton);
-                clickedMarker.closePopup();
             }
         };
-
-        const addButton = createButton('+', handleAddButtonClick);
-        const removeButton = createButton('-', handleRemoveButtonClick);
 
         const popupContent = document.createElement('div');
         const cityName = document.createElement('p');
@@ -105,13 +101,12 @@ const flightMap = {
 
         const waypointIndex = appState.waypoints.findIndex(wp => wp.iata_code === airport.iata_code);
         if (waypointIndex === -1) {
-            popupContent.appendChild(addButton);
+            popupContent.appendChild(createButton('+', handleAddButtonClick));
         } else {
-            popupContent.appendChild(removeButton);
+            popupContent.appendChild(createButton('-', handleRemoveButtonClick));
         }
 
         clickedMarker.bindPopup(popupContent, { autoClose: false, closeOnClick: true }).openPopup();
-        console.log('Selected airport:', appState.selectedAirport);
     },
 
     findRoute(fromIata, toIata) {
