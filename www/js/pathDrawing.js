@@ -45,6 +45,7 @@ class Line {
             this.addTag(`arrival-range:${this.getTimeRange(options.arrivalTime)}`);
         }
         this.addTag(`direct:${options.isDirect ? 'true' : 'false'}`);
+        this.addTag(`group:${options.groupNumber}`); // Add group tag
     }
 
     getPriceRange(price) {
@@ -213,6 +214,7 @@ const pathDrawing = {
                 return this.drawLine(routeId, 'route', {
                     price: route.price,
                     group: index + 1,
+                    groupNumber: route.group
                 });
             } else {
                 return this.drawDashedLine(route.origin, route.destination);

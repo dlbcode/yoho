@@ -7,8 +7,8 @@ const removeRoute = (routeNumber) => {
     let selectedRouteIndex = routeNumber;
     let groupNumber = appState.selectedRoutes[selectedRouteIndex]?.group;
 
-    // Clear all lines associated with this route
-    lineManager.clearLinesByRouteNumber(routeNumber);
+    // Clear lines first
+    lineManager.clearLinesByTags([`group:${groupNumber}`]);
 
     // Remove selectedRoutes with same group number
     Object.keys(appState.selectedRoutes).forEach(key => {

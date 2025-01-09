@@ -35,22 +35,19 @@ const lineManager = {
         });
     },
 
-    clearLinesByTags(tags, { excludeTags = [] } = {}) {
-        const linesToClear = this.getLinesByTags(tags)
-            .filter(line => !excludeTags.some(tag => line.tags.has(tag)));
-
-        linesToClear.forEach(line => line instanceof Line && line.remove());
-
-        const clearCache = cache => {
-            Object.entries(cache).forEach(([routeId, lines]) => {
-                cache[routeId] = lines.filter(line => !linesToClear.includes(line));
-                if (!cache[routeId].length) delete cache[routeId];
-            });
-        };
-
-        clearCache(pathDrawing.routePathCache);
-        clearCache(pathDrawing.dashedRoutePathCache);
-        pathDrawing.hoverLines = pathDrawing.hoverLines.filter(line => !linesToClear.includes(line));
+    clearLinesByTags(tags, options = {}) {
+        const lines = this.getLinesByTags(tags);
+        lines.forEach(line => {
+            if (line instanceof Line) {
+                line.remove(); // Uses Line class remove() which handles all line types
+            } else {
+                // Fallback for legacy line objects
+                if (line.visibleLine) line.visibleLine.remove();
+                if (line.invisibleLine) line.invisibleLine.remove();
+                if (line.dashedLine) line.dashedLine.remove();
+            }
+        });
+        return lines;
     },
 
     clearLines(type) {
@@ -67,26 +64,8 @@ const lineManager = {
     },
 
     clearLinesByRouteNumber(routeNumber) {
-        const groupTag = `group:${routeNumber + 1}`;
-        const linesToClear = [];
-        
-        [pathDrawing.routePathCache, pathDrawing.dashedRoutePathCache].forEach(cache => {
-            Object.values(cache).forEach(lineSet => {
-                lineSet.forEach(line => {
-                    line instanceof Line && line.tags.has(groupTag) && linesToClear.push(line);
-                });
-            });
-        });
-
-        linesToClear.forEach(line => {
-            line.remove();
-            [pathDrawing.routePathCache, pathDrawing.dashedRoutePathCache].forEach(cache => {
-                if (cache[line.routeId]) {
-                    cache[line.routeId] = cache[line.routeId].filter(l => l !== line);
-                    !cache[line.routeId].length && delete cache[line.routeId];
-                }
-            });
-        });
+        const tags = [`group:${routeNumber}`];
+        return this.clearLinesByTags(tags);
     },
 
     createPopup(latlng, content, options = {}) {
