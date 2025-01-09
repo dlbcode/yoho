@@ -4,10 +4,10 @@ import { flightMap } from './flightMap.js';
 import { lineManager } from './lineManager.js';
 
 class Line {
-    constructor(origin, destination, routeId, type, options = {}) {
+    constructor(originAirport, destinationAirport, routeId, type, options = {}) {
         this.iata = options.iata;
-        this.origin = origin;
-        this.destination = destination;
+        this.origin = originAirport;
+        this.destination = destinationAirport;
         this.routeId = routeId;
         this.type = type;
         this.map = map;
@@ -21,6 +21,20 @@ class Line {
         this.bindEvents();
         this.tags = new Set();
         this.addTags(options);
+        this.routeData = options.routeData; // Store routeData
+
+        // Create the visible and invisible lines
+        const coordinates = [[originAirport.latitude, originAirport.longitude], 
+                           [destinationAirport.latitude, destinationAirport.longitude]];
+        
+        this.visibleLine = L.geodesic([coordinates], {
+            weight: 1,
+            opacity: 0.7,
+            color: options.color || flightMap.getColorBasedOnPrice(options.price),
+            wrap: false
+        }).on('mouseover', (e) => lineManager.onMouseOver(e, this))
+          .on('mouseout', () => lineManager.onMouseOut(this))
+          .on('click', (e) => lineManager.onClickHandler(e, this));
     }
 
     addTag(tag) {
@@ -162,7 +176,19 @@ const pathDrawing = {
             if (destinationIata !== 'Any') {
                 flightMap.getAirportDataByIata(destinationIata).then(destinationAirport => {
                     if (!destinationAirport) return console.error('Destination airport data not found:', destinationIata);
-                    const line = new Line(originAirport, destinationAirport, routeId, type, options);
+                    
+                    // Create route data object
+                    const routeData = {
+                        originAirport,
+                        destinationAirport,
+                        price: options.price,
+                        date: options.date
+                    };
+
+                    const line = new Line(originAirport, destinationAirport, routeId, type, {
+                        ...options,
+                        routeData // Pass routeData to Line constructor
+                    });
                     this.cacheLine(routeId, type, line);
                 });
             }
