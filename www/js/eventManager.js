@@ -91,7 +91,7 @@ const eventManager = {
         map.on('click', () => this.handleMapClick());
     },
 
-    handleMapClick() {
+        handleMapClick() {
         const selectedAirportIata = appState.selectedAirport?.iata_code;
         if (selectedAirportIata) {
             const marker = flightMap.markers[selectedAirportIata];
@@ -102,6 +102,7 @@ const eventManager = {
         }
         flightMap.selectedMarker = null;
         updateState('selectedAirport', null, 'eventManager.handleMapClick');
+        lineManager.clearLines('hover');
         lineManager.clearLines('all');
     },
 
