@@ -88,7 +88,6 @@ function buildRouteTable(routeIndex) {
             console.log("API Response Data:", data); // Log the raw API response data
             let flightsData;
 
-            console.log("Endpoint:", endpoint, "Destination:", destination);
             if (endpoint === 'range' || destination === 'Any') {
                 if (data && data.data && Array.isArray(data.data)) {
                     flightsData = data.data;
@@ -158,17 +157,11 @@ function buildRouteTable(routeIndex) {
             table.appendChild(thead);
 
             const tbody = document.createElement('tbody');
-            console.log("Table:", table);
-            console.log("Tbody:", tbody);
             flightsData.forEach(flight => {
                 let row = document.createElement('tr');
                 let departureDate, arrivalDate;
                 const routeId = `${flight.flyFrom}-${flight.flyTo}`; // Fix route ID creation
-                row.setAttribute('data-route-id', routeId); // Set the route ID as a plain string
-                
-                // Add debug logging
-                console.log('Setting route ID on row:', routeId);
-                
+                row.setAttribute('data-route-id', routeId); // Set the route ID as a plain string                
                 const directFlight = flight.route.length === 1;
                 const price = parseFloat(flight.price.toFixed(2));
                 const stops = flight.route.length - 1;
@@ -204,7 +197,6 @@ function buildRouteTable(routeIndex) {
                                  <td>${layovers}</td>
                                  <td>${durationHours}h ${durationMinutes}m</td>
                                  <td>${routeIATAs}</td>`;
-                console.log("Row HTML:", row.innerHTML);
 
                 // Add parsed data as data attributes for filtering and sorting
                 row.dataset.price = price;

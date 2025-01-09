@@ -243,12 +243,10 @@ function routeInfoRow(rowElement, fullFlightData, routeIds, routeIndex) {
         // Get all IATA codes from the route for waypoint updating
         const intermediaryIatas = fullFlightData.route.map(segment => segment.flyFrom);
         intermediaryIatas.push(fullFlightData.route[fullFlightData.route.length - 1].flyTo);
-        console.log('Intermediate IATAs:', intermediaryIatas);
 
         // Process each segment with the same group ID
         fullFlightData.route.forEach((segmentData, idx) => {
             const selectedRouteIndex = routeIndex + idx;
-            console.log('Processing segment:', idx, segmentData);
             
             // Extract departure and arrival times
             const departureDate = segmentData.local_departure || 

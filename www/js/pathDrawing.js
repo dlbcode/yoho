@@ -21,7 +21,6 @@ class Line {
         this.bindEvents();
         this.tags = new Set();
         this.addTags(options);
-        console.log(`Line created with routeId: ${this.routeId} and tags: `, this.tags);
     }
 
     addTag(tag) {
@@ -32,6 +31,10 @@ class Line {
         this.addTag(`route:${this.routeId}`);
         this.addTag(`routeId:${this.routeId}`);
         this.addTag(`type:${this.type}`);
+        // Add type:route tag for both direct and dashed lines
+        if (this.type === 'route' || this.type === 'dashed') {
+            this.addTag('type:route');
+        }
         if (options.isTableRoute) this.addTag('type:table');
         if (options.group) this.addTag(`group:${options.group}`);
         if (options.price !== undefined && options.price !== null) {
@@ -130,7 +133,6 @@ class Line {
     }
 
     reset() {
-        console.log('Resetting line:', this.routeId);
         this.visibleLine.setStyle({
             color: this.color,
             weight: this.weight,
@@ -152,7 +154,6 @@ const pathDrawing = {
     hoverLines: [],
 
     drawLine: function (routeId, type, options) {
-        console.log('Drawing line:', routeId, type, options);
         const [originIata, destinationIata] = routeId.split('-');
         if (!originIata || destinationIata === 'Any') return;
 
@@ -208,7 +209,6 @@ const pathDrawing = {
     drawLines: async function () {
         lineManager.clearLines('route');
         const drawPromises = appState.routes.map((route, index) => {
-            console.log('pathdrawing.drawLines - route:', route);
             const routeId = `${route.origin}-${route.destination}`;
             if (route.isDirect) {
                 return this.drawLine(routeId, 'route', {
