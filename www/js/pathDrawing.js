@@ -213,8 +213,10 @@ const pathDrawing = {
             if (route.isDirect) {
                 return this.drawLine(routeId, 'route', {
                     price: route.price,
-                    group: index + 1,
-                    groupNumber: route.group
+                    // Only set group if route is selected
+                    ...(appState.selectedRoutes[index] && {
+                        group: appState.selectedRoutes[index].group
+                    })
                 });
             } else {
                 return this.drawDashedLine(route.origin, route.destination);
