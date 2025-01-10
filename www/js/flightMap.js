@@ -58,50 +58,9 @@ const flightMap = {
 
     handleMarkerClick(airport, clickedMarker) {
         Object.values(this.markers).forEach(marker => marker.closePopup());
-
-        // Set hover disabled when selecting a waypoint
-        this.preservedMarker = clickedMarker;  // Track preserved marker
+        this.preservedMarker = clickedMarker;
         this.hoverDisabled = true;
         updateState('selectedAirport', airport);
-
-        const createButton = (text, handler) => {
-            const button = document.createElement('button');
-            button.textContent = text;
-            button.className = 'tooltip-button';
-            button.addEventListener('click', handler);
-            return button;
-        };
-
-        const handleAddButtonClick = () => {
-            const lastWaypoint = appState.waypoints[appState.waypoints.length - 1];
-            if (appState.waypoints.length >= 2 && appState.waypoints.length % 2 === 0) {
-                updateState('addWaypoint', lastWaypoint, 'flightMap.handleMarkerClick1');
-                updateState('addWaypoint', airport, 'flightMap.handleMarkerClick2');
-            } else {
-                updateState('addWaypoint', airport, 'flightMap.handleMarkerClick3');
-            }
-            clickedMarker.setIcon(magentaDotIcon);
-            updateState('selectedAirport', null, 'flightMap.handleMarkerClick4');
-        };
-
-        const handleRemoveButtonClick = () => {
-            const waypointIndex = appState.waypoints.findIndex(wp => wp.iata_code === airport.iata_code);
-            if (appState.selectedAirport && appState.selectedAirport.iata_code === airport.iata_code) {
-                if (waypointIndex === appState.waypoints.length - 1 && waypointIndex > 1) {
-                    updateState('removeWaypoint', waypointIndex, 'flightMap.handleRemoveButtonClick1');
-                    updateState('removeWaypoint', waypointIndex - 1, 'flightMap.handleRemoveButtonClick2');
-                } else {
-                    updateState('removeWaypoint', waypointIndex + 1, 'flightMap.handleRemoveButtonClick1'); 
-                    updateState('removeWaypoint', waypointIndex, 'flightMap.handleRemoveButtonClick2');
-                }
-                // Add this line to clear hover lines
-                lineManager.clearLines('hover');
-                
-                clickedMarker.setIcon(blueDotIcon);
-                this.hoverDisabled = false; // Re-enable hovering
-                updateState('selectedAirport', null, 'flightMap.handleRemoveButtonClick3');
-            }
-        };
 
         const popupContent = document.createElement('div');
         const cityName = document.createElement('p');
@@ -109,12 +68,44 @@ const flightMap = {
         popupContent.appendChild(cityName);
 
         const waypointIndex = appState.waypoints.findIndex(wp => wp.iata_code === airport.iata_code);
-        if (waypointIndex === -1) {
-            popupContent.appendChild(createButton('+', handleAddButtonClick));
-        } else {
-            popupContent.appendChild(createButton('-', handleRemoveButtonClick));
-        }
+        const button = document.createElement('button');
+        button.className = 'tooltip-button';
 
+        button.addEventListener('click', () => {
+            // Get current waypoint status when button is clicked
+            const currentWaypointIndex = appState.waypoints.findIndex(wp => wp.iata_code === airport.iata_code);
+            
+            if (currentWaypointIndex === -1) {
+                // Add waypoint logic
+                const lastWaypoint = appState.waypoints[appState.waypoints.length - 1];
+                if (appState.waypoints.length >= 2 && appState.waypoints.length % 2 === 0) {
+                    updateState('addWaypoint', lastWaypoint);
+                    updateState('addWaypoint', airport);
+                } else {
+                    updateState('addWaypoint', airport);
+                }
+                clickedMarker.setIcon(magentaDotIcon);
+                button.textContent = '-';
+            } else {
+                // Remove waypoint logic
+                if (currentWaypointIndex === appState.waypoints.length - 1 && currentWaypointIndex > 1) {
+                    updateState('removeWaypoint', currentWaypointIndex);
+                    updateState('removeWaypoint', currentWaypointIndex - 1);
+                } else {
+                    updateState('removeWaypoint', currentWaypointIndex + 1);
+                    updateState('removeWaypoint', currentWaypointIndex);
+                }
+                lineManager.clearLines('hover');
+                clickedMarker.setIcon(blueDotIcon);
+                this.hoverDisabled = false;
+                button.textContent = '+';
+            }
+            updateState('selectedAirport', null);
+        });
+
+        // Initial button state
+        button.textContent = waypointIndex === -1 ? '+' : '-';
+        popupContent.appendChild(button);
         clickedMarker.bindPopup(popupContent, { autoClose: false, closeOnClick: true }).openPopup();
     },
 
