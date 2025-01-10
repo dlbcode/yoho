@@ -70,13 +70,11 @@ const flightMap = {
         const waypointIndex = appState.waypoints.findIndex(wp => wp.iata_code === airport.iata_code);
         const button = document.createElement('button');
         button.className = 'tooltip-button';
+        button.textContent = waypointIndex === -1 ? '+' : '-';
 
         button.addEventListener('click', () => {
-            // Get current waypoint status when button is clicked
             const currentWaypointIndex = appState.waypoints.findIndex(wp => wp.iata_code === airport.iata_code);
-            
             if (currentWaypointIndex === -1) {
-                // Add waypoint logic
                 const lastWaypoint = appState.waypoints[appState.waypoints.length - 1];
                 if (appState.waypoints.length >= 2 && appState.waypoints.length % 2 === 0) {
                     updateState('addWaypoint', lastWaypoint);
@@ -87,7 +85,6 @@ const flightMap = {
                 clickedMarker.setIcon(magentaDotIcon);
                 button.textContent = '-';
             } else {
-                // Remove waypoint logic
                 if (currentWaypointIndex === appState.waypoints.length - 1 && currentWaypointIndex > 1) {
                     updateState('removeWaypoint', currentWaypointIndex);
                     updateState('removeWaypoint', currentWaypointIndex - 1);
@@ -103,10 +100,19 @@ const flightMap = {
             updateState('selectedAirport', null);
         });
 
-        // Initial button state
-        button.textContent = waypointIndex === -1 ? '+' : '-';
         popupContent.appendChild(button);
         clickedMarker.bindPopup(popupContent, { autoClose: false, closeOnClick: true }).openPopup();
+
+        // Move line drawing after popup is bound
+        this.fetchAndCacheRoutes(airport.iata_code).then(() => {
+            if (!appState.directRoutes[airport.iata_code]) {
+                console.error('Direct routes not found for IATA:', airport.iata_code);
+                return;
+            }
+            lineManager.clearLines('hover');
+            pathDrawing.drawRoutePaths(airport.iata_code, appState.directRoutes, 'hover');
+            clickedMarker.openPopup(); // Re-open popup after drawing lines
+        });
     },
 
     findRoute(fromIata, toIata) {
