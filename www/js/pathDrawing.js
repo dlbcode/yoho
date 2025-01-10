@@ -153,6 +153,39 @@ const pathDrawing = {
     routePathCache: {},
     dashedRoutePathCache: {},
     hoverLines: [],
+    drawQueue: new Set(),
+    isDrawing: false,
+
+    queueDraw(routeId, type, options) {
+        this.drawQueue.add({routeId, type, options});
+        this.scheduleDraw();
+    },
+
+    scheduleDraw() {
+        if (!this.isDrawing) {
+            this.isDrawing = true;
+            requestAnimationFrame(() => this.processDrawQueue());
+        }
+    },
+
+    processDrawQueue() {
+        lineManager.clearLines('route');
+        
+        const promises = Array.from(this.drawQueue).map(({routeId, type, options}) => 
+            this.drawLine(routeId, type, options)
+        );
+
+        Promise.all(promises)
+            .then(() => {
+                this.drawQueue.clear();
+                this.isDrawing = false;
+            })
+            .catch(error => {
+                console.error('Error in batch drawing:', error);
+                this.drawQueue.clear();
+                this.isDrawing = false;
+            });
+    },
 
     drawLine: function (routeId, type, options) {
         const [originIata, destinationIata] = routeId.split('-');
@@ -220,11 +253,10 @@ const pathDrawing = {
     },
 
     drawLines: async function () {
-        lineManager.clearLines('route');
         const drawPromises = appState.routes.map((route, index) => {
             const routeId = `${route.origin}-${route.destination}`;
             if (route.isDirect) {
-                return this.drawLine(routeId, 'route', {
+                return this.queueDraw(routeId, 'route', {
                     price: route.price,
                     // Only set group if route is selected
                     ...(appState.selectedRoutes[index] && {
@@ -232,12 +264,15 @@ const pathDrawing = {
                     })
                 });
             } else {
-                return this.drawDashedLine(route.origin, route.destination);
+                return this.queueDraw(routeId, 'dashed');
             }
         });
-        await Promise.all(drawPromises);
+
         if (appState.selectedAirport) {
-            this.drawRoutePaths(appState.selectedAirport.iata_code, appState.directRoutes, appState.routeDirection);
+            this.queueDraw(appState.selectedAirport.iata_code, 'route', {
+                routes: appState.directRoutes,
+                direction: appState.routeDirection
+            });
         }
     },
 

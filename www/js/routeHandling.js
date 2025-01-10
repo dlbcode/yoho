@@ -9,18 +9,13 @@ const routeHandling = {
 
         const waypoints = appState.routeDirection === 'to' ? [...appState.waypoints].reverse() : appState.waypoints;
 
-        // Collect IATA codes for batch fetching
-        const iataCodes = waypoints.map(waypoint => waypoint.iata_code);
-        const uniqueIataCodes = [...new Set(iataCodes)];
-        
-        // Batch fetch routes for all unique IATA codes
-        const fetchPromises = uniqueIataCodes.map(iataCode => {
-          if (!appState.directRoutes[iataCode]) {
-            return flightMap.fetchAndCacheRoutes(iataCode);
-          }
-        });
-        
-        await Promise.all(fetchPromises.filter(Boolean));        
+        // Batch fetch routes
+        const uniqueIataCodes = [...new Set(waypoints.map(wp => wp.iata_code))];
+        await Promise.all(
+            uniqueIataCodes
+                .filter(code => !appState.directRoutes[code])
+                .map(code => flightMap.fetchAndCacheRoutes(code))
+        );
 
         for (let i = 0; i < waypoints.length; i += 2) {
             const fromWaypoint = waypoints[i];
@@ -78,11 +73,11 @@ const routeHandling = {
             ...route,
             tripType: appState.routes[index]?.tripType || route.tripType || 'oneWay'
         }));
-        updateState('updateRoutes', newRoutes, 'routeHandling.updateRoutesArray');
         
-        // Use lineManager to clear lines instead of pathDrawing
+        // Batch update and draw
         lineManager.clearLines('all');
-        pathDrawing.drawLines();
+        updateState('updateRoutes', newRoutes, 'routeHandling.updateRoutesArray');
+        pathDrawing.drawLines(); // Will now use batched drawing
     }
 };
 
