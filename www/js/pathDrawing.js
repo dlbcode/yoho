@@ -156,6 +156,9 @@ const pathDrawing = {
     drawQueue: new Set(),
     isDrawing: false,
 
+    // Add a map to track current line states
+    lineStates: new Map(),
+    
     queueDraw(routeId, type, options) {
         this.drawQueue.add({routeId, type, options});
         this.scheduleDraw();
@@ -253,27 +256,52 @@ const pathDrawing = {
     },
 
     drawLines: async function () {
-        const drawPromises = appState.routes.map((route, index) => {
+        const newLineStates = new Map();
+        const promises = appState.routes.map((route, index) => {
             const routeId = `${route.origin}-${route.destination}`;
-            if (route.isDirect) {
-                return this.queueDraw(routeId, 'route', {
-                    price: route.price,
-                    // Only set group if route is selected
-                    ...(appState.selectedRoutes[index] && {
-                        group: appState.selectedRoutes[index].group
-                    })
+            const lineState = {
+                type: route.isDirect ? 'route' : 'dashed',
+                price: route.price,
+                group: appState.selectedRoutes[index]?.group
+            };
+            newLineStates.set(routeId, lineState);
+
+            // Check if line needs to be updated
+            const currentState = this.lineStates.get(routeId);
+            if (!currentState || !this.isSameLineState(currentState, lineState)) {
+                // Line is new or changed - queue for update
+                return this.queueDraw(routeId, lineState.type, {
+                    price: lineState.price,
+                    ...(lineState.group && { group: lineState.group })
                 });
-            } else {
-                return this.queueDraw(routeId, 'dashed');
             }
+            return Promise.resolve();
         });
 
-        if (appState.selectedAirport) {
-            this.queueDraw(appState.selectedAirport.iata_code, 'route', {
-                routes: appState.directRoutes,
-                direction: appState.routeDirection
-            });
+        // Find lines to remove
+        for (const [routeId] of this.lineStates) {
+            if (!newLineStates.has(routeId)) {
+                // Line no longer exists - remove it
+                this.removeLine(routeId);
+            }
         }
+
+        // Update state tracker
+        this.lineStates = newLineStates;
+
+        await Promise.all(promises);
+    },
+
+    isSameLineState(state1, state2) {
+        return state1.type === state2.type && 
+               state1.price === state2.price && 
+               state1.group === state2.group;
+    },
+
+    removeLine(routeId) {
+        const lines = this.routePathCache[routeId] || [];
+        lines.forEach(line => line.remove());
+        delete this.routePathCache[routeId];
     },
 
     onClick(e, visibleLine, invisibleLine) {
