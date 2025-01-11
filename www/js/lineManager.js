@@ -39,12 +39,18 @@ const lineManager = {
         const lines = this.getLinesByTags(tags);
         lines.forEach(line => {
             if (line instanceof Line) {
-                line.remove(); // Uses Line class remove() which handles all line types
+                line.visibleLine.setStyle({ opacity: 0 });
+                map.removeLayer(line.visibleLine);
+                map.removeLayer(line.invisibleLine);
+                if (line.decoratedLine) map.removeLayer(line.decoratedLine);
             } else {
                 // Fallback for legacy line objects
-                if (line.visibleLine) line.visibleLine.remove();
-                if (line.invisibleLine) line.invisibleLine.remove();
-                if (line.dashedLine) line.dashedLine.remove();
+                if (line.visibleLine) {
+                    line.visibleLine.setStyle({ opacity: 0 });
+                    map.removeLayer(line.visibleLine);
+                }
+                if (line.invisibleLine) map.removeLayer(line.invisibleLine);
+                if (line.dashedLine) map.removeLayer(line.dashedLine);
             }
         });
         return lines;
