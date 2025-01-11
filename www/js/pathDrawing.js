@@ -311,10 +311,25 @@ const pathDrawing = {
         } else {
             console.error('Route data is undefined for the clicked line.');
         }
+    },
+
+    preloadDirectLines() {
+        const directRoutes = appState.directRoutes;
+        Object.keys(directRoutes).forEach(iata => {
+            directRoutes[iata].forEach(route => {
+                const routeId = `${route.originAirport.iata_code}-${route.destinationAirport.iata_code}`;
+                this.drawLine(routeId, 'route', {
+                    price: route.price,
+                    date: route.date,
+                    isDirect: true
+                });
+            });
+        });
     }
 };
 
 document.addEventListener('DOMContentLoaded', () => {
+    pathDrawing.preloadDirectLines();
     pathDrawing.drawLines();
 });
 
