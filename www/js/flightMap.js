@@ -145,26 +145,46 @@ const flightMap = {
     },
 
     async fetchAndCacheAirports(currentZoom) {
-        try {
-            const response = await fetch(`https://yonderhop.com/api/airports?zoom=${currentZoom}`);
-            const data = await response.json();
+        const cacheKey = `airports_${currentZoom}`;
+        const cachedData = localStorage.getItem(cacheKey); 
+    
+        if (cachedData && (Date.now() - JSON.parse(cachedData).timestamp < this.cacheDuration)) {
+            const { data } = JSON.parse(cachedData); 
             this.airportDataCache = data.reduce((acc, airport) => {
                 acc[airport.iata_code] = airport;
                 return acc;
             }, {});
+            console.info('Airport data loaded from localStorage');
+            return this.airportDataCache;
+        }
+    
+        try {
+            const response = await fetch(`https://yonderhop.com/api/airports?zoom=${currentZoom}`);
+            const data = await response.json();
+            
+            // Store the data in localStorage with a timestamp
+            localStorage.setItem(cacheKey, JSON.stringify({ data, timestamp: Date.now() })); 
+    
+            this.airportDataCache = data.reduce((acc, airport) => {
+                acc[airport.iata_code] = airport;
+                return acc;
+            }, {});
+    
+            console.info('Airport data fetched from API and cached');
             return this.airportDataCache;
         } catch (error) {
             console.error('Error fetching airports:', error);
             return {};
         }
     },
-
+    
     getAirportDataByIata(iata) {
         if (this.airportDataCache && this.airportDataCache[iata]) {
             return Promise.resolve(this.airportDataCache[iata]);
         }
-
-        return this.fetchAndCacheAirports(map?.getZoom()).then(cache => cache[iata] || null);
+    
+        // Fetch and cache all airports if the specific IATA is not found
+        return this.fetchAndCacheAirports(map?.getZoom()).then(cache => cache[iata] || null); 
     },
 
     getColorBasedOnPrice(price) {
@@ -223,19 +243,32 @@ const flightMap = {
             console.error('IATA code is empty');
             return;
         }
-        if (!appState.directRoutes[iata]) {
-            try {
-                const direction = appState.routeDirection; // 'to' or 'from'
-                const response = await fetch(`https://yonderhop.com/api/directRoutes?origin=${iata}&direction=${direction}`);
-                const routes = await response.json();
-                if (!routes || !routes.length) {
-                    console.error('No routes found for IATA:', iata);
-                    return;
-                }
-                appState.directRoutes[iata] = routes;
-            } catch (error) {
-                console.error('Error fetching routes:', error);
+    
+        const cacheKey = `routes_${iata}_${appState.routeDirection}`;
+        const cachedData = localStorage.getItem(cacheKey);
+    
+        if (cachedData && (Date.now() - JSON.parse(cachedData).timestamp < this.cacheDuration)) {
+            appState.directRoutes[iata] = JSON.parse(cachedData).data;
+            console.info('Route data loaded from localStorage');
+            return;
+        }
+    
+        try {
+            const direction = appState.routeDirection;
+            const response = await fetch(`https://yonderhop.com/api/directRoutes?origin=${iata}&direction=${direction}`);
+            const routes = await response.json();
+            if (!routes || !routes.length) {
+                console.error('No routes found for IATA:', iata);
+                return;
             }
+    
+            // Store the routes in localStorage with a timestamp
+            localStorage.setItem(cacheKey, JSON.stringify({ data: routes, timestamp: Date.now() })); 
+            appState.directRoutes[iata] = routes;
+    
+            console.info('Route data fetched from API and cached');
+        } catch (error) {
+            console.error('Error fetching routes:', error);
         }
     },
 
