@@ -4,57 +4,29 @@ import { eventManager } from './eventManager.js';
 import { appState, updateState } from './stateManager.js';
 import { lineManager } from './lineManager.js';
 
-const linePool = {
-    pool: [],
-    
-    init(size = 100) {
-        this.pool = Array.from({ length: size }, () => L.polyline([], {
-            color: '#666',
-            weight: 1,
-            opacity: 0
-        }));
-    },
-
-    acquire() {
-        return this.pool.pop() || this.createNewLine();
-    },
-
-    release(line) {
-        line.setLatLngs([]).setStyle({ opacity: 0 });
-        this.pool.push(line);
-    },
-
-    createNewLine() {
-        return L.polyline([], { color: '#666', weight: 1, opacity: 0 });
-    }
-};
-
 const flightMap = {
     markers: {},
     airportDataCache: {},
     cacheDuration: 600000, // 10 minutes in milliseconds 
-    hoverDisabled: false,
-    preservedMarker: null,
-    linePool: linePool,
-    routeCache: new Map(),
-    pendingRoutes: new Map(),
+    hoverDisabled: false, // Add this flag
+    preservedMarker: null,  // Add tracking for preserved marker
 
     init() {
-        if (!map) {
+        if (typeof map !== 'undefined') {
+            this.getAirportDataByIata = this.getAirportDataByIata.bind(this);
+            this.updateVisibleMarkers = this.updateVisibleMarkers.bind(this);
+
+            map.on('zoomend', this.updateVisibleMarkers);
+            map.on('moveend', this.updateVisibleMarkers);
+
+            this.fetchAndDisplayAirports();
+        } else {
             console.error('Map is not defined');
-            return;
         }
-
-        this.updateVisibleMarkers = this.updateVisibleMarkers.bind(this);
-        map.on('zoomend moveend', this.updateVisibleMarkers);
-
-        this.fetchAndDisplayAirports();
-        this.linePool.init();
-        this.initViewportLoading();
     },
 
     addMarker(airport) {
-        if (!airport?.iata_code || !airport.weight) {
+        if (!airport || !airport.iata_code || !airport.weight) {
             console.error('Incomplete airport data:', airport);
             return;
         }
@@ -64,7 +36,7 @@ const flightMap = {
 
         const icon = this.getMarkerIcon(iata, airport.type);
         const latLng = L.latLng(airport.latitude, airport.longitude);
-        const marker = L.marker(latLng, { icon }).addTo(map);
+        const marker = L.marker(latLng, { icon });
         marker.airportWeight = airport.weight;
         marker.iata_code = iata;
 
@@ -73,6 +45,10 @@ const flightMap = {
 
         eventManager.attachMarkerEventListeners(iata, marker, airport);
         this.markers[iata] = marker;
+
+        if (this.shouldDisplayAirport(marker.airportWeight, map.getZoom())) {
+            marker.addTo(map);
+        }
     },
 
     getMarkerIcon(iata, type) {
@@ -127,6 +103,7 @@ const flightMap = {
         popupContent.appendChild(button);
         clickedMarker.bindPopup(popupContent, { autoClose: false, closeOnClick: true }).openPopup();
 
+        // Move line drawing after popup is bound
         this.fetchAndCacheRoutes(airport.iata_code).then(() => {
             if (!appState.directRoutes[airport.iata_code]) {
                 console.error('Direct routes not found for IATA:', airport.iata_code);
@@ -138,16 +115,30 @@ const flightMap = {
         });
     },
 
-    async fetchAndDisplayAirports() {
-        const currentZoom = map?.getZoom();
-        if (currentZoom === undefined) {
-            console.error('Map is not ready');
-            return;
-        }
-
+    findRoute(fromIata, toIata) {
         try {
-            await this.fetchAndCacheAirports(currentZoom);
-            this.updateVisibleMarkers();
+            for (const routes of Object.values(appState.directRoutes)) {
+                for (const route of routes) {
+                    if (route.originAirport.iata_code === fromIata && route.destinationAirport.iata_code === toIata) {
+                        return route;
+                    }
+                }
+            }
+        } catch (error) {
+            console.error(`Error finding route from ${fromIata} to ${toIata}:`, error);
+        }
+        return null;
+    },
+
+    async fetchAndDisplayAirports() {
+        try {
+            const currentZoom = map?.getZoom();
+            if (currentZoom !== undefined) {
+                await this.fetchAndCacheAirports(currentZoom);
+                this.updateVisibleMarkers();
+            } else {
+                console.error('Map is not ready');
+            }
         } catch (error) {
             console.error('Error fetching airports:', error);
         }
@@ -169,7 +160,7 @@ const flightMap = {
     },
 
     getAirportDataByIata(iata) {
-        if (this.airportDataCache[iata]) {
+        if (this.airportDataCache && this.airportDataCache[iata]) {
             return Promise.resolve(this.airportDataCache[iata]);
         }
 
@@ -177,14 +168,11 @@ const flightMap = {
     },
 
     getColorBasedOnPrice(price) {
-        if (price == null || isNaN(parseFloat(price))) return 'grey';
+        if (price === null || price === undefined || isNaN(parseFloat(price))) {
+            return 'grey';
+        }
         price = parseFloat(price);
-        if (price < 100) return '#0099ff';
-        if (price < 200) return 'green';
-        if (price < 300) return '#abb740';
-        if (price < 400) return 'orange';
-        if (price < 500) return '#da4500';
-        return '#c32929';
+        return price < 100 ? '#0099ff' : price < 200 ? 'green' : price < 300 ? '#abb740' : price < 400 ? 'orange' : price < 500 ? '#da4500' : '#c32929';
     },
 
     redrawMarkers() {
@@ -195,11 +183,15 @@ const flightMap = {
     },
 
     markerHoverHandler(iata, event) {
-        if (this.preservedMarker && this.markers[iata] !== this.preservedMarker) return;
+        // Skip hover effects if there's a preserved marker and this isn't it
+        if (this.preservedMarker && this.markers[iata] !== this.preservedMarker) {
+            return;
+        }
 
         const marker = this.markers[iata];
+        if (!marker) return;
         const airport = this.airportDataCache[iata];
-        if (!marker || !airport) return;
+        if (!airport) return;
 
         if (event === 'mouseover') {
             this.fetchAndCacheRoutes(iata).then(() => {
@@ -207,6 +199,7 @@ const flightMap = {
                     console.error('Direct routes not found for IATA:', iata);
                     return;
                 }
+                // Only draw hover paths if no marker is preserved
                 if (!this.preservedMarker) {
                     pathDrawing.drawRoutePaths(iata, appState.directRoutes, 'hover');
                 }
@@ -220,7 +213,7 @@ const flightMap = {
             }, 200);
         }
 
-        if (appState.selectedAirport?.iata_code === iata) {
+        if (appState.selectedAirport && appState.selectedAirport.iata_code === iata) {
             marker.openPopup();
         }
     },
@@ -230,19 +223,19 @@ const flightMap = {
             console.error('IATA code is empty');
             return;
         }
-        if (appState.directRoutes[iata]) return;
-
-        try {
-            const direction = appState.routeDirection;
-            const response = await fetch(`https://yonderhop.com/api/directRoutes?origin=${iata}&direction=${direction}`);
-            const routes = await response.json();
-            if (!routes?.length) {
-                console.error('No routes found for IATA:', iata);
-                return;
+        if (!appState.directRoutes[iata]) {
+            try {
+                const direction = appState.routeDirection; // 'to' or 'from'
+                const response = await fetch(`https://yonderhop.com/api/directRoutes?origin=${iata}&direction=${direction}`);
+                const routes = await response.json();
+                if (!routes || !routes.length) {
+                    console.error('No routes found for IATA:', iata);
+                    return;
+                }
+                appState.directRoutes[iata] = routes;
+            } catch (error) {
+                console.error('Error fetching routes:', error);
             }
-            appState.directRoutes[iata] = routes;
-        } catch (error) {
-            console.error('Error fetching routes:', error);
         }
     },
 
@@ -255,101 +248,32 @@ const flightMap = {
         const currentBounds = map.getBounds();
 
         Object.values(this.airportDataCache).forEach(airport => {
-            const shouldDisplay = this.shouldDisplayAirport(airport.weight, currentZoom);
-            const isInBounds = currentBounds.contains(L.latLng(airport.latitude, airport.longitude));
-            const markerExists = !!this.markers[airport.iata_code];
-
-            if (shouldDisplay && isInBounds && !markerExists) {
+            if (this.shouldDisplayAirport(airport.weight, currentZoom) &&
+                currentBounds.contains(L.latLng(airport.latitude, airport.longitude)) &&
+                !this.markers[airport.iata_code]) {
                 this.addMarker(airport);
-            } else if (markerExists && (!shouldDisplay || !isInBounds)) {
-                map.removeLayer(this.markers[airport.iata_code]);
-                delete this.markers[airport.iata_code];
+                if (this.markers[airport.iata_code]) {
+                    this.markers[airport.iata_code].addTo(map);
+                }
             }
         });
 
         Object.keys(this.markers).forEach(iata => {
             const marker = this.markers[iata];
             const isWaypoint = appState.waypoints.some(wp => wp.iata_code === iata);
-            const shouldDisplay = isWaypoint || this.shouldDisplayAirport(marker.airportWeight, currentZoom);
-            const isInBounds = currentBounds.contains(marker.getLatLng());
-
-            if (shouldDisplay && isInBounds) {
-                if (!map.hasLayer(marker)) marker.addTo(map);
-            } else if (!isWaypoint && map.hasLayer(marker)) {
+            if (isWaypoint || this.shouldDisplayAirport(marker.airportWeight, currentZoom)) {
+                if (currentBounds.contains(marker.getLatLng())) {
+                    if (!map.hasLayer(marker)) {
+                        marker.addTo(map);
+                    }
+                } else if (!isWaypoint) {
+                    map.removeLayer(marker);
+                }
+            } else if (!isWaypoint) {
                 map.removeLayer(marker);
             }
         });
-    },
-
-    async getRouteData(iata) {
-        if (this.routeCache.has(iata)) return this.routeCache.get(iata);
-        if (this.pendingRoutes.has(iata)) return this.pendingRoutes.get(iata);
-
-        const routePromise = fetch(`/api/routes/${iata}`)
-            .then(res => res.json())
-            .then(data => {
-                this.routeCache.set(iata, data);
-                this.pendingRoutes.delete(iata);
-                return data;
-            });
-
-        this.pendingRoutes.set(iata, routePromise);
-        return routePromise;
-    },
-
-    drawRouteLines(iata, routes) {
-        const batchSize = 20;
-        let currentIndex = 0;
-
-        const drawBatch = () => {
-            const batch = routes.slice(currentIndex, currentIndex + batchSize);
-            
-            batch.forEach(route => {
-                const line = this.linePool.acquire();
-                const coords = this.calculateRouteCoordinates(route);
-                line.setLatLngs(coords).setStyle({opacity: 1});
-            });
-
-            currentIndex += batchSize;
-            if (currentIndex < routes.length) {
-                requestAnimationFrame(drawBatch);
-            }
-        };
-
-        requestAnimationFrame(drawBatch);
-    },
-
-    initViewportLoading() {
-        const loadVisibleRoutes = () => {
-            const bounds = map.getBounds();
-            const visibleMarkers = Object.values(this.markers)
-                .filter(marker => bounds.contains(marker.getLatLng()));
-
-            visibleMarkers.slice(0, 10).forEach(marker => {
-                this.getRouteData(marker.iata_code);
-            });
-        };
-
-        map.on('moveend zoomend', () => {
-            requestAnimationFrame(loadVisibleRoutes);
-        });
-    },
-
-    handleMarkerHover: debounce(function(iata, type) {
-        if (type === 'mouseover' && !this.hoverDisabled) {
-            this.getRouteData(iata).then(routes => {
-                this.drawRouteLines(iata, routes);
-            });
-        }
-    }, 50)
+    }
 };
-
-function debounce(func, wait) {
-    let timeout;
-    return function(...args) {
-        clearTimeout(timeout);
-        timeout = setTimeout(() => func.apply(this, args), wait);
-    };
-}
 
 export { flightMap };
