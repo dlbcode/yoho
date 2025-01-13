@@ -142,9 +142,9 @@ class Line {
     }
 
     remove() {
-        if (this.map.hasLayer(this.visibleLine)) this.map.removeLayer(this.visibleLine);
-        if (this.map.hasLayer(this.invisibleLine)) this.map.removeLayer(this.invisibleLine);
-        if (this.decoratedLine && this.map.hasLayer(this.decoratedLine)) this.map.removeLayer(this.decoratedLine);
+        map.removeLayer(this.visibleLine);
+        map.removeLayer(this.invisibleLine);
+        if (this.decoratedLine) map.removeLayer(this.decoratedLine);
     }
 }
 
@@ -172,21 +172,14 @@ const pathDrawing = {
         }
     },
 
-    processDrawQueue() {
+    async processDrawQueue() {
         const promises = Array.from(this.drawQueue).map(({ routeId, type, options }) =>
             this.drawLine(routeId, type, options)
         );
 
-        Promise.all(promises)
-            .then(() => {
-                this.drawQueue.clear();
-                this.isDrawing = false;
-            })
-            .catch(error => {
-                console.error('Error in batch drawing:', error);
-                this.drawQueue.clear();
-                this.isDrawing = false;
-            });
+        await Promise.all(promises);
+        this.drawQueue.clear();
+        this.isDrawing = false;
     },
 
     drawLine: function (routeId, type, options) {
@@ -310,8 +303,6 @@ const pathDrawing = {
     removeLine(routeId) {
         const lines = this.routePathCache[routeId] || [];
         lines.forEach(line => line.remove());
-        // Do not delete the cache entry
-        // delete this.routePathCache[routeId];
     },
 
     onClick(e, visibleLine, invisibleLine) {
@@ -328,7 +319,7 @@ const pathDrawing = {
             clearTimeout(this.hoverTimeout);
         }
         this.hoverTimeout = setTimeout(() => {
-        }, 100); // Debounce hover events by 100ms
+        }, 10); // Debounce hover events by 100ms
     },
 
     preloadDirectLines() {
@@ -336,7 +327,7 @@ const pathDrawing = {
         Object.keys(directRoutes).forEach(iata => {
             directRoutes[iata].forEach(route => {
                 const routeId = `${route.originAirport.iata_code}-${route.destinationAirport.iata_code}`;
-                this.drawLine(routeId, 'route', {
+                this.queueDraw(routeId, 'route', {
                     price: route.price,
                     date: route.date,
                     isDirect: true

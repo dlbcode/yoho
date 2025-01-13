@@ -37,22 +37,7 @@ const lineManager = {
 
     clearLinesByTags(tags, options = {}) {
         const lines = this.getLinesByTags(tags);
-        lines.forEach(line => {
-            if (line instanceof Line) {
-                line.visibleLine.setStyle({ opacity: 0 });
-                map.removeLayer(line.visibleLine);
-                map.removeLayer(line.invisibleLine);
-                if (line.decoratedLine) map.removeLayer(line.decoratedLine);
-            } else {
-                // Fallback for legacy line objects
-                if (line.visibleLine) {
-                    line.visibleLine.setStyle({ opacity: 0 });
-                    map.removeLayer(line.visibleLine);
-                }
-                if (line.invisibleLine) map.removeLayer(line.invisibleLine);
-                if (line.dashedLine) map.removeLayer(line.dashedLine);
-            }
-        });
+        lines.forEach(line => line.remove());
         return lines;
     },
 
