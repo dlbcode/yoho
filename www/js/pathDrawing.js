@@ -158,9 +158,10 @@ const pathDrawing = {
 
     // Add a map to track current line states
     lineStates: new Map(),
-    
+    hoverTimeout: null,
+
     queueDraw(routeId, type, options) {
-        this.drawQueue.add({routeId, type, options});
+        this.drawQueue.add({ routeId, type, options });
         this.scheduleDraw();
     },
 
@@ -172,9 +173,7 @@ const pathDrawing = {
     },
 
     processDrawQueue() {
-        lineManager.clearLines('route');
-        
-        const promises = Array.from(this.drawQueue).map(({routeId, type, options}) => 
+        const promises = Array.from(this.drawQueue).map(({ routeId, type, options }) =>
             this.drawLine(routeId, type, options)
         );
 
@@ -194,28 +193,38 @@ const pathDrawing = {
         const [originIata, destinationIata] = routeId.split('-');
         if (!originIata || destinationIata === 'Any') return;
 
-        flightMap.getAirportDataByIata(originIata).then(originAirport => {
-            if (!originAirport) return console.error('Origin airport data not found:', originIata);
-            if (destinationIata !== 'Any') {
-                flightMap.getAirportDataByIata(destinationIata).then(destinationAirport => {
-                    if (!destinationAirport) return console.error('Destination airport data not found:', destinationIata);
-                    
-                    // Create route data object
-                    const routeData = {
-                        originAirport,
-                        destinationAirport,
-                        price: options.price,
-                        date: options.date
-                    };
+        // Cache airport data to avoid redundant API calls
+        const originAirportPromise = flightMap.getAirportDataByIata(originIata);
+        const destinationAirportPromise = destinationIata !== 'Any' ? flightMap.getAirportDataByIata(destinationIata) : Promise.resolve(null);
 
-                    const line = new Line(originAirport, destinationAirport, routeId, type, {
-                        ...options,
-                        routeData // Pass routeData to Line constructor
-                    });
-                    this.cacheLine(routeId, type, line);
-                });
-            }
-        });
+        Promise.all([originAirportPromise, destinationAirportPromise])
+            .then(([originAirport, destinationAirport]) => {
+                if (!originAirport) {
+                    console.error('Origin airport data not found:', originIata);
+                    return;
+                }
+                if (destinationIata !== 'Any' && !destinationAirport) {
+                    console.error('Destination airport data not found:', destinationIata);
+                    return;
+                }
+
+                // Draw the line using the cached airport data
+                const line = new Line(originAirport, destinationAirport, routeId, type, options);
+                this.routePathCache[routeId] = this.routePathCache[routeId] || [];
+                this.routePathCache[routeId].push(line);
+
+                // Add the line to the map
+                line.visibleLine.addTo(map);
+                if (line.invisibleLine) {
+                    line.invisibleLine.addTo(map);
+                }
+                if (line.decoratedLine) {
+                    line.decoratedLine.addTo(map);
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching airport data:', error);
+            });
     },
 
     cacheLine(routeId, type, line) {
@@ -293,9 +302,9 @@ const pathDrawing = {
     },
 
     isSameLineState(state1, state2) {
-        return state1.type === state2.type && 
-               state1.price === state2.price && 
-               state1.group === state2.group;
+        return state1.type === state2.type &&
+            state1.price === state2.price &&
+            state1.group === state2.group;
     },
 
     removeLine(routeId) {
@@ -311,6 +320,14 @@ const pathDrawing = {
         } else {
             console.error('Route data is undefined for the clicked line.');
         }
+    },
+
+    onHoverMarker: function (marker) {
+        if (this.hoverTimeout) {
+            clearTimeout(this.hoverTimeout);
+        }
+        this.hoverTimeout = setTimeout(() => {
+        }, 100); // Debounce hover events by 100ms
     },
 
     preloadDirectLines() {
