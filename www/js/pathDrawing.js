@@ -310,7 +310,8 @@ const pathDrawing = {
     removeLine(routeId) {
         const lines = this.routePathCache[routeId] || [];
         lines.forEach(line => line.remove());
-        delete this.routePathCache[routeId];
+        // Do not delete the cache entry
+        // delete this.routePathCache[routeId];
     },
 
     onClick(e, visibleLine, invisibleLine) {
