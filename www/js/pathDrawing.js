@@ -182,7 +182,7 @@ const pathDrawing = {
         this.isDrawing = false;
     },
 
-    drawLine: function (routeId, type, options) {
+    async drawLine(routeId, type, options) {
         const [originIata, destinationIata] = routeId.split('-');
         if (!originIata || destinationIata === 'Any') return;
 
@@ -190,34 +190,30 @@ const pathDrawing = {
         const originAirportPromise = flightMap.getAirportDataByIata(originIata);
         const destinationAirportPromise = destinationIata !== 'Any' ? flightMap.getAirportDataByIata(destinationIata) : Promise.resolve(null);
 
-        Promise.all([originAirportPromise, destinationAirportPromise])
-            .then(([originAirport, destinationAirport]) => {
-                if (!originAirport) {
-                    console.error('Origin airport data not found:', originIata);
-                    return;
-                }
-                if (destinationIata !== 'Any' && !destinationAirport) {
-                    console.error('Destination airport data not found:', destinationIata);
-                    return;
-                }
+        const [originAirport, destinationAirport] = await Promise.all([originAirportPromise, destinationAirportPromise]);
 
-                // Draw the line using the cached airport data
-                const line = new Line(originAirport, destinationAirport, routeId, type, options);
-                this.routePathCache[routeId] = this.routePathCache[routeId] || [];
-                this.routePathCache[routeId].push(line);
+        if (!originAirport) {
+            console.error('Origin airport data not found:', originIata);
+            return;
+        }
+        if (destinationIata !== 'Any' && !destinationAirport) {
+            console.error('Destination airport data not found:', destinationIata);
+            return;
+        }
 
-                // Add the line to the map
-                line.visibleLine.addTo(map);
-                if (line.invisibleLine) {
-                    line.invisibleLine.addTo(map);
-                }
-                if (line.decoratedLine) {
-                    line.decoratedLine.addTo(map);
-                }
-            })
-            .catch(error => {
-                console.error('Error fetching airport data:', error);
-            });
+        // Draw the line using the cached airport data
+        const line = new Line(originAirport, destinationAirport, routeId, type, options);
+        this.routePathCache[routeId] = this.routePathCache[routeId] || [];
+        this.routePathCache[routeId].push(line);
+
+        // Add the line to the map
+        line.visibleLine.addTo(map);
+        if (line.invisibleLine) {
+            line.invisibleLine.addTo(map);
+        }
+        if (line.decoratedLine) {
+            line.decoratedLine.addTo(map);
+        }
     },
 
     cacheLine(routeId, type, line) {
@@ -257,7 +253,7 @@ const pathDrawing = {
         return L.latLng(latLng.lat, newLng);
     },
 
-    drawLines: async function () {
+    async drawLines() {
         const newLineStates = new Map();
         const promises = appState.routes.map((route, index) => {
             const routeId = `${route.origin}-${route.destination}`;
@@ -319,7 +315,12 @@ const pathDrawing = {
             clearTimeout(this.hoverTimeout);
         }
         this.hoverTimeout = setTimeout(() => {
-        }, 10); // Debounce hover events by 100ms
+            // Perform the hover action here
+            if (marker) {
+                // Example hover action: show a popup or highlight the marker
+                marker.openPopup();
+            }
+        }, 100); // Debounce hover events by 100ms
     },
 
     preloadDirectLines() {

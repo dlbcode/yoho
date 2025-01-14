@@ -10,6 +10,7 @@ const flightMap = {
     cacheDuration: 600000, // 10 minutes in milliseconds 
     hoverDisabled: false, // Add this flag
     preservedMarker: null,  // Add tracking for preserved marker
+    hoverTimeout: null, // Add hoverTimeout to debounce hover events
 
     init() {
         if (typeof map !== 'undefined') {
@@ -213,21 +214,27 @@ const flightMap = {
         const airport = this.airportDataCache[iata];
         if (!airport) return;
 
+        clearTimeout(this.hoverTimeout); // Clear any existing hover timeout
+
         if (event === 'mouseover') {
-            this.fetchAndCacheRoutes(iata).then(() => {
-                if (!appState.directRoutes[iata]) {
-                    console.error('Direct routes not found for IATA:', iata);
-                    return;
-                }
-                // Only draw hover paths if no marker is preserved
-                if (!this.preservedMarker) {
-                    pathDrawing.drawRoutePaths(iata, appState.directRoutes, 'hover');
-                }
-                marker.openPopup();
-                marker.hovered = true;
-            });
+            this.hoverTimeout = setTimeout(() => {
+                this.fetchAndCacheRoutes(iata).then(() => {
+                    if (!appState.directRoutes[iata]) {
+                        console.error('Direct routes not found for IATA:', iata);
+                        return;
+                    }
+                    // Clear existing hover lines before drawing new ones
+                    lineManager.clearLines('hover');
+                    // Only draw hover paths if no marker is preserved
+                    if (!this.preservedMarker) {
+                        pathDrawing.drawRoutePaths(iata, appState.directRoutes, 'hover');
+                    }
+                    marker.openPopup();
+                    marker.hovered = true;
+                });
+            }, 100); // Add a small delay to debounce hover events
         } else if (event === 'mouseout' && !this.preservedMarker) {
-            setTimeout(() => {
+            this.hoverTimeout = setTimeout(() => {
                 lineManager.clearLines('hover');
                 marker.closePopup();
             }, 200);
