@@ -77,13 +77,19 @@ class Line {
     createVisibleLine() {
         const adjustedOrigin = L.latLng(this.origin.latitude, this.origin.longitude);
         const adjustedDestination = L.latLng(this.destination.latitude, this.destination.longitude);
-        return new L.Geodesic([adjustedOrigin, adjustedDestination], {
+        const lineOptions = {
             weight: this.weight,
             opacity: 1,
             color: this.color,
             wrap: false,
             zIndex: -1
-        }).addTo(this.map);
+        };
+
+        if (this.type === 'dashed') {
+            lineOptions.dashArray = '5, 10'; // Adjust the dash pattern as needed
+        }
+
+        return new L.Geodesic([adjustedOrigin, adjustedDestination], lineOptions).addTo(this.map);
     }
 
     createInvisibleLine() {
