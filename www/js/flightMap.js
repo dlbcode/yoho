@@ -217,7 +217,6 @@ const flightMap = {
         clearTimeout(this.hoverTimeout); // Clear any existing hover timeout
 
         if (event === 'mouseover') {
-            this.hoverTimeout = setTimeout(() => {
                 this.fetchAndCacheRoutes(iata).then(() => {
                     if (!appState.directRoutes[iata]) {
                         console.error('Direct routes not found for IATA:', iata);
@@ -232,7 +231,6 @@ const flightMap = {
                     marker.openPopup();
                     marker.hovered = true;
                 });
-            }, 100); // Add a small delay to debounce hover events
         } else if (event === 'mouseout' && !this.preservedMarker) {
             this.hoverTimeout = setTimeout(() => {
                 lineManager.clearLines('hover');
