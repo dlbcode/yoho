@@ -4,7 +4,6 @@ import { buildRouteTable } from './routeTable/routeTable.js';
 import { selectedRoute } from './routeTable/selectedRoute.js';
 import { adjustMapSize, map } from './map.js';
 import { uiHandling } from './uiHandling.js';
-import { flightMap } from './flightMap.js';
 import { routeBox } from './routeBox/routeBox.js';
 import { lineManager } from './lineManager.js';
 
