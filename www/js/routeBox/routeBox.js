@@ -152,7 +152,6 @@ const routeBox = {
 
         setupWaypointInputListeners(routeNumber);
         handleTripTypeChange(appState.routes[routeNumber].tripType, routeNumber);
-        setTimeout(() => setWaypointInputs(routeNumber), 200);
         setWaypointInputs(routeNumber); // Pass the routeNumber to setWaypointInputs
     },
 
