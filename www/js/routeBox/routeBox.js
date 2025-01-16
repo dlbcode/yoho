@@ -95,11 +95,18 @@ const revertInput = (input) => {
     if (backButton) backButton.remove();
 };
 
-const setWaypointInputs = () => {
-    const fromInput = document.getElementById('waypoint-input-1');
-    const toInput = document.getElementById('waypoint-input-2');
-    if (fromInput) fromInput.value = appState.waypoints[0] ? `${appState.waypoints[0].city}, (${appState.waypoints[0].iata_code})` : '';
-    if (toInput) toInput.value = appState.waypoints[1] ? `${appState.waypoints[1].city}, (${appState.waypoints[1].iata_code})` : '';
+const setWaypointInputs = (routeNumber) => {
+    const fromInput = document.getElementById(`waypoint-input-${routeNumber * 2 + 1}`);
+    const toInput = document.getElementById(`waypoint-input-${routeNumber * 2 + 2}`);
+    const fromWaypoint = appState.waypoints[routeNumber * 2];
+    const toWaypoint = appState.waypoints[routeNumber * 2 + 1];
+
+    if (fromInput) {
+        fromInput.value = fromWaypoint ? `${fromWaypoint.city}, (${fromWaypoint.iata_code})` : '';
+    }
+    if (toInput) {
+        toInput.value = toWaypoint ? `${toWaypoint.city}, (${toWaypoint.iata_code})` : '';
+    }
 };
 
 const routeBox = {
@@ -145,7 +152,8 @@ const routeBox = {
 
         setupWaypointInputListeners(routeNumber);
         handleTripTypeChange(appState.routes[routeNumber].tripType, routeNumber);
-        setTimeout(setWaypointInputs, 200);
+        setTimeout(() => setWaypointInputs(routeNumber), 200);
+        setWaypointInputs(routeNumber); // Pass the routeNumber to setWaypointInputs
     },
 
     removeExistingRouteBox() {
