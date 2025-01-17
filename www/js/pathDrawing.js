@@ -260,38 +260,22 @@ const pathDrawing = {
     },
 
     async drawLines() {
-        const newLineStates = new Map();
+        // Clear all existing lines first
+        lineManager.clearLines('all');
+        
         const promises = appState.routes.map((route, index) => {
+            if (!route.origin || !route.destination) return Promise.resolve();
+            
             const routeId = `${route.origin}-${route.destination}`;
-            const lineState = {
-                type: route.isDirect ? 'route' : 'dashed',
+            const type = route.isDirect ? 'route' : 'dashed';
+            
+            return this.drawLine(routeId, type, {
                 price: route.price,
-                group: appState.selectedRoutes[index]?.group
-            };
-            newLineStates.set(routeId, lineState);
-
-            // Check if line needs to be updated
-            const currentState = this.lineStates.get(routeId);
-            if (!currentState || !this.isSameLineState(currentState, lineState)) {
-                // Line is new or changed - queue for update
-                return this.queueDraw(routeId, lineState.type, {
-                    price: lineState.price,
-                    ...(lineState.group && { group: lineState.group })
-                });
-            }
-            return Promise.resolve();
+                group: appState.selectedRoutes[index]?.group,
+                isTableRoute: false,
+                showPlane: type === 'route'
+            });
         });
-
-        // Find lines to remove
-        for (const [routeId] of this.lineStates) {
-            if (!newLineStates.has(routeId)) {
-                // Line no longer exists - remove it
-                this.removeLine(routeId);
-            }
-        }
-
-        // Update state tracker
-        this.lineStates = newLineStates;
 
         await Promise.all(promises);
     },
