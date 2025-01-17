@@ -28,11 +28,22 @@ const removeRoute = (routeNumber) => {
     // Remove route date
     delete appState.routeDates[routeNumber];
 
-    // Update map
+    // Update state management
+    if (appState.currentView === 'routeTable' && appState.currentRouteIndex === routeNumber) {
+        // Find previous valid route index
+        const prevRouteIndex = routeNumber - 1;
+        if (prevRouteIndex >= 0) {
+            appState.currentRouteIndex = prevRouteIndex;
+        } else {
+            appState.currentView = 'trip'; // Reset to trip view if no previous route
+        }
+    }
+
+    // Update map and UI
     mapHandling.updateMarkerIcons();
     routeHandling.updateRoutesArray();
     
-    // Close route box
+    // Hide route box
     document.getElementById('routeBox').style.display = 'none';
 
     // Collapse infoPane to initial state
