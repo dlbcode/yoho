@@ -5,6 +5,9 @@ import { lineManager } from './lineManager.js';
 
 const routeHandling = {
     updateRoutesArray: async function() {
+        // Clear all existing route lines before drawing new ones
+        lineManager.clearLines('route');
+        
         let newRoutes = [];
         const waypoints = appState.routeDirection === 'to' ? 
             [...appState.waypoints].reverse() : 
