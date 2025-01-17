@@ -2,6 +2,7 @@ import { appState, updateState } from '../stateManager.js';
 import { mapHandling } from '../mapHandling.js';
 import { routeHandling } from '../routeHandling.js';
 import { lineManager } from '../lineManager.js';
+import { adjustMapSize } from '../map.js';
 
 const removeRoute = (routeNumber) => {
     let selectedRouteIndex = routeNumber;
@@ -27,23 +28,23 @@ const removeRoute = (routeNumber) => {
     // Remove route date
     delete appState.routeDates[routeNumber];
 
-    // Re-index routeDates
-    const newRouteDates = {};
-    Object.keys(appState.routeDates).forEach(key => {
-        if (parseInt(key) < routeNumber) {
-            newRouteDates[key] = appState.routeDates[key];
-        } else if (parseInt(key) > routeNumber) {
-            newRouteDates[parseInt(key) - 1] = appState.routeDates[key];
-        }
-    });
-    appState.routeDates = newRouteDates;
-
     // Update map
     mapHandling.updateMarkerIcons();
     routeHandling.updateRoutesArray();
     
     // Close route box
     document.getElementById('routeBox').style.display = 'none';
+
+    // Collapse infoPane to initial state
+    const infoPane = document.getElementById('infoPane');
+    if (infoPane) {
+        infoPane.style.height = '40px'; // This is the default height with just the menu bar
+        const infoPaneContent = document.getElementById('infoPaneContent');
+        if (infoPaneContent) {
+            infoPaneContent.innerHTML = ''; // Clear the content
+        }
+        adjustMapSize();
+    }
 };
 
 const removeRouteButton = (container, routeNumber) => {
