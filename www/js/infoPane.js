@@ -80,8 +80,11 @@ const infoPane = {
 
             button.classList.toggle('selected-route-button', appState.selectedRoutes.hasOwnProperty(routeIndex));
             uiHandling.attachDateTooltip(button, routeIndex);
-            button.addEventListener('mouseover', () => this.highlightRouteLines(origin, destination, 'white'));
-            button.addEventListener('mouseout', () => this.resetRouteLineColors(origin, destination));
+
+            button.addEventListener('mouseover', () => 
+                this.applyToLines([`route:${origin}-${destination}`], 'highlight'));
+            button.addEventListener('mouseout', () => 
+                this.applyToLines([`route:${origin}-${destination}`], 'reset'));
         });
 
         if (appState.waypoints.length === 0 || appState.waypoints.length % 2 === 0) {
@@ -198,12 +201,10 @@ const infoPane = {
         tripButton.classList.add('green-button');
 
         if (appState.selectedRoutes.length > 0) {
-            tripButton.addEventListener('mouseover', () => {
-                const tableRows = document.querySelectorAll('.route-info-table tbody tr');
-                const allIataCodes = Array.from(tableRows).flatMap(row => row.cells[5].textContent.trim().split(' > '));
-                this.highlightRoute(allIataCodes);
-            });
-            tripButton.addEventListener('mouseout', () => lineManager.clearLinesByTags(['status:highlighted']));
+            tripButton.addEventListener('mouseover', () => 
+                this.applyToLines([`trip:${tripId}`], 'highlight'));
+            tripButton.addEventListener('mouseout', () => 
+                this.applyToLines([`trip:${tripId}`], 'reset'));
         }
     },
 
@@ -247,6 +248,10 @@ const infoPane = {
             updateState('updateRouteDate', { routeNumber: lastRouteIndex + 1, depart: newDepartDate.toISOString().slice(0, 10) }, 'infoPane.addPlusButton');
         }
         routeBox.showRouteBox(event, appState.routes.length);
+    },
+
+    applyToLines(tags, action) {
+        lineManager.getLinesByTags(tags).forEach(line => line[action]());
     }
 };
 

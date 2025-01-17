@@ -240,6 +240,8 @@ function routeInfoRow(rowElement, fullFlightData, routeIds, routeIndex) {
             });
         }
 
+        lineManager.clearLines('route'); // Use proper method from lineManager
+
         // Get all IATA codes from the route for waypoint updating
         const intermediaryIatas = fullFlightData.route.map(segment => segment.flyFrom);
         intermediaryIatas.push(fullFlightData.route[fullFlightData.route.length - 1].flyTo);
