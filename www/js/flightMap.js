@@ -7,7 +7,7 @@ import { lineManager } from './lineManager.js';
 const flightMap = {
     markers: {},
     airportDataCache: {},
-    cacheDuration: 600000, // 10 minutes in milliseconds 
+    cacheDuration: 3600000, // Increase from 10 minutes to 1 hour
     hoverDisabled: false, // Add this flag
     preservedMarker: null,  // Add tracking for preserved marker
     hoverTimeout: null, // Add hoverTimeout to debounce hover events

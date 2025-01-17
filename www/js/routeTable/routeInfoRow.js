@@ -183,21 +183,18 @@ function routeInfoRow(rowElement, fullFlightData, routeIds, routeIndex) {
     }
 
     async function fetchAndDisplayAirportData(origin, destination) {
-        try {
-            const [originAirport, destinationAirport] = await Promise.all([
-                flightMap.getAirportDataByIata(origin),
-                flightMap.getAirportDataByIata(destination)
+        // Check memory cache first
+        const originData = flightMap.airportDataCache[origin];
+        const destData = flightMap.airportDataCache[destination];
+        
+        if (originData && destData) {
+            map.fitBounds([
+                [originData.latitude, originData.longitude],
+                [destData.latitude, destData.longitude]
             ]);
-
-            if (originAirport && destinationAirport) {
-                map.fitBounds([
-                    [originAirport.latitude, originAirport.longitude],
-                    [destinationAirport.latitude, destinationAirport.longitude]
-                ]);
-            }
-        } catch (error) {
-            console.error('Error fetching airport data:', error);
+            return;
         }
+        // Fallback to API fetch if not cached
     }
 
     const departureColumn = detailCell.querySelector('.departure');
