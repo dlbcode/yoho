@@ -301,9 +301,6 @@ function routeInfoRow(rowElement, fullFlightData, routeIds, routeIndex) {
                 line.addTag('status:selected');
             });
         }
-
-        // Update visuals
-        pathDrawing.drawLines();
     });
 
     // When deselecting a route (if applicable)
