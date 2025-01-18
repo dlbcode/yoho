@@ -28,14 +28,21 @@ const removeRoute = (routeNumber) => {
     // Remove route date
     delete appState.routeDates[routeNumber];
 
-    // Update state management
+    // Update view based on previous route's state
     if (appState.currentView === 'routeTable' && appState.currentRouteIndex === routeNumber) {
-        // Find previous valid route index
         const prevRouteIndex = routeNumber - 1;
         if (prevRouteIndex >= 0) {
-            appState.currentRouteIndex = prevRouteIndex;
+            if (appState.selectedRoutes[prevRouteIndex]) {
+                // If previous route was selected, show its details
+                appState.currentView = 'selectedRoute';
+                appState.currentRouteIndex = prevRouteIndex;
+            } else {
+                // If previous route wasn't selected, go to trip view
+                appState.currentView = 'trip';
+            }
         } else {
-            appState.currentView = 'trip'; // Reset to trip view if no previous route
+            // No previous route, go to trip view
+            appState.currentView = 'trip';
         }
     }
 
@@ -44,15 +51,16 @@ const removeRoute = (routeNumber) => {
     routeHandling.updateRoutesArray();
     
     // Hide route box
-    document.getElementById('routeBox').style.display = 'none';
+    const routeBox = document.getElementById('routeBox');
+    if (routeBox) routeBox.style.display = 'none';
 
     // Collapse infoPane to initial state
     const infoPane = document.getElementById('infoPane');
     if (infoPane) {
-        infoPane.style.height = '40px'; // This is the default height with just the menu bar
+        infoPane.style.height = '40px';
         const infoPaneContent = document.getElementById('infoPaneContent');
         if (infoPaneContent) {
-            infoPaneContent.innerHTML = ''; // Clear the content
+            infoPaneContent.innerHTML = '';
         }
         adjustMapSize();
     }
