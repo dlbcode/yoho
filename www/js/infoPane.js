@@ -94,20 +94,36 @@ const infoPane = {
 
     handleRouteButtonClick(routeIndex, event) {
         adjustMapSize();
-        if (appState.currentRouteIndex !== routeIndex) {
-            appState.currentRouteIndex = routeIndex;
-            appState.currentView = appState.selectedRoutes.hasOwnProperty(routeIndex) ? 'selectedRoute' : 'routeTable';
-            if (appState.currentView === 'routeTable') {
-                routeBox.showRouteBox(event, routeIndex);
-            }
-            this.displayContent();
-        } else {
-            const routeBoxElement = document.getElementById('routeBox');
-            if (routeBoxElement.style.display === 'none') {
+        
+        const routeBoxElement = document.getElementById('routeBox');
+        const isRouteSelected = appState.selectedRoutes.hasOwnProperty(routeIndex);
+        const isRouteInfoCurrentlyShown = 
+            appState.currentView === 'selectedRoute' && 
+            appState.currentRouteIndex === routeIndex;
+        const isRouteBoxVisible = 
+            routeBoxElement && 
+            routeBoxElement.style.display !== 'none' &&
+            parseInt(routeBoxElement.dataset.routeNumber) === routeIndex;
+
+        if (isRouteSelected) {
+            if (isRouteBoxVisible) {
+                // Hide routeBox if it's already visible for this route
+                routeBoxElement.style.display = 'none';
+            } else if (isRouteInfoCurrentlyShown) {
+                // Show routeBox if route info is currently displayed
                 routeBox.showRouteBox(event, routeIndex);
             } else {
-                routeBoxElement.style.display = 'none';
+                // Show route info in infoPane
+                appState.currentRouteIndex = routeIndex;
+                appState.currentView = 'selectedRoute';
+                this.displayContent();
             }
+        } else {
+            // Handle unselected route - show routeBox
+            appState.currentRouteIndex = routeIndex;
+            appState.currentView = 'routeTable';
+            routeBox.showRouteBox(event, routeIndex);
+            this.displayContent();
         }
     },
 
