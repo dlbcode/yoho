@@ -113,6 +113,7 @@ const lineManager = {
     },
 
     onMouseOver(e, line) {
+        console.log('line', line);
         if (pathDrawing.popupFromClick) return;
 
         if (this.hoveredLine && this.hoveredLine !== line) {
@@ -124,17 +125,16 @@ const lineManager = {
         line.visibleLine?.setStyle({ color: 'white', weight: 2, opacity: 1 });
         line instanceof Line && line.highlight();
 
-        const { routeData } = line;
+        // Extract price from tags
+        const priceTag = Array.from(line.tags).find(tag => tag.startsWith('price:'));
+        const price = priceTag ? priceTag.split(':')[1] : 'N/A';
+
         const content = `
             <div style="line-height: 1.2; margin: 0;">
-                ${routeData?.destinationAirport?.city || 'Unknown City'}<br>
+                ${line.destination?.city || 'Unknown City'}<br>
                 <span><strong><span style="color: #ccc; font-size: 14px;">
-                    $${routeData?.price ? Math.round(routeData.price) : 'N/A'}
+                    $${price}
                 </span></strong></span>
-                ${routeData?.date ? `<br><span style="line-height: 1; display: block; color: #666">
-                    on ${new Date(routeData.date).toLocaleDateString("en-US", 
-                    { year: 'numeric', month: 'long', day: 'numeric' })}
-                </span>` : ''}
             </div>`;
 
         const popup = this.createPopup(e.latlng, content, { closeOnClick: true });
