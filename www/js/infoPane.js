@@ -207,21 +207,24 @@ const infoPane = {
     },
 
     updateTripButton(selectedRoutesArray) {
-        let totalPrice = selectedRoutesArray.reduce((total, item) => {
-            let price = typeof item.displayData.price === 'number' ? item.displayData.price : parseFloat(item.displayData.price.replace(/[^\d.-]/g, ''));
-            return isNaN(price) ? total : total + price;
+        // Group routes by their group ID to avoid counting segments multiple times
+        const pricesByGroup = selectedRoutesArray.reduce((groups, item) => {
+            const group = item.group;
+            if (!groups[group]) {
+                groups[group] = item.displayData.price;
+            }
+            return groups;
+        }, {});
+
+        // Sum up prices for each unique group
+        let totalPrice = Object.values(pricesByGroup).reduce((total, price) => {
+            const numericPrice = typeof price === 'number' ? price : parseFloat(String(price).replace(/[^\d.-]/g, ''));
+            return total + (isNaN(numericPrice) ? 0 : numericPrice);
         }, 0);
 
         const tripButton = document.getElementById('tripButton');
         tripButton.textContent = totalPrice > 0 ? `$${totalPrice.toFixed(2)}` : '$0.00';
         tripButton.classList.add('green-button');
-
-        if (appState.selectedRoutes.length > 0) {
-            tripButton.addEventListener('mouseover', () => 
-                this.applyToLines([`trip:${tripId}`], 'highlight'));
-            tripButton.addEventListener('mouseout', () => 
-                this.applyToLines([`trip:${tripId}`], 'reset'));
-        }
     },
 
     formatPrice(price) {
