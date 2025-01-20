@@ -18,9 +18,8 @@
   height: 40px;
   display: flex;
   align-items: center;
-  background-color: #333; /* Optional: to match the menu bar's background */
-  border-top: 3px solid #0060bb;
-  order: 2; /* Move to end of flex container */
+  background-color: #333;
+  order: 2; /* Keep at bottom */
 }
 
 #menu-bar {
@@ -120,6 +119,21 @@
   flex-grow: 1; /* Allow content to grow */
   overflow-y: auto;
   background-color: #1d1d1d;
+  border-top: 3px solid #0060bb;
+}
+
+/* Move animation to infoPaneContent */
+#infoPaneContent.loading::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background-image: linear-gradient(90deg, #0060bb 25%, #ffffff 50%, #0060bb 75%);
+  background-size: 200% 100%;
+  animation: loadingAnimation 1s linear infinite;
+  z-index: 10000;
 }
 
 table {
