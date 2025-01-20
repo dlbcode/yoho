@@ -11,7 +11,20 @@
   box-sizing: border-box;
   z-index: 1000;
   display: flex;
-  flex-direction: column;
+  flex-direction: column-reverse;
+}
+
+#infoPane.loading::before {
+  content: '';
+  position: absolute;
+  top: 40px; /* Height of resize handle */
+  left: 0;
+  right: 0;
+  height: 3px;
+  background-image: linear-gradient(90deg, #0060bb 25%, #ffffff 50%, #0060bb 75%);
+  background-size: 200% 100%;
+  animation: loadingAnimation 1s linear infinite;
+  z-index: 1001;
 }
 
 #top-bar {
@@ -115,25 +128,36 @@
 }
 
 #infoPaneContent {
-  position: relative; /* Change from absolute */
-  flex-grow: 1; /* Allow content to grow */
+  position: relative;
+  flex-grow: 1;
   overflow-y: auto;
   background-color: #1d1d1d;
-  border-top: 3px solid #0060bb;
 }
 
-/* Move animation to infoPaneContent */
-#infoPaneContent.loading::before {
+/* Add a pseudo-element for the border */
+#top-bar::before {
   content: '';
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
-  height: 2px;
+  height: 3px;
+  background-color: #0060bb;
+  z-index: 1;
+}
+
+/* Separate loading animation to a different pseudo-element */
+#infoPaneContent.loading::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
   background-image: linear-gradient(90deg, #0060bb 25%, #ffffff 50%, #0060bb 75%);
   background-size: 200% 100%;
   animation: loadingAnimation 1s linear infinite;
-  z-index: 10000;
+  z-index: 2;
 }
 
 table {
