@@ -31,6 +31,10 @@ function buildRouteTable(routeIndex) {
     const topBar = document.getElementById('top-bar');
     topBar.classList.add('loading');
 
+    // Start loading animation
+    const infoPaneContent = document.getElementById('infoPaneContent');
+    infoPaneContent.classList.add('loading');
+
     // **Helper function to format dates to DD/MM/YYYY**
     function formatDate(dateString) {
         if (!dateString || dateString === 'any' || dateString.includes(' to ')) {
@@ -240,6 +244,7 @@ function buildRouteTable(routeIndex) {
             table.appendChild(tbody);
             infoPaneContent.appendChild(table); // Append the table once all rows are added
             topBar.classList.remove('loading');
+            infoPaneContent.classList.remove('loading');
             pathDrawing.drawLines();
             highlightSelectedRowForRouteIndex(routeIndex);
             attachEventListeners(table, flightsData, routeIndex);
