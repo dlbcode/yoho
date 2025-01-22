@@ -1,7 +1,7 @@
 import { appState, updateState } from '../stateManager.js';
 import { sliderFilter } from './sliderFilter.js';
 import { sortTableByColumn } from './sortTable.js';
-import { pathDrawing } from '../pathDrawing.js';
+import { pathDrawing, Line } from '../pathDrawing.js';
 import { flightMap } from '../flightMap.js';
 import { routeInfoRow, highlightSelectedRowForRouteIndex } from './routeInfoRow.js';
 import { applyFilters, toggleFilterResetIcon, updateFilterHeaders, constructFilterTags } from './filterTable.js';
@@ -298,13 +298,78 @@ function buildRouteTable(routeIndex) {
         });
 
         document.querySelectorAll('.route-info-table tbody tr').forEach((row, index) => {
-            row.addEventListener('click', function () {
+            // Add click handler (existing code)
+            row.addEventListener('click', function() {
                 const routeIdString = this.getAttribute('data-route-id');
                 const routeIds = routeIdString.split('|');
                 const fullFlightData = data[index];
                 routeInfoRow(this, fullFlightData, routeIds, routeIndex);
             });
+
+            // Add hover handlers
+            row.addEventListener('mouseover', function() {
+                const flight = data[index];
+                if (flight && flight.route) {
+                    // Get all segments for multi-leg flights
+                    const segments = [];
+                    for (let i = 0; i < flight.route.length - 1; i++) {
+                        const segment = {
+                            from: flight.route[i].flyFrom,
+                            to: flight.route[i + 1].flyFrom
+                        };
+                        segments.push(segment);
+                    }
+                    
+                    // Add final destination
+                    if (flight.route.length > 0) {
+                        segments.push({
+                            from: flight.route[flight.route.length - 1].flyFrom,
+                            to: flight.route[flight.route.length - 1].flyTo
+                        });
+                    }
+
+                    // Highlight each segment
+                    segments.forEach(segment => {
+                        const routeId = `${segment.from}-${segment.to}`;
+                        console.log(`Processing segment: ${routeId}`);
+                        
+                        // Check both caches
+                        const lines = [
+                            ...(pathDrawing.routePathCache[routeId] || []),
+                            ...(pathDrawing.dashedRoutePathCache[routeId] || [])
+                        ];
+
+                        if (lines.length > 0) {
+                            lines.forEach(line => {
+                                if (line instanceof Line) {
+                                    line.highlight();
+                                    console.log(`Highlighted line: ${routeId}`);
+                                }
+                            });
+                        } else {
+                            console.log(`No lines found for route: ${routeId}`);
+                        }
+                    });
+                }
+            });
+
+            row.addEventListener('mouseout', function() {
+                const flight = data[index];
+                if (flight && flight.route) {
+                    flight.route.forEach((segment, i) => {
+                        if (i < flight.route.length) {
+                            const routeId = `${segment.flyFrom}-${segment.flyTo}`;
+                            const lines = [
+                                ...(pathDrawing.routePathCache[routeId] || []),
+                                ...(pathDrawing.dashedRoutePathCache[routeId] || [])
+                            ];
+                            lines.forEach(line => line instanceof Line && line.reset());
+                        }
+                    });
+                }
+            });
         });
+
         updateFilterHeaders();
         toggleFilterResetIcon('price');
         toggleFilterResetIcon('departure');
