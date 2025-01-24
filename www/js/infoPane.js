@@ -119,11 +119,9 @@ const infoPane = {
                 this.displayContent();
             }
         } else {
-            // Handle unselected route - show routeBox
+            // Handle unselected route - show routeBox only
             appState.currentRouteIndex = routeIndex;
-            appState.currentView = 'routeTable';
             routeBox.showRouteBox(event, routeIndex);
-            this.displayContent();
         }
     },
 

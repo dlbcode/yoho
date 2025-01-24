@@ -181,12 +181,16 @@ const routeBox = {
         const searchButton = createElement('button', { className: 'search-button', content: 'Search' });
         searchButton.onclick = () => {
             document.getElementById('infoPaneContent').innerHTML = '';
-            if (appState.currentView !== 'routeTable') updateState('currentView', 'routeTable', 'routeBox.createSearchButton');
+            if (appState.currentView !== 'routeTable') {
+                updateState('currentView', 'routeTable', 'routeBox.createSearchButton');
+            }
             buildRouteTable(routeNumber);
             const routeBoxElement = document.getElementById('routeBox');
             if (routeBoxElement) routeBoxElement.style.display = 'none';
             const infoPaneElement = document.getElementById('infoPane');
-            if (infoPaneElement && infoPaneElement.offsetHeight < (0.5 * window.innerHeight)) infoPaneElement.style.height = `${0.5 * window.innerHeight}px`;
+            if (infoPaneElement && infoPaneElement.offsetHeight < (0.5 * window.innerHeight)) {
+                infoPaneElement.style.height = `${0.5 * window.innerHeight}px`;
+            }
         };
         return searchButton;
     },
