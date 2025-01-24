@@ -310,17 +310,14 @@ function buildRouteTable(routeIndex) {
             row.addEventListener('mouseover', function() {
                 const flight = data[index];
                 if (flight && flight.route) {
-                    // Get all segments for multi-leg flights
                     const segments = [];
                     for (let i = 0; i < flight.route.length - 1; i++) {
-                        const segment = {
+                        segments.push({
                             from: flight.route[i].flyFrom,
                             to: flight.route[i + 1].flyFrom
-                        };
-                        segments.push(segment);
+                        });
                     }
                     
-                    // Add final destination
                     if (flight.route.length > 0) {
                         segments.push({
                             from: flight.route[flight.route.length - 1].flyFrom,
@@ -328,27 +325,13 @@ function buildRouteTable(routeIndex) {
                         });
                     }
 
-                    // Highlight each segment
                     segments.forEach(segment => {
                         const routeId = `${segment.from}-${segment.to}`;
-                        console.log(`Processing segment: ${routeId}`);
-                        
-                        // Check both caches
                         const lines = [
                             ...(pathDrawing.routePathCache[routeId] || []),
                             ...(pathDrawing.dashedRoutePathCache[routeId] || [])
                         ];
-
-                        if (lines.length > 0) {
-                            lines.forEach(line => {
-                                if (line instanceof Line) {
-                                    line.highlight();
-                                    console.log(`Highlighted line: ${routeId}`);
-                                }
-                            });
-                        } else {
-                            console.log(`No lines found for route: ${routeId}`);
-                        }
+                        lines.forEach(line => line instanceof Line && line.highlight());
                     });
                 }
             });
