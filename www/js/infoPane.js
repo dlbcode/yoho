@@ -100,17 +100,22 @@ const infoPane = {
         const isForThisRoute = parseInt(routeBoxElement?.dataset.routeNumber) === routeIndex;
         const isSelectedRoute = appState.selectedRoutes.hasOwnProperty(routeIndex);
 
-        if (isSelectedRoute) {
-            if (routeBoxElement) routeBoxElement.remove();
+        // If there's a routeBox and it's for this route, remove it
+        if (routeBoxElement && isForThisRoute) {
+            routeBoxElement.remove();
+        } else if (isSelectedRoute) {
+            // For a selected route, show both the route details and the routeBox if not already shown
             appState.currentRouteIndex = routeIndex;
             appState.currentView = 'selectedRoute';
             this.displayContent();
-        } else {
-            if (routeBoxElement && isForThisRoute) {
-                routeBoxElement.remove();
-            } else {
+            
+            // Show routeBox if it's not already displayed for this route
+            if (!routeBoxElement) {
                 routeBox.showRouteBox(event, routeIndex);
             }
+        } else {
+            // For non-selected routes, just show the routeBox
+            routeBox.showRouteBox(event, routeIndex);
         }
     },
 
