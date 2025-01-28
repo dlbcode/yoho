@@ -233,14 +233,14 @@ const routeBox = {
     },
 };
 
+// Remove the document click handler
 document.addEventListener('click', (event) => {
     const routeBox = document.getElementById('routeBox');
-    if (routeBox && !routeBox.contains(event.target) && !event.target.closest('.do-not-close-routebox')) {
-        const routeNumber = parseInt(routeBox.dataset.routeNumber);
-        const fromInput = document.querySelector('.from-input input');
-        const toInput = document.querySelector('.to-input input');
-        if (!fromInput.value.trim() && !toInput.value.trim()) removeRoute(routeNumber);
-        routeBox.style.display = 'none';
+    const isRouteButton = event.target.closest('.route-info-button');
+    const isDoNotClose = event.target.closest('.do-not-close-routebox');
+    
+    if (routeBox && !routeBox.contains(event.target) && !isRouteButton && !isDoNotClose) {
+        routeBox.remove();
     }
 }, true);
 

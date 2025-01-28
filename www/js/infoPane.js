@@ -93,35 +93,24 @@ const infoPane = {
     },
 
     handleRouteButtonClick(routeIndex, event) {
+        event.stopPropagation();
         adjustMapSize();
         
         const routeBoxElement = document.getElementById('routeBox');
-        const isRouteSelected = appState.selectedRoutes.hasOwnProperty(routeIndex);
-        const isRouteInfoCurrentlyShown = 
-            appState.currentView === 'selectedRoute' && 
-            appState.currentRouteIndex === routeIndex;
-        const isRouteBoxVisible = 
-            routeBoxElement && 
-            routeBoxElement.style.display !== 'none' &&
-            parseInt(routeBoxElement.dataset.routeNumber) === routeIndex;
+        const isForThisRoute = parseInt(routeBoxElement?.dataset.routeNumber) === routeIndex;
+        const isSelectedRoute = appState.selectedRoutes.hasOwnProperty(routeIndex);
 
-        if (isRouteSelected) {
-            if (isRouteBoxVisible) {
-                // Hide routeBox if it's already visible for this route
-                routeBoxElement.style.display = 'none';
-            } else if (isRouteInfoCurrentlyShown) {
-                // Show routeBox if route info is currently displayed
-                routeBox.showRouteBox(event, routeIndex);
-            } else {
-                // Show route info in infoPane
-                appState.currentRouteIndex = routeIndex;
-                appState.currentView = 'selectedRoute';
-                this.displayContent();
-            }
-        } else {
-            // Handle unselected route - show routeBox only
+        if (isSelectedRoute) {
+            if (routeBoxElement) routeBoxElement.remove();
             appState.currentRouteIndex = routeIndex;
-            routeBox.showRouteBox(event, routeIndex);
+            appState.currentView = 'selectedRoute';
+            this.displayContent();
+        } else {
+            if (routeBoxElement && isForThisRoute) {
+                routeBoxElement.remove();
+            } else {
+                routeBox.showRouteBox(event, routeIndex);
+            }
         }
     },
 
