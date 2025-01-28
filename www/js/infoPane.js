@@ -246,12 +246,27 @@ const infoPane = {
 
     handlePlusButtonClick(event) {
         if (appState.waypoints.length > 0) {
-            const lastWaypoint = { ...appState.waypoints[appState.waypoints.length - 1] };
-            updateState('addWaypoint', lastWaypoint, 'infoPane.addPlusButton');
-            const lastRouteIndex = appState.routes.length - 1;
-            const newDepartDate = new Date((appState.routeDates[lastRouteIndex]?.return || appState.routeDates[lastRouteIndex]?.depart) ?? Date.now());
-            newDepartDate.setDate(newDepartDate.getDate() + 1);
-            updateState('updateRouteDate', { routeNumber: lastRouteIndex + 1, depart: newDepartDate.toISOString().slice(0, 10) }, 'infoPane.addPlusButton');
+            updateState('addWaypoint', { ...appState.waypoints.at(-1) }, 'infoPane.handlePlusButtonClick');
+            
+            const routeIndex = appState.routes.length - 1;
+            const prevDates = appState.routeDates[routeIndex] || {};
+            
+            const baseDate = new Date(prevDates.return || prevDates.depart || Date.now());
+            
+            // Validate date and format safely
+            const newDate = !isNaN(baseDate) ? baseDate : new Date();
+            newDate.setDate(newDate.getDate() + 1);
+            
+            const formattedDate = 
+                newDate.getFullYear() + '-' + 
+                String(newDate.getMonth() + 1).padStart(2, '0') + '-' + 
+                String(newDate.getDate()).padStart(2, '0');
+
+            updateState('updateRouteDate', {
+                routeNumber: routeIndex + 1,
+                depart: formattedDate,
+                return: null
+            }, 'infoPane.handlePlusButtonClick');
         }
         routeBox.showRouteBox(event, appState.routes.length);
     },
