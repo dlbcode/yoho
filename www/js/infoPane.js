@@ -97,26 +97,23 @@ const infoPane = {
         adjustMapSize();
         
         const routeBoxElement = document.getElementById('routeBox');
-        const isForThisRoute = parseInt(routeBoxElement?.dataset.routeNumber) === routeIndex;
-        const isSelectedRoute = appState.selectedRoutes.hasOwnProperty(routeIndex);
+        const isForThisRoute = routeBoxElement?.dataset.routeNumber === String(routeIndex);
 
-        // If there's a routeBox and it's for this route, remove it
         if (routeBoxElement && isForThisRoute) {
             routeBoxElement.remove();
-        } else if (isSelectedRoute) {
-            // For a selected route, show both the route details and the routeBox if not already shown
+            return;
+        }
+
+        if (routeBoxElement) {
+            routeBoxElement.remove();
+        }
+
+        if (appState.selectedRoutes.hasOwnProperty(routeIndex)) {
             appState.currentRouteIndex = routeIndex;
             appState.currentView = 'selectedRoute';
             this.displayContent();
-            
-            // Show routeBox if it's not already displayed for this route
-            if (!routeBoxElement) {
-                routeBox.showRouteBox(event, routeIndex);
-            }
-        } else {
-            // For non-selected routes, just show the routeBox
-            routeBox.showRouteBox(event, routeIndex);
         }
+        routeBox.showRouteBox(event, routeIndex);
     },
 
     highlightRouteLines(origin, destination, color) {
