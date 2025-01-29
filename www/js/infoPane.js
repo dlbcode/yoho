@@ -70,13 +70,7 @@ const infoPane = {
             button.textContent = buttonText;
             button.onclick = this.handleRouteButtonClick.bind(this, routeIndex);
 
-            const [originWaypoint, destinationWaypoint] = [appState.waypoints[routeIndex * 2], appState.waypoints[routeIndex * 2 + 1]];
-            const group = [originWaypoint, destinationWaypoint].filter(wp => wp).map(airport => L.latLng(airport.latitude, airport.longitude));
-            if (group.length > 1) {
-                map.fitBounds(L.latLngBounds(group), { padding: [50, 50] });
-            } else if (group.length === 1) {
-                map.setView(group[0], 4);
-            }
+            this.fitMapToRoute(routeIndex);
 
             button.classList.toggle('selected-route-button', appState.selectedRoutes.hasOwnProperty(routeIndex));
             uiHandling.attachDateTooltip(button, routeIndex);
@@ -107,6 +101,8 @@ const infoPane = {
         if (routeBoxElement) {
             routeBoxElement.remove();
         }
+
+        this.fitMapToRoute(routeIndex);
 
         if (appState.selectedRoutes.hasOwnProperty(routeIndex)) {
             appState.currentRouteIndex = routeIndex;
@@ -275,6 +271,22 @@ const infoPane = {
 
     applyToLines(tags, action) {
         lineManager.getLinesByTags(tags).forEach(line => line[action]());
+    },
+
+    fitMapToRoute(routeIndex) {
+        const [originWaypoint, destinationWaypoint] = [
+            appState.waypoints[routeIndex * 2], 
+            appState.waypoints[routeIndex * 2 + 1]
+        ];
+        const group = [originWaypoint, destinationWaypoint]
+            .filter(wp => wp)
+            .map(airport => L.latLng(airport.latitude, airport.longitude));
+            
+        if (group.length > 1) {
+            map.fitBounds(L.latLngBounds(group), { padding: [50, 50] });
+        } else if (group.length === 1) {
+            map.setView(group[0], 4);
+        }
     }
 };
 
