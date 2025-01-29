@@ -1,15 +1,17 @@
 .route-box-popup {
-  position: absolute;
+  position: relative; /* Change from absolute */
   z-index: 1000;
   background-color: #222;
   border-radius: 5px;
   border: 1px solid #525252;
   padding: 10px;
-  width: 400px;
-  max-width: 90%;
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  box-sizing: border-box;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
@@ -245,7 +247,8 @@
     left: 0;
     right: 0;
     margin: auto;
-    border-radius: 0;
+    border-radius: 5px;
+    border: 1px solid #525252;
     border-left: none;
     border-right: none;
   }
@@ -301,6 +304,11 @@
     stroke: #fff;
     background: none;
   }
+}
 
-
+.content-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 20px;
 }

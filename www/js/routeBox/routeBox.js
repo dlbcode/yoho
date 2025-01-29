@@ -111,12 +111,21 @@ const setWaypointInputs = (routeNumber) => {
 
 const routeBox = {
     showRouteBox(event, routeNumber) {
-        this.removeExistingRouteBox();
+        const infoPaneContent = document.getElementById('infoPaneContent');
+        infoPaneContent.innerHTML = '';
+        
         const routeBoxElement = this.createRouteBox();
         routeBoxElement.dataset.routeNumber = routeNumber;
-        document.body.appendChild(routeBoxElement);
+        infoPaneContent.appendChild(routeBoxElement);
+        
+        this.setupRouteBox(routeBoxElement, routeNumber);
+    },
 
-        if (!appState.routes[routeNumber]) appState.routes[routeNumber] = { tripType: 'oneWay' };
+    setupRouteBox(routeBoxElement, routeNumber) {
+        if (!appState.routes[routeNumber]) {
+            appState.routes[routeNumber] = { tripType: 'oneWay' };
+        }
+
         const topRow = createElement('div', { id: 'topRow', className: 'top-row' });
         topRow.append(tripTypePicker(routeNumber), travelersPicker(routeNumber));
         routeBoxElement.append(topRow);
@@ -128,8 +137,11 @@ const routeBox = {
             const waypointInput = createWaypointInput(index, placeholder, appState.waypoints[index]);
             waypointInput.classList.add(i === 0 ? 'from-input' : 'to-input');
             waypointInputsContainer.append(waypointInput);
-            if (!firstEmptyInput && !appState.waypoints[index]) firstEmptyInput = waypointInput.querySelector('input');
+            if (!firstEmptyInput && !appState.waypoints[index]) {
+                firstEmptyInput = waypointInput.querySelector('input');
+            }
         });
+
         routeBoxElement.append(waypointInputsContainer);
         waypointInputsContainer.insertBefore(this.createSwapButton(routeNumber), waypointInputsContainer.children[1]);
 
@@ -137,22 +149,19 @@ const routeBox = {
         routeBoxElement.append(dateInputsContainer);
 
         const buttonContainer = createElement('div', { className: 'button-container' });
-        buttonContainer.append(this.createSearchButton(routeNumber), this.createCloseButton(routeBoxElement, routeNumber));
+        buttonContainer.append(this.createSearchButton(routeNumber));
         removeRouteButton(buttonContainer, routeNumber);
         routeBoxElement.append(buttonContainer);
 
-        this.positionPopup(routeBoxElement, event, routeNumber);
-        routeBoxElement.style.display = 'block';
-
         [`waypoint-input-${routeNumber * 2 + 1}`, `waypoint-input-${routeNumber * 2 + 2}`].forEach(id => setupAutocompleteForField(id));
+        
         if (firstEmptyInput) {
             firstEmptyInput.focus();
-            if (window.innerWidth <= 600) expandInput(firstEmptyInput);
         }
 
         setupWaypointInputListeners(routeNumber);
         handleTripTypeChange(appState.routes[routeNumber].tripType, routeNumber);
-        setWaypointInputs(routeNumber); // Pass the routeNumber to setWaypointInputs
+        setWaypointInputs(routeNumber);
     },
 
     removeExistingRouteBox() {
@@ -180,17 +189,21 @@ const routeBox = {
     createSearchButton(routeNumber) {
         const searchButton = createElement('button', { className: 'search-button', content: 'Search' });
         searchButton.onclick = () => {
-            document.getElementById('infoPaneContent').innerHTML = '';
             if (appState.currentView !== 'routeTable') {
                 updateState('currentView', 'routeTable', 'routeBox.createSearchButton');
             }
-            buildRouteTable(routeNumber);
-            const routeBoxElement = document.getElementById('routeBox');
-            if (routeBoxElement) routeBoxElement.style.display = 'none';
-            const infoPaneElement = document.getElementById('infoPane');
-            if (infoPaneElement && infoPaneElement.offsetHeight < (0.5 * window.innerHeight)) {
-                infoPaneElement.style.height = `${0.5 * window.innerHeight}px`;
+            
+            // Get the content wrapper
+            const contentWrapper = document.getElementById('routeBox').parentElement;
+            
+            // Remove any existing table
+            const existingTable = contentWrapper.querySelector('.route-info-table');
+            if (existingTable) {
+                existingTable.remove();
             }
+            
+            // Build table below the routeBox
+            buildRouteTable(routeNumber);
         };
         return searchButton;
     },
