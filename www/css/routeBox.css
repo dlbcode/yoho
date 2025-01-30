@@ -212,6 +212,12 @@
   background-color: #222;
   min-width: 40px;
   white-space: nowrap;
+  border: 1px solid #525252;
+  border-radius: 5px;
+}
+
+.trip-type-dropdown.dropdown-up {
+  box-shadow: 0 -2px 5px rgba(0,0,0,0.2);
 }
 
 .travelers-dropdown li:hover,
