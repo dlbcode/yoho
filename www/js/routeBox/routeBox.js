@@ -246,17 +246,4 @@ const routeBox = {
     },
 };
 
-// Remove the document click handler
-document.addEventListener('click', (event) => {
-    const routeBox = document.getElementById('routeBox');
-    const isRouteButton = event.target.closest('.route-info-button');
-    const isDoNotClose = event.target.closest('.do-not-close-routebox');
-    const isFilterButton = event.target.closest('.filter-button');
-    const isSliderHandle = event.target.closest('.noUi-handle');
-    
-    if (routeBox && !routeBox.contains(event.target) && !isRouteButton && !isDoNotClose && !isFilterButton && !isSliderHandle) {
-        routeBox.remove();
-    }
-}, true);
-
 export { routeBox };
