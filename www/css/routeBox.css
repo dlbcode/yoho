@@ -312,12 +312,33 @@
 }
 
 .inline-container {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 10px; /* Adjust the gap as needed */
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px; /* Adjust the gap as needed */
 }
 
 .inline-container > div {
-    flex: 1;
+  flex: 1;
+}
+
+.trip-type-container,
+.travelers-container,
+.waypoint-inputs-container {
+  position: relative;
+  z-index: 1100; /* Ensure these elements appear above the routeBox */
+}
+
+.trip-type-dropdown,
+.travelers-dropdown,
+.suggestions {
+  position: absolute; /* Use absolute positioning */
+  top: 100%; /* Adjust as needed */
+  left: 0;
+  z-index: 1200; /* Ensure dropdowns appear above other elements */
+  border: 1px solid #525252;
+  border-radius: 5px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  width: 100%;
+  box-sizing: border-box;
 }
