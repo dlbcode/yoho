@@ -5,8 +5,7 @@
   border-radius: 5px;
   border: 1px solid #525252;
   padding: 10px;
-  width: 100%;
-  max-width: 600px;
+  width: 100%; /* Set to full width */
   margin: 0 auto;
   display: flex;
   flex-direction: column;
