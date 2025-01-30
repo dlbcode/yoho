@@ -304,10 +304,13 @@ function buildRouteTable(routeIndex) {
                 }
             };
 
+            // Add the 'filter-button' class to the filter buttons
             if (filteredHeader) {
+                filteredHeader.classList.add('filter-button');
                 filteredHeader.addEventListener('click', handleFilterClick);
             }
             if (filterIcon) {
+                filterIcon.classList.add('filter-button');
                 filterIcon.addEventListener('click', handleFilterClick);
             }
         });

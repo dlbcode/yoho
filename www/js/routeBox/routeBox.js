@@ -251,8 +251,9 @@ document.addEventListener('click', (event) => {
     const routeBox = document.getElementById('routeBox');
     const isRouteButton = event.target.closest('.route-info-button');
     const isDoNotClose = event.target.closest('.do-not-close-routebox');
+    const isFilterButton = event.target.closest('.filter-button'); // Add this line
     
-    if (routeBox && !routeBox.contains(event.target) && !isRouteButton && !isDoNotClose) {
+    if (routeBox && !routeBox.contains(event.target) && !isRouteButton && !isDoNotClose && !isFilterButton) { // Update this line
         routeBox.remove();
     }
 }, true);
