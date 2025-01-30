@@ -1,4 +1,5 @@
 import { appState, updateState } from "../stateManager.js";
+import { uiHandling } from '../uiHandling.js';
 
 export function travelersPicker(routeNumber) {
   const travelersContainer = document.createElement('div');
@@ -19,43 +20,23 @@ export function travelersPicker(routeNumber) {
   dropdownList.className = 'travelers-dropdown hidden';
   const travelersOptions = ['1', '2', '3', '4', '5', '6', '7', '8']; // Adjust number of travelers as needed
 
-  // Position dropdown based on available space
-  const positionDropdown = () => {
-    const buttonRect = dropdownBtn.getBoundingClientRect();
-    const dropdownRect = dropdownList.getBoundingClientRect();
-    const viewportHeight = window.innerHeight;
-    
-    const spaceBelow = viewportHeight - buttonRect.bottom;
-    const spaceAbove = buttonRect.top;
-    
-    if (spaceBelow < dropdownRect.height && spaceAbove > dropdownRect.height) {
-      dropdownList.style.bottom = '100%';
-      dropdownList.style.top = 'auto';
-      dropdownList.classList.add('dropdown-up');
-    } else {
-      dropdownList.style.top = '100%';
-      dropdownList.style.bottom = 'auto';
-      dropdownList.classList.remove('dropdown-up');
-    }
-  };
-
   dropdownBtn.addEventListener('click', () => {
     dropdownList.classList.toggle('hidden');
     if (!dropdownList.classList.contains('hidden')) {
-      positionDropdown();
+      uiHandling.positionDropdown(dropdownBtn, dropdownList);
     }
   });
 
   // Update position on scroll/resize
   window.addEventListener('scroll', () => {
     if (!dropdownList.classList.contains('hidden')) {
-      positionDropdown();
+      uiHandling.positionDropdown(dropdownBtn, dropdownList);
     }
   });
 
   window.addEventListener('resize', () => {
     if (!dropdownList.classList.contains('hidden')) {
-      positionDropdown();
+      uiHandling.positionDropdown(dropdownBtn, dropdownList);
     }
   });
 

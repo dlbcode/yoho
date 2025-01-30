@@ -1,67 +1,44 @@
 import { appState, updateState } from "../stateManager.js";
 import { initDatePicker } from "./datePicker.js";
+import { uiHandling } from "../uiHandling.js";
 
 export function tripTypePicker(routeNumber) {
     const tripTypeContainer = document.createElement('div');
     tripTypeContainer.className = 'trip-type-container';
 
-    // Ensure the route and tripType are defined
     if (!appState.routes[routeNumber]) {
         appState.routes[routeNumber] = { tripType: 'oneWay' };
     }
     const tripType = appState.routes[routeNumber].tripType;
 
-    // Create dropdown button
     const dropdownBtn = document.createElement('button');
     dropdownBtn.id = 'tripTypeDropdownBtn';
     dropdownBtn.className = 'trip-type-dropdown-btn';
     dropdownBtn.innerHTML = `${tripType.charAt(0).toUpperCase() + tripType.slice(1)} <span class="icon-dropdown"></span>`;
     tripTypeContainer.appendChild(dropdownBtn);
 
-    // Create dropdown list
     const dropdownList = document.createElement('ul');
     dropdownList.id = 'tripTypeDropdown';
     dropdownList.className = 'trip-type-dropdown hidden';
-    const tripTypes = ['Round trip', 'One way', 'Nomad']; 
+    const tripTypes = ['Round trip', 'One way', 'Nomad'];
     const tripTypeValues = ['roundTrip', 'oneWay', 'nomad'];
-
-    // Position dropdown based on available space
-    const positionDropdown = () => {
-        const buttonRect = dropdownBtn.getBoundingClientRect();
-        const dropdownRect = dropdownList.getBoundingClientRect();
-        const viewportHeight = window.innerHeight;
-        
-        const spaceBelow = viewportHeight - buttonRect.bottom;
-        const spaceAbove = buttonRect.top;
-        
-        if (spaceBelow < dropdownRect.height && spaceAbove > dropdownRect.height) {
-            dropdownList.style.bottom = '100%';
-            dropdownList.style.top = 'auto';
-            dropdownList.classList.add('dropdown-up');
-        } else {
-            dropdownList.style.top = '100%';
-            dropdownList.style.bottom = 'auto';
-            dropdownList.classList.remove('dropdown-up');
-        }
-    };
 
     dropdownBtn.addEventListener('click', () => {
         dropdownList.classList.toggle('hidden');
         if (!dropdownList.classList.contains('hidden')) {
-            positionDropdown();
+            uiHandling.positionDropdown(dropdownBtn, dropdownList);
         }
     });
 
-    // Update position on scroll/resize
     window.addEventListener('scroll', () => {
         if (!dropdownList.classList.contains('hidden')) {
-            positionDropdown();
+            uiHandling.positionDropdown(dropdownBtn, dropdownList);
         }
     });
 
     window.addEventListener('resize', () => {
         if (!dropdownList.classList.contains('hidden')) {
-            positionDropdown();
+            uiHandling.positionDropdown(dropdownBtn, dropdownList);
         }
     });
 

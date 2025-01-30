@@ -138,6 +138,25 @@ const uiHandling = {
             tooltip.remove();
         });
     },
+
+    positionDropdown: function (dropdownBtn, dropdownList) {
+        const buttonRect = dropdownBtn.getBoundingClientRect();
+        const dropdownRect = dropdownList.getBoundingClientRect();
+        const viewportHeight = window.innerHeight;
+
+        const spaceBelow = viewportHeight - buttonRect.bottom;
+        const spaceAbove = buttonRect.top;
+
+        if (spaceBelow < dropdownRect.height && spaceAbove > dropdownRect.height) {
+            dropdownList.style.bottom = '100%';
+            dropdownList.style.top = 'auto';
+            dropdownList.classList.add('dropdown-up');
+        } else {
+            dropdownList.style.top = '100%';
+            dropdownList.style.bottom = 'auto';
+            dropdownList.classList.remove('dropdown-up');
+        }
+    }
 }
 
 window.addEventListener('resize', () => {
@@ -164,4 +183,4 @@ document.addEventListener('DOMContentLoaded', () => {
     adjustMapSize();
 });
 
-export { uiHandling }
+export { uiHandling };
