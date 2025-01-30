@@ -1,17 +1,18 @@
 .route-box-popup {
-  position: relative; /* Change from absolute */
+  position: relative;
   z-index: 1000;
   background-color: #222;
   border-radius: 5px;
   border: 1px solid #525252;
   padding: 10px;
-  width: 100%; /* Set to full width */
+  width: 100%;
   margin: 0 auto;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   box-sizing: border-box;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  overflow: visible; /* Ensure dropdown is not clipped */
 }
 
 .route-box-popup button,
@@ -205,7 +206,7 @@
   position: absolute;
   top: 100%;
   left: 0;
-  z-index: 1000;
+  z-index: 10000; /* Ensure this is higher than infoPane and mapPane */
   list-style: none;
   padding: 5px;
   margin: 0;
@@ -214,6 +215,7 @@
   white-space: nowrap;
   border: 1px solid #525252;
   border-radius: 5px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
 .trip-type-dropdown.dropdown-up {
@@ -347,4 +349,8 @@
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   width: 100%;
   box-sizing: border-box;
+}
+
+#infoPaneContent {
+  overflow: visible; /* Ensure dropdown is not clipped */
 }
