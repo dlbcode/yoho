@@ -126,9 +126,11 @@ const routeBox = {
             appState.routes[routeNumber] = { tripType: 'oneWay' };
         }
 
+        const container = createElement('div', { className: 'inline-container' });
+
         const topRow = createElement('div', { id: 'topRow', className: 'top-row' });
         topRow.append(tripTypePicker(routeNumber), travelersPicker(routeNumber));
-        routeBoxElement.append(topRow);
+        container.append(topRow);
 
         const waypointInputsContainer = createElement('div', { className: 'waypoint-inputs-container' });
         let firstEmptyInput = null;
@@ -141,20 +143,21 @@ const routeBox = {
                 firstEmptyInput = waypointInput.querySelector('input');
             }
         });
-
-        routeBoxElement.append(waypointInputsContainer);
         waypointInputsContainer.insertBefore(this.createSwapButton(routeNumber), waypointInputsContainer.children[1]);
+        container.append(waypointInputsContainer);
 
         const dateInputsContainer = createElement('div', { className: 'date-inputs-container' });
-        routeBoxElement.append(dateInputsContainer);
+        container.append(dateInputsContainer);
 
         const buttonContainer = createElement('div', { className: 'button-container' });
         buttonContainer.append(this.createSearchButton(routeNumber));
         removeRouteButton(buttonContainer, routeNumber);
-        routeBoxElement.append(buttonContainer);
+        container.append(buttonContainer);
+
+        routeBoxElement.append(container);
 
         [`waypoint-input-${routeNumber * 2 + 1}`, `waypoint-input-${routeNumber * 2 + 2}`].forEach(id => setupAutocompleteForField(id));
-        
+
         if (firstEmptyInput) {
             firstEmptyInput.focus();
         }

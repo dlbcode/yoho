@@ -313,3 +313,14 @@
   padding: 20px;
   overflow-y: auto;
 }
+
+.inline-container {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px; /* Adjust the gap as needed */
+}
+
+.inline-container > div {
+    flex: 1;
+}
