@@ -1,4 +1,4 @@
-.route-box-popup {
+.route-box {  /* Changed from route-box-popup */
   position: relative;
   z-index: 1000;
   background-color: #222;
@@ -12,25 +12,25 @@
   overflow: visible; /* Ensure dropdown is not clipped */
 }
 
-.route-box-popup button,
-.route-box-popup .search-button,
-.route-box-popup .remove-button,
-.route-box-popup .popup-close-button {
+.route-box button,  /* Changed from route-box-popup */
+.route-box .search-button,  /* Changed from route-box-popup */
+.route-box .remove-button,  /* Changed from route-box-popup */
+.route-box .popup-close-button {  /* Changed from route-box-popup */
   cursor: pointer;
 }
 
-.route-box-popup .popup-close-button:hover path {
+.route-box .popup-close-button:hover path {  /* Changed from route-box-popup */
   stroke: #ccc;
 }
 
-.route-box-popup .button-container {
+.route-box .button-container {  /* Changed from route-box-popup */
   display: flex;
   justify-content: space-between;
   margin: 0;
   width: 100%;
 }
 
-.route-box-popup .date-input {
+.route-box .date-input {  /* Changed from route-box-popup */
   display: block;
   margin-top: 13px;
   background-color: #444;
@@ -41,7 +41,7 @@
   box-sizing: border-box;
 }
 
-.route-box-popup .date-input:focus {
+.route-box .date-input:focus {
   outline: none;
   border: #2a4f7c;
   background-color: #2a4f7c;
@@ -110,7 +110,7 @@
   z-index: 1;
 }
 
-.route-box-popup .waypoint-input {
+.route-box .waypoint-input {  /* Changed from route-box-popup */
   background-color: transparent;
   padding: 10px 15px 10px 15px; /* Increased padding for better touch interaction */
   width: 100%;
@@ -118,7 +118,7 @@
   display: block;
 }
 
-.route-box-popup .waypoint-input:focus {
+.route-box .waypoint-input:focus {  /* Changed from route-box-popup */
   outline: none;
   background-color: #2a4f7c;
   border-radius: 5px;
@@ -245,7 +245,7 @@
 }
 
 @media (max-width: 600px) {
-  .route-box-popup {
+  .route-box {  /* Changed from route-box-popup */
     width: 100%;
     max-width: none;
     left: 0;

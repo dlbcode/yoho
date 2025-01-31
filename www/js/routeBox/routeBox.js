@@ -176,7 +176,7 @@ const routeBox = {
     },
 
     createRouteBox() {
-        return createElement('div', { id: 'routeBox', className: 'route-box-popup' });
+        return createElement('div', { id: 'routeBox', className: 'route-box' });
     },
 
     createSwapButton(routeNumber) {
