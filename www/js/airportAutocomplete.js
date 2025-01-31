@@ -81,11 +81,7 @@ function setupAutocompleteForField(fieldId) {
     const toggleSuggestionBox = (display) => {
         suggestionBox.style.display = display ? 'block' : 'none';
         if (display) {
-            const isMobile = window.innerWidth <= 600;
-            suggestionBox.style.position = isMobile ? 'fixed' : '';
-            suggestionBox.style.left = '0px';
-            suggestionBox.style.top = isMobile ? '50px' : '35px';
-            suggestionBox.style.width = isMobile ? '100%' : '300px';
+            uiHandling.positionDropdown(inputField, suggestionBox);
         }
     };
 
@@ -122,16 +118,17 @@ function setupAutocompleteForField(fieldId) {
                 if (items) items[currentFocus].click();
             }
         }
-        inputField.addEventListener('blur', () => {
-            setTimeout(() => {
-                clearInputField(inputField);
-                toggleSuggestionBox(false);
-                if (inputField.value === '' && appState.waypoints.length > 0) {
-                   const waypointIndex = parseInt(inputField.id.replace('waypoint-input-', '')) - 1;
-                   updateState('removeWaypoint', waypointIndex, 'airportAutocomplete.addEventListener3');
-                }
-            }, 300);
-        });
+    });
+
+    inputField.addEventListener('blur', () => {
+        setTimeout(() => {
+            clearInputField(inputField);
+            toggleSuggestionBox(false);
+            if (inputField.value === '' && appState.waypoints.length > 0) {
+                const waypointIndex = parseInt(inputField.id.replace('waypoint-input-', '')) - 1;
+                updateState('removeWaypoint', waypointIndex, 'airportAutocomplete.addEventListener3');
+            }
+        }, 300);
     });
 
     if (!window.outsideClickListenerAdded) {
@@ -164,13 +161,13 @@ function updateSuggestions(inputId, airports) {
     airports.forEach(airport => {
         const div = document.createElement('div');
         div.textContent = `${airport.name} (${airport.iata_code}) - ${airport.city}, ${airport.country}`;
-    
+
         const selectionHandler = (e) => {
             setTimeout(() => {
                 handleSelection(e, inputId, airport);
             }, 100);
         };
-    
+
         div.addEventListener('touchstart', (e) => {
             selectionHandledByTouch = false;
             div.style.pointerEvents = 'none';
@@ -179,24 +176,22 @@ function updateSuggestions(inputId, airports) {
         div.addEventListener('touchmove', (e) => {
             selectionHandledByTouch = true;
         }, { passive: true });
-    
+
         div.addEventListener('touchend', (e) => {
             div.style.pointerEvents = 'auto';
             if (!selectionHandledByTouch) {
                 selectionHandler(e);
             }
-        });
-    
-        div.addEventListener('click', (e) => {
-            if (!selectionHandledByTouch) {
-                selectionHandler(e);
-            }
             selectionHandledByTouch = false;
         });
-    
+
+        div.addEventListener('click', (e) => {
+            selectionHandler(e);
+        });
+
         suggestionBox.appendChild(div);
     });
-                     
+
     if (airports.length > 0) suggestionBox.style.display = 'block';
 }
 
