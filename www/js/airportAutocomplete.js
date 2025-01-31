@@ -76,6 +76,7 @@ function setupAutocompleteForField(fieldId) {
         updateSuggestions(fieldId, airports);
         selectionMade = false;
         currentFocus = -1;
+        { uiHandling.positionDropdown(inputField, suggestionBox); }
     });
 
     const toggleSuggestionBox = (display) => {
