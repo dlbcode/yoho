@@ -142,6 +142,7 @@
   flex-grow: 1; /* Allow content to grow */
   overflow-y: auto;
   background-color: #1d1d1d;
+  flex: 1;
 }
 
 table {
@@ -272,4 +273,10 @@ tr:hover {
   top: 0px;
   right: 5px;
   cursor: pointer;
+}
+
+#routeBoxContainer {
+  width: 100%;
+  background-color: #1d1d1d;
+  z-index: 1001;
 }

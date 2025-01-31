@@ -111,12 +111,13 @@ const setWaypointInputs = (routeNumber) => {
 
 const routeBox = {
     showRouteBox(event, routeNumber) {
-        const infoPaneContent = document.getElementById('infoPaneContent');
-        infoPaneContent.innerHTML = '';
+        // Clear previous routeBox if any
+        this.removeExistingRouteBox();
         
+        const routeBoxContainer = document.getElementById('routeBoxContainer');
         const routeBoxElement = this.createRouteBox();
         routeBoxElement.dataset.routeNumber = routeNumber;
-        infoPaneContent.appendChild(routeBoxElement);
+        routeBoxContainer.appendChild(routeBoxElement);
         
         this.setupRouteBox(routeBoxElement, routeNumber);
     },
@@ -168,8 +169,10 @@ const routeBox = {
     },
 
     removeExistingRouteBox() {
-        const existingRouteBox = document.getElementById('routeBox');
-        if (existingRouteBox) existingRouteBox.remove();
+        const routeBoxContainer = document.getElementById('routeBoxContainer');
+        if (routeBoxContainer) {
+            routeBoxContainer.innerHTML = '';
+        }
     },
 
     createRouteBox() {
