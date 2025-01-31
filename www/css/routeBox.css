@@ -2,9 +2,6 @@
   position: relative;
   z-index: 1000;
   background-color: #222;
-  border-radius: 5px;
-  border: 1px solid #525252;
-  padding: 10px;
   width: 100%;
   margin: 0 auto;
   display: flex;
