@@ -46,10 +46,14 @@
 }
 
 #menu-bar {
-  display: flex;
+  position: fixed; /* Fix the menu-bar at the bottom */
+  bottom: 0;
+  width: 100%;
   height: 40px;
+  display: flex;
   align-items: center;
-  flex-grow: 1; /* Allows the menu bar to take up remaining space */
+  background-color: #333;
+  z-index: 1001; /* Ensure it appears above the routeTable */
   overflow-x: auto; /* Enables horizontal scrolling */
   overflow-y: hidden; /* Disables vertical scrolling */
   white-space: nowrap; /* Prevents the content from wrapping to a new line */
@@ -69,7 +73,7 @@
 }
 
 #menu-bar::-webkit-scrollbar-thumb:hover {
-  background: #555; /* Color on hover */
+  background: #aaa; /* Lighter color on hover */
 }
 
 .plus-button {
@@ -140,9 +144,10 @@
 #infoPaneContent {
   position: relative; /* Change from absolute */
   flex-grow: 1; /* Allow content to grow */
-  overflow-y: auto;
+  overflow-y: auto; /* Enable vertical scrolling */
   background-color: #1d1d1d;
   flex: 1;
+  padding-bottom: 40px; /* Add padding to avoid overlap with the menu-bar */
 }
 
 table {
