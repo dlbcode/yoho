@@ -478,15 +478,13 @@
 
 /* Ensure autocomplete menus stretch across the waypoint inputs container */
 .waypoint-inputs-container .suggestions {
-  width: 372px;
-  box-sizing: border-box;
   position: absolute;
   top: 100%;
   left: 0;
   width: 100%;
   box-sizing: border-box;
-  /* Optional: add a higher z-index if needed to overlay other elements */
   z-index: 1001;
+  /* Remove any hardcoded width like 372px */
 }
 
 /* Ensure the suggestions menu aligns with the full width of the waypoint-inputs-container */
