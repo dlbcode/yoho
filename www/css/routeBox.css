@@ -256,6 +256,7 @@
 #topRow {
   display: flex;
   align-items: center;
+  align-self: flex-start;
   justify-content: flex-start;
   min-width: 160px;
 }
