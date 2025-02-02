@@ -39,6 +39,8 @@
   min-width: 372px;
   box-sizing: border-box;
   flex-shrink: 0;
+  width: 100%;
+  position: relative;
 }
 
 .date-inputs-container {
@@ -472,4 +474,31 @@
 /* Ensure consistent height across all elements */
 .route-box .inline-container > * {
   min-height: 32px;
+}
+
+/* Ensure autocomplete menus stretch across the waypoint inputs container */
+.waypoint-inputs-container .suggestions {
+  width: 372px;
+  box-sizing: border-box;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%;
+  box-sizing: border-box;
+  /* Optional: add a higher z-index if needed to overlay other elements */
+  z-index: 1001;
+}
+
+/* Ensure the suggestions menu aligns with the full width of the waypoint-inputs-container */
+.waypoint-inputs-container {
+  position: relative;
+}
+
+.waypoint-inputs-container .suggestions {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%;
+  box-sizing: border-box;
+  z-index: 1001;
 }

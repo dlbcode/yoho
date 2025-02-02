@@ -23,12 +23,20 @@ const createElement = (tag, { id, className, content } = {}) => {
     return element;
 };
 
+// Modify createWaypointInput to return elements separately so that the suggestions div
+// can be appended directly to the waypoint-inputs-container.
 const createWaypointInput = (index, placeholder, waypoint) => {
     const inputWrapper = createElement('div', { className: 'input-wrapper' });
-    const input = createElement('input', { id: `waypoint-input-${index + 1}`, className: 'waypoint-input', value: waypoint ? `${waypoint.city}, (${waypoint.iata_code})` : '', placeholder });
+    const input = createElement('input', { 
+        id: `waypoint-input-${index + 1}`, 
+        className: 'waypoint-input', 
+        value: waypoint ? `${waypoint.city}, (${waypoint.iata_code})` : '', 
+        placeholder 
+    });
     input.type = 'text';
-    inputWrapper.append(input, routeBox.createSuggestionsDiv(index));
-    return inputWrapper;
+    // Only append the input here.
+    inputWrapper.appendChild(input);
+    return { inputWrapper, input };
 };
 
 const enableSwapButtonIfNeeded = () => {
@@ -137,11 +145,13 @@ const routeBox = {
         let firstEmptyInput = null;
         ['From', 'Where to?'].forEach((placeholder, i) => {
             const index = routeNumber * 2 + i;
-            const waypointInput = createWaypointInput(index, placeholder, appState.waypoints[index]);
-            waypointInput.classList.add(i === 0 ? 'from-input' : 'to-input');
-            waypointInputsContainer.append(waypointInput);
+            const { inputWrapper } = createWaypointInput(index, placeholder, appState.waypoints[index]);
+            inputWrapper.classList.add(i === 0 ? 'from-input' : 'to-input');
+            waypointInputsContainer.append(inputWrapper);
+            const suggestionsDiv = routeBox.createSuggestionsDiv(index);
+            waypointInputsContainer.append(suggestionsDiv);
             if (!firstEmptyInput && !appState.waypoints[index]) {
-                firstEmptyInput = waypointInput.querySelector('input');
+                firstEmptyInput = inputWrapper.querySelector('input');
             }
         });
         waypointInputsContainer.insertBefore(this.createSwapButton(routeNumber), waypointInputsContainer.children[1]);
