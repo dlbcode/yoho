@@ -49,9 +49,10 @@
 /* Button container */
 .button-container {
   display: flex;
-  align-items: center;
+  align-items: center; /* Vertically center buttons */
   gap: 8px;
   margin: 0;
+  height: 100%; /* Match height of parent */
 }
 
 /* Remove top margin from date inputs */
@@ -395,4 +396,20 @@
 
 #infoPaneContent {
   overflow: visible; /* Ensure dropdown is not clipped */
+}
+
+/* Search and remove buttons */
+.search-button,
+.remove-button {
+  height: 40px; /* Match height with other elements */
+  padding: 0 12px;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Ensure consistent height across all elements */
+.route-box .inline-container > * {
+  min-height: 32px;
 }
