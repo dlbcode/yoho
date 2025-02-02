@@ -186,7 +186,7 @@ const routeBox = {
             }
             buildRouteTable(routeNumber);
             const routeBoxElement = document.getElementById('routeBox');
-            if (routeBoxElement) routeBoxElement.style.display = 'none';
+            if (routeBoxElement) routeBoxElement.remove(); // Change from .style.display = 'none'
             const infoPaneElement = document.getElementById('infoPane');
             if (infoPaneElement && infoPaneElement.offsetHeight < (0.5 * window.innerHeight)) {
                 infoPaneElement.style.height = `${0.5 * window.innerHeight}px`;
