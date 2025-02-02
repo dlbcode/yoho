@@ -1,63 +1,101 @@
-.route-box {  /* Changed from route-box-popup */
+.route-box {
   position: relative;
   z-index: 1000;
   background-color: #222;
   width: 100%;
   margin: 0 auto;
+  padding: 10px;
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  box-sizing: border-box;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  overflow: visible; /* Ensure dropdown is not clipped */
-  align-items: center; /* Vertically center all content */
-  padding: 10px;
+  gap: 10px;
 }
 
 /* Container for all inline elements */
 .inline-container {
   display: flex;
-  align-items: center; /* Vertically center children */
-  gap: 10px; /* Space between elements */
+  flex-wrap: wrap;
+  gap: 10px;
   width: 100%;
-  margin: 0;
 }
 
-/* Top row container - remove vertical stacking */
-#topRow {
+/* Element Groups */
+.picker-group {
   display: flex;
-  align-items: center;
-  margin: 0;
+  gap: 10px;
+  flex: 0 1 auto;
 }
 
-/* Waypoint inputs container */
-.waypoint-inputs-container {
+.waypoint-group {
   display: flex;
-  align-items: center;
-  margin: 0;
-  flex: 2; /* Give more space to the inputs */
+  gap: 10px;
+  flex: 1 1 auto;
+  min-width: 300px;
 }
 
-/* Date inputs container */
-.date-inputs-container {
+.date-group {
   display: flex;
-  align-items: center;
-  gap: 8px;
-  margin: 0;
+  gap: 10px;
+  flex: 1 1 auto;
+  min-width: 200px;
 }
 
-/* Button container */
-.button-container {
+.button-group {
   display: flex;
-  align-items: center; /* Vertically center buttons */
-  gap: 8px;
-  margin: 0;
-  height: 100%; /* Match height of parent */
+  gap: 10px;
+  flex: 0 1 auto;
 }
 
-/* Remove top margin from date inputs */
-.route-box .date-input {
-  margin-top: 0;
+/* Input wrapper styles */
+.input-wrapper {
+  flex: 1;
+  min-width: 140px;
+}
+
+/* Media query for screens less than 800px */
+@media (max-width: 799px) {
+  .inline-container {
+    flex-direction: column;
+  }
+
+  .picker-group,
+  .waypoint-group,
+  .date-group,
+  .button-group {
+    width: 100%;
+  }
+  
+  .waypoint-group {
+    flex-wrap: nowrap;
+  }
+  
+  .button-group {
+    justify-content: space-between;
+  }
+  
+  .search-button,
+  .remove-button {
+    flex: 1;
+  }
+}
+
+/* Base styles for buttons and inputs */
+.search-button,
+.remove-button {
+  height: 40px;
+  padding: 0 12px;
+  margin: 0;
+  min-width: 100px;
+}
+
+.trip-type-container,
+.travelers-container {
+  min-width: 120px;
+}
+
+.date-input {
+  flex: 1;
+  min-width: 140px;
 }
 
 .route-box button,  /* Changed from route-box-popup */
