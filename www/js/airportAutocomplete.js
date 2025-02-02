@@ -71,18 +71,47 @@ function setupAutocompleteForField(fieldId) {
         }
     });
 
+    const isMobileView = () => window.innerWidth <= 600;
+
     inputField.addEventListener('input', async () => {
         const airports = await fetchAirports(inputField.value);
         updateSuggestions(fieldId, airports);
         selectionMade = false;
         currentFocus = -1;
-        { uiHandling.positionDropdown(inputField, suggestionBox); }
+        
+        if (isMobileView()) {
+            // In mobile mode, suggestions follow the expanded input
+            suggestionBox.style.position = 'fixed';
+            suggestionBox.style.top = '50px';
+            suggestionBox.style.left = '0';
+            suggestionBox.style.width = '100%';
+            suggestionBox.style.maxHeight = 'calc(100vh - 50px)';
+        } else {
+            // Desktop mode - normal positioning
+            suggestionBox.style.position = 'absolute';
+            suggestionBox.style.removeProperty('top');
+            suggestionBox.style.removeProperty('left');
+            suggestionBox.style.removeProperty('max-height');
+            uiHandling.positionDropdown(inputField, suggestionBox);
+        }
     });
 
     const toggleSuggestionBox = (display) => {
         suggestionBox.style.display = display ? 'block' : 'none';
         if (display) {
-            uiHandling.positionDropdown(inputField, suggestionBox);
+            if (isMobileView()) {
+                suggestionBox.style.position = 'fixed';
+                suggestionBox.style.top = '50px';
+                suggestionBox.style.left = '0';
+                suggestionBox.style.width = '100%';
+                suggestionBox.style.maxHeight = 'calc(100vh - 50px)';
+            } else {
+                suggestionBox.style.position = 'absolute';
+                suggestionBox.style.removeProperty('top');
+                suggestionBox.style.removeProperty('left');
+                suggestionBox.style.removeProperty('max-height');
+                uiHandling.positionDropdown(inputField, suggestionBox);
+            }
         }
     };
 
