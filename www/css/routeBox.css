@@ -45,7 +45,7 @@
   display: flex;
   gap: 10px;
   flex: 0 0 372px;
-  min-width: 372px;
+  min-width: 160px;
   box-sizing: border-box;
   flex-shrink: 0;
 }
@@ -257,6 +257,7 @@
   display: flex;
   align-items: center;
   justify-content: flex-start;
+  min-width: 160px;
 }
 
 .travelers-dropdown-btn,
