@@ -216,6 +216,24 @@ tr:hover {
   height: 5px; /* Thin scrollbar height for horizontal scroll */
 }
 
+/* Style scrollbars for both infoPaneContent and content-wrapper */
+#infoPaneContent::-webkit-scrollbar-track,
+.content-wrapper::-webkit-scrollbar-track {
+  background-color: #000000; /* Dark track background */
+}
+
+#infoPaneContent::-webkit-scrollbar-thumb,
+.content-wrapper::-webkit-scrollbar-thumb {
+  background-color: #555; /* Dark thumb color */
+  border-radius: 2px; /* Rounded corners for the thumb */
+}
+
+#infoPaneContent::-webkit-scrollbar,
+.content-wrapper::-webkit-scrollbar {
+  width: 5px; /* Thin scrollbar width */
+  height: 5px; /* Thin scrollbar height for horizontal scroll */
+}
+
 .update-price-btn {
   background-color: rgb(60, 93, 110);
 }
