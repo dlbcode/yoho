@@ -148,7 +148,6 @@
   overflow-x: hidden;
   background-color: #1d1d1d;
   min-height: 0; /* Important for overflow to work */
-  padding-bottom: 40px; /* Add padding to avoid overlap with the menu-bar */
 }
 
 table {
@@ -191,29 +190,28 @@ tr:nth-child(odd) {
   background-color: #161616; /* White for odd rows */
 }
 
-/* Style for table rows on hover */
+/* Remove generic hover that gets overridden */
 tr:hover {
-  background-color: #000000; /* Slightly darker background on hover */
+  background-color: #000000; 
 }
 
 #infoPaneContent table tr:hover {
   background-color: #282828; /* Lighter shade for hover, adjust as needed */
 }
 
+/* Remove duplicate scrollbar styles and consolidate with content-wrapper styles */
 #infoPaneContent::-webkit-scrollbar-track {
-  background-color: #000000; /* Dark track background */
+  background-color: #000000;
 }
 
-/* Style the scrollbar thumb (scrollable handle) */
 #infoPaneContent::-webkit-scrollbar-thumb {
-  background-color: #555; /* Dark thumb color */
-  border-radius: 2px; /* Rounded corners for the thumb */
+  background-color: #555;
+  border-radius: 2px;
 }
 
-/* Style the scrollbar itself (width and height) */
 #infoPaneContent::-webkit-scrollbar {
-  width: 5px; /* Thin scrollbar width */
-  height: 5px; /* Thin scrollbar height for horizontal scroll */
+  width: 5px;
+  height: 5px;
 }
 
 /* Style scrollbars for both infoPaneContent and content-wrapper */
