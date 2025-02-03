@@ -1,39 +1,145 @@
-.route-box-popup {
-  position: absolute;
+.route-box {
+  position: relative;
   z-index: 1000;
   background-color: #222;
-  border-radius: 5px;
-  border: 1px solid #525252;
+  width: 100%;
+  margin: 0 auto;
   padding: 10px;
-  width: 400px;
-  max-width: 90%;
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  gap: 10px;
+  overflow: visible;
 }
 
-.route-box-popup button,
-.route-box-popup .search-button,
-.route-box-popup .remove-button,
-.route-box-popup .popup-close-button {
+/* Container for all inline elements */
+.inline-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  width: 100%;
+  box-sizing: border-box;
+  min-width: min-content;
+}
+
+/* Element Groups */
+.picker-group {
+  display: flex;
+  gap: 10px;
+  flex: 0 0 185px;
+  min-width: 185px;
+  box-sizing: border-box;
+  flex-shrink: 0;
+}
+
+.waypoint-inputs-container {
+  display: flex;
+  gap: 10px;
+  flex: 0 0 372px;
+  min-width: 372px;
+  box-sizing: border-box;
+  flex-shrink: 0;
+  width: 100%;
+  position: relative;
+}
+
+.date-inputs-container {
+  display: flex;
+  gap: 10px;
+  flex: 0 0 372px;
+  min-width: 160px;
+  box-sizing: border-box;
+  flex-shrink: 0;
+}
+
+.button-container {
+  display: flex;
+  gap: 10px;
+  flex: 0 0 372px;
+  min-width: 372px;
+  box-sizing: border-box;
+  flex-shrink: 0;
+}
+
+/* Input wrapper styles */
+.input-wrapper {
+  flex: 1;
+  min-width: 140px;
+}
+
+/* Waypoint input fields */
+.waypoint-inputs-container input {
+  min-width: 182px !important;
+  flex: 1 1 182px;
+  box-sizing: border-box;
+}
+
+/* Media query for screens less than 800px */
+@media (max-width: 799px) {
+  .inline-container {
+    flex-direction: column;
+  }
+
+  .picker-group,
+  .waypoint-inputs-container,
+  .date-inputs-container,
+  .button-container {
+    width: 100%;
+  }
+  
+  .waypoint-inputs-container {
+    flex-wrap: nowrap;
+  }
+  
+  .button-container {
+    justify-content: space-between;
+  }
+  
+  .search-button,
+  .remove-button {
+    flex: 1;
+  }
+}
+
+/* Base styles for buttons and inputs */
+.search-button,
+.remove-button {
+  height: 40px;
+  padding: 0 12px;
+  margin: 0;
+  min-width: 100px;
+}
+
+.trip-type-container,
+.travelers-container {
+  min-width: 120px;
+}
+
+.date-input {
+  flex: 1;
+  min-width: 140px;
+}
+
+.route-box button,  /* Changed from route-box-popup */
+.route-box .search-button,  /* Changed from route-box-popup */
+.route-box .remove-button,  /* Changed from route-box-popup */
+.route-box .popup-close-button {  /* Changed from route-box-popup */
   cursor: pointer;
 }
 
-.route-box-popup .popup-close-button:hover path {
+.route-box .popup-close-button:hover path {  /* Changed from route-box-popup */
   stroke: #ccc;
 }
 
-.route-box-popup .button-container {
+.route-box .button-container {  /* Changed from route-box-popup */
   display: flex;
   justify-content: space-between;
   margin: 0;
   width: 100%;
 }
 
-.route-box-popup .date-input {
+.route-box .date-input {  /* Changed from route-box-popup */
   display: block;
-  margin-top: 13px;
   background-color: #444;
   border: 1px solid #444;
   border-radius: 5px;
@@ -42,7 +148,7 @@
   box-sizing: border-box;
 }
 
-.route-box-popup .date-input:focus {
+.route-box .date-input:focus {
   outline: none;
   border: #2a4f7c;
   background-color: #2a4f7c;
@@ -73,7 +179,6 @@
 .waypoint-inputs-container {
   display: flex;
   justify-content: space-around;
-  margin-top: 10px;
   align-items: center;
   position: relative;
   width: 100%;
@@ -107,11 +212,11 @@
   height: 24px;
   background-color: #222;
   border-radius: 50%;
-  margin: 5px -12px;
+  margin: 0 5px;
   z-index: 1;
 }
 
-.route-box-popup .waypoint-input {
+.route-box .waypoint-input {  /* Changed from route-box-popup */
   background-color: transparent;
   padding: 10px 15px 10px 15px; /* Increased padding for better touch interaction */
   width: 100%;
@@ -119,7 +224,7 @@
   display: block;
 }
 
-.route-box-popup .waypoint-input:focus {
+.route-box .waypoint-input:focus {  /* Changed from route-box-popup */
   outline: none;
   background-color: #2a4f7c;
   border-radius: 5px;
@@ -153,7 +258,9 @@
 #topRow {
   display: flex;
   align-items: center;
+  align-self: flex-start;
   justify-content: flex-start;
+  min-width: 160px;
 }
 
 .travelers-dropdown-btn,
@@ -204,13 +311,20 @@
   position: absolute;
   top: 100%;
   left: 0;
-  z-index: 1000;
+  z-index: 10000; /* Ensure this is higher than infoPane and mapPane */
   list-style: none;
   padding: 5px;
   margin: 0;
   background-color: #222;
   min-width: 40px;
   white-space: nowrap;
+  border: 1px solid #525252;
+  border-radius: 5px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.trip-type-dropdown.dropdown-up {
+  box-shadow: 0 -2px 5px rgba(0,0,0,0.2);
 }
 
 .travelers-dropdown li:hover,
@@ -239,13 +353,14 @@
 }
 
 @media (max-width: 600px) {
-  .route-box-popup {
+  .route-box {  /* Changed from route-box-popup */
     width: 100%;
     max-width: none;
     left: 0;
     right: 0;
     margin: auto;
-    border-radius: 0;
+    border-radius: 5px;
+    border: 1px solid #525252;
     border-left: none;
     border-right: none;
   }
@@ -301,6 +416,87 @@
     stroke: #fff;
     background: none;
   }
+}
 
+.content-wrapper {
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
 
+.inline-container {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px; /* Adjust the gap as needed */
+}
+
+.inline-container > div {
+  flex: 1;
+}
+
+.trip-type-container,
+.travelers-container,
+.waypoint-inputs-container {
+  position: relative;
+  z-index: 1100; /* Ensure these elements appear above the routeBox */
+}
+
+.trip-type-dropdown,
+.travelers-dropdown,
+.suggestions {
+  position: absolute; /* Use absolute positioning */
+  top: 100%; /* Adjust as needed */
+  left: 0;
+  z-index: 1200; /* Ensure dropdowns appear above other elements */
+  border: 1px solid #525252;
+  border-radius: 5px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+#infoPaneContent {
+  overflow: visible; /* Ensure dropdown is not clipped */
+}
+
+/* Search and remove buttons */
+.search-button,
+.remove-button {
+  height: 40px; /* Match height with other elements */
+  padding: 0 12px;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Ensure consistent height across all elements */
+.route-box .inline-container > * {
+  min-height: 32px;
+}
+
+/* Ensure autocomplete menus stretch across the waypoint inputs container */
+.waypoint-inputs-container .suggestions {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%;
+  box-sizing: border-box;
+  z-index: 1001;
+  /* Remove any hardcoded width like 372px */
+}
+
+/* Ensure the suggestions menu aligns with the full width of the waypoint-inputs-container */
+.waypoint-inputs-container {
+  position: relative;
+}
+
+.waypoint-inputs-container .suggestions {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%;
+  box-sizing: border-box;
+  z-index: 1001;
 }

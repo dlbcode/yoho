@@ -1,29 +1,46 @@
 import { appState, updateState } from "../stateManager.js";
 import { initDatePicker } from "./datePicker.js";
+import { uiHandling } from "../uiHandling.js";
 
 export function tripTypePicker(routeNumber) {
     const tripTypeContainer = document.createElement('div');
     tripTypeContainer.className = 'trip-type-container';
 
-    // Ensure the route and tripType are defined
     if (!appState.routes[routeNumber]) {
-        appState.routes[routeNumber] = { tripType: 'oneWay' }; // Initialize route with default tripType
+        appState.routes[routeNumber] = { tripType: 'oneWay' };
     }
     const tripType = appState.routes[routeNumber].tripType;
 
-    // Create dropdown button
     const dropdownBtn = document.createElement('button');
     dropdownBtn.id = 'tripTypeDropdownBtn';
     dropdownBtn.className = 'trip-type-dropdown-btn';
     dropdownBtn.innerHTML = `${tripType.charAt(0).toUpperCase() + tripType.slice(1)} <span class="icon-dropdown"></span>`;
     tripTypeContainer.appendChild(dropdownBtn);
 
-    // Create dropdown list
     const dropdownList = document.createElement('ul');
     dropdownList.id = 'tripTypeDropdown';
     dropdownList.className = 'trip-type-dropdown hidden';
     const tripTypes = ['Round trip', 'One way', 'Nomad'];
     const tripTypeValues = ['roundTrip', 'oneWay', 'nomad'];
+
+    dropdownBtn.addEventListener('click', () => {
+        dropdownList.classList.toggle('hidden');
+        if (!dropdownList.classList.contains('hidden')) {
+            uiHandling.positionDropdown(dropdownBtn, dropdownList);
+        }
+    });
+
+    window.addEventListener('scroll', () => {
+        if (!dropdownList.classList.contains('hidden')) {
+            uiHandling.positionDropdown(dropdownBtn, dropdownList);
+        }
+    });
+
+    window.addEventListener('resize', () => {
+        if (!dropdownList.classList.contains('hidden')) {
+            uiHandling.positionDropdown(dropdownBtn, dropdownList);
+        }
+    });
 
     tripTypes.forEach((type, index) => {
         const listItem = document.createElement('li');
@@ -43,11 +60,6 @@ export function tripTypePicker(routeNumber) {
     });
 
     tripTypeContainer.appendChild(dropdownList);
-
-    // Toggle dropdown visibility on button click
-    dropdownBtn.addEventListener('click', function() {
-        dropdownList.classList.toggle('hidden');
-    });
 
     return tripTypeContainer;
 }

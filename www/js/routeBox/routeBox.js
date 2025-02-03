@@ -23,12 +23,20 @@ const createElement = (tag, { id, className, content } = {}) => {
     return element;
 };
 
+// Modify createWaypointInput to return elements separately so that the suggestions div
+// can be appended directly to the waypoint-inputs-container.
 const createWaypointInput = (index, placeholder, waypoint) => {
     const inputWrapper = createElement('div', { className: 'input-wrapper' });
-    const input = createElement('input', { id: `waypoint-input-${index + 1}`, className: 'waypoint-input', value: waypoint ? `${waypoint.city}, (${waypoint.iata_code})` : '', placeholder });
+    const input = createElement('input', { 
+        id: `waypoint-input-${index + 1}`, 
+        className: 'waypoint-input', 
+        value: waypoint ? `${waypoint.city}, (${waypoint.iata_code})` : '', 
+        placeholder 
+    });
     input.type = 'text';
-    inputWrapper.append(input, routeBox.createSuggestionsDiv(index));
-    return inputWrapper;
+    // Only append the input here.
+    inputWrapper.appendChild(input);
+    return { inputWrapper, input };
 };
 
 const enableSwapButtonIfNeeded = () => {
@@ -111,57 +119,74 @@ const setWaypointInputs = (routeNumber) => {
 
 const routeBox = {
     showRouteBox(event, routeNumber) {
+        // Clear previous routeBox if any
         this.removeExistingRouteBox();
+        
+        const routeBoxContainer = document.getElementById('routeBoxContainer');
         const routeBoxElement = this.createRouteBox();
         routeBoxElement.dataset.routeNumber = routeNumber;
-        document.body.appendChild(routeBoxElement);
+        routeBoxContainer.appendChild(routeBoxElement);
+        
+        this.setupRouteBox(routeBoxElement, routeNumber);
+    },
 
-        if (!appState.routes[routeNumber]) appState.routes[routeNumber] = { tripType: 'oneWay' };
+    setupRouteBox(routeBoxElement, routeNumber) {
+        if (!appState.routes[routeNumber]) {
+            appState.routes[routeNumber] = { tripType: 'oneWay' };
+        }
+
+        const container = createElement('div', { className: 'inline-container' });
+
         const topRow = createElement('div', { id: 'topRow', className: 'top-row' });
         topRow.append(tripTypePicker(routeNumber), travelersPicker(routeNumber));
-        routeBoxElement.append(topRow);
+        container.append(topRow);
 
         const waypointInputsContainer = createElement('div', { className: 'waypoint-inputs-container' });
         let firstEmptyInput = null;
         ['From', 'Where to?'].forEach((placeholder, i) => {
             const index = routeNumber * 2 + i;
-            const waypointInput = createWaypointInput(index, placeholder, appState.waypoints[index]);
-            waypointInput.classList.add(i === 0 ? 'from-input' : 'to-input');
-            waypointInputsContainer.append(waypointInput);
-            if (!firstEmptyInput && !appState.waypoints[index]) firstEmptyInput = waypointInput.querySelector('input');
+            const { inputWrapper } = createWaypointInput(index, placeholder, appState.waypoints[index]);
+            inputWrapper.classList.add(i === 0 ? 'from-input' : 'to-input');
+            waypointInputsContainer.append(inputWrapper);
+            const suggestionsDiv = routeBox.createSuggestionsDiv(index);
+            waypointInputsContainer.append(suggestionsDiv);
+            if (!firstEmptyInput && !appState.waypoints[index]) {
+                firstEmptyInput = inputWrapper.querySelector('input');
+            }
         });
-        routeBoxElement.append(waypointInputsContainer);
         waypointInputsContainer.insertBefore(this.createSwapButton(routeNumber), waypointInputsContainer.children[1]);
+        container.append(waypointInputsContainer);
 
         const dateInputsContainer = createElement('div', { className: 'date-inputs-container' });
-        routeBoxElement.append(dateInputsContainer);
+        container.append(dateInputsContainer);
 
         const buttonContainer = createElement('div', { className: 'button-container' });
-        buttonContainer.append(this.createSearchButton(routeNumber), this.createCloseButton(routeBoxElement, routeNumber));
+        buttonContainer.append(this.createSearchButton(routeNumber));
         removeRouteButton(buttonContainer, routeNumber);
-        routeBoxElement.append(buttonContainer);
+        container.append(buttonContainer);
 
-        this.positionPopup(routeBoxElement, event, routeNumber);
-        routeBoxElement.style.display = 'block';
+        routeBoxElement.append(container);
 
         [`waypoint-input-${routeNumber * 2 + 1}`, `waypoint-input-${routeNumber * 2 + 2}`].forEach(id => setupAutocompleteForField(id));
+
         if (firstEmptyInput) {
             firstEmptyInput.focus();
-            if (window.innerWidth <= 600) expandInput(firstEmptyInput);
         }
 
         setupWaypointInputListeners(routeNumber);
         handleTripTypeChange(appState.routes[routeNumber].tripType, routeNumber);
-        setWaypointInputs(routeNumber); // Pass the routeNumber to setWaypointInputs
+        setWaypointInputs(routeNumber);
     },
 
     removeExistingRouteBox() {
-        const existingRouteBox = document.getElementById('routeBox');
-        if (existingRouteBox) existingRouteBox.remove();
+        const routeBoxContainer = document.getElementById('routeBoxContainer');
+        if (routeBoxContainer) {
+            routeBoxContainer.innerHTML = '';
+        }
     },
 
     createRouteBox() {
-        return createElement('div', { id: 'routeBox', className: 'route-box-popup' });
+        return createElement('div', { id: 'routeBox', className: 'route-box' });
     },
 
     createSwapButton(routeNumber) {
@@ -180,17 +205,21 @@ const routeBox = {
     createSearchButton(routeNumber) {
         const searchButton = createElement('button', { className: 'search-button', content: 'Search' });
         searchButton.onclick = () => {
-            document.getElementById('infoPaneContent').innerHTML = '';
             if (appState.currentView !== 'routeTable') {
                 updateState('currentView', 'routeTable', 'routeBox.createSearchButton');
             }
-            buildRouteTable(routeNumber);
-            const routeBoxElement = document.getElementById('routeBox');
-            if (routeBoxElement) routeBoxElement.remove(); // Change from .style.display = 'none'
-            const infoPaneElement = document.getElementById('infoPane');
-            if (infoPaneElement && infoPaneElement.offsetHeight < (0.5 * window.innerHeight)) {
-                infoPaneElement.style.height = `${0.5 * window.innerHeight}px`;
+            
+            // Get the content wrapper
+            const contentWrapper = document.getElementById('routeBox').parentElement;
+            
+            // Remove any existing table
+            const existingTable = contentWrapper.querySelector('.route-info-table');
+            if (existingTable) {
+                existingTable.remove();
             }
+            
+            // Build table below the routeBox
+            buildRouteTable(routeNumber);
         };
         return searchButton;
     },
@@ -232,16 +261,5 @@ const routeBox = {
         }
     },
 };
-
-// Remove the document click handler
-document.addEventListener('click', (event) => {
-    const routeBox = document.getElementById('routeBox');
-    const isRouteButton = event.target.closest('.route-info-button');
-    const isDoNotClose = event.target.closest('.do-not-close-routebox');
-    
-    if (routeBox && !routeBox.contains(event.target) && !isRouteButton && !isDoNotClose) {
-        routeBox.remove();
-    }
-}, true);
 
 export { routeBox };

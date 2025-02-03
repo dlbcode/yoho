@@ -1,7 +1,9 @@
 import { appState, updateState } from './stateManager.js';
 import { map } from './map.js';
 import { uiHandling } from './uiHandling.js';
-import { routeHandling } from './routeHandling.js';
+
+let currentPositionMode = null;
+let resizeObserver = null;
 
 async function fetchAirports(query) {
     try {
@@ -36,10 +38,6 @@ function handleSelection(e, inputId, airport) {
         detail: { airport, fieldId: inputId }
     }));
     inputField.setAttribute('data-selected-iata', airport.iata_code);
-
-    const routeNumber = parseInt(inputId.split('-')[2]) - 1;
-    const existingWaypointIndex = appState.waypoints.findIndex(wp => wp.iata_code === airport.iata_code);
-
     inputField.blur();
 }
 
@@ -58,6 +56,7 @@ function setupAutocompleteForField(fieldId) {
         inputField.removeAttribute('readonly');
         toggleSuggestionBox(true);
         initialInputValue = inputField.value;
+        setSuggestionBoxPosition(); // Add position check on focus
 
         const iataCode = inputField.getAttribute('data-selected-iata') || getIataFromField(fieldId);
         if (iataCode) {
@@ -71,6 +70,52 @@ function setupAutocompleteForField(fieldId) {
         }
     });
 
+    const setSuggestionBoxPosition = () => {
+        const isMobile = window.innerWidth <= 600;
+        const inputRect = inputField.getBoundingClientRect();
+        const viewportHeight = window.innerHeight;
+        const spaceBelow = viewportHeight - inputRect.bottom;
+        const spaceAbove = inputRect.top;
+        
+        if (isMobile) {
+            suggestionBox.style.position = 'fixed';
+            suggestionBox.style.top = '50px';
+            suggestionBox.style.left = '0';
+            suggestionBox.style.width = '100%';
+            suggestionBox.style.maxHeight = 'calc(100vh - 50px)';
+        } else {
+            suggestionBox.style.position = 'absolute';
+            suggestionBox.style.width = '100%';
+            
+            // Check if there's enough space below
+            if (spaceBelow >= 200 || spaceBelow > spaceAbove) {
+                suggestionBox.style.top = '100%';
+                suggestionBox.style.bottom = 'auto';
+            } else {
+                suggestionBox.style.bottom = '100%';
+                suggestionBox.style.top = 'auto';
+            }
+        }
+    };
+
+    // Only update position on resize/orientation
+    const handleResize = () => {
+        if (suggestionBox.style.display === 'block') {
+            setSuggestionBoxPosition();
+        }
+    };
+
+    if (resizeObserver) resizeObserver.disconnect();
+    resizeObserver = new ResizeObserver(handleResize);
+    resizeObserver.observe(document.documentElement);
+
+    window.visualViewport?.addEventListener('resize', handleResize);
+    window.addEventListener('orientationchange', handleResize);
+
+    // Remove position mode tracking
+    currentPositionMode = null;
+
+    // Simplified input handler without position checks
     inputField.addEventListener('input', async () => {
         const airports = await fetchAirports(inputField.value);
         updateSuggestions(fieldId, airports);
@@ -81,11 +126,7 @@ function setupAutocompleteForField(fieldId) {
     const toggleSuggestionBox = (display) => {
         suggestionBox.style.display = display ? 'block' : 'none';
         if (display) {
-            const isMobile = window.innerWidth <= 600;
-            suggestionBox.style.position = isMobile ? 'fixed' : '';
-            suggestionBox.style.left = '0px';
-            suggestionBox.style.top = isMobile ? '50px' : '35px';
-            suggestionBox.style.width = isMobile ? '100%' : '300px';
+            setSuggestionBoxPosition();
         }
     };
 
@@ -122,16 +163,17 @@ function setupAutocompleteForField(fieldId) {
                 if (items) items[currentFocus].click();
             }
         }
-        inputField.addEventListener('blur', () => {
-            setTimeout(() => {
-                clearInputField(inputField);
-                toggleSuggestionBox(false);
-                if (inputField.value === '' && appState.waypoints.length > 0) {
-                   const waypointIndex = parseInt(inputField.id.replace('waypoint-input-', '')) - 1;
-                   updateState('removeWaypoint', waypointIndex, 'airportAutocomplete.addEventListener3');
-                }
-            }, 300);
-        });
+    });
+
+    inputField.addEventListener('blur', () => {
+        setTimeout(() => {
+            clearInputField(inputField);
+            toggleSuggestionBox(false);
+            if (inputField.value === '' && appState.waypoints.length > 0) {
+                const waypointIndex = parseInt(inputField.id.replace('waypoint-input-', '')) - 1;
+                updateState('removeWaypoint', waypointIndex, 'airportAutocomplete.addEventListener3');
+            }
+        }, 300);
     });
 
     if (!window.outsideClickListenerAdded) {
@@ -164,13 +206,13 @@ function updateSuggestions(inputId, airports) {
     airports.forEach(airport => {
         const div = document.createElement('div');
         div.textContent = `${airport.name} (${airport.iata_code}) - ${airport.city}, ${airport.country}`;
-    
+
         const selectionHandler = (e) => {
             setTimeout(() => {
                 handleSelection(e, inputId, airport);
             }, 100);
         };
-    
+
         div.addEventListener('touchstart', (e) => {
             selectionHandledByTouch = false;
             div.style.pointerEvents = 'none';
@@ -179,24 +221,22 @@ function updateSuggestions(inputId, airports) {
         div.addEventListener('touchmove', (e) => {
             selectionHandledByTouch = true;
         }, { passive: true });
-    
+
         div.addEventListener('touchend', (e) => {
             div.style.pointerEvents = 'auto';
             if (!selectionHandledByTouch) {
                 selectionHandler(e);
             }
-        });
-    
-        div.addEventListener('click', (e) => {
-            if (!selectionHandledByTouch) {
-                selectionHandler(e);
-            }
             selectionHandledByTouch = false;
         });
-    
+
+        div.addEventListener('click', (e) => {
+            selectionHandler(e);
+        });
+
         suggestionBox.appendChild(div);
     });
-                     
+
     if (airports.length > 0) suggestionBox.style.display = 'block';
 }
 

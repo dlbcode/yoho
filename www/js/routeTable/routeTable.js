@@ -119,7 +119,22 @@ function buildRouteTable(routeIndex) {
                 return;
             }
 
-            infoPaneContent.innerHTML = ''; // Clear existing content
+            // Instead of clearing the entire infoPaneContent, find/create content wrapper
+            let contentWrapper = infoPaneContent.querySelector('.content-wrapper');
+            
+            if (!contentWrapper) {
+                contentWrapper = document.createElement('div');
+                contentWrapper.className = 'content-wrapper';
+                infoPaneContent.appendChild(contentWrapper);
+            }
+
+            // Keep existing routeBox if present
+            const existingRouteBox = contentWrapper.querySelector('#routeBox');
+            contentWrapper.innerHTML = ''; // Clear the wrapper
+            if (existingRouteBox) {
+                contentWrapper.appendChild(existingRouteBox);
+            }
+
             const table = document.createElement('table');
             table.className = 'route-info-table';
             table.dataset.routeIndex = routeIndex;
@@ -242,7 +257,7 @@ function buildRouteTable(routeIndex) {
             });
 
             table.appendChild(tbody);
-            infoPaneContent.appendChild(table); // Append the table once all rows are added
+            contentWrapper.appendChild(table); // Append the table once all rows are added
             infoPane.classList.remove('loading');
             pathDrawing.drawLines();
             highlightSelectedRowForRouteIndex(routeIndex);
@@ -289,10 +304,13 @@ function buildRouteTable(routeIndex) {
                 }
             };
 
+            // Add the 'filter-button' class to the filter buttons
             if (filteredHeader) {
+                filteredHeader.classList.add('filter-button');
                 filteredHeader.addEventListener('click', handleFilterClick);
             }
             if (filterIcon) {
+                filterIcon.classList.add('filter-button');
                 filterIcon.addEventListener('click', handleFilterClick);
             }
         });

@@ -90,26 +90,34 @@ const infoPane = {
         event.stopPropagation();
         adjustMapSize();
         
-        const routeBoxElement = document.getElementById('routeBox');
-        const isForThisRoute = routeBoxElement?.dataset.routeNumber === String(routeIndex);
-
-        if (routeBoxElement && isForThisRoute) {
-            routeBoxElement.remove();
-            return;
-        }
-
-        if (routeBoxElement) {
-            routeBoxElement.remove();
+        // Clear any existing routeBox
+        const existingRouteBox = document.getElementById('routeBox');
+        if (existingRouteBox) {
+            existingRouteBox.remove();
         }
 
         this.fitMapToRoute(routeIndex);
+        
+        // Create content wrapper to hold both routeBox and table
+        const infoPaneContent = document.getElementById('infoPaneContent');
+        infoPaneContent.innerHTML = '';
+        const contentWrapper = document.createElement('div');
+        contentWrapper.className = 'content-wrapper';
+        infoPaneContent.appendChild(contentWrapper);
 
-        if (appState.selectedRoutes.hasOwnProperty(routeIndex)) {
-            appState.currentRouteIndex = routeIndex;
-            appState.currentView = 'selectedRoute';
-            this.displayContent();
+        // Show routeBox in infoPane
+        const routeBoxElement = routeBox.createRouteBox();
+        routeBoxElement.dataset.routeNumber = routeIndex;
+        contentWrapper.appendChild(routeBoxElement);
+
+        // Setup routeBox content
+        routeBox.setupRouteBox(routeBoxElement, routeIndex);
+
+        // Ensure infoPane is tall enough
+        const infoPaneElement = document.getElementById('infoPane');
+        if (infoPaneElement.offsetHeight < (0.5 * window.innerHeight)) {
+            infoPaneElement.style.height = `${0.5 * window.innerHeight}px`;
         }
-        routeBox.showRouteBox(event, routeIndex);
     },
 
     highlightRouteLines(origin, destination, color) {
