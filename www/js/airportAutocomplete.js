@@ -56,6 +56,7 @@ function setupAutocompleteForField(fieldId) {
         inputField.removeAttribute('readonly');
         toggleSuggestionBox(true);
         initialInputValue = inputField.value;
+        setSuggestionBoxPosition(); // Add position check on focus
 
         const iataCode = inputField.getAttribute('data-selected-iata') || getIataFromField(fieldId);
         if (iataCode) {
@@ -69,57 +70,57 @@ function setupAutocompleteForField(fieldId) {
         }
     });
 
-    // Initialize position mode
-    currentPositionMode = window.innerWidth <= 600 ? 'mobile' : 'desktop';
-
-    const isMobileView = () => window.innerWidth <= 600;
-
     const setSuggestionBoxPosition = () => {
-        const newPositionMode = isMobileView() ? 'mobile' : 'desktop';
+        const isMobile = window.innerWidth <= 600;
+        const inputRect = inputField.getBoundingClientRect();
+        const viewportHeight = window.innerHeight;
+        const spaceBelow = viewportHeight - inputRect.bottom;
+        const spaceAbove = inputRect.top;
         
-        if (currentPositionMode !== newPositionMode || suggestionBox.style.display === 'block') {
-            currentPositionMode = newPositionMode;
+        if (isMobile) {
+            suggestionBox.style.position = 'fixed';
+            suggestionBox.style.top = '50px';
+            suggestionBox.style.left = '0';
+            suggestionBox.style.width = '100%';
+            suggestionBox.style.maxHeight = 'calc(100vh - 50px)';
+        } else {
+            suggestionBox.style.position = 'absolute';
+            suggestionBox.style.width = '100%';
             
-            if (currentPositionMode === 'mobile') {
-                suggestionBox.style.position = 'fixed';
-                suggestionBox.style.top = '50px';
-                suggestionBox.style.left = '0';
-                suggestionBox.style.width = '100%';
-                suggestionBox.style.maxHeight = 'calc(100vh - 50px)';
+            // Check if there's enough space below
+            if (spaceBelow >= 200 || spaceBelow > spaceAbove) {
+                suggestionBox.style.top = '100%';
+                suggestionBox.style.bottom = 'auto';
             } else {
-                suggestionBox.style.position = 'absolute';
-                suggestionBox.style.removeProperty('top');
-                suggestionBox.style.removeProperty('left');
-                suggestionBox.style.width = '100%';
-                uiHandling.positionDropdown(inputField, suggestionBox);
+                suggestionBox.style.bottom = '100%';
+                suggestionBox.style.top = 'auto';
             }
         }
     };
 
-    // Update event listeners
+    // Only update position on resize/orientation
     const handleResize = () => {
         if (suggestionBox.style.display === 'block') {
             setSuggestionBoxPosition();
         }
     };
 
-    // Clean up existing observer
     if (resizeObserver) resizeObserver.disconnect();
-
-    // Create new resize observer
     resizeObserver = new ResizeObserver(handleResize);
     resizeObserver.observe(document.documentElement);
 
-    // Add viewport and orientation change handlers
     window.visualViewport?.addEventListener('resize', handleResize);
     window.addEventListener('orientationchange', handleResize);
 
+    // Remove position mode tracking
+    currentPositionMode = null;
+
+    // Simplified input handler without position checks
     inputField.addEventListener('input', async () => {
         const airports = await fetchAirports(inputField.value);
         updateSuggestions(fieldId, airports);
         selectionMade = false;
         currentFocus = -1;
-        setSuggestionBoxPosition();
     });
 
     const toggleSuggestionBox = (display) => {
