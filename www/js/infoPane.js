@@ -103,13 +103,18 @@ const infoPane = {
         infoPaneContent.innerHTML = '';
         const contentWrapper = document.createElement('div');
         contentWrapper.className = 'content-wrapper';
-        infoPaneContent.appendChild(contentWrapper);
-
-        // Show routeBox in infoPane
+        
+        // Add routeBox to content wrapper
+        const routeBoxContainer = document.createElement('div');
+        routeBoxContainer.id = 'routeBoxContainer';
         const routeBoxElement = routeBox.createRouteBox();
         routeBoxElement.dataset.routeNumber = routeIndex;
-        contentWrapper.appendChild(routeBoxElement);
-
+        
+        routeBoxContainer.appendChild(routeBoxElement);
+        contentWrapper.appendChild(routeBoxContainer);
+        
+        infoPaneContent.appendChild(contentWrapper);
+        
         // Setup routeBox content
         routeBox.setupRouteBox(routeBoxElement, routeIndex);
 
