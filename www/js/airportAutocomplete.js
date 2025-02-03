@@ -3,6 +3,9 @@ import { map } from './map.js';
 import { uiHandling } from './uiHandling.js';
 import { routeHandling } from './routeHandling.js';
 
+let currentPositionMode = null;
+let resizeObserver = null;
+
 async function fetchAirports(query) {
     try {
         const response = await fetch(`https://yonderhop.com/api/airports?query=${query}`);
@@ -71,35 +74,18 @@ function setupAutocompleteForField(fieldId) {
         }
     });
 
+    // Initialize position mode
+    currentPositionMode = window.innerWidth <= 600 ? 'mobile' : 'desktop';
+
     const isMobileView = () => window.innerWidth <= 600;
 
-    inputField.addEventListener('input', async () => {
-        const airports = await fetchAirports(inputField.value);
-        updateSuggestions(fieldId, airports);
-        selectionMade = false;
-        currentFocus = -1;
+    const setSuggestionBoxPosition = () => {
+        const newPositionMode = isMobileView() ? 'mobile' : 'desktop';
         
-        if (isMobileView()) {
-            // In mobile mode, suggestions follow the expanded input
-            suggestionBox.style.position = 'fixed';
-            suggestionBox.style.top = '50px';
-            suggestionBox.style.left = '0';
-            suggestionBox.style.width = '100%';
-            suggestionBox.style.maxHeight = 'calc(100vh - 50px)';
-        } else {
-            // Desktop mode - normal positioning
-            suggestionBox.style.position = 'absolute';
-            suggestionBox.style.removeProperty('top');
-            suggestionBox.style.removeProperty('left');
-            suggestionBox.style.removeProperty('max-height');
-            uiHandling.positionDropdown(inputField, suggestionBox);
-        }
-    });
-
-    const toggleSuggestionBox = (display) => {
-        suggestionBox.style.display = display ? 'block' : 'none';
-        if (display) {
-            if (isMobileView()) {
+        if (currentPositionMode !== newPositionMode || suggestionBox.style.display === 'block') {
+            currentPositionMode = newPositionMode;
+            
+            if (currentPositionMode === 'mobile') {
                 suggestionBox.style.position = 'fixed';
                 suggestionBox.style.top = '50px';
                 suggestionBox.style.left = '0';
@@ -109,9 +95,42 @@ function setupAutocompleteForField(fieldId) {
                 suggestionBox.style.position = 'absolute';
                 suggestionBox.style.removeProperty('top');
                 suggestionBox.style.removeProperty('left');
-                suggestionBox.style.removeProperty('max-height');
+                suggestionBox.style.width = '100%';
                 uiHandling.positionDropdown(inputField, suggestionBox);
             }
+        }
+    };
+
+    // Update event listeners
+    const handleResize = () => {
+        if (suggestionBox.style.display === 'block') {
+            setSuggestionBoxPosition();
+        }
+    };
+
+    // Clean up existing observer
+    if (resizeObserver) resizeObserver.disconnect();
+
+    // Create new resize observer
+    resizeObserver = new ResizeObserver(handleResize);
+    resizeObserver.observe(document.documentElement);
+
+    // Add viewport and orientation change handlers
+    window.visualViewport?.addEventListener('resize', handleResize);
+    window.addEventListener('orientationchange', handleResize);
+
+    inputField.addEventListener('input', async () => {
+        const airports = await fetchAirports(inputField.value);
+        updateSuggestions(fieldId, airports);
+        selectionMade = false;
+        currentFocus = -1;
+        setSuggestionBoxPosition();
+    });
+
+    const toggleSuggestionBox = (display) => {
+        suggestionBox.style.display = display ? 'block' : 'none';
+        if (display) {
+            setSuggestionBoxPosition();
         }
     };
 
