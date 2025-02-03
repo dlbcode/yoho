@@ -1,7 +1,6 @@
 import { appState, updateState } from './stateManager.js';
 import { map } from './map.js';
 import { uiHandling } from './uiHandling.js';
-import { routeHandling } from './routeHandling.js';
 
 let currentPositionMode = null;
 let resizeObserver = null;
@@ -39,10 +38,6 @@ function handleSelection(e, inputId, airport) {
         detail: { airport, fieldId: inputId }
     }));
     inputField.setAttribute('data-selected-iata', airport.iata_code);
-
-    const routeNumber = parseInt(inputId.split('-')[2]) - 1;
-    const existingWaypointIndex = appState.waypoints.findIndex(wp => wp.iata_code === airport.iata_code);
-
     inputField.blur();
 }
 
