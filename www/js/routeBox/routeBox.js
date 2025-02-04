@@ -185,8 +185,10 @@ const routeBox = {
         }
     },
 
-    createRouteBox() {
-        return createElement('div', { id: 'routeBox', className: 'route-box' });
+    createRouteBox: function() {
+        const routeBoxElement = document.createElement('div');
+        routeBoxElement.className = 'route-box';
+        return routeBoxElement;
     },
 
     createSwapButton(routeNumber) {

@@ -266,25 +266,33 @@ const infoPane = {
     }
 };
 
+document.querySelectorAll('.routeButton').forEach(button => {
+    button.addEventListener('click', handleRouteButtonClick);
+});
+
+function handleRouteButtonClick(event) {
+    const routeIndex = parseInt(event.target.dataset.routeIndex, 10);
+    setupRouteContent(routeIndex);
+}
+
 function setupRouteContent(routeIndex) {
     const infoPaneContent = document.getElementById('infoPaneContent');
-    if (!document.getElementById('routeBox')) {
-        infoPaneContent.innerHTML = '';
-        const contentWrapper = document.createElement('div');
-        contentWrapper.className = 'content-wrapper';
+    infoPaneContent.innerHTML = ''; // Always clear the content
 
-        const routeBoxContainer = document.createElement('div');
-        routeBoxContainer.id = 'routeBoxContainer';
-        const routeBoxElement = routeBox.createRouteBox();
-        routeBoxElement.dataset.routeNumber = routeIndex;
+    const contentWrapper = document.createElement('div');
+    contentWrapper.className = 'content-wrapper';
 
-        routeBoxContainer.appendChild(routeBoxElement);
-        contentWrapper.appendChild(routeBoxContainer);
+    const routeBoxContainer = document.createElement('div');
+    routeBoxContainer.id = 'routeBoxContainer';
+    const routeBoxElement = routeBox.createRouteBox();
+    routeBoxElement.dataset.routeNumber = routeIndex;
 
-        infoPaneContent.appendChild(contentWrapper);
+    routeBoxContainer.appendChild(routeBoxElement);
+    contentWrapper.appendChild(routeBoxContainer);
 
-        routeBox.setupRouteBox(routeBoxElement, routeIndex);
-    }
+    infoPaneContent.appendChild(contentWrapper);
+
+    routeBox.setupRouteBox(routeBoxElement, routeIndex);
 }
 
 export { infoPane };
