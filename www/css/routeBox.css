@@ -1,6 +1,6 @@
 .route-box {
   position: relative;
-  z-index: 1000;
+  z-index: auto;
   background-color: #222;
   width: 100%;
   margin: 0 auto;
@@ -41,6 +41,7 @@
   flex-shrink: 0;
   width: 100%;
   position: relative;
+  z-index: auto;
 }
 
 .date-inputs-container {
@@ -422,6 +423,8 @@
   display: flex;
   flex-direction: column;
   overflow-y: auto;
+  overflow: visible;
+  z-index: auto;
 }
 
 .inline-container {
@@ -458,6 +461,7 @@
 
 #infoPaneContent {
   overflow: visible; /* Ensure dropdown is not clipped */
+  z-index: auto;
 }
 
 /* Search and remove buttons */
