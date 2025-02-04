@@ -34,8 +34,8 @@ const infoPane = {
 
     displayContent() {
         const infoPaneContent = document.getElementById('infoPaneContent');
-        infoPaneContent.innerHTML = '';
-        const { currentView, currentRouteIndex, selectedRoutes } = appState;
+        const routeBox = document.getElementById('routeBox');
+        const currentView = appState.currentView;
     },
 
     updateRouteButtons() {
@@ -227,7 +227,6 @@ const infoPane = {
             const prevDates = appState.routeDates[routeIndex] || {};
 
             const baseDate = new Date(prevDates.return || prevDates.depart || Date.now());
-
             const newDate = !isNaN(baseDate) ? baseDate : new Date();
             newDate.setDate(newDate.getDate() + 1);
 
@@ -241,11 +240,9 @@ const infoPane = {
                 depart: formattedDate,
                 return: null
             }, 'infoPane.handlePlusButtonClick');
-
-            setupRouteContent(routeIndex + 1);
         }
 
-        routeBox.showRouteBox(event, appState.routes.length);
+        setupRouteContent(appState.routes.length);
     },
 
     applyToLines(tags, action) {
@@ -271,21 +268,23 @@ const infoPane = {
 
 function setupRouteContent(routeIndex) {
     const infoPaneContent = document.getElementById('infoPaneContent');
-    infoPaneContent.innerHTML = '';
-    const contentWrapper = document.createElement('div');
-    contentWrapper.className = 'content-wrapper';
+    if (!document.getElementById('routeBox')) {
+        infoPaneContent.innerHTML = '';
+        const contentWrapper = document.createElement('div');
+        contentWrapper.className = 'content-wrapper';
 
-    const routeBoxContainer = document.createElement('div');
-    routeBoxContainer.id = 'routeBoxContainer';
-    const routeBoxElement = routeBox.createRouteBox();
-    routeBoxElement.dataset.routeNumber = routeIndex;
+        const routeBoxContainer = document.createElement('div');
+        routeBoxContainer.id = 'routeBoxContainer';
+        const routeBoxElement = routeBox.createRouteBox();
+        routeBoxElement.dataset.routeNumber = routeIndex;
 
-    routeBoxContainer.appendChild(routeBoxElement);
-    contentWrapper.appendChild(routeBoxContainer);
+        routeBoxContainer.appendChild(routeBoxElement);
+        contentWrapper.appendChild(routeBoxContainer);
 
-    infoPaneContent.appendChild(contentWrapper);
+        infoPaneContent.appendChild(contentWrapper);
 
-    routeBox.setupRouteBox(routeBoxElement, routeIndex);
+        routeBox.setupRouteBox(routeBoxElement, routeIndex);
+    }
 }
 
 export { infoPane };
