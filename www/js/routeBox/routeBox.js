@@ -206,24 +206,31 @@ const routeBox = {
 
     createSearchButton(routeNumber) {
         const searchButton = createElement('button', { className: 'search-button', content: 'Search' });
-        searchButton.onclick = () => {
-            if (appState.currentView !== 'routeTable') {
-                updateState('currentView', 'routeTable', 'routeBox.createSearchButton');
-            }
-            
-            // Get the content wrapper
-            const contentWrapper = document.getElementById('routeBox').parentElement;
-            
-            // Remove any existing table
-            const existingTable = contentWrapper.querySelector('.route-info-table');
-            if (existingTable) {
-                existingTable.remove();
-            }
-            
-            // Build table below the routeBox
-            buildRouteTable(routeNumber);
-        };
-        return searchButton;
+    searchButton.onclick = () => {
+        if (appState.currentView !== 'routeTable') {
+            updateState('currentView', 'routeTable', 'routeBox.createSearchButton');
+        }
+
+        // Ensure the routeBox element exists
+        const routeBoxElement = document.querySelector(`#routeBoxContainer [data-route-number="${routeNumber}"]`);
+        if (!routeBoxElement) {
+            console.error('routeBox element not found');
+            return;
+        }
+
+        // Get the content wrapper
+        const contentWrapper = routeBoxElement.parentElement;
+
+        // Remove any existing table
+        const existingTable = contentWrapper.querySelector('.route-info-table');
+        if (existingTable) {
+            existingTable.remove();
+        }
+
+        // Build table below the routeBox
+        buildRouteTable(routeNumber);
+    };
+    return searchButton;
     },
 
     createCloseButton(routeBoxElement, routeNumber) {

@@ -1,4 +1,5 @@
 version: '3'
+
 services:
   web:
     image: nginx:latest
@@ -11,7 +12,15 @@ services:
     ports:
       - "80:80"
       - "443:443"
-  
+    deploy:
+      resources:
+        limits:
+          cpus: '1'  # Limit to 1 CPU
+          memory: '256M' # Limit to 256MB memory
+        reservations: # Guarantee resources (important for consistent performance)
+          cpus: '0.5' # Reserve half a CPU
+          memory: '128M' # Reserve 128MB memory
+
   certbot:
     image: certbot/certbot
     profiles:
@@ -19,6 +28,14 @@ services:
     volumes:
       - /etc/letsencrypt:/etc/letsencrypt
       - ./services/certbot/www:/var/www/certbot
+    deploy: # Certbot doesn't need much resources, limit aggressively
+      resources:
+        limits:
+          cpus: '0.25' 
+          memory: '128M'
+        reservations:
+          cpus: '0.125'
+          memory: '64M'
 
   mongodb:
     image: mongo:6.0
@@ -34,6 +51,14 @@ services:
       - ./services/mongo/mongodb:/data/db
       - ~/backup/yohodb:/backup
       - ./services/mongo/mongo-init.sh:/docker-entrypoint-initdb.d/mongo-init.sh
+    deploy: # MongoDB can be resource intensive. Adjust carefully.
+      resources:
+        limits:
+          cpus: '2' # Limit to 2 CPUs (can be higher if needed)
+          memory: '2G'  # Limit to 2GB memory (adjust based on data size)
+        reservations:
+          cpus: '1' # Reserve 1 CPU
+          memory: '1G' # Reserve 1GB memory
 
   nodejs:
     build:
@@ -42,15 +67,19 @@ services:
     container_name: yh-nodejs
     environment:
       MONGO_RSUSER_PASSWORD: ${MONGODB_RSUSER_PASSWORD}
-      AMADEUS_TEST_API_SECRET: ${AMADEUS_TEST_API_SECRET}
-      AMADEUS_TEST_API_KEY: ${AMADEUS_TEST_API_KEY}
-      AMADEUS_PROD_API_SECRET: ${AMADEUS_PROD_API_SECRET}
-      AMADEUS_PROD_API_KEY: ${AMADEUS_PROD_API_KEY}
       TEQUILA_API_KEY: ${TEQUILA_API_KEY}
     ports:
       - "3000:3000"
     depends_on:
       - mongodb
-
-volumes:
-  node_modules:
+    volumes:
+      - node_modules:/app/node_modules # Mount the volume inside the container
+      - ./services/nodejs:/app
+    deploy:
+      resources:
+        limits:
+          cpus: '2'  # Limit to 2 CPUs
+          memory: '1G' # Limit to 1GB memory
+        reservations:
+          cpus: '1' # Reserve 1 CPU
+          memory: '512M' # Reserve 512MB memory

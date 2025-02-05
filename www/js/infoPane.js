@@ -285,6 +285,7 @@ function setupRouteContent(routeIndex) {
     const routeBoxContainer = document.createElement('div');
     routeBoxContainer.id = 'routeBoxContainer';
     const routeBoxElement = routeBox.createRouteBox();
+    routeBoxElement.id = 'routeBox'; // Ensure the routeBox element has the correct ID
     routeBoxElement.dataset.routeNumber = routeIndex;
 
     routeBoxContainer.appendChild(routeBoxElement);
