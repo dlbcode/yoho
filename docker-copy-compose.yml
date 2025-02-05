@@ -1,0 +1,10 @@
+version: '3'
+services:
+  copy-web-data:
+    image: busybox:latest
+    volumes:
+      - www_data:/destination  # Mount the www_data volume
+      - ./www:/source       # Mount the directory containing your website files
+    command: ["/bin/sh", "-c", "cp -r /source/* /destination/"]
+volumes:
+  www_data:  # This MUST match the volume name in your main docker-compose.yml

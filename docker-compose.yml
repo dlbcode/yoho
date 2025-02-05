@@ -6,32 +6,32 @@ services:
     container_name: yh-web
     volumes:
       - ./services/nginx/nginx.conf:/etc/nginx/conf.d/default.conf
-      - ./services/nginx/logs:/var/log/nginx/
+      - nginx_logs:/var/log/nginx/
+      - ./www:/var/www/   
       - /etc/letsencrypt:/etc/letsencrypt:ro
-      - ./www:/var/www/
     ports:
       - "80:80"
       - "443:443"
     deploy:
       resources:
         limits:
-          cpus: '1'  # Limit to 1 CPU
-          memory: '256M' # Limit to 256MB memory
-        reservations: # Guarantee resources (important for consistent performance)
-          cpus: '0.5' # Reserve half a CPU
-          memory: '128M' # Reserve 128MB memory
+          cpus: '1'
+          memory: '256M'
+        reservations:
+          cpus: '0.5'
+          memory: '128M'
 
   certbot:
     image: certbot/certbot
     profiles:
       - manual
     volumes:
-      - /etc/letsencrypt:/etc/letsencrypt
-      - ./services/certbot/www:/var/www/certbot
-    deploy: # Certbot doesn't need much resources, limit aggressively
+      - letsencrypt_certs:/etc/letsencrypt
+      - certbot_www:/var/www/certbot
+    deploy:
       resources:
         limits:
-          cpus: '0.25' 
+          cpus: '0.25'
           memory: '128M'
         reservations:
           cpus: '0.125'
@@ -48,17 +48,17 @@ services:
     ports:
       - "27017:27017"
     volumes:
-      - ./services/mongo/mongodb:/data/db
-      - ~/backup/yohodb:/backup
-      - ./services/mongo/mongo-init.sh:/docker-entrypoint-initdb.d/mongo-init.sh
-    deploy: # MongoDB can be resource intensive. Adjust carefully.
+      - mongodb_data:/data/db
+      - mongodb_backup:/backup
+      - ./services/mongo/mongo-init.sh:/docker-entrypoint-initdb.d/mongo-init.sh # Keep this as a bind mount (for initialization)
+    deploy:
       resources:
         limits:
-          cpus: '2' # Limit to 2 CPUs (can be higher if needed)
-          memory: '2G'  # Limit to 2GB memory (adjust based on data size)
+          cpus: '2'
+          memory: '2G'
         reservations:
-          cpus: '1' # Reserve 1 CPU
-          memory: '1G' # Reserve 1GB memory
+          cpus: '1'
+          memory: '1G'
 
   nodejs:
     build:
@@ -73,13 +73,21 @@ services:
     depends_on:
       - mongodb
     volumes:
-      - node_modules:/app/node_modules # Mount the volume inside the container
-      - ./services/nodejs:/app
+      - node_modules:/app/node_modules
+      - nodejs_app:/app
     deploy:
       resources:
         limits:
-          cpus: '2'  # Limit to 2 CPUs
-          memory: '1G' # Limit to 1GB memory
+          cpus: '2'
+          memory: '1G'
         reservations:
-          cpus: '1' # Reserve 1 CPU
-          memory: '512M' # Reserve 512MB memory
+          cpus: '1'
+          memory: '512M'
+
+volumes:
+  nginx_logs:
+  certbot_www:
+  mongodb_data:
+  mongodb_backup:
+  node_modules:
+  nodejs_app:
