@@ -72,39 +72,47 @@ function setupAutocompleteForField(fieldId) {
 
     const setSuggestionBoxPosition = () => {
         const isMobile = window.innerWidth <= 600;
-        const inputRect = inputField.getBoundingClientRect();
-        const viewportHeight = window.innerHeight;
-        const spaceBelow = viewportHeight - inputRect.bottom;
-        const spaceAbove = inputRect.top;
         
         if (isMobile) {
-            suggestionBox.style.position = 'fixed';
-            suggestionBox.style.top = '50px';
-            suggestionBox.style.left = '0';
-            suggestionBox.style.width = '100%';
-            suggestionBox.style.maxHeight = 'calc(100vh - 50px)';
+            Object.assign(suggestionBox.style, {
+                position: 'fixed',
+                top: '50px',
+                left: '0',
+                width: '100%',
+                height: 'calc(100vh - 50px)',
+                maxHeight: 'none',
+                zIndex: '10000'
+            });
         } else {
-            suggestionBox.style.position = 'absolute';
-            suggestionBox.style.width = '100%';
-            
-            // Check if there's enough space below
-            if (spaceBelow >= 200 || spaceBelow > spaceAbove) {
-                suggestionBox.style.top = '100%';
-                suggestionBox.style.bottom = 'auto';
-            } else {
-                suggestionBox.style.bottom = '100%';
-                suggestionBox.style.top = 'auto';
-            }
+            const inputRect = inputField.getBoundingClientRect();
+            const viewportHeight = window.innerHeight;
+            const spaceBelow = viewportHeight - inputRect.bottom;
+            const spaceAbove = inputRect.top;
+
+            Object.assign(suggestionBox.style, {
+                position: 'absolute',
+                width: '100%',
+                maxHeight: '200px',
+                zIndex: '1000',
+                top: spaceBelow >= 200 || spaceBelow > spaceAbove ? '100%' : 'auto',
+                bottom: spaceBelow >= 200 || spaceBelow > spaceAbove ? 'auto' : '100%'
+            });
+        }
+
+        // Maintain visibility if suggestions exist
+        if (suggestionBox.children.length > 0) {
+            suggestionBox.style.display = 'block';
         }
     };
 
-    // Only update position on resize/orientation
+    // Handle resize events
     const handleResize = () => {
         if (suggestionBox.style.display === 'block') {
             setSuggestionBoxPosition();
         }
     };
 
+    // Set up resize observer
     if (resizeObserver) resizeObserver.disconnect();
     resizeObserver = new ResizeObserver(handleResize);
     resizeObserver.observe(document.documentElement);

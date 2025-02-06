@@ -353,6 +353,20 @@
   -webkit-tap-highlight-color: transparent; /* Remove tap highlight on touch devices */
 }
 
+/* Base suggestion styles */
+[id$='Suggestions'] {
+  position: absolute;
+  width: 100%;
+  max-height: 200px;
+  background-color: #2a4f7c;
+  color: #ccc;
+  overflow-y: auto;
+  z-index: 1000;
+  border: 1px solid #525252;
+  border-radius: 5px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
 @media (max-width: 600px) {
   .route-box {  /* Changed from route-box-popup */
     width: 100%;
@@ -416,6 +430,32 @@
   .back-button:hover svg {
     stroke: #fff;
     background: none;
+  }
+
+  /* Mobile-specific styles */
+  [id$='Suggestions'] {
+    position: fixed !important; /* Force fixed positioning */
+    top: 50px !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: calc(100vh - 50px) !important;
+    max-height: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    border-radius: 0 !important;
+    z-index: 10000 !important;
+  }
+
+  /* Ensure suggestions are visible when input is focused */
+  .waypoint-input:focus + [id$='Suggestions'] {
+    display: block !important;
+  }
+
+  /* Style suggestion items for better touch targets */
+  [id$='Suggestions'] div {
+    padding: 15px !important;
+    border-bottom: 1px solid #26303c !important;
   }
 }
 
