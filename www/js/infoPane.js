@@ -86,7 +86,7 @@ const infoPane = {
 
         this.fitMapToRoute(routeIndex);
 
-        setupRouteContent(routeIndex);
+        this.setupRouteContent(routeIndex);
     },
 
     highlightRouteLines(origin, destination, color) {
@@ -242,7 +242,7 @@ const infoPane = {
             }, 'infoPane.handlePlusButtonClick');
         }
 
-        setupRouteContent(appState.routes.length);
+        this.setupRouteContent(appState.routes.length);
     },
 
     applyToLines(tags, action) {
@@ -263,6 +263,27 @@ const infoPane = {
         } else if (group.length === 1) {
             map.setView(group[0], 4);
         }
+    },
+
+    setupRouteContent(routeIndex) {
+        const infoPaneContent = document.getElementById('infoPaneContent');
+        infoPaneContent.innerHTML = ''; // Always clear the content
+    
+        const contentWrapper = document.createElement('div');
+        contentWrapper.className = 'content-wrapper';
+    
+        const routeBoxContainer = document.createElement('div');
+        routeBoxContainer.id = 'routeBoxContainer';
+        const routeBoxElement = routeBox.createRouteBox();
+        routeBoxElement.id = 'routeBox'; // Ensure the routeBox element has the correct ID
+        routeBoxElement.dataset.routeNumber = routeIndex;
+    
+        routeBoxContainer.appendChild(routeBoxElement);
+        contentWrapper.appendChild(routeBoxContainer);
+    
+        infoPaneContent.appendChild(contentWrapper);
+    
+        routeBox.setupRouteBox(routeBoxElement, routeIndex);
     }
 };
 
@@ -273,27 +294,6 @@ document.querySelectorAll('.routeButton').forEach(button => {
 function handleRouteButtonClick(event) {
     const routeIndex = parseInt(event.target.dataset.routeIndex, 10);
     setupRouteContent(routeIndex);
-}
-
-function setupRouteContent(routeIndex) {
-    const infoPaneContent = document.getElementById('infoPaneContent');
-    infoPaneContent.innerHTML = ''; // Always clear the content
-
-    const contentWrapper = document.createElement('div');
-    contentWrapper.className = 'content-wrapper';
-
-    const routeBoxContainer = document.createElement('div');
-    routeBoxContainer.id = 'routeBoxContainer';
-    const routeBoxElement = routeBox.createRouteBox();
-    routeBoxElement.id = 'routeBox'; // Ensure the routeBox element has the correct ID
-    routeBoxElement.dataset.routeNumber = routeIndex;
-
-    routeBoxContainer.appendChild(routeBoxElement);
-    contentWrapper.appendChild(routeBoxContainer);
-
-    infoPaneContent.appendChild(contentWrapper);
-
-    routeBox.setupRouteBox(routeBoxElement, routeIndex);
 }
 
 export { infoPane };

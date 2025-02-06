@@ -122,7 +122,20 @@ const routeBox = {
         // Clear previous routeBox if any
         this.removeExistingRouteBox();
         
-        const routeBoxContainer = document.getElementById('routeBoxContainer');
+        // Get or create content wrapper
+        let contentWrapper = document.querySelector('.content-wrapper');
+        if (!contentWrapper) {
+            contentWrapper = createElement('div', { className: 'content-wrapper' });
+            document.body.appendChild(contentWrapper);
+        }
+        
+        // Get or create routeBoxContainer
+        let routeBoxContainer = document.getElementById('routeBoxContainer');
+        if (!routeBoxContainer) {
+            routeBoxContainer = createElement('div', { id: 'routeBoxContainer' });
+            contentWrapper.insertBefore(routeBoxContainer, contentWrapper.firstChild);
+        }
+        
         const routeBoxElement = this.createRouteBox();
         routeBoxElement.dataset.routeNumber = routeNumber;
         routeBoxContainer.appendChild(routeBoxElement);
@@ -206,31 +219,28 @@ const routeBox = {
 
     createSearchButton(routeNumber) {
         const searchButton = createElement('button', { className: 'search-button', content: 'Search' });
-    searchButton.onclick = () => {
-        if (appState.currentView !== 'routeTable') {
-            updateState('currentView', 'routeTable', 'routeBox.createSearchButton');
-        }
+        searchButton.onclick = () => {
+            if (appState.currentView !== 'routeTable') {
+                updateState('currentView', 'routeTable', 'routeBox.createSearchButton');
+            }
 
-        // Ensure the routeBox element exists
-        const routeBoxElement = document.querySelector(`#routeBoxContainer [data-route-number="${routeNumber}"]`);
-        if (!routeBoxElement) {
-            console.error('routeBox element not found');
-            return;
-        }
+            // Get or ensure content wrapper exists
+            let contentWrapper = document.querySelector('.content-wrapper');
+            if (!contentWrapper) {
+                contentWrapper = createElement('div', { className: 'content-wrapper' });
+                document.body.appendChild(contentWrapper);
+            }
 
-        // Get the content wrapper
-        const contentWrapper = routeBoxElement.parentElement;
+            // Keep existing routeBox, only remove table
+            const existingTable = contentWrapper.querySelector('.route-info-table');
+            if (existingTable) {
+                existingTable.remove();
+            }
 
-        // Remove any existing table
-        const existingTable = contentWrapper.querySelector('.route-info-table');
-        if (existingTable) {
-            existingTable.remove();
-        }
-
-        // Build table below the routeBox
-        buildRouteTable(routeNumber);
-    };
-    return searchButton;
+            // Build new table below existing routeBox
+            buildRouteTable(routeNumber);
+        };
+        return searchButton;
     },
 
     createCloseButton(routeBoxElement, routeNumber) {
