@@ -422,7 +422,7 @@
 .content-wrapper {
   display: flex;
   flex-direction: column;
-  overflow-y: auto;
+  overflow: visible;
   z-index: auto;
 }
 
