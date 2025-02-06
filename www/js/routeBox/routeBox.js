@@ -1,7 +1,7 @@
 import { appState, updateState, updateUrl } from '../stateManager.js';
 import { setupAutocompleteForField } from '../airportAutocomplete.js';
 import { buildRouteTable } from '../routeTable/routeTable.js';
-import { initDatePicker } from './datePicker.js';
+import { adjustMapSize } from '../map.js';
 import { travelersPicker } from './travelersPicker.js';
 import { tripTypePicker, handleTripTypeChange } from './tripTypePicker.js';
 import { removeRoute, removeRouteButton } from './removeRoute.js';
