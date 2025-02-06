@@ -447,11 +447,6 @@
     z-index: 10000 !important;
   }
 
-  /* Ensure suggestions are visible when input is focused */
-  .waypoint-input:focus + [id$='Suggestions'] {
-    display: block !important;
-  }
-
   /* Style suggestion items for better touch targets */
   [id$='Suggestions'] div {
     padding: 15px !important;

@@ -54,14 +54,13 @@ function setupAutocompleteForField(fieldId) {
 
     inputField.addEventListener('focus', async () => {
         inputField.removeAttribute('readonly');
-        toggleSuggestionBox(true);
         initialInputValue = inputField.value;
-        setSuggestionBoxPosition(); // Add position check on focus
+        setSuggestionBoxPosition();
 
         const iataCode = inputField.getAttribute('data-selected-iata') || getIataFromField(fieldId);
         if (iataCode) {
             const airport = await fetchAirportByIata(iataCode);
-            if (airport && airport.latitude && airport.longitude) {
+            if (airport?.latitude && airport?.longitude) {
                 map.flyTo([airport.latitude, airport.longitude], 6, {
                     animate: true,
                     duration: 0.5
@@ -123,12 +122,21 @@ function setupAutocompleteForField(fieldId) {
     // Remove position mode tracking
     currentPositionMode = null;
 
-    // Simplified input handler without position checks
+    // Show suggestions only when there are results
     inputField.addEventListener('input', async () => {
-        const airports = await fetchAirports(inputField.value);
-        updateSuggestions(fieldId, airports);
-        selectionMade = false;
-        currentFocus = -1;
+        const query = inputField.value;
+        if (query.length >= 2) {
+            const airports = await fetchAirports(query);
+            if (airports.length > 0) {
+                updateSuggestions(fieldId, airports);
+                suggestionBox.style.display = 'block';
+                setSuggestionBoxPosition();
+            } else {
+                suggestionBox.style.display = 'none';
+            }
+        } else {
+            suggestionBox.style.display = 'none';
+        }
     });
 
     const toggleSuggestionBox = (display) => {
@@ -153,7 +161,6 @@ function setupAutocompleteForField(fieldId) {
         }
     };
 
-    inputField.addEventListener('focus', () => toggleSuggestionBox(true));
     inputField.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
             toggleSuggestionBox(false);
