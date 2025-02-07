@@ -286,10 +286,13 @@ function setupRouteContent(routeIndex) {
 
     routeBoxContainer.appendChild(routeBoxElement);
     contentWrapper.appendChild(routeBoxContainer);
-
     infoPaneContent.appendChild(contentWrapper);
 
+    // Let content determine height naturally
+    document.getElementById('infoPane').style.height = 'auto';
+    
     routeBox.setupRouteBox(routeBoxElement, routeIndex);
+    adjustMapSize(); // Adjust map after route box is set up
 
     return { contentWrapper, routeBoxContainer, routeBoxElement };
 }
