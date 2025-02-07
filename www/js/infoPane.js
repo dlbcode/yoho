@@ -86,7 +86,7 @@ const infoPane = {
 
         this.fitMapToRoute(routeIndex);
 
-        this.setupRouteContent(routeIndex);
+        setupRouteContent(routeIndex);
     },
 
     highlightRouteLines(origin, destination, color) {
@@ -242,7 +242,7 @@ const infoPane = {
             }, 'infoPane.handlePlusButtonClick');
         }
 
-        this.setupRouteContent(appState.routes.length);
+        setupRouteContent(appState.routes.length);
     },
 
     applyToLines(tags, action) {
@@ -263,27 +263,6 @@ const infoPane = {
         } else if (group.length === 1) {
             map.setView(group[0], 4);
         }
-    },
-
-    setupRouteContent(routeIndex) {
-        const infoPaneContent = document.getElementById('infoPaneContent');
-        infoPaneContent.innerHTML = ''; // Always clear the content
-    
-        const contentWrapper = document.createElement('div');
-        contentWrapper.className = 'content-wrapper';
-    
-        const routeBoxContainer = document.createElement('div');
-        routeBoxContainer.id = 'routeBoxContainer';
-        const routeBoxElement = routeBox.createRouteBox();
-        routeBoxElement.id = 'routeBox'; // Ensure the routeBox element has the correct ID
-        routeBoxElement.dataset.routeNumber = routeIndex;
-    
-        routeBoxContainer.appendChild(routeBoxElement);
-        contentWrapper.appendChild(routeBoxContainer);
-    
-        infoPaneContent.appendChild(contentWrapper);
-    
-        routeBox.setupRouteBox(routeBoxElement, routeIndex);
     }
 };
 
@@ -296,4 +275,27 @@ function handleRouteButtonClick(event) {
     setupRouteContent(routeIndex);
 }
 
-export { infoPane };
+function setupRouteContent(routeIndex) {
+    const infoPaneContent = document.getElementById('infoPaneContent');
+    infoPaneContent.innerHTML = ''; // Always clear the content
+
+    const contentWrapper = document.createElement('div');
+    contentWrapper.className = 'content-wrapper';
+
+    const routeBoxContainer = document.createElement('div');
+    routeBoxContainer.id = 'routeBoxContainer';
+    const routeBoxElement = routeBox.createRouteBox();
+    routeBoxElement.id = 'routeBox';
+    routeBoxElement.dataset.routeNumber = routeIndex;
+
+    routeBoxContainer.appendChild(routeBoxElement);
+    contentWrapper.appendChild(routeBoxContainer);
+
+    infoPaneContent.appendChild(contentWrapper);
+
+    routeBox.setupRouteBox(routeBoxElement, routeIndex);
+
+    return { contentWrapper, routeBoxContainer, routeBoxElement };
+}
+
+export { infoPane, setupRouteContent };

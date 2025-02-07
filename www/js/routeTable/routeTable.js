@@ -1,10 +1,11 @@
-import { appState, updateState } from '../stateManager.js';
+import { appState } from '../stateManager.js';
 import { sliderFilter } from './sliderFilter.js';
 import { sortTableByColumn } from './sortTable.js';
 import { pathDrawing, Line } from '../pathDrawing.js';
 import { flightMap } from '../flightMap.js';
 import { routeInfoRow, highlightSelectedRowForRouteIndex } from './routeInfoRow.js';
 import { applyFilters, toggleFilterResetIcon, updateFilterHeaders, constructFilterTags } from './filterTable.js';
+import { setupRouteContent } from '../infoPane.js';
 
 function buildRouteTable(routeIndex) {
     appState.filterState = {
@@ -113,21 +114,9 @@ function buildRouteTable(routeIndex) {
             }
             console.log("Flights Data:", flightsData); // Log flightsData
 
-            const infoPaneContent = document.getElementById('infoPaneContent');
-            if (!infoPaneContent) {
-                console.error('infoPaneContent element not found');
-                return;
-            }
-
-            // Instead of clearing the entire infoPaneContent, find/create content wrapper
-            let contentWrapper = infoPaneContent.querySelector('.content-wrapper');
+            const elements = setupRouteContent(routeIndex);
+            const contentWrapper = elements.contentWrapper;
             
-            if (!contentWrapper) {
-                contentWrapper = document.createElement('div');
-                contentWrapper.className = 'content-wrapper';
-                infoPaneContent.appendChild(contentWrapper);
-            }
-
             // Keep existing routeBox if present
             const existingRouteBox = contentWrapper.querySelector('#routeBox');
             contentWrapper.innerHTML = ''; // Clear the wrapper

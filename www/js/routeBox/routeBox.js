@@ -6,6 +6,7 @@ import { travelersPicker } from './travelersPicker.js';
 import { tripTypePicker, handleTripTypeChange } from './tripTypePicker.js';
 import { removeRoute, removeRouteButton } from './removeRoute.js';
 import { routeHandling } from '../routeHandling.js';
+import { setupRouteContent } from '../infoPane.js';
 
 const loadCSS = (href) => {
     const link = document.createElement('link');
@@ -119,28 +120,8 @@ const setWaypointInputs = (routeNumber) => {
 
 const routeBox = {
     showRouteBox(event, routeNumber) {
-        // Clear previous routeBox if any
         this.removeExistingRouteBox();
-        
-        // Get or create content wrapper
-        let contentWrapper = document.querySelector('.content-wrapper');
-        if (!contentWrapper) {
-            contentWrapper = createElement('div', { className: 'content-wrapper' });
-            document.body.appendChild(contentWrapper);
-        }
-        
-        // Get or create routeBoxContainer
-        let routeBoxContainer = document.getElementById('routeBoxContainer');
-        if (!routeBoxContainer) {
-            routeBoxContainer = createElement('div', { id: 'routeBoxContainer' });
-            contentWrapper.insertBefore(routeBoxContainer, contentWrapper.firstChild);
-        }
-        
-        const routeBoxElement = this.createRouteBox();
-        routeBoxElement.dataset.routeNumber = routeNumber;
-        routeBoxContainer.appendChild(routeBoxElement);
-        
-        this.setupRouteBox(routeBoxElement, routeNumber);
+        setupRouteContent(routeNumber);
     },
 
     setupRouteBox(routeBoxElement, routeNumber) {
