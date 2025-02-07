@@ -46,5 +46,7 @@ export const domManager = {
         if (routeBox) routeBox.remove();
         if (routeBoxContainer) routeBoxContainer.remove();
         if (contentWrapper) contentWrapper.remove();
+        
+        document.getElementById('infoPane').style.height = 'auto';
     }
 };
