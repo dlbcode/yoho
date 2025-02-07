@@ -42,11 +42,11 @@ export const domManager = {
         const routeBox = document.getElementById('routeBox');
         const routeBoxContainer = document.getElementById('routeBoxContainer');
         const contentWrapper = document.querySelector('.content-wrapper');
+        const infoPane = document.getElementById('infoPane');
 
         if (routeBox) routeBox.remove();
         if (routeBoxContainer) routeBoxContainer.remove();
         if (contentWrapper) contentWrapper.remove();
-        
-        document.getElementById('infoPane').style.height = 'auto';
+        infoPane.classList.remove('search-results');
     }
 };

@@ -6,6 +6,7 @@
   position: fixed;
   bottom: var(--bottom-bar-height);
   width: 100%;
+  min-height: 42px;
   max-height: calc(100vh - var(--bottom-bar-height));
   display: flex;
   flex-direction: column;
@@ -16,6 +17,10 @@
 
 #infoPane.loading {
   border-top: none;
+}
+
+#infoPane.search-results {
+  height: 50vh !important;
 }
 
 @keyframes loadingAnimation {

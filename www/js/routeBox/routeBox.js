@@ -201,33 +201,9 @@ const routeBox = {
     createSearchButton(routeNumber) {
         const searchButton = createElement('button', { className: 'search-button', content: 'Search' });
         searchButton.onclick = () => {
-            if (appState.currentView !== 'routeTable') {
-                updateState('currentView', 'routeTable', 'routeBox.createSearchButton');
-            }
-
-            // Set infoPane height to 50% of viewport height minus menuBar
             const infoPane = document.getElementById('infoPane');
-            const menuBarHeight = document.getElementById('menu-bar').offsetHeight;
-            const maxHeight = (window.visualViewport ? window.visualViewport.height : window.innerHeight);
-            infoPane.style.height = `${(maxHeight * 0.5) - menuBarHeight}px`;
-
-            // Get or ensure content wrapper exists
-            let contentWrapper = document.querySelector('.content-wrapper');
-            if (!contentWrapper) {
-                contentWrapper = createElement('div', { className: 'content-wrapper' });
-                document.body.appendChild(contentWrapper);
-            }
-
-            // Keep existing routeBox, only remove table  
-            const existingTable = contentWrapper.querySelector('.route-info-table');
-            if (existingTable) {
-                existingTable.remove();
-            }
-
-            // Build new table below existing routeBox
+            infoPane.classList.add('search-results');
             buildRouteTable(routeNumber);
-
-            // Call adjustMapSize to update the map dimensions
             adjustMapSize();
         };
         return searchButton;
