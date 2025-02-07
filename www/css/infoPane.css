@@ -13,6 +13,7 @@
   z-index: 1000;
   background-color: #1d1d1d;
   border-top: 3px solid #0060bb;
+  height: auto; /* Default height */
 }
 
 #infoPane.loading {
@@ -20,7 +21,7 @@
 }
 
 #infoPane.search-results {
-  height: 50vh !important;
+  height: 50vh;
 }
 
 @keyframes loadingAnimation {

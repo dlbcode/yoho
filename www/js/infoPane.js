@@ -273,7 +273,7 @@ function handleRouteButtonClick(event) {
 
 function setupRouteContent(routeIndex) {
     const infoPaneContent = document.getElementById('infoPaneContent');
-    infoPaneContent.innerHTML = ''; // Always clear the content
+    infoPaneContent.innerHTML = '';
 
     const contentWrapper = document.createElement('div');
     contentWrapper.className = 'content-wrapper';
@@ -288,11 +288,8 @@ function setupRouteContent(routeIndex) {
     contentWrapper.appendChild(routeBoxContainer);
     infoPaneContent.appendChild(contentWrapper);
 
-    // Let content determine height naturally
-    document.getElementById('infoPane').style.height = 'auto';
-    
     routeBox.setupRouteBox(routeBoxElement, routeIndex);
-    adjustMapSize(); // Adjust map after route box is set up
+    adjustMapSize();
 
     return { contentWrapper, routeBoxContainer, routeBoxElement };
 }
