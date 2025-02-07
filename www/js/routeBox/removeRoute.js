@@ -3,69 +3,56 @@ import { mapHandling } from '../mapHandling.js';
 import { routeHandling } from '../routeHandling.js';
 import { lineManager } from '../lineManager.js';
 import { adjustMapSize } from '../map.js';
+import { setupRouteContent } from '../infoPane.js';
+import { domManager } from '../utils/domManager.js';
 
 const removeRoute = (routeNumber) => {
     let selectedRouteIndex = routeNumber;
     let groupNumber = appState.selectedRoutes[selectedRouteIndex]?.group;
 
-    // Clear lines first
+    // Remove DOM structure first
+    domManager.removeRouteStructure(routeNumber);
+
+    // Clear lines
     if (groupNumber !== undefined) {
         lineManager.clearLinesByTags([`group:${groupNumber}`]);
     } else {
         lineManager.clearLines('route', routeNumber);
     }
 
-    // Remove selectedRoutes with same group number
+    // Remove state
     Object.keys(appState.selectedRoutes).forEach(key => {
         if (appState.selectedRoutes[key].group === groupNumber) {
             updateState('removeSelectedRoute', parseInt(key), 'removeRoute.removeRouteButton2');
         }
     });
 
-    // Remove waypoints
     updateState('removeWaypoints', { routeNumber }, 'removeRoute.removeRouteButton2');
-
-    // Remove route date
     delete appState.routeDates[routeNumber];
 
-    // Update view based on previous route's state
+    // Setup next view
     if (appState.currentView === 'routeTable' && appState.currentRouteIndex === routeNumber) {
         const prevRouteIndex = routeNumber - 1;
         if (prevRouteIndex >= 0) {
+            setupRouteContent(prevRouteIndex);
             if (appState.selectedRoutes[prevRouteIndex]) {
-                // If previous route was selected, show its details
                 appState.currentView = 'selectedRoute';
                 appState.currentRouteIndex = prevRouteIndex;
             } else {
-                // If previous route wasn't selected, go to trip view
                 appState.currentView = 'trip';
             }
         } else {
-            // No previous route, go to trip view
+            setupRouteContent(0);
             appState.currentView = 'trip';
         }
     }
 
-    // Update map and UI
     mapHandling.updateMarkerIcons();
     routeHandling.updateRoutesArray();
-    
-    // Hide route box
-    const routeBox = document.getElementById('routeBox');
-    if (routeBox) routeBox.style.display = 'none';
-
-    // Collapse infoPane to initial state
-    const infoPane = document.getElementById('infoPane');
-    if (infoPane) {
-        infoPane.style.height = '40px';
-        const infoPaneContent = document.getElementById('infoPaneContent');
-        if (infoPaneContent) {
-            infoPaneContent.innerHTML = '';
-        }
-        adjustMapSize();
-    }
+    adjustMapSize();
 };
 
+// No changes needed for removeRouteButton
 const removeRouteButton = (container, routeNumber) => {
     const removeButton = document.createElement('button');
     removeButton.textContent = 'Remove';

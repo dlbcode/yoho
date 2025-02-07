@@ -114,8 +114,7 @@ function buildRouteTable(routeIndex) {
             }
             console.log("Flights Data:", flightsData); // Log flightsData
 
-            const elements = setupRouteContent(routeIndex);
-            const contentWrapper = elements.contentWrapper;
+            const { contentWrapper, routeBoxElement } = setupRouteContent(routeIndex);
             
             // Keep existing routeBox if present
             const existingRouteBox = contentWrapper.querySelector('#routeBox');

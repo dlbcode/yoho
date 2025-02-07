@@ -78,15 +78,11 @@ const infoPane = {
     handleRouteButtonClick(routeIndex, event) {
         event.stopPropagation();
         adjustMapSize();
-
-        const existingRouteBox = document.getElementById('routeBox');
-        if (existingRouteBox) {
-            existingRouteBox.remove();
-        }
-
+        
+        const { routeBoxElement } = setupRouteContent(routeIndex);
         this.fitMapToRoute(routeIndex);
-
-        setupRouteContent(routeIndex);
+        
+        return routeBoxElement;
     },
 
     highlightRouteLines(origin, destination, color) {

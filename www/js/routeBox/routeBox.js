@@ -120,8 +120,8 @@ const setWaypointInputs = (routeNumber) => {
 
 const routeBox = {
     showRouteBox(event, routeNumber) {
-        this.removeExistingRouteBox();
-        setupRouteContent(routeNumber);
+        const { routeBoxElement } = setupRouteContent(routeNumber);
+        return routeBoxElement;
     },
 
     setupRouteBox(routeBoxElement, routeNumber) {
