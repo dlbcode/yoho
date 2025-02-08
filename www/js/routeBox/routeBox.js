@@ -130,6 +130,7 @@ const routeBox = {
         }
 
         const container = createElement('div', { className: 'inline-container' });
+        const infoPane = document.getElementById('infoPane');
 
         const topRow = createElement('div', { id: 'topRow', className: 'top-row' });
         topRow.append(tripTypePicker(routeNumber), travelersPicker(routeNumber));
@@ -143,7 +144,8 @@ const routeBox = {
             inputWrapper.classList.add(i === 0 ? 'from-input' : 'to-input');
             waypointInputsContainer.append(inputWrapper);
             const suggestionsDiv = routeBox.createSuggestionsDiv(index);
-            waypointInputsContainer.append(suggestionsDiv);
+            // Append suggestions div to the routeBoxElement instead of waypointInputsContainer
+            infoPane.append(suggestionsDiv);
             if (!firstEmptyInput && !appState.waypoints[index]) {
                 firstEmptyInput = inputWrapper.querySelector('input');
             }
