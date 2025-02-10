@@ -272,9 +272,11 @@ function handleRouteButtonClick(event) {
 }
 
 function setupRouteContent(routeIndex) {
+    const infoPane = document.getElementById('infoPane');
     const infoPaneContent = document.getElementById('infoPaneContent');
     infoPaneContent.innerHTML = '';
 
+    // First create and append the content
     const contentWrapper = document.createElement('div');
     contentWrapper.className = 'content-wrapper';
 
@@ -288,8 +290,25 @@ function setupRouteContent(routeIndex) {
     contentWrapper.appendChild(routeBoxContainer);
     infoPaneContent.appendChild(contentWrapper);
 
+    // Setup the routeBox content
     routeBox.setupRouteBox(routeBoxElement, routeIndex);
-    adjustMapSize();
+
+    // Wait for the content to be rendered before adjusting height
+    requestAnimationFrame(() => {
+        const routeBoxHeight = routeBoxElement.offsetHeight;
+        const menuBarHeight = 42; // Height of the menu bar
+        const totalHeight = routeBoxHeight + menuBarHeight;
+        
+        // Set the height to fit the content
+        infoPane.style.height = `${totalHeight}px`;
+        infoPane.classList.remove('collapsed');
+        infoPane.classList.add('expanded');
+        
+        adjustMapSize();
+    });
+
+    // Update current route index
+    appState.currentRouteIndex = routeIndex;
 
     return { contentWrapper, routeBoxContainer, routeBoxElement };
 }

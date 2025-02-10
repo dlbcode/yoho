@@ -13,7 +13,8 @@
   z-index: 1000;
   background-color: #1d1d1d;
   border-top: 3px solid #0060bb;
-  height: auto; /* Default height */
+  height: 42px; /* Default to collapsed height */
+  transition: height 0.2s ease-out; /* Smooth height transition */
 }
 
 #infoPane.loading {
@@ -22,6 +23,16 @@
 
 #infoPane.search-results {
   height: 50vh;
+}
+
+#infoPane.collapsed {
+  height: 42px; /* Just enough to show the menu-bar */
+  overflow: hidden;
+}
+
+#infoPane.expanded {
+  height: auto; /* Will be set dynamically by JavaScript */
+  min-height: 60px; /* Adjust this value based on your routeBox height */
 }
 
 @keyframes loadingAnimation {
