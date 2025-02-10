@@ -77,8 +77,26 @@ const infoPane = {
 
     handleRouteButtonClick(routeIndex, event) {
         event.stopPropagation();
-        adjustMapSize();
         
+        const infoPane = document.getElementById('infoPane');
+        const currentHeight = infoPane.offsetHeight;
+        const menuBarHeight = 42;
+
+        // If clicking currently active route and pane is expanded, collapse it
+        if (routeIndex === appState.currentRouteIndex && currentHeight > menuBarHeight) {
+            infoPane.style.height = `${menuBarHeight}px`;
+            infoPane.classList.add('collapsed');
+            infoPane.classList.remove('expanded');
+            
+            // Wait for CSS transition to complete before adjusting map
+            infoPane.addEventListener('transitionend', function onTransitionEnd() {
+                adjustMapSize();
+                infoPane.removeEventListener('transitionend', onTransitionEnd);
+            });
+            return;
+        }
+        
+        // Otherwise, show the route content
         const { routeBoxElement } = setupRouteContent(routeIndex);
         this.fitMapToRoute(routeIndex);
         
