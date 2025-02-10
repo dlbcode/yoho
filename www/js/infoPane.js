@@ -8,6 +8,8 @@ import { routeBox } from './routeBox/routeBox.js';
 import { lineManager } from './lineManager.js';
 
 const infoPane = {
+    routeTables: new Map(), // Store route tables by route index
+
     init() {
         document.addEventListener('stateChange', this.handleStateChange.bind(this));
         document.getElementById('tripButton').addEventListener('click', this.handleTripButtonClick.bind(this));
@@ -282,53 +284,79 @@ function handleRouteButtonClick(event) {
 }
 
 function setupRouteContent(routeIndex) {
-    const infoPane = document.getElementById('infoPane');
+    const infoPaneElement = document.getElementById('infoPane');
     const infoPaneContent = document.getElementById('infoPaneContent');
     infoPaneContent.innerHTML = '';
 
-    // First create and append the content
-    const contentWrapper = document.createElement('div');
-    contentWrapper.className = 'content-wrapper';
+    let contentWrapper;
+    let routeBoxElement;
 
-    const routeBoxContainer = document.createElement('div');
-    routeBoxContainer.id = 'routeBoxContainer';
-    const routeBoxElement = routeBox.createRouteBox();
-    routeBoxElement.id = 'routeBox';
-    routeBoxElement.dataset.routeNumber = routeIndex;
-
-    routeBoxContainer.appendChild(routeBoxElement);
-    contentWrapper.appendChild(routeBoxContainer);
-    infoPaneContent.appendChild(contentWrapper);
-
-    // Setup the routeBox content
-    routeBox.setupRouteBox(routeBoxElement, routeIndex);
-
-    // Wait for the content to be rendered before adjusting height
-    requestAnimationFrame(() => {
-        const menuBarHeight = 42; // Height of the menu bar
+    // Use the infoPane module object instead of the DOM element
+    const existingRouteTable = infoPane.routeTables.get(routeIndex);
+    
+    if (existingRouteTable) {
+        // Use cached route table
+        contentWrapper = existingRouteTable;
+        infoPaneContent.appendChild(contentWrapper);
         
-        // If infoPane has search-results class (route table created), set to 50% height
-        if (infoPane.classList.contains('search-results')) {
+        // Get the routeBox if it exists in the cached content
+        routeBoxElement = contentWrapper.querySelector('#routeBox');
+        
+        // If no routeBox exists, create one
+        if (!routeBoxElement) {
+            const routeBoxContainer = document.createElement('div');
+            routeBoxContainer.id = 'routeBoxContainer';
+            routeBoxElement = routeBox.createRouteBox();
+            routeBoxElement.id = 'routeBox';
+            routeBoxElement.dataset.routeNumber = routeIndex;
+            
+            routeBoxContainer.appendChild(routeBoxElement);
+            contentWrapper.insertBefore(routeBoxContainer, contentWrapper.firstChild);
+            
+            // Setup the routeBox content
+            routeBox.setupRouteBox(routeBoxElement, routeIndex);
+        }
+    } else {
+        // Create new content
+        contentWrapper = document.createElement('div');
+        contentWrapper.className = 'content-wrapper';
+
+        const routeBoxContainer = document.createElement('div');
+        routeBoxContainer.id = 'routeBoxContainer';
+        routeBoxElement = routeBox.createRouteBox();
+        routeBoxElement.id = 'routeBox';
+        routeBoxElement.dataset.routeNumber = routeIndex;
+
+        routeBoxContainer.appendChild(routeBoxElement);
+        contentWrapper.appendChild(routeBoxContainer);
+        infoPaneContent.appendChild(contentWrapper);
+
+        // Setup the routeBox content
+        routeBox.setupRouteBox(routeBoxElement, routeIndex);
+    }
+
+    requestAnimationFrame(() => {
+        const menuBarHeight = 42;
+        
+        if (infoPaneElement.classList.contains('search-results')) {
             const viewportHeight = window.visualViewport ? window.visualViewport.height : window.innerHeight;
             const halfHeight = Math.floor(viewportHeight * 0.5);
-            infoPane.style.height = `${halfHeight}px`;
+            infoPaneElement.style.height = `${halfHeight}px`;
         } else {
-            // Otherwise fit to content as before
             const routeBoxHeight = routeBoxElement.offsetHeight;
             const totalHeight = routeBoxHeight + menuBarHeight;
-            infoPane.style.height = `${totalHeight}px`;
+            infoPaneElement.style.height = `${totalHeight}px`;
         }
 
-        infoPane.classList.remove('collapsed');
-        infoPane.classList.add('expanded');
+        infoPaneElement.classList.remove('collapsed');
+        infoPaneElement.classList.add('expanded');
         
         adjustMapSize();
     });
 
-    // Update current route index
     appState.currentRouteIndex = routeIndex;
-
-    return { contentWrapper, routeBoxContainer, routeBoxElement };
+    
+    return { contentWrapper, routeBoxElement };
 }
 
 function toggleInfoPaneHeight(infoPane, forceCollapse = false) {

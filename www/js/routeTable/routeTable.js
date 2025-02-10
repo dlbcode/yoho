@@ -5,7 +5,7 @@ import { pathDrawing, Line } from '../pathDrawing.js';
 import { flightMap } from '../flightMap.js';
 import { routeInfoRow, highlightSelectedRowForRouteIndex } from './routeInfoRow.js';
 import { applyFilters, toggleFilterResetIcon, updateFilterHeaders, constructFilterTags } from './filterTable.js';
-import { setupRouteContent } from '../infoPane.js';
+import { setupRouteContent, infoPane } from '../infoPane.js';  // Import infoPane module
 
 function buildRouteTable(routeIndex) {
     appState.filterState = {
@@ -28,13 +28,12 @@ function buildRouteTable(routeIndex) {
 
     document.head.appendChild(Object.assign(document.createElement('link'), { rel: 'stylesheet', type: 'text/css', href: '../css/routeTable.css' }));
 
-    // Start the loading animation
-    const topBar = document.getElementById('top-bar');
-    infoPane.classList.add('loading');
-
-    // Start loading animation
+    // Update DOM element references to be more specific
+    const infoPaneElement = document.getElementById('infoPane');
     const infoPaneContent = document.getElementById('infoPaneContent');
-    infoPane.classList.add('loading');
+
+    // Start the loading animation
+    infoPaneElement.classList.add('loading');
 
     // **Helper function to format dates to DD/MM/YYYY**
     function formatDate(dateString) {
@@ -82,13 +81,7 @@ function buildRouteTable(routeIndex) {
     console.log("API URL:", apiUrl); // Log the generated API URL
 
     fetch(apiUrl)
-        .then(response => {
-            console.log("API Response Status:", response.status); // Log the response status
-            if (!response.ok) {
-                throw new Error(`Failed to fetch route data: ${response.statusText}`);
-            }
-            return response.json();
-        })
+        .then(response => response.json())
         .then(data => {
             console.log("API Response Data:", data); // Log the raw API response data
             let flightsData;
@@ -98,23 +91,21 @@ function buildRouteTable(routeIndex) {
                     flightsData = data.data;
                 } else {
                     console.error("Unexpected data format from API (range or Any):", data);
-                    // Handle the error, maybe set flightsData to an empty array or show an error message
-                    flightsData = []; // or handle the error in a way that makes sense for your application
+                    flightsData = []; // Set empty array for error case
                 }
             } else { // Handle yhoneway and potentially yhreturn endpoints
                 if (Array.isArray(data)) { // Check if data is already an array
                     flightsData = data;
-                } else if (data && data.data && Array.isArray(data.data)) { // Check if data.data is an array
+                } else if (data && data.data && Array.isArray(data.data)) {
                     flightsData = data.data;
                 } else {
                     console.error("Unexpected data format from API (yhoneway/yhreturn):", data);
-                    // Handle the error, maybe set flightsData to an empty array or show an error message
-                    flightsData = []; // or handle the error in a way that makes sense for your application
+                    flightsData = []; // Set empty array for error case
                 }
             }
-            console.log("Flights Data:", flightsData); // Log flightsData
+            console.log("Flights Data:", flightsData); // Log processed flightsData
 
-            const { contentWrapper, routeBoxElement } = setupRouteContent(routeIndex);
+            const { contentWrapper } = setupRouteContent(routeIndex);
             
             // Keep existing routeBox if present
             const existingRouteBox = contentWrapper.querySelector('#routeBox');
@@ -123,6 +114,7 @@ function buildRouteTable(routeIndex) {
                 contentWrapper.appendChild(existingRouteBox);
             }
 
+            // Create and setup table
             const table = document.createElement('table');
             table.className = 'route-info-table';
             table.dataset.routeIndex = routeIndex;
@@ -246,7 +238,13 @@ function buildRouteTable(routeIndex) {
 
             table.appendChild(tbody);
             contentWrapper.appendChild(table); // Append the table once all rows are added
-            infoPane.classList.remove('loading');
+            
+            // Use the imported infoPane module
+            infoPane.routeTables.set(routeIndex, contentWrapper);
+            
+            // Use the DOM element reference
+            infoPaneElement.classList.remove('loading');
+            
             pathDrawing.drawLines();
             highlightSelectedRowForRouteIndex(routeIndex);
             attachEventListeners(table, flightsData, routeIndex);
