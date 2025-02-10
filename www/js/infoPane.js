@@ -87,12 +87,7 @@ const infoPane = {
             infoPane.style.height = `${menuBarHeight}px`;
             infoPane.classList.add('collapsed');
             infoPane.classList.remove('expanded');
-            
-            // Wait for CSS transition to complete before adjusting map
-            infoPane.addEventListener('transitionend', function onTransitionEnd() {
-                adjustMapSize();
-                infoPane.removeEventListener('transitionend', onTransitionEnd);
-            });
+            adjustMapSize(); // Call immediately since there's no transition
             return;
         }
         

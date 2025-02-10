@@ -14,7 +14,6 @@
   background-color: #1d1d1d;
   border-top: 3px solid #0060bb;
   height: 42px; /* Default to collapsed height */
-  transition: height 0.3s ease-out; /* Smooth height transition */
 }
 
 #infoPane.loading {
