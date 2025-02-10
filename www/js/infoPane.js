@@ -84,10 +84,7 @@ const infoPane = {
 
         // If clicking currently active route and pane is expanded, collapse it
         if (routeIndex === appState.currentRouteIndex && currentHeight > menuBarHeight) {
-            infoPane.style.height = `${menuBarHeight}px`;
-            infoPane.classList.add('collapsed');
-            infoPane.classList.remove('expanded');
-            adjustMapSize(); // Call immediately since there's no transition
+            toggleInfoPaneHeight(infoPane, true);
             return;
         }
         
@@ -324,6 +321,43 @@ function setupRouteContent(routeIndex) {
     appState.currentRouteIndex = routeIndex;
 
     return { contentWrapper, routeBoxContainer, routeBoxElement };
+}
+
+function toggleInfoPaneHeight(infoPane, forceCollapse = false) {
+    const currentHeight = infoPane.offsetHeight;
+    const menuBarHeight = 42;
+    const routeBox = document.getElementById('routeBox');
+
+    if (forceCollapse || (currentHeight > menuBarHeight && routeBox)) {
+        infoPane.style.height = `${menuBarHeight}px`;
+        infoPane.classList.add('collapsed');
+        infoPane.classList.remove('expanded');
+    } else if (routeBox) {
+        const routeBoxHeight = routeBox.offsetHeight;
+        const totalHeight = routeBoxHeight + menuBarHeight;
+        infoPane.style.height = `${totalHeight}px`;
+        infoPane.classList.remove('collapsed');
+        infoPane.classList.add('expanded');
+    }
+    
+    adjustMapSize();
+}
+
+window.addEventListener('resize', () => {
+    const infoPane = document.getElementById('infoPane');
+    if (infoPane) {
+        toggleInfoPaneHeight(infoPane);
+    }
+});
+
+// Also handle viewport changes for mobile devices
+if (window.visualViewport) {
+    window.visualViewport.addEventListener('resize', () => {
+        const infoPane = document.getElementById('infoPane');
+        if (infoPane) {
+            toggleInfoPaneHeight(infoPane);
+        }
+    });
 }
 
 export { infoPane, setupRouteContent };
