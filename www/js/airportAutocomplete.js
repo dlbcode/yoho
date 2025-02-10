@@ -70,33 +70,37 @@ function setupAutocompleteForField(fieldId) {
     });
 
     const setSuggestionBoxPosition = () => {
-        if (!suggestionBox || !inputField) return;
-
-        const inputWrapper = inputField.closest('.input-wrapper');
-        if (!inputWrapper) return;
-
-        const inputRect = inputWrapper.getBoundingClientRect();
-        const viewportHeight = window.innerHeight;
-        const spaceBelow = viewportHeight - inputRect.bottom;
-        const spaceAbove = inputRect.top;
-
-        // Set width to match parent container
-        suggestionBox.style.width = `${inputRect.width}px`;
-
-        // Position horizontally relative to input wrapper
-        suggestionBox.style.left = '0';
-
-        // Determine vertical position
-        if (spaceBelow < 308 && spaceAbove > 308) {
-            // Position above if not enough space below but enough space above
-            suggestionBox.style.bottom = `${inputRect.height}px`;
-            suggestionBox.style.top = 'auto';
-            suggestionBox.classList.add('suggestions-up');
+        const isMobile = window.innerWidth <= 600;
+        
+        if (isMobile) {
+            Object.assign(suggestionBox.style, {
+                position: 'fixed',
+                top: '50px',
+                left: '0',
+                width: '100%',
+                height: 'calc(100vh - 50px)',
+                maxHeight: 'none',
+                zIndex: '10000'
+            });
         } else {
-            // Default position below
-            suggestionBox.style.top = `${inputRect.height}px`;
-            suggestionBox.style.bottom = 'auto';
-            suggestionBox.classList.remove('suggestions-up');
+            const inputRect = inputField.getBoundingClientRect();
+            const viewportHeight = window.innerHeight;
+            const spaceBelow = viewportHeight - inputRect.bottom;
+            const spaceAbove = inputRect.top;
+
+            Object.assign(suggestionBox.style, {
+                position: 'absolute',
+                width: '100%',
+                maxHeight: '200px',
+                zIndex: '1000',
+                top: spaceBelow >= 200 || spaceBelow > spaceAbove ? '100%' : 'auto',
+                bottom: spaceBelow >= 200 || spaceBelow > spaceAbove ? 'auto' : '100%'
+            });
+        }
+
+        // Maintain visibility if suggestions exist
+        if (suggestionBox.children.length > 0) {
+            suggestionBox.style.display = 'block';
         }
     };
 
