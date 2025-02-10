@@ -305,12 +305,20 @@ function setupRouteContent(routeIndex) {
 
     // Wait for the content to be rendered before adjusting height
     requestAnimationFrame(() => {
-        const routeBoxHeight = routeBoxElement.offsetHeight;
         const menuBarHeight = 42; // Height of the menu bar
-        const totalHeight = routeBoxHeight + menuBarHeight;
         
-        // Set the height to fit the content
-        infoPane.style.height = `${totalHeight}px`;
+        // If infoPane has search-results class (route table created), set to 50% height
+        if (infoPane.classList.contains('search-results')) {
+            const viewportHeight = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+            const halfHeight = Math.floor(viewportHeight * 0.5);
+            infoPane.style.height = `${halfHeight}px`;
+        } else {
+            // Otherwise fit to content as before
+            const routeBoxHeight = routeBoxElement.offsetHeight;
+            const totalHeight = routeBoxHeight + menuBarHeight;
+            infoPane.style.height = `${totalHeight}px`;
+        }
+
         infoPane.classList.remove('collapsed');
         infoPane.classList.add('expanded');
         
