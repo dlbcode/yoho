@@ -80,7 +80,6 @@ function buildRouteTable(routeIndex) {
 
     console.log("API URL:", apiUrl); // Log the generated API URL
 
-    // Return the fetch promise
     return fetch(apiUrl)
         .then(response => response.json())
         .then(data => {
@@ -255,7 +254,7 @@ function buildRouteTable(routeIndex) {
             console.error('Error loading data:', error);
             console.error('Detailed error:', error);
             infoPaneContent.textContent = 'Error loading data: ' + error.message;
-            throw error; // Re-throw to properly handle the error in the calling code
+            throw error;
         });
 
     function attachEventListeners(table, data, routeIndex) {
