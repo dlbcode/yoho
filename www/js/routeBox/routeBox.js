@@ -205,8 +205,21 @@ const routeBox = {
         searchButton.onclick = () => {
             const infoPane = document.getElementById('infoPane');
             infoPane.classList.add('search-results');
-            buildRouteTable(routeNumber);
-            adjustMapSize();
+            
+            // First build the route table
+            buildRouteTable(routeNumber).then(() => {
+                // After table is built, adjust the height
+                const infoPaneElement = document.getElementById('infoPane');
+                const viewportHeight = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+                const halfHeight = Math.floor(viewportHeight * 0.5);
+                
+                requestAnimationFrame(() => {
+                    infoPaneElement.style.height = `${halfHeight}px`;
+                    infoPaneElement.classList.remove('collapsed');
+                    infoPaneElement.classList.add('expanded');
+                    adjustMapSize();
+                });
+            });
         };
         return searchButton;
     },
