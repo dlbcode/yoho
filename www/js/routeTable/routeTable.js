@@ -7,8 +7,12 @@ import { routeInfoRow, highlightSelectedRowForRouteIndex } from './routeInfoRow.
 import { applyFilters, toggleFilterResetIcon, updateFilterHeaders, constructFilterTags } from './filterTable.js';
 import { setupRouteContent, infoPane } from '../infoPane.js';  // Import infoPane module
 import { infoPaneHeight } from '../utils/infoPaneHeightManager.js';
+import { lineManager } from '../lineManager.js';
 
 function buildRouteTable(routeIndex) {
+    // Add this near the start of the function, before making the API call
+    lineManager.clearLinesByTags(['type:table']); // Clear any existing route table lines
+
     appState.filterState = {
         departure: { start: 0, end: 24 },
         arrival: { start: 0, end: 24 }
@@ -229,7 +233,8 @@ function buildRouteTable(routeIndex) {
                                 arrivalTime: arrivalTime,
                                 group: routeIndex + 1, // Assuming each route is a separate group
                                 isTableRoute: true,
-                                tableRouteId: tableRouteId
+                                tableRouteId: tableRouteId,
+                                type: 'table' // Add this tag to identify table-specific lines
                             });
                         });
                     });
