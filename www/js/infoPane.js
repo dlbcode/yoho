@@ -1,7 +1,5 @@
 import { appState, updateState } from './stateManager.js';
 import { pathDrawing } from './pathDrawing.js';
-import { buildRouteTable } from './routeTable/routeTable.js';
-import { selectedRoute } from './routeTable/selectedRoute.js';
 import { adjustMapSize, map } from './map.js';
 import { uiHandling } from './uiHandling.js';
 import { routeBox } from './routeBox/routeBox.js';

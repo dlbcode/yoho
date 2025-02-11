@@ -5,6 +5,7 @@ import { lineManager } from '../lineManager.js';
 import { adjustMapSize } from '../map.js';
 import { setupRouteContent } from '../infoPane.js';
 import { domManager } from '../utils/domManager.js';
+import { infoPane } from '../infoPane.js';
 
 const removeRoute = (routeNumber) => {
     let selectedRouteIndex = routeNumber;
@@ -12,6 +13,9 @@ const removeRoute = (routeNumber) => {
 
     // Remove DOM structure first
     domManager.removeRouteStructure(routeNumber);
+
+    // Clear cached route table
+    infoPane.routeTables.delete(routeNumber);
 
     // Clear lines
     if (groupNumber !== undefined) {
