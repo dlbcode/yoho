@@ -10,7 +10,6 @@ import { infoPaneHeight } from '../utils/infoPaneHeightManager.js';
 import { lineManager } from '../lineManager.js';
 
 function buildRouteTable(routeIndex) {
-    // Add this near the start of the function, before making the API call
     lineManager.clearLinesByTags(['type:table']); // Clear any existing route table lines
 
     appState.filterState = {
