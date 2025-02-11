@@ -1,6 +1,7 @@
 import { appState, updateState } from '../stateManager.js';
 import { pathDrawing, Line } from '../pathDrawing.js';
 import { map } from '../map.js';
+import { lineManager } from '../lineManager.js';
 
 function addTimeFilterTags(type, filterTags) {
     const time = appState.filterState[type];
@@ -69,29 +70,35 @@ function applyFilters() {
 }
 
 function updateLineVisibility(visibleRouteIds, maxPrice) {
-    Object.keys(pathDrawing.routePathCache).forEach(routeId => {
-        const lineSet = pathDrawing.routePathCache[routeId];
-        if (!lineSet) return;
-        lineSet.forEach(line => {
-            if (!(line instanceof Line)) return;
-            let price;
-            for (let tag of line.tags) {
-                if (tag.startsWith('price:')) {
-                    price = parseFloat(tag.split(':')[1]);
-                    break;
-                }
+    // First get all table-specific lines
+    const tableLines = lineManager.getLinesByTags(['type:table']);
+    
+    tableLines.forEach(line => {
+        if (!line || !(line instanceof Line)) return;
+        
+        // Skip permanent route lines
+        if (line.tags.has('isPermanent')) return;
+
+        let price;
+        for (let tag of line.tags) {
+            if (tag.startsWith('price:')) {
+                price = parseFloat(tag.split(':')[1]);
+                break;
             }
-            const isVisible = visibleRouteIds.has(line.routeId) && (!maxPrice || (price && price <= maxPrice));
-            if (isVisible) {
-                line.visibleLine.setStyle({ opacity: 1 });
-                map.addLayer(line.visibleLine);
-                map.addLayer(line.invisibleLine);
-            } else {
-                line.visibleLine.setStyle({ opacity: 0 });
-                map.removeLayer(line.visibleLine);
-                map.removeLayer(line.invisibleLine);
-            }
-        });
+        }
+
+        const isVisible = visibleRouteIds.has(line.routeId) && 
+                         (!maxPrice || (price && price <= maxPrice));
+
+        if (isVisible) {
+            line.visibleLine.setStyle({ opacity: 1 });
+            map.addLayer(line.visibleLine);
+            map.addLayer(line.invisibleLine);
+        } else {
+            line.visibleLine.setStyle({ opacity: 0 });
+            map.removeLayer(line.visibleLine);
+            map.removeLayer(line.invisibleLine);
+        }
     });
 }
 

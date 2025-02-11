@@ -37,8 +37,12 @@ const lineManager = {
 
     clearLinesByTags(tags, options = {}) {
         const lines = this.getLinesByTags(tags);
-        lines.forEach(line => line.remove());
-        return lines;
+        lines.forEach(line => {
+            // Don't clear lines that are part of appState.routes
+            if (!line.tags.has('isPermanent')) {
+                line.remove();
+            }
+        });
     },
 
     clearLines(type) {
