@@ -1,6 +1,7 @@
 import { appState, updateState } from './stateManager.js';
 import { pathDrawing } from './pathDrawing.js';
-import { adjustMapSize, map } from './map.js';
+import { map } from './map.js';
+import { applyFilters } from './routeTable/filterTable.js';
 import { uiHandling } from './uiHandling.js';
 import { routeBox } from './routeBox/routeBox.js';
 import { lineManager } from './lineManager.js';
@@ -283,6 +284,9 @@ function setupRouteContent(routeIndex) {
     const infoPaneContent = document.getElementById('infoPaneContent');
     infoPaneContent.innerHTML = '';
 
+    // Clear table-specific lines when switching routes
+    lineManager.clearLinesByTags(['type:table']);
+
     let contentWrapper;
     let routeBoxElement;
 
@@ -337,6 +341,7 @@ function setupRouteContent(routeIndex) {
     });
 
     appState.currentRouteIndex = routeIndex;
+    applyFilters();
     
     return { contentWrapper, routeBoxElement };
 }

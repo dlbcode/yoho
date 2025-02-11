@@ -246,15 +246,12 @@ function buildRouteTable(routeIndex) {
             // Use the imported infoPane module
             infoPane.routeTables.set(routeIndex, contentWrapper);
             
-            // Use the DOM element reference
             infoPaneElement.classList.remove('loading');
-            
             infoPaneHeight.setHeight('half');
             
-            pathDrawing.drawLines();
             highlightSelectedRowForRouteIndex(routeIndex);
             attachEventListeners(table, flightsData, routeIndex);
-            applyFilters();
+            applyFilters(); // This will show/hide lines based on current filters
         })
         .catch(error => {
             console.error('Error loading data:', error);
