@@ -395,4 +395,4 @@ if (window.visualViewport) {
     });
 }
 
-export { infoPane, setupRouteContent };
+export { infoPane, setupRouteContent, toggleInfoPaneHeight };

@@ -5,14 +5,22 @@ import { lineManager } from '../lineManager.js';
 import { adjustMapSize } from '../map.js';
 import { setupRouteContent } from '../infoPane.js';
 import { domManager } from '../utils/domManager.js';
-import { infoPane } from '../infoPane.js';
+import { infoPane, toggleInfoPaneHeight } from '../infoPane.js'; // Add this import
 
 const removeRoute = (routeNumber) => {
+    // Get the infoPane element before removing content
+    const infoPaneElement = document.getElementById('infoPane');
+    
     let selectedRouteIndex = routeNumber;
     let groupNumber = appState.selectedRoutes[selectedRouteIndex]?.group;
 
     // Remove DOM structure first
     domManager.removeRouteStructure(routeNumber);
+
+    // Collapse the info pane
+    if (infoPaneElement) {
+        toggleInfoPaneHeight(infoPaneElement, true);
+    }
 
     // Clear cached route table
     infoPane.routeTables.delete(routeNumber);
