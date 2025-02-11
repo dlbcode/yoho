@@ -41,11 +41,10 @@ function buildRouteTable(routeIndex) {
         if (!dateString || dateString === 'any' || dateString.includes(' to ')) {
             return dateString;
         }
-        const date = new Date(dateString);
-        const day = date.getDate().toString().padStart(2, '0');
-        const month = (date.getMonth() + 1).toString().padStart(2, '0');
-        const year = date.getFullYear();
-        return `${day}/${month}/${year}`;
+        // Split the date string directly instead of creating a Date object
+        const [year, month, day] = dateString.split('-');
+        // Return the date string as-is since it's already in YYYY-MM-DD format
+        return dateString;
     }
 
     // Check if dateRange and its properties are defined before formatting
