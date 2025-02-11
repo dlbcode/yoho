@@ -291,7 +291,6 @@ function setupRouteContent(routeIndex) {
     let contentWrapper;
     let routeBoxElement;
 
-    // Use the infoPane module object instead of the DOM element
     const existingRouteTable = infoPane.routeTables.get(routeIndex);
     
     if (existingRouteTable) {
@@ -338,7 +337,9 @@ function setupRouteContent(routeIndex) {
     requestAnimationFrame(() => {
         const menuBarHeight = 42;
         
-        if (infoPaneElement.classList.contains('search-results')) {
+        const hasSearchResults = existingRouteTable?.querySelector('.route-info-table');
+        
+        if (hasSearchResults) {
             const viewportHeight = window.visualViewport ? window.visualViewport.height : window.innerHeight;
             const halfHeight = Math.floor(viewportHeight * 0.5);
             infoPaneElement.style.height = `${halfHeight}px`;
