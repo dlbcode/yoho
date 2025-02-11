@@ -6,6 +6,7 @@ import { flightMap } from '../flightMap.js';
 import { routeInfoRow, highlightSelectedRowForRouteIndex } from './routeInfoRow.js';
 import { applyFilters, toggleFilterResetIcon, updateFilterHeaders, constructFilterTags } from './filterTable.js';
 import { setupRouteContent, infoPane } from '../infoPane.js';  // Import infoPane module
+import { infoPaneHeight } from '../utils/infoPaneHeightManager.js';
 
 function buildRouteTable(routeIndex) {
     appState.filterState = {
@@ -244,6 +245,8 @@ function buildRouteTable(routeIndex) {
             
             // Use the DOM element reference
             infoPaneElement.classList.remove('loading');
+            
+            infoPaneHeight.setHeight('half');
             
             pathDrawing.drawLines();
             highlightSelectedRowForRouteIndex(routeIndex);

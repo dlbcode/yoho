@@ -4,6 +4,7 @@ import { adjustMapSize, map } from './map.js';
 import { uiHandling } from './uiHandling.js';
 import { routeBox } from './routeBox/routeBox.js';
 import { lineManager } from './lineManager.js';
+import { infoPaneHeight } from './utils/infoPaneHeightManager.js';
 
 const infoPane = {
     routeTables: new Map(), // Store route tables by route index
@@ -78,17 +79,13 @@ const infoPane = {
     handleRouteButtonClick(routeIndex, event) {
         event.stopPropagation();
         
-        const infoPane = document.getElementById('infoPane');
-        const currentHeight = infoPane.offsetHeight;
-        const menuBarHeight = 42;
-
-        // If clicking currently active route and pane is expanded, collapse it
-        if (routeIndex === appState.currentRouteIndex && currentHeight > menuBarHeight) {
-            toggleInfoPaneHeight(infoPane, true);
+        // Simplify height check and collapse logic
+        if (routeIndex === appState.currentRouteIndex && 
+            document.getElementById('infoPane').offsetHeight > infoPaneHeight.MENU_BAR_HEIGHT) {
+            infoPaneHeight.setHeight('collapse');
             return;
         }
         
-        // Otherwise, show the route content
         const { routeBoxElement } = setupRouteContent(routeIndex);
         this.fitMapToRoute(routeIndex);
         
@@ -333,24 +330,10 @@ function setupRouteContent(routeIndex) {
     }
 
     requestAnimationFrame(() => {
-        const menuBarHeight = 42;
-        
         const hasSearchResults = existingRouteTable?.querySelector('.route-info-table');
-        
-        if (hasSearchResults) {
-            const viewportHeight = window.visualViewport ? window.visualViewport.height : window.innerHeight;
-            const halfHeight = Math.floor(viewportHeight * 0.5);
-            infoPaneElement.style.height = `${halfHeight}px`;
-        } else {
-            const routeBoxHeight = routeBoxElement.offsetHeight;
-            const totalHeight = routeBoxHeight + menuBarHeight;
-            infoPaneElement.style.height = `${totalHeight}px`;
-        }
-
-        infoPaneElement.classList.remove('collapsed');
-        infoPaneElement.classList.add('expanded');
-        
-        adjustMapSize();
+        infoPaneHeight.setHeight(hasSearchResults ? 'half' : 'content', {
+            contentElement: hasSearchResults ? null : document.getElementById('routeBox')
+        });
     });
 
     appState.currentRouteIndex = routeIndex;
@@ -359,23 +342,14 @@ function setupRouteContent(routeIndex) {
 }
 
 function toggleInfoPaneHeight(infoPane, forceCollapse = false) {
-    const currentHeight = infoPane.offsetHeight;
-    const menuBarHeight = 42;
-    const routeBox = document.getElementById('routeBox');
-
-    if (forceCollapse || (currentHeight > menuBarHeight && routeBox)) {
-        infoPane.style.height = `${menuBarHeight}px`;
-        infoPane.classList.add('collapsed');
-        infoPane.classList.remove('expanded');
-    } else if (routeBox) {
-        const routeBoxHeight = routeBox.offsetHeight;
-        const totalHeight = routeBoxHeight + menuBarHeight;
-        infoPane.style.height = `${totalHeight}px`;
-        infoPane.classList.remove('collapsed');
-        infoPane.classList.add('expanded');
+    if (forceCollapse || (infoPane.offsetHeight > infoPaneHeight.MENU_BAR_HEIGHT)) {
+        infoPaneHeight.setHeight('collapse');
+    } else {
+        const routeBox = document.getElementById('routeBox');
+        if (routeBox) {
+            infoPaneHeight.setHeight('content', { contentElement: routeBox });
+        }
     }
-    
-    adjustMapSize();
 }
 
 window.addEventListener('resize', () => {
