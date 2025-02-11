@@ -297,6 +297,12 @@ function setupRouteContent(routeIndex) {
         contentWrapper = existingRouteTable;
         infoPaneContent.appendChild(contentWrapper);
         
+        // Restore filter states for this route
+        const filterTypes = ['price', 'departure', 'arrival'];
+        
+        // Reapply filters to update line visibility
+        applyFilters();
+        
         // Get the routeBox if it exists in the cached content
         routeBoxElement = contentWrapper.querySelector('#routeBox');
         
