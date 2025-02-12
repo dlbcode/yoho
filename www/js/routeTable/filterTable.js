@@ -168,6 +168,8 @@ function toggleFilterResetIcon(column) {
         filterButtonSpan.classList.remove('filterButton');
         filterButtonSpan.classList.add('headerText');
     }
+
+    appState.filterStates[appState.currentRouteIndex] = { ...appState.filterState }; // Save filter state
 }
 
 document.addEventListener('click', function (e) {

@@ -298,7 +298,12 @@ function setupRouteContent(routeIndex) {
         infoPaneContent.appendChild(contentWrapper);
         
         // Restore filter states for this route
-        const filterTypes = ['price', 'departure', 'arrival'];
+        const filterState = appState.filterStates[routeIndex] || {
+            departure: { start: 0, end: 24 },
+            arrival: { start: 0, end: 24 },
+            price: { value: null }
+        };
+        appState.filterState = filterState; // Restore filter state
         
         // Reapply filters to update line visibility
         applyFilters();

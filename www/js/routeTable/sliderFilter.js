@@ -187,6 +187,7 @@ const sliderFilter = {
             appState.filterState[column] = { start, end: end || start };
             label.textContent = (start === 0 && end === 24) ? 'Anytime' : `${this.formatTime(start)} - ${this.formatTime(end)}`;
         }
+        appState.filterStates[appState.currentRouteIndex] = { ...appState.filterState }; // Save filter state
         applyFilters();
     }
 };

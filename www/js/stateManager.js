@@ -21,6 +21,7 @@ const appState = {
     },
     routeLines: [],
     invisibleRouteLines: [],
+    filterStates: {}, // Add this line
 };
 
 function updateState(key, value, calledFrom) {
