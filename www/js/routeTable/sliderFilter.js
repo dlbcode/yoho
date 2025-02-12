@@ -188,6 +188,17 @@ const sliderFilter = {
             label.textContent = (start === 0 && end === 24) ? 'Anytime' : `${this.formatTime(start)} - ${this.formatTime(end)}`;
         }
         appState.filterStates[appState.currentRouteIndex] = { ...appState.filterState }; // Save filter state
+
+        // Save filter thresholds
+        const slider = document.getElementById(`${column}Slider`);
+        if (slider) {
+            const { min, max } = slider.noUiSlider.options.range;
+            appState.filterThresholds[appState.currentRouteIndex] = {
+                ...appState.filterThresholds[appState.currentRouteIndex],
+                [column]: { min, max }
+            };
+        }
+
         applyFilters();
     }
 };

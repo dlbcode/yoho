@@ -304,6 +304,14 @@ function setupRouteContent(routeIndex) {
             price: { value: null }
         };
         appState.filterState = filterState; // Restore filter state
+
+        // Restore filter thresholds for this route
+        const filterThresholds = appState.filterThresholds[routeIndex] || {
+            departure: { min: 0, max: 24 },
+            arrival: { min: 0, max: 24 },
+            price: { min: 0, max: 1000 }
+        };
+        appState.filterThresholds = filterThresholds; // Restore filter thresholds
         
         // Reapply filters to update line visibility
         applyFilters();

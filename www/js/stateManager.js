@@ -21,7 +21,8 @@ const appState = {
     },
     routeLines: [],
     invisibleRouteLines: [],
-    filterStates: {}, // Add this line
+    filterStates: {},
+    filterThresholds: {},
 };
 
 function updateState(key, value, calledFrom) {
