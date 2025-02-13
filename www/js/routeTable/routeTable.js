@@ -22,12 +22,16 @@ function buildRouteTable(routeIndex) {
     let origin, destination, currentRoute, departDate, returnDate, apiUrl, endpoint;
     currentRoute = appState.routes[routeIndex];
 
-    if (appState.routes[routeIndex] && appState.routes[routeIndex].originAirport && appState.routes[routeIndex].destinationAirport) {
-        origin = appState.routes[routeIndex].originAirport.iata_code;
-        destination = appState.routes[routeIndex].destinationAirport.iata_code;
-    } else {
-        origin = appState.waypoints[routeIndex * 2]?.iata_code;
-        destination = appState.waypoints[(routeIndex * 2) + 1]?.iata_code || 'Any';
+    // Update this section to use the most current waypoint data
+    origin = appState.waypoints[routeIndex * 2]?.iata_code;
+    destination = appState.waypoints[(routeIndex * 2) + 1]?.iata_code || 'Any';
+
+    // Only fall back to routes if waypoints aren't available
+    if (!origin || !destination) {
+        if (currentRoute?.originAirport && currentRoute?.destinationAirport) {
+            origin = currentRoute.originAirport.iata_code;
+            destination = currentRoute.destinationAirport.iata_code;
+        }
     }
 
     document.head.appendChild(Object.assign(document.createElement('link'), { rel: 'stylesheet', type: 'text/css', href: '../css/routeTable.css' }));

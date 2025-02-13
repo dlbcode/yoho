@@ -26,6 +26,7 @@ const appState = {
 };
 
 function updateState(key, value, calledFrom) {
+    console.log(`updateState called from: ${calledFrom}, key: ${key}, value:`, value);
     let shouldUpdateUrl = true;
 
     switch (key) {
