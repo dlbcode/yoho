@@ -141,23 +141,17 @@ class Line {
         lines.forEach(line => {
             if (!line) return;
             
-            // Skip style updates for invisible lines on hover/reset
-            if (line === this.invisibleLine) {
-                // Only update z-index for invisible lines
-                if (style.zIndex !== undefined) {
-                    line.setStyle({ zIndex: style.zIndex });
-                    style.zIndex === this.highlightZIndex ? line.bringToFront() : line.bringToBack();
-                }
+            // Handle invisible line separately
+            if (line === this.invisibleLine && style.zIndex !== undefined) {
+                line.setStyle({ zIndex: style.zIndex });
+                style.zIndex === this.highlightZIndex ? line.bringToFront() : line.bringToBack();
                 return;
             }
     
-            // Apply full style updates to visible and decorated lines
-            line.setStyle(style);
-            
-            if (style.zIndex === this.highlightZIndex) {
-                line.bringToFront();
-            } else {
-                line.bringToBack();
+            // Handle visible and decorated lines
+            if (line !== this.invisibleLine) {
+                line.setStyle(style);
+                style.zIndex === this.highlightZIndex ? line.bringToFront() : line.bringToBack();
             }
         });
     }
