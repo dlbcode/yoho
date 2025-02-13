@@ -137,41 +137,31 @@ class Line {
         }
     }
 
+    updateLineStyles(lines, style) {
+        lines.forEach(line => {
+            if (line) {
+                line.setStyle(style);
+                style.zIndex === this.highlightZIndex ? line.bringToFront() : line.bringToBack();
+            }
+        });
+    }
+
     highlight() {
-        const highlightStyle = { 
+        const style = { 
             color: 'white',
             zIndex: this.highlightZIndex 
         };
-
-        [this.visibleLine, this.invisibleLine].forEach(line => {
-            if (line) {
-                line.setStyle(highlightStyle);
-                line.bringToFront();
-            }
-        });
-
-        if (this.decoratedLine) {
-            this.decoratedLine.bringToFront();
-        }
+        this.updateLineStyles([this.visibleLine, this.invisibleLine, this.decoratedLine], style);
     }
 
     reset() {
-        const resetStyle = {
+        const style = {
             color: this.color,
             weight: this.weight,
             opacity: 1,
             zIndex: this.defaultZIndex
         };
-
-        [this.visibleLine, this.invisibleLine].forEach(line => {
-            if (line) {
-                line.setStyle(resetStyle);
-            }
-        });
-
-        if (this.decoratedLine) {
-            this.decoratedLine.bringToBack();
-        }
+        this.updateLineStyles([this.visibleLine, this.invisibleLine, this.decoratedLine], style);
     }
 
     resetZIndex() {
