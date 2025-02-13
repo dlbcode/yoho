@@ -218,43 +218,27 @@ function buildRouteTable(routeIndex) {
                 const tableRouteId = `table-${routeIndex}-${flight.id}`; // Generate a unique tableRouteId for this route
 
                 flight.route.forEach((segment, idx) => {
-                    // For all segments except the last one, connect to the next segment's origin
-                    if (idx < flight.route.length - 1) {
-                        const routeId = `${segment.flyFrom}-${segment.flyTo}`;
-                        pathDrawing.drawLine(routeId, 'route', {
+                    const nextSegment = idx < flight.route.length - 1 
+                        ? flight.route[idx + 1]
+                        : {
+                            ...segment,
+                            flyFrom: segment.flyTo,
+                            local_departure: segment.local_arrival
+                        };
+
+                    const routeId = `${segment.flyFrom}-${segment.flyTo}`;
+                    pathDrawing.drawLine(routeId, 'route', {
+                        price: flight.price,
+                        iata: segment.flyFrom,
+                        isTableRoute: true,
+                        routeData: {
+                            tableRouteId,
+                            originAirport: segment,
+                            destinationAirport: nextSegment,
                             price: flight.price,
-                            iata: flight.flyFrom,
-                            isTableRoute: true,
-                            routeData: {
-                                tableRouteId,
-                                originAirport: segment,
-                                destinationAirport: flight.route[idx + 1],
-                                price: flight.price,
-                                date: segment.local_departure
-                            }
-                        });
-                    }
-                    
-                    // For the last segment, connect to its destination
-                    if (idx === flight.route.length - 1) {
-                        const routeId = `${segment.flyFrom}-${segment.flyTo}`;
-                        pathDrawing.drawLine(routeId, 'route', {
-                            price: flight.price,
-                            iata: flight.flyFrom,
-                            isTableRoute: true,
-                            routeData: {
-                                tableRouteId,
-                                originAirport: segment,
-                                destinationAirport: {
-                                    ...segment,
-                                    flyFrom: segment.flyTo,
-                                    local_departure: segment.local_arrival
-                                },
-                                price: flight.price,
-                                date: segment.local_departure
-                            }
-                        });
-                    }
+                            date: segment.local_departure
+                        }
+                    });
                 });
             });
 
