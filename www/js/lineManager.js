@@ -126,7 +126,6 @@ const lineManager = {
     },
 
     onMouseOver(e, line) {
-        console.log('line', line);
         if (pathDrawing.popupFromClick) return;
 
         if (this.hoveredLine && this.hoveredLine !== line) {
@@ -138,20 +137,29 @@ const lineManager = {
 
         // Find and highlight all lines in the same route
         if (line.routeData?.tableRouteId) {
-            console.log('line.routeData.tableRouteId', line.routeData.tableRouteId);
             // Get all lines with the same tableRouteId
             const routeLines = Object.values(pathDrawing.routePathCache)
                 .flat()
                 .filter(l => l.routeData?.tableRouteId === line.routeData.tableRouteId);
                 
             routeLines.forEach(routeLine => {
-                routeLine.visibleLine?.setStyle({ color: 'white', weight: 2, opacity: 1 });
-                routeLine instanceof Line && routeLine.highlight();
+                if (routeLine instanceof Line) {
+                    routeLine.highlight(); // This now includes bringing to front
+                } else if (routeLine.visibleLine) {
+                    routeLine.visibleLine.setStyle({ color: 'white', weight: 2, opacity: 1 });
+                    routeLine.visibleLine.setZIndexOffset(1000);
+                    routeLine.visibleLine.bringToFront();
+                }
             });
         } else {
-            // Single line highlight (existing behavior)
-            line.visibleLine?.setStyle({ color: 'white', weight: 2, opacity: 1 });
-            line instanceof Line && line.highlight();
+            // Single line highlight
+            if (line instanceof Line) {
+                line.highlight(); // This now includes bringing to front
+            } else if (line.visibleLine) {
+                line.visibleLine.setStyle({ color: 'white', weight: 2, opacity: 1 });
+                line.visibleLine.setZIndexOffset(1000);
+                line.visibleLine.bringToFront();
+            }
         }
 
         // Extract price from tags

@@ -22,6 +22,8 @@ class Line {
         this.tags = new Set();
         this.addTags(options);
         this.routeData = options.routeData; // Store routeData
+        this.defaultZIndex = 1; // Store default z-index
+        this.highlightZIndex = 1000; // Z-index for highlighted state
     }
 
     addTag(tag) {
@@ -136,15 +138,53 @@ class Line {
     }
 
     highlight() {
-        this.visibleLine.setStyle({ color: 'white' });
+        const highlightStyle = { 
+            color: 'white',
+            zIndex: this.highlightZIndex 
+        };
+
+        [this.visibleLine, this.invisibleLine].forEach(line => {
+            if (line) {
+                line.setStyle(highlightStyle);
+                line.bringToFront();
+            }
+        });
+
+        if (this.decoratedLine) {
+            this.decoratedLine.bringToFront();
+        }
     }
 
     reset() {
-        this.visibleLine.setStyle({
+        const resetStyle = {
             color: this.color,
             weight: this.weight,
-            opacity: 1
+            opacity: 1,
+            zIndex: this.defaultZIndex
+        };
+
+        [this.visibleLine, this.invisibleLine].forEach(line => {
+            if (line) {
+                line.setStyle(resetStyle);
+            }
         });
+
+        if (this.decoratedLine) {
+            this.decoratedLine.bringToBack();
+        }
+    }
+
+    resetZIndex() {
+        if (this.visibleLine) {
+            this.visibleLine.setStyle({ zIndex: this.defaultZIndex });
+        }
+        if (this.invisibleLine) {
+            this.invisibleLine.setStyle({ zIndex: this.defaultZIndex });
+        }
+        if (this.decoratedLine) {
+            // For decorated line, just bring it to back
+            this.decoratedLine.bringToBack();
+        }
     }
 
     remove() {
