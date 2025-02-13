@@ -126,8 +126,24 @@ const lineManager = {
         }
 
         this.hoveredLine = line;
-        line.visibleLine?.setStyle({ color: 'white', weight: 2, opacity: 1 });
-        line instanceof Line && line.highlight();
+
+        // Find and highlight all lines in the same route
+        if (line.routeData?.tableRouteId) {
+            console.log('line.routeData.tableRouteId', line.routeData.tableRouteId);
+            // Get all lines with the same tableRouteId
+            const routeLines = Object.values(pathDrawing.routePathCache)
+                .flat()
+                .filter(l => l.routeData?.tableRouteId === line.routeData.tableRouteId);
+                
+            routeLines.forEach(routeLine => {
+                routeLine.visibleLine?.setStyle({ color: 'white', weight: 2, opacity: 1 });
+                routeLine instanceof Line && routeLine.highlight();
+            });
+        } else {
+            // Single line highlight (existing behavior)
+            line.visibleLine?.setStyle({ color: 'white', weight: 2, opacity: 1 });
+            line instanceof Line && line.highlight();
+        }
 
         // Extract price from tags
         const priceTag = Array.from(line.tags).find(tag => tag.startsWith('price:'));
@@ -148,7 +164,21 @@ const lineManager = {
 
     onMouseOut(line) {
         if (pathDrawing.popupFromClick || this.linesWithPopups.has(line.visibleLine)) return;
-        line instanceof Line && line.reset();
+        
+        if (line.routeData?.tableRouteId) {
+            // Reset all lines with the same tableRouteId
+            const routeLines = Object.values(pathDrawing.routePathCache)
+                .flat()
+                .filter(l => l.routeData?.tableRouteId === line.routeData.tableRouteId);
+                
+            routeLines.forEach(routeLine => {
+                routeLine instanceof Line && routeLine.reset();
+            });
+        } else {
+            // Single line reset (existing behavior)
+            line instanceof Line && line.reset();
+        }
+        
         this.clearPopups('hover');
         this.hoveredLine = null;
     },

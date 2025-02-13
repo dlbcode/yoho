@@ -194,7 +194,8 @@ const pathDrawing = {
 
         // Cache airport data to avoid redundant API calls
         const originAirportPromise = flightMap.getAirportDataByIata(originIata);
-        const destinationAirportPromise = destinationIata !== 'Any' ? flightMap.getAirportDataByIata(destinationIata) : Promise.resolve(null);
+        const destinationAirportPromise = destinationIata !== 'Any' ? 
+            flightMap.getAirportDataByIata(destinationIata) : Promise.resolve(null);
 
         const [originAirport, destinationAirport] = await Promise.all([originAirportPromise, destinationAirportPromise]);
 
@@ -207,8 +208,18 @@ const pathDrawing = {
             return;
         }
 
-        // Draw the line using the cached airport data
-        const line = new Line(originAirport, destinationAirport, routeId, type, options);
+        // Include tableRouteId in routeData if it exists in options
+        const routeData = {
+            ...options.routeData,
+            tableRouteId: options.tableRouteId || options.routeData?.tableRouteId
+        };
+
+        // Draw the line using the cached airport data with updated routeData
+        const line = new Line(originAirport, destinationAirport, routeId, type, {
+            ...options,
+            routeData
+        });
+        
         this.routePathCache[routeId] = this.routePathCache[routeId] || [];
         this.routePathCache[routeId].push(line);
 
