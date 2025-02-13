@@ -139,9 +139,25 @@ class Line {
 
     updateLineStyles(lines, style) {
         lines.forEach(line => {
-            if (line) {
-                line.setStyle(style);
-                style.zIndex === this.highlightZIndex ? line.bringToFront() : line.bringToBack();
+            if (!line) return;
+            
+            // Skip style updates for invisible lines on hover/reset
+            if (line === this.invisibleLine) {
+                // Only update z-index for invisible lines
+                if (style.zIndex !== undefined) {
+                    line.setStyle({ zIndex: style.zIndex });
+                    style.zIndex === this.highlightZIndex ? line.bringToFront() : line.bringToBack();
+                }
+                return;
+            }
+    
+            // Apply full style updates to visible and decorated lines
+            line.setStyle(style);
+            
+            if (style.zIndex === this.highlightZIndex) {
+                line.bringToFront();
+            } else {
+                line.bringToBack();
             }
         });
     }
@@ -162,19 +178,6 @@ class Line {
             zIndex: this.defaultZIndex
         };
         this.updateLineStyles([this.visibleLine, this.invisibleLine, this.decoratedLine], style);
-    }
-
-    resetZIndex() {
-        if (this.visibleLine) {
-            this.visibleLine.setStyle({ zIndex: this.defaultZIndex });
-        }
-        if (this.invisibleLine) {
-            this.invisibleLine.setStyle({ zIndex: this.defaultZIndex });
-        }
-        if (this.decoratedLine) {
-            // For decorated line, just bring it to back
-            this.decoratedLine.bringToBack();
-        }
     }
 
     remove() {
