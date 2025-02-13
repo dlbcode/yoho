@@ -18,7 +18,8 @@ export function initDatePicker(inputId, routeNumber) {
         mode: currentRouteDate === 'any' ? 'any' : (isDateRange ? 'range' : 'single'),
         altInput: true,
         altFormat: "D, d M", // This will display the date as 'Fri, 10 May'
-        static: true, // Make positioning static
+        static: true, // Make positioning static,
+        clickOpens: false, // Disable default click to open behavior
         onValueUpdate: function(selectedDates, dateStr) {
             let dateValue = null;
             if (selectedDates.length > 0) {
@@ -72,13 +73,25 @@ export function initDatePicker(inputId, routeNumber) {
             };
             
             // Add event listeners for repositioning
-            window.addEventListener('resize', handleResize);
-            window.addEventListener('scroll', positionCalendar);
+            const addEventListeners = () => {
+                window.addEventListener('resize', handleResize);
+                window.addEventListener('scroll', positionCalendar);
+            };
+
+            const removeEventListeners = () => {
+                window.removeEventListener('resize', handleResize);
+                window.removeEventListener('scroll', positionCalendar);
+            };
+
+            addEventListeners();
             
             // Handle cleanup when calendar is closed
             instance.config.onClose.push(() => {
-                window.removeEventListener('resize', handleResize);
-                window.removeEventListener('scroll', positionCalendar);
+                removeEventListeners();
+            });
+
+            instance.config.onOpen.push(() => {
+                addEventListeners();
             });
 
             let prevMonthButton = instance.calendarContainer.querySelector('.flatpickr-prev-month');
@@ -90,7 +103,6 @@ export function initDatePicker(inputId, routeNumber) {
             selectedOption.className = 'selected-option';
             let options = ['Specific Date', 'Date Range', 'Any Dates'];
             let optionsContainer = document.createElement('div');
-            optionsContainer.className = 'options';
             optionsContainer.style.display = 'none'; // Hide the options by default
             let selectedOptionText = document.createElement('div');
             selectedOptionText.style.paddingLeft = '4px';
@@ -158,6 +170,15 @@ export function initDatePicker(inputId, routeNumber) {
                     const nextWeek = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000);
                     const dateToSet = newMode === "single" ? today : [today, nextWeek];
                     instance.setDate(dateToSet, true); // Set a valid date
+                }
+            });
+
+            // Add click handler to alt input to toggle calendar
+            instance.altInput.addEventListener('click', (e) => {
+                if (instance.isOpen) {
+                    instance.close();
+                } else {
+                    instance.open();
                 }
             });
         },
