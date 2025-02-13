@@ -82,7 +82,7 @@ const lineManager = {
         }) : '';
 
         // Add layover information if it exists
-        const layovers = fullRoute.length > 2 
+        const layovers = fullRoute.length > 1 
             ? fullRoute.slice(1, -1).map(segment => 
                 `<br><strong>Layover:</strong> ${segment.cityFrom} (${segment.flyFrom})`)
             : '';
