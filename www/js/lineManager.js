@@ -74,17 +74,26 @@ const lineManager = {
     },
 
     showRoutePopup(event, routeData, visibleLine, invisibleLine) {
-        const { originAirport, destinationAirport, price, date } = routeData;
+        // Use the full route information instead of segment info
+        const { originAirport, destinationAirport, price, date, fullRoute } = routeData.routeInfo;
+        
         const formattedDate = date ? new Date(date).toLocaleDateString("en-US", {
             year: 'numeric', month: 'long', day: 'numeric'
         }) : '';
 
+        // Add layover information if it exists
+        const layovers = fullRoute.length > 2 
+            ? fullRoute.slice(1, -1).map(segment => 
+                `<br><strong>Layover:</strong> ${segment.cityFrom} (${segment.flyFrom})`)
+            : '';
+
         const content = `
             <div style="line-height: 1.5;">
                 <strong>Route Information</strong><br>
-                <strong>From:</strong> ${originAirport.name} (${originAirport.iata_code})<br>
-                <strong>To:</strong> ${destinationAirport.name} (${destinationAirport.iata_code})<br>
-                <strong>Price:</strong> $${price}<br>
+                <strong>From:</strong> ${originAirport.cityFrom} (${originAirport.flyFrom})<br>
+                <strong>To:</strong> ${destinationAirport.cityTo} (${destinationAirport.flyTo})
+                ${layovers}
+                <br><strong>Price:</strong> $${price}<br>
                 ${formattedDate ? `<strong>Date:</strong> ${formattedDate}<br>` : ''}
             </div>`;
 

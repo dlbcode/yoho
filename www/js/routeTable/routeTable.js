@@ -227,17 +227,34 @@ function buildRouteTable(routeIndex) {
                         };
 
                     const routeId = `${segment.flyFrom}-${segment.flyTo}`;
+                    
+                    // Create routeData with both segment-specific and full route information
+                    const routeData = {
+                        tableRouteId,
+                        // Segment-specific information
+                        segmentInfo: {
+                            originAirport: segment,
+                            destinationAirport: nextSegment,
+                            date: segment.local_departure
+                        },
+                        // Full route information
+                        routeInfo: {
+                            originAirport: flight.route[0], // First airport in route
+                            destinationAirport: flight.route[flight.route.length - 1], // Last airport in route
+                            price: flight.price,
+                            date: flight.route[0].local_departure,
+                            fullRoute: flight.route, // Store the entire route array
+                            deep_link: flight.deep_link,
+                            bags_price: flight.bags_price,
+                            duration: flight.duration
+                        }
+                    };
+
                     pathDrawing.drawLine(routeId, 'route', {
                         price: flight.price,
                         iata: segment.flyFrom,
                         isTableRoute: true,
-                        routeData: {
-                            tableRouteId,
-                            originAirport: segment,
-                            destinationAirport: nextSegment,
-                            price: flight.price,
-                            date: segment.local_departure
-                        }
+                        routeData
                     });
                 });
             });
@@ -320,45 +337,27 @@ function buildRouteTable(routeIndex) {
             row.addEventListener('mouseover', function() {
                 const flight = data[index];
                 if (flight && flight.route) {
-                    const segments = [];
-                    for (let i = 0; i < flight.route.length - 1; i++) {
-                        segments.push({
-                            from: flight.route[i].flyFrom,
-                            to: flight.route[i + 1].flyFrom
-                        });
-                    }
+                    const tableRouteId = `table-${routeIndex}-${flight.id}`;
                     
-                    if (flight.route.length > 0) {
-                        segments.push({
-                            from: flight.route[flight.route.length - 1].flyFrom,
-                            to: flight.route[flight.route.length - 1].flyTo
-                        });
-                    }
-
-                    segments.forEach(segment => {
-                        const routeId = `${segment.from}-${segment.to}`;
-                        const lines = [
-                            ...(pathDrawing.routePathCache[routeId] || []),
-                            ...(pathDrawing.dashedRoutePathCache[routeId] || [])
-                        ];
-                        lines.forEach(line => line instanceof Line && line.highlight());
-                    });
+                    // Find all lines with this tableRouteId
+                    const routeLines = Object.values(pathDrawing.routePathCache)
+                        .flat()
+                        .filter(l => l.routeData?.tableRouteId === tableRouteId);
+                        
+                    routeLines.forEach(line => line instanceof Line && line.highlight());
                 }
             });
 
             row.addEventListener('mouseout', function() {
                 const flight = data[index];
                 if (flight && flight.route) {
-                    flight.route.forEach((segment, i) => {
-                        if (i < flight.route.length) {
-                            const routeId = `${segment.flyFrom}-${segment.flyTo}`;
-                            const lines = [
-                                ...(pathDrawing.routePathCache[routeId] || []),
-                                ...(pathDrawing.dashedRoutePathCache[routeId] || [])
-                            ];
-                            lines.forEach(line => line instanceof Line && line.reset());
-                        }
-                    });
+                    const tableRouteId = `table-${routeIndex}-${flight.id}`;
+                    
+                    const routeLines = Object.values(pathDrawing.routePathCache)
+                        .flat()
+                        .filter(l => l.routeData?.tableRouteId === tableRouteId);
+                        
+                    routeLines.forEach(line => line instanceof Line && line.reset());
                 }
             });
         });
