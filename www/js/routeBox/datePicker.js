@@ -18,6 +18,7 @@ export function initDatePicker(inputId, routeNumber) {
         mode: currentRouteDate === 'any' ? 'any' : (isDateRange ? 'range' : 'single'),
         altInput: true,
         altFormat: "D, d M", // This will display the date as 'Fri, 10 May'
+        static: true, // Make positioning static
         onValueUpdate: function(selectedDates, dateStr) {
             let dateValue = null;
             if (selectedDates.length > 0) {
@@ -33,7 +34,53 @@ export function initDatePicker(inputId, routeNumber) {
             updateState('updateRouteDate', { routeNumber, ...appState.routeDates[routeNumber] }, 'datePicker.initDatePicker');
         },
         onReady: (selectedDates, dateStr, instance) => {
+            const CALENDAR_HEIGHT = 308; // Updated to match your specified height
+            const positionCalendar = () => {
+                if (!instance.isOpen) return; // Only reposition if calendar is open
+                
+                const input = instance.altInput;
+                const calendar = instance.calendarContainer;
+                const inputRect = input.getBoundingClientRect();
+                const spaceAbove = inputRect.top;
+                const spaceBelow = window.innerHeight - inputRect.bottom;
+                
+                // Reset any previous positioning
+                calendar.style.position = 'fixed';
+                calendar.style.left = `${inputRect.left}px`;
+                
+                if (spaceAbove >= CALENDAR_HEIGHT) {
+                    // Show above if there's enough space
+                    calendar.style.top = `${inputRect.top - CALENDAR_HEIGHT}px`;
+                } else if (spaceBelow >= CALENDAR_HEIGHT) {
+                    // Show below if there's enough space
+                    calendar.style.top = `${inputRect.bottom}px`;
+                } else {
+                    // Not enough space below, align to top of viewport
+                    calendar.style.top = '0px';
+                }
+            };
+
+            // Position calendar when opened
             instance.calendarContainer.classList.add('do-not-close-routebox');
+            instance._positionCalendar = positionCalendar;
+            
+            // Debounce the resize handler
+            let resizeTimeout;
+            const handleResize = () => {
+                clearTimeout(resizeTimeout);
+                resizeTimeout = setTimeout(positionCalendar, 100);
+            };
+            
+            // Add event listeners for repositioning
+            window.addEventListener('resize', handleResize);
+            window.addEventListener('scroll', positionCalendar);
+            
+            // Handle cleanup when calendar is closed
+            instance.config.onClose.push(() => {
+                window.removeEventListener('resize', handleResize);
+                window.removeEventListener('scroll', positionCalendar);
+            });
+
             let prevMonthButton = instance.calendarContainer.querySelector('.flatpickr-prev-month');
             let dateModeSelectWrapper = document.createElement('div');
             dateModeSelectWrapper.className = 'select-wrapper';
@@ -113,6 +160,12 @@ export function initDatePicker(inputId, routeNumber) {
                     instance.setDate(dateToSet, true); // Set a valid date
                 }
             });
+        },
+        onOpen: function(selectedDates, dateStr, instance) {
+            // Call the positioning function when calendar opens
+            if (instance._positionCalendar) {
+                instance._positionCalendar();
+            }
         }
     });
 }

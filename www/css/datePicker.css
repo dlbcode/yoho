@@ -159,3 +159,8 @@ span.flatpickr-weekday {
 .full-width {
   width: 100% !important;
 }
+
+.flatpickr-calendar {
+  transition: top 0.2s ease-out;
+  z-index: 999999 !important;
+}
