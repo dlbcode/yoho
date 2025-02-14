@@ -71,6 +71,7 @@ function setupAutocompleteForField(fieldId) {
 
     const setSuggestionBoxPosition = () => {
         const isMobile = window.innerWidth <= 600;
+        const inputRect = inputField.getBoundingClientRect();
         
         if (isMobile) {
             Object.assign(suggestionBox.style, {
@@ -83,18 +84,23 @@ function setupAutocompleteForField(fieldId) {
                 zIndex: '10000'
             });
         } else {
-            const inputRect = inputField.getBoundingClientRect();
             const viewportHeight = window.innerHeight;
             const spaceBelow = viewportHeight - inputRect.bottom;
             const spaceAbove = inputRect.top;
-
+            
+            // Calculate position relative to the viewport
+            const left = inputRect.left;
+            const width = inputRect.width;
+            
             Object.assign(suggestionBox.style, {
-                position: 'absolute',
-                width: '100%',
+                position: 'fixed',
+                width: `${width}px`,
+                left: `${left}px`,
                 maxHeight: '200px',
                 zIndex: '1000',
-                top: spaceBelow >= 200 || spaceBelow > spaceAbove ? '100%' : 'auto',
-                bottom: spaceBelow >= 200 || spaceBelow > spaceAbove ? 'auto' : '100%'
+                top: spaceBelow >= 200 || spaceBelow > spaceAbove ? 
+                    `${inputRect.bottom}px` : 
+                    `${inputRect.top - 200}px`
             });
         }
 
@@ -292,10 +298,11 @@ document.addEventListener('DOMContentLoaded', () => {
         return L.latLng(targetLatLng.lat, targetLng);
     }
 
+    // Update the stateChange event listener to use correct IDs
     document.addEventListener('stateChange', (event) => {
         if (event.detail.key === 'waypoints') {
             event.detail.value.forEach((_, index) => {
-                setupAutocompleteForField(`waypoint${index + 1}`);
+                setupAutocompleteForField(`waypoint-input-${index + 1}`);
             });
         }
     });

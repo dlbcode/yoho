@@ -143,9 +143,11 @@ const routeBox = {
             const { inputWrapper } = createWaypointInput(index, placeholder, appState.waypoints[index]);
             inputWrapper.classList.add(i === 0 ? 'from-input' : 'to-input');
             waypointInputsContainer.append(inputWrapper);
+            
+            // Append suggestions div to the input wrapper for proper positioning
             const suggestionsDiv = routeBox.createSuggestionsDiv(index);
-            // Append suggestions div to the routeBoxElement instead of waypointInputsContainer
-            infoPane.append(suggestionsDiv);
+            inputWrapper.append(suggestionsDiv);
+            
             if (!firstEmptyInput && !appState.waypoints[index]) {
                 firstEmptyInput = inputWrapper.querySelector('input');
             }
@@ -163,7 +165,10 @@ const routeBox = {
 
         routeBoxElement.append(container);
 
-        [`waypoint-input-${routeNumber * 2 + 1}`, `waypoint-input-${routeNumber * 2 + 2}`].forEach(id => setupAutocompleteForField(id));
+        // Update the setupAutocomplete calls to use consistent IDs
+        [`waypoint-input-${routeNumber * 2 + 1}`, `waypoint-input-${routeNumber * 2 + 2}`].forEach(id => 
+            setupAutocompleteForField(id)
+        );
 
         if (firstEmptyInput) {
             firstEmptyInput.focus();
@@ -197,7 +202,12 @@ const routeBox = {
     },
 
     createSuggestionsDiv(index) {
-        return createElement('div', { id: `waypoint-input-${index + 1}Suggestions`, className: 'suggestions' });
+        const suggestionsDiv = createElement('div', { 
+            id: `waypoint-input-${index + 1}Suggestions`, 
+            className: 'suggestions' 
+        });
+        document.getElementById('infoPane').appendChild(suggestionsDiv);
+        return suggestionsDiv;
     },
 
     createSearchButton(routeNumber) {
