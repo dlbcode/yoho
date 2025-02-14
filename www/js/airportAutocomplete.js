@@ -72,6 +72,8 @@ function setupAutocompleteForField(fieldId) {
     const setSuggestionBoxPosition = () => {
         const isMobile = window.innerWidth <= 600;
         const inputRect = inputField.getBoundingClientRect();
+        const waypointContainer = inputField.closest('.waypoint-inputs-container');
+        const containerRect = waypointContainer.getBoundingClientRect();
         
         if (isMobile) {
             Object.assign(suggestionBox.style, {
@@ -85,22 +87,18 @@ function setupAutocompleteForField(fieldId) {
             });
         } else {
             const viewportHeight = window.innerHeight;
-            const spaceBelow = viewportHeight - inputRect.bottom;
-            const spaceAbove = inputRect.top;
-            
-            // Calculate position relative to the viewport
-            const left = inputRect.left;
-            const width = inputRect.width;
+            const spaceBelow = viewportHeight - containerRect.bottom;
+            const spaceAbove = containerRect.top;
             
             Object.assign(suggestionBox.style, {
                 position: 'fixed',
-                width: `${width}px`,
-                left: `${left}px`,
+                width: `${containerRect.width}px`,
+                left: `${containerRect.left}px`,
                 maxHeight: '200px',
                 zIndex: '1000',
                 top: spaceBelow >= 200 || spaceBelow > spaceAbove ? 
-                    `${inputRect.bottom}px` : 
-                    `${inputRect.top - 200}px`
+                    `${containerRect.bottom}px` : 
+                    `${containerRect.top - 200}px`
             });
         }
 
