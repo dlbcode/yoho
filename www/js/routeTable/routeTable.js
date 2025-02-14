@@ -220,6 +220,7 @@ function buildRouteTable(routeIndex) {
                 tbody.appendChild(row);
 
                 const tableRouteId = `table-${routeIndex}-${flight.id}`; // Generate a unique tableRouteId for this route
+                row.setAttribute('data-table-route-id', tableRouteId); // Add ID to row
 
                 flight.route.forEach((segment, idx) => {
                     const nextSegment = idx < flight.route.length - 1 

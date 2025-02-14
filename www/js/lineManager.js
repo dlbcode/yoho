@@ -204,9 +204,24 @@ const lineManager = {
         this.clearPopups('hover');
         pathDrawing.popupFromClick = true;
         line.addTag('status:highlighted');
-        line.routeData ? 
-            this.showRoutePopup(e, line.routeData, line.visibleLine, line.invisibleLine) : 
+
+        // Handle table route expansion when clicking a line
+        if (line.routeData?.tableRouteId) {
+            const tableRow = document.querySelector(`tr[data-table-route-id="${line.routeData.tableRouteId}"]`);
+            if (tableRow) {
+                    // Trigger the click event on the table row to open it
+                    tableRow.click();
+                    // Scroll row into view
+                    tableRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+
+        // Show route popup
+        if (line.routeData) {
+            this.showRoutePopup(e, line.routeData, line.visibleLine, line.invisibleLine);
+        } else {
             console.error('Route data is undefined for the clicked line.');
+        }
     },
 
     outsideClickListener: e => {
