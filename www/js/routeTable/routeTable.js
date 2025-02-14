@@ -374,21 +374,33 @@ function buildRouteTable(routeIndex) {
                 if (flight && flight.route) {
                     const tableRouteId = `table-${routeIndex}-${flight.id}`;
                     
-                    // Find existing lines for this route
-                    const routeLines = Object.values(pathDrawing.routePathCache)
+                    // First, check for any existing lines with the same route path
+                    const routePath = flight.route
+                        .map(segment => segment.flyFrom)
+                        .concat(flight.route[flight.route.length - 1].flyTo)
+                        .join('-');
+                        
+                    const existingRouteLines = Object.values(pathDrawing.routePathCache)
                         .flat()
-                        .filter(l => l.routeData?.tableRouteId === tableRouteId);
+                        .filter(l => {
+                            // Check if the line is part of the same route path
+                            const linePath = l.routeId;
+                            return flight.route.some((segment, idx) => {
+                                const segmentPath = `${segment.flyFrom}-${segment.flyTo}`;
+                                return linePath === segmentPath;
+                            });
+                        });
                     
-                    if (routeLines.length > 0) {
-                        // If lines exist, highlight them
-                        routeLines.forEach(line => {
-                            // Handle both Line instances and line objects with visibleLine
+                    if (existingRouteLines.length > 0) {
+                        // If lines exist for this route path, highlight them and update their tableRouteId
+                        existingRouteLines.forEach(line => {
                             if (line instanceof Line) {
+                                // Update the routeData to include this row's tableRouteId
+                                line.routeData = {
+                                    ...line.routeData,
+                                    tableRouteId
+                                };
                                 line.highlight();
-                            } else if (line.visibleLine) {
-                                line.visibleLine.setStyle({ color: 'white', weight: 2, opacity: 1 });
-                                line.visibleLine.setZIndexOffset(1000);
-                                line.visibleLine.bringToFront();
                             }
                         });
                     } else {
