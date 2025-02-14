@@ -89,6 +89,7 @@ function setupAutocompleteForField(fieldId) {
             const viewportHeight = window.innerHeight;
             const spaceBelow = viewportHeight - containerRect.bottom;
             const spaceAbove = containerRect.top;
+            const actualHeight = Math.min(suggestionBox.scrollHeight, 200);
             
             Object.assign(suggestionBox.style, {
                 position: 'fixed',
@@ -96,9 +97,9 @@ function setupAutocompleteForField(fieldId) {
                 left: `${containerRect.left}px`,
                 maxHeight: '200px',
                 zIndex: '1000',
-                top: spaceBelow >= 200 || spaceBelow > spaceAbove ? 
+                top: spaceBelow >= actualHeight || spaceBelow > spaceAbove ? 
                     `${containerRect.bottom}px` : 
-                    `${containerRect.top - 200}px`
+                    `${containerRect.top - actualHeight}px`
             });
         }
 
