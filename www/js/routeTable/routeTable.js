@@ -381,9 +381,19 @@ function buildRouteTable(routeIndex) {
                     
                     if (routeLines.length > 0) {
                         // If lines exist, highlight them
-                        routeLines.forEach(line => line instanceof Line && line.highlight());
+                        routeLines.forEach(line => {
+                            // Handle both Line instances and line objects with visibleLine
+                            if (line instanceof Line) {
+                                line.highlight();
+                            } else if (line.visibleLine) {
+                                line.visibleLine.setStyle({ color: 'white', weight: 2, opacity: 1 });
+                                line.visibleLine.setZIndexOffset(1000);
+                                line.visibleLine.bringToFront();
+                            }
+                        });
                     } else {
                         // If no lines exist, draw temporary ones
+                        const drawnLines = [];
                         flight.route.forEach((segment, idx) => {
                             const nextSegment = idx < flight.route.length - 1 
                                 ? flight.route[idx + 1]
@@ -414,14 +424,33 @@ function buildRouteTable(routeIndex) {
                                 }
                             };
 
-                            // Add temporary tag for hover-drawn lines
+                            // Draw temporary line and store reference
                             const line = pathDrawing.drawLine(routeId, 'route', {
                                 price: flight.price,
                                 iata: segment.flyFrom,
                                 isTableRoute: true,
-                                isTemporary: true,  // Add this flag
+                                isTemporary: true,
                                 routeData
                             });
+
+                            if (line) {
+                                drawnLines.push(line);
+                                // Ensure the line is brought to front immediately after drawing
+                                if (line instanceof Line && line.visibleLine) {
+                                    line.visibleLine.setStyle({ color: 'white', weight: 2, opacity: 1 });
+                                    line.visibleLine.setZIndexOffset(1000);
+                                    line.visibleLine.bringToFront();
+                                }
+                            }
+                        });
+
+                        // After all lines are drawn, highlight them
+                        drawnLines.forEach(line => {
+                            if (line && line.visibleLine) {
+                                line.visibleLine.setStyle({ color: 'white', weight: 2, opacity: 1 });
+                                line.visibleLine.setZIndexOffset(1000);
+                                line.visibleLine.bringToFront();
+                            }
                         });
                     }
                 }

@@ -147,8 +147,13 @@ class Line {
 
     highlight() {
         const style = { 
-            color: 'white'
+            color: 'white',
+            weight: 2,
+            opacity: 1,
+            zIndex: 1000  // Use zIndex instead of setZIndexOffset
         };
+        // Remove the setZIndexOffset call since it's not available for polylines
+        this.visibleLine.bringToFront();
         this.updateLineStyles([this.visibleLine, this.invisibleLine, this.decoratedLine], style);
     }
 
