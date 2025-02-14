@@ -22,8 +22,6 @@ class Line {
         this.tags = new Set();
         this.addTags(options);
         this.routeData = options.routeData; // Store routeData
-        this.defaultZIndex = 1; // Store default z-index
-        this.highlightZIndex = 1000; // Z-index for highlighted state
     }
 
     addTag(tag) {
@@ -83,8 +81,7 @@ class Line {
             weight: this.weight,
             opacity: 1,
             color: this.color,
-            wrap: false,
-            zIndex: -1
+            wrap: false
         };
 
         if (this.type === 'dashed') {
@@ -140,26 +137,17 @@ class Line {
     updateLineStyles(lines, style) {
         lines.forEach(line => {
             if (!line) return;
-            
-            // Handle invisible line separately
-            if (line === this.invisibleLine && style.zIndex !== undefined) {
-                line.setStyle({ zIndex: style.zIndex });
-                style.zIndex === this.highlightZIndex ? line.bringToFront() : line.bringToBack();
+            if (line === this.invisibleLine) {
+                line.setStyle({ opacity: 0.1 });
                 return;
             }
-    
-            // Handle visible and decorated lines
-            if (line !== this.invisibleLine) {
-                line.setStyle(style);
-                style.zIndex === this.highlightZIndex ? line.bringToFront() : line.bringToBack();
-            }
+            line.setStyle(style);
         });
     }
 
     highlight() {
         const style = { 
-            color: 'white',
-            zIndex: this.highlightZIndex 
+            color: 'white'
         };
         this.updateLineStyles([this.visibleLine, this.invisibleLine, this.decoratedLine], style);
     }
@@ -168,8 +156,7 @@ class Line {
         const style = {
             color: this.color,
             weight: this.weight,
-            opacity: 1,
-            zIndex: this.defaultZIndex
+            opacity: 1
         };
         this.updateLineStyles([this.visibleLine, this.invisibleLine, this.decoratedLine], style);
     }

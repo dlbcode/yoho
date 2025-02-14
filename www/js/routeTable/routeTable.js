@@ -162,6 +162,25 @@ function buildRouteTable(routeIndex) {
             </tr>`;
             table.appendChild(thead);
 
+            // Create a map to track lowest price routes
+            const lowestPriceRoutes = new Map();
+
+            // First pass: find lowest price for each unique route path
+            flightsData.forEach(flight => {
+                const routePath = flight.route
+                    .map(segment => segment.flyFrom)
+                    .concat(flight.route[flight.route.length - 1].flyTo)
+                    .join('-');
+                
+                if (!lowestPriceRoutes.has(routePath) || 
+                    lowestPriceRoutes.get(routePath).price > flight.price) {
+                    lowestPriceRoutes.set(routePath, {
+                        price: flight.price,
+                        flightId: flight.id
+                    });
+                }
+            });
+
             const tbody = document.createElement('tbody');
             flightsData.forEach(flight => {
                 let row = document.createElement('tr');
@@ -222,46 +241,57 @@ function buildRouteTable(routeIndex) {
                 const tableRouteId = `table-${routeIndex}-${flight.id}`; // Generate a unique tableRouteId for this route
                 row.setAttribute('data-table-route-id', tableRouteId); // Add ID to row
 
-                flight.route.forEach((segment, idx) => {
-                    const nextSegment = idx < flight.route.length - 1 
-                        ? flight.route[idx + 1]
-                        : {
-                            ...segment,
-                            flyFrom: segment.flyTo,
-                            local_departure: segment.local_arrival
+                // Only draw lines for the lowest price route
+                const routePath = flight.route
+                    .map(segment => segment.flyFrom)
+                    .concat(flight.route[flight.route.length - 1].flyTo)
+                    .join('-');
+
+                const isLowestPrice = lowestPriceRoutes.get(routePath).flightId === flight.id;
+
+                // Only draw lines if this is the lowest price route
+                if (isLowestPrice) {
+                    flight.route.forEach((segment, idx) => {
+                        const nextSegment = idx < flight.route.length - 1 
+                            ? flight.route[idx + 1]
+                            : {
+                                ...segment,
+                                flyFrom: segment.flyTo,
+                                local_departure: segment.local_arrival
+                            };
+
+                        const routeId = `${segment.flyFrom}-${segment.flyTo}`;
+                        
+                        // Create routeData with both segment-specific and full route information
+                        const routeData = {
+                            tableRouteId,
+                            // Segment-specific information
+                            segmentInfo: {
+                                originAirport: segment,
+                                destinationAirport: nextSegment,
+                                date: segment.local_departure
+                            },
+                            // Full route information
+                            routeInfo: {
+                                originAirport: flight.route[0], // First airport in route
+                                destinationAirport: flight.route[flight.route.length - 1], // Last airport in route
+                                price: flight.price,
+                                date: flight.route[0].local_departure,
+                                fullRoute: flight.route, // Store the entire route array
+                                deep_link: flight.deep_link,
+                                bags_price: flight.bags_price,
+                                duration: flight.duration
+                            }
                         };
 
-                    const routeId = `${segment.flyFrom}-${segment.flyTo}`;
-                    
-                    // Create routeData with both segment-specific and full route information
-                    const routeData = {
-                        tableRouteId,
-                        // Segment-specific information
-                        segmentInfo: {
-                            originAirport: segment,
-                            destinationAirport: nextSegment,
-                            date: segment.local_departure
-                        },
-                        // Full route information
-                        routeInfo: {
-                            originAirport: flight.route[0], // First airport in route
-                            destinationAirport: flight.route[flight.route.length - 1], // Last airport in route
+                        pathDrawing.drawLine(routeId, 'route', {
                             price: flight.price,
-                            date: flight.route[0].local_departure,
-                            fullRoute: flight.route, // Store the entire route array
-                            deep_link: flight.deep_link,
-                            bags_price: flight.bags_price,
-                            duration: flight.duration
-                        }
-                    };
-
-                    pathDrawing.drawLine(routeId, 'route', {
-                        price: flight.price,
-                        iata: segment.flyFrom,
-                        isTableRoute: true,
-                        routeData
+                            iata: segment.flyFrom,
+                            isTableRoute: true,
+                            routeData
+                        });
                     });
-                });
+                }
             });
 
             table.appendChild(tbody);
@@ -338,18 +368,62 @@ function buildRouteTable(routeIndex) {
                 routeInfoRow(this, fullFlightData, routeIds, routeIndex);
             });
 
-            // Add hover handlers
+            // Modified hover handlers
             row.addEventListener('mouseover', function() {
                 const flight = data[index];
                 if (flight && flight.route) {
                     const tableRouteId = `table-${routeIndex}-${flight.id}`;
                     
-                    // Find all lines with this tableRouteId
+                    // Find existing lines for this route
                     const routeLines = Object.values(pathDrawing.routePathCache)
                         .flat()
                         .filter(l => l.routeData?.tableRouteId === tableRouteId);
-                        
-                    routeLines.forEach(line => line instanceof Line && line.highlight());
+                    
+                    if (routeLines.length > 0) {
+                        // If lines exist, highlight them
+                        routeLines.forEach(line => line instanceof Line && line.highlight());
+                    } else {
+                        // If no lines exist, draw temporary ones
+                        flight.route.forEach((segment, idx) => {
+                            const nextSegment = idx < flight.route.length - 1 
+                                ? flight.route[idx + 1]
+                                : {
+                                    ...segment,
+                                    flyFrom: segment.flyTo,
+                                    local_departure: segment.local_arrival
+                                };
+
+                            const routeId = `${segment.flyFrom}-${segment.flyTo}`;
+                            
+                            const routeData = {
+                                tableRouteId,
+                                segmentInfo: {
+                                    originAirport: segment,
+                                    destinationAirport: nextSegment,
+                                    date: segment.local_departure
+                                },
+                                routeInfo: {
+                                    originAirport: flight.route[0],
+                                    destinationAirport: flight.route[flight.route.length - 1],
+                                    price: flight.price,
+                                    date: flight.route[0].local_departure,
+                                    fullRoute: flight.route,
+                                    deep_link: flight.deep_link,
+                                    bags_price: flight.bags_price,
+                                    duration: flight.duration
+                                }
+                            };
+
+                            // Add temporary tag for hover-drawn lines
+                            const line = pathDrawing.drawLine(routeId, 'route', {
+                                price: flight.price,
+                                iata: segment.flyFrom,
+                                isTableRoute: true,
+                                isTemporary: true,  // Add this flag
+                                routeData
+                            });
+                        });
+                    }
                 }
             });
 
@@ -361,8 +435,18 @@ function buildRouteTable(routeIndex) {
                     const routeLines = Object.values(pathDrawing.routePathCache)
                         .flat()
                         .filter(l => l.routeData?.tableRouteId === tableRouteId);
-                        
-                    routeLines.forEach(line => line instanceof Line && line.reset());
+                    
+                    routeLines.forEach(line => {
+                        if (line instanceof Line) {
+                            if (line.tags.has('isTemporary')) {
+                                // Remove temporary lines
+                                line.remove();
+                            } else {
+                                // Reset permanent lines
+                                line.reset();
+                            }
+                        }
+                    });
                 }
             });
         });
