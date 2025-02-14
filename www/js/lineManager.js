@@ -100,16 +100,19 @@ const lineManager = {
         this.clearPopups('route');
         const popup = this.createPopup(event.latlng, content)
             .on('remove', () => {
+                console.log('Popup removed');
                 this.linesWithPopups.delete(visibleLine);
                 pathDrawing.popupFromClick = false;
                 document.removeEventListener('click', this.outsideClickListener);
                 
-                if (!visibleLine.isTableRoute) {
-                    this.clearLines('specific', [{ visibleLine, invisibleLine }]);
-                } else {
-                    pathDrawing.routePathCache[visibleLine.routeData.tableRouteId]?.forEach(segment => {
-                        segment instanceof Line && 
-                        segment.visibleLine.setStyle({ color: segment.visibleLine.originalColor });
+                if (routeData?.tableRouteId) {
+                    // Reset all lines with the same tableRouteId
+                    const routeLines = Object.values(pathDrawing.routePathCache)
+                        .flat()
+                        .filter(l => l.routeData?.tableRouteId === routeData.tableRouteId);
+                        
+                    routeLines.forEach(routeLine => {
+                        routeLine instanceof Line && routeLine.reset();
                     });
                 }
             })
@@ -222,10 +225,6 @@ const lineManager = {
         } else {
             console.error('Route data is undefined for the clicked line.');
         }
-    },
-
-    outsideClickListener: e => {
-        !e.target.closest('.leaflet-popup') && lineManager.clearPopups('route');
     }
 };
 
