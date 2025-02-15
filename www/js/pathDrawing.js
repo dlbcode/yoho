@@ -4,6 +4,25 @@ import { flightMap } from './flightMap.js';
 import { lineManager } from './lineManager.js';
 
 class Line {
+    static PRICE_COLORS = {
+        100: '#0099ff',
+        200: 'green',
+        300: '#abb740',
+        400: 'orange',
+        500: '#da4500',
+        Infinity: '#c32929'
+    };
+
+    static getRangeByThresholds(value, thresholds, prefix = '') {
+        if (value === undefined) return null;
+        for (let i = 0; i < thresholds.length - 1; i++) {
+            if (value < thresholds[i + 1]) {
+                return `${prefix}${thresholds[i]}-${thresholds[i + 1]}`;
+            }
+        }
+        return `${prefix}${thresholds[thresholds.length - 1]}+`;
+    }
+
     constructor(originAirport, destinationAirport, routeId, type, options = {}) {
         this.iata = options.iata;
         this.origin = originAirport;
@@ -50,25 +69,18 @@ class Line {
     }
 
     getPriceRange(price) {
-        if (price < 100) return '0-100';
-        if (price < 200) return '100-200';
-        if (price < 300) return '200-300';
-        if (price < 400) return '300-400';
-        if (price < 500) return '400-500';
-        return '500+';
+        return Line.getRangeByThresholds(price, [0, 100, 200, 300, 400, 500]);
     }
 
     getTimeRange(time) {
-        if (time < 6) return '00-06';
-        if (time < 12) return '06-12';
-        if (time < 18) return '12-18';
-        return '18-24';
+        return Line.getRangeByThresholds(time, [0, 6, 12, 18, 24]);
     }
 
     getColorBasedOnPrice(price) {
-        if (price === null || price === undefined || isNaN(parseFloat(price))) return 'grey';
+        if (!price || isNaN(parseFloat(price))) return 'grey';
         price = parseFloat(price);
-        return price < 100 ? '#0099ff' : price < 200 ? 'green' : price < 300 ? '#abb740' : price < 400 ? 'orange' : price < 500 ? '#da4500' : '#c32929';
+        return Object.entries(Line.PRICE_COLORS)
+            .find(([threshold]) => price < threshold)?.[1] || Line.PRICE_COLORS.Infinity;
     }
 
     getBaseLineOptions(isInvisible = false) {
@@ -81,20 +93,20 @@ class Line {
         };
     }
 
-    createVisibleLine() {
+    createLine(isInvisible = false) {
         const coords = [
             L.latLng(this.origin.latitude, this.origin.longitude),
             L.latLng(this.destination.latitude, this.destination.longitude)
         ];
-        return new L.Geodesic(coords, this.getBaseLineOptions()).addTo(this.map);
+        return new L.Geodesic(coords, this.getBaseLineOptions(isInvisible)).addTo(this.map);
+    }
+
+    createVisibleLine() {
+        return this.createLine(false);
     }
 
     createInvisibleLine() {
-        const coords = [
-            L.latLng(this.origin.latitude, this.origin.longitude),
-            L.latLng(this.destination.latitude, this.destination.longitude)
-        ];
-        return new L.Geodesic(coords, this.getBaseLineOptions(true)).addTo(this.map);
+        return this.createLine(true);
     }
 
     createDecoratedLine() {
@@ -187,6 +199,12 @@ const pathDrawing = {
     lineStates: new Map(),
     hoverTimeout: null,
 
+    caches: {
+        route: {},
+        dashed: {},
+        hover: []
+    },
+
     queueDraw(routeId, type, options) {
         this.drawQueue.add({ routeId, type, options });
         this.scheduleDraw();
@@ -277,16 +295,36 @@ const pathDrawing = {
         if (line.decoratedLine) line.decoratedLine.addTo(map);
     },
 
-    getCacheForType(type) {
-        const cacheMap = {
-            'route': this.routePathCache,
-            'dashed': this.dashedRoutePathCache,
-            'hover': this.hoverLines
-        };
-        return cacheMap[type];
+    async drawWithOptions(routeId, type, airports, options = {}) {
+        if (!airports.origin || !airports.destination) {
+            console.error('Invalid airport data:', airports);
+            return;
+        }
+
+        const line = new Line(airports.origin, airports.destination, routeId, type, options);
+        this.addToCache(routeId, type, line);
+        return line;
     },
 
-    cacheLine(routeId, type, line) {
+    async drawRoutePaths(iata, routes, type = 'route') {
+        return Promise.all(routes.map(route => {
+            const routeId = `${route.originAirport.iata_code}-${route.destinationAirport.iata_code}`;
+            return this.drawWithOptions(routeId, type, {
+                origin: route.originAirport,
+                destination: route.destinationAirport
+            }, {
+                price: route.price,
+                iata: iata,
+                isTableRoute: type === 'route'
+            });
+        }));
+    },
+
+    getCacheForType(type) {
+        return this.caches[type];
+    },
+
+    addToCache(routeId, type, line) {
         const cache = this.getCacheForType(type);
         if (Array.isArray(cache)) {
             cache.push(line);
@@ -294,18 +332,6 @@ const pathDrawing = {
             cache[routeId] = cache[routeId] || [];
             cache[routeId].push(line);
         }
-    },
-
-    drawRoutePaths(iata, directRoutes, type = 'route') {
-        directRoutes[iata]?.forEach(route => {
-            const routeId = `${route.originAirport.iata_code}-${route.destinationAirport.iata_code}`;
-            if (!route.originAirport || !route.destinationAirport) return console.error('Invalid route data:', route);
-            this.drawLine(routeId, type, {
-                price: route.price,
-                iata: iata,
-                isTableRoute: type === 'route'
-            });
-        });
     },
 
     drawDashedLine(origin, destination) {
