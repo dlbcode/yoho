@@ -2,10 +2,9 @@ import { appState } from '../stateManager.js';
 import { sliderFilter } from './sliderFilter.js';
 import { sortTableByColumn } from './sortTable.js';
 import { pathDrawing, Line } from '../pathDrawing.js';
-import { flightMap } from '../flightMap.js';
 import { routeInfoRow, highlightSelectedRowForRouteIndex } from './routeInfoRow.js';
-import { applyFilters, toggleFilterResetIcon, updateFilterHeaders, constructFilterTags } from './filterTable.js';
-import { setupRouteContent, infoPane } from '../infoPane.js';  // Import infoPane module
+import { applyFilters, toggleFilterResetIcon, updateFilterHeaders } from './filterTable.js';
+import { setupRouteContent, infoPane } from '../infoPane.js';
 import { infoPaneHeight } from '../utils/infoPaneHeightManager.js';
 import { lineManager } from '../lineManager.js';
 
@@ -20,7 +19,6 @@ function buildRouteTable(routeIndex) {
     // Check if appState.routeDates[routeIndex] exists before accessing its properties
     const dateRange = appState.routeDates[routeIndex] || {}; // Provide an empty object as a fallback
     let origin, destination, currentRoute, departDate, returnDate, apiUrl, endpoint;
-    currentRoute = appState.routes[routeIndex];
 
     // Update this section to use the most current waypoint data
     origin = appState.waypoints[routeIndex * 2]?.iata_code;
@@ -38,21 +36,12 @@ function buildRouteTable(routeIndex) {
 
     // Update DOM element references to be more specific
     const infoPaneElement = document.getElementById('infoPane');
-    const infoPaneContent = document.getElementById('infoPaneContent');
 
     // Start the loading animation
     infoPaneElement.classList.add('loading');
 
     // **Helper function to format dates to DD/MM/YYYY**
-    function formatDate(dateString) {
-        if (!dateString || dateString === 'any' || dateString.includes(' to ')) {
-            return dateString;
-        }
-        // Split the date string directly instead of creating a Date object
-        const [year, month, day] = dateString.split('-');
-        // Return the date string as-is since it's already in YYYY-MM-DD format
-        return dateString;
-    }
+    const formatDate = dateString => dateString || 'any';
 
     // Check if dateRange and its properties are defined before formatting
     departDate = dateRange.depart ? formatDate(dateRange.depart) : 'any';
@@ -309,8 +298,7 @@ function buildRouteTable(routeIndex) {
         })
         .catch(error => {
             console.error('Error loading data:', error);
-            console.error('Detailed error:', error);
-            infoPaneContent.textContent = 'Error loading data: ' + error.message;
+            document.getElementById('infoPaneContent').textContent = 'Error loading data: ' + error.message;
             throw error;
         });
 
@@ -470,25 +458,7 @@ function buildRouteTable(routeIndex) {
 
             row.addEventListener('mouseout', function() {
                 const flight = data[index];
-                if (flight && flight.route) {
-                    const tableRouteId = `table-${routeIndex}-${flight.id}`;
-                    
-                    const routeLines = Object.values(pathDrawing.routePathCache)
-                        .flat()
-                        .filter(l => l.routeData?.tableRouteId === tableRouteId);
-                    
-                    routeLines.forEach(line => {
-                        if (line instanceof Line) {
-                            if (line.tags.has('isTemporary')) {
-                                // Remove temporary lines
-                                line.remove();
-                            } else {
-                                // Reset permanent lines
-                                line.reset();
-                            }
-                        }
-                    });
-                }
+                handleRouteLineVisibility(flight, routeIndex, false);
             });
         });
 
@@ -555,6 +525,25 @@ function buildRouteTable(routeIndex) {
                 return null;
         }
     }
+}
+
+function handleRouteLineVisibility(flight, routeIndex, isVisible) {
+    if (!flight?.route) return;
+    
+    const tableRouteId = `table-${routeIndex}-${flight.id}`;
+    const routeLines = Object.values(pathDrawing.routePathCache)
+        .flat()
+        .filter(l => l.routeData?.tableRouteId === tableRouteId);
+        
+    routeLines.forEach(line => {
+        if (line instanceof Line) {
+            if (line.tags.has('isTemporary')) {
+                line.remove();
+            } else {
+                isVisible ? line.highlight() : line.reset();
+            }
+        }
+    });
 }
 
 export { buildRouteTable };
