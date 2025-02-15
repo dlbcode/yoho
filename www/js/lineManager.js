@@ -217,9 +217,17 @@ const lineManager = {
             previousLine.reset();
         });
 
-        // Highlight the newly clicked line
-        line.addTag('status:highlighted');
-        line.highlight();
+        // Find and highlight all lines with the same tableRouteId
+        if (line.routeData?.tableRouteId) {
+            const routeLines = Object.values(pathDrawing.routePathCache)
+                .flat()
+                .filter(l => l.routeData?.tableRouteId === line.routeData.tableRouteId);
+                
+            routeLines.forEach(routeLine => {
+                routeLine.addTag('status:highlighted');
+                routeLine.highlight();
+            });
+        }
 
         // Handle table route expansion when clicking a line
         if (line.routeData?.tableRouteId) {
