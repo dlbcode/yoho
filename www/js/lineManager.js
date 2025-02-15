@@ -206,16 +206,29 @@ const lineManager = {
     onClickHandler(e, line) {
         this.clearPopups('hover');
         pathDrawing.popupFromClick = true;
+
+        // Reset previously highlighted lines
+        const allTableLines = Object.values(pathDrawing.routePathCache)
+            .flat()
+            .filter(l => l instanceof Line && l.tags.has('status:highlighted'));
+        
+        allTableLines.forEach(previousLine => {
+            previousLine.tags.delete('status:highlighted');
+            previousLine.reset();
+        });
+
+        // Highlight the newly clicked line
         line.addTag('status:highlighted');
+        line.highlight();
 
         // Handle table route expansion when clicking a line
         if (line.routeData?.tableRouteId) {
             const tableRow = document.querySelector(`tr[data-table-route-id="${line.routeData.tableRouteId}"]`);
             if (tableRow) {
-                    // Trigger the click event on the table row to open it
-                    tableRow.click();
-                    // Scroll row into view
-                    tableRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                // Trigger the click event on the table row to open it
+                tableRow.click();
+                // Scroll row into view
+                tableRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
             }
         }
 
