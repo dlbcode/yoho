@@ -211,12 +211,7 @@ function buildRouteTable(routeIndex) {
                 row.dataset.departureTime = departureTime;
                 row.dataset.arrivalTime = arrivalTime;
 
-                row.dataset.priceRange = price < 100 ? 'price-range:0-100' :
-                    price < 200 ? 'price-range:100-200' :
-                    price < 300 ? 'price-range:200-300' :
-                    price < 400 ? 'price-range:300-400' :
-                    price < 500 ? 'price-range:400-500' :
-                    'price-range:500+';
+                row.dataset.priceRange = getPriceRangeCategory(price);
                 row.dataset.priceValue = Math.round(price);
 
                 tbody.appendChild(row);
@@ -309,14 +304,8 @@ function buildRouteTable(routeIndex) {
             };
 
             // Add the 'filter-button' class to the filter buttons
-            if (filteredHeader) {
-                filteredHeader.classList.add('filter-button');
-                filteredHeader.addEventListener('click', handleFilterClick);
-            }
-            if (filterIcon) {
-                filterIcon.classList.add('filter-button');
-                filterIcon.addEventListener('click', handleFilterClick);
-            }
+            setupFilterIcon(filteredHeader, handleFilterClick);
+            setupFilterIcon(filterIcon, handleFilterClick);
         });
 
         document.querySelectorAll('.route-info-table tbody tr').forEach((row, index) => {
@@ -530,6 +519,26 @@ function createRouteData(flight, segment, nextSegment, tableRouteId) {
 function formatFlightDateTime(date) {
     const dayName = date.toLocaleDateString('en-US', { weekday: 'short' });
     return `${dayName} ${date.toLocaleString()}`;
+}
+
+function setupFilterIcon(element, handleFilterClick) {
+    if (element) {
+        element.classList.add('filter-button');
+        element.addEventListener('click', handleFilterClick);
+    }
+}
+
+function getPriceRangeCategory(price) {
+    const ranges = [
+        { max: 100, label: '0-100' },
+        { max: 200, label: '100-200' },
+        { max: 300, label: '200-300' },
+        { max: 400, label: '300-400' },
+        { max: 500, label: '400-500' }
+    ];
+    
+    const range = ranges.find(r => price < r.max);
+    return `price-range:${range ? range.label : '500+'}`;
 }
 
 export { buildRouteTable };
