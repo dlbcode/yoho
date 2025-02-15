@@ -123,14 +123,20 @@ class Line {
     }
 
     bindEvents() {
-        this.visibleLine.on('click', (e) => lineManager.onClickHandler(e, this));
-        this.invisibleLine.on('click', (e) => lineManager.onClickHandler(e, this));
-        this.invisibleLine.on('mouseover', (e) => lineManager.onMouseOver(e, this, this.map));
-        this.invisibleLine.on('mouseout', () => lineManager.onMouseOut(this));
+        const bindLineEvents = (line) => {
+            if (line) {
+                line.on('click', (e) => lineManager.onClickHandler(e, this));
+                line.on('mouseover', (e) => lineManager.onMouseOver(e, this));
+                line.on('mouseout', () => lineManager.onMouseOut(this));
+            }
+        };
+
+        // Bind events to both visible and invisible lines
+        bindLineEvents(this.visibleLine);
+        bindLineEvents(this.invisibleLine);
+        
         if (this.decoratedLine) {
-            this.decoratedLine.on('click', (e) => this.invisibleLine.fire('click', e));
-            this.decoratedLine.on('mouseover', (e) => lineManager.onMouseOver(e, this, this.map));
-            this.decoratedLine.on('mouseout', () => lineManager.onMouseOut(this));
+            bindLineEvents(this.decoratedLine);
         }
     }
 
