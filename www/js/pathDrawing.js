@@ -29,27 +29,24 @@ class Line {
     }
 
     addTags(options) {
-        this.addTag(`route:${this.routeId}`);
-        this.addTag(`routeId:${this.routeId}`);
-        this.addTag(`type:${this.type}`);
-        // Add type:route tag for both direct and dashed lines
-        if (this.type === 'route' || this.type === 'dashed') {
-            this.addTag('type:route');
-        }
-        if (options.isTableRoute) this.addTag('type:table');
-        if (options.group) this.addTag(`group:${options.group}`);
-        if (options.price !== undefined && options.price !== null) {
-            this.addTag(`price:${options.price}`);
-            this.addTag(`price-range:${this.getPriceRange(options.price)}`);
-        }
-        if (options.departureTime !== undefined) {
-            this.addTag(`departure-range:${this.getTimeRange(options.departureTime)}`);
-        }
-        if (options.arrivalTime !== undefined) {
-            this.addTag(`arrival-range:${this.getTimeRange(options.arrivalTime)}`);
-        }
-        this.addTag(`direct:${options.isDirect ? 'true' : 'false'}`);
-        this.addTag(`group:${options.groupNumber}`); // Add group tag
+        const tagMap = {
+            [`route:${this.routeId}`]: true,
+            [`routeId:${this.routeId}`]: true,
+            [`type:${this.type}`]: true,
+            'type:route': ['route', 'dashed'].includes(this.type),
+            'type:table': options.isTableRoute,
+            [`group:${options.group}`]: options.group,
+            [`price:${options.price}`]: options.price !== undefined,
+            [`price-range:${this.getPriceRange(options.price)}`]: options.price !== undefined,
+            [`departure-range:${this.getTimeRange(options.departureTime)}`]: options.departureTime !== undefined,
+            [`arrival-range:${this.getTimeRange(options.arrivalTime)}`]: options.arrivalTime !== undefined,
+            [`direct:${options.isDirect ? 'true' : 'false'}`]: true,
+            [`group:${options.groupNumber}`]: options.groupNumber
+        };
+
+        Object.entries(tagMap)
+            .filter(([_, shouldAdd]) => shouldAdd)
+            .forEach(([tag]) => this.tags.add(tag));
     }
 
     getPriceRange(price) {
@@ -74,31 +71,30 @@ class Line {
         return price < 100 ? '#0099ff' : price < 200 ? 'green' : price < 300 ? '#abb740' : price < 400 ? 'orange' : price < 500 ? '#da4500' : '#c32929';
     }
 
-    createVisibleLine() {
-        const adjustedOrigin = L.latLng(this.origin.latitude, this.origin.longitude);
-        const adjustedDestination = L.latLng(this.destination.latitude, this.destination.longitude);
-        const lineOptions = {
-            weight: this.weight,
-            opacity: 1,
-            color: this.color,
-            wrap: false
+    getBaseLineOptions(isInvisible = false) {
+        return {
+            weight: isInvisible ? 10 : this.weight,
+            opacity: isInvisible ? 0.1 : 1,
+            color: isInvisible ? this.color : this.color,
+            wrap: false,
+            ...(this.type === 'dashed' ? { dashArray: '5, 10' } : {})
         };
+    }
 
-        if (this.type === 'dashed') {
-            lineOptions.dashArray = '5, 10'; // Adjust the dash pattern as needed
-        }
-
-        return new L.Geodesic([adjustedOrigin, adjustedDestination], lineOptions).addTo(this.map);
+    createVisibleLine() {
+        const coords = [
+            L.latLng(this.origin.latitude, this.origin.longitude),
+            L.latLng(this.destination.latitude, this.destination.longitude)
+        ];
+        return new L.Geodesic(coords, this.getBaseLineOptions()).addTo(this.map);
     }
 
     createInvisibleLine() {
-        const adjustedOrigin = L.latLng(this.origin.latitude, this.origin.longitude);
-        const adjustedDestination = L.latLng(this.destination.latitude, this.destination.longitude);
-        return new L.Geodesic([adjustedOrigin, adjustedDestination], {
-            weight: 10,
-            opacity: 0.1,
-            wrap: false
-        }).addTo(this.map);
+        const coords = [
+            L.latLng(this.origin.latitude, this.origin.longitude),
+            L.latLng(this.destination.latitude, this.destination.longitude)
+        ];
+        return new L.Geodesic(coords, this.getBaseLineOptions(true)).addTo(this.map);
     }
 
     createDecoratedLine() {
@@ -213,21 +209,28 @@ const pathDrawing = {
         this.isDrawing = false;
     },
 
+    async getAirportPair(originIata, destinationIata) {
+        if (!originIata || destinationIata === 'Any') {
+            return [null, null];
+        }
+
+        const [origin, destination] = await Promise.all([
+            flightMap.getAirportDataByIata(originIata),
+            destinationIata !== 'Any' ? flightMap.getAirportDataByIata(destinationIata) : null
+        ]);
+
+        if (!origin || (destinationIata !== 'Any' && !destination)) {
+            console.error('Airport data not found:', !origin ? originIata : destinationIata);
+            return [null, null];
+        }
+
+        return [origin, destination];
+    },
+
     async drawLine(routeId, type, options) {
         const [originIata, destinationIata] = routeId.split('-');
-        if (!originIata || destinationIata === 'Any') return;
-
-        // Cache airport data to avoid redundant API calls
-        const originAirportPromise = flightMap.getAirportDataByIata(originIata);
-        const destinationAirportPromise = destinationIata !== 'Any' ? 
-            flightMap.getAirportDataByIata(destinationIata) : Promise.resolve(null);
-
-        const [originAirport, destinationAirport] = await Promise.all([originAirportPromise, destinationAirportPromise]);
-
-        if (!originAirport || (destinationIata !== 'Any' && !destinationAirport)) {
-            console.error('Airport data not found:', !originAirport ? originIata : destinationIata);
-            return;
-        }
+        const [originAirport, destinationAirport] = await this.getAirportPair(originIata, destinationIata);
+        if (!originAirport) return;
 
         // Construct routeData based on the line type and available information
         const routeData = {
@@ -274,15 +277,22 @@ const pathDrawing = {
         if (line.decoratedLine) line.decoratedLine.addTo(map);
     },
 
+    getCacheForType(type) {
+        const cacheMap = {
+            'route': this.routePathCache,
+            'dashed': this.dashedRoutePathCache,
+            'hover': this.hoverLines
+        };
+        return cacheMap[type];
+    },
+
     cacheLine(routeId, type, line) {
-        if (type === 'route') {
-            this.routePathCache[routeId] = this.routePathCache[routeId] || [];
-            this.routePathCache[routeId].push(line);
-        } else if (type === 'dashed') {
-            this.dashedRoutePathCache[routeId] = this.dashedRoutePathCache[routeId] || [];
-            this.dashedRoutePathCache[routeId].push(line);
-        } else if (type === 'hover') {
-            this.hoverLines.push(line);
+        const cache = this.getCacheForType(type);
+        if (Array.isArray(cache)) {
+            cache.push(line);
+        } else if (cache) {
+            cache[routeId] = cache[routeId] || [];
+            cache[routeId].push(line);
         }
     },
 
