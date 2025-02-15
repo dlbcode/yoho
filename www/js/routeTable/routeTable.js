@@ -156,10 +156,7 @@ function buildRouteTable(routeIndex) {
 
             // First pass: find lowest price for each unique route path
             flightsData.forEach(flight => {
-                const routePath = flight.route
-                    .map(segment => segment.flyFrom)
-                    .concat(flight.route[flight.route.length - 1].flyTo)
-                    .join('-');
+                const routePath = getRoutePath(flight);
                 
                 if (!lowestPriceRoutes.has(routePath) || 
                     lowestPriceRoutes.get(routePath).price > flight.price) {
@@ -192,11 +189,8 @@ function buildRouteTable(routeIndex) {
                     arrivalDate = new Date(flight.local_arrival);
                 }
 
-                const departureDayName = departureDate.toLocaleDateString('en-US', { weekday: 'short' });
-                const arrivalDayName = arrivalDate.toLocaleDateString('en-US', { weekday: 'short' });
-
-                const formattedDeparture = `${departureDayName} ${departureDate.toLocaleString()}`;
-                const formattedArrival = `${arrivalDayName} ${arrivalDate.toLocaleString()}`;
+                const formattedDeparture = formatFlightDateTime(departureDate);
+                const formattedArrival = formatFlightDateTime(arrivalDate);
 
                 // Convert time to decimal hours for filtering
                 const departureTime = departureDate.getHours() + departureDate.getMinutes() / 60;
@@ -231,10 +225,7 @@ function buildRouteTable(routeIndex) {
                 row.setAttribute('data-table-route-id', tableRouteId); // Add ID to row
 
                 // Only draw lines for the lowest price route
-                const routePath = flight.route
-                    .map(segment => segment.flyFrom)
-                    .concat(flight.route[flight.route.length - 1].flyTo)
-                    .join('-');
+                const routePath = getRoutePath(flight);
 
                 const isLowestPrice = lowestPriceRoutes.get(routePath).flightId === flight.id;
 
@@ -252,26 +243,7 @@ function buildRouteTable(routeIndex) {
                         const routeId = `${segment.flyFrom}-${segment.flyTo}`;
                         
                         // Create routeData with both segment-specific and full route information
-                        const routeData = {
-                            tableRouteId,
-                            // Segment-specific information
-                            segmentInfo: {
-                                originAirport: segment,
-                                destinationAirport: nextSegment,
-                                date: segment.local_departure
-                            },
-                            // Full route information
-                            routeInfo: {
-                                originAirport: flight.route[0], // First airport in route
-                                destinationAirport: flight.route[flight.route.length - 1], // Last airport in route
-                                price: flight.price,
-                                date: flight.route[0].local_departure,
-                                fullRoute: flight.route, // Store the entire route array
-                                deep_link: flight.deep_link,
-                                bags_price: flight.bags_price,
-                                duration: flight.duration
-                            }
-                        };
+                        const routeData = createRouteData(flight, segment, nextSegment, tableRouteId);
 
                         pathDrawing.drawLine(routeId, 'route', {
                             price: flight.price,
@@ -363,10 +335,7 @@ function buildRouteTable(routeIndex) {
                     const tableRouteId = `table-${routeIndex}-${flight.id}`;
                     
                     // First, check for any existing lines with the same route path
-                    const routePath = flight.route
-                        .map(segment => segment.flyFrom)
-                        .concat(flight.route[flight.route.length - 1].flyTo)
-                        .join('-');
+                    const routePath = getRoutePath(flight);
                         
                     const existingRouteLines = Object.values(pathDrawing.routePathCache)
                         .flat()
@@ -405,24 +374,7 @@ function buildRouteTable(routeIndex) {
 
                             const routeId = `${segment.flyFrom}-${segment.flyTo}`;
                             
-                            const routeData = {
-                                tableRouteId,
-                                segmentInfo: {
-                                    originAirport: segment,
-                                    destinationAirport: nextSegment,
-                                    date: segment.local_departure
-                                },
-                                routeInfo: {
-                                    originAirport: flight.route[0],
-                                    destinationAirport: flight.route[flight.route.length - 1],
-                                    price: flight.price,
-                                    date: flight.route[0].local_departure,
-                                    fullRoute: flight.route,
-                                    deep_link: flight.deep_link,
-                                    bags_price: flight.bags_price,
-                                    duration: flight.duration
-                                }
-                            };
+                            const routeData = createRouteData(flight, segment, nextSegment, tableRouteId);
 
                             // Draw temporary line and store reference
                             const line = pathDrawing.drawLine(routeId, 'route', {
@@ -435,22 +387,13 @@ function buildRouteTable(routeIndex) {
 
                             if (line) {
                                 drawnLines.push(line);
-                                // Ensure the line is brought to front immediately after drawing
-                                if (line instanceof Line && line.visibleLine) {
-                                    line.visibleLine.setStyle({ color: 'white', weight: 2, opacity: 1 });
-                                    line.visibleLine.setZIndexOffset(1000);
-                                    line.visibleLine.bringToFront();
-                                }
+                                applyLineHighlightStyle(line);
                             }
                         });
 
                         // After all lines are drawn, highlight them
                         drawnLines.forEach(line => {
-                            if (line && line.visibleLine) {
-                                line.visibleLine.setStyle({ color: 'white', weight: 2, opacity: 1 });
-                                line.visibleLine.setZIndexOffset(1000);
-                                line.visibleLine.bringToFront();
-                            }
+                            applyLineHighlightStyle(line);
                         });
                     }
                 }
@@ -544,6 +487,49 @@ function handleRouteLineVisibility(flight, routeIndex, isVisible) {
             }
         }
     });
+}
+
+// Replace multiple occurrences of line styling with a single helper function
+function applyLineHighlightStyle(line) {
+    if (line instanceof Line && line.visibleLine) {
+        line.visibleLine.setStyle({ color: 'white', weight: 2, opacity: 1 });
+        line.visibleLine.setZIndexOffset(1000);
+        line.visibleLine.bringToFront();
+    }
+}
+
+// Replace repeated route path creation with a helper function
+function getRoutePath(flight) {
+    return flight.route
+        .map(segment => segment.flyFrom)
+        .concat(flight.route[flight.route.length - 1].flyTo)
+        .join('-');
+}
+
+function createRouteData(flight, segment, nextSegment, tableRouteId) {
+    return {
+        tableRouteId,
+        segmentInfo: {
+            originAirport: segment,
+            destinationAirport: nextSegment,
+            date: segment.local_departure
+        },
+        routeInfo: {
+            originAirport: flight.route[0],
+            destinationAirport: flight.route[flight.route.length - 1],
+            price: flight.price,
+            date: flight.route[0].local_departure,
+            fullRoute: flight.route,
+            deep_link: flight.deep_link,
+            bags_price: flight.bags_price,
+            duration: flight.duration
+        }
+    };
+}
+
+function formatFlightDateTime(date) {
+    const dayName = date.toLocaleDateString('en-US', { weekday: 'short' });
+    return `${dayName} ${date.toLocaleString()}`;
 }
 
 export { buildRouteTable };
