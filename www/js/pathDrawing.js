@@ -224,22 +224,42 @@ const pathDrawing = {
 
         const [originAirport, destinationAirport] = await Promise.all([originAirportPromise, destinationAirportPromise]);
 
-        if (!originAirport) {
-            console.error('Origin airport data not found:', originIata);
-            return;
-        }
-        if (destinationIata !== 'Any' && !destinationAirport) {
-            console.error('Destination airport data not found:', destinationIata);
+        if (!originAirport || (destinationIata !== 'Any' && !destinationAirport)) {
+            console.error('Airport data not found:', !originAirport ? originIata : destinationIata);
             return;
         }
 
-        // Include tableRouteId in routeData if it exists in options
+        // Construct routeData based on the line type and available information
         const routeData = {
-            ...options.routeData,
-            tableRouteId: options.tableRouteId || options.routeData?.tableRouteId
+            // For table routes, preserve existing table-specific data
+            ...(options.routeData || {}),
+            tableRouteId: options.tableRouteId || options.routeData?.tableRouteId,
+            // Add common route information
+            routeInfo: {
+                originAirport: {
+                    cityFrom: originAirport.city,
+                    flyFrom: originAirport.iata_code,
+                    name: originAirport.name
+                },
+                destinationAirport: {
+                    cityTo: destinationAirport.city,
+                    flyTo: destinationAirport.iata_code,
+                    name: destinationAirport.name
+                },
+                price: options.price,
+                date: options.date,
+                isDirect: options.isDirect || false,
+                fullRoute: [{
+                    cityFrom: originAirport.city,
+                    flyFrom: originAirport.iata_code
+                }, {
+                    cityTo: destinationAirport.city,
+                    flyTo: destinationAirport.iata_code
+                }]
+            }
         };
 
-        // Draw the line using the cached airport data with updated routeData
+        // Create line with complete route data
         const line = new Line(originAirport, destinationAirport, routeId, type, {
             ...options,
             routeData
@@ -250,12 +270,8 @@ const pathDrawing = {
 
         // Add the line to the map
         line.visibleLine.addTo(map);
-        if (line.invisibleLine) {
-            line.invisibleLine.addTo(map);
-        }
-        if (line.decoratedLine) {
-            line.decoratedLine.addTo(map);
-        }
+        if (line.invisibleLine) line.invisibleLine.addTo(map);
+        if (line.decoratedLine) line.decoratedLine.addTo(map);
     },
 
     cacheLine(routeId, type, line) {
