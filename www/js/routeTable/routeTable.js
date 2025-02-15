@@ -47,32 +47,9 @@ function buildRouteTable(routeIndex) {
     departDate = dateRange.depart ? formatDate(dateRange.depart) : 'any';
     returnDate = dateRange.return ? formatDate(dateRange.return) : '';
 
-    if (destination === 'Any') {
-        endpoint = 'cheapestFlights';
-        if (departDate === 'any') {
-            apiUrl = `https://yonderhop.com/api/${endpoint}?origin=${origin}`;
-        } else if (departDate.includes(' to ')) {
-            const [dateFrom, dateTo] = departDate.split(' to ');
-            apiUrl = `https://yonderhop.com/api/${endpoint}?origin=${origin}&date_from=${dateFrom}&date_to=${dateTo}`;
-        } else {
-            apiUrl = `https://yonderhop.com/api/${endpoint}?origin=${origin}&date_from=${departDate}&date_to=${departDate}`;
-        }
-    } else {
-        if (departDate === 'any' || returnDate === 'any') {
-            endpoint = 'range';
-            apiUrl = `https://yonderhop.com/api/${endpoint}?flyFrom=${origin}&flyTo=${destination}`;
-        } else if (departDate.includes(' to ') || returnDate.includes(' to ')) {
-            endpoint = 'range';
-            const [dateFrom, dateTo] = departDate.includes(' to ') ? departDate.split(' to ') : [departDate, returnDate];
-            apiUrl = `https://yonderhop.com/api/${endpoint}?flyFrom=${origin}&flyTo=${destination}&dateFrom=${dateFrom}&dateTo=${dateTo}`;
-        } else if (returnDate) {
-            endpoint = 'yhreturn';
-            apiUrl = `https://yonderhop.com/api/${endpoint}?origin=${origin}&destination=${destination}&departureDate=${departDate}&returnDate=${returnDate}`;
-        } else {
-            endpoint = 'yhoneway';
-            apiUrl = `https://yonderhop.com/api/${endpoint}?origin=${origin}&destination=${destination}&departureDate=${departDate}`;
-        }
-    }
+    const { url, endpoint: apiEndpoint } = buildApiUrl(origin, destination, departDate, returnDate);
+    apiUrl = url;
+    endpoint = apiEndpoint;
 
     console.log("API URL:", apiUrl); // Log the generated API URL
 
@@ -226,27 +203,7 @@ function buildRouteTable(routeIndex) {
 
                 // Only draw lines if this is the lowest price route
                 if (isLowestPrice) {
-                    flight.route.forEach((segment, idx) => {
-                        const nextSegment = idx < flight.route.length - 1 
-                            ? flight.route[idx + 1]
-                            : {
-                                ...segment,
-                                flyFrom: segment.flyTo,
-                                local_departure: segment.local_arrival
-                            };
-
-                        const routeId = `${segment.flyFrom}-${segment.flyTo}`;
-                        
-                        // Create routeData with both segment-specific and full route information
-                        const routeData = createRouteData(flight, segment, nextSegment, tableRouteId);
-
-                        pathDrawing.drawLine(routeId, 'route', {
-                            price: flight.price,
-                            iata: segment.flyFrom,
-                            isTableRoute: true,
-                            routeData
-                        });
-                    });
+                    drawFlightLines(flight, routeIndex);
                 }
             });
 
@@ -309,89 +266,7 @@ function buildRouteTable(routeIndex) {
         });
 
         document.querySelectorAll('.route-info-table tbody tr').forEach((row, index) => {
-            // Add click handler (existing code)
-            row.addEventListener('click', function() {
-                const routeIdString = this.getAttribute('data-route-id');
-                const routeIds = routeIdString.split('|');
-                const fullFlightData = data[index];
-                routeInfoRow(this, fullFlightData, routeIds, routeIndex);
-            });
-
-            // Modified hover handlers
-            row.addEventListener('mouseover', function() {
-                const flight = data[index];
-                if (flight && flight.route) {
-                    const tableRouteId = `table-${routeIndex}-${flight.id}`;
-                    
-                    // First, check for any existing lines with the same route path
-                    const routePath = getRoutePath(flight);
-                        
-                    const existingRouteLines = Object.values(pathDrawing.routePathCache)
-                        .flat()
-                        .filter(l => {
-                            // Check if the line is part of the same route path
-                            const linePath = l.routeId;
-                            return flight.route.some((segment, idx) => {
-                                const segmentPath = `${segment.flyFrom}-${segment.flyTo}`;
-                                return linePath === segmentPath;
-                            });
-                        });
-                    
-                    if (existingRouteLines.length > 0) {
-                        // If lines exist for this route path, highlight them and update their tableRouteId
-                        existingRouteLines.forEach(line => {
-                            if (line instanceof Line) {
-                                // Update the routeData to include this row's tableRouteId
-                                line.routeData = {
-                                    ...line.routeData,
-                                    tableRouteId
-                                };
-                                line.highlight();
-                            }
-                        });
-                    } else {
-                        // If no lines exist, draw temporary ones
-                        const drawnLines = [];
-                        flight.route.forEach((segment, idx) => {
-                            const nextSegment = idx < flight.route.length - 1 
-                                ? flight.route[idx + 1]
-                                : {
-                                    ...segment,
-                                    flyFrom: segment.flyTo,
-                                    local_departure: segment.local_arrival
-                                };
-
-                            const routeId = `${segment.flyFrom}-${segment.flyTo}`;
-                            
-                            const routeData = createRouteData(flight, segment, nextSegment, tableRouteId);
-
-                            // Draw temporary line and store reference
-                            const line = pathDrawing.drawLine(routeId, 'route', {
-                                price: flight.price,
-                                iata: segment.flyFrom,
-                                isTableRoute: true,
-                                isTemporary: true,
-                                routeData
-                            });
-
-                            if (line) {
-                                drawnLines.push(line);
-                                applyLineHighlightStyle(line);
-                            }
-                        });
-
-                        // After all lines are drawn, highlight them
-                        drawnLines.forEach(line => {
-                            applyLineHighlightStyle(line);
-                        });
-                    }
-                }
-            });
-
-            row.addEventListener('mouseout', function() {
-                const flight = data[index];
-                handleRouteLineVisibility(flight, routeIndex, false);
-            });
+            attachRowEventHandlers(row, data[index], index, data, routeIndex);
         });
 
         updateFilterHeaders();
@@ -539,6 +414,113 @@ function getPriceRangeCategory(price) {
     
     const range = ranges.find(r => price < r.max);
     return `price-range:${range ? range.label : '500+'}`;
+}
+
+function drawFlightLines(flight, routeIndex, isTemporary = false) {
+    const tableRouteId = `table-${routeIndex}-${flight.id}`;
+    const drawnLines = [];
+
+    flight.route.forEach((segment, idx) => {
+        const nextSegment = idx < flight.route.length - 1 
+            ? flight.route[idx + 1]
+            : {
+                ...segment,
+                flyFrom: segment.flyTo,
+                local_departure: segment.local_arrival
+            };
+
+        const routeId = `${segment.flyFrom}-${segment.flyTo}`;
+        const routeData = createRouteData(flight, segment, nextSegment, tableRouteId);
+
+        const line = pathDrawing.drawLine(routeId, 'route', {
+            price: flight.price,
+            iata: segment.flyFrom,
+            isTableRoute: true,
+            isTemporary,
+            routeData
+        });
+
+        if (line) {
+            drawnLines.push(line);
+            if (isTemporary) {
+                applyLineHighlightStyle(line);
+            }
+        }
+    });
+
+    return drawnLines;
+}
+
+function attachRowEventHandlers(row, flight, index, data, routeIndex) {
+    row.addEventListener('click', () => {
+        const routeIdString = row.getAttribute('data-route-id');
+        const routeIds = routeIdString.split('|');
+        const fullFlightData = data[index];
+        routeInfoRow(row, fullFlightData, routeIds, routeIndex);
+    });
+
+    row.addEventListener('mouseover', () => {
+        if (!flight?.route) return;
+        
+        const routePath = getRoutePath(flight);
+        const existingRouteLines = Object.values(pathDrawing.routePathCache)
+            .flat()
+            .filter(l => flight.route.some((segment) => {
+                const segmentPath = `${segment.flyFrom}-${segment.flyTo}`;
+                return l.routeId === segmentPath;
+            }));
+        
+        if (existingRouteLines.length > 0) {
+            existingRouteLines.forEach(line => {
+                if (line instanceof Line) {
+                    line.routeData = {
+                        ...line.routeData,
+                        tableRouteId: `table-${routeIndex}-${flight.id}`
+                    };
+                    line.highlight();
+                }
+            });
+        } else {
+            drawFlightLines(flight, routeIndex, true);
+        }
+    });
+
+    row.addEventListener('mouseout', () => {
+        handleRouteLineVisibility(flight, routeIndex, false);
+    });
+}
+
+function buildApiUrl(origin, destination, departDate, returnDate) {
+    let endpoint, url;
+
+    if (destination === 'Any') {
+        endpoint = 'cheapestFlights';
+        url = `https://yonderhop.com/api/${endpoint}?origin=${origin}`;
+        
+        if (departDate !== 'any') {
+            const [dateFrom, dateTo] = departDate.includes(' to ') 
+                ? departDate.split(' to ') 
+                : [departDate, departDate];
+            url += `&date_from=${dateFrom}&date_to=${dateTo}`;
+        }
+    } else {
+        if (departDate === 'any' || returnDate === 'any') {
+            endpoint = 'range';
+            url = `https://yonderhop.com/api/${endpoint}?flyFrom=${origin}&flyTo=${destination}`;
+        } else if (departDate.includes(' to ') || returnDate.includes(' to ')) {
+            endpoint = 'range';
+            const [dateFrom, dateTo] = departDate.includes(' to ') 
+                ? departDate.split(' to ') 
+                : [departDate, returnDate];
+            url = `https://yonderhop.com/api/${endpoint}?flyFrom=${origin}&flyTo=${destination}&dateFrom=${dateFrom}&dateTo=${dateTo}`;
+        } else {
+            endpoint = returnDate ? 'yhreturn' : 'yhoneway';
+            url = `https://yonderhop.com/api/${endpoint}?origin=${origin}&destination=${destination}&departureDate=${departDate}`;
+            if (returnDate) url += `&returnDate=${returnDate}`;
+        }
+    }
+
+    return { url, endpoint };
 }
 
 export { buildRouteTable };
