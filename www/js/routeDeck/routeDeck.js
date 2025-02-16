@@ -442,6 +442,13 @@ function createRouteCard(flight, endpoint, routeIndex, destination) {
     const card = document.createElement('div');
     card.className = 'route-card';
     
+    // Create route ID using all segments
+    const routeId = flight.route.map(segment => segment.flyFrom)
+        .concat(flight.route[flight.route.length - 1].flyTo)
+        .join('-');
+        
+    card.setAttribute('data-route-id', routeId);
+    
     const departureDate = endpoint === 'range' || destination === 'Any' 
         ? new Date(flight.dTime * 1000)
         : new Date(flight.local_departure);
@@ -449,10 +456,8 @@ function createRouteCard(flight, endpoint, routeIndex, destination) {
         ? new Date(flight.aTime * 1000)
         : new Date(flight.local_arrival);
 
-    const routeId = `${flight.flyFrom}-${flight.flyTo}`;
     const deckRouteId = `deck-${routeIndex}-${flight.id}`;
     
-    card.setAttribute('data-route-id', routeId);
     card.setAttribute('data-deck-route-id', deckRouteId);
     card.setAttribute('data-price', flight.price);
     card.setAttribute('data-departure-time', departureDate.getHours() + departureDate.getMinutes() / 60);
