@@ -15,7 +15,7 @@ function formatLayover(flight, idx) {
     return '';
 }
 
-function routeInfoRow(rowElement, fullFlightData, routeIds, routeIndex) {
+function routeInfoCard(rowElement, fullFlightData, routeIds, routeIndex) {
     // Toggle details row visibility
     let existingDetailRow = rowElement.nextSibling;
     if (existingDetailRow && existingDetailRow.classList.contains('route-info-row')) {
@@ -394,4 +394,4 @@ function replaceWaypointsForCurrentRoute(intermediaryIatas, routeIndex) {
     updateState('updateWaypoint', appState.waypoints);
 }
 
-export { routeInfoRow, highlightSelectedRowForRouteIndex };
+export { routeInfoCard, highlightSelectedRowForRouteIndex };

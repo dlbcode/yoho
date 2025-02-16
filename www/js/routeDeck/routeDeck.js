@@ -2,7 +2,7 @@ import { appState } from '../stateManager.js';
 import { sliderFilter } from './sliderFilter.js';
 import { sortDeckByColumn } from './sortDeck.js';
 import { pathDrawing, Line } from '../pathDrawing.js';
-import { routeInfoRow, highlightSelectedRowForRouteIndex } from './routeInfoRow.js';
+import { routeInfoCard, highlightSelectedRowForRouteIndex } from './routeInfoCard.js';
 import { applyFilters, toggleFilterResetIcon, updateFilterHeaders } from './filterDeck.js';
 import { setupRouteContent, infoPane } from '../infoPane.js';
 import { infoPaneHeight } from '../utils/infoPaneHeightManager.js';
@@ -345,7 +345,7 @@ function attachRowEventHandlers(row, flight, index, data, routeIndex) {
         const routeIdString = row.getAttribute('data-route-id');
         const routeIds = routeIdString.split('|');
         const fullFlightData = data[index];
-        routeInfoRow(row, fullFlightData, routeIds, routeIndex);
+        routeInfoCard(row, fullFlightData, routeIds, routeIndex);
     });
 
     row.addEventListener('mouseover', () => {
