@@ -22,7 +22,7 @@ const removeRoute = (routeNumber) => {
         toggleInfoPaneHeight(infoPaneElement, true);
     }
 
-    // Clear cached route table
+    // Clear cached route deck
     infoPane.routeDecks.delete(routeNumber);
 
     // Clear lines

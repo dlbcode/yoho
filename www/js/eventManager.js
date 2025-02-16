@@ -7,7 +7,7 @@ import { lineManager } from './lineManager.js';
 
 const clearLinesForView = (view) => 
     view === 'routeDeck' 
-        ? lineManager.clearLinesByTags(['type:table'])
+        ? lineManager.clearLinesByTags(['type:deck'])
         : lineManager.clearLines(true);
 
 const handleWaypointChange = () => {

@@ -34,7 +34,7 @@ class Line {
             [`routeId:${this.routeId}`]: true,
             [`type:${this.type}`]: true,
             'type:route': ['route', 'dashed'].includes(this.type),
-            'type:table': options.isTableRoute,
+            'type:deck': options.isTableRoute,
             [`group:${options.group}`]: options.group,
             [`price:${options.price}`]: options.price !== undefined,
             [`price-range:${this.getPriceRange(options.price)}`]: options.price !== undefined,
@@ -234,9 +234,9 @@ const pathDrawing = {
 
         // Construct routeData based on the line type and available information
         const routeData = {
-            // For table routes, preserve existing table-specific data
+            // For deck routes, preserve existing deck-specific data
             ...(options.routeData || {}),
-            tableRouteId: options.tableRouteId || options.routeData?.tableRouteId,
+            deckRouteId: options.deckRouteId || options.routeData?.deckRouteId,
             // Add common route information
             routeInfo: {
                 originAirport: {

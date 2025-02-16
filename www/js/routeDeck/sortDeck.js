@@ -1,6 +1,6 @@
-export function sortDeckByColumn(table, columnIndex, asc = true) {
+export function sortDeckByColumn(deck, columnIndex, asc = true) {
     const dirModifier = asc ? 1 : -1;
-    const tBody = table.tBodies[0];
+    const tBody = deck.tBodies[0];
     // Only sort visible rows
     const rows = Array.from(tBody.querySelectorAll("tr:not([style*='display: none'])"));
 
@@ -27,11 +27,11 @@ export function sortDeckByColumn(table, columnIndex, asc = true) {
         tBody.removeChild(tBody.firstChild);
     }
     tBody.append(...sortedRows);
-    table.querySelectorAll("th").forEach(th => th.classList.remove("th-sort-asc", "th-sort-desc"));
+    deck.querySelectorAll("th").forEach(th => th.classList.remove("th-sort-asc", "th-sort-desc"));
     if (asc) {
-        table.querySelector(`th:nth-child(${columnIndex + 1})`).classList.add("th-sort-asc");
+        deck.querySelector(`th:nth-child(${columnIndex + 1})`).classList.add("th-sort-asc");
     } else {
-        table.querySelector(`th:nth-child(${columnIndex + 1})`).classList.add("th-sort-desc");
+        deck.querySelector(`th:nth-child(${columnIndex + 1})`).classList.add("th-sort-desc");
     }
 }
 

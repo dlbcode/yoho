@@ -9,7 +9,7 @@ import { infoPaneHeight } from '../utils/infoPaneHeightManager.js';
 import { lineManager } from '../lineManager.js';
 
 function buildRouteTable(routeIndex) {
-    lineManager.clearLinesByTags(['type:table']); // Clear any existing route table lines
+    lineManager.clearLinesByTags(['type:deck']); // Clear any existing route deck lines
 
     appState.filterState = {
         departure: { start: 0, end: 24 },
@@ -97,6 +97,9 @@ function buildRouteTable(routeIndex) {
                 const card = createRouteCard(flight, endpoint, routeIndex, destination);
                 cardsContainer.appendChild(card);
                 
+                // Draw initial route lines (add this)
+                drawFlightLines(flight, routeIndex, false);
+                
                 // Attach event handlers
                 attachRowEventHandlers(card, flight, index, flightsData, routeIndex);
             });
@@ -120,7 +123,7 @@ function buildRouteTable(routeIndex) {
         });
 
     function attachEventListeners(container, data, routeIndex) {
-        // Remove the table header related code
+        // Remove the deck header related code
         const filterButtons = container.parentElement.querySelectorAll('.filter-button');
         
         filterButtons.forEach(button => {
@@ -226,10 +229,10 @@ function buildRouteTable(routeIndex) {
 function handleRouteLineVisibility(flight, routeIndex, isVisible) {
     if (!flight?.route) return;
     
-    const tableRouteId = `table-${routeIndex}-${flight.id}`;
+    const deckRouteId = `deck-${routeIndex}-${flight.id}`;
     const routeLines = Object.values(pathDrawing.routePathCache)
         .flat()
-        .filter(l => l.routeData?.tableRouteId === tableRouteId);
+        .filter(l => l.routeData?.deckRouteId === deckRouteId);
         
     routeLines.forEach(line => {
         if (line instanceof Line) {
@@ -259,9 +262,9 @@ function getRoutePath(flight) {
         .join('-');
 }
 
-function createRouteData(flight, segment, nextSegment, tableRouteId) {
+function createRouteData(flight, segment, nextSegment, deckRouteId) {
     return {
-        tableRouteId,
+        deckRouteId,
         segmentInfo: {
             originAirport: segment,
             destinationAirport: nextSegment,
@@ -306,7 +309,7 @@ function getPriceRangeCategory(price) {
 }
 
 function drawFlightLines(flight, routeIndex, isTemporary = false) {
-    const tableRouteId = `table-${routeIndex}-${flight.id}`;
+    const deckRouteId = `deck-${routeIndex}-${flight.id}`;
     const drawnLines = [];
 
     flight.route.forEach((segment, idx) => {
@@ -319,7 +322,7 @@ function drawFlightLines(flight, routeIndex, isTemporary = false) {
             };
 
         const routeId = `${segment.flyFrom}-${segment.flyTo}`;
-        const routeData = createRouteData(flight, segment, nextSegment, tableRouteId);
+        const routeData = createRouteData(flight, segment, nextSegment, deckRouteId);
 
         const line = pathDrawing.drawLine(routeId, 'route', {
             price: flight.price,
@@ -364,7 +367,7 @@ function attachRowEventHandlers(row, flight, index, data, routeIndex) {
                 if (line instanceof Line) {
                     line.routeData = {
                         ...line.routeData,
-                        tableRouteId: `table-${routeIndex}-${flight.id}`
+                        deckRouteId: `deck-${routeIndex}-${flight.id}`
                     };
                     line.highlight();
                 }
@@ -447,10 +450,10 @@ function createRouteCard(flight, endpoint, routeIndex, destination) {
         : new Date(flight.local_arrival);
 
     const routeId = `${flight.flyFrom}-${flight.flyTo}`;
-    const tableRouteId = `table-${routeIndex}-${flight.id}`;
+    const deckRouteId = `deck-${routeIndex}-${flight.id}`;
     
     card.setAttribute('data-route-id', routeId);
-    card.setAttribute('data-table-route-id', tableRouteId);
+    card.setAttribute('data-deck-route-id', deckRouteId);
     card.setAttribute('data-price', flight.price);
     card.setAttribute('data-departure-time', departureDate.getHours() + departureDate.getMinutes() / 60);
     card.setAttribute('data-arrival-time', arrivalDate.getHours() + arrivalDate.getMinutes() / 60);

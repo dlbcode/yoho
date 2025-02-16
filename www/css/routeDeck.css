@@ -20,7 +20,7 @@
   cursor: pointer;
 }
 
-.filterIcon, .route-info-table th .filterIcon, .slider-handle {
+.filterIcon, .route-info-deck th .filterIcon, .slider-handle {
   width: 16px;
   height: 16px;
 }
@@ -29,7 +29,7 @@
   color: #007bff;
 }
 
-.route-info-table th {
+.route-info-deck th {
   position: relative;
   font-size: 14px;
   text-align: left;
@@ -82,7 +82,7 @@
   align-items: center;
 }
 
-.route-info-table tbody tr.selected {
+.route-info-deck tbody tr.selected {
   background-color: #444;
 }
 

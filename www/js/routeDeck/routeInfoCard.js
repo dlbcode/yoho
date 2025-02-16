@@ -39,7 +39,7 @@ function routeInfoCard(rowElement, fullFlightData, routeIds, routeIndex) {
     const detailRow = document.createElement('tr');
     const detailCell = document.createElement('td');
     const flight = fullFlightData;
-    detailCell.colSpan = 9; // Assuming there are 9 columns in your table
+    detailCell.colSpan = 9; // Assuming there are 9 columns in your deck
 
     function generateSegmentDetails(flight) {
         let segmentsHtml = ['<div class="route-details">'];
@@ -146,11 +146,11 @@ function routeInfoCard(rowElement, fullFlightData, routeIds, routeIndex) {
     detailRow.classList.add('route-info-row');
     detailRow.appendChild(detailCell);
 
-    // add selected class to the clicked row in the table
+    // add selected class to the clicked row in the deck
     rowElement.classList.add('route-info-row');
     rowElement.classList.add('route-info-row-header');
 
-    // Insert the new row right after the clicked row in the table
+    // Insert the new row right after the clicked row in the deck
     if (rowElement.nextSibling) {
         rowElement.parentNode.insertBefore(detailRow, rowElement.nextSibling);
     } else {
@@ -314,15 +314,15 @@ function routeInfoCard(rowElement, fullFlightData, routeIds, routeIndex) {
 }
 
 function highlightSelectedRowForRouteIndex(routeIndex) {
-    document.querySelectorAll(`.route-info-table[data-route-index="${routeIndex}"] tbody tr.selected`).forEach(row => {
+    document.querySelectorAll(`.route-info-deck[data-route-index="${routeIndex}"] tbody tr.selected`).forEach(row => {
         row.classList.remove('selected');
     });
 
     const selectedRouteDetails = appState.selectedRoutes[routeIndex];
     if (selectedRouteDetails && selectedRouteDetails.id) {
-        let selectedRow = document.querySelector('.route-info-table tbody tr');
+        let selectedRow = document.querySelector('.route-info-deck tbody tr');
         if (!selectedRow) {
-            document.querySelectorAll(`.route-info-table[data-route-index="${routeIndex}"] tbody tr`).forEach(row => {
+            document.querySelectorAll(`.route-info-deck[data-route-index="${routeIndex}"] tbody tr`).forEach(row => {
                 const routeId = row.getAttribute('data-route-id');
                 if (routeId && routeId.split('|').includes(selectedRouteDetails.id)) {
                     selectedRow = row;

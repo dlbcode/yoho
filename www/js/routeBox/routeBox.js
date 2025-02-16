@@ -216,9 +216,9 @@ const routeBox = {
             const infoPane = document.getElementById('infoPane');
             infoPane.classList.add('search-results');
             
-            // First build the route table
+            // First build the route deck
             buildRouteTable(routeNumber).then(() => {
-                // After table is built, adjust the height
+                // After deck is built, adjust the height
                 const infoPaneElement = document.getElementById('infoPane');
                 const viewportHeight = window.visualViewport ? window.visualViewport.height : window.innerHeight;
                 const halfHeight = Math.floor(viewportHeight * 0.5);

@@ -166,28 +166,28 @@
   min-height: 0; /* Important for overflow to work */
 }
 
-table {
+deck {
   width: 100%;
   border-collapse: collapse;
   font-family: "Google Sans", Roboto, "Helvetica Neue", Arial, sans-serif;
   font-size: 14px; /* Similar to default console font size */
   color: #acacac; /* Default text color */
-  box-sizing: border-box; /* Include padding and border in the table's total width */
+  box-sizing: border-box; /* Include padding and border in the deck's total width */
 }
 
-/* Style for table headers */
+/* Style for deck headers */
 th {
   font-weight: 500;
   background-color: #222; /* Very light grey background */
   color: #ccc;
   text-align: left;
-  padding: 5px; /* Padding for table cells */
+  padding: 5px; /* Padding for deck cells */
   /*border: 1px solid #555; /* Subtle bottom border */
 }
 
-/* Style for table rows */
+/* Style for deck rows */
 td {
-  padding: 4px; /* Padding for table cells */
+  padding: 4px; /* Padding for deck cells */
   /*border: 1px solid #555; /* Subtle bottom border */
 }
 
@@ -211,7 +211,7 @@ tr:hover {
   background-color: #000000; 
 }
 
-#infoPaneContent table tr:hover {
+#infoPaneContent deck tr:hover {
   background-color: #282828; /* Lighter shade for hover, adjust as needed */
 }
 
@@ -329,7 +329,7 @@ tr:hover {
 }
 
 /* Prevent scroll propagation to map */
-.route-info-table {
+.route-info-deck {
   position: relative;
   width: 100%;
   overflow: auto;

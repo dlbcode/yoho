@@ -8,7 +8,7 @@ import { lineManager } from './lineManager.js';
 import { infoPaneHeight } from './utils/infoPaneHeightManager.js';
 
 const infoPane = {
-    routeDecks: new Map(), // Store route tables by route index
+    routeDecks: new Map(), // Store route decks by route index
 
     init() {
         document.addEventListener('stateChange', this.handleStateChange.bind(this));
@@ -117,9 +117,9 @@ const infoPane = {
         const infoPaneContent = document.getElementById('infoPaneContent');
         infoPaneContent.innerHTML = '';
 
-        const table = document.createElement('table');
-        table.className = 'route-info-table';
-        table.innerHTML = `<thead><tr><th>Departure</th><th>Arrival</th><th>Price</th><th>Airline</th><th>Stops</th><th>Route</th><th>Action</th></tr></thead>`;
+        const deck = document.createElement('deck');
+        deck.className = 'route-info-deck';
+        deck.innerHTML = `<thead><tr><th>Departure</th><th>Arrival</th><th>Price</th><th>Airline</th><th>Stops</th><th>Route</th><th>Action</th></tr></thead>`;
 
         const tbody = document.createElement('tbody');
         let groupData = this.aggregateGroupData(selectedRoutesArray);
@@ -133,8 +133,8 @@ const infoPane = {
             tbody.appendChild(row);
         });
 
-        table.appendChild(tbody);
-        infoPaneContent.appendChild(table);
+        deck.appendChild(tbody);
+        infoPaneContent.appendChild(deck);
         this.updateTripButton(selectedRoutesArray);
     },
 
@@ -284,8 +284,8 @@ function setupRouteContent(routeIndex) {
     const infoPaneContent = document.getElementById('infoPaneContent');
     infoPaneContent.innerHTML = '';
 
-    // Clear table-specific lines when switching routes
-    lineManager.clearLinesByTags(['type:table']);
+    // Clear deck-specific lines when switching routes
+    lineManager.clearLinesByTags(['type:deck']);
 
     let contentWrapper;
     let routeBoxElement;
@@ -293,7 +293,7 @@ function setupRouteContent(routeIndex) {
     const existingRouteTable = infoPane.routeDecks.get(routeIndex);
     
     if (existingRouteTable) {
-        // Use cached route table
+        // Use cached route deck
         contentWrapper = existingRouteTable;
         infoPaneContent.appendChild(contentWrapper);
         
@@ -353,7 +353,7 @@ function setupRouteContent(routeIndex) {
     }
 
     requestAnimationFrame(() => {
-        const hasSearchResults = existingRouteTable?.querySelector('.route-info-table');
+        const hasSearchResults = existingRouteTable?.querySelector('.route-info-deck');
         infoPaneHeight.setHeight(hasSearchResults ? 'half' : 'content', {
             contentElement: hasSearchResults ? null : document.getElementById('routeBox')
         });

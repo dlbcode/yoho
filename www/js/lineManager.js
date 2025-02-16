@@ -48,10 +48,10 @@ const lineManager = {
     clearLines(type) {
         const clearTypes = {
             all: () => this.clearLinesByTags(['type:route', 'type:hover'], 
-                        { excludeTags: ['type:table', 'status:selected'] }),
+                        { excludeTags: ['type:deck', 'status:selected'] }),
             hover: () => this.clearLinesByTags(['type:hover']),
             route: () => this.clearLinesByTags(['type:route'], 
-                        { excludeTags: ['type:table', 'status:selected'] })
+                        { excludeTags: ['type:deck', 'status:selected'] })
         };
 
         (clearTypes[type] || clearTypes.all)();
@@ -105,11 +105,11 @@ const lineManager = {
                 pathDrawing.popupFromClick = false;
                 document.removeEventListener('click', this.outsideClickListener);
                 
-                if (routeData?.tableRouteId) {
-                    // Reset all lines with the same tableRouteId
+                if (routeData?.deckRouteId) {
+                    // Reset all lines with the same deckRouteId
                     const routeLines = Object.values(pathDrawing.routePathCache)
                         .flat()
-                        .filter(l => l.routeData?.tableRouteId === routeData.tableRouteId);
+                        .filter(l => l.routeData?.deckRouteId === routeData.deckRouteId);
                         
                     routeLines.forEach(routeLine => {
                         routeLine instanceof Line && routeLine.reset();
@@ -139,11 +139,11 @@ const lineManager = {
         this.hoveredLine = line;
 
         // Find and highlight all lines in the same route
-        if (line.routeData?.tableRouteId) {
-            // Get all lines with the same tableRouteId
+        if (line.routeData?.deckRouteId) {
+            // Get all lines with the same deckRouteId
             const routeLines = Object.values(pathDrawing.routePathCache)
                 .flat()
-                .filter(l => l.routeData?.tableRouteId === line.routeData.tableRouteId);
+                .filter(l => l.routeData?.deckRouteId === line.routeData.deckRouteId);
                 
             routeLines.forEach(routeLine => {
                 if (routeLine instanceof Line) {
@@ -185,11 +185,11 @@ const lineManager = {
     onMouseOut(line) {
         if (pathDrawing.popupFromClick || this.linesWithPopups.has(line.visibleLine)) return;
         
-        if (line.routeData?.tableRouteId) {
-            // Reset all lines with the same tableRouteId
+        if (line.routeData?.deckRouteId) {
+            // Reset all lines with the same deckRouteId
             const routeLines = Object.values(pathDrawing.routePathCache)
                 .flat()
-                .filter(l => l.routeData?.tableRouteId === line.routeData.tableRouteId);
+                .filter(l => l.routeData?.deckRouteId === line.routeData.deckRouteId);
                 
             routeLines.forEach(routeLine => {
                 routeLine instanceof Line && routeLine.reset();
@@ -217,11 +217,11 @@ const lineManager = {
             previousLine.reset();
         });
 
-        // Find and highlight all lines with the same tableRouteId
-        if (line.routeData?.tableRouteId) {
+        // Find and highlight all lines with the same deckRouteId
+        if (line.routeData?.deckRouteId) {
             const routeLines = Object.values(pathDrawing.routePathCache)
                 .flat()
-                .filter(l => l.routeData?.tableRouteId === line.routeData.tableRouteId);
+                .filter(l => l.routeData?.deckRouteId === line.routeData.deckRouteId);
                 
             routeLines.forEach(routeLine => {
                 routeLine.addTag('status:highlighted');
@@ -229,14 +229,14 @@ const lineManager = {
             });
         }
 
-        // Handle table route expansion when clicking a line
-        if (line.routeData?.tableRouteId) {
-            const tableRow = document.querySelector(`tr[data-table-route-id="${line.routeData.tableRouteId}"]`);
-            if (tableRow) {
-                // Trigger the click event on the table row to open it
-                tableRow.click();
+        // Handle deck route expansion when clicking a line
+        if (line.routeData?.deckRouteId) {
+            const deckRow = document.querySelector(`tr[data-deck-route-id="${line.routeData.deckRouteId}"]`);
+            if (deckRow) {
+                // Trigger the click event on the deck row to open it
+                deckRow.click();
                 // Scroll row into view
-                tableRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                deckRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
             }
         }
 

@@ -71,10 +71,10 @@ function applyFilters() {
 }
 
 function updateLineVisibility(visibleRouteIds, maxPrice) {
-    // First get all table-specific lines
-    const tableLines = lineManager.getLinesByTags(['type:table']);
+    // First get all deck-specific lines
+    const deckLines = lineManager.getLinesByTags(['type:deck']);
     
-    tableLines.forEach(line => {
+    deckLines.forEach(line => {
         if (!line || !(line instanceof Line)) return;
         
         // Skip permanent route lines
