@@ -1,7 +1,8 @@
 export function sortTableByColumn(table, columnIndex, asc = true) {
     const dirModifier = asc ? 1 : -1;
     const tBody = table.tBodies[0];
-    const rows = Array.from(tBody.querySelectorAll("tr"));
+    // Only sort visible rows
+    const rows = Array.from(tBody.querySelectorAll("tr:not([style*='display: none'])"));
 
     const sortedRows = rows.sort((a, b) => {
         let aColText = a.cells[columnIndex].textContent.trim();
