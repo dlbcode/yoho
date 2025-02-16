@@ -105,11 +105,11 @@ const lineManager = {
                 pathDrawing.popupFromClick = false;
                 document.removeEventListener('click', this.outsideClickListener);
                 
-                if (routeData?.deckRouteId) {
-                    // Reset all lines with the same deckRouteId
+                if (routeData?.cardId) {
+                    // Reset all lines with the same cardId
                     const routeLines = Object.values(pathDrawing.routePathCache)
                         .flat()
-                        .filter(l => l.routeData?.deckRouteId === routeData.deckRouteId);
+                        .filter(l => l.routeData?.cardId === routeData.cardId);
                         
                     routeLines.forEach(routeLine => {
                         routeLine instanceof Line && routeLine.reset();
@@ -139,11 +139,11 @@ const lineManager = {
         this.hoveredLine = line;
 
         // Find and highlight all lines in the same route
-        if (line.routeData?.deckRouteId) {
-            // Get all lines with the same deckRouteId
+        if (line.routeData?.cardId) {
+            // Get all lines with the same cardId
             const routeLines = Object.values(pathDrawing.routePathCache)
                 .flat()
-                .filter(l => l.routeData?.deckRouteId === line.routeData.deckRouteId);
+                .filter(l => l.routeData?.cardId === line.routeData.cardId);
                 
             routeLines.forEach(routeLine => {
                 if (routeLine instanceof Line) {
@@ -185,11 +185,11 @@ const lineManager = {
     onMouseOut(line) {
         if (pathDrawing.popupFromClick || this.linesWithPopups.has(line.visibleLine)) return;
         
-        if (line.routeData?.deckRouteId) {
-            // Reset all lines with the same deckRouteId
+        if (line.routeData?.cardId) {
+            // Reset all lines with the same cardId
             const routeLines = Object.values(pathDrawing.routePathCache)
                 .flat()
-                .filter(l => l.routeData?.deckRouteId === line.routeData.deckRouteId);
+                .filter(l => l.routeData?.cardId === line.routeData.cardId);
                 
             routeLines.forEach(routeLine => {
                 routeLine instanceof Line && routeLine.reset();
@@ -217,11 +217,11 @@ const lineManager = {
             previousLine.reset();
         });
 
-        // Find and highlight all lines with the same deckRouteId
-        if (line.routeData?.deckRouteId) {
+        // Find and highlight all lines with the same cardId
+        if (line.routeData?.cardId) {
             const routeLines = Object.values(pathDrawing.routePathCache)
                 .flat()
-                .filter(l => l.routeData?.deckRouteId === line.routeData.deckRouteId);
+                .filter(l => l.routeData?.cardId === line.routeData.cardId);
                 
             routeLines.forEach(routeLine => {
                 routeLine.addTag('status:highlighted');
@@ -230,13 +230,13 @@ const lineManager = {
         }
 
         // Handle deck route expansion when clicking a line
-        if (line.routeData?.deckRouteId) {
-            const deckRow = document.querySelector(`tr[data-deck-route-id="${line.routeData.deckRouteId}"]`);
-            if (deckRow) {
-                // Trigger the click event on the deck row to open it
-                deckRow.click();
-                // Scroll row into view
-                deckRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        if (line.routeData?.cardId) {
+            const card = document.querySelector(`tr[data-card-id="${line.routeData.cardId}"]`);
+            if (card) {
+                // Trigger the click event on the card to open it
+                card.click();
+                // Scroll card into view
+                card.scrollIntoView({ behavior: 'smooth', block: 'center' });
             }
         }
 

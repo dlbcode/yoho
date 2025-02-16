@@ -236,7 +236,7 @@ const pathDrawing = {
         const routeData = {
             // For deck routes, preserve existing deck-specific data
             ...(options.routeData || {}),
-            deckRouteId: options.deckRouteId || options.routeData?.deckRouteId,
+            cardId: options.cardId || options.routeData?.cardId,
             // Add common route information
             routeInfo: {
                 originAirport: {

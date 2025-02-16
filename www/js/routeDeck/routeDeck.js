@@ -229,10 +229,10 @@ function buildRouteDeck(routeIndex) {
 function handleRouteLineVisibility(flight, routeIndex, isVisible) {
     if (!flight?.route) return;
     
-    const deckRouteId = `deck-${routeIndex}-${flight.id}`;
+    const cardId = `deck-${routeIndex}-${flight.id}`;
     const routeLines = Object.values(pathDrawing.routePathCache)
         .flat()
-        .filter(l => l.routeData?.deckRouteId === deckRouteId);
+        .filter(l => l.routeData?.cardId === cardId);
         
     routeLines.forEach(line => {
         if (line instanceof Line) {
@@ -262,9 +262,9 @@ function getRoutePath(flight) {
         .join('-');
 }
 
-function createRouteData(flight, segment, nextSegment, deckRouteId) {
+function createRouteData(flight, segment, nextSegment, cardId) {
     return {
-        deckRouteId,
+        cardId,
         segmentInfo: {
             originAirport: segment,
             destinationAirport: nextSegment,
@@ -309,7 +309,7 @@ function getPriceRangeCategory(price) {
 }
 
 function drawFlightLines(flight, routeIndex, isTemporary = false) {
-    const deckRouteId = `deck-${routeIndex}-${flight.id}`;
+    const cardId = `deck-${routeIndex}-${flight.id}`;
     const drawnLines = [];
 
     flight.route.forEach((segment, idx) => {
@@ -322,7 +322,7 @@ function drawFlightLines(flight, routeIndex, isTemporary = false) {
             };
 
         const routeId = `${segment.flyFrom}-${segment.flyTo}`;
-        const routeData = createRouteData(flight, segment, nextSegment, deckRouteId);
+        const routeData = createRouteData(flight, segment, nextSegment, cardId);
 
         const line = pathDrawing.drawLine(routeId, 'route', {
             price: flight.price,
@@ -367,7 +367,7 @@ function attachRowEventHandlers(row, flight, index, data, routeIndex) {
                 if (line instanceof Line) {
                     line.routeData = {
                         ...line.routeData,
-                        deckRouteId: `deck-${routeIndex}-${flight.id}`
+                        cardId: `deck-${routeIndex}-${flight.id}`
                     };
                     line.highlight();
                 }
@@ -456,9 +456,9 @@ function createRouteCard(flight, endpoint, routeIndex, destination) {
         ? new Date(flight.aTime * 1000)
         : new Date(flight.local_arrival);
 
-    const deckRouteId = `deck-${routeIndex}-${flight.id}`;
+    const cardId = `deck-${routeIndex}-${flight.id}`;
     
-    card.setAttribute('data-deck-route-id', deckRouteId);
+    card.setAttribute('data-card-id', cardId);
     card.setAttribute('data-price', flight.price);
     card.setAttribute('data-departure-time', departureDate.getHours() + departureDate.getMinutes() / 60);
     card.setAttribute('data-arrival-time', arrivalDate.getHours() + arrivalDate.getMinutes() / 60);
