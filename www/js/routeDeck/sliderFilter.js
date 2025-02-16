@@ -148,13 +148,17 @@ const sliderFilter = {
                 tooltips: [this.createTooltip(true), this.createTooltip(true)]
             };
         } else if (column === 'price' && data?.min !== undefined && data?.max !== undefined) {
+            // Add buffer when min equals max
+            const actualMax = data.max;
+            const sliderMax = data.min === data.max ? data.max + Math.max(1, data.max * 0.1) : data.max;
+            
             return {
-                start: data.max,
-                range: { 'min': data.min, 'max': data.max },
+                start: actualMax,
+                range: { 'min': data.min, 'max': sliderMax },
                 step: 1,
                 tooltips: this.createTooltip(false),
                 format: {
-                    to: (value) => `$${Math.round(value)}`,
+                    to: (value) => `$${Math.round(Math.min(value, actualMax))}`,
                     from: (value) => Number(value.replace('$', ''))
                 }
             };
