@@ -34,7 +34,7 @@ class Line {
             [`routeId:${this.routeId}`]: true,
             [`type:${this.type}`]: true,
             'type:route': ['route', 'dashed'].includes(this.type),
-            'type:deck': options.isTableRoute,
+            'type:deck': options.isDeckRoute,
             [`group:${options.group}`]: options.group,
             [`price:${options.price}`]: options.price !== undefined,
             [`price-range:${this.getPriceRange(options.price)}`]: options.price !== undefined,
@@ -303,7 +303,7 @@ const pathDrawing = {
             this.drawLine(routeId, type, {
                 price: route.price,
                 iata: iata,
-                isTableRoute: type === 'route'
+                isDeckRoute: type === 'route'
             });
         });
     },
@@ -334,7 +334,7 @@ const pathDrawing = {
             return this.drawLine(routeId, type, {
                 price: route.price,
                 group: appState.selectedRoutes[index]?.group,
-                isTableRoute: false,
+                isDeckRoute: false,
                 showPlane: type === 'route'
             });
         });

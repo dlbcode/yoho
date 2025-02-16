@@ -8,7 +8,7 @@ import { setupRouteContent, infoPane } from '../infoPane.js';
 import { infoPaneHeight } from '../utils/infoPaneHeightManager.js';
 import { lineManager } from '../lineManager.js';
 
-function buildRouteTable(routeIndex) {
+function buildRouteDeck(routeIndex) {
     lineManager.clearLinesByTags(['type:deck']); // Clear any existing route deck lines
 
     appState.filterState = {
@@ -327,7 +327,7 @@ function drawFlightLines(flight, routeIndex, isTemporary = false) {
         const line = pathDrawing.drawLine(routeId, 'route', {
             price: flight.price,
             iata: segment.flyFrom,
-            isTableRoute: true,
+            isDeckRoute: true,
             isTemporary,
             routeData
         });
@@ -515,4 +515,4 @@ function createRouteCard(flight, endpoint, routeIndex, destination) {
     return card;
 }
 
-export { buildRouteTable };
+export { buildRouteDeck };

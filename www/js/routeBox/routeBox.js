@@ -1,6 +1,6 @@
 import { appState, updateState, updateUrl } from '../stateManager.js';
 import { setupAutocompleteForField } from '../airportAutocomplete.js';
-import { buildRouteTable } from '../routeDeck/routeDeck.js';
+import { buildRouteDeck } from '../routeDeck/routeDeck.js';
 import { adjustMapSize } from '../map.js';
 import { travelersPicker } from './travelersPicker.js';
 import { tripTypePicker, handleTripTypeChange } from './tripTypePicker.js';
@@ -217,7 +217,7 @@ const routeBox = {
             infoPane.classList.add('search-results');
             
             // First build the route deck
-            buildRouteTable(routeNumber).then(() => {
+            buildRouteDeck(routeNumber).then(() => {
                 // After deck is built, adjust the height
                 const infoPaneElement = document.getElementById('infoPane');
                 const viewportHeight = window.visualViewport ? window.visualViewport.height : window.innerHeight;

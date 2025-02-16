@@ -208,11 +208,11 @@ const lineManager = {
         pathDrawing.popupFromClick = true;
 
         // Reset previously highlighted lines
-        const allTableLines = Object.values(pathDrawing.routePathCache)
+        const allDeckLines = Object.values(pathDrawing.routePathCache)
             .flat()
             .filter(l => l instanceof Line && l.tags.has('status:highlighted'));
         
-        allTableLines.forEach(previousLine => {
+        allDeckLines.forEach(previousLine => {
             previousLine.tags.delete('status:highlighted');
             previousLine.reset();
         });
