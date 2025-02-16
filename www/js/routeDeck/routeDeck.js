@@ -1,9 +1,9 @@
 import { appState } from '../stateManager.js';
 import { sliderFilter } from './sliderFilter.js';
-import { sortTableByColumn } from './sortTable.js';
+import { sortDeckByColumn } from './sortDeck.js';
 import { pathDrawing, Line } from '../pathDrawing.js';
 import { routeInfoRow, highlightSelectedRowForRouteIndex } from './routeInfoRow.js';
-import { applyFilters, toggleFilterResetIcon, updateFilterHeaders } from './filterTable.js';
+import { applyFilters, toggleFilterResetIcon, updateFilterHeaders } from './filterDeck.js';
 import { setupRouteContent, infoPane } from '../infoPane.js';
 import { infoPaneHeight } from '../utils/infoPaneHeightManager.js';
 import { lineManager } from '../lineManager.js';
@@ -32,7 +32,7 @@ function buildRouteTable(routeIndex) {
         }
     }
 
-    document.head.appendChild(Object.assign(document.createElement('link'), { rel: 'stylesheet', type: 'text/css', href: '../css/routeTable.css' }));
+    document.head.appendChild(Object.assign(document.createElement('link'), { rel: 'stylesheet', type: 'text/css', href: '../css/routeDeck.css' }));
 
     // Update DOM element references to be more specific
     const infoPaneElement = document.getElementById('infoPane');
@@ -104,7 +104,7 @@ function buildRouteTable(routeIndex) {
             contentWrapper.appendChild(cardsContainer);
             
             // Use the imported infoPane module
-            infoPane.routeTables.set(routeIndex, contentWrapper);
+            infoPane.routeDecks.set(routeIndex, contentWrapper);
             
             infoPaneElement.classList.remove('loading');
             infoPaneHeight.setHeight('half');

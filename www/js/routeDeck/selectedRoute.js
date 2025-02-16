@@ -21,10 +21,10 @@ const selectedRoute = {
         changeRouteButton.textContent = 'Change Route';
         changeRouteButton.className = 'change-route-button';
         changeRouteButton.onclick = () => {
-            appState.currentView = 'routeTable';
+            appState.currentView = 'routeDeck';
             appState.currentRouteIndex = routeIndex;
             document.dispatchEvent(new CustomEvent('stateChange', { 
-                detail: { key: 'changeView', value: 'routeTable' } 
+                detail: { key: 'changeView', value: 'routeDeck' } 
             }));
         };
         buttonContainer.appendChild(changeRouteButton);

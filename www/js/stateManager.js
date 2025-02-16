@@ -12,7 +12,7 @@ const appState = {
     directRoutes: [],
     selectedRoutes: {},
     tripTableData: null,
-    routeTablesData: {},
+    routeDecksData: {},
     currentView: 'trip',
     currentGroupID: 0,
     highestGroupId: 0,

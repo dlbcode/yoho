@@ -1,4 +1,4 @@
-export function sortTableByColumn(table, columnIndex, asc = true) {
+export function sortDeckByColumn(table, columnIndex, asc = true) {
     const dirModifier = asc ? 1 : -1;
     const tBody = table.tBodies[0];
     // Only sort visible rows

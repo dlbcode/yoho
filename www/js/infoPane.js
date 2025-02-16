@@ -1,14 +1,14 @@
 import { appState, updateState } from './stateManager.js';
 import { pathDrawing } from './pathDrawing.js';
 import { map } from './map.js';
-import { applyFilters } from './routeTable/filterTable.js';
+import { applyFilters } from './routeDeck/filterDeck.js';
 import { uiHandling } from './uiHandling.js';
 import { routeBox } from './routeBox/routeBox.js';
 import { lineManager } from './lineManager.js';
 import { infoPaneHeight } from './utils/infoPaneHeightManager.js';
 
 const infoPane = {
-    routeTables: new Map(), // Store route tables by route index
+    routeDecks: new Map(), // Store route tables by route index
 
     init() {
         document.addEventListener('stateChange', this.handleStateChange.bind(this));
@@ -290,7 +290,7 @@ function setupRouteContent(routeIndex) {
     let contentWrapper;
     let routeBoxElement;
 
-    const existingRouteTable = infoPane.routeTables.get(routeIndex);
+    const existingRouteTable = infoPane.routeDecks.get(routeIndex);
     
     if (existingRouteTable) {
         // Use cached route table

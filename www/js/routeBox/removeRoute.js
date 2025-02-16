@@ -23,7 +23,7 @@ const removeRoute = (routeNumber) => {
     }
 
     // Clear cached route table
-    infoPane.routeTables.delete(routeNumber);
+    infoPane.routeDecks.delete(routeNumber);
 
     // Clear lines
     if (groupNumber !== undefined) {
@@ -43,7 +43,7 @@ const removeRoute = (routeNumber) => {
     delete appState.routeDates[routeNumber];
 
     // Setup next view
-    if (appState.currentView === 'routeTable' && appState.currentRouteIndex === routeNumber) {
+    if (appState.currentView === 'routeDeck' && appState.currentRouteIndex === routeNumber) {
         const prevRouteIndex = routeNumber - 1;
         if (prevRouteIndex >= 0) {
             setupRouteContent(prevRouteIndex);

@@ -3,7 +3,7 @@ import { pathDrawing } from '../pathDrawing.js';
 import { flightMap } from '../flightMap.js';
 import { map } from '../map.js';
 import { lineManager } from '../lineManager.js';
-import { constructFilterTags } from './filterTable.js';
+import { constructFilterTags } from './filterDeck.js';
 
 function formatLayover(flight, idx) {
     if (idx < flight.route.length - 1) {

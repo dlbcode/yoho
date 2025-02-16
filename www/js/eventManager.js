@@ -6,14 +6,14 @@ import { mapHandling } from './mapHandling.js';
 import { lineManager } from './lineManager.js';
 
 const clearLinesForView = (view) => 
-    view === 'routeTable' 
+    view === 'routeDeck' 
         ? lineManager.clearLinesByTags(['type:table'])
         : lineManager.clearLines(true);
 
 const handleWaypointChange = () => {
     mapHandling.updateMarkerIcons();
     routeHandling.updateRoutesArray();
-    clearLinesForView('routeTable');
+    clearLinesForView('routeDeck');
     if (appState.currentView !== 'trip') appState.currentView = 'trip';
 };
 
