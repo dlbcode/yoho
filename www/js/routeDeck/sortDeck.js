@@ -1,12 +1,34 @@
-export function sortDeckByColumn(deck, columnIndex, asc = true) {
+export function sortDeckByColumn(container, columnIndex, asc = true) {
     const dirModifier = asc ? 1 : -1;
-    const tBody = deck.tBodies[0];
-    // Only sort visible rows
-    const rows = Array.from(tBody.querySelectorAll("tr:not([style*='display: none'])"));
+    // Only sort visible cards
+    const cards = Array.from(container.querySelectorAll(".route-card:not([style*='display: none'])"));
 
-    const sortedRows = rows.sort((a, b) => {
-        let aColText = a.cells[columnIndex].textContent.trim();
-        let bColText = b.cells[columnIndex].textContent.trim();
+    const sortedCards = cards.sort((a, b) => {
+        // Define a mapping between column index and data extraction logic
+        const columnMap = {
+            0: (card) => { //departure
+                const departureDetail = card.querySelector('.detail-value[data-departure]');
+                return departureDetail ? departureDetail.textContent.trim() : '';
+            },
+            1: (card) => { //arrival
+                 const arrivalDetail = card.querySelector('.detail-value[data-arrival]');
+                return arrivalDetail ? arrivalDetail.textContent.trim() : '';
+            },
+            2: (card) => { //price
+                const priceElement = card.querySelector('.card-price');
+                return priceElement ? priceElement.textContent.replace('$', '').trim() : '';
+            },
+            // Add more cases for other columns as needed (airlines, stops, etc.)
+            // Example for duration:
+            7: (card) => { //duration
+                const durationElement = card.querySelector('.card-duration .detail-value');
+                return durationElement ? durationElement.textContent.trim() : '';
+            }
+        };
+
+        // Extract data based on the column index
+        const aColText = columnMap[columnIndex] ? columnMap[columnIndex](a) : '';
+        const bColText = columnMap[columnIndex] ? columnMap[columnIndex](b) : '';
 
         // Use the convertData function to handle data conversion
         let aValue = convertData(aColText, columnIndex);
@@ -23,16 +45,12 @@ export function sortDeckByColumn(deck, columnIndex, asc = true) {
         }
     });
 
-    while (tBody.firstChild) {
-        tBody.removeChild(tBody.firstChild);
+    // Remove all cards
+    while (container.firstChild) {
+        container.removeChild(container.firstChild);
     }
-    tBody.append(...sortedRows);
-    deck.querySelectorAll("th").forEach(th => th.classList.remove("th-sort-asc", "th-sort-desc"));
-    if (asc) {
-        deck.querySelector(`th:nth-child(${columnIndex + 1})`).classList.add("th-sort-asc");
-    } else {
-        deck.querySelector(`th:nth-child(${columnIndex + 1})`).classList.add("th-sort-desc");
-    }
+    // Append the sorted cards
+    sortedCards.forEach(card => container.appendChild(card));
 }
 
 function convertData(data, columnIndex) {
@@ -42,10 +60,6 @@ function convertData(data, columnIndex) {
             return new Date(data);
         case 2: // Price (Numeric)
             return parseFloat(data.replace(/[^0-9.]/g, ''));
-        case 4: // Direct (Boolean)
-            return data === '✓';
-        case 5: // Stops (Numeric)
-            return parseInt(data);
         case 7: // Duration (hh mm)
             const [hours, minutes] = data.split('h ');
             return parseInt(hours) * 60 + parseInt(minutes.replace('m', ''));

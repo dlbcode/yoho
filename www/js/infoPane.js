@@ -113,7 +113,7 @@ const infoPane = {
         });
     },
 
-    updateTripTable(selectedRoutesArray) {
+    updateTripDeck(selectedRoutesArray) {
         const infoPaneContent = document.getElementById('infoPaneContent');
         infoPaneContent.innerHTML = '';
 
