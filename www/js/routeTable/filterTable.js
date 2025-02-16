@@ -39,41 +39,34 @@ function checkTimeRange(tagPrefix, timeValue, filterTags) {
 }
 
 function applyFilters() {
-    const tableRows = document.querySelectorAll('.route-info-table tbody tr');
+    const cards = document.querySelectorAll('.route-card');
     const filterTags = constructFilterTags();
     const visibleRouteIds = new Set();
     const maxPrice = appState.filterState.price?.value;
 
-    tableRows.forEach(row => {
-        const routeCell = row.querySelector('td:nth-child(9)');
-        if (!routeCell) return;
-
-        const price = parseFloat(row.dataset.priceValue);
-        const departureTime = parseFloat(row.dataset.departureTime);
-        const arrivalTime = parseFloat(row.dataset.arrivalTime);
+    cards.forEach(card => {
+        const price = parseFloat(card.dataset.priceValue);
+        const departureTime = parseFloat(card.dataset.departureTime);
+        const arrivalTime = parseFloat(card.dataset.arrivalTime);
 
         const hasMatchingPrice = !maxPrice || price <= maxPrice;
         const hasMatchingDeparture = checkTimeRange('departure-range:', departureTime, filterTags);
         const hasMatchingArrival = checkTimeRange('arrival-range:', arrivalTime, filterTags);
 
         if (hasMatchingPrice && hasMatchingDeparture && hasMatchingArrival) {
-            row.style.display = '';
-            const routeSegments = routeCell.textContent.split(' > ');
-            for (let i = 0; i < routeSegments.length - 1; i++) {
-                visibleRouteIds.add(`${routeSegments[i]}-${routeSegments[i + 1]}`);
+            card.style.display = '';
+            const routeId = card.getAttribute('data-route-id');
+            if (routeId) {
+                const segments = routeId.split('-');
+                for (let i = 0; i < segments.length - 1; i++) {
+                    visibleRouteIds.add(`${segments[i]}-${segments[i + 1]}`);
+                }
             }
         } else {
-            row.style.display = 'none';
-
-            // Check if a route info row exists and remove it
-            let existingDetailRow = row.nextSibling;
-            if (existingDetailRow && existingDetailRow.classList.contains('route-info-row')) {
-                row.parentNode.removeChild(existingDetailRow);
-                row.classList.remove('route-info-row-header');
-                row.classList.remove('route-info-row');
-            }
+            card.style.display = 'none';
         }
     });
+
     updateLineVisibility(visibleRouteIds, maxPrice);
 }
 

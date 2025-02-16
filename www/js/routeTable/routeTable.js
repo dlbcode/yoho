@@ -87,128 +87,21 @@ function buildRouteTable(routeIndex) {
                 contentWrapper.appendChild(existingRouteBox);
             }
 
-            // Create and setup table
-            const table = document.createElement('table');
-            table.className = 'route-info-table';
-            table.dataset.routeIndex = routeIndex;
-            table.style.width = '100%';
+            const filterControls = createFilterControls();
+            contentWrapper.appendChild(filterControls);
 
-            const thead = document.createElement('thead');
-            thead.innerHTML = `<tr>
-                <th data-column="departure">
-                    <span class="headerText" data-column="departure">
-                    <span class="filteredHeader" data-column="departure">Departure</span>
-                    <img class="filterIcon" id="departureFilter" data-column="departure" src="/assets/filter-icon.svg" alt="Filter">
-                    <span class="resetIcon" id="resetDepartureFilter" data-column="departure" style="display:none; cursor:pointer;">✕</span>
-                    </span>
-                    <span class="sortIcon" data-column="departure">&#x21C5;</span>
-                </th>
-                <th data-column="arrival">
-                    <span class="headerText" data-column="arrival">
-                    <span class="filteredHeader" data-column="arrival">Arrival</span>
-                    <img id="arrivalFilter" class="filterIcon" data-column="arrival" src="/assets/filter-icon.svg" alt="Filter">
-                    <span class="resetIcon" id="resetArrivalFilter" data-column="arrival" style="display:none; cursor:pointer;">✕</span>
-                    </span>
-                    <span class="sortIcon" data-column="arrival">&#x21C5;</span>
-                </th>
-                <th data-column="price">
-                    <span class="headerText" data-column="price">
-                    <span class="filteredHeader" data-column="price" id="priceText">Price</span>
-                    <img id="priceFilter" class="filterIcon" data-column="price" src="/assets/filter-icon.svg" alt="Filter">
-                    <span class="resetIcon" id="resetPriceFilter" data-column="price" style="display:none; cursor:pointer;">✕</span>
-                    </span>
-                    <span class="sortIcon" data-column="price">&#x21C5;</span>
-                </th>
-                <th data-column="airlines"><span class="headerText">Airlines</span><span class="sortIcon" data-column="airlines">&#x21C5;</span></th>
-                <th data-column="direct"><span class="headerText">Direct</span><span class="sortIcon" data-column="direct">&#x21C5;</span></th>
-                <th data-column="stops"><span class="headerText">Stops</span><span class="sortIcon" data-column="stops">&#x21C5;</span></th>
-                <th data-column="layovers"><span class="headerText">Layovers</span><span class="sortIcon" data-column="layovers">&#x21C5;</span></th>
-                <th data-column="duration"><span class="headerText">Duration</span><span class="sortIcon" data-column="duration">&#x21C5;</span></th>
-                <th data-column="route"><span class="headerText">Route</span><span class="sortIcon" data-column="route">&#x21C5;</span></th>
-            </tr>`;
-            table.appendChild(thead);
+            const cardsContainer = document.createElement('div');
+            cardsContainer.className = 'route-cards-container';
 
-            // Create a map to track lowest price routes
-            const lowestPriceRoutes = new Map();
-
-            // First pass: find lowest price for each unique route path
-            flightsData.forEach(flight => {
-                const routePath = getRoutePath(flight);
+            flightsData.forEach((flight, index) => {
+                const card = createRouteCard(flight, endpoint, routeIndex, destination);
+                cardsContainer.appendChild(card);
                 
-                if (!lowestPriceRoutes.has(routePath) || 
-                    lowestPriceRoutes.get(routePath).price > flight.price) {
-                    lowestPriceRoutes.set(routePath, {
-                        price: flight.price,
-                        flightId: flight.id
-                    });
-                }
+                // Attach event handlers
+                attachRowEventHandlers(card, flight, index, flightsData, routeIndex);
             });
 
-            const tbody = document.createElement('tbody');
-            flightsData.forEach(flight => {
-                let row = document.createElement('tr');
-                let departureDate, arrivalDate;
-                const routeId = `${flight.flyFrom}-${flight.flyTo}`; // Fix route ID creation
-                row.setAttribute('data-route-id', routeId); // Set the route ID as a plain string                
-                const directFlight = flight.route.length === 1;
-                const price = parseFloat(flight.price.toFixed(2));
-                const stops = flight.route.length - 1;
-                const layovers = flight.route.slice(0, -1).map(r => r.flyTo).join(", ");
-                const durationHours = Math.floor(flight.duration.total / 3600);
-                const durationMinutes = Math.floor((flight.duration.total % 3600) / 60);
-                const routeIATAs = flight.route.map(r => r.flyFrom).concat(flight.route[flight.route.length - 1].flyTo).join(" > ");
-
-                if (endpoint === 'range' || destination === 'Any') {
-                    departureDate = new Date(flight.dTime * 1000);
-                    arrivalDate = new Date(flight.aTime * 1000);
-                } else {
-                    departureDate = new Date(flight.local_departure);
-                    arrivalDate = new Date(flight.local_arrival);
-                }
-
-                const formattedDeparture = formatFlightDateTime(departureDate);
-                const formattedArrival = formatFlightDateTime(arrivalDate);
-
-                // Convert time to decimal hours for filtering
-                const departureTime = departureDate.getHours() + departureDate.getMinutes() / 60;
-                const arrivalTime = arrivalDate.getHours() + arrivalDate.getMinutes() / 60;
-
-                row.innerHTML = `<td>${formattedDeparture}</td>
-                                 <td>${formattedArrival}</td>
-                                 <td>$${price}</td>
-                                 <td>${flight.airlines.join(", ")}</td>
-                                 <td>${directFlight ? '✓' : ''}</td>
-                                 <td>${stops}</td>
-                                 <td>${layovers}</td>
-                                 <td>${durationHours}h ${durationMinutes}m</td>
-                                 <td>${routeIATAs}</td>`;
-
-                // Add parsed data as data attributes for filtering and sorting
-                row.dataset.price = price;
-                row.dataset.departureTime = departureTime;
-                row.dataset.arrivalTime = arrivalTime;
-
-                row.dataset.priceRange = getPriceRangeCategory(price);
-                row.dataset.priceValue = Math.round(price);
-
-                tbody.appendChild(row);
-
-                const tableRouteId = `table-${routeIndex}-${flight.id}`; // Generate a unique tableRouteId for this route
-                row.setAttribute('data-table-route-id', tableRouteId); // Add ID to row
-
-                // Only draw lines for the lowest price route
-                const routePath = getRoutePath(flight);
-
-                const isLowestPrice = lowestPriceRoutes.get(routePath).flightId === flight.id;
-
-                // Only draw lines if this is the lowest price route
-                if (isLowestPrice) {
-                    drawFlightLines(flight, routeIndex);
-                }
-            });
-
-            table.appendChild(tbody);
-            contentWrapper.appendChild(table); // Append the table once all rows are added
+            contentWrapper.appendChild(cardsContainer);
             
             // Use the imported infoPane module
             infoPane.routeTables.set(routeIndex, contentWrapper);
@@ -217,7 +110,7 @@ function buildRouteTable(routeIndex) {
             infoPaneHeight.setHeight('half');
             
             highlightSelectedRowForRouteIndex(routeIndex);
-            attachEventListeners(table, flightsData, routeIndex);
+            attachEventListeners(cardsContainer, flightsData, routeIndex);
             applyFilters(); // This will show/hide lines based on current filters
         })
         .catch(error => {
@@ -226,8 +119,8 @@ function buildRouteTable(routeIndex) {
             throw error;
         });
 
-    function attachEventListeners(table, data, routeIndex) {
-        const headers = table.querySelectorAll('th');
+    function attachEventListeners(container, data, routeIndex) {
+        const headers = container.querySelectorAll('th');
         headers.forEach(header => {
             header.style.cursor = 'pointer';
             header.addEventListener('click', function (event) {
@@ -236,7 +129,7 @@ function buildRouteTable(routeIndex) {
                     const columnIdentifier = sortIcon.getAttribute('data-column');
                     const columnIndex = getColumnIndex(columnIdentifier);
                     const isAscending = sortIcon.getAttribute('data-sort') !== 'asc';
-                    sortTableByColumn(table, columnIndex, isAscending);
+                    sortTableByColumn(container, columnIndex, isAscending);
                     resetSortIcons(headers, sortIcon, isAscending ? 'asc' : 'desc');
                 }
             });
@@ -265,8 +158,8 @@ function buildRouteTable(routeIndex) {
             setupFilterIcon(filterIcon, handleFilterClick);
         });
 
-        document.querySelectorAll('.route-info-table tbody tr').forEach((row, index) => {
-            attachRowEventHandlers(row, data[index], index, data, routeIndex);
+        document.querySelectorAll('.route-card').forEach((card, index) => {
+            attachRowEventHandlers(card, data[index], index, data, routeIndex);
         });
 
         updateFilterHeaders();
@@ -305,7 +198,7 @@ function buildRouteTable(routeIndex) {
 
     function fetchDataForColumn(column) {
         const getPriceRange = () => {
-            const priceCells = document.querySelectorAll('.route-info-table tbody tr td:nth-child(' + (getColumnIndex('price') + 1) + ')');
+            const priceCells = document.querySelectorAll('.route-card .card-price');
             const prices = Array.from(priceCells)
                 .map(cell => parseFloat(cell.textContent.replace(/[^0-9.]/g, '')))
                 .filter(price => !isNaN(price));
@@ -521,6 +414,101 @@ function buildApiUrl(origin, destination, departDate, returnDate) {
     }
 
     return { url, endpoint };
+}
+
+function createFilterControls() {
+    const filterControls = document.createElement('div');
+    filterControls.className = 'filter-controls';
+    
+    const columns = ['departure', 'arrival', 'price'];
+    columns.forEach(column => {
+        const filterButton = document.createElement('button');
+        filterButton.className = 'filter-button';
+        filterButton.setAttribute('data-column', column);
+        
+        filterButton.innerHTML = `
+            <span class="filteredHeader" data-column="${column}">${column.charAt(0).toUpperCase() + column.slice(1)}</span>
+            <img class="filterIcon" id="${column}Filter" data-column="${column}" src="/assets/filter-icon.svg" alt="Filter">
+            <span class="resetIcon" id="reset${column.charAt(0).toUpperCase() + column.slice(1)}Filter" 
+                  data-column="${column}" style="display:none;">✕</span>
+        `;
+        
+        filterControls.appendChild(filterButton);
+    });
+    
+    return filterControls;
+}
+
+function createRouteCard(flight, endpoint, routeIndex, destination) {
+    const card = document.createElement('div');
+    card.className = 'route-card';
+    
+    const departureDate = endpoint === 'range' || destination === 'Any' 
+        ? new Date(flight.dTime * 1000)
+        : new Date(flight.local_departure);
+    const arrivalDate = endpoint === 'range' || destination === 'Any'
+        ? new Date(flight.aTime * 1000)
+        : new Date(flight.local_arrival);
+
+    const routeId = `${flight.flyFrom}-${flight.flyTo}`;
+    const tableRouteId = `table-${routeIndex}-${flight.id}`;
+    
+    card.setAttribute('data-route-id', routeId);
+    card.setAttribute('data-table-route-id', tableRouteId);
+    card.setAttribute('data-price', flight.price);
+    card.setAttribute('data-departure-time', departureDate.getHours() + departureDate.getMinutes() / 60);
+    card.setAttribute('data-arrival-time', arrivalDate.getHours() + arrivalDate.getMinutes() / 60);
+    card.setAttribute('data-price-range', getPriceRangeCategory(flight.price));
+    card.setAttribute('data-price-value', Math.round(flight.price));
+
+    card.innerHTML = `
+        <div class="card-header">
+            <div class="card-price">$${flight.price.toFixed(2)}</div>
+            <div class="card-duration">
+                <span class="detail-label">Duration</span>
+                <span class="detail-value">${Math.floor(flight.duration.total / 3600)}h ${Math.floor((flight.duration.total % 3600) / 60)}m</span>
+            </div>
+        </div>
+        
+        <div class="card-route">
+            ${flight.route.map((segment, idx) => `
+                <div class="route-segment">
+                    <div class="detail-group">
+                        <div class="detail-label">${idx === 0 ? 'From' : 'Via'}</div>
+                        <div class="detail-value">${segment.flyFrom}</div>
+                    </div>
+                    ${idx < flight.route.length - 1 ? '<span class="route-arrow">→</span>' : ''}
+                </div>
+            `).join('')}
+            <div class="route-segment">
+                <div class="detail-group">
+                    <div class="detail-label">To</div>
+                    <div class="detail-value">${flight.route[flight.route.length - 1].flyTo}</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card-details">
+            <div class="detail-group">
+                <div class="detail-label">Departure</div>
+                <div class="detail-value">${formatFlightDateTime(departureDate)}</div>
+            </div>
+            <div class="detail-group">
+                <div class="detail-label">Arrival</div>
+                <div class="detail-value">${formatFlightDateTime(arrivalDate)}</div>
+            </div>
+            <div class="detail-group">
+                <div class="detail-label">Airlines</div>
+                <div class="detail-value">${flight.airlines.join(", ")}</div>
+            </div>
+            <div class="detail-group">
+                <div class="detail-label">Stops</div>
+                <div class="detail-value">${flight.route.length - 1}</div>
+            </div>
+        </div>
+    `;
+
+    return card;
 }
 
 export { buildRouteTable };
