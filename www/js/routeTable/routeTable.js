@@ -120,31 +120,21 @@ function buildRouteTable(routeIndex) {
         });
 
     function attachEventListeners(container, data, routeIndex) {
-        const headers = container.querySelectorAll('th');
-        headers.forEach(header => {
-            header.style.cursor = 'pointer';
-            header.addEventListener('click', function (event) {
-                const sortIcon = event.target.closest('.sortIcon');
-                if (sortIcon) {
-                    const columnIdentifier = sortIcon.getAttribute('data-column');
-                    const columnIndex = getColumnIndex(columnIdentifier);
-                    const isAscending = sortIcon.getAttribute('data-sort') !== 'asc';
-                    sortTableByColumn(container, columnIndex, isAscending);
-                    resetSortIcons(headers, sortIcon, isAscending ? 'asc' : 'desc');
-                }
-            });
-        });
-
-        headers.forEach(header => {
-            const filteredHeader = header.querySelector('.filteredHeader');
-            const filterIcon = header.querySelector('.filterIcon');
-            const handleFilterClick = function (event) {
+        // Remove the table header related code
+        const filterButtons = container.parentElement.querySelectorAll('.filter-button');
+        
+        filterButtons.forEach(button => {
+            const filterIcon = button.querySelector('.filterIcon');
+            const filteredHeader = button.querySelector('.filteredHeader');
+            
+            const handleFilterClick = function(event) {
                 event.stopPropagation();
                 const column = this.getAttribute('data-column');
                 if (!column) {
-                    console.error('Column attribute is missing on the icon:', this);
+                    console.error('Column attribute is missing on the button:', this);
                     return;
                 }
+                
                 const data = fetchDataForColumn(column);
                 if (data) {
                     sliderFilter.createFilterPopup(column, data, event);
@@ -153,11 +143,17 @@ function buildRouteTable(routeIndex) {
                 }
             };
 
-            // Add the 'filter-button' class to the filter buttons
-            setupFilterIcon(filteredHeader, handleFilterClick);
-            setupFilterIcon(filterIcon, handleFilterClick);
+            // Attach click handlers to both the button and its children
+            button.addEventListener('click', handleFilterClick);
+            if (filterIcon) {
+                filterIcon.addEventListener('click', handleFilterClick);
+            }
+            if (filteredHeader) {
+                filteredHeader.addEventListener('click', handleFilterClick);
+            }
         });
 
+        // Add event handlers to cards
         document.querySelectorAll('.route-card').forEach((card, index) => {
             attachRowEventHandlers(card, data[index], index, data, routeIndex);
         });
@@ -198,18 +194,18 @@ function buildRouteTable(routeIndex) {
 
     function fetchDataForColumn(column) {
         const getPriceRange = () => {
-            const priceCells = document.querySelectorAll('.route-card .card-price');
-            const prices = Array.from(priceCells)
-                .map(cell => parseFloat(cell.textContent.replace(/[^0-9.]/g, '')))
+            const cards = document.querySelectorAll('.route-card');
+            const prices = Array.from(cards)
+                .map(card => parseFloat(card.dataset.priceValue))
                 .filter(price => !isNaN(price));
 
             if (prices.length === 0) {
-                console.error('No valid prices found in the column');
+                console.error('No valid prices found');
                 return { min: 0, max: 0 };
             }
 
             const min = Math.min(...prices);
-            const max = min === Math.max(...prices) ? min + 1 : Math.max(...prices);
+            const max = Math.max(...prices);
 
             return { min, max };
         };

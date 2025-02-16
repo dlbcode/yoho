@@ -1,11 +1,11 @@
 #priceSliderPopup, .filter-popup {
-  position: absolute;
+  position: fixed; /* Changed from absolute to fixed */
   z-index: 1000;
   background-color: #333;
   border: 1px solid #525252;
-  border-radius: 5px;
-  padding: 5px;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  border-radius: 8px;
+  padding: 1rem;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
 }
 
 .hidden {
@@ -87,17 +87,14 @@
 }
 
 .filter-popup {
-  position: absolute;
+  position: fixed; /* Changed from absolute to fixed */
   z-index: 1000;
   background-color: #333;
-  border-radius: 5px;
+  border-radius: 8px;
   border: 1px solid #525252;
-  padding: 10px;
-  width: 220px;
-  height: 90px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
+  padding: 1rem;
+  width: 280px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
 }
 
 .popup-label {
@@ -331,13 +328,16 @@
 
 /* Adjust filter controls for card layout */
 .filter-controls {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1rem;
-  padding: 1rem;
+  position: sticky;
+  top: 0;
+  z-index: 10;
   background: #333;
+  padding: 1rem;
   border-radius: 8px;
   margin-bottom: 1rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
 }
 
 .filter-button {
@@ -345,14 +345,20 @@
   border: none;
   padding: 0.5rem 1rem;
   border-radius: 4px;
+  color: #fff;
   display: flex;
   align-items: center;
   gap: 0.5rem;
   cursor: pointer;
+  transition: background-color 0.2s;
 }
 
 .filter-button:hover {
   background: #555;
+}
+
+.filter-button.active {
+  background: #2a4f7c;
 }
 
 /* Responsive adjustments */
