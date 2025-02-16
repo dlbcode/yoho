@@ -64,6 +64,14 @@ function applyFilters() {
             }
         } else {
             row.style.display = 'none';
+
+            // Check if a route info row exists and remove it
+            let existingDetailRow = row.nextSibling;
+            if (existingDetailRow && existingDetailRow.classList.contains('route-info-row')) {
+                row.parentNode.removeChild(existingDetailRow);
+                row.classList.remove('route-info-row-header');
+                row.classList.remove('route-info-row');
+            }
         }
     });
     updateLineVisibility(visibleRouteIds, maxPrice);
