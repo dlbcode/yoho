@@ -123,12 +123,6 @@ function buildRouteDeck(routeIndex) {
         });
 
     function attachEventListeners(container, data, routeIndex) {
-        // Remove this section that's re-attaching card event listeners
-        // document.querySelectorAll('.route-card').forEach((card, index) => {
-        //     attachRowEventHandlers(card, data[index], index, data, routeIndex);
-        // });
-
-        // Keep only the filter button event listeners
         const filterButtons = container.parentElement.querySelectorAll('.filter-button');
         
         filterButtons.forEach(button => {
@@ -165,19 +159,6 @@ function buildRouteDeck(routeIndex) {
         toggleFilterResetIcon('price');
         toggleFilterResetIcon('departure');
         toggleFilterResetIcon('arrival');
-    }
-
-    function resetSortIcons(headers, currentIcon, newSortState) {
-        headers.forEach(header => {
-            const icon = header.querySelector('.sortIcon');
-            if (icon !== currentIcon) {
-                icon.innerHTML = '&#x21C5;'; // Reset to double arrow
-                icon.removeAttribute('data-sort');
-            } else {
-                icon.innerHTML = newSortState === 'asc' ? '&#x25B2;' : '&#x25BC;';
-                icon.setAttribute('data-sort', newSortState);
-            }
-        });
     }
 
     function fetchDataForColumn(column) {
@@ -271,13 +252,6 @@ function createRouteData(flight, segment, nextSegment, cardId) {
 function formatFlightDateTime(date) {
     const dayName = date.toLocaleDateString('en-US', { weekday: 'short' });
     return `${dayName} ${date.toLocaleString()}`;
-}
-
-function setupFilterIcon(element, handleFilterClick) {
-    if (element) {
-        element.classList.add('filter-button');
-        element.addEventListener('click', handleFilterClick);
-    }
 }
 
 function getPriceRangeCategory(price) {

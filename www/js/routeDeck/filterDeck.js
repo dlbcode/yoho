@@ -129,21 +129,6 @@ function formatTime(decimalTime) {
     return `${displayHours}:${minutes.toString().padStart(2, '0')} ${period}`;
 }
 
-function getColumnIndex(columnIdentifier) {
-    const columnMap = {
-        'departure': 0,
-        'arrival': 1,
-        'price': 2,
-        'airlines': 3,
-        'direct': 4,
-        'stops': 5,
-        'layovers': 6,
-        'duration': 7,
-        'route': 8
-    };
-    return columnMap[columnIdentifier] !== undefined ? columnMap[columnIdentifier] : -1;
-}
-
 function toggleFilterResetIcon(column) {
     const filterIcon = document.getElementById(`${column}Filter`);
     if (!filterIcon) return;
