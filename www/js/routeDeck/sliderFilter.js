@@ -26,56 +26,56 @@ const sliderFilter = {
         });
     },
 
-    createFilterPopup: function (column, data, event) {
-        let popup = document.getElementById(`${column}FilterPopup`);
+    createFilterPopup: function (filterType, data, event) {
+        let popup = document.getElementById(`${filterType}FilterPopup`);
         if (popup) {
             popup.classList.toggle('hidden');
-            if (!popup.classList.contains('hidden')) this.updatePopupValues(popup, column, data);
+            if (!popup.classList.contains('hidden')) this.updatePopupValues(popup, filterType, data);
         } else {
-            this.createAndShowPopup(column, data, event);
+            this.createAndShowPopup(filterType, data, event);
         }
     },
 
-    updatePopupValues: function (popup, column, data) {
-        const slider = popup.querySelector(`#${column}Slider`);
-        const filterValues = appState.filterState[column];
+    updatePopupValues: function (popup, filterType, data) {
+        const slider = popup.querySelector(`#${filterType}Slider`);
+        const filterValues = appState.filterState[filterType];
         if (slider) {
             slider.noUiSlider.set(filterValues ? [filterValues.start, filterValues.end] : [data.min, data.max]);
         }
         this.positionPopup(popup, event);
     },
 
-    createAndShowPopup: function (column, data, event) {
-        if (!data) return console.error('No data provided for filtering:', column);
+    createAndShowPopup: function (filterType, data, event) {
+        if (!data) return console.error('No data provided for filtering:', filterType);
 
-        document.getElementById(`${column}FilterPopup`)?.remove();
+        document.getElementById(`${filterType}FilterPopup`)?.remove();
 
-        let filterIcon = document.getElementById(`${column}Filter`);
+        let filterIcon = document.getElementById(`${filterType}Filter`);
         if (!filterIcon) {
             filterIcon = document.createElement('span');
-            filterIcon.id = `${column}Filter`;
+            filterIcon.id = `${filterType}Filter`;
             filterIcon.className = 'filterIcon';
-            filterIcon.setAttribute('data-column', column);
-            document.querySelector(`th[data-column="${column}"]`)?.appendChild(filterIcon);
+            filterIcon.setAttribute('data-filter', filterType);
+            document.querySelector(`[data-filter="${filterType}"]`)?.appendChild(filterIcon);
         }
 
-        let resetIcon = document.getElementById(`reset${column.charAt(0).toUpperCase() + column.slice(1)}Filter`);
+        let resetIcon = document.getElementById(`reset${filterType.charAt(0).toUpperCase() + filterType.slice(1)}Filter`);
         if (!resetIcon) {
             resetIcon = document.createElement('span');
-            resetIcon.id = `reset${column.charAt(0).toUpperCase() + column.slice(1)}Filter`;
+            resetIcon.id = `reset${filterType.charAt(0).toUpperCase() + filterType.slice(1)}Filter`;
             resetIcon.className = 'resetIcon';
-            resetIcon.setAttribute('data-column', column);
+            resetIcon.setAttribute('data-filter', filterType);
             resetIcon.style.display = 'none';
-            document.querySelector(`th[data-column="${column}"]`)?.appendChild(resetIcon);
+            document.querySelector(`[data-filter="${filterType}"]`)?.appendChild(resetIcon);
         }
 
         const filterPopup = document.createElement('div');
-        filterPopup.id = `${column}FilterPopup`;
+        filterPopup.id = `${filterType}FilterPopup`;
         filterPopup.className = 'filter-popup';
         document.body.appendChild(filterPopup);
 
         const label = document.createElement('span');
-        label.textContent = column.charAt(0).toUpperCase() + column.slice(1);
+        label.textContent = filterType.charAt(0).toUpperCase() + filterType.slice(1);
         label.className = 'popup-label';
         filterPopup.appendChild(label);
 
@@ -86,18 +86,18 @@ const sliderFilter = {
         filterPopup.appendChild(closeButton);
 
         const valueLabel = document.createElement('div');
-        valueLabel.id = `${column}ValueLabel`;
+        valueLabel.id = `${filterType}ValueLabel`;
         valueLabel.className = 'filter-value-label';
         filterPopup.appendChild(valueLabel);
 
         this.positionPopup(filterPopup, event);
-        this.initializeSlider(filterPopup, column, data, valueLabel);
+        this.initializeSlider(filterPopup, filterType, data, valueLabel);
 
         document.addEventListener('click', (e) => {
             if (!filterPopup.contains(e.target) && e.target !== event.target) {
                 filterPopup.classList.add('hidden');
             }
-            toggleFilterResetIcon(column);
+            toggleFilterResetIcon(filterType);
         }, true);
     },
 
@@ -118,28 +118,28 @@ const sliderFilter = {
         popup.style.top = `${iconRect.top + window.scrollY - 90}px`;
     },
 
-    initializeSlider: function (popup, column, data, valueLabel) {
+    initializeSlider: function (popup, filterType, data, valueLabel) {
         const slider = document.createElement('div');
-        slider.id = `${column}Slider`;
+        slider.id = `${filterType}Slider`;
         popup.appendChild(slider);
 
-        const sliderSettings = this.getSliderSettings(column, data);
+        const sliderSettings = this.getSliderSettings(filterType, data);
         if (sliderSettings) {
             noUiSlider.create(slider, sliderSettings);
             slider.querySelectorAll('.noUi-handle').forEach(handle => handle.classList.add('slider-handle'));
             slider.noUiSlider.on('update', (values) => {
-                this.updateFilterStateAndLabel(column, values, valueLabel);
+                this.updateFilterStateAndLabel(filterType, values, valueLabel);
                 applyFilters();
                 updateFilterHeaders();
             });
-            slider.addEventListener('touchend', () => toggleFilterResetIcon(column));
+            slider.addEventListener('touchend', () => toggleFilterResetIcon(filterType));
         } else {
             console.error('Slider settings not defined due to missing or incorrect data');
         }
     },
 
-    getSliderSettings: function (column, data) {
-        if (['departure', 'arrival'].includes(column)) {
+    getSliderSettings: function (filterType, data) {
+        if (['departure', 'arrival'].includes(filterType)) {
             return {
                 start: [data.min || 0, data.max || 24],
                 connect: true,
@@ -147,7 +147,7 @@ const sliderFilter = {
                 step: 0.5,
                 tooltips: [this.createTooltip(true), this.createTooltip(true)]
             };
-        } else if (column === 'price' && data?.min !== undefined && data?.max !== undefined) {
+        } else if (filterType === 'price' && data?.min !== undefined && data?.max !== undefined) {
             // Add buffer when min equals max
             const actualMax = data.max;
             const sliderMax = data.min === data.max ? data.max + Math.max(1, data.max * 0.1) : data.max;
@@ -163,7 +163,7 @@ const sliderFilter = {
                 }
             };
         }
-        console.error('Unsupported column or missing data for slider:', column, data);
+        console.error('Unsupported filter or missing data for slider:', filterType, data);
         return null;
     },
 
@@ -182,11 +182,11 @@ const sliderFilter = {
         return `${displayHours}:${minutes < 10 ? '0' + minutes : minutes} ${period}`;
     },
 
-    updateFilterStateAndLabel: function (column, values, label) {
+    updateFilterStateAndLabel: function (filterType, values, label) {
         let newValues;
         let labelText;
 
-        if (column === 'price') {
+        if (filterType === 'price') {
             const priceValue = parseFloat(values[0].replace('$', ''));
             newValues = { value: priceValue };
             labelText = `up to: $${priceValue}`;
@@ -198,7 +198,7 @@ const sliderFilter = {
         }
 
         label.textContent = labelText;
-        updateFilterState(column, newValues);
+        updateFilterState(filterType, newValues);
     }
 };
 

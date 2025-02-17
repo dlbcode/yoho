@@ -128,17 +128,17 @@ function buildRouteDeck(routeIndex) {
             
             const handleFilterClick = function(event) {
                 event.stopPropagation();
-                const column = this.getAttribute('data-column');
-                if (!column) {
+                const filterType = this.getAttribute('data-column');
+                if (!filterType) {
                     console.error('Column attribute is missing on the button:', this);
                     return;
                 }
                 
-                const data = fetchDataForColumn(column);
+                const data = fetchDataForColumn(filterType);
                 if (data) {
-                    sliderFilter.createFilterPopup(column, data, event);
+                    sliderFilter.createFilterPopup(filterType, data, event);
                 } else {
-                    console.error('Failed to fetch data for column:', column);
+                    console.error('Failed to fetch data for column:', filterType);
                 }
             };
 
@@ -158,7 +158,7 @@ function buildRouteDeck(routeIndex) {
         toggleFilterResetIcon('arrival');
     }
 
-    function fetchDataForColumn(column) {
+    function fetchDataForColumn(filterType) {
         const getPriceRange = () => {
             const cards = document.querySelectorAll('.route-card');
             const prices = Array.from(cards)
@@ -176,14 +176,14 @@ function buildRouteDeck(routeIndex) {
             return { min, max };
         };
 
-        switch (column) {
+        switch (filterType) {
             case 'price':
                 return getPriceRange();
             case 'departure':
             case 'arrival':
                 return { min: 0, max: 24 };
             default:
-                console.error('Unsupported column:', column);
+                console.error('Unsupported column:', filterType);
                 return null;
         }
     }
@@ -379,7 +379,7 @@ function createFilterControls() {
             <span class="filter-header" data-column="${column}">${column.charAt(0).toUpperCase() + column.slice(1)}</span>
             <img class="filterIcon" id="${column}Filter" data-column="${column}" src="/assets/filter-icon.svg" alt="Filter">
             <span class="resetIcon hidden" id="reset${column.charAt(0).toUpperCase() + column.slice(1)}Filter" 
-                  data-column="${column}" data-column="${column}">✕</span>
+                  data-column="${column}">✕</span>
         `;
         
         filterControls.appendChild(filterButton);
