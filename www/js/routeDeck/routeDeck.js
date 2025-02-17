@@ -218,13 +218,6 @@ function applyLineHighlightStyle(line) {
 }
 
 // Replace repeated route path creation with a helper function
-function getRoutePath(flight) {
-    return flight.route
-        .map(segment => segment.flyFrom)
-        .concat(flight.route[flight.route.length - 1].flyTo)
-        .join('-');
-}
-
 function createRouteData(flight, segment, nextSegment, cardId) {
     return {
         cardId,
@@ -275,7 +268,7 @@ function drawFlightLines(flight, routeIndex, isTemporary = false) {
             local_departure: segment.local_arrival
         };
 
-        const routeId = createRouteId([segment.flyFrom, segment.flyTo]);
+        const routeId = createRouteId([{flyFrom: segment.flyFrom, flyTo: segment.flyTo}]);
 
         const routeData = createRouteData(flight, segment, nextSegment, cardId);
 
@@ -310,7 +303,8 @@ function attachRowEventHandlers(card, flight, index, data, routeIndex) {
     card.addEventListener('mouseover', () => {
         if (!flight?.route) return;
         
-        const routePath = getRoutePath(flight);
+        const routePath = createRouteId(flight.route);
+        
         const existingRouteLines = Object.values(pathDrawing.routePathCache)
             .flat()
             .filter(l => flight.route.some((segment) => {
