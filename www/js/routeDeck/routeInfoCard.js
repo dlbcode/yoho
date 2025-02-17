@@ -94,18 +94,18 @@ function generateSegmentDetails(flight) {
 }
 
 // Change function name to match card terminology
-function routeInfoCard(rowElement, fullFlightData, routeIds, routeIndex) {
-    // Toggle details row visibility
-    let existingDetailCard = rowElement.nextSibling;
+function routeInfoCard(cardElement, fullFlightData, routeIds, routeIndex) {
+    // Toggle details card visibility
+    let existingDetailCard = cardElement.nextSibling;
     if (existingDetailCard && existingDetailCard.classList.contains('route-info-card')) {
         // Remove the existing details card if clicked again
-        rowElement.parentNode.removeChild(existingDetailCard);
-        rowElement.classList.remove('route-info-card-header');
-        rowElement.classList.remove('route-info-card');
+        cardElement.parentNode.removeChild(existingDetailCard);
+        cardElement.classList.remove('route-info-card-header');
+        cardElement.classList.remove('route-info-card');
 
         // Remove 'status:highlighted' tag from associated lines
         const filterTags = constructFilterTags();
-        const linesToUnhighlight = lineManager.getLinesByTags([...filterTags, `route:${rowElement.getAttribute('data-route-id')}`], 'route');
+        const linesToUnhighlight = lineManager.getLinesByTags([...filterTags, `route:${cardElement.getAttribute('data-route-id')}`], 'route');
 
         linesToUnhighlight.forEach(line => {
             line.removeTag('status:highlighted');
@@ -116,18 +116,18 @@ function routeInfoCard(rowElement, fullFlightData, routeIds, routeIndex) {
 
     // Create a new card for detailed information
     const detailCard = document.createElement('div');
-    detailCard.className = 'route-info-card'; // Use a different class name
+    detailCard.className = 'route-info-card';
     const flight = fullFlightData;
 
     detailCard.innerHTML = `
         <div class='route-details' style='display: flex; flex-direction: column; align-items: flex-start;'>
-            <div class='top-wrapper' style='display: flex; flex-direction: row; align-items: flex-start'>
+            <div class='top-wrapper' style='display: flex; flex-direction: card; align-items: flex-start'>
                 <div class='left-wrapper' style='display: flex; flex-direction: column; align-items: flex-start; margin-right: 20px;'>
                     <button id='selectRoute' class="select-button">
                         <div style='font-size: 20px;'>${Math.ceil(flight.price)}</div>
                         <div>Select</div>
                     </button>
-                    <div class="info-box" style="display: flex; flex-direction: row; margin-top: 4px; padding-bottom: 2px; width: 100%;">
+                    <div class="info-box" style="display: flex; flex-direction: card; margin-top: 4px; padding-bottom: 2px; width: 100%;">
                         <div class="bags-price" style="display: flex; flex-direction: column; align-items: center; margin-right: 5px;">
                             <svg fill="#aaa" height="20px" width="20px" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 248.35 248.35" xml:space="preserve">
                                 <g>
@@ -140,7 +140,7 @@ function routeInfoCard(rowElement, fullFlightData, routeIds, routeIndex) {
                 </div>
             </div>
             <div class='segments-wrapper' style='display: flex; flex-direction: column; align-items: flex-start;'>
-                <div class='segments' style='display: flex; flex-direction: row; align-items: flex-start;'>
+                <div class='segments' style='display: flex; flex-direction: card; align-items: flex-start;'>
                     ${generateSegmentDetails(flight)}
                 </div>                
             </div>
@@ -148,15 +148,15 @@ function routeInfoCard(rowElement, fullFlightData, routeIds, routeIndex) {
     `;
 
     // Insert the new card right after the clicked card in the container
-    if (rowElement.nextSibling) {
-        rowElement.parentNode.insertBefore(detailCard, rowElement.nextSibling);
+    if (cardElement.nextSibling) {
+        cardElement.parentNode.insertBefore(detailCard, cardElement.nextSibling);
     } else {
-        rowElement.parentNode.appendChild(detailCard); // Append to the end if there's no next sibling
+        cardElement.parentNode.appendChild(detailCard); // Append to the end if there's no next sibling
     }
 
     // Add 'status:highlighted' tag to associated lines
     const filterTags = constructFilterTags();
-    const linesToHighlight = lineManager.getLinesByTags([...filterTags, `route:${rowElement.getAttribute('data-route-id')}`], 'route');
+    const linesToHighlight = lineManager.getLinesByTags([...filterTags, `route:${cardElement.getAttribute('data-route-id')}`], 'route');
 
     linesToHighlight.forEach(line => {
         line.addTag('status:highlighted');
@@ -302,14 +302,14 @@ function routeInfoCard(rowElement, fullFlightData, routeIds, routeIndex) {
     });
 
     // add selected class to the clicked card in the container
-    rowElement.classList.add('route-info-card');
-    rowElement.classList.add('route-info-card-header');
+    cardElement.classList.add('route-info-card');
+    cardElement.classList.add('route-info-card-header');
     highlightSelectedCardForRouteIndex(routeIndex);
 }
 
 // This function name and implementation should be updated
 function highlightSelectedCardForRouteIndex(routeIndex) {
-    // Update selectors to use cards instead of table rows
+    // Update selectors to use cards instead of table cards
     document.querySelectorAll(`.route-card[data-route-index="${routeIndex}"]`).forEach(card => {
         card.classList.remove('selected');
     });

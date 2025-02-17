@@ -16,32 +16,16 @@
   width: 200px;
 }
 
-.filterIcon, .sortIcon, #sortIcon, #filterIcon, .resetIcon {
+[class*="Icon"], 
+[id*="Icon"] {
   cursor: pointer;
-}
-
-.filterIcon, .route-info-deck th .filterIcon, .slider-handle {
   width: 16px;
   height: 16px;
 }
 
-#sortIcon:hover, #priceFilterIcon:hover {
+[class*="Icon"]:hover, 
+[id*="Icon"]:hover {
   color: #007bff;
-}
-
-.route-info-deck th {
-  position: relative;
-  font-size: 14px;
-  text-align: left;
-  min-width: 140px;
-}
-
-.filterButton {
-  background: #2a4f7c;
-}
-
-.filteredHeader {
-  width: 100%;
 }
 
 .resetIcon {
@@ -50,25 +34,6 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-}
-
-.sortIcon {
-  background: #444;
-  float: right;
-  height: 26px;
-  width: 24px;
-  margin-left: 0;
-  font-size: 16px;
-  font-weight: 300;
-  padding: 10px 5px;
-  border-top-right-radius: 5px;
-  border-bottom-right-radius: 5px;
-  display: inline-flex;
-  align-items: center;
-}
-
-.route-info-deck tbody tr.selected {
-  background-color: #444;
 }
 
 .filter-popup {
@@ -100,9 +65,9 @@
 
 .filter-value-label {
   color: #ddd;
-  font-size: 15px;
+  font-size: 12px;
   text-align: center;
-  margin-top: 20px;
+  margin-bottom: 5px;
 }
 
 .noUi-target {
@@ -163,19 +128,12 @@
   z-index: 1;
 }
 
-.filter-value-label {
-  color: #ddd;
-  font-size: 12px;
-  text-align: center;
-  margin-bottom: 5px;
-}
-
-.route-info-row {
+.route-info-card {
   border-left: #007bff solid 3px;
   background-color: #000 !important;
 }
 
-.route-info-row-header {
+.route-info-card-header {
   background-color: #333 !important;
 }
 
@@ -311,7 +269,6 @@
   color: #fff;
 }
 
-/* Adjust filter controls for card layout */
 .filter-controls {
   background: #333;
   padding: 1rem;
@@ -344,7 +301,6 @@
   background: #2a4f7c;
 }
 
-/* Add these new styles */
 .sort-button {
     margin-left: auto; /* This will push the sort button to the right */
     background: #444;
@@ -401,7 +357,6 @@
     margin-left: auto;
 }
 
-/* Responsive adjustments */
 @media (max-width: 768px) {
   .card-details {
     grid-template-columns: 1fr;
