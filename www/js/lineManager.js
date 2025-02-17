@@ -231,7 +231,7 @@ const lineManager = {
 
         // Handle deck route expansion when clicking a line
         if (line.routeData?.cardId) {
-            const card = document.querySelector(`tr[data-card-id="${line.routeData.cardId}"]`);
+            const card = document.querySelector(`div.route-card[data-card-id="${line.routeData.cardId}"]`);
             if (card) {
                 // Trigger the click event on the card to open it
                 card.click();
