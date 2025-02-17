@@ -133,7 +133,7 @@ function formatTime(decimalTime) {
 function toggleFilterResetIcon(column) {
     const filterIcon = document.getElementById(`${column}Filter`);
     const resetIcon = document.getElementById(`reset${column.charAt(0).toUpperCase() + column.slice(1)}Filter`);
-    const filterButtonSpan = filterIcon?.closest('.headerText, .filterButton');
+    const filterButtonSpan = filterIcon?.closest('.filter-header, .filterButton');
 
     if (!filterIcon || !resetIcon || !filterButtonSpan) return;
 
@@ -142,11 +142,11 @@ function toggleFilterResetIcon(column) {
         ((column === 'price' && filterValue.value !== undefined && filterValue.value !== null) ||
          ((column === 'departure' || 'arrival') && (filterValue.start !== 0 || filterValue.end !== 24)));
 
-    filterIcon.style.display = isNonDefault ? 'none' : 'inline';
-    resetIcon.style.display = isNonDefault ? 'inline' : 'none';
+    resetIcon.classList.toggle('hidden', !isNonDefault); // Use class toggle for visibility
+    filterIcon.classList.toggle('hidden', isNonDefault); // Use class toggle for visibility
 
     filterButtonSpan.classList.toggle('filterButton', isNonDefault);
-    filterButtonSpan.classList.toggle('headerText', !isNonDefault);
+    filterButtonSpan.classList.toggle('filter-header', !isNonDefault);
 
     appState.filterStates[appState.currentRouteIndex] = { ...appState.filterState }; // Save filter state
 }
@@ -161,7 +161,7 @@ document.addEventListener('click', function (e) {
 
 function resetFilter(column) {
     const filterIcon = document.querySelector(`#${column}Filter`);
-    const filterButtonSpan = filterIcon?.closest('.filterButton, .headerText');
+    const filterButtonSpan = filterIcon?.closest('.filterButton, .filter-header');
     const resetIcon = document.querySelector(`#reset${column.charAt(0).toUpperCase() + column.slice(1)}Filter`);
 
     if (column === 'departure' || column === 'arrival') {
@@ -170,12 +170,12 @@ function resetFilter(column) {
         appState.filterState[column] = { value: null };
     }
 
-    if (filterIcon) filterIcon.style.display = 'inline';
-    if (resetIcon) resetIcon.style.display = 'none';
+    if (filterIcon) filterIcon.classList.remove('hidden'); // Use class toggle for visibility
+    if (resetIcon) resetIcon.classList.add('hidden'); // Use class toggle for visibility
 
     if (filterButtonSpan) {
         filterButtonSpan.classList.remove('filterButton');
-        filterButtonSpan.classList.add('headerText');
+        filterButtonSpan.classList.add('filter-header');
     }
 
     applyFilters();

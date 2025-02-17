@@ -127,7 +127,7 @@ function buildRouteDeck(routeIndex) {
         
         filterButtons.forEach(button => {
             const filterIcon = button.querySelector('.filterIcon');
-            const filteredHeader = button.querySelector('.filteredHeader');
+            const filterHeader = button.querySelector('.filter-header');
             
             const handleFilterClick = function(event) {
                 event.stopPropagation();
@@ -150,8 +150,8 @@ function buildRouteDeck(routeIndex) {
             if (filterIcon) {
                 filterIcon.addEventListener('click', handleFilterClick);
             }
-            if (filteredHeader) {
-                filteredHeader.addEventListener('click', handleFilterClick);
+            if (filterHeader) {
+                filterHeader.addEventListener('click', handleFilterClick);
             }
         });
 
@@ -386,10 +386,10 @@ function createFilterControls() {
         filterButton.setAttribute('data-column', column);
         
         filterButton.innerHTML = `
-            <span class="filteredHeader" data-column="${column}">${column.charAt(0).toUpperCase() + column.slice(1)}</span>
+            <span class="filter-header" data-column="${column}">${column.charAt(0).toUpperCase() + column.slice(1)}</span>
             <img class="filterIcon" id="${column}Filter" data-column="${column}" src="/assets/filter-icon.svg" alt="Filter">
-            <span class="resetIcon" id="reset${column.charAt(0).toUpperCase() + column.slice(1)}Filter" 
-                  data-column="${column}" style="display:none;">✕</span>
+            <span class="resetIcon hidden" id="reset${column.charAt(0).toUpperCase() + column.slice(1)}Filter" 
+                  data-column="${column}" data-column="${column}">✕</span>
         `;
         
         filterControls.appendChild(filterButton);
