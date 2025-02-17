@@ -29,14 +29,14 @@ function generateSegmentDetails(flight) {
         const airlineLogoUrl = `assets/airline_logos/70px/${airlineCode}.png`;
 
         if (idx === 0) {
-            // Origin Column
+            // Origin Card
             segmentsHtml.push(`
                 <div class="departure" style="margin-right: 2px;" data-origin="${segment.flyFrom}">
                     <div>${segment.flyFrom} (${segment.cityFrom})</div>
                     <div style="color: #999;">Depart: <span style="color: #ccc;">${departureTime}</span></div>
                 </div>`);
 
-            // First Duration Column 
+            // First Duration Card 
             segmentsHtml.push(`
                 <div class="duration" data-origin="${segment.flyFrom}" data-destination="${segment.flyTo}">
                     <div style="position: relative; margin-top: 12px; color: #ccc;">
@@ -50,7 +50,7 @@ function generateSegmentDetails(flight) {
         }
 
         if (idx > 0) {
-            // Layover Column
+            // Layover Card
             const layoverDuration = formatLayover(flight, idx - 1);
             const previousArrivalTime = flight.route[idx - 1].local_arrival ? new Date(flight.route[idx - 1].local_arrival).toLocaleTimeString() : new Date(flight.route[idx - 1].aTime * 1000).toLocaleTimeString();
             const recheckBagsText = flight.route[idx - 1].bags_recheck_required ? '<div style="color: #FFBF00;">- Recheck bags</div>' : '';
@@ -66,7 +66,7 @@ function generateSegmentDetails(flight) {
                     <div style="color: #999;">Depart: <span style="color: #ccc;">${departureTime}</span></div>
                 </div>`);
 
-            // Another Duration Column
+            // Another Duration Card
             segmentsHtml.push(`
                 <div class="duration" data-origin="${flight.route[idx].flyFrom}" data-destination="${flight.route[idx].flyTo}">
                     <div style="position: relative; margin-top: 12px; color: #ccc;">
@@ -80,7 +80,7 @@ function generateSegmentDetails(flight) {
         }
 
         if (idx === arr.length - 1) {
-            // Destination Column
+            // Destination Card
             segmentsHtml.push(`
                 <div class="destination" data-destination="${segment.flyTo}">
                     <div>${segment.flyTo} (${segment.cityTo})</div>
@@ -200,25 +200,25 @@ function routeInfoCard(cardElement, fullFlightData, routeIds, routeIndex) {
         // Fallback to API fetch if not cached
     }
 
-    const departureColumn = detailCard.querySelector('.departure');
-    addClickListener(departureColumn, 'data-origin', flyToLocation);
+    const departureCard = detailCard.querySelector('.departure');
+    addClickListener(departureCard, 'data-origin', flyToLocation);
 
-    const destinationColumn = detailCard.querySelector('.destination');
-    addClickListener(destinationColumn, 'data-destination', flyToLocation);
+    const destinationCard = detailCard.querySelector('.destination');
+    addClickListener(destinationCard, 'data-destination', flyToLocation);
 
-    const durationColumn = detailCard.querySelectorAll('.duration');
-    durationColumn.forEach(column => {
-        addClickListener(column, 'data-origin', (origin) => {
-            const destination = column.getAttribute('data-destination');
+    const durationCards = detailCard.querySelectorAll('.duration');
+    durationCards.forEach(card => {
+        addClickListener(card, 'data-origin', (origin) => {
+            const destination = card.getAttribute('data-destination');
             fetchAndDisplayAirportData(origin, destination);
         });
     });
 
-    const layoverColumn = detailCard.querySelectorAll('.layover');
-    layoverColumn.forEach(column => {
-        column.addEventListener('click', (event) => {
+    const layoverCards = detailCard.querySelectorAll('.layover');
+    layoverCards.forEach(card => {
+        card.addEventListener('click', (event) => {
             event.stopPropagation();
-            const layover = column.getAttribute('data-layover');
+            const layover = card.getAttribute('data-layover');
             flyToLocation(layover);
         });
     });
