@@ -184,16 +184,20 @@ const sliderFilter = {
 
     updateFilterStateAndLabel: function (column, values, label) {
         let newValues;
+        let labelText;
+
         if (column === 'price') {
-            newValues = { value: parseFloat(values[0].replace('$', '')) };
-            label.textContent = `up to: $${newValues.value}`;
+            const priceValue = parseFloat(values[0].replace('$', ''));
+            newValues = { value: priceValue };
+            labelText = `up to: $${priceValue}`;
         } else {
             const [start, end] = values.map(parseFloat);
             newValues = { start, end: end || start };
-            label.textContent = (start === 0 && end === 24) ? 'Anytime' : 
+            labelText = (start === 0 && end === 24) ? 'Anytime' :
                 `${this.formatTime(start)} - ${this.formatTime(end)}`;
         }
-        
+
+        label.textContent = labelText;
         updateFilterState(column, newValues);
     }
 };
