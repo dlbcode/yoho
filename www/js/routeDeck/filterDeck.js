@@ -26,6 +26,10 @@ function updateFilterState(type, values) {
     toggleFilterResetIcon(type);
 }
 
+function resetFilter(type) {
+    updateFilterState(type, DEFAULT_FILTER_STATE[type]);
+}
+
 function addTimeFilterTags(type, filterTags) {
     const time = appState.filterState[type];
     if (!time) return;
@@ -178,10 +182,6 @@ document.addEventListener('click', function (e) {
         resetFilter(column);
     }
 });
-
-function resetFilter(type) {
-    updateFilterState(type, DEFAULT_FILTER_STATE[type]);
-}
 
 export function createRouteId(segments, separator = '-') {
     if (Array.isArray(segments)) {
