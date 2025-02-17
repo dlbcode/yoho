@@ -7,6 +7,7 @@ import { applyFilters, toggleFilterResetIcon, updateFilterHeaders, initializeFil
 import { setupRouteContent, infoPane } from '../infoPane.js';
 import { infoPaneHeight } from '../utils/infoPaneHeightManager.js';
 import { lineManager } from '../lineManager.js';
+import { createRouteCard } from './routeCard.js'; // Import createRouteCard
 
 function buildRouteDeck(routeIndex) {
     lineManager.clearLinesByTags(['type:deck']); // Clear any existing route deck lines
@@ -131,15 +132,15 @@ function buildRouteDeck(routeIndex) {
                 event.stopPropagation();
                 const filterType = this.getAttribute('data-column');
                 if (!filterType) {
-                    console.error('Column attribute is missing on the button:', this);
+                    console.error('Filter attribute is missing on the button:', this);
                     return;
                 }
                 
-                const data = fetchDataForColumn(filterType);
+                const data = fetchDataForFilter(filterType);
                 if (data) {
                     sliderFilter.createFilterPopup(filterType, data, event);
                 } else {
-                    console.error('Failed to fetch data for column:', filterType);
+                    console.error('Failed to fetch data for filter:', filterType);
                 }
             };
 
@@ -154,7 +155,7 @@ function buildRouteDeck(routeIndex) {
         });
     }
 
-    function fetchDataForColumn(filterType) {
+    function fetchDataForFilter(filterType) {
         const getPriceRange = () => {
             const cards = document.querySelectorAll('.route-card');
             const prices = Array.from(cards)
@@ -179,7 +180,7 @@ function buildRouteDeck(routeIndex) {
             case 'arrival':
                 return { min: 0, max: 24 };
             default:
-                console.error('Unsupported column:', filterType);
+                console.error('Unsupported filter:', filterType);
                 return null;
         }
     }
@@ -365,11 +366,11 @@ function createFilterControls() {
     const filterControls = document.createElement('div');
     filterControls.className = 'filter-controls';
     
-    const filters = ['departure', 'arrival', 'price']; // Changed columns to filters
-    filters.forEach(filterType => { // Changed column to filterType
+    const filters = ['departure', 'arrival', 'price'];
+    filters.forEach(filterType => {
         const filterButton = document.createElement('button');
         filterButton.className = 'filter-button';
-        filterButton.setAttribute('data-column', filterType); // Keep data-column for now for simplicity
+        filterButton.setAttribute('data-column', filterType);
         
         filterButton.innerHTML = `
             <span class="filter-header" data-column="${filterType}">${filterType.charAt(0).toUpperCase() + filterType.slice(1)}</span>
@@ -382,80 +383,6 @@ function createFilterControls() {
     });
 
     return filterControls;
-}
-
-function createRouteCard(flight, endpoint, routeIndex, destination) {
-    const card = document.createElement('div');
-    card.className = 'route-card';
-    
-    // Use standardized route ID creation
-    const routeId = createRouteId(flight.route);
-    card.setAttribute('data-route-id', routeId);
-    
-    const departureDate = endpoint === 'range' || destination === 'Any' 
-        ? new Date(flight.dTime * 1000)
-        : new Date(flight.local_departure);
-    const arrivalDate = endpoint === 'range' || destination === 'Any'
-        ? new Date(flight.aTime * 1000)
-        : new Date(flight.local_arrival);
-
-    const cardId = `deck-${routeIndex}-${flight.id}`;
-    
-    card.setAttribute('data-card-id', cardId);
-    card.setAttribute('data-price', flight.price);
-    card.setAttribute('data-departure-time', departureDate.getHours() + departureDate.getMinutes() / 60);
-    card.setAttribute('data-arrival-time', arrivalDate.getHours() + arrivalDate.getMinutes() / 60);
-    card.setAttribute('data-price-range', getPriceRangeCategory(flight.price));
-    card.setAttribute('data-price-value', Math.round(flight.price));
-
-    card.innerHTML = `
-        <div class="card-header">
-            <div class="card-price">$${flight.price.toFixed(2)}</div>
-            <div class="card-duration">
-                <span class="detail-label">Duration</span>
-                <span class="detail-value">${Math.floor(flight.duration.total / 3600)}h ${Math.floor((flight.duration.total % 3600) / 60)}m</span>
-            </div>
-        </div>
-        
-        <div class="card-route">
-            ${flight.route.map((segment, idx) => `
-                <div class="route-segment">
-                    <div class="detail-group">
-                        <div class="detail-label">${idx === 0 ? 'From' : 'Via'}</div>
-                        <div class="detail-value">${segment.flyFrom}</div>
-                    </div>
-                    ${idx < flight.route.length - 1 ? '<span class="route-arrow">→</span>' : ''}
-                </div>
-            `).join('')}
-            <div class="route-segment">
-                <div class="detail-group">
-                    <div class="detail-label">To</div>
-                    <div class="detail-value">${flight.route[flight.route.length - 1].flyTo}</div>
-                </div>
-            </div>
-        </div>
-
-        <div class="card-details">
-            <div class="detail-group">
-                <div class="detail-label">Departure</div>
-                <div class="detail-value" data-departure="${formatFlightDateTime(departureDate)}">${formatFlightDateTime(departureDate)}</div>
-            </div>
-            <div class="detail-group">
-                <div class="detail-label">Arrival</div>
-                <div class="detail-value" data-arrival="${formatFlightDateTime(arrivalDate)}">${formatFlightDateTime(arrivalDate)}</div>
-            </div>
-            <div class="detail-group">
-                <div class="detail-label">Airlines</div>
-                <div class="detail-value">${flight.airlines.join(", ")}</div>
-            </div>
-            <div class="detail-group">
-                <div class="detail-label">Stops</div>
-                <div class="detail-value">${flight.route.length - 1}</div>
-            </div>
-        </div>
-    `;
-
-    return card;
 }
 
 export { buildRouteDeck };
