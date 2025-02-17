@@ -93,6 +93,7 @@ function generateSegmentDetails(flight) {
     return segmentsHtml.join('');
 }
 
+// Change function name to match card terminology
 function routeInfoCard(rowElement, fullFlightData, routeIds, routeIndex) {
     // Toggle details row visibility
     let existingDetailCard = rowElement.nextSibling;
@@ -303,28 +304,30 @@ function routeInfoCard(rowElement, fullFlightData, routeIds, routeIndex) {
     // add selected class to the clicked card in the container
     rowElement.classList.add('route-info-card');
     rowElement.classList.add('route-info-card-header');
-    highlightSelectedRowForRouteIndex(routeIndex);
+    highlightSelectedCardForRouteIndex(routeIndex);
 }
 
-function highlightSelectedRowForRouteIndex(routeIndex) {
-    document.querySelectorAll(`.route-info-deck[data-route-index="${routeIndex}"] tbody tr.selected`).forEach(row => {
-        row.classList.remove('selected');
+// This function name and implementation should be updated
+function highlightSelectedCardForRouteIndex(routeIndex) {
+    // Update selectors to use cards instead of table rows
+    document.querySelectorAll(`.route-card[data-route-index="${routeIndex}"]`).forEach(card => {
+        card.classList.remove('selected');
     });
 
     const selectedRouteDetails = appState.selectedRoutes[routeIndex];
     if (selectedRouteDetails && selectedRouteDetails.id) {
-        let selectedRow = document.querySelector('.route-info-deck tbody tr');
-        if (!selectedRow) {
-            document.querySelectorAll(`.route-info-deck[data-route-index="${routeIndex}"] tbody tr`).forEach(row => {
-                const routeId = row.getAttribute('data-route-id');
+        let selectedCard = document.querySelector('.route-card');
+        if (!selectedCard) {
+            document.querySelectorAll(`.route-card[data-route-index="${routeIndex}"]`).forEach(card => {
+                const routeId = card.getAttribute('data-route-id');
                 if (routeId && routeId.split('|').includes(selectedRouteDetails.id)) {
-                    selectedRow = row;
+                    selectedCard = card;
                 }
             });
         }
 
-        if (selectedRow) {
-            selectedRow.classList.add('selected');
+        if (selectedCard) {
+            selectedCard.classList.add('selected');
         }
     }
 }
@@ -387,4 +390,4 @@ function replaceWaypointsForCurrentRoute(intermediaryIatas, routeIndex) {
     updateState('updateWaypoint', appState.waypoints);
 }
 
-export { routeInfoCard, highlightSelectedRowForRouteIndex };
+export { routeInfoCard, highlightSelectedCardForRouteIndex };

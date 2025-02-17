@@ -104,6 +104,7 @@ function updateLineVisibility(visibleRouteIds, maxPrice) {
 }
 
 function updateFilterHeaders() {
+    // Remove references to table headers
     const filterTypes = ['price', 'departure', 'arrival'];
     filterTypes.forEach(type => {
         const filterIcon = document.getElementById(`${type}Filter`);

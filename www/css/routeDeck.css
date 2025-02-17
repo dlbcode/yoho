@@ -34,21 +34,6 @@
   font-size: 14px;
   text-align: left;
   min-width: 140px;
-  vertical-align: middle;
-  padding-right: 10px;
-}
-
-.headerText, .filterButton {
-  background: #111;
-  height: 26px;
-  width: calc(100% - 24px);
-  border-top-left-radius: 5px;
-  border-bottom-left-radius: 5px;
-  display: inline-flex;
-  padding: 0 5px;
-  align-items: center;
-  font-size: 14px;
-  justify-content: space-between;
 }
 
 .filterButton {
