@@ -307,31 +307,20 @@ function routeInfoCard(cardElement, fullFlightData, routeIds, routeIndex) {
     // add selected class to the clicked card in the container
     cardElement.classList.add('route-info-card');
     cardElement.classList.add('route-info-card-header');
-    highlightSelectedCardForRouteIndex(routeIndex);
+    setSelectedRouteCard(routeIndex);
 }
 
 // This function name and implementation should be updated
-function highlightSelectedCardForRouteIndex(routeIndex) {
-    // Update selectors to use cards instead of table cards
-    document.querySelectorAll(`.route-card[data-route-index="${routeIndex}"]`).forEach(card => {
+function setSelectedRouteCard(routeIndex) {
+    // Remove 'selected' class from all route cards
+    document.querySelectorAll('.route-card').forEach(card => {
         card.classList.remove('selected');
     });
 
-    const selectedRouteDetails = appState.selectedRoutes[routeIndex];
-    if (selectedRouteDetails && selectedRouteDetails.id) {
-        let selectedCard = document.querySelector('.route-card');
-        if (!selectedCard) {
-            document.querySelectorAll(`.route-card[data-route-index="${routeIndex}"]`).forEach(card => {
-                const routeId = card.getAttribute('data-route-id');
-                if (routeId && routeId.split('|').includes(selectedRouteDetails.id)) {
-                    selectedCard = card;
-                }
-            });
-        }
-
-        if (selectedCard) {
-            selectedCard.classList.add('selected');
-        }
+    // Add 'selected' class to the route card with the given index
+    const selectedCard = document.querySelector(`.route-card[data-route-index="${routeIndex}"]`);
+    if (selectedCard) {
+        selectedCard.classList.add('selected');
     }
 }
 
@@ -393,4 +382,4 @@ function replaceWaypointsForCurrentRoute(intermediaryIatas, routeIndex) {
     updateState('updateWaypoint', appState.waypoints);
 }
 
-export { routeInfoCard, highlightSelectedCardForRouteIndex };
+export { routeInfoCard, setSelectedRouteCard };

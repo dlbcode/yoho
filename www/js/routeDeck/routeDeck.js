@@ -2,7 +2,7 @@ import { appState } from '../stateManager.js';
 import { sliderFilter } from './sliderFilter.js';
 import { sortDeckByField } from './sortDeck.js';
 import { pathDrawing, Line } from '../pathDrawing.js';
-import { routeInfoCard, highlightSelectedCardForRouteIndex } from './routeInfoCard.js';
+import { routeInfoCard, setSelectedRouteCard } from './routeInfoCard.js';
 import { applyFilters, toggleFilterResetIcon, updateFilterHeaders, initializeFilterState, updateFilterState, constructFilterTags, createRouteId } from './filterDeck.js';
 import { setupRouteContent, infoPane } from '../infoPane.js';
 import { infoPaneHeight } from '../utils/infoPaneHeightManager.js';
@@ -109,7 +109,7 @@ function buildRouteDeck(routeIndex) {
             infoPaneElement.classList.remove('loading');
             infoPaneHeight.setHeight('half');
             
-            highlightSelectedCardForRouteIndex(routeIndex);
+            setSelectedRouteCard(routeIndex);
             attachEventListeners(cardsContainer, flightsData, routeIndex);
             applyFilters(); // This will show/hide lines based on current filters
         })
