@@ -7,19 +7,25 @@ export function sortDeckByColumn(container, columnIndex, asc = true) {
         // Define a mapping between column index and data extraction logic
         const columnMap = {
             0: (card) => { //departure
-                const departureDetail = card.querySelector('.detail-value[data-departure]');
-                return departureDetail ? departureDetail.textContent.trim() : '';
+                const departureElement = card.querySelector('.card-details .detail-value[data-departure]');
+                return departureElement ? departureElement.textContent.trim() : '';
             },
             1: (card) => { //arrival
-                 const arrivalDetail = card.querySelector('.detail-value[data-arrival]');
-                return arrivalDetail ? arrivalDetail.textContent.trim() : '';
+                const arrivalElement = card.querySelector('.card-details .detail-value[data-arrival]');
+                return arrivalElement ? arrivalElement.textContent.trim() : '';
             },
             2: (card) => { //price
                 const priceElement = card.querySelector('.card-price');
                 return priceElement ? priceElement.textContent.replace('$', '').trim() : '';
             },
-            // Add more cases for other columns as needed (airlines, stops, etc.)
-            // Example for duration:
+            5: (card) => { //stops
+                const detailGroups = card.querySelectorAll('.card-details .detail-group');
+                const stopsGroup = Array.from(detailGroups).find(group => 
+                    group.querySelector('.detail-label').textContent.trim() === 'Stops'
+                );
+                const stopsElement = stopsGroup?.querySelector('.detail-value');
+                return stopsElement ? stopsElement.textContent.trim() : '0';
+            },
             7: (card) => { //duration
                 const durationElement = card.querySelector('.card-duration .detail-value');
                 return durationElement ? durationElement.textContent.trim() : '';
@@ -58,14 +64,13 @@ function convertData(data, columnIndex) {
         case 0:
         case 1:
             return new Date(data);
-        case 2: // Price (Numeric)
+        case 2: // Price
             return parseFloat(data.replace(/[^0-9.]/g, ''));
-        case 7: // Duration (hh mm)
+        case 5: // Stops
+            return parseInt(data, 10);
+        case 7: // Duration
             const [hours, minutes] = data.split('h ');
             return parseInt(hours) * 60 + parseInt(minutes.replace('m', ''));
-        case 3: // Airlines, Layovers, Route (Text)
-        case 6:
-        case 8:
         default:
             return data;
     }

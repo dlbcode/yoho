@@ -571,11 +571,11 @@ function createRouteCard(flight, endpoint, routeIndex, destination) {
         <div class="card-details">
             <div class="detail-group">
                 <div class="detail-label">Departure</div>
-                <div class="detail-value">${formatFlightDateTime(departureDate)}</div>
+                <div class="detail-value" data-departure="${formatFlightDateTime(departureDate)}">${formatFlightDateTime(departureDate)}</div>
             </div>
             <div class="detail-group">
                 <div class="detail-label">Arrival</div>
-                <div class="detail-value">${formatFlightDateTime(arrivalDate)}</div>
+                <div class="detail-value" data-arrival="${formatFlightDateTime(arrivalDate)}">${formatFlightDateTime(arrivalDate)}</div>
             </div>
             <div class="detail-group">
                 <div class="detail-label">Airlines</div>
