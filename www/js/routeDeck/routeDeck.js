@@ -1,9 +1,9 @@
 import { appState } from '../stateManager.js';
 import { sliderFilter } from './sliderFilter.js';
-import { sortDeckByField, createSortButton } from './sortDeck.js';
+import { createSortButton } from './sortDeck.js';
 import { pathDrawing, Line } from '../pathDrawing.js';
 import { routeInfoCard, setSelectedRouteCard } from './routeInfoCard.js';
-import { applyFilters, toggleFilterResetIcon, updateFilterHeaders, initializeFilterState, updateFilterState, constructFilterTags, createRouteId } from './filterDeck.js';
+import { applyFilters, initializeFilterState, createRouteId } from './filterDeck.js';
 import { setupRouteContent, infoPane } from '../infoPane.js';
 import { infoPaneHeight } from '../utils/infoPaneHeightManager.js';
 import { lineManager } from '../lineManager.js';
@@ -14,40 +14,30 @@ function buildRouteDeck(routeIndex) {
 
     initializeFilterState();
 
-    // Check if appState.routeDates[routeIndex] exists before accessing its properties
-    const dateRange = appState.routeDates[routeIndex] || {}; // Provide an empty object as a fallback
-    let origin, destination, currentRoute, departDate, returnDate, apiUrl, endpoint;
+    // Use optional chaining and nullish coalescing for conciseness
+    const dateRange = appState.routeDates[routeIndex] ?? {};
+    let origin = appState.waypoints[routeIndex * 2]?.iata_code;
+    let destination = appState.waypoints[(routeIndex * 2) + 1]?.iata_code || 'Any';
 
-    // Update this section to use the most current waypoint data
-    origin = appState.waypoints[routeIndex * 2]?.iata_code;
-    destination = appState.waypoints[(routeIndex * 2) + 1]?.iata_code || 'Any';
-
-    // Only fall back to routes if waypoints aren't available
+    // Simplify origin/destination logic
     if (!origin || !destination) {
-        if (currentRoute?.originAirport && currentRoute?.destinationAirport) {
-            origin = currentRoute.originAirport.iata_code;
-            destination = currentRoute.destinationAirport.iata_code;
-        }
+        const { originAirport, destinationAirport } = appState.currentRoute || {};
+        origin = originAirport?.iata_code || origin;
+        destination = destinationAirport?.iata_code || destination;
     }
 
     document.head.appendChild(Object.assign(document.createElement('link'), { rel: 'stylesheet', type: 'text/css', href: '../css/routeDeck.css' }));
 
-    // Update DOM element references to be more specific
     const infoPaneElement = document.getElementById('infoPane');
-
-    // Start the loading animation
     infoPaneElement.classList.add('loading');
 
     // **Helper function to format dates to DD/MM/YYYY**
     const formatDate = dateString => dateString || 'any';
 
-    // Check if dateRange and its properties are defined before formatting
-    departDate = dateRange.depart ? formatDate(dateRange.depart) : 'any';
-    returnDate = dateRange.return ? formatDate(dateRange.return) : '';
+    const departDate = dateRange.depart ? formatDate(dateRange.depart) : 'any';
+    const returnDate = dateRange.return ? formatDate(dateRange.return) : '';
 
-    const { url, endpoint: apiEndpoint } = buildApiUrl(origin, destination, departDate, returnDate);
-    apiUrl = url;
-    endpoint = apiEndpoint;
+    const { url: apiUrl, endpoint } = buildApiUrl(origin, destination, departDate, returnDate);
 
     console.log("API URL:", apiUrl); // Log the generated API URL
 
@@ -55,25 +45,12 @@ function buildRouteDeck(routeIndex) {
         .then(response => response.json())
         .then(data => {
             console.log("API Response Data:", data); // Log the raw API response data
-            let flightsData;
 
-            if (endpoint === 'range' || destination === 'Any') {
-                if (data && data.data && Array.isArray(data.data)) {
-                    flightsData = data.data;
-                } else {
-                    console.error("Unexpected data format from API (range or Any):", data);
-                    flightsData = []; // Set empty array for error case
-                }
-            } else { // Handle yhoneway and potentially yhreturn endpoints
-                if (Array.isArray(data)) { // Check if data is already an array
-                    flightsData = data;
-                } else if (data && data.data && Array.isArray(data.data)) {
-                    flightsData = data.data;
-                } else {
-                    console.error("Unexpected data format from API (yhoneway/yhreturn):", data);
-                    flightsData = []; // Set empty array for error case
-                }
-            }
+            // Simplify flightsData assignment
+            const flightsData = (endpoint === 'range' || destination === 'Any')
+                ? (data?.data || [])
+                : (Array.isArray(data) ? data : (data?.data || []));
+
             console.log("Flights Data:", flightsData); // Log processed flightsData
 
             const { contentWrapper } = setupRouteContent(routeIndex);
@@ -125,14 +102,11 @@ function buildRouteDeck(routeIndex) {
         const filterButtons = container.parentElement.querySelectorAll('.filter-button');
         
         filterButtons.forEach(button => {
-            const filterIcon = button.querySelector('.filterIcon');
-            const filterHeader = button.querySelector('.filter-header');
-            
-            const handleFilterClick = function(event) {
+            const handleFilterClick = (event) => {
                 event.stopPropagation();
-                const filterType = this.getAttribute('data-filter'); // Changed attribute name
+                const filterType = button.getAttribute('data-filter'); // Changed attribute name
                 if (!filterType) {
-                    console.error('Filter attribute is missing on the button:', this);
+                    console.error('Filter attribute is missing on the button:', button);
                     return;
                 }
                 
@@ -144,14 +118,8 @@ function buildRouteDeck(routeIndex) {
                 }
             };
 
-            // Attach click handlers to both the button and its children
+            // Attach click handlers to the button
             button.addEventListener('click', handleFilterClick);
-            if (filterIcon) {
-                filterIcon.addEventListener('click', handleFilterClick);
-            }
-            if (filterHeader) {
-                filterHeader.addEventListener('click', handleFilterClick);
-            }
         });
     }
 
