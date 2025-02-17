@@ -177,7 +177,7 @@ function toggleFilterResetIcon(filterType) {
 // Consolidate reset logic and improve conciseness
 document.addEventListener('click', function (e) {
     if (e.target.classList.contains('resetIcon')) {
-        const filterType = e.target.getAttribute('data-column');
+        const filterType = e.target.getAttribute('data-filter'); // Changed attribute name
         resetFilter(filterType);
     }
 });

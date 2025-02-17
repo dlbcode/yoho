@@ -130,7 +130,7 @@ function buildRouteDeck(routeIndex) {
             
             const handleFilterClick = function(event) {
                 event.stopPropagation();
-                const filterType = this.getAttribute('data-column');
+                const filterType = this.getAttribute('data-filter'); // Changed attribute name
                 if (!filterType) {
                     console.error('Filter attribute is missing on the button:', this);
                     return;
@@ -370,13 +370,13 @@ function createFilterControls() {
     filters.forEach(filterType => {
         const filterButton = document.createElement('button');
         filterButton.className = 'filter-button';
-        filterButton.setAttribute('data-column', filterType);
+        filterButton.setAttribute('data-filter', filterType); // Changed attribute name
         
         filterButton.innerHTML = `
-            <span class="filter-header" data-column="${filterType}">${filterType.charAt(0).toUpperCase() + filterType.slice(1)}</span>
-            <img class="filterIcon" id="${filterType}Filter" data-column="${filterType}" src="/assets/filter-icon.svg" alt="Filter">
+            <span class="filter-header" data-filter="${filterType}">${filterType.charAt(0).toUpperCase() + filterType.slice(1)}</span>
+            <img class="filterIcon" id="${filterType}Filter" data-filter="${filterType}" src="/assets/filter-icon.svg" alt="Filter">
             <span class="resetIcon hidden" id="reset${filterType.charAt(0).toUpperCase() + filterType.slice(1)}Filter" 
-                  data-column="${filterType}">✕</span>
+                  data-filter="${filterType}">✕</span>
         `;
         
         filterControls.appendChild(filterButton);
