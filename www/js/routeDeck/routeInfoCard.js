@@ -15,6 +15,84 @@ function formatLayover(flight, idx) {
     return '';
 }
 
+function generateSegmentDetails(flight) {
+    let segmentsHtml = ['<div class="route-details">'];
+
+    flight.route.forEach((segment, idx, arr) => {
+        const options = { hour: '2-digit', minute: '2-digit' };
+        const departureDate = segment.local_departure ? new Date(segment.local_departure) : new Date(segment.dTime * 1000);
+        const arrivalDate = segment.local_arrival ? new Date(segment.local_arrival) : new Date(segment.aTime * 1000);
+        const departureTime = departureDate.toLocaleTimeString([], options);
+        const arrivalTime = arrivalDate.toLocaleTimeString([], options);
+        const duration = ((arrivalDate - departureDate) / 3600000).toFixed(1) + ' hrs';
+        const airlineCode = segment.airline;
+        const airlineLogoUrl = `assets/airline_logos/70px/${airlineCode}.png`;
+
+        if (idx === 0) {
+            // Origin Column
+            segmentsHtml.push(`
+                <div class="departure" style="margin-right: 2px;" data-origin="${segment.flyFrom}">
+                    <div>${segment.flyFrom} (${segment.cityFrom})</div>
+                    <div style="color: #999;">Depart: <span style="color: #ccc;">${departureTime}</span></div>
+                </div>`);
+
+            // First Duration Column 
+            segmentsHtml.push(`
+                <div class="duration" data-origin="${segment.flyFrom}" data-destination="${segment.flyTo}">
+                    <div style="position: relative; margin-top: 12px; color: #ccc;">
+                        ${duration}
+                        <svg style="position: absolute; bottom: 12px; left: 0px; width: 100%; height: 30px; overflow: visible;">
+                            <path d="M2,35 Q45,-2 88,35" stroke="#666" fill="transparent" stroke-width="2" stroke-dasharray="1,4" stroke-dashoffset="6" stroke-linecap="round"></path>
+                        </svg>
+                    </div>
+                    <img src="${airlineLogoUrl}" alt="${airlineCode} Logo" style="width: 60px; height: 60px; object-fit: contain; object-position: center; border-radius: 5px;"/>
+                </div>`);
+        }
+
+        if (idx > 0) {
+            // Layover Column
+            const layoverDuration = formatLayover(flight, idx - 1);
+            const previousArrivalTime = flight.route[idx - 1].local_arrival ? new Date(flight.route[idx - 1].local_arrival).toLocaleTimeString() : new Date(flight.route[idx - 1].aTime * 1000).toLocaleTimeString();
+            const recheckBagsText = flight.route[idx - 1].bags_recheck_required ? '<div style="color: #FFBF00;">- Recheck bags</div>' : '';
+            
+            segmentsHtml.push(`
+                <div class="layover" data-layover="${flight.route[idx - 1].flyTo}">
+                    <div>${flight.route[idx - 1].flyTo} (${segment.cityFrom})</div>
+                    <div style="color: #999;">Arrive: <span style="color: #ccc;">${previousArrivalTime}</span></div>
+                    <div style="text-align: center; color: #999;">&darr;</div>
+                    <div style="color: #999;">Layover: <span style="color: #ccc;">${layoverDuration}</span></div>
+                    ${recheckBagsText}
+                    <div style="text-align: center; color: #999;">&darr;</div>
+                    <div style="color: #999;">Depart: <span style="color: #ccc;">${departureTime}</span></div>
+                </div>`);
+
+            // Another Duration Column
+            segmentsHtml.push(`
+                <div class="duration" data-origin="${flight.route[idx].flyFrom}" data-destination="${flight.route[idx].flyTo}">
+                    <div style="position: relative; margin-top: 12px; color: #ccc;">
+                        ${duration}
+                        <svg style="position: absolute; bottom: 12px; left: 0px; width: 100%; height: 30px; overflow: visible;">
+                            <path d="M2,35 Q45,-2 88,35" stroke="#666" fill="transparent" stroke-width="2" stroke-dasharray="1,4" stroke-dashoffset="6" stroke-linecap="round"></path>
+                        </svg>
+                    </div>
+                    <img src="${airlineLogoUrl}" alt="${airlineCode} Logo" style="width: 60px; height: 60px; object-fit: contain; object-position: center; border-radius: 5px;"/>
+                </div>`);
+        }
+
+        if (idx === arr.length - 1) {
+            // Destination Column
+            segmentsHtml.push(`
+                <div class="destination" data-destination="${segment.flyTo}">
+                    <div>${segment.flyTo} (${segment.cityTo})</div>
+                    <div style="color: #999;">Arrive: <span style="color: #ccc;">${arrivalTime}</span></div>
+                </div>`);
+        }
+    });
+
+    segmentsHtml.push('</div>'); // Close route-details
+    return segmentsHtml.join('');
+}
+
 function routeInfoCard(rowElement, fullFlightData, routeIds, routeIndex) {
     // Toggle details row visibility
     let existingDetailCard = rowElement.nextSibling;
@@ -52,7 +130,7 @@ function routeInfoCard(rowElement, fullFlightData, routeIds, routeIndex) {
                         <div class="bags-price" style="display: flex; flex-direction: column; align-items: center; margin-right: 5px;">
                             <svg fill="#aaa" height="20px" width="20px" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 248.35 248.35" xml:space="preserve">
                                 <g>
-                                    <path d="M186.057,66.136h-15.314V19.839C170.743,8.901,161.844,0,150.904,0H97.448c-10.938,0-19.84,8.901-19.84,19.839v46.296H62.295c-9.567,0-17.324,7.757-17.324,17.324V214.26c0,9.571,7.759,17.326,17.324,17.326h2.323v12.576c0,2.315,1.876,4.188,4.186,4.188h19.811c2.315,0,4.188-1.876,4.188-4.188v-12.576h62.741v12.576c0,2.315,1.876,4.188,4.188,4.188h19.811c2.315,0,4.188-1.876,4.188-4.188v-12.576h2.323c9.565,0,17.324-7.755,17.324-17.326V83.461C203.381,73.896,195.622,66.136,186.057,66.136z M93.262,231.586h-15.69c-2.311,0-4.186-1.876-4.186-4.188v-12.576h19.876c2.311,0,4.186,1.876,4.186,4.188v12.576C97.448,229.71,95.573,231.586,93.262,231.586z M155.09,231.586h-15.69c-2.311,0-4.188-1.876-4.188-4.188v-12.576h19.878c2.311,0,4.188,1.876,4.188,4.188v12.576C159.276,229.71,157.4,231.586,155.09,231.586z M186.057,214.26c0,0.813-0.661,1.474-1.474,1.474H63.769c-0.813,0-1.474-0.661-1.474-1.474V83.461c0-0.813,0.661-1.474,1.474-1.474h120.814c0.813,0,1.474,0.661,1.474,1.474V214.26z"/>
+                                    <path d="M186.057,66.136h-15.314V19.839C170.743,8.901,161.844,0,150.904,0H97.448c-10.938,0-19.84,8.901-19.84,19.839v46.296H62.295c-9.567,0-17.324,7.757-17.324,17.324V214.26c0,9.571,7.759,17.326,17.324,17.326h2.323v12.576c0,2.315,1.876,4.188,4.186,4.188h19.811c2.315,0,4.188-1.876,4.188-4.188v-12.576h62.741v12.576c0,2.315,1.878,4.188,4.188,4.188h19.809c2.317,0,4.188-1.876,4.188-4.188v-12.576h2.326c9.567,0,17.324-7.757,17.324-17.326V83.46C203.381,73.891,195.624,66.136,186.057,66.136z M157.514,66.135H90.832V19.839c0-3.646,2.967-6.613,6.613-6.613h53.456c3.646,0,6.613,2.967,6.613,6.613V66.135z"/>
                                 </g>
                             </svg>
                             <div style="padding: 2px 2px 4px 2px;font-size: 16px;color: #bbb;">${Math.ceil(flight.bags_price[1] * appState.eurToUsd)}</div>
@@ -63,7 +141,7 @@ function routeInfoCard(rowElement, fullFlightData, routeIds, routeIndex) {
             <div class='segments-wrapper' style='display: flex; flex-direction: column; align-items: flex-start;'>
                 <div class='segments' style='display: flex; flex-direction: row; align-items: flex-start;'>
                     ${generateSegmentDetails(flight)}
-                </div>
+                </div>                
             </div>
         </div>
     `;
@@ -104,21 +182,18 @@ function routeInfoCard(rowElement, fullFlightData, routeIds, routeIndex) {
     }
 
     async function fetchAndDisplayAirportData(origin, destination) {
-        if (!origin || !destination) return;
-        const apiKey = 'YOUR_AIRPORT_API_KEY'; // Replace with your actual API key
-        const apiUrl = `https://example.com/api/airports?origin=${origin}&destination=${destination}&apiKey=${apiKey}`;
-
-        try {
-            const response = await fetch(apiUrl);
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            const data = await response.json();
-            console.log('Airport Data:', data);
-            // Display airport data in a popup or a designated area
-        } catch (error) {
-            console.error('Error fetching airport data:', error);
+        // Check memory cache first
+        const originData = flightMap.airportDataCache[origin];
+        const destData = flightMap.airportDataCache[destination];
+        
+        if (originData && destData) {
+            map.fitBounds([
+                [originData.latitude, originData.longitude],
+                [destData.latitude, destData.longitude]
+            ]);
+            return;
         }
+        // Fallback to API fetch if not cached
     }
 
     const departureColumn = detailCard.querySelector('.departure');
@@ -147,11 +222,11 @@ function routeInfoCard(rowElement, fullFlightData, routeIds, routeIndex) {
     const selectRouteButton = detailCard.querySelector('#selectRoute');
     selectRouteButton.addEventListener('click', () => {
         console.log('Selecting route:', fullFlightData);
-
+        
         // Use same group ID for all segments
         appState.highestGroupId += 1;
         const newRouteGroupId = appState.highestGroupId;
-
+        
         // Remove existing routes with same group if any
         const existingRouteDetails = appState.selectedRoutes[routeIndex];
         if (existingRouteDetails) {
@@ -164,48 +239,65 @@ function routeInfoCard(rowElement, fullFlightData, routeIds, routeIndex) {
 
         lineManager.clearLines('route'); // Use proper method from lineManager
 
-        // Draw lines for the selected route
-        fullFlightData.route.forEach((segment, idx) => {
-            if (idx < fullFlightData.route.length - 1) {
-                const nextSegment = fullFlightData.route[idx + 1];
-                const routeId = `${segment.flyFrom}-${segment.flyTo}`;
-                const routeData = {
-                    price: flight.price,
-                    origin: segment.flyFrom,
-                    destination: segment.flyTo,
-                    departureTime: segment.local_departure,
-                    arrivalTime: segment.local_arrival,
-                    airline: flight.airlines[0],
-                    group: newRouteGroupId,
-                    routeNumber: routeIndex,
-                    displayData: {
-                        price: flight.price,
-                        airline: flight.airlines[0],
-                        route: `${segment.flyFrom} > ${segment.flyTo}`,
-                        deep_link: flight.deep_link
-                    }
-                };
-                pathDrawing.drawLine(routeId, 'route', {
-                    price: flight.price,
-                    iata: segment.flyFrom,
-                    routeData
-                });
-            }
+        // Get all IATA codes from the route for waypoint updating
+        const intermediaryIatas = fullFlightData.route.map(segment => segment.flyFrom);
+        intermediaryIatas.push(fullFlightData.route[fullFlightData.route.length - 1].flyTo);
+
+        // Process each segment with the same group ID
+        fullFlightData.route.forEach((segmentData, idx) => {
+            const selectedRouteIndex = routeIndex + idx;
+            
+            // Extract departure and arrival times
+            const departureDate = segmentData.local_departure || 
+                                new Date(segmentData.dTime * 1000).toISOString();
+            const arrivalDate = segmentData.local_arrival || 
+                               new Date(segmentData.aTime * 1000).toISOString();
+            
+            // Update selected routes
+            appState.selectedRoutes[selectedRouteIndex] = {
+                displayData: {
+                    departure: departureDate,
+                    arrival: arrivalDate,
+                    price: fullFlightData.price,
+                    airline: segmentData.airline,
+                    route: `${segmentData.flyFrom} > ${segmentData.flyTo}`,
+                    deep_link: fullFlightData.deep_link
+                },
+                fullData: segmentData,
+                group: newRouteGroupId,
+                routeNumber: routeIndex,
+                routeDates: {
+                    depart: departureDate,
+                    return: null
+                }
+            };
         });
 
-        updateState('addSelectedRoute', {
+        // Update waypoints for the entire route
+        replaceWaypointsForCurrentRoute(intermediaryIatas, routeIndex);
+
+        // Update route dates in appState
+        if (!appState.routeDates[routeIndex]) {
+            appState.routeDates[routeIndex] = {};
+        }
+        appState.routeDates[routeIndex].depart = fullFlightData.route[0].local_departure;
+        
+        // Trigger necessary state updates
+        updateState('updateRouteDate', {
             routeNumber: routeIndex,
-            id: routeIds[0],
-            displayData: {
-                price: flight.price,
-                airline: flight.airlines[0],
-                route: `${fullFlightData.route[0].flyFrom} > ${fullFlightData.route[fullFlightData.route.length - 1].flyTo}`,
-                deep_link: flight.deep_link
-            },
-            group: newRouteGroupId
+            depart: fullFlightData.route[0].local_departure,
+            return: null
         });
-
-        pathDrawing.drawLines(); // Keep this to redraw other paths
+        
+        // Add 'status:selected' tag to the route lines
+        const routeSegments = fullFlightData.route;
+        for (let i = 0; i < routeSegments.length - 1; i++) {
+            const routeId = `${routeSegments[i].flyFrom}-${routeSegments[i+1].flyTo}`;
+            const lines = pathDrawing.routePathCache[routeId] || [];
+            lines.forEach(line => {
+                line.addTag('status:selected');
+            });
+        }
     });
 
     // add selected class to the clicked card in the container

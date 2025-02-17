@@ -123,7 +123,12 @@ function buildRouteDeck(routeIndex) {
         });
 
     function attachEventListeners(container, data, routeIndex) {
-        // Remove the deck header related code
+        // Remove this section that's re-attaching card event listeners
+        // document.querySelectorAll('.route-card').forEach((card, index) => {
+        //     attachRowEventHandlers(card, data[index], index, data, routeIndex);
+        // });
+
+        // Keep only the filter button event listeners
         const filterButtons = container.parentElement.querySelectorAll('.filter-button');
         
         filterButtons.forEach(button => {
@@ -154,11 +159,6 @@ function buildRouteDeck(routeIndex) {
             if (filteredHeader) {
                 filteredHeader.addEventListener('click', handleFilterClick);
             }
-        });
-
-        // Add event handlers to cards
-        document.querySelectorAll('.route-card').forEach((card, index) => {
-            attachRowEventHandlers(card, data[index], index, data, routeIndex);
         });
 
         updateFilterHeaders();
