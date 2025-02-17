@@ -3,6 +3,29 @@ import { Line } from '../pathDrawing.js';
 import { map } from '../map.js';
 import { lineManager } from '../lineManager.js';
 
+const DEFAULT_FILTER_STATE = {
+    departure: { start: 0, end: 24 },
+    arrival: { start: 0, end: 24 },
+    price: { value: null }
+};
+
+function initializeFilterState() {
+    appState.filterState = { ...DEFAULT_FILTER_STATE };
+}
+
+function updateFilterState(type, values) {
+    if (!appState.filterState) {
+        initializeFilterState();
+    }
+    
+    appState.filterState[type] = { ...values };
+    appState.filterStates[appState.currentRouteIndex] = { ...appState.filterState };
+    
+    applyFilters();
+    updateFilterHeaders();
+    toggleFilterResetIcon(type);
+}
+
 function addTimeFilterTags(type, filterTags) {
     const time = appState.filterState[type];
     if (!time) return;
@@ -32,6 +55,7 @@ function constructFilterTags() {
 function checkTimeRange(tagPrefix, timeValue, filterTags) {
     const relevantTags = filterTags.filter(tag => tag.startsWith(tagPrefix));
     if (!relevantTags.length) return true;
+    
     return relevantTags.some(tag => {
         const [start, end] = tag.replace(tagPrefix, '').split('-').map(Number);
         return timeValue >= start && timeValue <= end;
@@ -138,17 +162,13 @@ function toggleFilterResetIcon(column) {
     if (!filterIcon || !resetIcon || !filterButtonSpan) return;
 
     const filterValue = appState.filterState[column];
-    const isNonDefault = filterValue &&
-        ((column === 'price' && filterValue.value !== undefined && filterValue.value !== null) ||
-         ((column === 'departure' || 'arrival') && (filterValue.start !== 0 || filterValue.end !== 24)));
+    const isNonDefault = filterValue && 
+        JSON.stringify(filterValue) !== JSON.stringify(DEFAULT_FILTER_STATE[column]);
 
-    resetIcon.classList.toggle('hidden', !isNonDefault); // Use class toggle for visibility
-    filterIcon.classList.toggle('hidden', isNonDefault); // Use class toggle for visibility
-
+    resetIcon.classList.toggle('hidden', !isNonDefault);
+    filterIcon.classList.toggle('hidden', isNonDefault);
     filterButtonSpan.classList.toggle('filterButton', isNonDefault);
     filterButtonSpan.classList.toggle('filter-header', !isNonDefault);
-
-    appState.filterStates[appState.currentRouteIndex] = { ...appState.filterState }; // Save filter state
 }
 
 // Consolidate reset logic and improve conciseness
@@ -159,27 +179,15 @@ document.addEventListener('click', function (e) {
     }
 });
 
-function resetFilter(column) {
-    const filterIcon = document.querySelector(`#${column}Filter`);
-    const filterButtonSpan = filterIcon?.closest('.filterButton, .filter-header');
-    const resetIcon = document.querySelector(`#reset${column.charAt(0).toUpperCase() + column.slice(1)}Filter`);
-
-    if (column === 'departure' || column === 'arrival') {
-        appState.filterState[column] = { start: 0, end: 24 };
-    } else if (column === 'price') {
-        appState.filterState[column] = { value: null };
-    }
-
-    if (filterIcon) filterIcon.classList.remove('hidden'); // Use class toggle for visibility
-    if (resetIcon) resetIcon.classList.add('hidden'); // Use class toggle for visibility
-
-    if (filterButtonSpan) {
-        filterButtonSpan.classList.remove('filterButton');
-        filterButtonSpan.classList.add('filter-header');
-    }
-
-    applyFilters();
-    updateFilterHeaders();
+function resetFilter(type) {
+    updateFilterState(type, DEFAULT_FILTER_STATE[type]);
 }
 
-export { applyFilters, toggleFilterResetIcon, updateFilterHeaders, constructFilterTags };
+export { 
+    applyFilters, 
+    toggleFilterResetIcon, 
+    updateFilterHeaders, 
+    constructFilterTags,
+    initializeFilterState,
+    updateFilterState 
+};

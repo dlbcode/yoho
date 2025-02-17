@@ -3,7 +3,7 @@ import { sliderFilter } from './sliderFilter.js';
 import { sortDeckByField } from './sortDeck.js';
 import { pathDrawing, Line } from '../pathDrawing.js';
 import { routeInfoCard, highlightSelectedCardForRouteIndex } from './routeInfoCard.js';
-import { applyFilters, toggleFilterResetIcon, updateFilterHeaders } from './filterDeck.js';
+import { applyFilters, toggleFilterResetIcon, updateFilterHeaders, initializeFilterState, updateFilterState, constructFilterTags } from './filterDeck.js';
 import { setupRouteContent, infoPane } from '../infoPane.js';
 import { infoPaneHeight } from '../utils/infoPaneHeightManager.js';
 import { lineManager } from '../lineManager.js';
@@ -11,10 +11,7 @@ import { lineManager } from '../lineManager.js';
 function buildRouteDeck(routeIndex) {
     lineManager.clearLinesByTags(['type:deck']); // Clear any existing route deck lines
 
-    appState.filterState = {
-        departure: { start: 0, end: 24 },
-        arrival: { start: 0, end: 24 }
-    };
+    initializeFilterState();
 
     // Check if appState.routeDates[routeIndex] exists before accessing its properties
     const dateRange = appState.routeDates[routeIndex] || {}; // Provide an empty object as a fallback

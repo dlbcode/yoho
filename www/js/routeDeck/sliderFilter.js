@@ -1,5 +1,5 @@
 import { appState } from '../stateManager.js';
-import { applyFilters, toggleFilterResetIcon, updateFilterHeaders } from './filterDeck.js';
+import { applyFilters, toggleFilterResetIcon, updateFilterHeaders, updateFilterState } from './filterDeck.js';
 
 appState.filterState = {
     departure: { start: 0, end: 24 },
@@ -183,27 +183,18 @@ const sliderFilter = {
     },
 
     updateFilterStateAndLabel: function (column, values, label) {
+        let newValues;
         if (column === 'price') {
-            appState.filterState[column] = { value: parseFloat(values[0].replace('$', '')) };
-            label.textContent = `up to: $${appState.filterState[column].value}`;
+            newValues = { value: parseFloat(values[0].replace('$', '')) };
+            label.textContent = `up to: $${newValues.value}`;
         } else {
             const [start, end] = values.map(parseFloat);
-            appState.filterState[column] = { start, end: end || start };
-            label.textContent = (start === 0 && end === 24) ? 'Anytime' : `${this.formatTime(start)} - ${this.formatTime(end)}`;
+            newValues = { start, end: end || start };
+            label.textContent = (start === 0 && end === 24) ? 'Anytime' : 
+                `${this.formatTime(start)} - ${this.formatTime(end)}`;
         }
-        appState.filterStates[appState.currentRouteIndex] = { ...appState.filterState }; // Save filter state
-
-        // Save filter thresholds
-        const slider = document.getElementById(`${column}Slider`);
-        if (slider) {
-            const { min, max } = slider.noUiSlider.options.range;
-            appState.filterThresholds[appState.currentRouteIndex] = {
-                ...appState.filterThresholds[appState.currentRouteIndex],
-                [column]: { min, max }
-            };
-        }
-
-        applyFilters();
+        
+        updateFilterState(column, newValues);
     }
 };
 
