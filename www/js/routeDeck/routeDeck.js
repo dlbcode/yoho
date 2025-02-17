@@ -3,7 +3,7 @@ import { sliderFilter } from './sliderFilter.js';
 import { sortDeckByField } from './sortDeck.js';
 import { pathDrawing, Line } from '../pathDrawing.js';
 import { routeInfoCard, highlightSelectedCardForRouteIndex } from './routeInfoCard.js';
-import { applyFilters, toggleFilterResetIcon, updateFilterHeaders, initializeFilterState, updateFilterState, constructFilterTags } from './filterDeck.js';
+import { applyFilters, toggleFilterResetIcon, updateFilterHeaders, initializeFilterState, updateFilterState, constructFilterTags, createRouteId } from './filterDeck.js';
 import { setupRouteContent, infoPane } from '../infoPane.js';
 import { infoPaneHeight } from '../utils/infoPaneHeightManager.js';
 import { lineManager } from '../lineManager.js';
@@ -269,15 +269,14 @@ function drawFlightLines(flight, routeIndex, isTemporary = false) {
     const drawnLines = [];
 
     flight.route.forEach((segment, idx) => {
-        const nextSegment = idx < flight.route.length - 1 
-            ? flight.route[idx + 1]
-            : {
-                ...segment,
-                flyFrom: segment.flyTo,
-                local_departure: segment.local_arrival
-            };
+        const nextSegment = flight.route[idx + 1] || {
+            ...segment,
+            flyFrom: segment.flyTo,
+            local_departure: segment.local_arrival
+        };
 
-        const routeId = `${segment.flyFrom}-${segment.flyTo}`;
+        const routeId = createRouteId([segment.flyFrom, segment.flyTo]);
+
         const routeData = createRouteData(flight, segment, nextSegment, cardId);
 
         const line = pathDrawing.drawLine(routeId, 'route', {
@@ -465,11 +464,8 @@ function createRouteCard(flight, endpoint, routeIndex, destination) {
     const card = document.createElement('div');
     card.className = 'route-card';
     
-    // Create route ID using all segments
-    const routeId = flight.route.map(segment => segment.flyFrom)
-        .concat(flight.route[flight.route.length - 1].flyTo)
-        .join('-');
-        
+    // Use standardized route ID creation
+    const routeId = createRouteId(flight.route);
     card.setAttribute('data-route-id', routeId);
     
     const departureDate = endpoint === 'range' || destination === 'Any' 

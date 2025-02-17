@@ -3,7 +3,7 @@ import { pathDrawing } from '../pathDrawing.js';
 import { flightMap } from '../flightMap.js';
 import { map } from '../map.js';
 import { lineManager } from '../lineManager.js';
-import { constructFilterTags } from './filterDeck.js';
+import { constructFilterTags, createRouteId } from './filterDeck.js';
 
 function formatLayover(flight, idx) {
     if (idx < flight.route.length - 1) {
@@ -95,6 +95,9 @@ function generateSegmentDetails(flight) {
 
 // Change function name to match card terminology
 function routeInfoCard(cardElement, fullFlightData, routeIds, routeIndex) {
+    // Update route ID handling
+    const routeId = createRouteId(fullFlightData.route);
+    
     // Toggle details card visibility
     let existingDetailCard = cardElement.nextSibling;
     if (existingDetailCard && existingDetailCard.classList.contains('route-info-card')) {

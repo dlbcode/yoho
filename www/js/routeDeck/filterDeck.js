@@ -81,9 +81,9 @@ function applyFilters() {
             card.style.display = '';
             const routeId = card.getAttribute('data-route-id');
             if (routeId) {
-                const segments = routeId.split('-');
+                const segments = createRouteId(routeId).split('-');
                 for (let i = 0; i < segments.length - 1; i++) {
-                    visibleRouteIds.add(`${segments[i]}-${segments[i + 1]}`);
+                    visibleRouteIds.add(createRouteId([segments[i], segments[i + 1]]));
                 }
             }
         } else {
@@ -181,6 +181,22 @@ document.addEventListener('click', function (e) {
 
 function resetFilter(type) {
     updateFilterState(type, DEFAULT_FILTER_STATE[type]);
+}
+
+export function createRouteId(segments, separator = '-') {
+    if (Array.isArray(segments)) {
+        if (segments[0]?.flyFrom) {
+            // Handle route segment objects
+            return segments
+                .map(segment => segment.flyFrom)
+                .concat(segments[segments.length - 1].flyTo)
+                .join(separator);
+        }
+        // Handle array of IATA codes
+        return segments.join(separator);
+    }
+    // Handle string input
+    return segments.split(/[-|]/).join(separator);
 }
 
 export { 
