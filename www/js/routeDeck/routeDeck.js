@@ -302,15 +302,16 @@ function drawFlightLines(flight, routeIndex, isTemporary = false) {
     return drawnLines;
 }
 
-function attachRowEventHandlers(row, flight, index, data, routeIndex) {
-    row.addEventListener('click', () => {
-        const routeIdString = row.getAttribute('data-route-id');
+// Standardize terminology and improve conciseness in attachRowEventHandlers
+function attachRowEventHandlers(card, flight, index, data, routeIndex) {
+    card.addEventListener('click', () => {
+        const routeIdString = card.getAttribute('data-route-id');
         const routeIds = routeIdString.split('|');
         const fullFlightData = data[index];
-        routeInfoCard(row, fullFlightData, routeIds, routeIndex);
+        routeInfoCard(card, fullFlightData, routeIds, routeIndex); // Use card instead of row
     });
 
-    row.addEventListener('mouseover', () => {
+    card.addEventListener('mouseover', () => {
         if (!flight?.route) return;
         
         const routePath = getRoutePath(flight);
@@ -336,7 +337,7 @@ function attachRowEventHandlers(row, flight, index, data, routeIndex) {
         }
     });
 
-    row.addEventListener('mouseout', () => {
+    card.addEventListener('mouseout', () => {
         handleRouteLineVisibility(flight, routeIndex, false);
     });
 }

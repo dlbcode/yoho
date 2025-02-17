@@ -132,56 +132,54 @@ function formatTime(decimalTime) {
 
 function toggleFilterResetIcon(column) {
     const filterIcon = document.getElementById(`${column}Filter`);
-    if (!filterIcon) return;
     const resetIcon = document.getElementById(`reset${column.charAt(0).toUpperCase() + column.slice(1)}Filter`);
-    if (!resetIcon) return;
+    const filterButtonSpan = filterIcon?.closest('.headerText, .filterButton');
 
-    let filterButtonSpan = filterIcon.closest('.headerText') || filterIcon.closest('.filterButton');
-    if (!filterButtonSpan) return;
+    if (!filterIcon || !resetIcon || !filterButtonSpan) return;
 
     const filterValue = appState.filterState[column];
     const isNonDefault = filterValue &&
-        ((column === 'price' && filterValue.value !== undefined) ||
-         ((column === 'departure' || column === 'arrival') && (filterValue.start !== 0 || filterValue.end !== 24)));
+        ((column === 'price' && filterValue.value !== undefined && filterValue.value !== null) ||
+         ((column === 'departure' || 'arrival') && (filterValue.start !== 0 || filterValue.end !== 24)));
 
-    if (isNonDefault) {
-        filterIcon.style.display = 'none';
-        resetIcon.style.display = 'inline';
-        filterButtonSpan.classList.add('filterButton');
-        filterButtonSpan.classList.remove('headerText');
-    } else {
-        filterIcon.style.display = 'inline';
-        resetIcon.style.display = 'none';
-        filterButtonSpan.classList.remove('filterButton');
-        filterButtonSpan.classList.add('headerText');
-    }
+    filterIcon.style.display = isNonDefault ? 'none' : 'inline';
+    resetIcon.style.display = isNonDefault ? 'inline' : 'none';
+
+    filterButtonSpan.classList.toggle('filterButton', isNonDefault);
+    filterButtonSpan.classList.toggle('headerText', !isNonDefault);
 
     appState.filterStates[appState.currentRouteIndex] = { ...appState.filterState }; // Save filter state
 }
 
+// Consolidate reset logic and improve conciseness
 document.addEventListener('click', function (e) {
     if (e.target.classList.contains('resetIcon')) {
         const column = e.target.getAttribute('data-column');
-        const filterIcon = document.querySelector(`#${column}Filter`);
-        const filterButtonSpan = filterIcon?.closest('.filterButton');
-        const resetIcon = e.target;
-
-        if (column === 'departure' || column === 'arrival') {
-            appState.filterState[column] = { start: 0, end: 24 };
-        } else if (column === 'price') {
-            appState.filterState[column] = { value: null };
-        }
-
-        if (filterIcon) filterIcon.style.display = 'inline';
-        resetIcon.style.display = 'none';
-        if (filterButtonSpan) {
-            filterButtonSpan.classList.remove('filterButton');
-            filterButtonSpan.classList.add('headerText');
-        }
-
-        applyFilters();
-        updateFilterHeaders();
+        resetFilter(column);
     }
 });
+
+function resetFilter(column) {
+    const filterIcon = document.querySelector(`#${column}Filter`);
+    const filterButtonSpan = filterIcon?.closest('.filterButton, .headerText');
+    const resetIcon = document.querySelector(`#reset${column.charAt(0).toUpperCase() + column.slice(1)}Filter`);
+
+    if (column === 'departure' || column === 'arrival') {
+        appState.filterState[column] = { start: 0, end: 24 };
+    } else if (column === 'price') {
+        appState.filterState[column] = { value: null };
+    }
+
+    if (filterIcon) filterIcon.style.display = 'inline';
+    if (resetIcon) resetIcon.style.display = 'none';
+
+    if (filterButtonSpan) {
+        filterButtonSpan.classList.remove('filterButton');
+        filterButtonSpan.classList.add('headerText');
+    }
+
+    applyFilters();
+    updateFilterHeaders();
+}
 
 export { applyFilters, toggleFilterResetIcon, updateFilterHeaders, constructFilterTags };
