@@ -13,31 +13,31 @@ function initializeFilterState() {
     appState.filterState = { ...DEFAULT_FILTER_STATE };
 }
 
-function updateFilterState(type, values) {
+function updateFilterState(filterType, values) {
     if (!appState.filterState) {
         initializeFilterState();
     }
     
-    appState.filterState[type] = { ...values };
+    appState.filterState[filterType] = { ...values };
     appState.filterStates[appState.currentRouteIndex] = { ...appState.filterState };
     
     applyFilters();
     updateFilterHeaders();
-    toggleFilterResetIcon(type);
+    toggleFilterResetIcon(filterType);
 }
 
-function resetFilter(type) {
-    updateFilterState(type, DEFAULT_FILTER_STATE[type]);
+function resetFilter(filterType) {
+    updateFilterState(filterType, DEFAULT_FILTER_STATE[filterType]);
 }
 
-function addTimeFilterTags(type, filterTags) {
-    const time = appState.filterState[type];
+function addTimeFilterTags(filterType, filterTags) {
+    const time = appState.filterState[filterType];
     if (!time) return;
     const { start, end } = time;
-    if (start < 6 && end > 0) filterTags.push(`${type}-range:00-06`);
-    if (start < 12 && end > 6) filterTags.push(`${type}-range:06-12`);
-    if (start < 18 && end > 12) filterTags.push(`${type}-range:12-18`);
-    if (end > 18) filterTags.push(`${type}-range:18-24`);
+    if (start < 6 && end > 0) filterTags.push(`${filterType}-range:00-06`);
+    if (start < 12 && end > 6) filterTags.push(`${filterType}-range:06-12`);
+    if (start < 18 && end > 12) filterTags.push(`${filterType}-range:12-18`);
+    if (end > 18) filterTags.push(`${filterType}-range:18-24`);
 }
 
 function constructFilterTags() {
@@ -132,17 +132,16 @@ function updateLineVisibility(visibleRouteIds, maxPrice) {
 }
 
 function updateFilterHeaders() {
-    // Remove references to table headers
     const filterTypes = ['price', 'departure', 'arrival'];
-    filterTypes.forEach(type => {
-        const filterIcon = document.getElementById(`${type}Filter`);
+    filterTypes.forEach(filterType => {
+        const filterIcon = document.getElementById(`${filterType}Filter`);
         if (!filterIcon) return;
-        const filterValue = appState.filterState[type];
-        const filterTextElement = document.getElementById(`${type}Text`);
+        const filterValue = appState.filterState[filterType];
+        const filterTextElement = document.getElementById(`${filterType}Text`);
         if (!filterTextElement) return;
         if (!filterValue) {
-            filterTextElement.textContent = `${type.charAt(0).toUpperCase()}${type.slice(1)}`;
-        } else if (type === 'price') {
+            filterTextElement.textContent = `${filterType.charAt(0).toUpperCase()}${filterType.slice(1)}`;
+        } else if (filterType === 'price') {
             filterTextElement.textContent = filterValue.value ? `$${filterValue.value}` : 'Price';
         } else {
             filterTextElement.textContent = `${formatTime(filterValue.start)} - ${formatTime(filterValue.end)}`;
@@ -158,16 +157,16 @@ function formatTime(decimalTime) {
     return `${displayHours}:${minutes.toString().padStart(2, '0')} ${period}`;
 }
 
-function toggleFilterResetIcon(column) {
-    const filterIcon = document.getElementById(`${column}Filter`);
-    const resetIcon = document.getElementById(`reset${column.charAt(0).toUpperCase() + column.slice(1)}Filter`);
+function toggleFilterResetIcon(filterType) {
+    const filterIcon = document.getElementById(`${filterType}Filter`);
+    const resetIcon = document.getElementById(`reset${filterType.charAt(0).toUpperCase() + filterType.slice(1)}Filter`);
     const filterButtonSpan = filterIcon?.closest('.filter-header, .filterButton');
 
     if (!filterIcon || !resetIcon || !filterButtonSpan) return;
 
-    const filterValue = appState.filterState[column];
+    const filterValue = appState.filterState[filterType];
     const isNonDefault = filterValue && 
-        JSON.stringify(filterValue) !== JSON.stringify(DEFAULT_FILTER_STATE[column]);
+        JSON.stringify(filterValue) !== JSON.stringify(DEFAULT_FILTER_STATE[filterType]);
 
     resetIcon.classList.toggle('hidden', !isNonDefault);
     filterIcon.classList.toggle('hidden', isNonDefault);
@@ -178,8 +177,8 @@ function toggleFilterResetIcon(column) {
 // Consolidate reset logic and improve conciseness
 document.addEventListener('click', function (e) {
     if (e.target.classList.contains('resetIcon')) {
-        const column = e.target.getAttribute('data-column');
-        resetFilter(column);
+        const filterType = e.target.getAttribute('data-column');
+        resetFilter(filterType);
     }
 });
 

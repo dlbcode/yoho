@@ -74,3 +74,70 @@ function convertData(data, fieldName) {
             return data;
     }
 }
+
+export function createSortButton() {
+    const sortButton = document.createElement('button');
+    sortButton.className = 'sort-button';
+    sortButton.innerHTML = `
+        <span>Sort by: <span id="currentSort">Price</span></span>
+        <div class="sort-dropdown">
+            <div class="sort-option selected" data-sort="price">
+                Price
+                <span class="sort-icon">↓</span>
+            </div>
+            <div class="sort-option" data-sort="departure">
+                Departure Time
+                <span class="sort-icon">↓</span>
+            </div>
+            <div class="sort-option" data-sort="arrival">
+                Arrival Time
+                <span class="sort-icon">↓</span>
+            </div>
+            <div class="sort-option" data-sort="duration">
+                Duration
+                <span class="sort-icon">↓</span>
+            </div>
+            <div class="sort-option" data-sort="stops">
+                Stops
+                <span class="sort-icon">↓</span>
+            </div>
+        </div>
+    `;
+
+    // Add sort button event listeners
+    sortButton.addEventListener('click', (e) => {
+        const dropdown = sortButton.querySelector('.sort-dropdown');
+        dropdown.classList.toggle('active');
+        e.stopPropagation();
+    });
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', () => {
+        const dropdown = sortButton.querySelector('.sort-dropdown');
+        dropdown.classList.remove('active');
+    });
+
+    // Handle sort options
+    sortButton.querySelectorAll('.sort-option').forEach(option => {
+        option.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const sortField = option.getAttribute('data-sort');
+            const currentSort = document.getElementById('currentSort');
+            currentSort.textContent = option.textContent.trim().split('\n')[0];
+
+            // Remove selected class from all options
+            sortButton.querySelectorAll('.sort-option').forEach(opt => {
+                opt.classList.remove('selected');
+            });
+            option.classList.add('selected');
+
+            const container = document.querySelector('.route-cards-container');
+            sortDeckByField(container, sortField);
+
+            const dropdown = sortButton.querySelector('.sort-dropdown');
+            dropdown.classList.remove('active');
+        });
+    });
+
+    return sortButton;
+}

@@ -1,6 +1,6 @@
 import { appState } from '../stateManager.js';
 import { sliderFilter } from './sliderFilter.js';
-import { sortDeckByField } from './sortDeck.js';
+import { sortDeckByField, createSortButton } from './sortDeck.js';
 import { pathDrawing, Line } from '../pathDrawing.js';
 import { routeInfoCard, setSelectedRouteCard } from './routeInfoCard.js';
 import { applyFilters, toggleFilterResetIcon, updateFilterHeaders, initializeFilterState, updateFilterState, constructFilterTags, createRouteId } from './filterDeck.js';
@@ -85,6 +85,7 @@ function buildRouteDeck(routeIndex) {
             }
 
             const filterControls = createFilterControls();
+            filterControls.appendChild(createSortButton()); // Add the sort button to the filter controls
             contentWrapper.appendChild(filterControls);
 
             const cardsContainer = document.createElement('div');
@@ -151,11 +152,6 @@ function buildRouteDeck(routeIndex) {
                 filterHeader.addEventListener('click', handleFilterClick);
             }
         });
-
-        updateFilterHeaders();
-        toggleFilterResetIcon('price');
-        toggleFilterResetIcon('departure');
-        toggleFilterResetIcon('arrival');
     }
 
     function fetchDataForColumn(filterType) {
@@ -369,88 +365,22 @@ function createFilterControls() {
     const filterControls = document.createElement('div');
     filterControls.className = 'filter-controls';
     
-    const columns = ['departure', 'arrival', 'price'];
-    columns.forEach(column => {
+    const filters = ['departure', 'arrival', 'price']; // Changed columns to filters
+    filters.forEach(filterType => { // Changed column to filterType
         const filterButton = document.createElement('button');
         filterButton.className = 'filter-button';
-        filterButton.setAttribute('data-column', column);
+        filterButton.setAttribute('data-column', filterType); // Keep data-column for now for simplicity
         
         filterButton.innerHTML = `
-            <span class="filter-header" data-column="${column}">${column.charAt(0).toUpperCase() + column.slice(1)}</span>
-            <img class="filterIcon" id="${column}Filter" data-column="${column}" src="/assets/filter-icon.svg" alt="Filter">
-            <span class="resetIcon hidden" id="reset${column.charAt(0).toUpperCase() + column.slice(1)}Filter" 
-                  data-column="${column}">✕</span>
+            <span class="filter-header" data-column="${filterType}">${filterType.charAt(0).toUpperCase() + filterType.slice(1)}</span>
+            <img class="filterIcon" id="${filterType}Filter" data-column="${filterType}" src="/assets/filter-icon.svg" alt="Filter">
+            <span class="resetIcon hidden" id="reset${filterType.charAt(0).toUpperCase() + filterType.slice(1)}Filter" 
+                  data-column="${filterType}">✕</span>
         `;
         
         filterControls.appendChild(filterButton);
     });
 
-    // Add sort button
-    const sortButton = document.createElement('button');
-    sortButton.className = 'sort-button';
-    sortButton.innerHTML = `
-        <span>Sort by: <span id="currentSort">Price</span></span>
-        <div class="sort-dropdown">
-            <div class="sort-option selected" data-sort="price">
-                Price
-                <span class="sort-icon">↓</span>
-            </div>
-            <div class="sort-option" data-sort="departure">
-                Departure Time
-                <span class="sort-icon">↓</span>
-            </div>
-            <div class="sort-option" data-sort="arrival">
-                Arrival Time
-                <span class="sort-icon">↓</span>
-            </div>
-            <div class="sort-option" data-sort="duration">
-                Duration
-                <span class="sort-icon">↓</span>
-            </div>
-            <div class="sort-option" data-sort="stops">
-                Stops
-                <span class="sort-icon">↓</span>
-            </div>
-        </div>
-    `;
-
-    // Add sort button event listeners
-    sortButton.addEventListener('click', (e) => {
-        const dropdown = sortButton.querySelector('.sort-dropdown');
-        dropdown.classList.toggle('active');
-        e.stopPropagation();
-    });
-
-    // Close dropdown when clicking outside
-    document.addEventListener('click', () => {
-        const dropdown = sortButton.querySelector('.sort-dropdown');
-        dropdown.classList.remove('active');
-    });
-
-    // Handle sort options
-    sortButton.querySelectorAll('.sort-option').forEach(option => {
-        option.addEventListener('click', (e) => {
-            e.stopPropagation();
-            const sortField = option.getAttribute('data-sort');
-            const currentSort = document.getElementById('currentSort');
-            currentSort.textContent = option.textContent.trim().split('\n')[0];
-
-            // Remove selected class from all options
-            sortButton.querySelectorAll('.sort-option').forEach(opt => {
-                opt.classList.remove('selected');
-            });
-            option.classList.add('selected');
-
-            const container = document.querySelector('.route-cards-container');
-            sortDeckByField(container, sortField);
-
-            const dropdown = sortButton.querySelector('.sort-dropdown');
-            dropdown.classList.remove('active');
-        });
-    });
-
-    filterControls.appendChild(sortButton);
-    
     return filterControls;
 }
 
