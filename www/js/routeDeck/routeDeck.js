@@ -1,6 +1,6 @@
 import { appState } from '../stateManager.js';
 import { sliderFilter } from './sliderFilter.js';
-import { sortDeckByColumn } from './sortDeck.js';
+import { sortDeckByField } from './sortDeck.js';
 import { pathDrawing, Line } from '../pathDrawing.js';
 import { routeInfoCard, highlightSelectedRowForRouteIndex } from './routeInfoCard.js';
 import { applyFilters, toggleFilterResetIcon, updateFilterHeaders } from './filterDeck.js';
@@ -178,21 +178,6 @@ function buildRouteDeck(routeIndex) {
                 icon.setAttribute('data-sort', newSortState);
             }
         });
-    }
-
-    function getColumnIndex(columnIdentifier) {
-        const columnMap = {
-            'departure': 0,
-            'arrival': 1,
-            'price': 2,
-            'airlines': 3,
-            'direct': 4,
-            'stops': 5,
-            'layovers': 6,
-            'duration': 7,
-            'route': 8
-        };
-        return columnMap[columnIdentifier];
     }
 
     function fetchDataForColumn(column) {
@@ -481,7 +466,7 @@ function createFilterControls() {
     sortButton.querySelectorAll('.sort-option').forEach(option => {
         option.addEventListener('click', (e) => {
             e.stopPropagation();
-            const sortType = option.getAttribute('data-sort');
+            const sortField = option.getAttribute('data-sort');
             const currentSort = document.getElementById('currentSort');
             currentSort.textContent = option.textContent.trim().split('\n')[0];
 
@@ -491,18 +476,8 @@ function createFilterControls() {
             });
             option.classList.add('selected');
 
-            // Map sort types to column indices
-            const sortMap = {
-                'price': 2,
-                'departure': 0,
-                'arrival': 1,
-                'duration': 7,
-                'stops': 5
-            };
-
-            const columnIndex = sortMap[sortType];
             const container = document.querySelector('.route-cards-container');
-            sortDeckByColumn(container, columnIndex);
+            sortDeckByField(container, sortField);
 
             const dropdown = sortButton.querySelector('.sort-dropdown');
             dropdown.classList.remove('active');

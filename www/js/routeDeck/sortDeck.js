@@ -1,44 +1,43 @@
-export function sortDeckByColumn(container, columnIndex, asc = true) {
+export function sortDeckByField(container, fieldName, asc = true) {
     const dirModifier = asc ? 1 : -1;
-    // Only sort visible cards
     const cards = Array.from(container.querySelectorAll(".route-card:not([style*='display: none'])"));
 
     const sortedCards = cards.sort((a, b) => {
-        // Define a mapping between column index and data extraction logic
-        const columnMap = {
-            0: (card) => { //departure
-                const departureElement = card.querySelector('.card-details .detail-value[data-departure]');
-                return departureElement ? departureElement.textContent.trim() : '';
+        // Define a mapping between field names and data extraction logic
+        const fieldMap = {
+            'departure': (card) => {
+                const element = card.querySelector('.card-details .detail-value[data-departure]');
+                return element ? element.textContent.trim() : '';
             },
-            1: (card) => { //arrival
-                const arrivalElement = card.querySelector('.card-details .detail-value[data-arrival]');
-                return arrivalElement ? arrivalElement.textContent.trim() : '';
+            'arrival': (card) => {
+                const element = card.querySelector('.card-details .detail-value[data-arrival]');
+                return element ? element.textContent.trim() : '';
             },
-            2: (card) => { //price
-                const priceElement = card.querySelector('.card-price');
-                return priceElement ? priceElement.textContent.replace('$', '').trim() : '';
+            'price': (card) => {
+                const element = card.querySelector('.card-price');
+                return element ? element.textContent.replace('$', '').trim() : '';
             },
-            5: (card) => { //stops
+            'stops': (card) => {
                 const detailGroups = card.querySelectorAll('.card-details .detail-group');
                 const stopsGroup = Array.from(detailGroups).find(group => 
                     group.querySelector('.detail-label').textContent.trim() === 'Stops'
                 );
-                const stopsElement = stopsGroup?.querySelector('.detail-value');
-                return stopsElement ? stopsElement.textContent.trim() : '0';
+                const element = stopsGroup?.querySelector('.detail-value');
+                return element ? element.textContent.trim() : '0';
             },
-            7: (card) => { //duration
-                const durationElement = card.querySelector('.card-duration .detail-value');
-                return durationElement ? durationElement.textContent.trim() : '';
+            'duration': (card) => {
+                const element = card.querySelector('.card-duration .detail-value');
+                return element ? element.textContent.trim() : '';
             }
         };
 
-        // Extract data based on the column index
-        const aColText = columnMap[columnIndex] ? columnMap[columnIndex](a) : '';
-        const bColText = columnMap[columnIndex] ? columnMap[columnIndex](b) : '';
+        // Extract data based on the field name
+        const aText = fieldMap[fieldName] ? fieldMap[fieldName](a) : '';
+        const bText = fieldMap[fieldName] ? fieldMap[fieldName](b) : '';
 
         // Use the convertData function to handle data conversion
-        let aValue = convertData(aColText, columnIndex);
-        let bValue = convertData(bColText, columnIndex);
+        let aValue = convertData(aText, fieldName);
+        let bValue = convertData(bText, fieldName);
 
         if (typeof aValue === "number" && typeof bValue === "number") {
             return (aValue - bValue) * dirModifier;
@@ -59,16 +58,16 @@ export function sortDeckByColumn(container, columnIndex, asc = true) {
     sortedCards.forEach(card => container.appendChild(card));
 }
 
-function convertData(data, columnIndex) {
-    switch (columnIndex) {
-        case 0:
-        case 1:
+function convertData(data, fieldName) {
+    switch (fieldName) {
+        case 'departure':
+        case 'arrival':
             return new Date(data);
-        case 2: // Price
+        case 'price':
             return parseFloat(data.replace(/[^0-9.]/g, ''));
-        case 5: // Stops
+        case 'stops':
             return parseInt(data, 10);
-        case 7: // Duration
+        case 'duration':
             const [hours, minutes] = data.split('h ');
             return parseInt(hours) * 60 + parseInt(minutes.replace('m', ''));
         default:
