@@ -328,9 +328,6 @@
 
 /* Adjust filter controls for card layout */
 .filter-controls {
-  position: sticky;
-  top: 0;
-  z-index: 10;
   background: #333;
   padding: 1rem;
   border-radius: 8px;
@@ -338,6 +335,7 @@
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
+  justify-content: flex-start; /* Align items to the start */
 }
 
 .filter-button {
@@ -359,6 +357,63 @@
 
 .filter-button.active {
   background: #2a4f7c;
+}
+
+/* Add these new styles */
+.sort-button {
+    margin-left: auto; /* This will push the sort button to the right */
+    background: #444;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    position: relative;
+}
+
+.sort-button:hover {
+    background: #555;
+}
+
+.sort-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background: #333;
+    border: 1px solid #525252;
+    border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    z-index: 1000;
+    min-width: 150px;
+    display: none;
+}
+
+.sort-dropdown.active {
+    display: block;
+}
+
+.sort-option {
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.sort-option:hover {
+    background: #444;
+}
+
+.sort-option.selected {
+    background: #2a4f7c;
+}
+
+.sort-icon {
+    margin-left: auto;
 }
 
 /* Responsive adjustments */
