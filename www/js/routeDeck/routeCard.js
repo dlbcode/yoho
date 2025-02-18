@@ -53,9 +53,9 @@ function createRouteCard(flight, endpoint, routeIndex, destination) {
     card.innerHTML = `
         <div class="card-header">
             <div class="card-price">$${flight.price.toFixed(2)}</div>
-            <div class="card-duration">
-                <span class="segment-info">Duration</span>
-                <span class="segment-iata">${Math.floor(flight.duration.total / 3600)}h ${Math.floor((flight.duration.total % 3600) / 60)}m</span>
+            <div class="total-duration">
+                <span class="duration-text">Total Duration:</span>
+                ${Math.floor(flight.duration.total / 3600)}h ${Math.floor((flight.duration.total % 3600) / 60)}m
             </div>
             <div class="card-route">
                 ${flight.route.map((segment, idx, segments) => {

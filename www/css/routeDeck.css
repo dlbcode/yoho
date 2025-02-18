@@ -142,7 +142,7 @@
 .route-card {
   background: #222;
   border-radius: 8px;
-  padding: 1rem;
+  padding: 10px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
   transition: all 0.2s ease;
   border-left: 3px solid transparent;
@@ -163,7 +163,6 @@
   display: flex;
   justify-content: space-between; /* Distribute items evenly */
   align-items: center;
-  margin-bottom: 1rem;
   flex-direction: row-reverse; /* Move price to the right */
 }
 
@@ -200,7 +199,6 @@
   flex-wrap: wrap;
   gap: 0.5rem;
   align-items: center;
-  margin-bottom: 1rem;
 }
 
 .route-segment {
@@ -257,12 +255,34 @@
   color: #fff;
 }
 
+.duration-label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  color: #888;
+  font-size: 0.875rem;
+}
+
+.duration-value {
+  color: #fff;
+}
+
+.total-duration {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+  font-size: 0.9em;
+  color: #666;
+}
+
+.duration-text {
+  font-weight: 500;
+}
+
 /* Filter controls */
 .filter-controls {
   background: #333;
-  padding: 1rem;
-  border-radius: 8px;
-  margin-bottom: 1rem;
+  padding: 10px;
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
