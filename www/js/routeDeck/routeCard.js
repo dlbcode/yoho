@@ -61,7 +61,7 @@ function createRouteCard(flight, endpoint, routeIndex, destination) {
                     return `
                         <div class="route-segment">
                             <div class="detail-group">
-                                <div class="segment-info">${idx === 0 ? `<span class="segment-iata">${segment.flyFrom}</span><div class="card-times depart"><span>${formatTime(departureDate)}</span></div>` : (isLastSegment ? `<span class="segment-iata">${segment.flyTo}</span><div class="card-times arrive"><span>${formatTime(arrivalDate)}</span></div>` : `<span class="segment-iata">${segment.flyFrom}</span>`)}</div>
+                                <div class="segment-info">${idx === 0 ? `<div class="card-times depart"><span>${formatTime(departureDate)}</span></div><span class="segment-iata">${segment.flyFrom}</span>` : (isLastSegment ? `<div class="card-times arrive"><span>${formatTime(arrivalDate)}</span></div><span class="segment-iata">${segment.flyTo}</span>` : `<span class="segment-iata">${segment.flyFrom}</span>`)}</div>
                             </div>
                             ${!isLastSegment ? `
                                 <div style="display: flex; flex-direction: column; align-items: center;">
