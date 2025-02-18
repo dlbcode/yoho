@@ -303,6 +303,7 @@
   font-size: 0.9em;
   color: #666;
   margin-left: 1rem;
+  flex-grow: 1; /* Add this line */
 }
 
 .duration-text {
@@ -476,8 +477,8 @@
   .total-duration {
     order: 2; /* Move duration to middle */
     width: 100%;
-    justify-content: left;
-    margin-top: 0.5rem;
+    justify-content: flex-start; /* Align to the left */
+    margin-top: 0; /* Remove top margin */
   }
 
   .card-price {
