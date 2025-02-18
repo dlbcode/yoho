@@ -181,19 +181,22 @@
   align-items: flex-start;
 }
 
-.card-times span {
-  font-size: 1rem;
+.card-times.origin {
+  color: #fff;
+}
+
+.card-times.destination {
   color: #fff;
 }
 
 .card-times.layover {
-  color: #888;
-  font-size: 0.6em;
+  color: #aaa;
+  font-size: 0.8rem;
   cursor: help;
 }
 
 .card-times.layover:hover {
-  text-decoration: underline dotted;
+  opacity: 1; /* Restore full opacity on hover */
 }
 
 .card-price {

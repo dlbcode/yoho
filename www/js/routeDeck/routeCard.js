@@ -80,7 +80,7 @@ function createRouteCard(flight, endpoint, routeIndex, destination) {
                                 </div>
                             ` : `
                                 <div class="segment-info">
-                                    <div class="card-times">
+                                    <div class="card-times origin">
                                         <span>${formatTime(departureDate)}</span>
                                     </div>
                                     <span class="segment-iata">${segment.flyFrom}</span>
@@ -92,7 +92,7 @@ function createRouteCard(flight, endpoint, routeIndex, destination) {
                             </div>
                             ${isLastSegment ? `
                                 <div class="segment-info">
-                                    <div class="card-times arrive">
+                                    <div class="card-times destination">
                                         <span>${formatTime(arrivalDate)}</span>
                                     </div>
                                     <span class="segment-iata">${segment.flyTo}</span>
