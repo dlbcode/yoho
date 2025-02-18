@@ -7,7 +7,10 @@ export function formatFlightDateTime(date) {
 }
 
 function formatTime(date) {
-    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    return date.toLocaleTimeString([], { 
+        hour: 'numeric',  // changed from '2-digit' to 'numeric'
+        minute: '2-digit'
+    });
 }
 
 function getPriceRangeCategory(price) {
