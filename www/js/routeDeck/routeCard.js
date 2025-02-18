@@ -51,8 +51,8 @@ function createRouteCard(flight, endpoint, routeIndex, destination) {
         <div class="card-header">
             <div class="card-price">$${flight.price.toFixed(2)}</div>
             <div class="card-duration">
-                <span class="detail-label">Duration</span>
-                <span class="detail-value">${Math.floor(flight.duration.total / 3600)}h ${Math.floor((flight.duration.total % 3600) / 60)}m</span>
+                <span class="segment-info">Duration</span>
+                <span class="segment-iata">${Math.floor(flight.duration.total / 3600)}h ${Math.floor((flight.duration.total % 3600) / 60)}m</span>
             </div>
             <div class="card-route">
                 ${flight.route.map((segment, idx) => {
@@ -61,7 +61,7 @@ function createRouteCard(flight, endpoint, routeIndex, destination) {
                     return `
                         <div class="route-segment">
                             <div class="detail-group">
-                                <div class="detail-label">${idx === 0 ? `<span class="detail-value">${segment.flyFrom}</span><div class="card-times depart"><span>${formatTime(departureDate)}</span></div>` : (isLastSegment ? `<span class="detail-value">${segment.flyTo}</span><div class="card-times arrive"><span>${formatTime(arrivalDate)}</span></div>` : `<span class="detail-value">${segment.flyFrom}</span>`)}</div>
+                                <div class="segment-info">${idx === 0 ? `<span class="segment-iata">${segment.flyFrom}</span><div class="card-times depart"><span>${formatTime(departureDate)}</span></div>` : (isLastSegment ? `<span class="segment-iata">${segment.flyTo}</span><div class="card-times arrive"><span>${formatTime(arrivalDate)}</span></div>` : `<span class="segment-iata">${segment.flyFrom}</span>`)}</div>
                             </div>
                             ${!isLastSegment ? `
                                 <div style="display: flex; flex-direction: column; align-items: center;">

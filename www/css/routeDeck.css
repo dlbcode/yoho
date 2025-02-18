@@ -199,7 +199,7 @@
   gap: 0.5rem;
 }
 
-.route-segment .detail-value {
+.route-segment .segment-iata {
   color: #888;
   font-size: 0.875rem;
 }
@@ -221,12 +221,12 @@
   gap: 0.25rem;
 }
 
-.detail-label {
+.segment-info {
   color: #888;
   font-size: 0.875rem;
 }
 
-.detail-value {
+.segment-iata {
   color: #fff;
 }
 
