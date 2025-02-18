@@ -59,7 +59,6 @@ function createRouteCard(flight, endpoint, routeIndex, destination) {
                     const airlineLogoUrl = `assets/airline_logos/70px/${segment.airline}.png`;
                     const isLastSegment = idx === segments.length - 1;
                     const segmentDate = new Date(segment.local_departure);
-                    const nextSegment = segments[idx + 1];
                     
                     return `
                         <div class="route-segment">
@@ -71,12 +70,10 @@ function createRouteCard(flight, endpoint, routeIndex, destination) {
                                     <span class="segment-iata">${segment.flyFrom}</span>
                                 </div>
                             </div>
-                            ${nextSegment ? `
-                                <div style="display: flex; flex-direction: column; align-items: center;">
-                                    <span class="route-arrow">→</span>
-                                    <img src="${airlineLogoUrl}" alt="${segment.airline} Logo" style="width: 20px; height: 20px;">
-                                </div>
-                            ` : ''}
+                            <div style="display: flex; flex-direction: column; align-items: center;">
+                                <span class="route-arrow">→</span>
+                                <img src="${airlineLogoUrl}" alt="${segment.airline} Logo" style="width: 20px; height: 20px;">
+                            </div>
                             ${isLastSegment ? `
                                 <div class="detail-group">
                                     <div class="segment-info">
