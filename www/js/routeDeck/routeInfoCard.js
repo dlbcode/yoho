@@ -1,5 +1,5 @@
 import { appState, updateState } from '../stateManager.js';
-import { pathDrawing } from '../pathDrawing.js';
+import { pathDrawing, Line } from '../pathDrawing.js';
 import { flightMap } from '../flightMap.js';
 import { map } from '../map.js';
 import { lineManager } from '../lineManager.js';
@@ -123,8 +123,42 @@ function routeInfoCard(cardElement, fullFlightData, routeIds, routeIndex) {
     cardElement.parentNode.insertBefore(detailCard, cardElement.nextSibling);
     highlightRoute(cardElement.getAttribute('data-route-id'));
 
-    detailCard.addEventListener('mouseover', () => highlightRoutePath(fullFlightData.route));
-    detailCard.addEventListener('mouseout', () => lineManager.clearLines('hover'));
+    detailCard.addEventListener('mouseover', () => {
+        if (!fullFlightData?.route) return;
+        
+        const existingRouteLines = Object.values(pathDrawing.routePathCache)
+            .flat()
+            .filter(l => fullFlightData.route.some((segment) => {
+                const segmentPath = `${segment.flyFrom}-${segment.flyTo}`;
+                return l.routeId === segmentPath;
+            }));
+        
+        if (existingRouteLines.length > 0) {
+            existingRouteLines.forEach(line => {
+                if (line instanceof Line) {
+                    line.routeData = {
+                        ...line.routeData,
+                        cardId: cardElement.getAttribute('data-card-id')
+                    };
+                    line.highlight();
+                }
+            });
+        }
+    });
+
+    detailCard.addEventListener('mouseout', () => {
+        const cardId = cardElement.getAttribute('data-card-id');
+        if (cardId) {
+            const routeLines = Object.values(pathDrawing.routePathCache)
+                .flat()
+                .filter(l => l.routeData?.cardId === cardId);
+                
+            routeLines.forEach(routeLine => {
+                routeLine instanceof Line && routeLine.reset();
+            });
+        }
+        lineManager.clearLines('hover');
+    });
 
     const addClickListener = (selector, attr, callback) => {
         detailCard.querySelectorAll(selector).forEach(element => {
