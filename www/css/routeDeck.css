@@ -232,6 +232,9 @@
 }
 
 .segment-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
   color: #888;
   font-size: 0.875rem;
 }

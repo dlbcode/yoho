@@ -77,22 +77,18 @@ function createRouteCard(flight, endpoint, routeIndex, destination) {
                     return `
                         <div class="route-segment">
                             ${idx > 0 ? `
-                                <div class="detail-group">
-                                    <div class="segment-info">
-                                        <div class="card-times layover" title="Arrives: ${formatTime(new Date(segments[idx-1].local_arrival))}">
-                                            <span>${layoverInfo}</span>
-                                        </div>
-                                        <span class="segment-iata">${segment.flyFrom}</span>
+                                <div class="segment-info">
+                                    <div class="card-times layover" title="Arrives: ${formatTime(new Date(segments[idx-1].local_arrival))}">
+                                        <span>${layoverInfo}</span>
                                     </div>
+                                    <span class="segment-iata">${segment.flyFrom}</span>
                                 </div>
                             ` : `
-                                <div class="detail-group">
-                                    <div class="segment-info">
-                                        <div class="card-times">
-                                            <span>${formatTime(departureDate)}</span>
-                                        </div>
-                                        <span class="segment-iata">${segment.flyFrom}</span>
+                                <div class="segment-info">
+                                    <div class="card-times">
+                                        <span>${formatTime(departureDate)}</span>
                                     </div>
+                                    <span class="segment-iata">${segment.flyFrom}</span>
                                 </div>
                             `}
                             <div style="display: flex; flex-direction: column; align-items: center;">
