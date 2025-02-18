@@ -204,7 +204,7 @@
 }
 
 .card-route {
-  flex: 1;
+  flex: 0 1 auto; /* Adjust width based on content */
   overflow-x: auto;
   display: flex;
   align-items: center;
