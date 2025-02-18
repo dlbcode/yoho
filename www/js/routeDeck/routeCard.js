@@ -1,4 +1,5 @@
 import { createRouteId } from './filterDeck.js';
+import { highlightRouteLines, resetRouteLines } from './routeHighlighting.js';
 
 function formatFlightDateTime(date) {
     const dayName = date.toLocaleDateString('en-US', { weekday: 'short' });
@@ -88,6 +89,9 @@ function createRouteCard(flight, endpoint, routeIndex, destination) {
             </div>
         </div>
     `;
+
+    card.addEventListener('mouseover', () => highlightRouteLines(flight, card));
+    card.addEventListener('mouseout', () => resetRouteLines(card));
 
     return card;
 }
