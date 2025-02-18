@@ -69,12 +69,22 @@ function buildRouteDeck(routeIndex) {
             const cardsContainer = document.createElement('div');
             cardsContainer.className = 'route-cards-container';
 
+            let drawnPaths = new Set();
+
             flightsData.forEach((flight, index) => {
                 const card = createRouteCard(flight, endpoint, routeIndex, destination);
                 cardsContainer.appendChild(card);
                 
-                // Draw initial route lines (add this)
-                drawFlightLines(flight, routeIndex, false);
+                // Only draw lines if this is the lowest price for this route
+                flight.route.forEach((segment, idx) => {
+                    if (idx < flight.route.length - 1) {
+                        const pathKey = `${segment.flyFrom}-${segment.flyTo}`;
+                        if (!drawnPaths.has(pathKey)) {
+                            drawFlightLines(flight, routeIndex, false);
+                            drawnPaths.add(pathKey);
+                        }
+                    }
+                });
                 
                 // Attach event handlers
                 attachRowEventHandlers(card, flight, index, flightsData, routeIndex);
@@ -165,7 +175,12 @@ function handleRouteLineVisibility(flight, routeIndex, isVisible) {
     routeLines.forEach(line => {
         if (line instanceof Line) {
             if (line.tags.has('isTemporary')) {
+                // Always remove temporary lines
                 line.remove();
+                // Remove from cache
+                const routeId = line.routeId;
+                pathDrawing.routePathCache[routeId] = 
+                    pathDrawing.routePathCache[routeId].filter(l => l !== line);
             } else {
                 isVisible ? line.highlight() : line.reset();
             }
