@@ -199,6 +199,11 @@
   gap: 0.5rem;
 }
 
+.route-segment .detail-value {
+  color: #888;
+  font-size: 0.875rem;
+}
+
 .route-arrow {
   color: #666;
 }
