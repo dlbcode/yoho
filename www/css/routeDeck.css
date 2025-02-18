@@ -462,12 +462,15 @@
 /* Media query */
 @media (max-width: 768px) {
   .card-header {
-    flex-direction: column;
+    flex-direction: row; /* Ensure row direction */
     gap: 1rem;
+    justify-content: space-between; /* Ensure proper spacing */
+    align-items: center; /* Align items in the center */
   }
 
   .card-route {
     justify-content: flex-start;
+    flex: 1; /* Allow card-route to take available space */
   }
 
   .total-duration {
@@ -478,9 +481,9 @@
   }
 
   .card-price {
-    order: 3; /* Move price to bottom */
-    width: 100%;
+    order: 1; /* Move price to top */
     text-align: right;
+    flex-shrink: 0; /* Prevent shrinking */
   }
 
   .route-segment {
