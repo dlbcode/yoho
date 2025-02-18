@@ -1,9 +1,13 @@
 import { createRouteId } from './filterDeck.js';
 import { highlightRouteLines, resetRouteLines } from './routeHighlighting.js';
 
-function formatFlightDateTime(date) {
+export function formatFlightDateTime(date) {
     const dayName = date.toLocaleDateString('en-US', { weekday: 'short' });
     return `${dayName} ${date.toLocaleString()}`;
+}
+
+function formatTime(date) {
+    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 }
 
 function getPriceRangeCategory(price) {
@@ -50,45 +54,31 @@ function createRouteCard(flight, endpoint, routeIndex, destination) {
                 <span class="detail-label">Duration</span>
                 <span class="detail-value">${Math.floor(flight.duration.total / 3600)}h ${Math.floor((flight.duration.total % 3600) / 60)}m</span>
             </div>
-        </div>
-        
-        <div class="card-route">
-            ${flight.route.map((segment, idx) => {
-                const airlineLogoUrl = `assets/airline_logos/70px/${segment.airline}.png`;
-                const isLastSegment = idx === flight.route.length - 1;
-                return `
-                    <div class="route-segment">
-                        <div class="detail-group">
-                            <div class="detail-label">${idx === 0 ? 'From' : (isLastSegment ? 'To' : 'Via')}</div>
-                            <div class="detail-value">${segment.flyFrom}</div>
-                        </div>
-                        ${!isLastSegment ? `
-                            <div style="display: flex; flex-direction: column; align-items: center;">
-                                <span class="route-arrow">→</span>
-                                <img src="${airlineLogoUrl}" alt="${segment.airline} Logo" style="width: 20px; height: 20px;">
+            <div class="card-times depart">
+                <span>${formatTime(departureDate)}</span>
+            </div>
+            <div class="card-route">
+                ${flight.route.map((segment, idx) => {
+                    const airlineLogoUrl = `assets/airline_logos/70px/${segment.airline}.png`;
+                    const isLastSegment = idx === flight.route.length - 1;
+                    return `
+                        <div class="route-segment">
+                            <div class="detail-group">
+                                <div class="detail-label">${idx === 0 ? 'From' : (isLastSegment ? 'To' : 'Via')}</div>
+                                <div class="detail-value">${segment.flyFrom}</div>
                             </div>
-                        ` : ''}
-                    </div>
-                `;
-            }).join('')}
-        </div>
-
-        <div class="card-details">
-            <div class="detail-group">
-                <div class="detail-label">Departure</div>
-                <div class="detail-value" data-departure="${formatFlightDateTime(departureDate)}">${formatFlightDateTime(departureDate)}</div>
+                            ${!isLastSegment ? `
+                                <div style="display: flex; flex-direction: column; align-items: center;">
+                                    <span class="route-arrow">→</span>
+                                    <img src="${airlineLogoUrl}" alt="${segment.airline} Logo" style="width: 20px; height: 20px;">
+                                </div>
+                            ` : ''}
+                        </div>
+                    `;
+                }).join('')}
             </div>
-            <div class="detail-group">
-                <div class="detail-label">Arrival</div>
-                <div class="detail-value" data-arrival="${formatFlightDateTime(arrivalDate)}">${formatFlightDateTime(arrivalDate)}</div>
-            </div>
-            <div class="detail-group">
-                <div class="detail-label">Airlines</div>
-                <div class="detail-value">${flight.airlines.join(", ")}</div>
-            </div>
-            <div class="detail-group">
-                <div class="detail-label">Stops</div>
-                <div class="detail-value">${flight.route.length - 1}</div>
+            <div class="card-times arrive">
+                <span>${formatTime(arrivalDate)}</span>
             </div>
         </div>
     `;

@@ -1,10 +1,11 @@
 import { appState, updateState } from '../stateManager.js';
-import { pathDrawing, Line } from '../pathDrawing.js';
+import { pathDrawing } from '../pathDrawing.js';
 import { flightMap } from '../flightMap.js';
 import { map } from '../map.js';
 import { lineManager } from '../lineManager.js';
 import { constructFilterTags, createRouteId } from './filterDeck.js';
 import { highlightRouteLines, resetRouteLines } from './routeHighlighting.js';
+import { formatFlightDateTime } from './routeCard.js'; // Import formatFlightDateTime
 
 const formatTime = (date) => date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 const bagIcon = `<svg fill="#aaa" height="20px" width="20px" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 248.35 248.35" xml:space="preserve"><g><path d="M186.057,66.136h-15.314V19.839C170.743,8.901,161.844,0,150.904,0H97.448c-10.938,0-19.84,8.901-19.84,19.839v46.296H62.295c-9.567,0-17.324,7.757-17.324,17.324V214.26c0,9.571,7.759,17.326,17.324,17.326h2.323v12.576c0,2.315,1.876,4.188,4.186,4.188h19.811c2.315,0,4.188-1.876,4.188-4.188v-12.576h62.741v12.576c0,2.315,1.878,4.188,4.188,4.188h19.809c2.317,0,4.188-1.876,4.188-4.188v-12.576h2.326c9.567,0,17.324-7.757,17.324-17.326V83.46C203.381,73.891,195.624,66.136,186.057,66.136z M157.514,66.135H90.832V19.839c0-3.646,2.967-6.613,6.613-6.613h53.456c3.646,0,6.613,2.967,6.613,6.613V66.135z"/></g></svg>`;
@@ -98,6 +99,24 @@ function routeInfoCard(cardElement, fullFlightData, routeIds, routeIndex) {
     const detailCard = document.createElement('div');
     detailCard.className = 'route-info-card';
     detailCard.innerHTML = `
+        <div class="card-details">
+            <div class="detail-group">
+                <div class="detail-label">Airlines</div>
+                <div class="detail-value">${fullFlightData.airlines.join(", ")}</div>
+            </div>
+            <div class="detail-group">
+                <div class="detail-label">Stops</div>
+                <div class="detail-value">${fullFlightData.route.length - 1}</div>
+            </div>
+            <div class="detail-group">
+                <div class="detail-label">Departure</div>
+                <div class="detail-value" data-departure="${formatFlightDateTime(new Date(fullFlightData.dTime * 1000))}">${formatFlightDateTime(new Date(fullFlightData.dTime * 1000))}</div>
+            </div>
+            <div class="detail-group">
+                <div class="detail-label">Arrival</div>
+                <div class="detail-value" data-arrival="${formatFlightDateTime(new Date(fullFlightData.aTime * 1000))}">${formatFlightDateTime(new Date(fullFlightData.aTime * 1000))}</div>
+            </div>
+        </div>
         <div class='route-details' style='display: flex; flex-direction: column; align-items: flex-start;'>
             <div class='top-wrapper' style='display: flex; flex-direction: card; align-items: flex-start'>
                 <div class='left-wrapper' style='display: flex; flex-direction: column; align-items: flex-start; margin-right: 20px;'>
