@@ -55,18 +55,36 @@ function createRouteCard(flight, endpoint, routeIndex, destination) {
                 <span class="segment-iata">${Math.floor(flight.duration.total / 3600)}h ${Math.floor((flight.duration.total % 3600) / 60)}m</span>
             </div>
             <div class="card-route">
-                ${flight.route.map((segment, idx) => {
+                ${flight.route.map((segment, idx, segments) => {
                     const airlineLogoUrl = `assets/airline_logos/70px/${segment.airline}.png`;
-                    const isLastSegment = idx === flight.route.length - 1;
+                    const isLastSegment = idx === segments.length - 1;
+                    const segmentDate = new Date(segment.local_departure);
+                    const nextSegment = segments[idx + 1];
+                    
                     return `
                         <div class="route-segment">
                             <div class="detail-group">
-                                <div class="segment-info">${idx === 0 ? `<div class="card-times depart"><span>${formatTime(departureDate)}</span></div><span class="segment-iata">${segment.flyFrom}</span>` : (isLastSegment ? `<div class="card-times arrive"><span>${formatTime(arrivalDate)}</span></div><span class="segment-iata">${segment.flyTo}</span>` : `<span class="segment-iata">${segment.flyFrom}</span>`)}</div>
+                                <div class="segment-info">
+                                    <div class="card-times">
+                                        <span>${formatTime(idx === 0 ? departureDate : segmentDate)}</span>
+                                    </div>
+                                    <span class="segment-iata">${segment.flyFrom}</span>
+                                </div>
                             </div>
-                            ${!isLastSegment ? `
+                            ${nextSegment ? `
                                 <div style="display: flex; flex-direction: column; align-items: center;">
                                     <span class="route-arrow">→</span>
                                     <img src="${airlineLogoUrl}" alt="${segment.airline} Logo" style="width: 20px; height: 20px;">
+                                </div>
+                            ` : ''}
+                            ${isLastSegment ? `
+                                <div class="detail-group">
+                                    <div class="segment-info">
+                                        <div class="card-times arrive">
+                                            <span>${formatTime(arrivalDate)}</span>
+                                        </div>
+                                        <span class="segment-iata">${segment.flyTo}</span>
+                                    </div>
                                 </div>
                             ` : ''}
                         </div>
