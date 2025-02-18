@@ -63,16 +63,38 @@ function createRouteCard(flight, endpoint, routeIndex, destination) {
                     const isLastSegment = idx === segments.length - 1;
                     const segmentDate = new Date(segment.local_departure);
                     
+                    // Calculate layover time if this isn't the first segment
+                    const layoverInfo = idx > 0 ? (() => {
+                        const prevSegment = segments[idx - 1];
+                        const arrivalTime = new Date(prevSegment.local_arrival);
+                        const departureTime = new Date(segment.local_departure);
+                        const layoverMins = Math.round((departureTime - arrivalTime) / (1000 * 60));
+                        const hours = Math.floor(layoverMins / 60);
+                        const mins = layoverMins % 60;
+                        return hours > 0 ? `${hours}h ${mins}m` : `${mins}m`;
+                    })() : '';
+                    
                     return `
                         <div class="route-segment">
-                            <div class="detail-group">
-                                <div class="segment-info">
-                                    <div class="card-times">
-                                        <span>${formatTime(idx === 0 ? departureDate : segmentDate)}</span>
+                            ${idx > 0 ? `
+                                <div class="detail-group">
+                                    <div class="segment-info">
+                                        <div class="card-times layover" title="Arrives: ${formatTime(new Date(segments[idx-1].local_arrival))}">
+                                            <span>${layoverInfo}</span>
+                                        </div>
+                                        <span class="segment-iata">${segment.flyFrom}</span>
                                     </div>
-                                    <span class="segment-iata">${segment.flyFrom}</span>
                                 </div>
-                            </div>
+                            ` : `
+                                <div class="detail-group">
+                                    <div class="segment-info">
+                                        <div class="card-times">
+                                            <span>${formatTime(departureDate)}</span>
+                                        </div>
+                                        <span class="segment-iata">${segment.flyFrom}</span>
+                                    </div>
+                                </div>
+                            `}
                             <div style="display: flex; flex-direction: column; align-items: center;">
                                 <span class="route-arrow">→</span>
                                 <img src="${airlineLogoUrl}" alt="${segment.airline} Logo" style="width: 20px; height: 20px;">

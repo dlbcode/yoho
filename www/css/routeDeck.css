@@ -179,6 +179,16 @@
   color: #fff;
 }
 
+.card-times.layover {
+  color: #888;
+  font-size: 0.6em;
+  cursor: help;
+}
+
+.card-times.layover:hover {
+  text-decoration: underline dotted;
+}
+
 .card-price {
   font-size: 1.5rem;
   font-weight: bold;
