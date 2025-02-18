@@ -91,13 +91,11 @@ function createRouteCard(flight, endpoint, routeIndex, destination) {
                                 <img src="${airlineLogoUrl}" alt="${segment.airline} Logo" style="width: 20px; height: 20px;">
                             </div>
                             ${isLastSegment ? `
-                                <div class="detail-group">
-                                    <div class="segment-info">
-                                        <div class="card-times arrive">
-                                            <span>${formatTime(arrivalDate)}</span>
-                                        </div>
-                                        <span class="segment-iata">${segment.flyTo}</span>
+                                <div class="segment-info">
+                                    <div class="card-times arrive">
+                                        <span>${formatTime(arrivalDate)}</span>
                                     </div>
+                                    <span class="segment-iata">${segment.flyTo}</span>
                                 </div>
                             ` : ''}
                         </div>
