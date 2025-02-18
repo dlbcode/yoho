@@ -239,6 +239,20 @@
   font-size: 0.875rem;
 }
 
+/* Add new styles for layover segment info */
+.segment-info .card-times.layover {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  justify-content: center;
+  width: 100%;
+}
+
+.segment-info .card-times.layover + .segment-iata {
+  text-align: center;
+  width: 100%;
+}
+
 .segment-iata {
   color: #fff;
 }
