@@ -210,11 +210,10 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  padding-bottom: 0.5rem; /* Add space for potential scrollbar */
   flex-wrap: nowrap; /* Prevent wrapping */
+  height: 47px; /* Set explicit height */
 }
 
-/* Hide scrollbar but keep functionality */
 .card-route::-webkit-scrollbar {
   display: none;
 }
@@ -224,26 +223,11 @@
   scrollbar-width: none;
 }
 
-.card-route {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  align-items: center;
-}
-
 .route-segment {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-}
-
-.route-segment .segment-iata {
-  color: #888;
-  font-size: 0.875rem;
-}
-
-.route-arrow {
-  color: #666;
+  height: 100%; /* Make segments fill container height */
 }
 
 .card-details {
@@ -265,6 +249,8 @@
   gap: 0.25rem;
   color: #888;
   font-size: 0.875rem;
+  justify-content: center; /* Center content vertically */
+  height: 100%; /* Make info fill segment height */
 }
 
 /* Add new styles for layover segment info */
