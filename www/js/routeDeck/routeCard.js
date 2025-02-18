@@ -53,21 +53,24 @@ function createRouteCard(flight, endpoint, routeIndex, destination) {
         </div>
         
         <div class="card-route">
-            ${flight.route.map((segment, idx) => `
-                <div class="route-segment">
-                    <div class="detail-group">
-                        <div class="detail-label">${idx === 0 ? 'From' : 'Via'}</div>
-                        <div class="detail-value">${segment.flyFrom}</div>
+            ${flight.route.map((segment, idx) => {
+                const airlineLogoUrl = `assets/airline_logos/70px/${segment.airline}.png`;
+                const isLastSegment = idx === flight.route.length - 1;
+                return `
+                    <div class="route-segment">
+                        <div class="detail-group">
+                            <div class="detail-label">${idx === 0 ? 'From' : (isLastSegment ? 'To' : 'Via')}</div>
+                            <div class="detail-value">${segment.flyFrom}</div>
+                        </div>
+                        ${!isLastSegment ? `
+                            <div style="display: flex; flex-direction: column; align-items: center;">
+                                <span class="route-arrow">→</span>
+                                <img src="${airlineLogoUrl}" alt="${segment.airline} Logo" style="width: 20px; height: 20px;">
+                            </div>
+                        ` : ''}
                     </div>
-                    ${idx < flight.route.length - 1 ? '<span class="route-arrow">→</span>' : ''}
-                </div>
-            `).join('')}
-            <div class="route-segment">
-                <div class="detail-group">
-                    <div class="detail-label">To</div>
-                    <div class="detail-value">${flight.route[flight.route.length - 1].flyTo}</div>
-                </div>
-            </div>
+                `;
+            }).join('')}
         </div>
 
         <div class="card-details">
