@@ -262,7 +262,13 @@
   gap: 16px;
 }
 
-.departure-section,
+.departure-section {
+  display: flex;
+  flex-direction: column;
+  width: 70px;
+  align-items: flex-end; /* Add this line to align items to the right */
+}
+
 .arrival-section {
   display: flex;
   flex-direction: column;
