@@ -83,9 +83,9 @@ function createRouteCard(flight, endpoint, routeIndex, destination) {
             </div>
 
             <div class="route-stops">
-                ${flight.route.slice(1, -1).map(segment => 
+                ${flight.route.slice(0, -1).map(segment => 
                     `<span class="stop-iata">${segment.flyTo}</span>`
-                ).join(' · ')}
+                ).join(', ')}
             </div>
 
             <div class="duration">

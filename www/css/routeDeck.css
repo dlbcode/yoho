@@ -499,12 +499,12 @@
   color: #666;
   font-size: 0.9rem;
   display: flex;
-  gap: 8px;
   flex: 1;
 }
 
 .stop-iata {
   color: #888;
+  margin-left: 4px;
 }
 
 /* Media query */
