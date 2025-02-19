@@ -88,8 +88,6 @@ const infoPane = {
 
         const { routeBoxElement } = setupRouteContent(routeIndex);
         this.fitMapToRoute(routeIndex);
-
-        return routeBoxElement;
     },
 
     updateTripDeck(selectedRoutesArray) {
@@ -101,6 +99,8 @@ const infoPane = {
         deck.innerHTML = `<thead><tr><th>Departure</th><th>Arrival</th><th>Price</th><th>Airline</th><th>Stops</th><th>Route</th><th>Action</th></tr></thead>`;
 
         const tbody = document.createElement('tbody');
+        const fragment = document.createDocumentFragment(); // Create a fragment
+
         let groupData = this.aggregateGroupData(selectedRoutesArray);
 
         Object.values(groupData).forEach(data => {
@@ -109,10 +109,10 @@ const infoPane = {
             row.innerHTML = `<td>${formattedDeparture}</td><td>${formattedArrival}</td><td>${price}</td><td>${data.airlines.join(', ')}</td><td>${data.stops.size}</td><td>${route.join(' > ')}</td><td><a href="${deep_link}" target="_blank"><button>Book Flight</button></a></td>`;
             row.addEventListener('mouseover', () => this.highlightRoute(data.route, group));
             row.addEventListener('mouseout', () => lineManager.clearLinesByTags(['status:highlighted']));
-            tbody.appendChild(row);
+            fragment.appendChild(row); // Append to the fragment
         });
 
-        deck.appendChild(tbody);
+        deck.appendChild(fragment); // Append the entire fragment to tbody
         infoPaneContent.appendChild(deck);
         this.updateTripButton(selectedRoutesArray);
     },
@@ -120,6 +120,7 @@ const infoPane = {
     aggregateGroupData(selectedRoutesArray) {
         return selectedRoutesArray.reduce((groupData, item, index) => {
             const group = item.group;
+            const routeParts = item.displayData.route.split(' > '); // Extract route parts
             if (!groupData[group]) {
                 groupData[group] = {
                     departure: appState.routeDates[item.routeNumber]?.depart,
@@ -127,16 +128,16 @@ const infoPane = {
                     price: item.displayData.price,
                     airlines: [item.displayData.airline],
                     stops: new Set(),
-                    route: [item.displayData.route.split(' > ')[0]],
+                    route: [routeParts[0]], // Use extracted route parts
                     deep_link: item.displayData.deep_link
                 };
             } else {
                 groupData[group].arrival = appState.routeDates[item.routeNumber]?.return;
                 groupData[group].airlines.push(item.displayData.airline);
             }
-            groupData[group].route.push(item.displayData.route.split(' > ')[1]);
+            groupData[group].route.push(routeParts[1]); // Use extracted route parts
             if (index > 0) {
-                groupData[group].stops.add(item.displayData.route.split(' > ')[0]);
+                groupData[group].stops.add(routeParts[0]); // Use extracted route parts
             }
             return groupData;
         }, {});
@@ -163,7 +164,8 @@ const infoPane = {
 
         // Sum up prices for each unique group
         let totalPrice = Object.values(pricesByGroup).reduce((total, price) => {
-            const numericPrice = typeof price === 'number' ? price : parseFloat(String(price).replace(/[^\d.-]/g, ''));
+            const priceString = String(price).replace(/[^\d.-]/g, ''); // Extract price string conversion
+            const numericPrice = typeof price === 'number' ? price : parseFloat(priceString);
             return total + (isNaN(numericPrice) ? 0 : numericPrice);
         }, 0);
 
