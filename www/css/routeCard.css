@@ -10,7 +10,7 @@
 .route-card {
   background: #222;
   border-radius: 8px;
-  padding: 12px 16px;
+  padding: 12px 10px;
   margin-bottom: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
   transition: all 0.2s ease;
@@ -240,7 +240,7 @@
 .card-content {
   display: grid;
   grid-template-columns: auto 1fr auto;
-  gap: 16px;
+  gap: 10px;
   align-items: center;
   width: 100%;
 }
@@ -262,11 +262,21 @@
   gap: 10px;
 }
 
-.departure-section {
+.departure-section,
+.arrival-section {
   display: flex;
   flex-direction: column;
+  min-width: 70px;
   width: 70px;
-  align-items: flex-end; /* Add this line to align items to the right */
+}
+
+.departure-time,
+.arrival-time {
+  color: #ddd;
+  font-size: 1rem;
+  font-weight: 500;
+  white-space: nowrap;
+  width: 70px;
 }
 
 .arrival-section {
