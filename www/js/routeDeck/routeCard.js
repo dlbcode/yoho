@@ -120,7 +120,7 @@ function createRouteCard(flight, endpoint, routeIndex, destination) {
                 </div>
 
                 <div class="route-indicator">
-                    <div class="duration-section">
+                    <div class="duration">
                         ${Math.floor(flight.duration.total / 3600)}h ${Math.floor((flight.duration.total % 3600) / 60)}m
                     </div>
                     ${createRouteArrowSVG(flight.route.length - 1, flight.route).outerHTML}
@@ -132,25 +132,7 @@ function createRouteCard(flight, endpoint, routeIndex, destination) {
                 </div>
             </div>
 
-            <div class="flight-details">
-                <div class="stops-section">
-                    <div class="stops-count">
-                        ${flight.route.length > 1 
-                          ? `${flight.route.length - 1} stop${flight.route.length > 2 ? 's' : ''}`
-                          : 'Direct'}
-                    </div>
-
-                    <div class="route-stops">
-                        ${flight.route.slice(0, -1).map(segment => 
-                            `<span class="stop-iata">${segment.flyTo}</span>`
-                        ).join(', ')}
-                    </div>
-                </div>
-
-                <div class="duration">
-                    ${Math.floor(flight.duration.total / 3600)}h ${Math.floor((flight.duration.total % 3600) / 60)}m
-                </div>
-
+            <div class="price-section">
                 <div class="card-price">$${flight.price.toFixed(2)}</div>
             </div>
         </div>
