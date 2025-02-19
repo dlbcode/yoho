@@ -482,7 +482,7 @@
 .arrival-section {
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: left;
   min-width: 60px;
 }
 
