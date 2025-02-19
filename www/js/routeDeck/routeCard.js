@@ -40,6 +40,45 @@ function setCardAttributes(card, attributes) {
     }
 }
 
+function createRouteArrowSVG(stops, segments) {
+    const svgNS = "http://www.w3.org/2000/svg";
+    const svg = document.createElementNS(svgNS, "svg");
+    svg.classList.add("route-arrow-svg");
+    svg.setAttribute("viewBox", "0 0 110 40"); // Increase height to accommodate IATAs
+
+    const line = document.createElementNS(svgNS, "line");
+    line.classList.add("route-arrow-line");
+    line.setAttribute("x1", "0");
+    line.setAttribute("y1", "12");
+    line.setAttribute("x2", "100");
+    line.setAttribute("y2", "12");
+    svg.appendChild(line);
+
+    const dotSpacing = 100 / (stops + 1);
+    for (let i = 1; i <= stops; i++) {
+        const dot = document.createElementNS(svgNS, "circle");
+        dot.classList.add("route-arrow-dot");
+        dot.setAttribute("cx", dotSpacing * i);
+        dot.setAttribute("cy", "12");
+        dot.setAttribute("r", "4"); // Increase the radius of the dots
+        svg.appendChild(dot);
+
+        const iata = document.createElementNS(svgNS, "text");
+        iata.classList.add("route-arrow-iata");
+        iata.setAttribute("x", dotSpacing * i);
+        iata.setAttribute("y", "20"); // Position below the dot
+        iata.textContent = segments[i - 1].flyTo;
+        svg.appendChild(iata);
+    }
+
+    const arrowHead = document.createElementNS(svgNS, "polygon");
+    arrowHead.classList.add("route-arrow-head");
+    arrowHead.setAttribute("points", "100,8 110,12 100,16");
+    svg.appendChild(arrowHead);
+
+    return svg;
+}
+
 function createRouteCard(flight, endpoint, routeIndex, destination) {
     const card = document.createElement('div');
     card.className = 'route-card';
@@ -81,7 +120,7 @@ function createRouteCard(flight, endpoint, routeIndex, destination) {
                 </div>
 
                 <div class="route-indicator">
-                    <span class="route-arrow">→</span>
+                    ${createRouteArrowSVG(flight.route.length - 1, flight.route).outerHTML}
                 </div>
 
                 <div class="arrival-section">
