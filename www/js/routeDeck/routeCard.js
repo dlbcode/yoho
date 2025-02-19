@@ -13,7 +13,13 @@ function formatTime(date) {
     });
 }
 
+const priceRangeCache = new Map();
+
 function getPriceRangeCategory(price) {
+    if (priceRangeCache.has(price)) {
+        return priceRangeCache.get(price);
+    }
+
     const ranges = [
         { max: 100, label: '0-100' },
         { max: 200, label: '100-200' },
@@ -23,7 +29,9 @@ function getPriceRangeCategory(price) {
     ];
     
     const range = ranges.find(r => price < r.max);
-    return `price-range:${range ? range.label : '500+'}`;
+    const result = `price-range:${range ? range.label : '500+'}`;
+    priceRangeCache.set(price, result);
+    return result;
 }
 
 function createRouteCard(flight, endpoint, routeIndex, destination) {
