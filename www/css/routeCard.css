@@ -317,7 +317,9 @@
   color: #ddd;
   font-size: 0.7rem;
   min-width: 80px;
-  text-align: center;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
 }
 
 .price-section {

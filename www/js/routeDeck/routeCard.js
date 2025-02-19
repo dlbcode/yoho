@@ -66,7 +66,7 @@ function createRouteArrowSVG(stops, segments) {
         const iata = document.createElementNS(svgNS, "text");
         iata.classList.add("route-arrow-iata");
         iata.setAttribute("x", dotSpacing * i);
-        iata.setAttribute("y", "20"); // Position below the dot
+        iata.setAttribute("y", "25"); // Position below the dot
         iata.textContent = segments[i - 1].flyTo;
         svg.appendChild(iata);
     }
