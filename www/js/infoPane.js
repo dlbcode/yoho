@@ -35,9 +35,9 @@ const infoPane = {
     },
 
     displayContent() {
-        const infoPaneContent = document.getElementById('infoPaneContent');
-        const routeBox = document.getElementById('routeBox');
-        const currentView = appState.currentView;
+        //const infoPaneContent = document.getElementById('infoPaneContent'); //Unused variable
+        //const routeBox = document.getElementById('routeBox'); //Unused variable
+        //const currentView = appState.currentView; //Unused variable
     },
 
     updateRouteButtons() {
@@ -66,10 +66,9 @@ const infoPane = {
             button.classList.toggle('selected-route-button', appState.selectedRoutes.hasOwnProperty(routeIndex));
             uiHandling.attachDateTooltip(button, routeIndex);
 
-            button.addEventListener('mouseover', () =>
-                this.applyToLines([`route:${origin}-${destination}`], 'highlight'));
-            button.addEventListener('mouseout', () =>
-                this.applyToLines([`route:${origin}-${destination}`], 'reset'));
+            // Use a single event listener for both mouseover and mouseout
+            button.addEventListener('mouseover', () => this.applyToLines([`route:${origin}-${destination}`], 'highlight'));
+            button.addEventListener('mouseout', () => this.applyToLines([`route:${origin}-${destination}`], 'reset'));
         });
 
         if (appState.waypoints.length === 0 || appState.waypoints.length % 2 === 0) {
@@ -91,26 +90,6 @@ const infoPane = {
         this.fitMapToRoute(routeIndex);
 
         return routeBoxElement;
-    },
-
-    highlightRouteLines(origin, destination, color) {
-        const routeId = `${origin}-${destination}`;
-        const lineSets = pathDrawing.routePathCache[routeId] || pathDrawing.dashedRoutePathCache[routeId] || [];
-        lineSets.forEach(lineSet => {
-            lineSet.lines?.forEach(linePair => linePair.visibleLine?.setStyle({ color }));
-        });
-    },
-
-    resetRouteLineColors(origin, destination) {
-        const routeId = `${origin}-${destination}`;
-        const lineSets = pathDrawing.routePathCache[routeId] || [];
-        const dashedLineSets = pathDrawing.dashedRoutePathCache[routeId] || [];
-
-        dashedLineSets.forEach(line => line.visibleLine?.setStyle({ color: '#999' }));
-        lineSets.forEach(line => {
-            const originalColor = line.visibleLine?.options.originalColor || 'grey';
-            line.visibleLine?.setStyle({ color: originalColor });
-        });
     },
 
     updateTripDeck(selectedRoutesArray) {
