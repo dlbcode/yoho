@@ -73,7 +73,7 @@ function createRouteArrowSVG(stops, segments) {
 
     const arrowHead = document.createElementNS(svgNS, "polygon");
     arrowHead.classList.add("route-arrow-head");
-    arrowHead.setAttribute("points", "100,8 110,12 100,16");
+    arrowHead.setAttribute("points", "100,8 108,12 100,16");
     svg.appendChild(arrowHead);
 
     return svg;

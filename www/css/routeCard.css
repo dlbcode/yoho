@@ -336,17 +336,17 @@
 }
 
 .route-arrow-line {
-  stroke: #666;
+  stroke: #999;
   stroke-width: 2;
 }
 
 .route-arrow-dot {
-  fill: #666;
+  fill: #007bff; /* Change to application theme blue */
   r: 4; /* Increase the radius of the dots */
 }
 
 .route-arrow-head {
-  fill: #666;
+  fill: #999;
 }
 
 .route-arrow-iata {
