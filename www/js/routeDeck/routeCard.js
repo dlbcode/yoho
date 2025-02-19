@@ -34,11 +34,16 @@ function getPriceRangeCategory(price) {
     return result;
 }
 
+function setCardAttributes(card, attributes) {
+    for (const [key, value] of Object.entries(attributes)) {
+        card.setAttribute(key, value);
+    }
+}
+
 function createRouteCard(flight, endpoint, routeIndex, destination) {
     const card = document.createElement('div');
     card.className = 'route-card';
     
-    // Use standardized route ID creation
     const routeId = createRouteId(flight.route);
     card.setAttribute('data-route-id', routeId);
     
@@ -51,48 +56,61 @@ function createRouteCard(flight, endpoint, routeIndex, destination) {
 
     const cardId = `deck-${routeIndex}-${flight.id}`;
     
-    card.setAttribute('data-card-id', cardId);
-    card.setAttribute('data-price', flight.price);
-    card.setAttribute('data-departure-time', departureDate.getHours() + departureDate.getMinutes() / 60);
-    card.setAttribute('data-arrival-time', arrivalDate.getHours() + arrivalDate.getMinutes() / 60);
-    card.setAttribute('data-price-range', getPriceRangeCategory(flight.price));
-    card.setAttribute('data-price-value', Math.round(flight.price));
+    // Set card attributes
+    setCardAttributes(card, {
+        'data-card-id': cardId,
+        'data-price': flight.price,
+        'data-departure-time': departureDate.getHours() + departureDate.getMinutes() / 60,
+        'data-arrival-time': arrivalDate.getHours() + arrivalDate.getMinutes() / 60,
+        'data-price-range': getPriceRangeCategory(flight.price),
+        'data-price-value': Math.round(flight.price)
+    });
 
     card.innerHTML = `
         <div class="card-content">
-            <img src="assets/airline_logos/70px/${flight.route[0].airline}.png" 
-                 alt="${flight.route[0].airline} Logo" 
-                 class="airline-logo">
-            
-            <div class="time-group departure">
-                <span class="time">${formatTime(departureDate)}</span>
-                <span class="iata">${flight.route[0].flyFrom}</span>
+            <div class="airline-section">
+                <img src="assets/airline_logos/70px/${flight.route[0].airline}.png" 
+                     alt="${flight.route[0].airline} Logo" 
+                     class="airline-logo">
             </div>
 
-            <span class="route-arrow">→</span>
+            <div class="journey-section">
+                <div class="departure-section">
+                    <span class="departure-time">${formatTime(departureDate)}</span>
+                    <span class="departure-code">${flight.route[0].flyFrom}</span>
+                </div>
 
-            <div class="time-group arrival">
-                <span class="time">${formatTime(arrivalDate)}</span>
-                <span class="iata">${flight.route[flight.route.length - 1].flyTo}</span>
+                <div class="route-indicator">
+                    <span class="route-arrow">→</span>
+                </div>
+
+                <div class="arrival-section">
+                    <span class="arrival-time">${formatTime(arrivalDate)}</span>
+                    <span class="arrival-code">${flight.route[flight.route.length - 1].flyTo}</span>
+                </div>
             </div>
 
-            <div class="stops-info">
-                ${flight.route.length > 1 
-                  ? `${flight.route.length - 1} stop${flight.route.length > 2 ? 's' : ''}`
-                  : 'Direct'}
-            </div>
+            <div class="flight-details">
+                <div class="stops-section">
+                    <div class="stops-count">
+                        ${flight.route.length > 1 
+                          ? `${flight.route.length - 1} stop${flight.route.length > 2 ? 's' : ''}`
+                          : 'Direct'}
+                    </div>
 
-            <div class="route-stops">
-                ${flight.route.slice(0, -1).map(segment => 
-                    `<span class="stop-iata">${segment.flyTo}</span>`
-                ).join(', ')}
-            </div>
+                    <div class="route-stops">
+                        ${flight.route.slice(0, -1).map(segment => 
+                            `<span class="stop-iata">${segment.flyTo}</span>`
+                        ).join(', ')}
+                    </div>
+                </div>
 
-            <div class="duration">
-                ${Math.floor(flight.duration.total / 3600)}h ${Math.floor((flight.duration.total % 3600) / 60)}m
-            </div>
+                <div class="duration">
+                    ${Math.floor(flight.duration.total / 3600)}h ${Math.floor((flight.duration.total % 3600) / 60)}m
+                </div>
 
-            <div class="card-price">$${flight.price.toFixed(2)}</div>
+                <div class="card-price">$${flight.price.toFixed(2)}</div>
+            </div>
         </div>
     `;
 

@@ -454,10 +454,16 @@
 /* Add these new styles for the redesigned card */
 
 .card-content {
+  display: grid;
+  grid-template-columns: auto 1fr auto auto;
+  gap: 16px;
+  align-items: center;
+  width: 100%;
+}
+
+.airline-section {
   display: flex;
   align-items: center;
-  gap: 16px;
-  width: 100%;
 }
 
 .airline-logo {
@@ -466,45 +472,82 @@
   object-fit: contain;
 }
 
-.time-group {
+.journey-section {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.departure-section,
+.arrival-section {
   display: flex;
   flex-direction: column;
   align-items: center;
   min-width: 60px;
 }
 
-.time-group .time {
+.departure-time,
+.arrival-time {
   color: #fff;
   font-size: 1rem;
   font-weight: 500;
 }
 
-.time-group .iata {
+.departure-code,
+.arrival-code {
   color: #888;
   font-size: 0.8rem;
 }
 
-.route-arrow {
+.route-indicator {
   color: #666;
   font-size: 1.2rem;
 }
 
-.stops-info {
-  color: #888;
-  font-size: 0.9rem;
-  min-width: 80px;
+.flight-details {
+  display: flex;
+  gap: 24px;
 }
 
-.route-stops {
+.stops-section {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.stops-count {
+  color: #888;
+  font-size: 0.9rem;
+}
+
+.stops-list {
   color: #666;
   font-size: 0.9rem;
-  display: flex;
-  flex: 1;
 }
 
-.stop-iata {
+.stop-code {
   color: #888;
   margin-left: 4px;
+}
+
+.duration-section {
+  color: #fff;
+  font-size: 0.9rem;
+  min-width: 80px;
+  text-align: center;
+}
+
+.price-section {
+  display: flex;
+  align-items: center;
+}
+
+.price-amount {
+  color: #4caf50;
+  font-size: 1.2rem;
+  font-weight: 600;
+  min-width: 80px;
+  text-align: right;
 }
 
 /* Media query */
