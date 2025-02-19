@@ -66,9 +66,9 @@ const infoPane = {
             button.classList.toggle('selected-route-button', appState.selectedRoutes.hasOwnProperty(routeIndex));
             uiHandling.attachDateTooltip(button, routeIndex);
 
-            button.addEventListener('mouseover', () => 
+            button.addEventListener('mouseover', () =>
                 this.applyToLines([`route:${origin}-${destination}`], 'highlight'));
-            button.addEventListener('mouseout', () => 
+            button.addEventListener('mouseout', () =>
                 this.applyToLines([`route:${origin}-${destination}`], 'reset'));
         });
 
@@ -79,17 +79,17 @@ const infoPane = {
 
     handleRouteButtonClick(routeIndex, event) {
         event.stopPropagation();
-        
+
         // Simplify height check and collapse logic
-        if (routeIndex === appState.currentRouteIndex && 
+        if (routeIndex === appState.currentRouteIndex &&
             document.getElementById('infoPane').offsetHeight > infoPaneHeight.MENU_BAR_HEIGHT) {
             infoPaneHeight.setHeight('collapse');
             return;
         }
-        
+
         const { routeBoxElement } = setupRouteContent(routeIndex);
         this.fitMapToRoute(routeIndex);
-        
+
         return routeBoxElement;
     },
 
@@ -234,9 +234,9 @@ const infoPane = {
             const newDate = !isNaN(baseDate) ? baseDate : new Date();
             newDate.setDate(newDate.getDate() + 1);
 
-            const formattedDate = 
-                newDate.getFullYear() + '-' + 
-                String(newDate.getMonth() + 1).padStart(2, '0') + '-' + 
+            const formattedDate =
+                newDate.getFullYear() + '-' +
+                String(newDate.getMonth() + 1).padStart(2, '0') + '-' +
                 String(newDate.getDate()).padStart(2, '0');
 
             updateState('updateRouteDate', {
@@ -255,13 +255,13 @@ const infoPane = {
 
     fitMapToRoute(routeIndex) {
         const [originWaypoint, destinationWaypoint] = [
-            appState.waypoints[routeIndex * 2], 
+            appState.waypoints[routeIndex * 2],
             appState.waypoints[routeIndex * 2 + 1]
         ];
         const group = [originWaypoint, destinationWaypoint]
             .filter(wp => wp)
             .map(airport => L.latLng(airport.latitude, airport.longitude));
-            
+
         if (group.length > 1) {
             map.fitBounds(L.latLngBounds(group), { padding: [50, 50] });
         } else if (group.length === 1) {
@@ -291,12 +291,12 @@ function setupRouteContent(routeIndex) {
     let routeBoxElement;
 
     const existingRouteTable = infoPane.routeDecks.get(routeIndex);
-    
+
     if (existingRouteTable) {
         // Use cached route deck
         contentWrapper = existingRouteTable;
         infoPaneContent.appendChild(contentWrapper);
-        
+
         // Restore filter states for this route
         const filterState = appState.filterStates[routeIndex] || {
             departure: { start: 0, end: 24 },
@@ -312,13 +312,13 @@ function setupRouteContent(routeIndex) {
             price: { min: 0, max: 1000 }
         };
         appState.filterThresholds = filterThresholds; // Restore filter thresholds
-        
+
         // Reapply filters to update line visibility
         applyFilters();
-        
+
         // Get the routeBox if it exists in the cached content
         routeBoxElement = contentWrapper.querySelector('#routeBox');
-        
+
         // If no routeBox exists, create one
         if (!routeBoxElement) {
             const routeBoxContainer = document.createElement('div');
@@ -326,10 +326,10 @@ function setupRouteContent(routeIndex) {
             routeBoxElement = routeBox.createRouteBox();
             routeBoxElement.id = 'routeBox';
             routeBoxElement.dataset.routeNumber = routeIndex;
-            
+
             routeBoxContainer.appendChild(routeBoxElement);
             contentWrapper.insertBefore(routeBoxContainer, contentWrapper.firstChild);
-            
+
             // Setup the routeBox content
             routeBox.setupRouteBox(routeBoxElement, routeIndex);
         }
@@ -361,19 +361,12 @@ function setupRouteContent(routeIndex) {
 
     appState.currentRouteIndex = routeIndex;
     applyFilters();
-    
+
     return { contentWrapper, routeBoxElement };
 }
 
 function toggleInfoPaneHeight(infoPane, forceCollapse = false) {
-    if (forceCollapse || (infoPane.offsetHeight > infoPaneHeight.MENU_BAR_HEIGHT)) {
-        infoPaneHeight.setHeight('collapse');
-    } else {
-        const routeBox = document.getElementById('routeBox');
-        if (routeBox) {
-            infoPaneHeight.setHeight('content', { contentElement: routeBox });
-        }
-    }
+    infoPaneHeight.toggleInfoPaneHeight(infoPane, forceCollapse);
 }
 
 window.addEventListener('resize', () => {
