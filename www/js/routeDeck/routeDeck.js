@@ -219,24 +219,6 @@ function createRouteData(flight, segment, nextSegment, cardId) {
     };
 }
 
-function formatFlightDateTime(date) {
-    const dayName = date.toLocaleDateString('en-US', { weekday: 'short' });
-    return `${dayName} ${date.toLocaleString()}`;
-}
-
-function getPriceRangeCategory(price) {
-    const ranges = [
-        { max: 100, label: '0-100' },
-        { max: 200, label: '100-200' },
-        { max: 300, label: '200-300' },
-        { max: 400, label: '300-400' },
-        { max: 500, label: '400-500' }
-    ];
-    
-    const range = ranges.find(r => price < r.max);
-    return `price-range:${range ? range.label : '500+'}`;
-}
-
 function drawFlightLines(flight, routeIndex, isTemporary = false) {
     const cardId = `deck-${routeIndex}-${flight.id}`;
     const drawnLines = [];
