@@ -72,7 +72,6 @@
   color: #ddd;
   margin-left: auto;
   min-width: 60px;
-  text-align: right;
 }
 
 .card-route {
@@ -378,9 +377,25 @@
     order: 1; /* Move price to top */
     text-align: right;
     flex-shrink: 0; /* Prevent shrinking */
+    font-size: 0.9rem; /* Reduced from 1.1rem */
   }
 
   .route-segment {
     flex-shrink: 0; /* Prevent segments from shrinking */
+  }
+
+  .departure-time,
+  .arrival-time {
+    font-size: 0.8rem; /* Reduced from 1rem */
+  }
+
+  .departure-section {
+    align-items: flex-end;  /* Right align departure elements */
+  }
+
+  .departure-section .departure-time,
+  .departure-section .departure-code {
+    text-align: right;  /* Right align text inside spans */
+    width: 100%;  /* Ensure spans take full width */
   }
 }
