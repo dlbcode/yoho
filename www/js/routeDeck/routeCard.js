@@ -133,7 +133,7 @@ function createRouteCard(flight, endpoint, routeIndex, destination) {
             </div>
 
             <div class="price-section">
-                <div class="card-price">$${flight.price.toFixed(2)}</div>
+                <div class="card-price">$${Math.ceil(flight.price)}</div>
             </div>
         </div>
     `;
