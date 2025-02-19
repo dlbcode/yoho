@@ -365,25 +365,4 @@ function setupRouteContent(routeIndex) {
     return { contentWrapper, routeBoxElement };
 }
 
-function toggleInfoPaneHeight(infoPane, forceCollapse = false) {
-    infoPaneHeight.toggleInfoPaneHeight(infoPane, forceCollapse);
-}
-
-window.addEventListener('resize', () => {
-    const infoPane = document.getElementById('infoPane');
-    if (infoPane) {
-        toggleInfoPaneHeight(infoPane);
-    }
-});
-
-// Also handle viewport changes for mobile devices
-if (window.visualViewport) {
-    window.visualViewport.addEventListener('resize', () => {
-        const infoPane = document.getElementById('infoPane');
-        if (infoPane) {
-            toggleInfoPaneHeight(infoPane);
-        }
-    });
-}
-
-export { infoPane, setupRouteContent, toggleInfoPaneHeight };
+export { infoPane, setupRouteContent };

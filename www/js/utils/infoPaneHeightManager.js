@@ -2,12 +2,17 @@ import { adjustMapSize } from '../map.js';
 
 export const infoPaneHeight = {
     MENU_BAR_HEIGHT: 42,
+    DEFAULT_HEIGHT_RATIO: 0.5, // Default ratio, can be adjusted
+    currentHeightRatio: 0.5,
 
     setHeight(type, params = {}) {
         const infoPane = document.getElementById('infoPane');
         if (!infoPane) return;
 
         let height;
+        const viewportHeight = window.visualViewport
+            ? window.visualViewport.height
+            : window.innerHeight;
 
         switch (type) {
             case 'collapse':
@@ -25,10 +30,12 @@ export const infoPaneHeight = {
                 break;
 
             case 'half':
-                const viewportHeight = window.visualViewport
-                    ? window.visualViewport.height
-                    : window.innerHeight;
-                height = Math.floor(viewportHeight * 0.5);
+                height = Math.floor(viewportHeight * this.currentHeightRatio);
+                infoPane.classList.remove('collapsed');
+                infoPane.classList.add('expanded');
+                break;
+            case 'ratio':
+                height = Math.floor(viewportHeight * this.currentHeightRatio);
                 infoPane.classList.remove('collapsed');
                 infoPane.classList.add('expanded');
                 break;
@@ -36,6 +43,11 @@ export const infoPaneHeight = {
 
         infoPane.style.height = `${height}px`;
         adjustMapSize();
+    },
+
+    setHeightRatio(ratio) {
+        this.currentHeightRatio = ratio;
+        this.setHeight('ratio');
     },
 
     toggleInfoPaneHeight(infoPane, forceCollapse = false) {
