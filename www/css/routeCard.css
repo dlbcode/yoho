@@ -259,7 +259,7 @@
 .journey-section {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 10px;
 }
 
 .departure-section {
