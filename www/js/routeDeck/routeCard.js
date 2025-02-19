@@ -120,6 +120,9 @@ function createRouteCard(flight, endpoint, routeIndex, destination) {
                 </div>
 
                 <div class="route-indicator">
+                    <div class="duration-section">
+                        ${Math.floor(flight.duration.total / 3600)}h ${Math.floor((flight.duration.total % 3600) / 60)}m
+                    </div>
                     ${createRouteArrowSVG(flight.route.length - 1, flight.route).outerHTML}
                 </div>
 
