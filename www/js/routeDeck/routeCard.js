@@ -59,61 +59,39 @@ function createRouteCard(flight, endpoint, routeIndex, destination) {
     card.setAttribute('data-price-value', Math.round(flight.price));
 
     card.innerHTML = `
-        <div class="card-header">
-            <div class="card-route">
-                ${flight.route.map((segment, idx, segments) => {
-                    const airlineLogoUrl = `assets/airline_logos/70px/${segment.airline}.png`;
-                    const isLastSegment = idx === segments.length - 1;
-                    const segmentDate = new Date(segment.local_departure);
-                    
-                    // Calculate layover time if this isn't the first segment
-                    const layoverInfo = idx > 0 ? (() => {
-                        const prevSegment = segments[idx - 1];
-                        const arrivalTime = new Date(prevSegment.local_arrival);
-                        const departureTime = new Date(segment.local_departure);
-                        const layoverMins = Math.round((departureTime - arrivalTime) / (1000 * 60));
-                        const hours = Math.floor(layoverMins / 60);
-                        const mins = layoverMins % 60;
-                        return hours > 0 ? `${hours}h ${mins}m` : `${mins}m`;
-                    })() : '';
-                    
-                    return `
-                        <div class="route-segment">
-                            ${idx > 0 ? `
-                                <div class="segment-info">
-                                    <div class="card-times layover" title="Arrives: ${formatTime(new Date(segments[idx-1].local_arrival))}">
-                                        <span>${layoverInfo}</span>
-                                    </div>
-                                    <span class="segment-iata">${segment.flyFrom}</span>
-                                </div>
-                            ` : `
-                                <div class="segment-info">
-                                    <div class="card-times origin">
-                                        <span>${formatTime(departureDate)}</span>
-                                    </div>
-                                    <span class="segment-iata">${segment.flyFrom}</span>
-                                </div>
-                            `}
-                            <div style="display: flex; flex-direction: column; align-items: center;">
-                                <span class="route-arrow">→</span>
-                                <img src="${airlineLogoUrl}" alt="${segment.airline} Logo" style="width: 20px; height: 20px;">
-                            </div>
-                            ${isLastSegment ? `
-                                <div class="segment-info">
-                                    <div class="card-times destination">
-                                        <span>${formatTime(arrivalDate)}</span>
-                                    </div>
-                                    <span class="segment-iata">${segment.flyTo}</span>
-                                </div>
-                            ` : ''}
-                        </div>
-                    `;
-                }).join('')}
+        <div class="card-content">
+            <img src="assets/airline_logos/70px/${flight.route[0].airline}.png" 
+                 alt="${flight.route[0].airline} Logo" 
+                 class="airline-logo">
+            
+            <div class="time-group departure">
+                <span class="time">${formatTime(departureDate)}</span>
+                <span class="iata">${flight.route[0].flyFrom}</span>
             </div>
-            <div class="total-duration">
-                <span class="duration-text">Total Duration:</span>
+
+            <span class="route-arrow">→</span>
+
+            <div class="time-group arrival">
+                <span class="time">${formatTime(arrivalDate)}</span>
+                <span class="iata">${flight.route[flight.route.length - 1].flyTo}</span>
+            </div>
+
+            <div class="stops-info">
+                ${flight.route.length > 1 
+                  ? `${flight.route.length - 1} stop${flight.route.length > 2 ? 's' : ''}`
+                  : 'Direct'}
+            </div>
+
+            <div class="route-stops">
+                ${flight.route.slice(1, -1).map(segment => 
+                    `<span class="stop-iata">${segment.flyTo}</span>`
+                ).join(' · ')}
+            </div>
+
+            <div class="duration">
                 ${Math.floor(flight.duration.total / 3600)}h ${Math.floor((flight.duration.total % 3600) / 60)}m
             </div>
+
             <div class="card-price">$${flight.price.toFixed(2)}</div>
         </div>
     `;
