@@ -50,11 +50,11 @@
 }
 
 .card-times.origin {
-  color: #fff;
+  color: #ddd;
 }
 
 .card-times.destination {
-  color: #fff;
+  color: #ddd;
 }
 
 .card-times.layover {
@@ -68,9 +68,9 @@
 }
 
 .card-price {
-  font-size: 1.2rem;
-  font-weight: 600;
-  color: #4caf50;
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: #ddd;
   margin-left: auto;
   min-width: 80px;
   text-align: right;
@@ -140,7 +140,7 @@
 }
 
 .segment-iata {
-  color: #fff;
+  color: #ddd;
 }
 
 .duration-label {
@@ -152,7 +152,7 @@
 }
 
 .duration-value {
-  color: #fff;
+  color: #ddd;
 }
 
 .total-duration {
@@ -225,7 +225,7 @@
 }
 
 .duration img {
-  background-color: #fff;
+  background-color: #ddd;
 }
 
 .segments {
@@ -277,7 +277,7 @@
 
 .departure-time,
 .arrival-time {
-  color: #fff;
+  color: #ddd;
   font-size: 1rem;
   font-weight: 500;
 }
