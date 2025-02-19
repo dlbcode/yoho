@@ -17,10 +17,10 @@ function updateFilterState(filterType, values) {
     if (!appState.filterState) {
         initializeFilterState();
     }
-    
-    appState.filterState[filterType] = { ...values };
-    appState.filterStates[appState.currentRouteIndex] = { ...appState.filterState };
-    
+
+    appState.filterState[filterType] = values;
+    appState.filterStates[appState.currentRouteIndex] = appState.filterState;
+
     applyFilters();
     updateFilterHeaders();
     toggleFilterResetIcon(filterType);
@@ -34,10 +34,19 @@ function addTimeFilterTags(filterType, filterTags) {
     const time = appState.filterState[filterType];
     if (!time) return;
     const { start, end } = time;
-    if (start < 6 && end > 0) filterTags.push(`${filterType}-range:00-06`);
-    if (start < 12 && end > 6) filterTags.push(`${filterType}-range:06-12`);
-    if (start < 18 && end > 12) filterTags.push(`${filterType}-range:12-18`);
-    if (end > 18) filterTags.push(`${filterType}-range:18-24`);
+
+    const timeRanges = [
+        { start: 0, end: 6, tag: `${filterType}-range:00-06` },
+        { start: 6, end: 12, tag: `${filterType}-range:06-12` },
+        { start: 12, end: 18, tag: `${filterType}-range:12-18` },
+        { start: 18, end: 24, tag: `${filterType}-range:18-24` }
+    ];
+
+    timeRanges.forEach(range => {
+        if (start < range.end && end > range.start) {
+            filterTags.push(range.tag);
+        }
+    });
 }
 
 function constructFilterTags() {
@@ -59,9 +68,9 @@ function constructFilterTags() {
 function checkTimeRange(tagPrefix, timeValue, filterTags) {
     const relevantTags = filterTags.filter(tag => tag.startsWith(tagPrefix));
     if (!relevantTags.length) return true;
-    
+
     return relevantTags.some(tag => {
-        const [start, end] = tag.replace(tagPrefix, '').split('-').map(Number);
+        const [start, end] = tag.slice(tagPrefix.length).split('-').map(Number);
         return timeValue >= start && timeValue <= end;
     });
 }
@@ -99,14 +108,10 @@ function applyFilters() {
 }
 
 function updateLineVisibility(visibleRouteIds, maxPrice) {
-    // First get all deck-specific lines
     const deckLines = lineManager.getLinesByTags(['type:deck']);
-    
+
     deckLines.forEach(line => {
-        if (!line || !(line instanceof Line)) return;
-        
-        // Skip permanent route lines
-        if (line.tags.has('isPermanent')) return;
+        if (!line || !(line instanceof Line) || line.tags.has('isPermanent')) return;
 
         let price;
         for (let tag of line.tags) {
@@ -116,15 +121,16 @@ function updateLineVisibility(visibleRouteIds, maxPrice) {
             }
         }
 
-        const isVisible = visibleRouteIds.has(line.routeId) && 
+        const isVisible = visibleRouteIds.has(line.routeId) &&
                          (!maxPrice || (price && price <= maxPrice));
 
+        const opacity = isVisible ? 1 : 0;
+        line.visibleLine.setStyle({ opacity });
+
         if (isVisible) {
-            line.visibleLine.setStyle({ opacity: 1 });
             map.addLayer(line.visibleLine);
             map.addLayer(line.invisibleLine);
         } else {
-            line.visibleLine.setStyle({ opacity: 0 });
             map.removeLayer(line.visibleLine);
             map.removeLayer(line.invisibleLine);
         }
