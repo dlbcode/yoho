@@ -147,14 +147,14 @@ const uiHandling = {
         const spaceBelow = viewportHeight - buttonRect.bottom;
         const spaceAbove = buttonRect.top;
 
-        if (spaceBelow < dropdownRect.height && spaceAbove > dropdownRect.height) {
-            dropdownList.style.bottom = '100%';
-            dropdownList.style.top = 'auto';
-            dropdownList.classList.add('dropdown-up');
-        } else {
+        if (spaceAbove > dropdownRect.height && spaceBelow < dropdownRect.height) {
             dropdownList.style.top = '100%';
             dropdownList.style.bottom = 'auto';
             dropdownList.classList.remove('dropdown-up');
+        } else {
+            dropdownList.style.bottom = '100%';
+            dropdownList.style.top = 'auto';
+            dropdownList.classList.add('dropdown-up');
         }
     }
 }
