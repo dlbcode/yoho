@@ -107,7 +107,7 @@
 }
 
 /* Media query for screens less than 800px */
-@media (max-width: 799px) {
+@media (max-width: 880px) {
   .topRow {
     flex-direction: column;
     width: 100%;
@@ -118,7 +118,7 @@
   .date-inputs-container,
   .button-container {
     width: 100%;
-    min-width: 0; /* Allow containers to shrink below min-width */
+    min-width: 0 !important; /* Allow containers to shrink below min-width */
   }
   
   .waypoint-inputs-container {
@@ -212,6 +212,7 @@
   align-items: center;
   position: relative;
   width: 100%;
+  min-width: 372px;
 }
 
 .input-wrapper {
