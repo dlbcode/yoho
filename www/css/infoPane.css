@@ -160,7 +160,7 @@
 #infoPaneContent {
   position: relative;
   flex: 1; /* Take remaining space */
-  overflow: hidden; /* Changed from overflow-y: auto */
+  overflow-y: auto; /* Change from hidden to auto to enable vertical scrolling */
   overflow-x: hidden;
   background-color: #1d1d1d;
   min-height: 0; /* Important for overflow to work */
@@ -327,7 +327,7 @@ tr:hover {
   flex-direction: column;
   overflow: visible;
   z-index: auto;
-  overflow-y: visible;
+  /* Remove duplicate overflow-y declaration */
 }
 
 /* Prevent scroll propagation to map */
@@ -336,4 +336,5 @@ tr:hover {
   width: 100%;
   overflow: auto;
   flex: 1;
+  min-height: 0; /* Add this to ensure proper flex scrolling */
 }
