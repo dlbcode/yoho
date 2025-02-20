@@ -129,12 +129,12 @@ const routeBox = {
             appState.routes[routeNumber] = { tripType: 'oneWay' };
         }
 
-        const container = createElement('div', { className: 'inline-container' });
+        const container = createElement('div', { className: 'topRow' });
         const infoPane = document.getElementById('infoPane');
 
-        const topRow = createElement('div', { id: 'topRow', className: 'top-row' });
-        topRow.append(tripTypePicker(routeNumber), travelersPicker(routeNumber));
-        container.append(topRow);
+        const optionsContainer = createElement('div', { className: 'options-container' });
+        optionsContainer.append(tripTypePicker(routeNumber), travelersPicker(routeNumber));
+        container.append(optionsContainer);
 
         const waypointInputsContainer = createElement('div', { className: 'waypoint-inputs-container' });
         let firstEmptyInput = null;
