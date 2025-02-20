@@ -51,6 +51,7 @@
   z-index: auto;
 }
 
+/* Base styles for the date inputs container */
 .date-inputs-container {
   display: flex;
   gap: 10px;
@@ -58,6 +59,28 @@
   min-width: 372px;
   box-sizing: border-box;
   flex-shrink: 0;
+}
+
+/* Style for individual date input wrappers */
+.date-inputs-container .flatpickr-wrapper {
+  flex: 1;
+  width: 100%; /* Default to full width */
+}
+
+/* When there are two date inputs, adjust their widths */
+.date-inputs-container .flatpickr-wrapper:not(:only-child) {
+  width: calc(50% - 5px); /* Account for the gap between inputs */
+}
+
+/* Style for the actual date input elements */
+.route-box .date-input {
+  display: block;
+  background-color: #444;
+  border: 1px solid #444;
+  border-radius: 5px;
+  padding: 10px;
+  width: 100%; /* Take full width of wrapper */
+  box-sizing: border-box;
 }
 
 .button-container {
@@ -144,16 +167,6 @@
   justify-content: space-between;
   margin: 0;
   width: 100%;
-}
-
-.route-box .date-input {  /* Changed from route-box-popup */
-  display: block;
-  background-color: #444;
-  border: 1px solid #444;
-  border-radius: 5px;
-  padding: 10px;
-  width: calc(50% - 4px); /* Match width with waypoint input */
-  box-sizing: border-box;
 }
 
 .route-box .date-input:focus {
