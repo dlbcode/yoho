@@ -33,15 +33,6 @@
   flex: 0 0 auto; /* Prevent container from growing unnecessarily */
 }
 
-.picker-group {
-  display: flex;
-  gap: 10px;
-  flex: 0 0 185px;
-  min-width: 185px;
-  box-sizing: border-box;
-  flex-shrink: 0;
-}
-
 .waypoint-inputs-container {
   display: flex;
   gap: 10px;
@@ -459,20 +450,6 @@
   border: 1px solid #525252;
   border-radius: 5px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-}
-
-@media (max-width: 600px) {
-  .route-box {  /* Changed from route-box-popup */
-    width: 100%;
-    max-width: none;
-    left: 0;
-    right: 0;
-    margin: auto;
-    border-radius: 5px;
-    border: 1px solid #525252;
-    border-left: none;
-    border-right: none;
-  }
 }
 
 @media (max-width: 600px) {
