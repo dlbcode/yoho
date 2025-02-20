@@ -22,17 +22,8 @@
   min-width: min-content;
 }
 
-.options-container,
-.picker-group,
-.waypoint-inputs-container,
-.date-inputs-container,
-.button-container {
-  display: flex;
-  gap: 10px;
-  box-sizing: border-box;
-}
-
 .options-container {
+  display: flex;
   align-items: center;
   align-self: flex-start;
   justify-content: flex-start;
@@ -41,13 +32,19 @@
 }
 
 .picker-group {
+  display: flex;
+  gap: 10px;
   flex: 0 0 185px;
   min-width: 185px;
+  box-sizing: border-box;
   flex-shrink: 0;
 }
 
 .waypoint-inputs-container {
+  display: flex;
+  gap: 10px;
   flex: 1 1 372px;
+  box-sizing: border-box;
   width: 100%;
   position: relative;
   z-index: auto;
@@ -56,7 +53,10 @@
 
 /* Base styles for the date inputs container */
 .date-inputs-container {
+  display: flex;
+  gap: 10px;
   flex: 1 1 372px;
+  box-sizing: border-box;
   flex-shrink: 0;
 }
 
@@ -83,7 +83,10 @@
 }
 
 .button-container {
+  display: flex;
+  gap: 10px;
   flex: 1 1 372px;
+  box-sizing: border-box;
   flex-shrink: 0;
 }
 
@@ -145,11 +148,6 @@
   padding: 0 12px;
   margin: 0;
   min-width: 100px;
-  border: none;
-  border-radius: 5px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 
 .trip-type-container,
@@ -209,6 +207,7 @@
 }
 
 .waypoint-inputs-container {
+  display: flex;
   justify-content: space-around;
   align-items: center;
   position: relative;
@@ -217,6 +216,7 @@
 
 .input-wrapper {
   position: absolute;
+  flex: 1;
   display: flex;
   width: calc(50% - 4px);
 }
@@ -277,6 +277,15 @@
   border-radius: 5px;
 }
 
+.search-button,
+.remove-button {
+  border: none;
+  border-radius: 5px;
+  padding: 10px; /* Increased padding for better touch interaction */
+  margin-top: 10px;
+  width: calc(50% - 4px);
+}
+
 .search-button {
   background-color: #0f2f56;
 }
@@ -291,6 +300,14 @@
 
 .remove-button:hover {
   background-color: #5e0c01;
+}
+
+#topRow {
+  display: flex;
+  align-items: center;
+  align-self: flex-start;
+  justify-content: flex-start;
+  min-width: 160px;
 }
 
 .travelers-dropdown-btn,
@@ -483,7 +500,14 @@
   }
 }
 
-.options-container > div,
+.inline-container > div {
+  flex: 1;
+}
+
+.options-container > div {
+  flex: 1;
+}
+
 .topRow > div {
   flex: 1;
 }
@@ -512,6 +536,17 @@
 #infoPaneContent {
   overflow: visible; /* Ensure dropdown is not clipped */
   z-index: auto;
+}
+
+/* Search and remove buttons */
+.search-button,
+.remove-button {
+  height: 40px; /* Match height with other elements */
+  padding: 0 12px;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /* Ensure consistent height across all elements */
