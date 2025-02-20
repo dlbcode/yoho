@@ -141,21 +141,36 @@ const uiHandling = {
 
     positionDropdown: function (dropdownBtn, dropdownList) {
         const buttonRect = dropdownBtn.getBoundingClientRect();
-        const dropdownRect = dropdownList.getBoundingClientRect();
         const viewportHeight = window.innerHeight;
+        const viewportWidth = window.innerWidth;
 
-        const spaceBelow = viewportHeight - buttonRect.bottom;
-        const spaceAbove = buttonRect.top;
+        // Set fixed positioning
+        dropdownList.style.position = 'fixed';
+        dropdownList.style.width = `${buttonRect.width}px`;
+        
+        // Calculate position
+        let top = buttonRect.bottom + 2; // 2px gap
+        let left = buttonRect.left;
 
-        if (spaceAbove > dropdownRect.height && spaceBelow < dropdownRect.height) {
-            dropdownList.style.top = '100%';
-            dropdownList.style.bottom = 'auto';
-            dropdownList.classList.remove('dropdown-up');
-        } else {
-            dropdownList.style.bottom = '100%';
-            dropdownList.style.top = 'auto';
+        // Check if dropdown would go off bottom of screen
+        const dropdownHeight = dropdownList.offsetHeight;
+        if (top + dropdownHeight > viewportHeight) {
+            // Position above button if not enough space below
+            top = buttonRect.top - dropdownHeight - 2;
             dropdownList.classList.add('dropdown-up');
+        } else {
+            dropdownList.classList.remove('dropdown-up');
         }
+
+        // Ensure dropdown doesn't go off right edge of screen
+        if (left + buttonRect.width > viewportWidth) {
+            left = viewportWidth - buttonRect.width - 5; // 5px safety margin
+        }
+
+        // Apply calculated position
+        dropdownList.style.top = `${top}px`;
+        dropdownList.style.left = `${left}px`;
+        dropdownList.style.zIndex = '2000'; // Ensure it's above other elements
     }
 }
 

@@ -326,6 +326,8 @@
   border-radius: 5px; /* Add border radius */
   width: 100%;
   box-sizing: border-box; /* Ensure padding is included in the width */
+  position: relative;
+  z-index: 1999;
 }
 
 .travelers-dropdown-btn:hover,
@@ -361,6 +363,17 @@
   width: 16px;
   height: 16px;
   margin-right: 5px;
+}
+
+.travelers-dropdown,
+.trip-type-dropdown {
+  position: fixed;
+  z-index: 2000;
+  margin-top: 2px; /* Add small gap from trigger */
+  background-color: #222;
+  border: 1px solid #525252;
+  border-radius: 5px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
 }
 
 .travelers-dropdown,
@@ -600,4 +613,9 @@
 .trip-type-dropdown li {
   padding: 5px 8px;
   cursor: pointer;
+}
+
+/* Add positioning helper class */
+.dropdown-visible {
+  overflow: visible !important;
 }
