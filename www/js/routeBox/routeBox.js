@@ -256,18 +256,6 @@ const routeBox = {
         return closeButton;
     },
 
-    positionPopup(popup, event, routeNumber) {
-        const rect = event.target.getBoundingClientRect();
-        const screenPadding = 10;
-        const menuBar = document.getElementById('menu-bar');
-        const menuBarRect = menuBar.getBoundingClientRect();
-        const menuBarTop = menuBarRect.top + window.scrollY;
-        let left = Math.min(Math.max(90 * routeNumber, screenPadding), window.innerWidth - popup.offsetWidth - screenPadding);
-        popup.style.left = `${left}px`;
-        let top = Math.max(menuBarTop - popup.offsetHeight - 55, screenPadding);
-        popup.style.top = `${top}px`;
-    },
-
     handleSwapButtonClick(routeNumber) {
         const inputs = document.querySelectorAll('.waypoint-inputs-container input[type="text"]');
         if (inputs.length === 2) {
