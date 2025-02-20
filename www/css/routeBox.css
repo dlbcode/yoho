@@ -27,7 +27,7 @@
   align-items: center;
   align-self: flex-start;
   justify-content: flex-start;
-  min-width: 160px;
+  min-width: 200px;
   height: 40px; /* Add explicit height */
   gap: 10px;
   flex: 0 0 auto; /* Prevent container from growing unnecessarily */
@@ -320,21 +320,37 @@
 
 .travelers-dropdown-btn,
 .trip-type-dropdown-btn {
-  height: 32px;
-  padding: 10px;
+  height: 40px; /* Match height with other elements */
+  padding: 0 12px; /* Match padding with other buttons */
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background-color: #222;
-  color: white;
+  background-color: #444; /* Match background color with input fields */
+  color: #ccc; /* Match text color with input fields */
   cursor: pointer;
-  border-right: 1px solid #666;
+  border: none; /* Remove border */
+  border-radius: 5px; /* Add border radius */
   width: 100%;
-  height: 100%;
-  padding: 0 8px;
+  box-sizing: border-box; /* Ensure padding is included in the width */
+}
+
+.travelers-dropdown-btn:hover,
+.trip-type-dropdown-btn:hover {
+    background-color: #2a4f7c; /* Match hover background color with other buttons */
+}
+
+.travelers-container,
+.trip-type-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 5px;
+  flex: 1; /* Allow the containers to take up available space */
+  min-width: 0; /* Allow the containers to shrink */
 }
 
 .travelers-container,
@@ -529,7 +545,6 @@
 .travelers-container,
 .waypoint-inputs-container {
   position: relative;
-  z-index: 1100; /* Ensure these elements appear above the routeBox */
 }
 
 .trip-type-dropdown,
