@@ -10,7 +10,7 @@
 .route-card {
   background: #222;
   border-radius: 8px;
-  padding: 5px;
+  padding: 0px 10px 0px 10px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
   transition: all 0.2s ease;
 }
@@ -209,7 +209,7 @@
   text-align: left;
   white-space: nowrap;
   width: auto;
-  padding: 0 5px;
+  padding: 5px 5px 0px 5px;
 }
 
 .duration {
@@ -377,6 +377,7 @@
     text-align: right;
     flex-shrink: 0; /* Prevent shrinking */
     font-size: 0.9rem; /* Reduced from 1.1rem */
+    padding: 5px 10px 5px 5px;
   }
 
   .route-segment {
