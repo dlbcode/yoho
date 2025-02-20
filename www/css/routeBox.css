@@ -393,52 +393,10 @@
   list-style: none; /* Remove bullets */
 }
 
-.travelers-dropdown,
-.trip-type-dropdown {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  z-index: 10000; /* Ensure this is higher than infoPane and mapPane */
-  padding: 5px;
-  margin: 0;
-  background-color: #222;
-  min-width: 120px; /* Set minimum width */
-  width: max-content; /* Allow content to define width */
-  white-space: nowrap;
-  border: 1px solid #525252;
-  border-radius: 5px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  box-sizing: border-box;
-  align-items: center;
-  justify-content: space-between;
-  list-style: none; /* Remove bullets */
-}
-
 .travelers-dropdown li,
 .trip-type-dropdown li {
   padding: 5px 8px;
   cursor: pointer;
-}
-
-.travelers-dropdown,
-.trip-type-dropdown {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  z-index: 10000; /* Ensure this is higher than infoPane and mapPane */
-  padding: 5px;
-  margin: 0;
-  background-color: #222;
-  min-width: 120px; /* Set minimum width */
-  width: max-content; /* Allow content to define width */
-  white-space: nowrap;
-  border: 1px solid #525252;
-  border-radius: 5px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  box-sizing: border-box;
-  align-items: center;
-  justify-content: space-between;
-  list-style: none; /* Remove bullets */
 }
 
 .travelers-button {
