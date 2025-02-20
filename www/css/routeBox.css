@@ -29,6 +29,8 @@
   justify-content: flex-start;
   min-width: 160px;
   height: 40px; /* Add explicit height */
+  gap: 10px;
+  flex: 0 0 auto; /* Prevent container from growing unnecessarily */
 }
 
 .picker-group {
@@ -153,6 +155,11 @@
 .trip-type-container,
 .travelers-container {
   min-width: 120px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-width: 80px; /* Reduce minimum width */
+  height: 40px;
 }
 
 .date-input {
@@ -325,6 +332,9 @@
   color: white;
   cursor: pointer;
   border-right: 1px solid #666;
+  width: 100%;
+  height: 100%;
+  padding: 0 8px;
 }
 
 .travelers-container,
@@ -369,6 +379,8 @@
   border: 1px solid #525252;
   border-radius: 5px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  min-width: 120px; /* Set minimum width for dropdown */
+  width: max-content; /* Allow dropdown to be wider than container */
 }
 
 .trip-type-dropdown.dropdown-up {
@@ -589,4 +601,10 @@
   height: 40px; /* Match container height */
   padding: 0 15px !important; /* Adjust padding to maintain text alignment */
   line-height: 40px; /* Center text vertically */
+}
+
+.travelers-dropdown li,
+.trip-type-dropdown li {
+  padding: 5px 8px;
+  cursor: pointer;
 }
