@@ -320,8 +320,8 @@
 
 .travelers-dropdown-btn,
 .trip-type-dropdown-btn {
-  height: 40px; /* Match height with other elements */
-  padding: 0 12px; /* Match padding with other buttons */
+  height: 100%; /* Match height with container */
+  padding: 0 12px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -339,7 +339,7 @@
 
 .travelers-dropdown-btn:hover,
 .trip-type-dropdown-btn:hover {
-    background-color: #2a4f7c; /* Match hover background color with other buttons */
+  background-color: #2a4f7c; /* Match hover background color with other buttons */
 }
 
 .travelers-container,
@@ -351,15 +351,7 @@
   gap: 5px;
   flex: 1; /* Allow the containers to take up available space */
   min-width: 0; /* Allow the containers to shrink */
-}
-
-.travelers-container,
-.trip-type-container {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 5px;
+  height: 40px; /* Consistent height */
 }
 
 .autocomplete-active {
@@ -386,19 +378,67 @@
   top: 100%;
   left: 0;
   z-index: 10000; /* Ensure this is higher than infoPane and mapPane */
-  list-style: none;
   padding: 5px;
   margin: 0;
   background-color: #222;
-  min-width: 40px;
+  min-width: 120px; /* Set minimum width */
+  width: max-content; /* Allow content to define width */
   white-space: nowrap;
   border: 1px solid #525252;
   border-radius: 5px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  min-width: 120px; /* Set minimum width for dropdown */
-  width: max-content; /* Allow dropdown to be wider than container */
+  box-sizing: border-box;
   align-items: center;
   justify-content: space-between;
+  list-style: none; /* Remove bullets */
+}
+
+.travelers-dropdown,
+.trip-type-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 10000; /* Ensure this is higher than infoPane and mapPane */
+  padding: 5px;
+  margin: 0;
+  background-color: #222;
+  min-width: 120px; /* Set minimum width */
+  width: max-content; /* Allow content to define width */
+  white-space: nowrap;
+  border: 1px solid #525252;
+  border-radius: 5px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  box-sizing: border-box;
+  align-items: center;
+  justify-content: space-between;
+  list-style: none; /* Remove bullets */
+}
+
+.travelers-dropdown li,
+.trip-type-dropdown li {
+  padding: 5px 8px;
+  cursor: pointer;
+}
+
+.travelers-dropdown,
+.trip-type-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 10000; /* Ensure this is higher than infoPane and mapPane */
+  padding: 5px;
+  margin: 0;
+  background-color: #222;
+  min-width: 120px; /* Set minimum width */
+  width: max-content; /* Allow content to define width */
+  white-space: nowrap;
+  border: 1px solid #525252;
+  border-radius: 5px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  box-sizing: border-box;
+  align-items: center;
+  justify-content: space-between;
+  list-style: none; /* Remove bullets */
 }
 
 .travelers-button {
