@@ -322,10 +322,10 @@ tr:hover {
 
 .content-wrapper {
   height: 100%;
-  overflow-y: auto;
-  overflow-x: hidden;
   display: flex;
   flex-direction: column;
+  overflow: visible;
+  z-index: auto;
 }
 
 /* Prevent scroll propagation to map */
