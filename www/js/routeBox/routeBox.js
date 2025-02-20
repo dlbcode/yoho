@@ -193,12 +193,20 @@ const routeBox = {
     },
 
     createSwapButton(routeNumber) {
+        const swapButtonContainer = createElement('div', { className: 'swap-button-container' });
         const swapButtonWrapper = createElement('div', { className: 'swap-button-wrapper' });
-        const swapButton = createElement('button', { className: 'swap-route-button', content: '&#8646;', title: 'Swap waypoints', disabled: true });
+        const swapButton = createElement('button', { 
+            className: 'swap-route-button', 
+            content: '&#8646;',
+            title: 'Swap waypoints',
+            disabled: true 
+        });
         swapButton.classList.add('disabled');
         swapButton.onclick = () => this.handleSwapButtonClick(routeNumber);
+        
         swapButtonWrapper.appendChild(swapButton);
-        return swapButtonWrapper;
+        swapButtonContainer.appendChild(swapButtonWrapper);
+        return swapButtonContainer;
     },
 
     createSuggestionsDiv(index) {

@@ -28,6 +28,7 @@
   align-self: flex-start;
   justify-content: flex-start;
   min-width: 160px;
+  height: 40px; /* Add explicit height */
 }
 
 .picker-group {
@@ -49,6 +50,7 @@
   width: 100%;
   position: relative;
   z-index: auto;
+  height: 40px; /* Add explicit height */
 }
 
 /* Base styles for the date inputs container */
@@ -96,6 +98,9 @@
 .input-wrapper {
   flex: 1;
   min-width: 140px;
+  height: 40px;
+  display: flex;
+  align-items: center;
 }
 
 /* Waypoint input fields */
@@ -216,14 +221,32 @@
   right: 0;
   border-radius: 5px;
   background-color: #444;
+  height: 40px;
+  display: flex;
+  align-items: center;
 }
 
 .from-input {
   left: 0;
   border-radius: 5px;
   background-color: #444;
+  height: 40px;
+  display: flex;
+  align-items: center;
 }
 
+/* Add a new wrapper for the swap button */
+.swap-button-container {
+  position: relative;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 5px;
+  z-index: 1;
+}
+
+/* Update swap-button-wrapper to be centered within its container */
 .swap-button-wrapper {
   position: relative;
   display: flex;
@@ -233,7 +256,6 @@
   height: 24px;
   background-color: #222;
   border-radius: 50%;
-  margin: 0 5px;
   z-index: 1;
 }
 
@@ -556,4 +578,10 @@
   width: 100%;
   box-sizing: border-box;
   z-index: 1001;
+}
+
+.waypoint-input {
+  height: 40px; /* Match container height */
+  padding: 0 15px !important; /* Adjust padding to maintain text alignment */
+  line-height: 40px; /* Center text vertically */
 }
