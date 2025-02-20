@@ -548,9 +548,6 @@
   }
 }
 
-.inline-container > div {
-  flex: 1;
-}
 
 .options-container > div {
   flex: 1;
@@ -594,16 +591,6 @@
   display: flex;
   align-items: center;
   justify-content: center;
-}
-
-/* Ensure consistent height across all elements */
-.route-box .inline-container > * {
-  min-height: 32px;
-}
-
-/* Ensure consistent height across all elements */
-.route-box .options-container > * {
-  min-height: 32px;
 }
 
 /* Ensure autocomplete menus stretch across the waypoint inputs container */
