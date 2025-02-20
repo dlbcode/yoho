@@ -326,6 +326,7 @@ tr:hover {
   flex-direction: column;
   overflow: visible;
   z-index: auto;
+  overflow-y: visible;
 }
 
 /* Prevent scroll propagation to map */
