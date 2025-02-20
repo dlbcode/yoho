@@ -160,8 +160,7 @@
 #infoPaneContent {
   position: relative;
   flex: 1; /* Take remaining space */
-  overflow-y: auto; /* Change from hidden to auto to enable vertical scrolling */
-  overflow-x: hidden;
+  overflow-y: scroll; /* Change from hidden to auto to enable vertical scrolling */
   background-color: #1d1d1d;
   min-height: 0; /* Important for overflow to work */
 }

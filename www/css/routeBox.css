@@ -554,11 +554,6 @@
   box-sizing: border-box;
 }
 
-#infoPaneContent {
-  overflow: visible; /* Ensure dropdown is not clipped */
-  z-index: auto;
-}
-
 /* Search and remove buttons */
 .search-button,
 .remove-button {
