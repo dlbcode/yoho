@@ -61,6 +61,13 @@ export function tripTypePicker(routeNumber) {
 
     tripTypeContainer.appendChild(dropdownList);
 
+    // Add event listener to close the dropdown when clicking outside
+    document.addEventListener('click', function (event) {
+        if (!tripTypeContainer.contains(event.target)) {
+            dropdownList.classList.add('hidden');
+        }
+    });
+
     return tripTypeContainer;
 }
 
