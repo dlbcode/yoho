@@ -6,8 +6,13 @@ export function travelersPicker(routeNumber) {
   travelersContainer.className = 'travelers-container';
 
   // Ensure the route exists and has a defined travelers value
-  const route = appState.routes[routeNumber];
-  const travelersCount = route ? route.travelers || 1 : 1;  // Default to 1 if undefined
+  let travelersCount = appState.routes[routeNumber]?.travelers || 1;
+  if (travelersCount < 1) {
+    travelersCount = 1;
+  }
+  if (travelersCount > 10) {
+    travelersCount = 10;
+  }
 
   const dropdownBtn = document.createElement('button');
   dropdownBtn.id = 'travelersDropdownBtn';
@@ -15,10 +20,24 @@ export function travelersPicker(routeNumber) {
   dropdownBtn.innerHTML = `<img src="assets/person.svg" alt="" class="icon-person"> ${travelersCount} <span class="icon-dropdown"></span>`;
   travelersContainer.appendChild(dropdownBtn);
 
-  const dropdownList = document.createElement('ul');
+  const dropdownList = document.createElement('div');
   dropdownList.id = 'travelersDropdown';
   dropdownList.className = 'travelers-dropdown hidden';
-  const travelersOptions = ['1', '2', '3', '4', '5', '6', '7', '8']; // Adjust number of travelers as needed
+
+  const decrementButton = document.createElement('button');
+  decrementButton.textContent = '-';
+  decrementButton.className = 'travelers-button';
+  dropdownList.appendChild(decrementButton);
+
+  const travelersCountDisplay = document.createElement('span');
+  travelersCountDisplay.textContent = travelersCount;
+  travelersCountDisplay.className = 'travelers-count-display';
+  dropdownList.appendChild(travelersCountDisplay);
+
+  const incrementButton = document.createElement('button');
+  incrementButton.textContent = '+';
+  incrementButton.className = 'travelers-button';
+  dropdownList.appendChild(incrementButton);
 
   dropdownBtn.addEventListener('click', () => {
     dropdownList.classList.toggle('hidden');
@@ -40,16 +59,14 @@ export function travelersPicker(routeNumber) {
     }
   });
 
-  travelersOptions.forEach(option => {
-    const listItem = document.createElement('li');
-    listItem.textContent = option;
-    dropdownList.appendChild(listItem);
+  decrementButton.addEventListener('click', () => {
+    travelersCount = Math.max(1, travelersCount - 1);
+    updateTravelersCount(travelersCount, routeNumber, dropdownBtn, travelersCountDisplay);
+  });
 
-    listItem.addEventListener('click', function() {
-      updateState('updateTravelers', { routeNumber, travelers: this.textContent }, 'travelersPicker.travelersPicker');
-      dropdownBtn.innerHTML = `<img src="assets/person.svg" alt="" class="icon-person"> ${this.textContent} <span class="icon-dropdown"></span>`;
-      dropdownList.classList.add('hidden');
-    });
+  incrementButton.addEventListener('click', () => {
+    travelersCount = Math.min(10, travelersCount + 1);
+    updateTravelersCount(travelersCount, routeNumber, dropdownBtn, travelersCountDisplay);
   });
 
   travelersContainer.appendChild(dropdownList);
@@ -62,4 +79,10 @@ export function travelersPicker(routeNumber) {
   });
 
   return travelersContainer;  // Return the complete component
+}
+
+function updateTravelersCount(count, routeNumber, dropdownBtn, travelersCountDisplay) {
+  travelersCountDisplay.textContent = count;
+  dropdownBtn.innerHTML = `<img src="assets/person.svg" alt="" class="icon-person"> ${count} <span class="icon-dropdown"></span>`;
+  updateState('updateTravelers', { routeNumber, travelers: count }, 'travelersPicker.travelersPicker');
 }
