@@ -1,6 +1,6 @@
 .route-box {
   position: relative;
-  z-index: 1;  /* Create stacking context */
+  z-index: 1;
   background-color: #222;
   width: 100%;
   margin: 0 auto;
@@ -94,8 +94,8 @@
 
 .route-box .button-container {
   justify-content: space-between;
-  margin: 0;
   width: 100%;
+  margin: 0;
 }
 
 /* Input wrapper styles */
@@ -179,17 +179,15 @@
   background-repeat: no-repeat;
   background-position: center;
   overflow: hidden;
+  background-size: auto 25px;
 }
 
 .search-button {
   background-color: #0f2f56;
   /* Replace text with magnifying glass icon */
   background-image: url('../assets/search_icon.svg');
-  background-repeat: no-repeat;
-  background-position: center;
-  text-indent: -9999px; /* Hide the text */
-  overflow: hidden; /* Clip any overflowing content */
-  background-size: 25px; /* Adjust the size as needed */
+  /* Hide the text */
+  text-indent: -9999px;
 }
 
 .search-button:hover {
@@ -200,11 +198,9 @@
   background-color: #2d0500;
   /* Replace text with trash icon */
   background-image: url('../assets/trash_icon.svg');
-  background-repeat: no-repeat;
-  background-position: center;
-  text-indent: -9999px; /* Hide the text */
-  overflow: hidden; /* Clip any overflowing content */
-  background-size: 20px; /* Adjust the size as needed */
+  /* Hide the text */
+  text-indent: -9999px;
+  background-size: auto 20px;
 }
 
 .remove-button:hover {
@@ -226,14 +222,14 @@
   min-width: 140px;
 }
 
-.route-box button,  /* Changed from route-box-popup */
-.route-box .search-button,  /* Changed from route-box-popup */
-.route-box .remove-button,  /* Changed from route-box-popup */
-.route-box .popup-close-button {  /* Changed from route-box-popup */
+.route-box button,
+.route-box .search-button,
+.route-box .remove-button,
+.route-box .popup-close-button {
   cursor: pointer;
 }
 
-.route-box .popup-close-button:hover path {  /* Changed from route-box-popup */
+.route-box .popup-close-button:hover path {
   stroke: #ccc;
 }
 
@@ -259,8 +255,8 @@
   color: #ddd;
 }
 
-.to-input {
-  right: 0;
+.to-input,
+.from-input {
   border-radius: 5px;
   background-color: #444;
   height: 40px;
@@ -268,13 +264,12 @@
   align-items: center;
 }
 
+.to-input {
+  right: 0;
+}
+
 .from-input {
   left: 0;
-  border-radius: 5px;
-  background-color: #444;
-  height: 40px;
-  display: flex;
-  align-items: center;
 }
 
 /* Add a new wrapper for the swap button */
@@ -301,15 +296,15 @@
   z-index: 1;
 }
 
-.route-box .waypoint-input {  /* Changed from route-box-popup */
+.route-box .waypoint-input {
   background-color: transparent;
-  padding: 10px 15px 10px 15px; /* Increased padding for better touch interaction */
+  padding: 10px 15px; /* Increased padding for better touch interaction */
   width: 100%;
   box-sizing: border-box;
   display: block;
 }
 
-.route-box .waypoint-input:focus {  /* Changed from route-box-popup */
+.route-box .waypoint-input:focus {
   outline: none;
   background-color: #2a4f7c;
   border-radius: 5px;
@@ -553,10 +548,7 @@
   }
 }
 
-.options-container > div {
-  flex: 1;
-}
-
+.options-container > div,
 .topRow > div {
   flex: 1;
 }
