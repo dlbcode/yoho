@@ -47,6 +47,7 @@ function setupAutocompleteForField(fieldId) {
     let selectionMade = false;
     let initialInputValue = "";
     let currentFocus = -1;
+    let isNavigatingWithKeyboard = false;
 
     inputField.setAttribute('autocomplete', 'new-password');
     inputField.setAttribute('name', 'waypoint-input-' + Date.now());
@@ -172,30 +173,33 @@ function setupAutocompleteForField(fieldId) {
         if (e.key === 'Escape') {
             toggleSuggestionBox(false);
             clearInputField();
-        } else if (e.key === 'ArrowDown') {
-            currentFocus++;
+        } else if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+            e.preventDefault(); // Prevent cursor movement
+            isNavigatingWithKeyboard = true;
+            if (e.key === 'ArrowDown') currentFocus++;
+            else currentFocus--;
             updateActiveItem(suggestionBox.getElementsByTagName('div'));
-        } else if (e.key === 'ArrowUp') {
-            currentFocus--;
-            updateActiveItem(suggestionBox.getElementsByTagName('div'));
-        } else if (e.key === 'Enter') {
+        } else if (e.key === 'Enter' && isNavigatingWithKeyboard) {
             e.preventDefault();
             if (currentFocus > -1) {
                 const items = suggestionBox.getElementsByTagName('div');
                 if (items) items[currentFocus].click();
             }
+            isNavigatingWithKeyboard = false;
         }
     });
 
     inputField.addEventListener('blur', () => {
-        setTimeout(() => {
-            clearInputField(inputField);
-            toggleSuggestionBox(false);
-            if (inputField.value === '' && appState.waypoints.length > 0) {
-                const waypointIndex = parseInt(inputField.id.replace('waypoint-input-', '')) - 1;
-                updateState('removeWaypoint', waypointIndex, 'airportAutocomplete.addEventListener3');
-            }
-        }, 300);
+        if (!isNavigatingWithKeyboard) {
+            setTimeout(() => {
+                clearInputField(inputField);
+                clearSuggestions(fieldId);
+                if (inputField.value === '' && appState.waypoints.length > 0) {
+                    const waypointIndex = parseInt(inputField.id.replace('waypoint-input-', '')) - 1;
+                    updateState('removeWaypoint', waypointIndex, 'airportAutocomplete.addEventListener3');
+                }
+            }, 300);
+        }
     });
 
     if (!window.outsideClickListenerAdded) {
@@ -221,7 +225,26 @@ function setupAutocompleteForField(fieldId) {
 }
 
 function updateSuggestions(inputId, airports) {
-    const suggestionBox = document.getElementById(inputId + 'Suggestions');
+    // Ensure suggestions portal exists
+    const portal = document.getElementById('suggestionsPortal') || 
+        (() => {
+            const p = document.createElement('div');
+            p.id = 'suggestionsPortal';
+            p.className = 'suggestions-portal';
+            document.body.appendChild(p);
+            return p;
+        })();
+
+    // Get or create suggestions box
+    let suggestionBox = document.getElementById(inputId + 'Suggestions');
+    if (!suggestionBox) {
+        suggestionBox = document.createElement('div');
+        suggestionBox.id = inputId + 'Suggestions';
+        suggestionBox.className = 'suggestions';
+        portal.appendChild(suggestionBox);
+    }
+
+    // Clear and update suggestions
     suggestionBox.innerHTML = '';
     let selectionHandledByTouch = false;
 
@@ -308,6 +331,13 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 });
+
+function clearSuggestions(inputId) {
+    const suggestionBox = document.getElementById(inputId + 'Suggestions');
+    if (suggestionBox) {
+        suggestionBox.remove(); // Remove from DOM completely instead of just hiding
+    }
+}
 
 export function getIataFromField(inputId) {
     const fieldValue = document.getElementById(inputId).value;

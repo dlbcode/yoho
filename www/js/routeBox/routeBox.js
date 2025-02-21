@@ -25,6 +25,17 @@ const createElement = (tag, { id, className, content } = {}) => {
     return element;
 };
 
+// Add this function near the top with other initialization code
+function ensureSuggestionsPortal() {
+    if (!document.getElementById('suggestionsPortal')) {
+        const portal = createElement('div', { 
+            id: 'suggestionsPortal',
+            className: 'suggestions-portal'
+        });
+        document.body.appendChild(portal);
+    }
+}
+
 // Modify createWaypointInput to return elements separately so that the suggestions div
 // can be appended directly to the waypoint-inputs-container.
 const createWaypointInput = (index, placeholder, waypoint) => {
@@ -128,6 +139,7 @@ const routeBox = {
     },
 
     setupRouteBox(routeBoxElement, routeNumber) {
+        ensureSuggestionsPortal(); // Add this line at the start
         if (!appState.routes[routeNumber]) {
             appState.routes[routeNumber] = { tripType: 'oneWay' };
         }
@@ -212,12 +224,13 @@ const routeBox = {
         return swapButtonContainer;
     },
 
+    // Update createSuggestionsDiv to use the portal
     createSuggestionsDiv(index) {
         const suggestionsDiv = createElement('div', { 
             id: `waypoint-input-${index + 1}Suggestions`, 
             className: 'suggestions' 
         });
-        document.getElementById('infoPane').appendChild(suggestionsDiv);
+        document.getElementById('suggestionsPortal').appendChild(suggestionsDiv);
         return suggestionsDiv;
     },
 
