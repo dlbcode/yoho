@@ -194,7 +194,8 @@ const routeBox = {
         // Set up listeners first, then focus
         setupWaypointInputListeners(routeNumber);
 
-        if (firstEmptyInput) {
+        // Only focus if not first route box and screen width > 880px
+        if (firstEmptyInput && (routeNumber > 0 || window.innerWidth > 600)) {
             firstEmptyInput.focus();
         }
 
