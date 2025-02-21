@@ -10,8 +10,8 @@ export function travelersPicker(routeNumber) {
   if (travelersCount < 1) {
     travelersCount = 1;
   }
-  if (travelersCount > 10) {
-    travelersCount = 10;
+  if (travelersCount > 9) {
+    travelersCount = 9;
   }
 
   const dropdownBtn = document.createElement('button');
@@ -65,7 +65,7 @@ export function travelersPicker(routeNumber) {
   });
 
   incrementButton.addEventListener('click', () => {
-    travelersCount = Math.min(10, travelersCount + 1);
+    travelersCount = Math.min(9, travelersCount + 1);
     updateTravelersCount(travelersCount, routeNumber, dropdownBtn, travelersCountDisplay);
   });
 

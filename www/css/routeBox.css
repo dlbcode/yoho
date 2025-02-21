@@ -385,7 +385,6 @@
   padding: 5px;
   margin: 0;
   background-color: #222;
-  min-width: 120px; /* Set minimum width */
   width: max-content; /* Allow content to define width */
   white-space: nowrap;
   border: 1px solid #525252;
