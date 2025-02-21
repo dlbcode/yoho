@@ -517,7 +517,7 @@
   /* Mobile-specific styles */
   [id$='Suggestions'] {
     position: fixed !important; /* Force fixed positioning */
-    top: 50px !important;
+    top: 40px !important;
     left: 0 !important;
     width: 100% !important;
     max-height: none !important;
