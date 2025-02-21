@@ -42,6 +42,9 @@
   position: relative;
   z-index: auto;
   height: 40px;
+  justify-content: space-around;
+  align-items: center;
+  min-width: 372px;
 }
 
 /* Base styles for the date inputs container */
@@ -75,6 +78,12 @@
   box-sizing: border-box;
 }
 
+.route-box .date-input:focus {
+  outline: none;
+  border: #2a4f7c;
+  background-color: #2a4f7c;
+}
+
 .button-container {
   display: flex;
   gap: 10px;
@@ -83,13 +92,18 @@
   flex-shrink: 0;
 }
 
+.route-box .button-container {
+  justify-content: space-between;
+  margin: 0;
+  width: 100%;
+}
+
 /* Input wrapper styles */
 .input-wrapper {
+  position: absolute;
   flex: 1;
-  min-width: 140px;
-  height: 40px;
   display: flex;
-  align-items: center;
+  width: calc(50% - 4px);
 }
 
 /* Waypoint input fields */
@@ -97,6 +111,21 @@
   min-width: 182px !important;
   flex: 1 1 182px;
   box-sizing: border-box;
+}
+
+.waypoint-input {
+  height: 40px; /* Match container height */
+  padding: 0 15px !important; /* Adjust padding to maintain text alignment */
+  line-height: 40px; /* Center text vertically */
+  background-color: transparent;
+  box-sizing: border-box;
+  display: block;
+}
+
+.waypoint-input:focus {
+  outline: none;
+  background-color: #2a4f7c;
+  border-radius: 5px;
 }
 
 /* Media query for screens less than 800px */
@@ -138,9 +167,48 @@
 .search-button,
 .remove-button {
   height: 40px;
-  padding: 0 12px;
+  padding: 10px;
   margin: 0;
-  min-width: 100px;
+  margin-top: 10px;
+  width: calc(50% - 4px);
+  border: none;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-repeat: no-repeat;
+  background-position: center;
+  overflow: hidden;
+}
+
+.search-button {
+  background-color: #0f2f56;
+  /* Replace text with magnifying glass icon */
+  background-image: url('../assets/search_icon.svg');
+  background-repeat: no-repeat;
+  background-position: center;
+  text-indent: -9999px; /* Hide the text */
+  overflow: hidden; /* Clip any overflowing content */
+  background-size: 25px; /* Adjust the size as needed */
+}
+
+.search-button:hover {
+  background-color: #2a4f7c;
+}
+
+.remove-button {
+  background-color: #2d0500;
+  /* Replace text with trash icon */
+  background-image: url('../assets/trash_icon.svg');
+  background-repeat: no-repeat;
+  background-position: center;
+  text-indent: -9999px; /* Hide the text */
+  overflow: hidden; /* Clip any overflowing content */
+  background-size: 20px; /* Adjust the size as needed */
+}
+
+.remove-button:hover {
+  background-color: #5e0c01;
 }
 
 .trip-type-container,
@@ -169,19 +237,6 @@
   stroke: #ccc;
 }
 
-.route-box .button-container {  /* Changed from route-box-popup */
-  display: flex;
-  justify-content: space-between;
-  margin: 0;
-  width: 100%;
-}
-
-.route-box .date-input:focus {
-  outline: none;
-  border: #2a4f7c;
-  background-color: #2a4f7c;
-}
-
 .swap-route-button {
   margin: 0 5px;
   padding: 0;
@@ -202,22 +257,6 @@
 .swap-route-button:hover {
   background-color: transparent;
   color: #ddd;
-}
-
-.waypoint-inputs-container {
-  display: flex;
-  justify-content: space-around;
-  align-items: center;
-  position: relative;
-  width: 100%;
-  min-width: 372px;
-}
-
-.input-wrapper {
-  position: absolute;
-  flex: 1;
-  display: flex;
-  width: calc(50% - 4px);
 }
 
 .to-input {
@@ -276,45 +315,6 @@
   border-radius: 5px;
 }
 
-.search-button,
-.remove-button {
-  border: none;
-  border-radius: 5px;
-  padding: 10px; /* Increased padding for better touch interaction */
-  margin-top: 10px;
-  width: calc(50% - 4px);
-}
-
-.search-button {
-  background-color: #0f2f56;
-  /* Replace text with magnifying glass icon */
-  background-image: url('../assets/search_icon.svg');
-  background-repeat: no-repeat;
-  background-position: center;
-  text-indent: -9999px; /* Hide the text */
-  overflow: hidden; /* Clip any overflowing content */
-  background-size: 25px; /* Adjust the size as needed */
-}
-
-.search-button:hover {
-  background-color: #2a4f7c;
-}
-
-.remove-button {
-  background-color: #2d0500;
-  /* Replace text with trash icon */
-  background-image: url('../assets/trash_icon.svg');
-  background-repeat: no-repeat;
-  background-position: center;
-  text-indent: -9999px; /* Hide the text */
-  overflow: hidden; /* Clip any overflowing content */
-  background-size: 20px; /* Adjust the size as needed */
-}
-
-.remove-button:hover {
-  background-color: #5e0c01;
-}
-
 #topRow {
   display: flex;
   align-items: center;
@@ -341,7 +341,7 @@
   width: 100%;
   box-sizing: border-box; /* Ensure padding is included in the width */
   position: relative;
-  z-index: 100;
+  z-index: 10;
 }
 
 .travelers-dropdown-btn:hover,
@@ -384,7 +384,7 @@
   position: absolute;
   top: 100%;
   left: 0;
-  z-index: 10000; /* Ensure this is higher than infoPane and mapPane */
+  z-index: 100; /* Ensure this is higher than infoPane and mapPane */
   padding: 5px;
   margin: 0;
   background-color: #222;
@@ -440,7 +440,7 @@
   background-color: #2a4f7c;
   color: #ccc;
   position: absolute;
-  z-index: 10000;  /* Keep suggestions above overlay */
+  z-index: 100;  /* Keep suggestions above overlay */
   max-height: 200px;
   overflow-y: auto;
   display: none;
@@ -476,7 +476,7 @@
     width: 100%;
     height: auto;
     background-color: #222;
-    z-index: 10000;
+    z-index: 100;
     padding: 15px 15px 15px 40px; /* Add padding to leave space for the back button */
     font-size: 18px;
     box-sizing: border-box;
@@ -490,7 +490,7 @@
     width: 100%;
     height: 100%;
     background-color: #2a4f7c;
-    z-index: 10000;
+    z-index: 100;
     overflow-y: auto;
   }
 
@@ -531,7 +531,7 @@
     padding: 0 !important;
     border: none !important;
     border-radius: 0 !important;
-    z-index: 10000 !important;
+    z-index: 100 !important;
   }
 
   /* Style suggestion items for better touch targets */
@@ -548,7 +548,7 @@
     height: calc(100vh - 50px) !important;
     max-height: none !important;
     background-color: #2a4f7c !important;
-    z-index: 10000 !important;
+    z-index: 100 !important;
     overflow-y: auto !important;
   }
 }
@@ -620,16 +620,6 @@
   overflow: visible !important;
 }
 
-.search-button {
-  background-color: #0f2f56;
-  /* Replace text with magnifying glass icon */
-  background-image: url('../assets/search_icon.svg');
-  background-repeat: no-repeat;
-  background-position: center;
-  overflow: hidden; /* Clip any overflowing content */
-  background-size: 25px; /* Adjust the size as needed */
-}
-
 .route-box-overlay {
   position: absolute;  /* Change to absolute to match routeBox context */
   top: 0;
@@ -641,7 +631,7 @@
   visibility: hidden;
   transition: opacity 0.2s ease-in-out;
   pointer-events: none;
-  z-index: 9000;  /* Lower than suggestions (10000) but higher than route box content */
+  z-index: 90;
 }
 
 .route-box-overlay.active {
