@@ -287,6 +287,13 @@
 
 .search-button {
   background-color: #0f2f56;
+  /* Replace text with magnifying glass icon */
+  background-image: url('../assets/search_icon.svg');
+  background-repeat: no-repeat;
+  background-position: center;
+  text-indent: -9999px; /* Hide the text */
+  overflow: hidden; /* Clip any overflowing content */
+  background-size: 20px; /* Adjust the size as needed */
 }
 
 .search-button:hover {
@@ -593,4 +600,14 @@
 /* Add positioning helper class */
 .dropdown-visible {
   overflow: visible !important;
+}
+
+.search-button {
+  background-color: #0f2f56;
+  /* Replace text with magnifying glass icon */
+  background-image: url('../assets/search_icon.svg');
+  background-repeat: no-repeat;
+  background-position: center;
+  overflow: hidden; /* Clip any overflowing content */
+  background-size: 25px; /* Adjust the size as needed */
 }
