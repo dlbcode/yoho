@@ -1,6 +1,6 @@
 .route-box {
   position: relative;
-  z-index: auto;
+  z-index: 1;  /* Create stacking context */
   background-color: #222;
   width: 100%;
   margin: 0 auto;
@@ -440,7 +440,7 @@
   background-color: #2a4f7c;
   color: #ccc;
   position: absolute;
-  z-index: 1;
+  z-index: 10000;  /* Keep suggestions above overlay */
   max-height: 200px;
   overflow-y: auto;
   display: none;
@@ -617,4 +617,23 @@
   background-position: center;
   overflow: hidden; /* Clip any overflowing content */
   background-size: 25px; /* Adjust the size as needed */
+}
+
+.route-box-overlay {
+  position: absolute;  /* Change to absolute to match routeBox context */
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s ease-in-out;
+  pointer-events: none;
+  z-index: 9000;  /* Lower than suggestions (10000) but higher than route box content */
+}
+
+.route-box-overlay.active {
+  opacity: 1;
+  visibility: visible;
 }

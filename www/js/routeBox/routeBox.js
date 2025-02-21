@@ -77,6 +77,17 @@ const expandInput = (input) => {
     input.classList.add('expanded-input');
     const suggestionsDiv = document.getElementById(`${input.id}Suggestions`);
     if (suggestionsDiv) suggestionsDiv.classList.add('expanded-suggestions');
+
+    // Create and add overlay as a child of route-box
+    const routeBox = document.querySelector('.route-box');
+    const overlay = document.createElement('div');
+    overlay.className = 'route-box-overlay';
+    routeBox.appendChild(overlay);
+    
+    // Trigger reflow then add active class for transition
+    overlay.offsetHeight;
+    overlay.classList.add('active');
+
     const inputWrapper = input.parentElement;
     const backButton = createElement('button', { className: 'back-button', content: `
         <svg viewBox="0 0 24 24">
@@ -89,6 +100,9 @@ const expandInput = (input) => {
         event.preventDefault();
         event.stopPropagation();
         input.value = '';
+        // Remove overlay when back button is clicked
+        overlay.classList.remove('active');
+        setTimeout(() => overlay.remove(), 200);
         updateState('removeWaypoint', parseInt(input.id.replace('waypoint-input-', '')) - 1, 'routeBox.expandInput');
         routeHandling.updateRoutesArray();
         input.blur();
@@ -102,6 +116,13 @@ const revertInput = (input) => {
     if (suggestionsDiv) suggestionsDiv.classList.remove('expanded-suggestions');
     const backButton = input.parentElement.querySelector('.back-button');
     if (backButton) backButton.remove();
+    
+    // Remove overlay with fade out animation
+    const overlay = document.querySelector('.route-box-overlay');
+    if (overlay) {
+        overlay.classList.remove('active');
+        setTimeout(() => overlay.remove(), 200);
+    }
 };
 
 const setWaypointInputs = (routeNumber) => {
