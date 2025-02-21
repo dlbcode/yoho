@@ -384,7 +384,7 @@
   position: absolute;
   top: 100%;
   left: 0;
-  z-index: 10000; /* Ensure this is higher than infoPane and mapPane */
+  z-index: 2000; /* Ensure this is higher than infoPane and mapPane */
   padding: 5px;
   margin: 0;
   background-color: #222;
@@ -476,7 +476,7 @@
     width: 100%;
     height: auto;
     background-color: #222;
-    z-index: 10000;
+    z-index: 2000;
     padding: 15px 15px 15px 40px; /* Add padding to leave space for the back button */
     font-size: 18px;
     box-sizing: border-box;
@@ -490,7 +490,7 @@
     width: 100%;
     height: 100%;
     background-color: #2a4f7c;
-    z-index: 10000;
+    z-index: 2000;
     overflow-y: auto;
   }
 
@@ -531,7 +531,7 @@
     padding: 0 !important;
     border: none !important;
     border-radius: 0 !important;
-    z-index: 10000 !important;
+    z-index: 2000 !important;
   }
 
   /* Style suggestion items for better touch targets */
