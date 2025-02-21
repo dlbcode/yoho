@@ -24,7 +24,8 @@ export const infoPaneHeight = {
             case 'content':
                 const { contentElement } = params;
                 if (!contentElement) return;
-                height = contentElement.offsetHeight + this.MENU_BAR_HEIGHT;
+                // Add a small buffer to prevent scrollbar
+                height = Math.ceil(contentElement.offsetHeight + this.MENU_BAR_HEIGHT + 1);
                 infoPane.classList.remove('collapsed');
                 infoPane.classList.add('expanded');
                 break;
@@ -40,6 +41,11 @@ export const infoPaneHeight = {
                 infoPane.classList.add('expanded');
                 break;
         }
+
+        // Ensure height doesn't exceed viewport
+        const maxHeight = viewportHeight - parseFloat(getComputedStyle(document.documentElement)
+            .getPropertyValue('--bottom-bar-height'));
+        height = Math.min(height, maxHeight);
 
         infoPane.style.height = `${height}px`;
         adjustMapSize();
