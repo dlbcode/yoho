@@ -42,12 +42,20 @@ export function initDatePicker(inputId, routeNumber) {
                 const input = instance.altInput;
                 const calendar = instance.calendarContainer;
                 const inputRect = input.getBoundingClientRect();
+                const calendarWidth = calendar.offsetWidth;
                 const spaceAbove = inputRect.top;
                 const spaceBelow = window.innerHeight - inputRect.bottom;
                 
                 // Reset any previous positioning
                 calendar.style.position = 'fixed';
-                calendar.style.left = `${inputRect.left}px`;
+                
+                // For return date input (second date picker), align to right edge
+                if (dateType === 'return') {
+                    calendar.style.left = `${inputRect.right - calendarWidth}px`;
+                } else {
+                    // For depart date input, keep left alignment
+                    calendar.style.left = `${inputRect.left}px`;
+                }
                 
                 if (spaceAbove >= CALENDAR_HEIGHT) {
                     // Show above if there's enough space
