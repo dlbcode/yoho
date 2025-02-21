@@ -525,8 +525,8 @@
     top: 50px !important;
     left: 0 !important;
     width: 100% !important;
-    height: calc(100vh - 50px) !important;
-    max-height: none !important;
+    height: auto !important;
+    max-height: calc(80vh - 50px) !important; /* Match the JS setting */
     margin: 0 !important;
     padding: 0 !important;
     border: none !important;

@@ -83,8 +83,8 @@ function setupAutocompleteForField(fieldId) {
                 top: '50px',
                 left: '0',
                 width: '100%',
-                height: 'calc(100vh - 50px)',
-                maxHeight: 'none',
+                maxHeight: 'calc(80vh - 50px)', // Set maximum height to 80% of viewport height
+                height: 'auto', // Let it adapt to content
                 zIndex: '10000'
             });
         } else {
@@ -335,7 +335,11 @@ document.addEventListener('DOMContentLoaded', () => {
 function clearSuggestions(inputId) {
     const suggestionBox = document.getElementById(inputId + 'Suggestions');
     if (suggestionBox) {
-        suggestionBox.remove(); // Remove from DOM completely instead of just hiding
+        suggestionBox.remove(); // Remove from DOM completely 
+        const portal = document.getElementById('suggestionsPortal');
+        if (portal && portal.children.length === 0) {
+            portal.remove(); // Clean up empty portal
+        }
     }
 }
 
