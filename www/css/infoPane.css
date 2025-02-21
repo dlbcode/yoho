@@ -337,3 +337,15 @@ tr:hover {
   flex: 1;
   min-height: 0; /* Add this to ensure proper flex scrolling */
 }
+
+/* Add dimming overlay styles */
+#dimmingOverlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent black */
+    z-index: 1200; /* Ensure it's above other elements but below the expanded input */
+    display: none; /* Hidden by default */
+}

@@ -462,7 +462,7 @@
   background-color: #2a4f7c;
   color: #ccc;
   overflow-y: auto;
-  z-index: 1000;
+  z-index: 2000;
   border: 1px solid #525252;
   border-radius: 5px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);

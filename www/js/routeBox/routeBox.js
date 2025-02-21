@@ -7,6 +7,7 @@ import { tripTypePicker, handleTripTypeChange } from './tripTypePicker.js';
 import { removeRoute, removeRouteButton } from './removeRoute.js';
 import { routeHandling } from '../routeHandling.js';
 import { setupRouteContent } from '../infoPane.js';
+import { uiHandling } from '../uiHandling.js';
 
 const loadCSS = (href) => {
     const link = document.createElement('link');
@@ -94,6 +95,7 @@ const expandInput = (input) => {
         input.blur();
     };
     inputWrapper.appendChild(backButton);
+    uiHandling.dimInfoPane(); // Show the dimming overlay
 };
 
 const revertInput = (input) => {
@@ -102,6 +104,7 @@ const revertInput = (input) => {
     if (suggestionsDiv) suggestionsDiv.classList.remove('expanded-suggestions');
     const backButton = input.parentElement.querySelector('.back-button');
     if (backButton) backButton.remove();
+    uiHandling.unDim(); // Hide the dimming overlay
 };
 
 const setWaypointInputs = (routeNumber) => {
