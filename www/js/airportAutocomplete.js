@@ -82,8 +82,8 @@ function setupAutocompleteForField(fieldId) {
                 top: '50px',
                 left: '0',
                 width: '100%',
-                height: 'calc(100vh - 50px)',
-                maxHeight: 'none',
+                maxHeight: 'calc(100vh - 50px)',
+                minHeight: 'none',
                 zIndex: '10000'
             });
         } else {
