@@ -34,6 +34,14 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  color: #999;
+  font-size: 14px;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.resetIcon:hover {
+  color: #fff;
 }
 
 .price-slider {
@@ -152,6 +160,8 @@
   gap: 0.5rem;
   cursor: pointer;
   transition: background-color 0.2s;
+  min-width: 100px; /* Add minimum width for better layout */
+  justify-content: space-between; /* Spread out the elements */
 }
 
 .filter-button:hover {
@@ -160,6 +170,13 @@
 
 .filter-button.active {
   background: #2a4f7c;
+}
+
+.filter-header {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 150px; /* Prevent very long price values from breaking layout */
 }
 
 /* Sort button and dropdown */

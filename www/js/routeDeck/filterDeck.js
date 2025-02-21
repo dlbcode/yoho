@@ -26,7 +26,15 @@ function updateFilterState(filterType, values) {
     toggleFilterResetIcon(filterType);
 }
 
+// Update the resetFilter function
 function resetFilter(filterType) {
+    const filterButton = document.querySelector(`[data-filter="${filterType}"]`);
+    const filterHeader = filterButton?.querySelector('.filter-header');
+    
+    if (filterType === 'price' && filterHeader) {
+        filterHeader.textContent = 'Price';
+    }
+    
     updateFilterState(filterType, DEFAULT_FILTER_STATE[filterType]);
 }
 
@@ -163,21 +171,25 @@ function formatTime(decimalTime) {
     return `${displayHours}:${minutes.toString().padStart(2, '0')} ${period}`;
 }
 
+// Update the toggleFilterResetIcon function
 function toggleFilterResetIcon(filterType) {
     const filterIcon = document.getElementById(`${filterType}Filter`);
     const resetIcon = document.getElementById(`reset${filterType.charAt(0).toUpperCase() + filterType.slice(1)}Filter`);
-    const filterButtonSpan = filterIcon?.closest('.filter-header, .filterButton');
-
-    if (!filterIcon || !resetIcon || !filterButtonSpan) return;
+    
+    if (!filterIcon || !resetIcon) return;
 
     const filterValue = appState.filterState[filterType];
-    const isNonDefault = filterValue && 
-        JSON.stringify(filterValue) !== JSON.stringify(DEFAULT_FILTER_STATE[filterType]);
+    let isNonDefault;
+
+    if (filterType === 'price') {
+        isNonDefault = filterValue && filterValue.value !== null;
+    } else {
+        isNonDefault = filterValue && 
+            JSON.stringify(filterValue) !== JSON.stringify(DEFAULT_FILTER_STATE[filterType]);
+    }
 
     resetIcon.classList.toggle('hidden', !isNonDefault);
     filterIcon.classList.toggle('hidden', isNonDefault);
-    filterButtonSpan.classList.toggle('filterButton', isNonDefault);
-    filterButtonSpan.classList.toggle('filter-header', !isNonDefault);
 }
 
 // Consolidate reset logic and improve conciseness

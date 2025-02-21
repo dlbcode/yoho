@@ -185,11 +185,17 @@ const sliderFilter = {
     updateFilterStateAndLabel: function (filterType, values, label) {
         let newValues;
         let labelText;
+        const filterButton = document.querySelector(`[data-filter="${filterType}"]`);
+        const filterHeader = filterButton?.querySelector('.filter-header');
 
         if (filterType === 'price') {
             const priceValue = parseFloat(values[0].replace('$', ''));
             newValues = { value: priceValue };
             labelText = `up to: $${priceValue}`;
+            // Update the filter button text
+            if (filterHeader) {
+                filterHeader.textContent = `Price: $${priceValue}`;
+            }
         } else {
             const [start, end] = values.map(parseFloat);
             newValues = { start, end: end || start };
