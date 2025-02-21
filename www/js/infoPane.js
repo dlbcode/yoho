@@ -8,13 +8,21 @@ import { lineManager } from './lineManager.js';
 import { infoPaneHeight } from './utils/infoPaneHeightManager.js';
 
 const infoPane = {
-    routeDecks: new Map(), // Store route decks by route index
+    routeDecks: new Map(),
 
     init() {
         document.addEventListener('stateChange', this.handleStateChange.bind(this));
         document.getElementById('tripButton').addEventListener('click', this.handleTripButtonClick.bind(this));
         this.addPlusButton();
-        this.handlePlusButtonClick(); // Simulate '+' button click on initial load
+        
+        // Check if URL contains waypoints parameter
+        const urlParams = new URLSearchParams(window.location.search);
+        const hasWaypointsInUrl = urlParams.has('waypoints');
+        
+        // Only trigger plus button click if there are no waypoints and no waypoints in URL
+        if (appState.waypoints.length === 0 && !hasWaypointsInUrl) {
+            this.handlePlusButtonClick();
+        }
     },
 
     handleTripButtonClick() {
