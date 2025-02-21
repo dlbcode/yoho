@@ -32,10 +32,9 @@ const createWaypointInput = (index, placeholder, waypoint) => {
         id: `waypoint-input-${index + 1}`, 
         className: 'waypoint-input', 
         value: waypoint ? `${waypoint.city}, (${waypoint.iata_code})` : '', 
-        placeholder 
+        placeholder: placeholder // Add this line to set the placeholder
     });
     input.type = 'text';
-    // Only append the input here.
     inputWrapper.appendChild(input);
     return { inputWrapper, input };
 };
@@ -159,9 +158,13 @@ const routeBox = {
 
         const waypointInputsContainer = createElement('div', { className: 'waypoint-inputs-container' });
         let firstEmptyInput = null;
-        ['From', 'Where to?'].forEach((placeholder, i) => {
+        
+        // Add explicit placeholders for each input
+        const placeholders = ['From', 'Where to?'];
+        placeholders.forEach((placeholder, i) => {
             const index = routeNumber * 2 + i;
-            const { inputWrapper } = createWaypointInput(index, placeholder, appState.waypoints[index]);
+            const { inputWrapper, input } = createWaypointInput(index, placeholder, appState.waypoints[index]);
+            input.placeholder = placeholder; // Explicitly set the placeholder
             inputWrapper.classList.add(i === 0 ? 'from-input' : 'to-input');
             waypointInputsContainer.append(inputWrapper);
             
@@ -170,7 +173,7 @@ const routeBox = {
             inputWrapper.append(suggestionsDiv);
             
             if (!firstEmptyInput && !appState.waypoints[index]) {
-                firstEmptyInput = inputWrapper.querySelector('input');
+                firstEmptyInput = input;
             }
         });
         waypointInputsContainer.insertBefore(this.createSwapButton(routeNumber), waypointInputsContainer.children[1]);
