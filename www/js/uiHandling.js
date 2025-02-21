@@ -180,25 +180,7 @@ const uiHandling = {
         dropdownList.style.top = `${top}px`;
         dropdownList.style.left = `${left}px`;
         dropdownList.style.zIndex = '2000';
-    },
-
-    dimInfoPane: function () {
-        let overlay = document.getElementById('dimmingOverlay');
-        if (!overlay) {
-            overlay = document.createElement('div');
-            overlay.id = 'dimmingOverlay';
-            document.getElementById('infoPane').appendChild(overlay);
-        }
-        overlay.style.display = 'block';
-    },
-    
-    unDim: function () {
-        const overlay = document.getElementById('dimmingOverlay');
-        if (overlay) {
-            overlay.style.display = 'none';
-        }
-    },
-    
+    }
 }
 
 window.addEventListener('resize', () => {

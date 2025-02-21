@@ -7,7 +7,6 @@ import { tripTypePicker, handleTripTypeChange } from './tripTypePicker.js';
 import { removeRoute, removeRouteButton } from './removeRoute.js';
 import { routeHandling } from '../routeHandling.js';
 import { setupRouteContent } from '../infoPane.js';
-import { uiHandling } from '../uiHandling.js';
 
 const loadCSS = (href) => {
     const link = document.createElement('link');
@@ -24,17 +23,6 @@ const createElement = (tag, { id, className, content } = {}) => {
     if (content) element.innerHTML = content;
     return element;
 };
-
-// Add this function near the top with other initialization code
-function ensureSuggestionsPortal() {
-    if (!document.getElementById('suggestionsPortal')) {
-        const portal = createElement('div', { 
-            id: 'suggestionsPortal',
-            className: 'suggestions-portal'
-        });
-        document.body.appendChild(portal);
-    }
-}
 
 // Modify createWaypointInput to return elements separately so that the suggestions div
 // can be appended directly to the waypoint-inputs-container.
@@ -106,7 +94,6 @@ const expandInput = (input) => {
         input.blur();
     };
     inputWrapper.appendChild(backButton);
-    uiHandling.dimInfoPane(); // Show the dimming overlay
 };
 
 const revertInput = (input) => {
@@ -115,7 +102,6 @@ const revertInput = (input) => {
     if (suggestionsDiv) suggestionsDiv.classList.remove('expanded-suggestions');
     const backButton = input.parentElement.querySelector('.back-button');
     if (backButton) backButton.remove();
-    uiHandling.unDim(); // Hide the dimming overlay
 };
 
 const setWaypointInputs = (routeNumber) => {
@@ -139,7 +125,6 @@ const routeBox = {
     },
 
     setupRouteBox(routeBoxElement, routeNumber) {
-        ensureSuggestionsPortal(); // Add this line at the start
         if (!appState.routes[routeNumber]) {
             appState.routes[routeNumber] = { tripType: 'oneWay' };
         }
@@ -224,13 +209,12 @@ const routeBox = {
         return swapButtonContainer;
     },
 
-    // Update createSuggestionsDiv to use the portal
     createSuggestionsDiv(index) {
         const suggestionsDiv = createElement('div', { 
             id: `waypoint-input-${index + 1}Suggestions`, 
             className: 'suggestions' 
         });
-        document.getElementById('suggestionsPortal').appendChild(suggestionsDiv);
+        document.getElementById('infoPane').appendChild(suggestionsDiv);
         return suggestionsDiv;
     },
 

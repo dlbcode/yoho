@@ -384,7 +384,7 @@
   position: absolute;
   top: 100%;
   left: 0;
-  z-index: 2000; /* Ensure this is higher than infoPane and mapPane */
+  z-index: 10000; /* Ensure this is higher than infoPane and mapPane */
   padding: 5px;
   margin: 0;
   background-color: #222;
@@ -462,7 +462,7 @@
   background-color: #2a4f7c;
   color: #ccc;
   overflow-y: auto;
-  z-index: 2000;
+  z-index: 1000;
   border: 1px solid #525252;
   border-radius: 5px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
@@ -476,7 +476,7 @@
     width: 100%;
     height: auto;
     background-color: #222;
-    z-index: 2000;
+    z-index: 10000;
     padding: 15px 15px 15px 40px; /* Add padding to leave space for the back button */
     font-size: 18px;
     box-sizing: border-box;
@@ -490,7 +490,7 @@
     width: 100%;
     height: 100%;
     background-color: #2a4f7c;
-    z-index: 2000;
+    z-index: 10000;
     overflow-y: auto;
   }
 
@@ -525,13 +525,13 @@
     top: 50px !important;
     left: 0 !important;
     width: 100% !important;
-    height: auto !important;
-    max-height: calc(80vh - 50px) !important; /* Match the JS setting */
+    height: calc(100vh - 50px) !important;
+    max-height: none !important;
     margin: 0 !important;
     padding: 0 !important;
     border: none !important;
     border-radius: 0 !important;
-    z-index: 2000 !important;
+    z-index: 10000 !important;
   }
 
   /* Style suggestion items for better touch targets */

@@ -47,7 +47,6 @@ function setupAutocompleteForField(fieldId) {
     let selectionMade = false;
     let initialInputValue = "";
     let currentFocus = -1;
-    let isNavigatingWithKeyboard = false;
 
     inputField.setAttribute('autocomplete', 'new-password');
     inputField.setAttribute('name', 'waypoint-input-' + Date.now());
@@ -83,8 +82,8 @@ function setupAutocompleteForField(fieldId) {
                 top: '50px',
                 left: '0',
                 width: '100%',
-                maxHeight: 'calc(80vh - 50px)', // Set maximum height to 80% of viewport height
-                height: 'auto', // Let it adapt to content
+                height: 'calc(100vh - 50px)',
+                maxHeight: 'none',
                 zIndex: '10000'
             });
         } else {
@@ -173,33 +172,30 @@ function setupAutocompleteForField(fieldId) {
         if (e.key === 'Escape') {
             toggleSuggestionBox(false);
             clearInputField();
-        } else if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
-            e.preventDefault(); // Prevent cursor movement
-            isNavigatingWithKeyboard = true;
-            if (e.key === 'ArrowDown') currentFocus++;
-            else currentFocus--;
+        } else if (e.key === 'ArrowDown') {
+            currentFocus++;
             updateActiveItem(suggestionBox.getElementsByTagName('div'));
-        } else if (e.key === 'Enter' && isNavigatingWithKeyboard) {
+        } else if (e.key === 'ArrowUp') {
+            currentFocus--;
+            updateActiveItem(suggestionBox.getElementsByTagName('div'));
+        } else if (e.key === 'Enter') {
             e.preventDefault();
             if (currentFocus > -1) {
                 const items = suggestionBox.getElementsByTagName('div');
                 if (items) items[currentFocus].click();
             }
-            isNavigatingWithKeyboard = false;
         }
     });
 
     inputField.addEventListener('blur', () => {
-        if (!isNavigatingWithKeyboard) {
-            setTimeout(() => {
-                clearInputField(inputField);
-                clearSuggestions(fieldId);
-                if (inputField.value === '' && appState.waypoints.length > 0) {
-                    const waypointIndex = parseInt(inputField.id.replace('waypoint-input-', '')) - 1;
-                    updateState('removeWaypoint', waypointIndex, 'airportAutocomplete.addEventListener3');
-                }
-            }, 300);
-        }
+        setTimeout(() => {
+            clearInputField(inputField);
+            toggleSuggestionBox(false);
+            if (inputField.value === '' && appState.waypoints.length > 0) {
+                const waypointIndex = parseInt(inputField.id.replace('waypoint-input-', '')) - 1;
+                updateState('removeWaypoint', waypointIndex, 'airportAutocomplete.addEventListener3');
+            }
+        }, 300);
     });
 
     if (!window.outsideClickListenerAdded) {
@@ -225,26 +221,7 @@ function setupAutocompleteForField(fieldId) {
 }
 
 function updateSuggestions(inputId, airports) {
-    // Ensure suggestions portal exists
-    const portal = document.getElementById('suggestionsPortal') || 
-        (() => {
-            const p = document.createElement('div');
-            p.id = 'suggestionsPortal';
-            p.className = 'suggestions-portal';
-            document.body.appendChild(p);
-            return p;
-        })();
-
-    // Get or create suggestions box
-    let suggestionBox = document.getElementById(inputId + 'Suggestions');
-    if (!suggestionBox) {
-        suggestionBox = document.createElement('div');
-        suggestionBox.id = inputId + 'Suggestions';
-        suggestionBox.className = 'suggestions';
-        portal.appendChild(suggestionBox);
-    }
-
-    // Clear and update suggestions
+    const suggestionBox = document.getElementById(inputId + 'Suggestions');
     suggestionBox.innerHTML = '';
     let selectionHandledByTouch = false;
 
@@ -331,17 +308,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 });
-
-function clearSuggestions(inputId) {
-    const suggestionBox = document.getElementById(inputId + 'Suggestions');
-    if (suggestionBox) {
-        suggestionBox.remove(); // Remove from DOM completely 
-        const portal = document.getElementById('suggestionsPortal');
-        if (portal && portal.children.length === 0) {
-            portal.remove(); // Clean up empty portal
-        }
-    }
-}
 
 export function getIataFromField(inputId) {
     const fieldValue = document.getElementById(inputId).value;
