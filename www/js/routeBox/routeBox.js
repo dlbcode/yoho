@@ -191,11 +191,13 @@ const routeBox = {
             setupAutocompleteForField(id)
         );
 
+        // Set up listeners first, then focus
+        setupWaypointInputListeners(routeNumber);
+
         if (firstEmptyInput) {
             firstEmptyInput.focus();
         }
 
-        setupWaypointInputListeners(routeNumber);
         handleTripTypeChange(appState.routes[routeNumber].tripType, routeNumber);
         setWaypointInputs(routeNumber);
     },
