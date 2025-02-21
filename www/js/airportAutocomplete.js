@@ -316,3 +316,20 @@ export function getIataFromField(inputId) {
 }
 
 export { setupAutocompleteForField, fetchAirportByIata };
+
+function createSuggestionsDiv(index) {
+    const suggestionsDiv = createElement('div', { 
+        id: `waypoint-input-${index + 1}Suggestions`, 
+        className: 'suggestions'
+    });
+    
+    // Append to body instead of infoPane to ensure consistent positioning context
+    document.body.appendChild(suggestionsDiv);
+    
+    // Add mobile-specific class
+    if (window.innerWidth <= 600) {
+        suggestionsDiv.classList.add('mobile-suggestions');
+    }
+    
+    return suggestionsDiv;
+}
