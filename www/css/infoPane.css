@@ -265,7 +265,7 @@ tr:hover {
   border-radius: 3px;
   cursor: ns-resize;
   background-color: #1f1f1f;
-  z-index: 1000;
+  z-index: 1;
 }
 
 .resize-handle:hover {
