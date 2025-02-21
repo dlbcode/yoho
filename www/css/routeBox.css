@@ -367,17 +367,6 @@
 
 .travelers-dropdown,
 .trip-type-dropdown {
-  position: fixed;
-  z-index: 2000;
-  margin-top: 2px; /* Add small gap from trigger */
-  background-color: #222;
-  border: 1px solid #525252;
-  border-radius: 5px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-}
-
-.travelers-dropdown,
-.trip-type-dropdown {
   position: absolute;
   top: 100%;
   left: 0;
@@ -409,6 +398,7 @@
   border-radius: 5px;
   padding: 5px 10px;
   cursor: pointer;
+  height: 30px;
 }
 
 .travelers-button:hover {
@@ -550,20 +540,6 @@
 .travelers-container,
 .waypoint-inputs-container {
   position: relative;
-}
-
-.trip-type-dropdown,
-.travelers-dropdown,
-.suggestions {
-  position: absolute; /* Use absolute positioning */
-  top: 100%; /* Adjust as needed */
-  left: 0;
-  z-index: 1200; /* Ensure dropdowns appear above other elements */
-  border: 1px solid #525252;
-  border-radius: 5px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  width: 100%;
-  box-sizing: border-box;
 }
 
 /* Search and remove buttons */
