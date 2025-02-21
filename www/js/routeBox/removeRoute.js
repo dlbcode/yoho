@@ -68,10 +68,10 @@ const removeRoute = (routeNumber) => {
 // No changes needed for removeRouteButton
 const removeRouteButton = (container, routeNumber) => {
     const removeButton = document.createElement('button');
-    removeButton.textContent = 'Remove';
     removeButton.className = 'remove-button';
     removeButton.dataset.routeNumber = routeNumber;
     removeButton.onclick = () => removeRoute(routeNumber);
+    removeButton.innerHTML = `<img src="./assets/trash_icon.svg" alt="Remove" style="width: 20px; height: 20px;">`; // Use trash icon
     if (container instanceof HTMLElement) {
         container.appendChild(removeButton);
     } else {
