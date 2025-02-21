@@ -14,6 +14,7 @@ const infoPane = {
         document.addEventListener('stateChange', this.handleStateChange.bind(this));
         document.getElementById('tripButton').addEventListener('click', this.handleTripButtonClick.bind(this));
         this.addPlusButton();
+        this.handlePlusButtonClick(); // Simulate '+' button click on initial load
     },
 
     handleTripButtonClick() {
