@@ -6,7 +6,7 @@ import { lineManager } from '../lineManager.js';
 const DEFAULT_FILTER_STATE = {
     departure: { start: 0, end: 24 },
     arrival: { start: 0, end: 24 },
-    price: { value: null }
+    price: { value: null }  // null means no price limit - show all prices
 };
 
 function initializeFilterState() {
@@ -28,6 +28,25 @@ function updateFilterState(filterType, values) {
 
 // Update the resetFilter function
 function resetFilter(filterType) {
+    console.log('currentRouteIndex:', appState.currentRouteIndex);
+    console.log('filterState before reset:', JSON.stringify(appState.filterState));
+    console.log(`Resetting filter for ${filterType}`);
+
+    // Create a new filter state object to avoid reference issues
+    const newFilterState = {
+        ...appState.filterState,
+        [filterType]: { ...DEFAULT_FILTER_STATE[filterType] }
+    };
+
+    // Update the appState filter state
+    appState.filterState = newFilterState;
+    
+    // Update the filter states array for the current route
+    if (appState.currentRouteIndex !== undefined) {
+        appState.filterStates[appState.currentRouteIndex] = newFilterState;
+    }
+
+    // Update UI elements
     const filterButton = document.querySelector(`[data-filter="${filterType}"]`);
     const filterHeader = filterButton?.querySelector('.filter-header');
     
@@ -35,7 +54,12 @@ function resetFilter(filterType) {
         filterHeader.textContent = 'Price';
     }
     
-    updateFilterState(filterType, DEFAULT_FILTER_STATE[filterType]);
+    // Apply the changes
+    applyFilters();
+    updateFilterHeaders();
+    toggleFilterResetIcon(filterType);
+
+    console.log(`New filter state after reset:`, JSON.stringify(appState.filterState));
 }
 
 function addTimeFilterTags(filterType, filterTags) {
@@ -87,7 +111,18 @@ function applyFilters() {
     const cards = document.querySelectorAll('.route-card');
     const filterTags = constructFilterTags();
     const visibleRouteIds = new Set();
+    
+    // Get maxPrice from filter state, null means no limit
     const maxPrice = appState.filterState.price?.value;
+    
+    // Calculate highest price in current result set for debugging
+    let highestPrice = 0;
+    cards.forEach(card => {
+        const price = parseFloat(card.dataset.priceValue);
+        highestPrice = Math.max(highestPrice, price);
+    });
+    console.log('Highest available price:', highestPrice);
+    console.log('Current price filter:', maxPrice === null ? 'No limit' : maxPrice);
 
     cards.forEach(card => {
         const price = parseFloat(card.dataset.priceValue);

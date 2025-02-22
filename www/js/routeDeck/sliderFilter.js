@@ -38,8 +38,13 @@ const sliderFilter = {
 
     updatePopupValues: function (popup, filterType, data) {
         const slider = popup.querySelector(`#${filterType}Slider`);
-        const filterValues = appState.filterState[filterType];
-        if (slider) {
+        if (slider && filterType === 'price') {
+            const currentValue = appState.filterState?.price?.value;
+            // Set to max price when no filter is applied
+            const value = currentValue !== null ? currentValue : data.max;
+            slider.noUiSlider.set(value);
+        } else if (slider) {
+            const filterValues = appState.filterState[filterType];
             slider.noUiSlider.set(filterValues ? [filterValues.start, filterValues.end] : [data.min, data.max]);
         }
         this.positionPopup(popup, event);
@@ -152,8 +157,12 @@ const sliderFilter = {
             const actualMax = data.max;
             const sliderMax = data.min === data.max ? data.max + Math.max(1, data.max * 0.1) : data.max;
             
+            // Changed this part - start from actualMax when value is null
+            const currentValue = appState.filterState?.price?.value;
+            const startValue = currentValue !== null ? currentValue : actualMax;
+            
             return {
-                start: actualMax,
+                start: startValue,
                 range: { 'min': data.min, 'max': sliderMax },
                 step: 1,
                 tooltips: this.createTooltip(false),
