@@ -112,24 +112,21 @@ function buildRouteDeck(routeIndex) {
         const filterButtons = container.parentElement.querySelectorAll('.filter-button');
         
         filterButtons.forEach(button => {
-            const handleFilterClick = (event) => {
-                event.stopPropagation();
-                const filterType = button.getAttribute('data-filter'); // Changed attribute name
-                if (!filterType) {
-                    console.error('Filter attribute is missing on the button:', button);
-                    return;
-                }
-                
-                const data = fetchDataForFilter(filterType);
-                if (data) {
-                    sliderFilter.createFilterPopup(filterType, data, event);
-                } else {
-                    console.error('Failed to fetch data for filter:', filterType);
-                }
-            };
+            const filterType = button.getAttribute('data-filter');
 
-            // Attach click handlers to the button
-            button.addEventListener('click', handleFilterClick);
+            // Attach click handler to the filterIcon
+            const filterIcon = button.querySelector('.filterIcon');
+            filterIcon.addEventListener('click', (event) => {
+                event.stopPropagation();
+                sliderFilter.createFilterPopup(filterType, fetchDataForFilter(filterType), event);
+            });
+
+            // Attach click handler to the filterHeader
+            const filterHeader = button.querySelector('.filter-header');
+            filterHeader.addEventListener('click', (event) => {
+                event.stopPropagation();
+                sliderFilter.createFilterPopup(filterType, fetchDataForFilter(filterType), event);
+            });
         });
     }
 
