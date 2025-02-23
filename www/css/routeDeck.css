@@ -198,6 +198,21 @@
   border-radius: 0; /* Remove border radius */
 }
 
+.sort-button .sort-icon {
+  width: 16px;
+  height: 16px;
+  vertical-align: middle;
+  margin-right: 4px;
+}
+
+.sort-button:hover .sort-icon {
+  filter: brightness(1.2);
+}
+
+.sort-button.active .sort-icon {
+  filter: brightness(1.5);
+}
+
 .sort-button:hover {
   background: none;
   color: #fff; /* Match filter button hover */

@@ -79,7 +79,7 @@ export function createSortButton() {
     const sortButton = document.createElement('button');
     sortButton.className = 'sort-button';
     sortButton.innerHTML = `
-        <span>Sort by: <span id="currentSort">Price</span></span>
+        <span><img src="/assets/sort_icon.svg" alt="Sort" class="sort-icon"> <span id="currentSort">Price</span></span>
         <div class="sort-dropdown">
             <div class="sort-option selected" data-sort="price">
                 Price
