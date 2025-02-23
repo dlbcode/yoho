@@ -144,19 +144,24 @@ const uiHandling = {
         const viewportHeight = window.innerHeight;
         const viewportWidth = window.innerWidth;
         const dropdownHeight = dropdownList.offsetHeight;
+        const dropdownWidth = dropdownList.offsetWidth;
 
         // Set fixed positioning
         dropdownList.style.position = 'fixed';
-        dropdownList.style.width = `${buttonRect.width}px`;
         
-        // Calculate horizontal position first
+        // Calculate horizontal position
         let left = buttonRect.left;
-        if (left + buttonRect.width > viewportWidth) {
-            left = viewportWidth - buttonRect.width - 5; // 5px safety margin
+        // If dropdown would overflow to the right, align it to the right edge of the button
+        if (left + dropdownWidth > viewportWidth) {
+            left = buttonRect.right - dropdownWidth;
+        }
+        // If still overflows (rare case with very wide dropdown), align to viewport edge with padding
+        if (left < 0) {
+            left = 5; // 5px padding from viewport edge
         }
 
-        // Try to position above first
-        let top = buttonRect.top - dropdownHeight - 2; // 2px gap
+        // Calculate vertical position
+        let top = buttonRect.top - dropdownHeight - 2; // Try above first
         dropdownList.classList.add('dropdown-up');
 
         // If not enough space above, position below

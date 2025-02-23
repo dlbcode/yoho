@@ -1,3 +1,5 @@
+import { uiHandling } from '../uiHandling.js';
+
 export function sortDeckByField(container, fieldName, asc = true) {
     const dirModifier = asc ? 1 : -1;
     const cards = Array.from(container.querySelectorAll(".route-card:not([style*='display: none'])"));
@@ -104,10 +106,13 @@ export function createSortButton() {
         </div>
     `;
 
-    // Add sort button event listeners
+    // Update sort button event listeners
     sortButton.addEventListener('click', (e) => {
         const dropdown = sortButton.querySelector('.sort-dropdown');
         dropdown.classList.toggle('active');
+        if (dropdown.classList.contains('active')) {
+            uiHandling.positionDropdown(sortButton, dropdown);
+        }
         e.stopPropagation();
     });
 
