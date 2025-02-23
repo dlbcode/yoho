@@ -349,7 +349,7 @@ function createFilterControls() {
 
     // Create a separate container for the sort button
     const sortControls = document.createElement('div');
-    sortControls.className = 'sort-controls';
+    sortControls.className = 'sort-button';
     sortControls.appendChild(createSortButton()); // Add the sort button to the sort controls
 
     filterControls.appendChild(filterButtonsContainer);
