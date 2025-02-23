@@ -151,6 +151,15 @@
 .filter-buttons-container {
   display: flex;
   align-items: center;
+  overflow-x: auto; /* Enable horizontal scrolling */
+  scroll-snap-type: x mandatory; /* Enable scroll snapping */
+  scrollbar-width: none; /* Hide scrollbar for Firefox */
+  -ms-overflow-style: none; /* Hide scrollbar for IE and Edge */
+}
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+.filter-buttons-container::-webkit-scrollbar {
+  display: none;
 }
 
 .sort-button {
