@@ -219,9 +219,13 @@ const sliderFilter = {
             labelText = (start === 0 && end === 24) ? 'Anytime' :
                 `${formatTimeAmPm(start)} - ${formatTimeAmPm(end)}`;
 
-            // Update the filter button text specifically for arrival
-            if (filterHeader && filterType === 'arrival') {
-                filterHeader.innerHTML = `<span class="filter-label">Arrive:</span> ${labelText}`;
+            // Update the filter button text for both arrival and departure
+            if (filterHeader) {
+                if (filterType === 'arrival') {
+                    filterHeader.innerHTML = `<span class="filter-label">Arrive:</span> ${labelText}`;
+                } else if (filterType === 'departure') {
+                    filterHeader.innerHTML = `<span class="filter-label">Depart:</span> ${labelText}`;
+                }
             }
         }
 
