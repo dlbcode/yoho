@@ -85,23 +85,18 @@ export function createSortButton() {
         <div class="sort-dropdown">
             <div class="sort-option selected" data-sort="price">
                 Price
-                <span class="sort-icon">↓</span>
             </div>
             <div class="sort-option" data-sort="departure">
                 Departure Time
-                <span class="sort-icon">↓</span>
             </div>
             <div class="sort-option" data-sort="arrival">
                 Arrival Time
-                <span class="sort-icon">↓</span>
             </div>
             <div class="sort-option" data-sort="duration">
                 Duration
-                <span class="sort-icon">↓</span>
             </div>
             <div class="sort-option" data-sort="stops">
                 Stops
-                <span class="sort-icon">↓</span>
             </div>
         </div>
     `;
