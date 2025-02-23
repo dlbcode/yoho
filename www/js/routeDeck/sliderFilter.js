@@ -149,7 +149,7 @@ const sliderFilter = {
                 start: [data.min || 0, data.max || 24],
                 connect: true,
                 range: { 'min': 0, 'max': 24 },
-                step: 0.5,
+                step: 1,  // Changed from 0.5 to 1
                 tooltips: [this.createTooltip(true), this.createTooltip(true)]
             };
         } else if (filterType === 'price' && data?.min !== undefined && data?.max !== undefined) {
@@ -185,10 +185,9 @@ const sliderFilter = {
 
     formatTime: function (value) {
         const hours = Math.floor(value);
-        const minutes = Math.floor((value % 1) * 60);
         const period = hours < 12 || hours === 24 ? 'AM' : 'PM';
         const displayHours = hours % 12 === 0 ? 12 : hours % 12;
-        return `${displayHours}:${minutes < 10 ? '0' + minutes : minutes} ${period}`;
+        return `${displayHours}${period}`;
     },
 
     updateFilterStateAndLabel: function (filterType, values, label) {
@@ -208,8 +207,22 @@ const sliderFilter = {
         } else {
             const [start, end] = values.map(parseFloat);
             newValues = { start, end: end || start };
+            
+            // Format time values in 12-hour format with lowercase am/pm
+            const formatTimeAmPm = (value) => {
+                const hours = Math.floor(value);
+                const period = hours < 12 || hours === 24 ? 'am' : 'pm';
+                const displayHours = hours % 12 === 0 ? 12 : hours % 12;
+                return `${displayHours}${period}`;
+            };
+
             labelText = (start === 0 && end === 24) ? 'Anytime' :
-                `${this.formatTime(start)} - ${this.formatTime(end)}`;
+                `${formatTimeAmPm(start)} - ${formatTimeAmPm(end)}`;
+
+            // Update the filter button text specifically for arrival
+            if (filterHeader && filterType === 'arrival') {
+                filterHeader.innerHTML = `<span class="filter-label">Arrive:</span> ${labelText}`;
+            }
         }
 
         label.textContent = labelText;

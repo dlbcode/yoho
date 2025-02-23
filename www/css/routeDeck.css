@@ -143,8 +143,7 @@
   background: #1a2942; /* Dark blue background */
   height: 38px;
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.25rem;
+  flex-wrap: nowrap;
   justify-content: space-between; /* Changed from flex-start to space-between */
   align-items: center;
 }
