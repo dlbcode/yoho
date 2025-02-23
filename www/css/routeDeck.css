@@ -210,10 +210,11 @@
 
 /* Sort button and dropdown */
 .sort-button {
+  width: 80px; /* Match filter button width */
   margin-left: auto;
   background: none; /* Changed from #444 */
   border: none;
-  padding: 0px 8px; /* Match filter button padding */
+  padding: 0px 5px; /* Match filter button padding */
   color: #ccc; /* Match filter button color */
   display: flex;
   align-items: center;
