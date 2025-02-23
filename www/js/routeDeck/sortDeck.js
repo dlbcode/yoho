@@ -84,19 +84,19 @@ export function createSortButton() {
         <span><img src="/assets/sort_icon.svg" alt="Sort" class="sort-icon"> <span id="currentSort">Price</span></span>
         <div class="sort-dropdown">
             <div class="sort-option selected" data-sort="price">
-                Price
+                Price <img src="/assets/money_icon.svg" alt="Price" class="menu-icon">
             </div>
             <div class="sort-option" data-sort="departure">
-                Departure Time
+                Depart <img src="/assets/time_icon.svg" alt="Departure" class="menu-icon">
             </div>
             <div class="sort-option" data-sort="arrival">
-                Arrival Time
+                Arrive <img src="/assets/time_icon.svg" alt="Arrival" class="menu-icon">
             </div>
             <div class="sort-option" data-sort="duration">
-                Duration
+                Duration <img src="/assets/duration_icon.svg" alt="Duration" class="menu-icon">
             </div>
             <div class="sort-option" data-sort="stops">
-                Stops
+                Stops <img src="/assets/stops_icon.svg" alt="Stops" class="menu-icon">
             </div>
         </div>
     `;

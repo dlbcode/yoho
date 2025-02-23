@@ -242,11 +242,22 @@
   cursor: pointer;
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 0.5rem;
 }
 
-.sort-option:hover {
-  background: #444;
+.sort-option .menu-icon {
+  width: 16px;
+  height: 16px;
+  opacity: 0.7;
+}
+
+.sort-option:hover .menu-icon {
+  opacity: 1;
+}
+
+.sort-option.selected .menu-icon {
+  opacity: 1;
 }
 
 .sort-option.selected {
