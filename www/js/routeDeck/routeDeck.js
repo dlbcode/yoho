@@ -63,7 +63,6 @@ function buildRouteDeck(routeIndex) {
             }
 
             const filterControls = createFilterControls();
-            filterControls.appendChild(createSortButton()); // Add the sort button to the filter controls
             contentWrapper.appendChild(filterControls);
 
             const cardsContainer = document.createElement('div');
@@ -354,6 +353,7 @@ function createFilterControls() {
     sortControls.appendChild(createSortButton()); // Add the sort button to the sort controls
 
     filterControls.appendChild(filterButtonsContainer);
+    filterControls.appendChild(sortControls);
 
     return filterControls;
 }
