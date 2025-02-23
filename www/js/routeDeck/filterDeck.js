@@ -28,10 +28,6 @@ function updateFilterState(filterType, values) {
 
 // Update the resetFilter function
 function resetFilter(filterType) {
-    console.log('currentRouteIndex:', appState.currentRouteIndex);
-    console.log('filterState before reset:', JSON.stringify(appState.filterState));
-    console.log(`Resetting filter for ${filterType}`);
-
     // Create a new filter state object to avoid reference issues
     const newFilterState = {
         ...appState.filterState,
@@ -58,8 +54,6 @@ function resetFilter(filterType) {
     applyFilters();
     updateFilterHeaders();
     toggleFilterResetIcon(filterType);
-
-    console.log(`New filter state after reset:`, JSON.stringify(appState.filterState));
 }
 
 function addTimeFilterTags(filterType, filterTags) {
@@ -121,8 +115,6 @@ function applyFilters() {
         const price = parseFloat(card.dataset.priceValue);
         highestPrice = Math.max(highestPrice, price);
     });
-    console.log('Highest available price:', highestPrice);
-    console.log('Current price filter:', maxPrice === null ? 'No limit' : maxPrice);
 
     cards.forEach(card => {
         const price = parseFloat(card.dataset.priceValue);

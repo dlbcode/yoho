@@ -203,7 +203,7 @@ const sliderFilter = {
             labelText = `up to: $${priceValue}`;
             // Update the filter button text
             if (filterHeader) {
-                filterHeader.textContent = `Price: $${priceValue}`;
+                filterHeader.textContent = `< ${priceValue}`;
             }
         } else {
             const [start, end] = values.map(parseFloat);
