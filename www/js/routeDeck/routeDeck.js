@@ -328,6 +328,10 @@ function createFilterControls() {
     const filterControls = document.createElement('div');
     filterControls.className = 'filter-controls';
     
+    // Create a separate container for filter buttons
+    const filterButtonsContainer = document.createElement('div');
+    filterButtonsContainer.className = 'filter-buttons-container';
+
     const filters = ['departure', 'arrival', 'price'];
     filters.forEach(filterType => {
         const filterButton = document.createElement('button');
@@ -341,8 +345,15 @@ function createFilterControls() {
                   data-filter="${filterType}">✕</span>
         `;
         
-        filterControls.appendChild(filterButton);
+        filterButtonsContainer.appendChild(filterButton);
     });
+
+    // Create a separate container for the sort button
+    const sortControls = document.createElement('div');
+    sortControls.className = 'sort-controls';
+    sortControls.appendChild(createSortButton()); // Add the sort button to the sort controls
+
+    filterControls.appendChild(filterButtonsContainer);
 
     return filterControls;
 }

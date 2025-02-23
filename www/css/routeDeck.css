@@ -144,7 +144,17 @@
   height: 38px;
   display: flex;
   flex-wrap: nowrap;
-  justify-content: space-between; /* Changed from flex-start to space-between */
+  justify-content: space-between;
+  align-items: center;
+}
+
+.filter-buttons-container {
+  display: flex;
+  align-items: center;
+}
+
+.sort-controls {
+  display: flex;
   align-items: center;
 }
 
