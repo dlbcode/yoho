@@ -276,3 +276,7 @@
 .sort-icon {
   margin-left: auto;
 }
+
+.filter-label {
+  color: #999;
+}
