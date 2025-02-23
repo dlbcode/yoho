@@ -175,14 +175,14 @@
   color: #4a9eff;
 }
 
-.filter-header {
+.filter-text {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   max-width: 150px; /* Prevent very long price values from breaking layout */
 }
 
-/* Add styling for currentSort to match filter-header */
+/* Add styling for currentSort to match filter-text */
 #currentSort {
   white-space: nowrap;
   overflow: hidden;

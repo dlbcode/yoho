@@ -122,7 +122,7 @@ function buildRouteDeck(routeIndex) {
             });
 
             // Attach click handler to the filterHeader
-            const filterHeader = button.querySelector('.filter-header');
+            const filterHeader = button.querySelector('.filter-text');
             filterHeader.addEventListener('click', (event) => {
                 event.stopPropagation();
                 sliderFilter.createFilterPopup(filterType, fetchDataForFilter(filterType), event);
@@ -335,7 +335,7 @@ function createFilterControls() {
         filterButton.setAttribute('data-filter', filterType); // Changed attribute name
         
         filterButton.innerHTML = `
-            <span class="filter-header" data-filter="${filterType}">${filterType.charAt(0).toUpperCase() + filterType.slice(1)}</span>
+            <span class="filter-text" data-filter="${filterType}">${filterType.charAt(0).toUpperCase() + filterType.slice(1)}</span>
             <img class="filterIcon" id="${filterType}Filter" data-filter="${filterType}" src="/assets/filter-icon.svg" alt="Filter">
             <span class="resetIcon hidden" id="reset${filterType.charAt(0).toUpperCase() + filterType.slice(1)}Filter" 
                   data-filter="${filterType}">✕</span>

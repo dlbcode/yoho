@@ -48,7 +48,7 @@ function resetFilter(filterType) {
 
     // Update UI elements
     const filterButton = document.querySelector(`[data-filter="${filterType}"]`);
-    const filterHeader = filterButton?.querySelector('.filter-header');
+    const filterHeader = filterButton?.querySelector('.filter-text');
     
     if (filterType === 'price' && filterHeader) {
         filterHeader.textContent = 'Price';

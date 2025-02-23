@@ -195,7 +195,7 @@ const sliderFilter = {
         let newValues;
         let labelText;
         const filterButton = document.querySelector(`[data-filter="${filterType}"]`);
-        const filterHeader = filterButton?.querySelector('.filter-header');
+        const filterHeader = filterButton?.querySelector('.filter-text');
 
         if (filterType === 'price') {
             const priceValue = parseFloat(values[0].replace('$', ''));
