@@ -226,7 +226,7 @@
 .sort-dropdown {
   position: absolute;
   top: 100%;
-  left: 0;
+  right: 0; /* Change from left: 0 to right: 0 */
   background: #333;
   border: 1px solid #525252;
   border-radius: 4px;
