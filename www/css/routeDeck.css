@@ -142,7 +142,6 @@
 /* Filter controls */
 .filter-controls {
   background: #1a2942; /* Dark blue background */
-  padding: 4px 8px;
   display: flex;
   flex-wrap: wrap;
   gap: 0.25rem;
@@ -179,6 +178,19 @@
   overflow: hidden;
   text-overflow: ellipsis;
   max-width: 150px; /* Prevent very long price values from breaking layout */
+  line-height: 1.2; /* Add explicit line height */
+  padding: 4px 0; /* Add vertical padding */
+}
+
+/* Add styling for currentSort to match filter-header */
+#currentSort {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.2;
+  padding: 4px 0;
+  display: inline-block; /* Ensure consistent block formatting */
+  vertical-align: middle; /* Align with sort icon */
 }
 
 /* Sort button and dropdown */
