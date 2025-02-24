@@ -46,8 +46,18 @@ function resetFilter(filterType) {
     const filterButton = document.querySelector(`[data-filter="${filterType}"]`);
     const filterHeader = filterButton?.querySelector('.filter-text');
     
-    if (filterType === 'price' && filterHeader) {
-        filterHeader.textContent = 'Price';
+    if (filterHeader) {
+        switch (filterType) {
+            case 'price':
+                filterHeader.innerHTML = '<span class="filter-label">Price:</span> Any';
+                break;
+            case 'departure':
+                filterHeader.innerHTML = '<span class="filter-label">Depart:</span> Anytime';
+                break;
+            case 'arrival':
+                filterHeader.innerHTML = '<span class="filter-label">Arrive:</span> Anytime';
+                break;
+        }
     }
     
     // Apply the changes
