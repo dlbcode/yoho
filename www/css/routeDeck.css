@@ -155,11 +155,24 @@
   scroll-snap-type: x mandatory; /* Enable scroll snapping */
   scrollbar-width: none; /* Hide scrollbar for Firefox */
   -ms-overflow-style: none; /* Hide scrollbar for IE and Edge */
+  position: relative;
 }
 
 /* Hide scrollbar for Chrome, Safari and Opera */
 .filter-buttons-container::-webkit-scrollbar {
   display: none;
+}
+
+/* Style for the scroll indicator line */
+.scroll-indicator {
+  position: absolute;
+  bottom: 0;
+  height: 2px;
+  background-color: #007bff;
+  transition: transform 0.1s ease, width 0.1s ease;
+  pointer-events: none;
+  will-change: transform, width;
+  transform-origin: left center;
 }
 
 .sort-button {

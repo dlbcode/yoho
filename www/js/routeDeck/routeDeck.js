@@ -331,6 +331,16 @@ function createFilterControls() {
     const filterButtonsContainer = document.createElement('div');
     filterButtonsContainer.className = 'filter-buttons-container';
 
+    // Create scroll indicator
+    const scrollIndicator = document.createElement('div');
+    scrollIndicator.className = 'scroll-indicator';
+    filterButtonsContainer.appendChild(scrollIndicator);
+
+    // Add scroll event listener
+    filterButtonsContainer.addEventListener('scroll', updateScrollIndicator);
+    // Add resize observer to handle container size changes
+    new ResizeObserver(() => updateScrollIndicator(filterButtonsContainer)).observe(filterButtonsContainer);
+
     const filters = ['departure', 'arrival', 'price'];
     filters.forEach(filterType => {
         const filterButton = document.createElement('button');
@@ -356,6 +366,38 @@ function createFilterControls() {
     filterControls.appendChild(sortControls);
 
     return filterControls;
+}
+
+function updateScrollIndicator(container) {
+    const buttonsContainer = container instanceof Event ? container.target : container;
+    const scrollIndicator = buttonsContainer.querySelector('.scroll-indicator');
+    
+    const containerWidth = buttonsContainer.clientWidth;
+    const scrollWidth = buttonsContainer.scrollWidth;
+    
+    if (scrollWidth <= containerWidth) {
+        scrollIndicator.style.width = '0';
+        return;
+    }
+
+    // Calculate the ratio of visible content to total content
+    const visibleRatio = containerWidth / scrollWidth;
+    const lineWidth = Math.max(containerWidth * visibleRatio, 30);
+
+    // Calculate how much content is overflowing
+    const overflowAmount = scrollWidth - containerWidth;
+    
+    // Calculate how far we've scrolled through the overflow content (0 to 1)
+    const scrollProgress = buttonsContainer.scrollLeft / overflowAmount;
+    
+    // The line should start at the right edge when no content is scrolled
+    // and move left as content is scrolled right
+    const rightEdgePosition = containerWidth - lineWidth;
+    const leftPosition = rightEdgePosition * (1 - scrollProgress);
+
+    // Set width and position
+    scrollIndicator.style.width = `${lineWidth}px`;
+    scrollIndicator.style.transform = `translateX(${leftPosition}px)`;
 }
 
 export { buildRouteDeck };
