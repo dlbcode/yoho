@@ -64,13 +64,14 @@
 }
 
 .filter-popup {
+  height: 90px;
   position: fixed; /* Changed from absolute to fixed */
   z-index: 1000;
   background-color: #333;
   border-radius: 8px;
   border: 1px solid #525252;
   padding: 1rem;
-  width: 280px;
+  width: 300px;
   box-shadow: 0 4px 12px rgba(0,0,0,0.2);
 }
 
@@ -83,7 +84,7 @@
 }
 
 .noUi-target {
-  margin: 5px auto 0; /* shorthand for margin-top, margin-right/left, margin-bottom */
+  margin: 35px auto 0; /* shorthand for margin-top, margin-right/left, margin-bottom */
   width: calc(100% - 20px);
   box-sizing: border-box;
 }
