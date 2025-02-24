@@ -27,27 +27,36 @@ const sliderFilter = {
     },
 
     createFilterPopup: function (filterType, data, event) {
-        let popup = document.getElementById(`${filterType}FilterPopup`);
-        if (popup) {
-            popup.classList.toggle('hidden');
-            if (!popup.classList.contains('hidden')) this.updatePopupValues(popup, filterType, data);
-        } else {
-            this.createAndShowPopup(filterType, data, event);
+        // Remove any existing popup for this filter type
+        const existingPopup = document.getElementById(`${filterType}FilterPopup`);
+        if (existingPopup) {
+            existingPopup.remove();
         }
+
+        if (!data) {
+            console.error('No data provided for filtering:', filterType);
+            return;
+        }
+
+        // Create new popup
+        this.createAndShowPopup(filterType, data, event);
     },
 
     updatePopupValues: function (popup, filterType, data) {
         const slider = popup.querySelector(`#${filterType}Slider`);
-        if (slider && filterType === 'price') {
+        if (!slider || !slider.noUiSlider) return;
+
+        if (filterType === 'price') {
             const currentValue = appState.filterState?.price?.value;
             // Set to max price when no filter is applied
             const value = currentValue !== null ? currentValue : data.max;
             slider.noUiSlider.set(value);
-        } else if (slider) {
+        } else {
             const filterValues = appState.filterState[filterType];
-            slider.noUiSlider.set(filterValues ? [filterValues.start, filterValues.end] : [data.min, data.max]);
+            const defaultValues = [data.min, data.max];
+            const values = filterValues ? [filterValues.start, filterValues.end] : defaultValues;
+            slider.noUiSlider.set(values);
         }
-        this.positionPopup(popup, event);
     },
 
     createAndShowPopup: function (filterType, data, event) {

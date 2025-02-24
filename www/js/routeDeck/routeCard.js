@@ -82,6 +82,7 @@ function createRouteArrowSVG(stops, segments) {
 function createRouteCard(flight, endpoint, routeIndex, destination) {
     const card = document.createElement('div');
     card.className = 'route-card';
+    card.dataset.priceValue = flight.price; // Add this line
     
     const routeId = createRouteId(flight.route);
     card.setAttribute('data-route-id', routeId);

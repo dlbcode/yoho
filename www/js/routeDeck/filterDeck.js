@@ -42,6 +42,12 @@ function resetFilter(filterType) {
         appState.filterStates[appState.currentRouteIndex] = newFilterState;
     }
 
+    // Clean up any existing popup
+    const existingPopup = document.getElementById(`${filterType}FilterPopup`);
+    if (existingPopup) {
+        existingPopup.remove();
+    }
+
     // Update UI elements
     const filterButton = document.querySelector(`[data-filter="${filterType}"]`);
     const filterHeader = filterButton?.querySelector('.filter-text');
