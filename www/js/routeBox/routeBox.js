@@ -183,6 +183,13 @@ const routeBox = {
         container.append(dateInputsContainer);
 
         const buttonContainer = createElement('div', { className: 'button-container' });
+        
+        // Clean up previous search button if it exists
+        const existingButton = buttonContainer.querySelector('.search-button');
+        if (existingButton?.cleanup) {
+            existingButton.cleanup();
+        }
+        
         buttonContainer.append(this.createSearchButton(routeNumber));
         removeRouteButton(buttonContainer, routeNumber);
         container.append(buttonContainer);
@@ -246,14 +253,56 @@ const routeBox = {
     },
 
     createSearchButton(routeNumber) {
-        const searchButton = createElement('button', { className: 'search-button', content: 'Search' });
+        const searchButton = createElement('button', { 
+            className: 'search-button', 
+            content: 'Search'
+        });
+
+        // Function to check if route has valid waypoints (either origin OR destination)
+        const hasValidWaypoint = () => {
+            const fromWaypoint = appState.waypoints[routeNumber * 2];
+            const toWaypoint = appState.waypoints[routeNumber * 2 + 1];
+            return Boolean(fromWaypoint?.iata_code || toWaypoint?.iata_code);
+        };
+
+        // Function to update button state
+        const updateButtonState = () => {
+            const isEnabled = hasValidWaypoint();
+            searchButton.disabled = !isEnabled;
+            searchButton.classList.toggle('disabled', !isEnabled);
+        };
+
+        // Create a bound listener for this button instance
+        const handleStateChange = () => {
+            // Use requestAnimationFrame to ensure we get the latest state
+            requestAnimationFrame(updateButtonState);
+        };
+
+        // Set initial state
+        updateButtonState();
+
+        // Add state change listener with explicit check for waypoints
+        document.addEventListener('stateChange', (event) => {
+            if (event.detail.key === 'waypoints' || 
+                event.detail.key === 'addWaypoint' || 
+                event.detail.key === 'removeWaypoint' || 
+                event.detail.key === 'updateWaypoint') {
+                handleStateChange();
+            }
+        });
+
+        // Clean up listener when button is removed
+        searchButton.cleanup = () => {
+            document.removeEventListener('stateChange', handleStateChange);
+        };
+
         searchButton.onclick = () => {
+            if (!hasValidWaypoint()) return;
+            
             const infoPane = document.getElementById('infoPane');
             infoPane.classList.add('search-results');
             
-            // First build the route deck
             buildRouteDeck(routeNumber).then(() => {
-                // After deck is built, adjust the height
                 const infoPaneElement = document.getElementById('infoPane');
                 const viewportHeight = window.visualViewport ? window.visualViewport.height : window.innerHeight;
                 const halfHeight = Math.floor(viewportHeight * 0.5);
@@ -266,6 +315,7 @@ const routeBox = {
                 });
             });
         };
+
         return searchButton;
     },
 

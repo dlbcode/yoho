@@ -194,6 +194,14 @@
   background-color: #2a4f7c;
 }
 
+.search-button.disabled,
+.search-button:disabled {
+    background-color: #1f1f1f;
+    cursor: not-allowed;
+    opacity: 0.5;
+    pointer-events: none;
+}
+
 .remove-button {
   background-color: #2d0500;
   /* Replace text with trash icon */
