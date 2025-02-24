@@ -393,7 +393,7 @@ function updateScrollIndicator(container) {
     // The line should start at the right edge when no content is scrolled
     // and move left as content is scrolled right
     const rightEdgePosition = containerWidth - lineWidth;
-    const leftPosition = rightEdgePosition * (1 - scrollProgress);
+    const leftPosition = rightEdgePosition * (scrollProgress) * 2;
 
     // Set width and position
     scrollIndicator.style.width = `${lineWidth}px`;

@@ -171,14 +171,12 @@
 
 /* Style for the scroll indicator line */
 .scroll-indicator {
+  left: 0px;
   position: absolute;
   bottom: 0;
   height: 2px;
   background-color: #007bff;
-  transition: transform 0.1s ease, width 0.1s ease;
   pointer-events: none;
-  will-change: transform, width;
-  transform-origin: left center;
 }
 
 .sort-button {
