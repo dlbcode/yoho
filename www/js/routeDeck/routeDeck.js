@@ -327,19 +327,23 @@ function createFilterControls() {
     const filterControls = document.createElement('div');
     filterControls.className = 'filter-controls';
     
-    // Create a separate container for filter buttons
+    // Create a wrapper for the scrollable container
+    const containerWrapper = document.createElement('div');
+    containerWrapper.className = 'filter-buttons-container-wrapper';
+    
     const filterButtonsContainer = document.createElement('div');
     filterButtonsContainer.className = 'filter-buttons-container';
-
-    // Create scroll indicator
+    
+    // Create the scroll indicator
     const scrollIndicator = document.createElement('div');
     scrollIndicator.className = 'scroll-indicator';
-    filterButtonsContainer.appendChild(scrollIndicator);
+    containerWrapper.appendChild(scrollIndicator); // Place indicator in the wrapper
 
-    // Add scroll event listener
     filterButtonsContainer.addEventListener('scroll', updateScrollIndicator);
-    // Add resize observer to handle container size changes
     new ResizeObserver(() => updateScrollIndicator(filterButtonsContainer)).observe(filterButtonsContainer);
+    
+    containerWrapper.appendChild(filterButtonsContainer);
+    filterControls.appendChild(containerWrapper);
 
     const filters = ['departure', 'arrival', 'price'];
     filters.forEach(filterType => {
@@ -362,7 +366,6 @@ function createFilterControls() {
     sortControls.className = 'sort-button';
     sortControls.appendChild(createSortButton()); // Add the sort button to the sort controls
 
-    filterControls.appendChild(filterButtonsContainer);
     filterControls.appendChild(sortControls);
 
     return filterControls;
@@ -370,7 +373,8 @@ function createFilterControls() {
 
 function updateScrollIndicator(container) {
     const buttonsContainer = container instanceof Event ? container.target : container;
-    const scrollIndicator = buttonsContainer.querySelector('.scroll-indicator');
+    // Look for scroll indicator in the parent wrapper instead
+    const scrollIndicator = buttonsContainer.parentElement.querySelector('.scroll-indicator');
     
     const containerWidth = buttonsContainer.clientWidth;
     const scrollWidth = buttonsContainer.scrollWidth;
@@ -384,18 +388,15 @@ function updateScrollIndicator(container) {
     const visibleRatio = containerWidth / scrollWidth;
     const lineWidth = Math.max(containerWidth * visibleRatio, 30);
 
-    // Calculate how much content is overflowing
-    const overflowAmount = scrollWidth - containerWidth;
-    
-    // Calculate how far we've scrolled through the overflow content (0 to 1)
-    const scrollProgress = buttonsContainer.scrollLeft / overflowAmount;
-    
-    // The line should start at the right edge when no content is scrolled
-    // and move left as content is scrolled right
-    const rightEdgePosition = containerWidth - lineWidth;
-    const leftPosition = rightEdgePosition * (1 - scrollProgress);
+    // Calculate scroll progress (0 to 1)
+    const maxScrollLeft = scrollWidth - containerWidth;
+    const scrollProgress = buttonsContainer.scrollLeft / maxScrollLeft;
 
-    // Set width and position
+    // Calculate how far the thumb can travel
+    const maxThumbTravel = containerWidth - lineWidth;
+    const leftPosition = maxThumbTravel * scrollProgress;
+
+    // Apply size and position
     scrollIndicator.style.width = `${lineWidth}px`;
     scrollIndicator.style.transform = `translateX(${leftPosition}px)`;
 }

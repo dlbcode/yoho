@@ -148,6 +148,11 @@
   align-items: center;
 }
 
+.filter-buttons-container-wrapper {
+  position: relative; 
+  overflow: hidden; /* Wrapper doesn't scroll; only .filter-buttons-container does */
+}
+
 .filter-buttons-container {
   display: flex;
   align-items: center;
@@ -155,7 +160,7 @@
   scroll-snap-type: x mandatory; /* Enable scroll snapping */
   scrollbar-width: none; /* Hide scrollbar for Firefox */
   -ms-overflow-style: none; /* Hide scrollbar for IE and Edge */
-  position: relative;
+  position: relative; /* Needed for correct scroll measurement */
 }
 
 /* Hide scrollbar for Chrome, Safari and Opera */
