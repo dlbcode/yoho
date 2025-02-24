@@ -336,10 +336,8 @@ function createFilterControls() {
     scrollIndicator.className = 'scroll-indicator';
     filterButtonsContainer.appendChild(scrollIndicator);
 
-    // Add scroll event listener
-    filterButtonsContainer.addEventListener('scroll', updateScrollIndicator);
-    // Add resize observer to handle container size changes
-    new ResizeObserver(() => updateScrollIndicator(filterButtonsContainer)).observe(filterButtonsContainer);
+    // Set up scroll indicator with mutation observer
+    setupScrollIndicator(filterButtonsContainer);
 
     const filters = ['departure', 'arrival', 'price'];
     filters.forEach(filterType => {
@@ -365,6 +363,9 @@ function createFilterControls() {
     filterControls.appendChild(filterButtonsContainer);
     filterControls.appendChild(sortControls);
 
+    // Setup scroll indicator
+    setupScrollIndicator(filterButtonsContainer);
+
     return filterControls;
 }
 
@@ -377,27 +378,46 @@ function updateScrollIndicator(container) {
     
     if (scrollWidth <= containerWidth) {
         scrollIndicator.style.width = '0';
+        scrollIndicator.style.transform = 'translateX(0)';
         return;
     }
 
-    // Calculate the ratio of visible content to total content
+    // Calculate the visible ratio and line width
     const visibleRatio = containerWidth / scrollWidth;
     const lineWidth = Math.max(containerWidth * visibleRatio, 30);
-
-    // Calculate how much content is overflowing
-    const overflowAmount = scrollWidth - containerWidth;
     
-    // Calculate how far we've scrolled through the overflow content (0 to 1)
+    // Calculate scroll values
+    const overflowAmount = scrollWidth - containerWidth;
     const scrollProgress = buttonsContainer.scrollLeft / overflowAmount;
     
-    // The line should start at the right edge when no content is scrolled
-    // and move left as content is scrolled right
-    const rightEdgePosition = containerWidth - lineWidth;
-    const leftPosition = rightEdgePosition * (scrollProgress) * 2;
+    // Calculate maximum travel distance
+    const maxTravel = containerWidth - lineWidth;
+    // multiply by 2.25 to compensate for the scrolling within the container
+    const leftPosition = scrollProgress * maxTravel * 2.25;
 
-    // Set width and position
-    scrollIndicator.style.width = `${lineWidth}px`;
-    scrollIndicator.style.transform = `translateX(${leftPosition}px)`;
+    // Apply changes in a requestAnimationFrame for smooth updates
+    requestAnimationFrame(() => {
+        scrollIndicator.style.width = `${lineWidth}px`;
+        scrollIndicator.style.transform = `translateX(${leftPosition}px)`;
+    });
 }
 
+// Add a mutation observer to watch for content changes
+function setupScrollIndicator(filterButtonsContainer) {
+    const observer = new MutationObserver(() => updateScrollIndicator(filterButtonsContainer));
+    
+    observer.observe(filterButtonsContainer, {
+        childList: true,
+        subtree: true,
+        characterData: true,
+        attributes: true
+    });
+    
+    // Initial update
+    updateScrollIndicator(filterButtonsContainer);
+    
+    // Add event listeners
+    filterButtonsContainer.addEventListener('scroll', updateScrollIndicator);
+    window.addEventListener('resize', () => updateScrollIndicator(filterButtonsContainer));
+}
 export { buildRouteDeck };
