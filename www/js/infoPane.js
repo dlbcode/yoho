@@ -344,8 +344,11 @@ function setupRouteContent(routeIndex) {
 
     requestAnimationFrame(() => {
         const hasSearchResults = existingRouteTable?.querySelector('.route-info-deck');
-        infoPaneHeight.setHeight(hasSearchResults ? 'half' : 'content', {
-            contentElement: hasSearchResults ? null : document.getElementById('routeBox')
+        const routeBox = document.getElementById('routeBox');
+        
+        // Let the height manager calculate based on routeBox size
+        infoPaneHeight.setHeight('content', {
+            contentElement: routeBox
         });
     });
 

@@ -65,8 +65,10 @@ export const infoPaneHeight = {
 
             case 'content':
                 const { contentHeight } = params;
-                // Use provided content height or calculate minimum
-                height = contentHeight || minHeight;
+                // Use provided content height or calculate using routeBox
+                const routeBox = document.querySelector('.route-box');
+                const routeBoxHeight = routeBox ? routeBox.offsetHeight : 0;
+                height = contentHeight || routeBoxHeight + this.MENU_BAR_HEIGHT + 1;
                 height = Math.max(height, minHeight);
                 infoPane.classList.remove('collapsed');
                 infoPane.classList.add('expanded');
