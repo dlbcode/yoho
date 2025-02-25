@@ -23,7 +23,7 @@ export function sortDeckByField(container, fieldName, asc = true) {
                 return parseInt(card.getAttribute('data-stops'), 10);
             },
             'duration': (card) => {
-                const element = card.querySelector('.card-duration .detail-value');
+                const element = card.querySelector('.route-indicator .duration');
                 return element ? element.textContent.trim() : '';
             }
         };
