@@ -76,8 +76,15 @@ function convertData(data, fieldName) {
 export function createSortButton() {
     const sortButton = document.createElement('button');
     sortButton.className = 'sort-button';
+    // Add data attributes to track current sort state
+    sortButton.dataset.currentSort = 'price';
+    sortButton.dataset.sortDirection = 'asc';
+    
     sortButton.innerHTML = `
-        <span><img src="/assets/sort_icon.svg" alt="Sort" class="sort-icon"> <span id="currentSort">Price</span></span>
+        <span>
+            <img src="/assets/sort_icon.svg" alt="Sort" class="sort-icon" id="sortDirectionToggle"> 
+            <span id="currentSort">Price</span>
+        </span>
         <div class="sort-dropdown">
             <div class="sort-option selected" data-sort="price">
                 Price <img src="/assets/money_icon.svg" alt="Price" class="menu-icon">
@@ -97,23 +104,27 @@ export function createSortButton() {
         </div>
     `;
 
-    // Update sort button event listeners
-    sortButton.addEventListener('click', (e) => {
-        const dropdown = sortButton.querySelector('.sort-dropdown');
-        dropdown.classList.toggle('active');
-        if (dropdown.classList.contains('active')) {
-            uiHandling.positionDropdown(sortButton, dropdown);
-        }
+    // Add click handler for the sort direction icon
+    const sortIcon = sortButton.querySelector('#sortDirectionToggle');
+    sortIcon.addEventListener('click', (e) => {
         e.stopPropagation();
+        const currentDirection = sortButton.dataset.sortDirection;
+        const newDirection = currentDirection === 'asc' ? 'desc' : 'asc';
+        sortButton.dataset.sortDirection = newDirection;
+        
+        // Rotate the icon 180 degrees when descending
+        sortIcon.style.transform = newDirection === 'desc' ? 'rotate(180deg)' : 'rotate(0deg)';
+        
+        // Find the cards container and resort
+        const container = sortButton.closest('.filter-controls')
+            .nextElementSibling;
+        
+        if (container && container.classList.contains('route-cards-container')) {
+            sortDeckByField(container, sortButton.dataset.currentSort, newDirection === 'asc');
+        }
     });
 
-    // Close dropdown when clicking outside
-    document.addEventListener('click', () => {
-        const dropdown = sortButton.querySelector('.sort-dropdown');
-        dropdown.classList.remove('active');
-    });
-
-    // Handle sort options
+    // Update existing sort options click handler
     sortButton.querySelectorAll('.sort-option').forEach(option => {
         option.addEventListener('click', (e) => {
             e.stopPropagation();
@@ -121,23 +132,45 @@ export function createSortButton() {
             const currentSort = document.getElementById('currentSort');
             currentSort.textContent = option.textContent.trim().split('\n')[0];
 
+            // Update current sort field
+            sortButton.dataset.currentSort = sortField;
+            // Reset sort direction to ascending when changing sort field
+            sortButton.dataset.sortDirection = 'asc';
+            sortButton.querySelector('#sortDirectionToggle').style.transform = 'rotate(0deg)';
+
             // Remove selected class from all options
             sortButton.querySelectorAll('.sort-option').forEach(opt => {
                 opt.classList.remove('selected');
             });
             option.classList.add('selected');
 
-            // Find the cards container relative to the sort button
             const container = sortButton.closest('.filter-controls')
                 .nextElementSibling;
             
             if (container && container.classList.contains('route-cards-container')) {
-                sortDeckByField(container, sortField);
+                sortDeckByField(container, sortField, true);
             }
 
             const dropdown = sortButton.querySelector('.sort-dropdown');
             dropdown.classList.remove('active');
         });
+    });
+
+    // Keep existing dropdown toggle and outside click handlers
+    sortButton.addEventListener('click', (e) => {
+        if (e.target.id !== 'sortDirectionToggle') {
+            const dropdown = sortButton.querySelector('.sort-dropdown');
+            dropdown.classList.toggle('active');
+            if (dropdown.classList.contains('active')) {
+                uiHandling.positionDropdown(sortButton, dropdown);
+            }
+            e.stopPropagation();
+        }
+    });
+
+    document.addEventListener('click', () => {
+        const dropdown = sortButton.querySelector('.sort-dropdown');
+        dropdown.classList.remove('active');
     });
 
     return sortButton;

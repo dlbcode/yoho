@@ -260,6 +260,10 @@
   filter: brightness(1.5);
 }
 
+.sort-icon:hover {
+  opacity: 0.8;
+}
+
 .sort-button:hover {
   background: none;
   color: #fff; /* Match filter button hover */
