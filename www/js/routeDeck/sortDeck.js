@@ -8,8 +8,8 @@ export function sortDeckByField(container, fieldName, asc = true) {
         // Define a mapping between field names and data extraction logic
         const fieldMap = {
             'departure': (card) => {
-                const element = card.querySelector('.card-details .detail-value[data-departure]');
-                return element ? element.textContent.trim() : '';
+                // Use the data attribute we set for sorting
+                return parseFloat(card.getAttribute('data-departure-time'));
             },
             'arrival': (card) => {
                 const element = card.querySelector('.card-details .detail-value[data-arrival]');
