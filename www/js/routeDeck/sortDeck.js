@@ -112,8 +112,8 @@ export function createSortButton() {
         const newDirection = currentDirection === 'asc' ? 'desc' : 'asc';
         sortButton.dataset.sortDirection = newDirection;
         
-        // Rotate the icon 180 degrees when descending
-        sortIcon.style.transform = newDirection === 'desc' ? 'rotate(180deg)' : 'rotate(0deg)';
+        // Replace the rotate transform with scaleY
+        sortIcon.style.transform = newDirection === 'desc' ? 'scaleY(-1)' : 'scaleY(1)';
         
         // Find the cards container and resort
         const container = sortButton.closest('.filter-controls')
@@ -134,9 +134,12 @@ export function createSortButton() {
 
             // Update current sort field
             sortButton.dataset.currentSort = sortField;
-            // Reset sort direction to ascending when changing sort field
+            
+            // Reset sort direction and icon rotation when changing sort field
             sortButton.dataset.sortDirection = 'asc';
-            sortButton.querySelector('#sortDirectionToggle').style.transform = 'rotate(0deg)';
+            const sortIcon = sortButton.querySelector('#sortDirectionToggle');
+            // Replace the rotate reset with scaleY reset
+            sortIcon.style.transform = 'scaleY(1)';
 
             // Remove selected class from all options
             sortButton.querySelectorAll('.sort-option').forEach(opt => {
@@ -148,7 +151,7 @@ export function createSortButton() {
                 .nextElementSibling;
             
             if (container && container.classList.contains('route-cards-container')) {
-                sortDeckByField(container, sortField, true);
+                sortDeckByField(container, sortField, true); // Force ascending sort
             }
 
             const dropdown = sortButton.querySelector('.sort-dropdown');
