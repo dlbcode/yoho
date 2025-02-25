@@ -96,6 +96,8 @@ function createRouteCard(flight, endpoint, routeIndex, destination) {
 
     const cardId = `deck-${routeIndex}-${flight.id}`;
     
+    // Add stops data attribute
+    const numberOfStops = flight.route.length - 1;
     // Set card attributes
     setCardAttributes(card, {
         'data-card-id': cardId,
@@ -103,7 +105,8 @@ function createRouteCard(flight, endpoint, routeIndex, destination) {
         'data-departure-time': departureDate.getHours() + departureDate.getMinutes() / 60,
         'data-arrival-time': arrivalDate.getHours() + arrivalDate.getMinutes() / 60,
         'data-price-range': getPriceRangeCategory(flight.price),
-        'data-price-value': Math.round(flight.price)
+        'data-price-value': Math.round(flight.price),
+        'data-stops': numberOfStops  // Add this line
     });
 
     card.innerHTML = `

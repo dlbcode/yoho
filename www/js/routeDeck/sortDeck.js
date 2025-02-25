@@ -20,12 +20,7 @@ export function sortDeckByField(container, fieldName, asc = true) {
                 return element ? element.textContent.replace('$', '').trim() : '';
             },
             'stops': (card) => {
-                const detailGroups = card.querySelectorAll('.card-details .detail-group');
-                const stopsGroup = Array.from(detailGroups).find(group => 
-                    group.querySelector('.detail-label').textContent.trim() === 'Stops'
-                );
-                const element = stopsGroup?.querySelector('.detail-value');
-                return element ? element.textContent.trim() : '0';
+                return parseInt(card.getAttribute('data-stops'), 10);
             },
             'duration': (card) => {
                 const element = card.querySelector('.card-duration .detail-value');
@@ -131,8 +126,13 @@ export function createSortButton() {
             });
             option.classList.add('selected');
 
-            const container = document.querySelector('.route-cards-container');
-            sortDeckByField(container, sortField);
+            // Find the cards container relative to the sort button
+            const container = sortButton.closest('.filter-controls')
+                .nextElementSibling;
+            
+            if (container && container.classList.contains('route-cards-container')) {
+                sortDeckByField(container, sortField);
+            }
 
             const dropdown = sortButton.querySelector('.sort-dropdown');
             dropdown.classList.remove('active');
