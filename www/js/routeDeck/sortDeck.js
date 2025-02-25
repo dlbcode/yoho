@@ -12,8 +12,8 @@ export function sortDeckByField(container, fieldName, asc = true) {
                 return parseFloat(card.getAttribute('data-departure-time'));
             },
             'arrival': (card) => {
-                const element = card.querySelector('.card-details .detail-value[data-arrival]');
-                return element ? element.textContent.trim() : '';
+                // Use the data attribute we set for sorting
+                return parseFloat(card.getAttribute('data-arrival-time'));
             },
             'price': (card) => {
                 const element = card.querySelector('.card-price');
@@ -59,7 +59,8 @@ function convertData(data, fieldName) {
     switch (fieldName) {
         case 'departure':
         case 'arrival':
-            return new Date(data);
+            // Data is already a float (hours + minutes/60)
+            return data;
         case 'price':
             return parseFloat(data.replace(/[^0-9.]/g, ''));
         case 'stops':
