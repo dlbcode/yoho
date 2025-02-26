@@ -36,16 +36,30 @@ const lineManager = {
     },
 
     clearLinesByTags(tags, options = {}) {
+        console.log('Clearing lines by tags:', tags);
+        // First, get all lines matching the tag criteria
         const lines = this.getLinesByTags(tags);
+        
+        // Log the number of lines found for debugging
+        console.log(`Found ${lines.length} lines to clear`);
+        
+        // Remove lines and clean up caches
         lines.forEach(line => {
-            // Don't clear lines that are part of appState.routes
             if (!line.tags.has('isPermanent')) {
+                // Remove the line from the map
                 line.remove();
+                
+                // Also remove from route path cache
+                if (line.routeId && pathDrawing.routePathCache[line.routeId]) {
+                    pathDrawing.routePathCache[line.routeId] = 
+                        pathDrawing.routePathCache[line.routeId].filter(l => l !== line);
+                }
             }
         });
     },
 
     clearLines(type) {
+        console.log('Clearing lines:', type);
         const clearTypes = {
             all: () => this.clearLinesByTags(['type:route', 'type:hover'], 
                         { excludeTags: ['type:deck', 'status:selected'] }),
@@ -59,6 +73,7 @@ const lineManager = {
     },
 
     clearLinesByRouteNumber(routeNumber) {
+        console.log('Clearing lines by route number:', routeNumber);
         const tags = [`group:${routeNumber}`];
         return this.clearLinesByTags(tags);
     },
