@@ -25,6 +25,29 @@ const appState = {
     filterThresholds: {},
 };
 
+const originalUpdateState = window.updateState;
+window.updateState = function(key, value, caller) {
+    // Special handling for waypoint removal
+    if (key === 'removeWaypoint') {
+        const waypointIndex = value;
+        const waypoint = appState.waypoints[waypointIndex];
+        
+        // Check for "Any" destination markers
+        const isAnyDestination = 
+            (waypoint && (waypoint.iata_code === 'Any' || waypoint.isAnyDestination === true)) ||
+            window.preserveAnyDestination ||
+            document.getElementById(`waypoint-input-${waypointIndex + 1}`)?.getAttribute('data-is-any-destination') === 'true';
+        
+        // Skip the removal for "Any" destinations
+        if (isAnyDestination) {
+            return;
+        }
+    }
+    
+    // Call the original function for normal operation
+    originalUpdateState.call(this, key, value, caller);
+};
+
 function updateState(key, value, calledFrom) {
     console.log(`updateState called from: ${calledFrom}, key: ${key}, value:`, value);
     let shouldUpdateUrl = true;

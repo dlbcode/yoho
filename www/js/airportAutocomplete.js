@@ -189,48 +189,27 @@ function setupAutocompleteForField(fieldId) {
 
     inputField.addEventListener('blur', () => {
         setTimeout(() => {
-            // Don't clear the field if it has an "Any" value
-            if (inputField.getAttribute('data-is-any-destination') !== 'true') {
-                clearInputField(inputField);
-            }
-            
-            toggleSuggestionBox(false);
-            
-            // Skip all removal logic if we're in preserveAnyDestination mode
-            if (window.preserveAnyDestination) {
-                console.log('Preserving "Any" destination due to global flag');
-                return;
-            }
-            
-            // Get the current input value before any clearing
-            const currentValue = inputField.value;
-            const originalValue = inputField.getAttribute('data-original-value');
             const waypointIndex = parseInt(inputField.id.replace('waypoint-input-', '')) - 1;
             const waypoint = appState.waypoints[waypointIndex];
+            const currentValue = inputField.value;
             
-            // Don't perform empty check if this is an "Any" field
-            if (currentValue === 'Any' || 
-                originalValue === 'Any' || 
-                currentValue.includes('Any') || 
-                inputField.getAttribute('data-is-any-destination') === 'true') {
-                console.log('Preserving "Any" destination waypoint');
-                return;
-            }
+            // Check if this is an "Any" destination that we should preserve
+            const isAnyDestination = 
+                currentValue === 'Any' || 
+                inputField.getAttribute('data-is-any-destination') === 'true' ||
+                (waypoint && (waypoint.iata_code === 'Any' || waypoint.isAnyDestination === true));
             
-            // Don't perform empty check if the waypoint is marked as "Any"
-            if (waypoint && (
-                waypoint.iata_code === 'Any' || 
-                waypoint.isAnyDestination === true ||
-                waypoint.type === 'any'
-            )) {
-                console.log('Preserving waypoint marked as "Any"');
-                return;
-            }
-            
-            // Only remove if it's empty and not an "Any" destination
-            if (currentValue === '' && appState.waypoints.length > 0) {
-                console.log('Removing empty waypoint that is not "Any"');
-                updateState('removeWaypoint', waypointIndex, 'airportAutocomplete.addEventListener3');
+            // Don't clear "Any" destination fields
+            if (!isAnyDestination) {
+                clearInputField(inputField);
+                toggleSuggestionBox(false);
+                
+                // Only remove empty waypoints that aren't "Any" destinations
+                if (currentValue === '' && appState.waypoints.length > 0 && !window.preserveAnyDestination) {
+                    updateState('removeWaypoint', waypointIndex, 'airportAutocomplete.addEventListener3');
+                }
+            } else {
+                toggleSuggestionBox(false);
             }
         }, 300);
     });

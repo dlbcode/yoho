@@ -36,24 +36,26 @@ const lineManager = {
     },
 
     clearLinesByTags(tags, options = {}) {
+        // Skip clearing deck lines during "Any" destination searches
+        if (tags.includes('type:deck') && window.preserveAnyDestination) {
+            return;
+        }
+        
         console.log('Clearing lines by tags:', tags);
-        // First, get all lines matching the tag criteria
-        const lines = this.getLinesByTags(tags);
         
-        // Log the number of lines found for debugging
-        console.log(`Found ${lines.length} lines to clear`);
+        // Use getLinesByTags to get lines instead of this.lines
+        const linesToRemove = this.getLinesByTags(tags);
         
-        // Remove lines and clean up caches
-        lines.forEach(line => {
-            if (!line.tags.has('filterExempt')) {
-                // Remove the line from the map
+        console.log('Found', linesToRemove.length, 'lines to clear');
+        
+        // Create removeLine method if it doesn't exist or use an alternative approach
+        linesToRemove.forEach(line => {
+            if (line instanceof Line) {
                 line.remove();
-                
-                // Also remove from route path cache
-                if (line.routeId && pathDrawing.routePathCache[line.routeId]) {
-                    pathDrawing.routePathCache[line.routeId] = 
-                        pathDrawing.routePathCache[line.routeId].filter(l => l !== line);
-                }
+            } else if (line.visibleLine) {
+                // For non-Line objects that might have visibleLine property
+                map.removeLayer(line.visibleLine);
+                if (line.invisibleLine) map.removeLayer(line.invisibleLine);
             }
         });
     },

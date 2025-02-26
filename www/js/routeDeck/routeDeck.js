@@ -43,48 +43,38 @@ window.updateState = function(key, value, caller) {
 };
 
 function buildRouteDeck(routeIndex) {
-    lineManager.clearLinesByTags(['type:deck']); // Clear any existing route deck lines
-
+    lineManager.clearLinesByTags(['type:deck']);
     initializeFilterState();
 
-    // Use optional chaining and nullish coalescing for conciseness
+    // Get origin and destination information
     const dateRange = appState.routeDates[routeIndex] ?? {};
     let origin = appState.waypoints[routeIndex * 2]?.iata_code;
     let destination = appState.waypoints[(routeIndex * 2) + 1]?.iata_code || 'Any';
 
-    // Mark the destination as "Any" if that's what we're searching for
+    // Special handling for "Any" destination searches
     if (destination === 'Any') {
-        console.log("Setting up Any destination search");
-        
         // Create a special waypoint object that won't be cleared
-        const anyDestination = {
-            iata_code: 'Any',
-            name: 'Any Destination',
-            city: 'Any',
-            type: 'any',
-            isAnyDestination: true
-        };
-        
-        // Update the state with this special waypoint
         updateState('updateWaypoint', { 
             index: (routeIndex * 2) + 1, 
-            data: anyDestination 
+            data: {
+                iata_code: 'Any',
+                name: 'Any Destination',
+                isAnyDestination: true
+            }
         }, 'buildRouteDeck');
         
-        // Also mark the input field
+        // Mark the input field
         const destInput = document.getElementById(`waypoint-input-${(routeIndex * 2) + 2}`);
         if (destInput) {
             destInput.value = 'Any';
             destInput.setAttribute('data-is-any-destination', 'true');
-            // Store original value to prevent it from being cleared
-            destInput.setAttribute('data-original-value', 'Any');
         }
         
-        // Disable the blur handler temporarily
+        // Enable protection mode
         window.preserveAnyDestination = true;
         setTimeout(() => {
             window.preserveAnyDestination = false;
-        }, 2000); // Keep it disabled for 2 seconds
+        }, 1000);
     }
 
     // Modify this section to prevent removing the "Any" waypoint
