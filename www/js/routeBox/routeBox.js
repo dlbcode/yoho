@@ -59,7 +59,6 @@ const setupWaypointInputListeners = (routeNumber) => {
         input.addEventListener('keydown', (event) => {
             if (event.key === 'Enter') {
                 event.preventDefault();
-                // Using ternary: focus next input if i===0, otherwise blur this input
                 i === 0 
                     ? document.querySelector(`#waypoint-input-${routeNumber * 2 + 2}`)?.focus()
                     : input.blur();
