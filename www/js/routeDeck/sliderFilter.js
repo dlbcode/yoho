@@ -27,16 +27,25 @@ const sliderFilter = {
     },
 
     createFilterPopup: function (filterType, data, event) {
-        // Remove any existing popup for this filter type
+        // Toggle behavior - check if we're clicking on the same filter that has an open popup
         const existingPopup = document.getElementById(`${filterType}FilterPopup`);
-        if (existingPopup) {
-            existingPopup.remove();
-        }
-
-        if (!data) {
-            console.error('No data provided for filtering:', filterType);
+        const clickedElement = event.target;
+        const isFilterElement = clickedElement.getAttribute('data-filter') === filterType || 
+                              clickedElement.closest(`[data-filter="${filterType}"]`);
+        
+        if (existingPopup && isFilterElement) {
+            // If clicking the same filter button that created this popup, close it
+            existingPopup.classList.add('hidden');
+            setTimeout(() => existingPopup.remove(), 300);
+            toggleFilterResetIcon(filterType); // Ensure reset icon is shown if filter is active
             return;
         }
+        
+        // Remove any existing popups
+        document.querySelectorAll('.filter-popup').forEach(popup => {
+            popup.classList.add('hidden');
+            setTimeout(() => popup.remove(), 300);
+        });
 
         // Create new popup
         this.createAndShowPopup(filterType, data, event);
@@ -62,7 +71,14 @@ const sliderFilter = {
     createAndShowPopup: function (filterType, data, event) {
         if (!data) return console.error('No data provided for filtering:', filterType);
 
-        document.getElementById(`${filterType}FilterPopup`)?.remove();
+        const existingPopup = document.getElementById(`${filterType}FilterPopup`);
+        
+        // If popup already exists, just close it and return
+        if (existingPopup) {
+            existingPopup.classList.add('hidden');
+            setTimeout(() => existingPopup.remove(), 300);
+            return;
+        }
 
         let filterIcon = document.getElementById(`${filterType}Filter`);
         if (!filterIcon) {
@@ -129,7 +145,7 @@ const sliderFilter = {
         }
 
         popup.style.left = `${leftPosition}px`;
-        popup.style.top = `${iconRect.top + window.scrollY - 90}px`;
+        popup.style.top = `${iconRect.top + window.scrollY - 100}px`;
     },
 
     initializeSlider: function (popup, filterType, data, valueLabel) {
