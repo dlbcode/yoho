@@ -120,22 +120,26 @@
 }
 
 .route-info-button {
-  height: 50px; /* Match the height of the plus button */
-  width: 80px; /* Adjust width as needed */
-  background-color: #444; /* Same background color as plus button */
+  position: relative;
+  padding-left: 8px;
+  height: 50px;
+  width: 80px;
+  background-color: #444;
   display: flex;
   align-items: center;
   justify-content: center;
   border: none;
   cursor: pointer;
-  color: #ccc; /* Ensure the text color matches */
-  font-size: 14px; /* Adjust the font size if necessary */
-  flex-shrink: 0; /* Prevents the button from collapsing */
+  color: #ccc;
+  font-size: 12px;
+  flex-shrink: 0;
+  margin-right: 5px; /* Add space for the point */
+  clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 50%, calc(100% - 10px) 100%, 0 100%, 10px 50%);
 }
 
 .route-info-button:hover {
-  background-color: #2a4f7c; /* Same hover background color as plus button */
-  color: #ddd; /* Change text color on hover */
+  background-color: #2a4f7c;
+  color: #ddd;
 }
 
 .route-info-button:focus, .route-info-button:active {
