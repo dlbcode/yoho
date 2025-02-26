@@ -12,12 +12,37 @@
   flex-direction: column;
   z-index: 1000;
   background-color: #1d1d1d;
-  border-top: 3px solid #0060bb;
+  /* Remove border-top and handle it with pseudo-element instead */
   height: 50px; /* Default to collapsed height */
 }
 
+/* Add border as pseudo-element so it doesn't affect the box model */
+#infoPane::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background-color: #0060bb;
+  z-index: 1002; /* Increased from 1 to be higher than routeBoxContainer (1001) */
+}
+
 #infoPane.loading {
-  border-top: none;
+  /* Remove border-top: none as it's now handled by pseudo-element */
+}
+
+#infoPane.loading::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background-image: linear-gradient(90deg, #0060bb 25%, #ffffff 50%, #0060bb 75%);
+  background-size: 200% 100%;
+  animation: loadingAnimation 1s linear infinite;
+  z-index: 1002; /* Match the standard border z-index for consistency */
 }
 
 #infoPane.search-results {
@@ -37,19 +62,6 @@
 @keyframes loadingAnimation {
   0% { background-position: 200% 0; }
   100% { background-position: -200% 0; }
-}
-
-#infoPane.loading::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 3px;
-  background-image: linear-gradient(90deg, #0060bb 25%, #ffffff 50%, #0060bb 75%);
-  background-size: 200% 100%;
-  animation: loadingAnimation 1s linear infinite;
-  z-index: 1001;
 }
 
 #menu-container {
