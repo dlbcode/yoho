@@ -130,6 +130,8 @@ const setWaypointInputs = (routeNumber) => {
     const fromWaypoint = appState.waypoints[routeNumber * 2];
     const toWaypoint = appState.waypoints[routeNumber * 2 + 1];
 
+    console.log('Setting waypoint inputs:', { fromWaypoint, toWaypoint });
+
     if (fromInput) {
         fromInput.value = fromWaypoint ? `${fromWaypoint.city}, (${fromWaypoint.iata_code})` : '';
     }
@@ -313,6 +315,13 @@ const routeBox = {
                     infoPaneElement.classList.add('expanded');
                     adjustMapSize();
                 });
+
+                // Ensure the destination waypoint is set to 'Any'
+                const toInput = document.getElementById(`waypoint-input-${routeNumber * 2 + 2}`);
+                if (toInput && !toInput.value) {
+                    toInput.value = 'Any';
+                    console.log('Setting destination waypoint to Any');
+                }
             });
         };
 
