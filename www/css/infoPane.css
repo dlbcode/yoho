@@ -59,7 +59,7 @@
   height: 50px;
   display: flex;
   align-items: center;
-  background-color: #333;
+  background-color: #111;
   z-index: 1001;
 }
 
@@ -72,7 +72,7 @@
   overflow-y: hidden;
   white-space: nowrap;
   scrollbar-width: thin;
-  padding: 0 10px 0 0;
+  padding: 0 20px 0 0; /* Increase right padding to compensate for overlap */
 }
 
 #menu-bar::-webkit-scrollbar {
@@ -95,7 +95,7 @@
 .plus-button {
   height: 32px;
   width: 32px;
-  margin: 1px;
+  margin: 1px 1px 1px -5px; /* Adjust left margin to align with buttons */
   background-color: #444;
   border-radius: 50%; /* Make the button circular */
   display: flex;
@@ -104,6 +104,7 @@
   border: none;
   cursor: pointer;
   flex-shrink: 0; /* Prevents the button from collapsing */
+  z-index: 1050; /* Higher than any route button */
 }
 
 .plus-button svg {
@@ -133,30 +134,37 @@
   color: #ccc;
   font-size: 12px;
   flex-shrink: 0;
-  margin-right: 5px; /* Add space for the point */
+  margin-right: -8px; /* Negative margin to create overlap */
   clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 50%, calc(100% - 10px) 100%, 0 100%, 10px 50%);
+  /* Base z-index will be calculated dynamically */
 }
 
+/* Make hovered buttons appear on top */
 .route-info-button:hover {
   background-color: #2a4f7c;
   color: #ddd;
+  z-index: 100 !important; /* Highest z-index when hovered, overrides any calculated value */
 }
 
-.route-info-button:focus, .route-info-button:active {
-  background-color: #3b7897; /* Active state background color */
-  color: #fff; /* Active state text color */
-}
-
+/* Make selected buttons appear on top of regular buttons */
 .selected-route-button {
-  background-color: rgb(0, 70, 0); /* Green background for selected state */
+  background-color: rgb(0, 70, 0);
   color: #ccc;
-  border: none; /* Remove border */
-  flex-shrink: 0; /* Prevents the button from collapsing */
+  border: none;
+  flex-shrink: 0;
+  z-index: 50 !important; /* Higher than regular buttons but lower than hovered */
 }
 
-.selected-route-button:hover {
-  background-color: #327935; /* Darker green on hover */
-  color: #ddd;
+/* Dynamic z-index calculation for route buttons */
+/* We use a high base value (1000) and subtract the child index to ensure earlier buttons appear on top */
+#menu-bar .route-info-button {
+  z-index: calc(1000 - var(--button-index, 0));
+}
+
+/* Set custom property for each button based on its position */
+#menu-bar .route-info-button:nth-child(n) {
+  --button-index: calc(var(--n, 0) + 1);
+  --n: var(--button-index);
 }
 
 #infoPaneContent {
