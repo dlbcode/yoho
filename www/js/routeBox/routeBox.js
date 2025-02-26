@@ -57,23 +57,12 @@ const setupWaypointInputListeners = (routeNumber) => {
             setTimeout(() => event.target.select(), 0);
         });
         input.addEventListener('keydown', (event) => {
-            // Handle Enter/Return key press
             if (event.key === 'Enter') {
                 event.preventDefault();
-                
-                // If this is the "from" input, focus the "to" input
-                if (i === 0) {
-                    const nextInput = document.querySelector(`#waypoint-input-${routeNumber * 2 + 2}`);
-                    if (nextInput) {
-                        nextInput.focus();
-                    }
-                } 
-                // If this is the "to" input, trigger search
-                else if (i === 1) {
-                    if (nextInput) {
-                        nextInput.focus();
-                    }
-                }
+                // Using ternary: focus next input if i===0, otherwise blur this input
+                i === 0 
+                    ? document.querySelector(`#waypoint-input-${routeNumber * 2 + 2}`)?.focus()
+                    : input.blur();
             }
         });
         input.addEventListener('blur', async (event) => {
