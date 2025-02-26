@@ -11,36 +11,17 @@ import { createRouteCard } from './routeCard.js'; // Import createRouteCard
 
 // Add to the updateState function before making any state changes
 
-// Original updateState function
-const originalUpdateState = window.updateState || function() {};
-
-window.updateState = function(key, value, caller) {
-    // Special debug for removeWaypoint
-    if (key === 'removeWaypoint') {
-        const index = value;
-        const waypoint = appState.waypoints[index];
-        
-        console.log(`WAYPOINT REMOVAL REQUEST: index=${index}`, {
-            waypoint,
-            caller,
-            isAny: waypoint?.iata_code === "Any" || waypoint?.isAnyDestination === true,
-            inputValue: document.getElementById(`waypoint-input-${index + 1}`)?.value,
-            stack: new Error().stack
-        });
-        
-        // Prevent removal of "Any" destination waypoints
-        if (waypoint?.iata_code === "Any" || 
-            waypoint?.isAnyDestination === true || 
-            document.getElementById(`waypoint-input-${index + 1}`)?.value === "Any") {
-            
-            console.log(`⛔ BLOCKING removal of "Any" destination waypoint at index ${index}`);
-            return; // Skip the removal
+// If you want to add debugging for "Any" destination specifically in routeDeck.js,
+// use the middleware pattern instead:
+if (typeof window.updateState.use === 'function') {
+    // Register a debugging middleware just for routeDeck
+    window.updateState.use(function routeDeckDebugMiddleware(key, value, caller) {
+        if (key === 'removeWaypoint' && caller === 'buildRouteDeck') {
+            console.log(`Route deck detected waypoint removal: ${value}`);
         }
-    }
-    
-    // Call the original function
-    originalUpdateState.call(this, key, value, caller);
-};
+        return true; // Always continue the chain
+    });
+}
 
 function buildRouteDeck(routeIndex) {
     lineManager.clearLinesByTags(['type:deck']);
