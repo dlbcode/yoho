@@ -56,6 +56,27 @@ const setupWaypointInputListeners = (routeNumber) => {
             if (window.innerWidth <= 600) expandInput(event.target);
             setTimeout(() => event.target.select(), 0);
         });
+        input.addEventListener('keydown', (event) => {
+            // Handle Enter/Return key press
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                
+                // If this is the "from" input, focus the "to" input
+                if (i === 0) {
+                    const nextInput = document.querySelector(`#waypoint-input-${routeNumber * 2 + 2}`);
+                    if (nextInput) {
+                        nextInput.focus();
+                    }
+                } 
+                // If this is the "to" input, trigger search
+                else if (i === 1) {
+                    const searchButton = document.querySelector('.search-button');
+                    if (searchButton && !searchButton.disabled) {
+                        searchButton.click();
+                    }
+                }
+            }
+        });
         input.addEventListener('blur', async (event) => {
             if (window.innerWidth <= 600) revertInput(event.target);
             const fromInput = document.querySelector(`#waypoint-input-${routeNumber * 2 + 1}`);
