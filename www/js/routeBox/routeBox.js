@@ -70,9 +70,8 @@ const setupWaypointInputListeners = (routeNumber) => {
                 } 
                 // If this is the "to" input, trigger search
                 else if (i === 1) {
-                    const searchButton = document.querySelector('.search-button');
-                    if (searchButton && !searchButton.disabled) {
-                        searchButton.click();
+                    if (nextInput) {
+                        nextInput.focus();
                     }
                 }
             }
