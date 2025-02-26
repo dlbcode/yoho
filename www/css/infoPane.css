@@ -105,23 +105,28 @@
 }
 
 .plus-button {
-  height: 32px;
-  width: 32px;
-  margin: 1px 1px 1px -5px; /* Adjust left margin to align with buttons */
+  height: 30px;
+  width: 24px; /* Reduced from 50px to 24px as requested */
+  margin: 0 0px 0 4px;
+  padding-left: 8px; /* Adjusted padding to center the SVG */
   background-color: #444;
-  border-radius: 50%; /* Make the button circular */
+  border-radius: 0; /* Remove circular shape */
   display: flex;
   align-items: center;
   justify-content: center;
   border: none;
   cursor: pointer;
-  flex-shrink: 0; /* Prevents the button from collapsing */
-  z-index: 1050; /* Higher than any route button */
+  flex-shrink: 0;
+  z-index: 1050;
+  color: #ccc;
+  /* Apply similar clip-path as route buttons but adjusted for the narrower width */
+  clip-path: polygon(0 0, calc(100% - 6px) 0, 100% 50%, calc(100% - 6px) 100%, 0 100%, 6px 50%);
 }
 
 .plus-button svg {
-  width: 24px;
-  height: 24px;
+  width: 14px; /* Reduced from 30px to fit narrower button */
+  height: 14px;
+  fill: #ccc;
 }
 
 .plus-button:hover {
