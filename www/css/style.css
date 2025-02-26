@@ -23,6 +23,15 @@ body::-webkit-scrollbar, [id$='Suggestions']::-webkit-scrollbar {
   width: 5px;
 }
 
+@font-face {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Roboto'), local('Roboto-Regular'),
+       url('/assets/fonts/roboto-regular.ttf') format('woff2');
+  font-display: swap;
+}
+
 .container {
   position: relative;
   display: flex;
