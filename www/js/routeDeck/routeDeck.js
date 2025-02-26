@@ -1,4 +1,4 @@
-import { appState } from '../stateManager.js';
+import { appState, updateState } from '../stateManager.js';
 import { sliderFilter } from './sliderFilter.js';
 import { createSortButton } from './sortDeck.js';
 import { pathDrawing, Line } from '../pathDrawing.js';
@@ -9,6 +9,39 @@ import { infoPaneHeight } from '../utils/infoPaneHeightManager.js';
 import { lineManager } from '../lineManager.js';
 import { createRouteCard } from './routeCard.js'; // Import createRouteCard
 
+// Add to the updateState function before making any state changes
+
+// Original updateState function
+const originalUpdateState = window.updateState || function() {};
+
+window.updateState = function(key, value, caller) {
+    // Special debug for removeWaypoint
+    if (key === 'removeWaypoint') {
+        const index = value;
+        const waypoint = appState.waypoints[index];
+        
+        console.log(`WAYPOINT REMOVAL REQUEST: index=${index}`, {
+            waypoint,
+            caller,
+            isAny: waypoint?.iata_code === "Any" || waypoint?.isAnyDestination === true,
+            inputValue: document.getElementById(`waypoint-input-${index + 1}`)?.value,
+            stack: new Error().stack
+        });
+        
+        // Prevent removal of "Any" destination waypoints
+        if (waypoint?.iata_code === "Any" || 
+            waypoint?.isAnyDestination === true || 
+            document.getElementById(`waypoint-input-${index + 1}`)?.value === "Any") {
+            
+            console.log(`⛔ BLOCKING removal of "Any" destination waypoint at index ${index}`);
+            return; // Skip the removal
+        }
+    }
+    
+    // Call the original function
+    originalUpdateState.call(this, key, value, caller);
+};
+
 function buildRouteDeck(routeIndex) {
     lineManager.clearLinesByTags(['type:deck']); // Clear any existing route deck lines
 
@@ -18,6 +51,53 @@ function buildRouteDeck(routeIndex) {
     const dateRange = appState.routeDates[routeIndex] ?? {};
     let origin = appState.waypoints[routeIndex * 2]?.iata_code;
     let destination = appState.waypoints[(routeIndex * 2) + 1]?.iata_code || 'Any';
+
+    // Mark the destination as "Any" if that's what we're searching for
+    if (destination === 'Any') {
+        console.log("Setting up Any destination search");
+        
+        // Create a special waypoint object that won't be cleared
+        const anyDestination = {
+            iata_code: 'Any',
+            name: 'Any Destination',
+            city: 'Any',
+            type: 'any',
+            isAnyDestination: true
+        };
+        
+        // Update the state with this special waypoint
+        updateState('updateWaypoint', { 
+            index: (routeIndex * 2) + 1, 
+            data: anyDestination 
+        }, 'buildRouteDeck');
+        
+        // Also mark the input field
+        const destInput = document.getElementById(`waypoint-input-${(routeIndex * 2) + 2}`);
+        if (destInput) {
+            destInput.value = 'Any';
+            destInput.setAttribute('data-is-any-destination', 'true');
+            // Store original value to prevent it from being cleared
+            destInput.setAttribute('data-original-value', 'Any');
+        }
+        
+        // Disable the blur handler temporarily
+        window.preserveAnyDestination = true;
+        setTimeout(() => {
+            window.preserveAnyDestination = false;
+        }, 2000); // Keep it disabled for 2 seconds
+    }
+
+    // Modify this section to prevent removing the "Any" waypoint
+    // If destination is 'Any', we should preserve it and not trigger a removeWaypoint action
+    if (destination === 'Any') {
+        // Make sure we have a waypoint object for "Any" to prevent it from being removed
+        if (!appState.waypoints[(routeIndex * 2) + 1]) {
+            updateState('updateWaypoint', { 
+                index: (routeIndex * 2) + 1, 
+                data: { iata_code: 'Any', isAnyDestination: true } 
+            }, 'buildRouteDeck');
+        }
+    }
 
     // Simplify origin/destination logic
     if (!origin || !destination) {
