@@ -45,7 +45,7 @@ const lineManager = {
         
         // Remove lines and clean up caches
         lines.forEach(line => {
-            if (!line.tags.has('isPermanent')) {
+            if (!line.tags.has('filterExempt')) {
                 // Remove the line from the map
                 line.remove();
                 

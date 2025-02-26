@@ -162,7 +162,7 @@ function updateLineVisibility(visibleRouteIds, maxPrice) {
     const deckLines = lineManager.getLinesByTags(['type:deck']);
 
     deckLines.forEach(line => {
-        if (!line || !(line instanceof Line) || line.tags.has('isPermanent')) return;
+        if (!line || !(line instanceof Line) || line.tags.has('filterExempt')) return;
 
         let price;
         for (let tag of line.tags) {
