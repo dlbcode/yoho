@@ -1,7 +1,7 @@
 import { adjustMapSize } from '../map.js';
 
 export const infoPaneHeight = {
-    MENU_BAR_HEIGHT: 42,
+    MENU_BAR_HEIGHT: 50,
     DEFAULT_HEIGHT_RATIO: 0.5,
     currentHeightRatio: 0.5,
 
@@ -33,7 +33,7 @@ export const infoPaneHeight = {
         
         if (currentType === 'content') {
             // Add menu bar height and small buffer
-            const optimalHeight = Math.ceil(totalContentHeight + this.MENU_BAR_HEIGHT + 1);
+            const optimalHeight = Math.ceil(totalContentHeight + this.MENU_BAR_HEIGHT + 3);
             this.setHeight('content', { contentHeight: optimalHeight });
         } else if (currentType === 'ratio') {
             this.setHeight('ratio');
@@ -68,7 +68,7 @@ export const infoPaneHeight = {
                 // Use provided content height or calculate using routeBox
                 const routeBox = document.querySelector('.route-box');
                 const routeBoxHeight = routeBox ? routeBox.offsetHeight : 0;
-                height = contentHeight || routeBoxHeight + this.MENU_BAR_HEIGHT + 1;
+                height = contentHeight || routeBoxHeight + this.MENU_BAR_HEIGHT + 3;
                 height = Math.max(height, minHeight);
                 infoPane.classList.remove('collapsed');
                 infoPane.classList.add('expanded');
