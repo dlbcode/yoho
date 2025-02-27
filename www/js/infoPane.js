@@ -116,15 +116,24 @@ const infoPane = {
     handleRouteButtonClick(routeIndex, event) {
         event.stopPropagation();
 
+        // Set a flag to prevent line clearing during route switching
+        appState.isRouteSwitching = true;
+
         // Simplify height check and collapse logic
         if (routeIndex === appState.currentRouteIndex &&
             document.getElementById('infoPane').offsetHeight > infoPaneHeight.MENU_BAR_HEIGHT) {
             infoPaneHeight.setHeight('collapse');
+            appState.isRouteSwitching = false; // Reset flag
             return;
         }
 
         const { routeBoxElement } = setupRouteContent(routeIndex);
         this.fitMapToRoute(routeIndex);
+        
+        // Reset the flag after a short delay to allow for inputs to initialize
+        setTimeout(() => {
+            appState.isRouteSwitching = false;
+        }, 500);
     },
 
     updateTripDeck(selectedRoutesArray) {

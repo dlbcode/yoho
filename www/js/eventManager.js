@@ -14,9 +14,10 @@ const handleWaypointChange = () => {
     mapHandling.updateMarkerIcons();
     
     // Don't clear deck lines if we're just handling an "Any" destination
+    // or if we're in the middle of a route switch
     const isAnyDestinationChange = appState.waypoints.some(wp => wp && wp.iata_code === 'Any' && wp.isAnyDestination);
     
-    if (!isAnyDestinationChange) {
+    if (!isAnyDestinationChange && !appState.isRouteSwitching) {
         routeHandling.updateRoutesArray();
         clearLinesForView('routeDeck');
     }

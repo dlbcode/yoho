@@ -52,10 +52,24 @@ const setupWaypointInputListeners = (routeNumber) => {
     ['from-input', 'to-input'].forEach((className, i) => {
         const input = document.querySelector(`#waypoint-input-${routeNumber * 2 + i + 1}`);
         input.addEventListener('input', enableSwapButtonIfNeeded);
+        
+        // Add a flag to track if this is the initial focus after route switching
+        let isInitialFocus = true;
+        
         input.addEventListener('focus', (event) => {
-            if (window.innerWidth <= 600) expandInput(event.target);
+            // Only expand input if this is not the initial focus after route switching
+            // or if we're on mobile (small screen)
+            if (!isInitialFocus || window.innerWidth <= 600) {
+                expandInput(event.target);
+            }
+            
+            // Clear the flag after first focus
+            isInitialFocus = false;
+            
+            // Still select text for better UX
             setTimeout(() => event.target.select(), 0);
         });
+        
         input.addEventListener('keydown', (event) => {
             if (event.key === 'Enter') {
                 event.preventDefault();
@@ -64,13 +78,21 @@ const setupWaypointInputListeners = (routeNumber) => {
                     : input.blur();
             }
         });
+        
         input.addEventListener('blur', async (event) => {
             if (window.innerWidth <= 600) revertInput(event.target);
             const fromInput = document.querySelector(`#waypoint-input-${routeNumber * 2 + 1}`);
             const toInput = document.querySelector(`#waypoint-input-${routeNumber * 2 + 2}`);
-            if (input.value === '' && fromInput.value !== '' && toInput.value !== '' && appState.waypoints.length > 0) {
+            
+            // Only process waypoint removal if the input field was manually cleared
+            // and not during route switching
+            if (input.value === '' && fromInput.value !== '' && toInput.value !== '' && 
+                appState.waypoints.length > 0 && !appState.isRouteSwitching) {
+                
                 const waypointIndex = parseInt(input.id.replace('waypoint-input-', '')) - 1;
-                if (waypointIndex >= 0 && waypointIndex < appState.waypoints.length && appState.waypoints[waypointIndex].iata_code !== '') {
+                if (waypointIndex >= 0 && waypointIndex < appState.waypoints.length && 
+                    appState.waypoints[waypointIndex].iata_code !== '') {
+                    
                     updateState('removeWaypoint', waypointIndex, 'routeBox.setupWaypointInputListeners');
                     routeHandling.updateRoutesArray();
                 }
