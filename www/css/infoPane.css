@@ -67,7 +67,7 @@
   height: 50px;
   display: flex;
   align-items: center;
-  background-color: #111;
+  background-color: #222;
   z-index: 1001;
 }
 
@@ -102,11 +102,10 @@
 
 .plus-button {
   height: 30px;
-  width: 24px; /* Reduced from 50px to 24px as requested */
+  width: 30px;
   margin: 0 0px 0 4px;
-  padding-left: 8px; /* Adjusted padding to center the SVG */
-  background-color: #444;
-  border-radius: 0; /* Remove circular shape */
+  padding: 0;
+  background-color: transparent; /* Remove background color */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -114,31 +113,29 @@
   cursor: pointer;
   flex-shrink: 0;
   z-index: 1050;
-  color: #ccc;
-  /* Apply similar clip-path as route buttons but adjusted for the narrower width */
-  clip-path: polygon(0 0, calc(100% - 6px) 0, 100% 50%, calc(100% - 6px) 100%, 0 100%, 6px 50%);
 }
 
-.plus-button svg {
-  width: 14px; /* Reduced from 30px to fit narrower button */
-  height: 14px;
-  fill: #ccc;
+.plus-button img {
+  width: 30px;
+  height: 30px;
+  filter: brightness(.8); /* Keep the icon slightly brighter */
 }
 
+.plus-button:hover img {
+  filter: brightness(1); /* Brighten the icon on hover instead of changing background */
+}
+
+/* Override the hover background rule to keep it transparent */
 .plus-button:hover {
-  background-color: #2a4f7c;
-}
-
-.plus-button:hover svg {
-  fill: #ccc; /* Change the color of the SVG on hover */
+  background-color: transparent;
 }
 
 .route-info-button {
   position: relative;
-  padding-left: 8px;
   height: 50px;
-  width: 80px;
-  background-color: #444;
+  width: 50px;
+  /* Default gradient direction (for odd-indexed buttons) */
+  background: linear-gradient(135deg, #1a3a5f 50%, #132840 50%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -147,25 +144,64 @@
   color: #ccc;
   font-size: 12px;
   flex-shrink: 0;
-  margin-right: -8px; /* Negative margin to create overlap */
-  clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 50%, calc(100% - 10px) 100%, 0 100%, 10px 50%);
-  /* Base z-index will be calculated dynamically */
+  margin-right: 1px;
 }
 
-/* Make hovered buttons appear on top */
+/* Alternate gradient direction for even-indexed buttons */
+.route-info-button.even-button {
+  background: linear-gradient(315deg, #1a3a5f 50%, #132840 50%);
+}
+
+/* Origin IATA code positioned in upper left */
+.route-info-button .origin-iata {
+  position: absolute;
+  top: 4px;
+  left: 5px;
+  font-size: 12px;
+  color: #ccc;
+}
+
+/* Destination IATA code positioned in lower right */
+.route-info-button .dest-iata {
+  position: absolute;
+  bottom: 4px;
+  right: 4px;
+  font-size: 12px;
+  color: #ccc;
+}
+
+/* Adjust hover styles to ensure text remains visible */
+.route-info-button:hover .origin-iata,
+.route-info-button:hover .dest-iata {
+  color: #fff;
+}
+
+/* Make hovered buttons appear on top with a slightly lighter color */
 .route-info-button:hover {
-  background-color: #2a4f7c;
-  color: #ddd;
-  z-index: 100 !important; /* Highest z-index when hovered, overrides any calculated value */
+  background: linear-gradient(135deg, #234b79 50%, #1a3452 50%);
+  color: #fff;
+  z-index: 100 !important;
 }
 
-/* Make selected buttons appear on top of regular buttons */
+/* Alternate hover gradient for even-indexed buttons */
+.route-info-button.even-button:hover {
+  background: linear-gradient(315deg, #234b79 50%, #1a3452 50%);
+  color: #fff;
+  z-index: 100 !important;
+}
+
+/* Make selected buttons appear with a green color scheme */
 .selected-route-button {
-  background-color: rgb(0, 70, 0);
+  background: linear-gradient(135deg, #004600 50%, #003500 50%);
   color: #ccc;
   border: none;
   flex-shrink: 0;
-  z-index: 50 !important; /* Higher than regular buttons but lower than hovered */
+  z-index: 50 !important;
+}
+
+/* Alternate gradient direction for even-indexed selected buttons */
+.selected-route-button.even-button {
+  background: linear-gradient(315deg, #004600 50%, #003500 50%) !important;
 }
 
 /* Dynamic z-index calculation for route buttons */
@@ -178,6 +214,21 @@
 #menu-bar .route-info-button:nth-child(n) {
   --button-index: calc(var(--n, 0) + 1);
   --n: var(--button-index);
+}
+
+/* Plane icon in the center - add this back */
+.route-info-button::after {
+  content: '';
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  background-image: url('../assets/yhplane.svg');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  opacity: 0.9;
+  filter: brightness(2.2);
+  transform: none; /* No rotation */
 }
 
 #infoPaneContent {

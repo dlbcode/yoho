@@ -59,20 +59,45 @@ const infoPane = {
             let button = document.getElementById(buttonId) || document.createElement('button');
             const origin = appState.waypoints[routeIndex * 2]?.iata_code || 'Any';
             const destination = appState.waypoints[routeIndex * 2 + 1]?.iata_code || 'Any';
-            const buttonText = `${origin}-${destination}`;
-
+            
             if (!button.id) {
                 button.id = buttonId;
                 button.className = 'route-info-button';
+                
+                // Add even-button class to alternate gradient directions
+                if (routeIndex % 2 === 1) {
+                    button.classList.add('even-button');
+                }
+                
                 menuBar.appendChild(button);
             }
-
-            button.textContent = buttonText;
+            
+            // Clear previous content and add structured elements for origin and destination
+            button.innerHTML = '';
+            
+            // Create origin element (upper left)
+            const originElement = document.createElement('span');
+            originElement.className = 'origin-iata';
+            originElement.textContent = origin;
+            button.appendChild(originElement);
+            
+            // Create destination element (lower right)
+            const destElement = document.createElement('span');
+            destElement.className = 'dest-iata';
+            destElement.textContent = destination;
+            button.appendChild(destElement);
+            
             button.onclick = this.handleRouteButtonClick.bind(this, routeIndex);
 
             this.fitMapToRoute(routeIndex);
 
-            button.classList.toggle('selected-route-button', appState.selectedRoutes.hasOwnProperty(routeIndex));
+            // Ensure selected button class is applied while maintaining the even-button class if needed
+            if (appState.selectedRoutes.hasOwnProperty(routeIndex)) {
+                button.classList.add('selected-route-button');
+            } else {
+                button.classList.remove('selected-route-button');
+            }
+
             uiHandling.attachDateTooltip(button, routeIndex);
 
             // Use a single event listener for both mouseover and mouseout
@@ -207,7 +232,8 @@ const infoPane = {
             let plusButton = document.createElement('button');
             plusButton.id = 'plus-button';
             plusButton.className = 'plus-button';
-            plusButton.innerHTML = `<svg height="32px" width="32px" viewBox="0 0 64 64" fill="#aaa"><rect x="30" y="10" width="4" height="44"></rect><rect x="10" y="30" width="44" height="4"></rect></svg>`;
+            // Replace the inline SVG with the add_circle.svg reference
+            plusButton.innerHTML = `<img src="../assets/add_circle.svg" alt="Add route" width="20" height="20">`;
             plusButton.onclick = this.handlePlusButtonClick.bind(this);
             menuBar.appendChild(plusButton);
         }
