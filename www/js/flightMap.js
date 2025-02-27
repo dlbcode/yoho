@@ -58,6 +58,14 @@ const flightMap = {
     },
 
     handleMarkerClick(airport, clickedMarker) {
+        // Set flag to prevent map view changes
+        appState.preventMapViewChange = true;
+        
+        // Store current map view before any operations
+        const currentCenter = map.getCenter();
+        const currentZoom = map.getZoom();
+        
+        // Continue with normal marker click handling
         Object.values(this.markers).forEach(marker => marker.closePopup());
         this.preservedMarker = clickedMarker;
         this.hoverDisabled = true;
@@ -113,6 +121,15 @@ const flightMap = {
             lineManager.clearLines('hover');
             pathDrawing.drawRoutePaths(airport.iata_code, appState.directRoutes, 'hover');
             clickedMarker.openPopup(); // Re-open popup after drawing lines
+            
+            // After operations complete, restore map view if it changed
+            setTimeout(() => {
+                if (appState.preventMapViewChange && 
+                    (!map.getCenter().equals(currentCenter) || map.getZoom() !== currentZoom)) {
+                    map.setView(currentCenter, currentZoom, { animate: false });
+                }
+                appState.preventMapViewChange = false;
+            }, 100);
         });
     },
 
