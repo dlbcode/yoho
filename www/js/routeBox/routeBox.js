@@ -57,9 +57,11 @@ const setupWaypointInputListeners = (routeNumber) => {
         let isInitialFocus = true;
         
         input.addEventListener('focus', (event) => {
-            // Only expand input if this is not the initial focus after route switching
-            // or if we're on mobile (small screen)
-            if (!isInitialFocus || window.innerWidth <= 600) {
+            // Don't expand input if:
+            // 1. This is the initial focus after route switching, or
+            // 2. We're on mobile (small screen), or
+            // 3. We're loading search results
+            if (!isInitialFocus && window.innerWidth > 600 && !appState.searchResultsLoading) {
                 expandInput(event.target);
             }
             
@@ -85,9 +87,10 @@ const setupWaypointInputListeners = (routeNumber) => {
             const toInput = document.querySelector(`#waypoint-input-${routeNumber * 2 + 2}`);
             
             // Only process waypoint removal if the input field was manually cleared
-            // and not during route switching
+            // and not during route switching or search results loading
             if (input.value === '' && fromInput.value !== '' && toInput.value !== '' && 
-                appState.waypoints.length > 0 && !appState.isRouteSwitching) {
+                appState.waypoints.length > 0 && !appState.isRouteSwitching && 
+                !appState.searchResultsLoading) {
                 
                 const waypointIndex = parseInt(input.id.replace('waypoint-input-', '')) - 1;
                 if (waypointIndex >= 0 && waypointIndex < appState.waypoints.length && 
@@ -103,6 +106,9 @@ const setupWaypointInputListeners = (routeNumber) => {
 };
 
 const expandInput = (input) => {
+    // Don't expand input during search results loading
+    if (appState.searchResultsLoading) return;
+
     input.classList.add('expanded-input');
     const suggestionsDiv = document.getElementById(`${input.id}Suggestions`);
     if (suggestionsDiv) suggestionsDiv.classList.add('expanded-suggestions');
@@ -334,6 +340,9 @@ const routeBox = {
             const infoPane = document.getElementById('infoPane');
             infoPane.classList.add('search-results');
             
+            // Set a temporary flag to prevent input expansion during search results loading
+            appState.searchResultsLoading = true;
+            
             buildRouteDeck(routeNumber).then(() => {
                 const infoPaneElement = document.getElementById('infoPane');
                 const viewportHeight = window.visualViewport ? window.visualViewport.height : window.innerHeight;
@@ -344,6 +353,11 @@ const routeBox = {
                     infoPaneElement.classList.remove('collapsed');
                     infoPaneElement.classList.add('expanded');
                     adjustMapSize();
+                    
+                    // Clear the search results loading flag
+                    setTimeout(() => {
+                        appState.searchResultsLoading = false;
+                    }, 500);
                 });
 
                 // Ensure the destination waypoint is set to 'Any'
