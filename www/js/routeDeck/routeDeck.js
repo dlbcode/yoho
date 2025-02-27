@@ -125,16 +125,14 @@ function buildRouteDeck(routeIndex) {
                 const card = createRouteCard(flight, endpoint, routeIndex, destination);
                 cardsContainer.appendChild(card);
                 
-                // Only draw lines if this is the lowest price for this route
-                flight.route.forEach((segment, idx) => {
-                    if (idx < flight.route.length - 1) {
-                        const pathKey = `${segment.flyFrom}-${segment.flyTo}`;
-                        if (!drawnPaths.has(pathKey)) {
-                            drawFlightLines(flight, routeIndex, false);
-                            drawnPaths.add(pathKey);
-                        }
-                    }
-                });
+                // Simplified logic - draw lines for each flight once
+                const pathKey = flight.route.map(segment => 
+                    `${segment.flyFrom}-${segment.flyTo}`).join('|');
+                    
+                if (!drawnPaths.has(pathKey)) {
+                    drawFlightLines(flight, routeIndex, false);
+                    drawnPaths.add(pathKey);
+                }
                 
                 // Attach event handlers
                 attachRowEventHandlers(card, flight, index, flightsData, routeIndex);
