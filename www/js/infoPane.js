@@ -89,7 +89,10 @@ const infoPane = {
             
             button.onclick = this.handleRouteButtonClick.bind(this, routeIndex);
 
-            this.fitMapToRoute(routeIndex);
+            // Only fit map to route if we're not preventing map view changes
+            if (!appState.preventMapViewChange) {
+                this.fitMapToRoute(routeIndex);
+            }
 
             // Ensure selected button class is applied while maintaining the even-button class if needed
             if (appState.selectedRoutes.hasOwnProperty(routeIndex)) {
@@ -270,10 +273,20 @@ const infoPane = {
     },
 
     fitMapToRoute(routeIndex) {
+        // Skip if map view changes are prevented
+        if (appState.preventMapViewChange) {
+            console.log("Map view change prevented by flag");
+            return;
+        }
+        
         const [originWaypoint, destinationWaypoint] = [
             appState.waypoints[routeIndex * 2],
             appState.waypoints[routeIndex * 2 + 1]
         ];
+        
+        // If either waypoint is missing, don't adjust the map
+        if (!originWaypoint || !destinationWaypoint) return;
+        
         const group = [originWaypoint, destinationWaypoint]
             .filter(wp => wp)
             .map(airport => L.latLng(airport.latitude, airport.longitude));

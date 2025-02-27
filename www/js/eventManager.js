@@ -99,6 +99,9 @@ const eventManager = {
     },
 
     handleMapClick() {
+        // First set the flag to prevent any view changes
+        appState.preventMapViewChange = true;
+        
         const selectedAirportIata = appState.selectedAirport?.iata_code;
         if (selectedAirportIata) {
             const marker = flightMap.markers[selectedAirportIata];
@@ -112,12 +115,29 @@ const eventManager = {
         flightMap.selectedMarker = null;
         flightMap.preservedMarker = null;
         flightMap.hoverDisabled = false; // Ensure hover is enabled
+        
+        // Store the current map view before any state changes
+        const currentCenter = map.getCenter();
+        const currentZoom = map.getZoom();
+        
+        // Update state
         updateState('selectedAirport', null, 'eventManager.handleMapClick');
+        
+        // Only clear hover lines
         lineManager.clearLines('hover');
-        lineManager.clearLines('all');
         
         // Ensure lines can be drawn on subsequent hovers and clicks
         flightMap.hoverDisabled = false;
+        
+        // After a short delay, restore the map view if it changed and reset the flag
+        setTimeout(() => {
+            // Check if view changed and restore if needed
+            if (appState.preventMapViewChange && 
+                (!map.getCenter().equals(currentCenter) || map.getZoom() !== currentZoom)) {
+                map.setView(currentCenter, currentZoom, { animate: false });
+            }
+            appState.preventMapViewChange = false;
+        }, 100);
     },
 
     setupAllPathsButtonEventListener() {
