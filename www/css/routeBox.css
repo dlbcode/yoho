@@ -637,3 +637,10 @@
   opacity: 1;
   visibility: visible;
 }
+
+/* Add to your routeBox.css file */
+.route-box-overlay.mobile-overlay {
+    /* Mobile specific styles */
+    z-index: 999;
+    background-color: rgba(0, 0, 0, 0.7); /* Darker overlay for mobile */
+}

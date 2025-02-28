@@ -57,11 +57,12 @@ const setupWaypointInputListeners = (routeNumber) => {
         let isInitialFocus = true;
         
         input.addEventListener('focus', (event) => {
-            // Don't expand input if:
-            // 1. This is the initial focus after route switching, or
-            // 2. We're on mobile (small screen), or
-            // 3. We're loading search results
-            if (!isInitialFocus && window.innerWidth > 600 && !appState.searchResultsLoading) {
+            // For mobile screens, create the overlay without expanding the input
+            if (window.innerWidth <= 600 && !appState.searchResultsLoading) {
+                createMobileOverlay();
+            } 
+            // For desktop, use the existing expandInput functionality
+            else if (!isInitialFocus && window.innerWidth > 600 && !appState.searchResultsLoading) {
                 expandInput(event.target);
             }
             
@@ -75,9 +76,12 @@ const setupWaypointInputListeners = (routeNumber) => {
         input.addEventListener('keydown', (event) => {
             if (event.key === 'Enter') {
                 event.preventDefault();
-                i === 0 
-                    ? document.querySelector(`#waypoint-input-${routeNumber * 2 + 2}`)?.focus()
-                    : input.blur();
+                // Only focus the next field if not on mobile
+                if (i === 0 && window.innerWidth > 600) {
+                    document.querySelector(`#waypoint-input-${routeNumber * 2 + 2}`)?.focus();
+                } else {
+                    input.blur();
+                }
             }
         });
         
@@ -382,6 +386,23 @@ const routeBox = {
             updateUrl();
         }
     },
+};
+
+// Add this new function to create a mobile-specific overlay
+const createMobileOverlay = () => {
+    // Remove any existing overlay first
+    const existingOverlay = document.querySelector('.route-box-overlay');
+    if (existingOverlay) existingOverlay.remove();
+    
+    // Create and add overlay as a child of route-box
+    const routeBox = document.querySelector('.route-box');
+    const overlay = document.createElement('div');
+    overlay.className = 'route-box-overlay mobile-overlay';
+    routeBox.appendChild(overlay);
+    
+    // Trigger reflow then add active class for transition
+    overlay.offsetHeight;
+    overlay.classList.add('active');
 };
 
 export { routeBox };

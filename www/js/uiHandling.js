@@ -30,7 +30,12 @@ const setBottomBarHeight = () => {
 };
 
 const uiHandling = {
-    setFocusToNextUnsetInput: function () {
+    setFocusToNextUnsetInput() {
+        // Skip focusing on mobile devices
+        if (window.innerWidth <= 600) {
+            return;
+        }
+
         const waypointInputs = document.querySelectorAll('.waypoint-input[type="text"]');
         requestAnimationFrame(() => {
             for (let input of waypointInputs) {

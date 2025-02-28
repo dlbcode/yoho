@@ -298,7 +298,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 duration: 0.5
             });
         }
-        uiHandling.setFocusToNextUnsetInput();
+        if (window.innerWidth > 600) {
+            uiHandling.setFocusToNextUnsetInput();
+        }
     });
 
     function adjustLatLngForShortestPath(currentLatLng, targetLatLng) {
