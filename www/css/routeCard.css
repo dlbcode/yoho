@@ -265,13 +265,16 @@
   flex-direction: column;
   min-width: 70px;
   width: 70px;
+  margin-top: 2px;
+  align-items: center;
+  text-align: center; /* Ensure text is centered */
 }
 
 .departure-time,
 .arrival-time {
   color: #ddd;
   font-size: 1rem;
-  font-weight: 500;
+  font-weight: 600;
   white-space: nowrap;
   width: 70px;
 }
@@ -286,7 +289,7 @@
 .arrival-time {
   color: #ddd;
   font-size: 1rem;
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .departure-code,
@@ -351,6 +354,16 @@
   dominant-baseline: hanging;
 }
 
+.departure-date,
+.arrival-date {
+  display: block;
+  color: #bbb;
+  font-size: 0.8rem;
+  font-weight: 400;
+  white-space: nowrap;
+  overflow: visible;
+}
+
 /* Media query */
 @media (max-width: 768px) {
   .card-header {
@@ -391,11 +404,40 @@
 
   .departure-section {
     align-items: flex-end;  /* Right align departure elements */
+    width: 100%;
   }
 
   .departure-section .departure-time,
-  .departure-section .departure-code {
+  .departure-section .departure-code,
+  .departure-section .departure-date {
     text-align: right;  /* Right align text inside spans */
     width: 100%;  /* Ensure spans take full width */
+    margin-top: 2px;
+  }
+
+  .departure-date,
+  .arrival-date {
+    font-size: 0.7rem;
+    white-space: nowrap;
+    overflow: visible;
+  }
+
+  .departure-section .departure-date,
+  .arrival-section .arrival-date {
+    width: auto; /* Override the 100% width to prevent wrapping */
+    max-width: none; /* Ensure no max-width restriction */
+  }
+
+  .arrival-section {
+    align-items: flex-start; /* Left align arrival elements */
+    width: 100%;
+  }
+
+  .arrival-section .arrival-time,
+  .arrival-section .arrival-code,
+  .arrival-section .arrival-date {
+    text-align: left; /* Left align text inside spans */
+    width: 100%; /* Ensure spans take full width */
+    margin-top: 2px;
   }
 }

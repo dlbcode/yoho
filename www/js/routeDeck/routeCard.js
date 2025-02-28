@@ -83,7 +83,7 @@ function createRouteArrowSVG(stops, segments) {
 function createRouteCard(flight, endpoint, routeIndex, destination) {
     const card = document.createElement('div');
     card.className = 'route-card';
-    card.dataset.priceValue = flight.price; // Add this line
+    card.dataset.priceValue = flight.price;
     
     const routeId = createRouteId(flight.route);
     card.setAttribute('data-route-id', routeId);
@@ -107,8 +107,20 @@ function createRouteCard(flight, endpoint, routeIndex, destination) {
         'data-arrival-time': arrivalDate.getHours() + arrivalDate.getMinutes() / 60,
         'data-price-range': getPriceRangeCategory(flight.price),
         'data-price-value': Math.round(flight.price),
-        'data-stops': numberOfStops  // Add this line
+        'data-stops': numberOfStops
     });
+    
+    // Format dates as "Thu, Aug 11"
+    const formatDateShort = (date) => {
+        return date.toLocaleDateString('en-US', { 
+            weekday: 'short', 
+            month: 'short', 
+            day: 'numeric' 
+        });
+    };
+    
+    const departDateFormatted = formatDateShort(departureDate);
+    const arrivalDateFormatted = formatDateShort(arrivalDate);
 
     card.innerHTML = `
         <div class="card-content">
@@ -120,6 +132,7 @@ function createRouteCard(flight, endpoint, routeIndex, destination) {
 
             <div class="journey-section">
                 <div class="departure-section">
+                    <span class="departure-date">${departDateFormatted}</span>
                     <span class="departure-time">${formatTime(departureDate)}</span>
                     <span class="departure-code">${flight.route[0].flyFrom}</span>
                 </div>
@@ -132,6 +145,7 @@ function createRouteCard(flight, endpoint, routeIndex, destination) {
                 </div>
 
                 <div class="arrival-section">
+                    <span class="arrival-date">${arrivalDateFormatted}</span>
                     <span class="arrival-time">${formatTime(arrivalDate)}</span>
                     <span class="arrival-code">${flight.route[flight.route.length - 1].flyTo}</span>
                 </div>
