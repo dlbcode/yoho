@@ -329,13 +329,20 @@ const pathDrawing = {
             if (!route.origin || !route.destination) return Promise.resolve();
             
             const routeId = `${route.origin}-${route.destination}`;
-            const type = route.isDirect ? 'route' : 'dashed';
+            
+            // Check if this is a selected route
+            const isSelected = route.isSelected || !!appState.selectedRoutes[index];
+            
+            // Always use 'route' type (solid line) for selected routes, regardless of isDirect
+            // Otherwise, use the line type based on whether it's a direct route
+            const type = isSelected ? 'route' : (route.isDirect ? 'route' : 'dashed');
             
             return this.drawLine(routeId, type, {
                 price: route.price,
                 group: appState.selectedRoutes[index]?.group,
                 isDeckRoute: false,
-                showPlane: type === 'route'
+                showPlane: type === 'route',
+                status: isSelected ? 'selected' : undefined
             });
         });
 

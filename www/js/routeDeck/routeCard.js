@@ -1,5 +1,6 @@
 import { createRouteId } from './filterDeck.js';
 import { highlightRouteLines, resetRouteLines } from './routeHighlighting.js';
+import { routeInfoCard } from './routeInfoCard.js'; // Import the proper implementation
 
 export function formatFlightDateTime(date) {
     const dayName = date.toLocaleDateString('en-US', { weekday: 'short' });
