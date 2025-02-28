@@ -162,19 +162,28 @@ function buildRouteDeck(routeIndex) {
         filterButtons.forEach(button => {
             const filterType = button.getAttribute('data-filter');
 
-            // Attach click handler to the filterIcon
-            const filterIcon = button.querySelector('.filterIcon');
-            filterIcon.addEventListener('click', (event) => {
+            // Add event listener to the entire button
+            button.addEventListener('click', (event) => {
                 event.stopPropagation();
                 sliderFilter.createFilterPopup(filterType, fetchDataForFilter(filterType), event);
             });
 
-            // Attach click handler to the filterHeader
+            // Keep existing specific element listeners for backward compatibility
+            const filterIcon = button.querySelector('.filterIcon');
+            if (filterIcon) {
+                filterIcon.addEventListener('click', (event) => {
+                    event.stopPropagation();
+                    sliderFilter.createFilterPopup(filterType, fetchDataForFilter(filterType), event);
+                });
+            }
+
             const filterHeader = button.querySelector('.filter-text');
-            filterHeader.addEventListener('click', (event) => {
-                event.stopPropagation();
-                sliderFilter.createFilterPopup(filterType, fetchDataForFilter(filterType), event);
-            });
+            if (filterHeader) {
+                filterHeader.addEventListener('click', (event) => {
+                    event.stopPropagation();
+                    sliderFilter.createFilterPopup(filterType, fetchDataForFilter(filterType), event);
+                });
+            }
         });
     }
 
