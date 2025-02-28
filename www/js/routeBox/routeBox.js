@@ -60,11 +60,15 @@ const setupWaypointInputListeners = (routeNumber) => {
             // For mobile screens, create the overlay AND expand the input
             if (window.innerWidth <= 600 && !appState.searchResultsLoading) {
                 createMobileOverlay();
-                expandInput(event.target); // Add this line to create the back button
-            } 
-            // For desktop, use the existing expandInput functionality
-            else if (!isInitialFocus && window.innerWidth > 600 && !appState.searchResultsLoading) {
                 expandInput(event.target);
+            } 
+            // For desktop, only expand on non-initial focus and only when actually needed
+            else if (!isInitialFocus && window.innerWidth > 600 && !appState.searchResultsLoading) {
+                // On desktop, we might only want to manage suggestions visibility without full expansion
+                const suggestionsDiv = document.getElementById(`${event.target.id}Suggestions`);
+                if (suggestionsDiv && suggestionsDiv.children.length > 0) {
+                    suggestionsDiv.style.display = 'block';
+                }
             }
             
             // Clear the flag after first focus
@@ -134,30 +138,32 @@ const expandInput = (input) => {
         }
     }
 
-    // Rest of the function remains the same
-    const inputWrapper = input.parentElement;
-    const backButton = createElement('button', { className: 'back-button', content: `
-        <svg viewBox="0 0 24 24">
-            <line x1="22" y1="12" x2="4" y2="12" />
-            <line x1="12" y1="3" x2="3" y2="12" />
-            <line x1="12" y1="21" x2="3" y2="12" />
-        </svg>
-    `});
-    backButton.onclick = (event) => {
-        event.preventDefault();
-        event.stopPropagation();
-        input.value = '';
-        // Remove overlay when back button is clicked
-        const overlay = document.querySelector('.route-box-overlay');
-        if (overlay) {
-            overlay.classList.remove('active');
-            setTimeout(() => overlay.remove(), 200);
-        }
-        updateState('removeWaypoint', parseInt(input.id.replace('waypoint-input-', '')) - 1, 'routeBox.expandInput');
-        routeHandling.updateRoutesArray();
-        input.blur();
-    };
-    inputWrapper.appendChild(backButton);
+    // Only add back button for mobile screens
+    if (window.innerWidth <= 600) {
+        const inputWrapper = input.parentElement;
+        const backButton = createElement('button', { className: 'back-button', content: `
+            <svg viewBox="0 0 24 24">
+                <line x1="22" y1="12" x2="4" y2="12" />
+                <line x1="12" y1="3" x2="3" y2="12" />
+                <line x1="12" y1="21" x2="3" y2="12" />
+            </svg>
+        `});
+        backButton.onclick = (event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            input.value = '';
+            // Remove overlay when back button is clicked
+            const overlay = document.querySelector('.route-box-overlay');
+            if (overlay) {
+                overlay.classList.remove('active');
+                setTimeout(() => overlay.remove(), 200);
+            }
+            updateState('removeWaypoint', parseInt(input.id.replace('waypoint-input-', '')) - 1, 'routeBox.expandInput');
+            routeHandling.updateRoutesArray();
+            input.blur();
+        };
+        inputWrapper.appendChild(backButton);
+    }
 };
 
 const revertInput = (input) => {
