@@ -37,6 +37,9 @@
   font-size: 15px;
   cursor: pointer;
   transition: color 0.2s;
+  position: relative; /* Add position relative */
+  z-index: 10; /* Ensure it's above other elements */
+  pointer-events: auto; /* Ensure it captures clicks */
 }
 
 .resetIcon:hover {
@@ -58,9 +61,21 @@
 
 .popup-close-button {
   position: absolute;
-  top: 0px;
-  right: 5px;
+  top: 5px;
+  right: 10px;
   cursor: pointer;
+  font-size: 15px;
+  color: #999;
+  transition: color 0.2s;
+  z-index: 11;
+  padding: 6px 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.popup-close-button:hover {
+  color: #fff;
 }
 
 .filter-popup {
@@ -201,6 +216,11 @@
   transition: color 0.2s;
   min-width: unset; /* Remove minimum width */
   font-size: 0.9rem;
+  position: relative; /* Ensure proper stacking context */
+}
+
+.filter-button > * {
+  pointer-events: auto; /* Ensure all child elements capture clicks */
 }
 
 .filter-button:hover {

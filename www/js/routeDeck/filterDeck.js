@@ -265,5 +265,6 @@ export {
     updateFilterHeaders, 
     constructFilterTags,
     initializeFilterState,
-    updateFilterState 
+    updateFilterState,
+    resetFilter
 };

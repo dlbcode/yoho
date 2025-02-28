@@ -3,7 +3,7 @@ import { sliderFilter } from './sliderFilter.js';
 import { createSortButton } from './sortDeck.js';
 import { pathDrawing, Line } from '../pathDrawing.js';
 import { routeInfoCard, setSelectedRouteCard } from './routeInfoCard.js';
-import { applyFilters, initializeFilterState, createRouteId } from './filterDeck.js';
+import { applyFilters, initializeFilterState, createRouteId, resetFilter } from './filterDeck.js';
 import { setupRouteContent, infoPane } from '../infoPane.js';
 import { infoPaneHeight } from '../utils/infoPaneHeightManager.js';
 import { lineManager } from '../lineManager.js';
@@ -164,9 +164,23 @@ function buildRouteDeck(routeIndex) {
 
             // Add event listener to the entire button
             button.addEventListener('click', (event) => {
+                // Don't trigger if reset icon was clicked
+                if (event.target.classList.contains('resetIcon')) {
+                    return;
+                }
                 event.stopPropagation();
                 sliderFilter.createFilterPopup(filterType, fetchDataForFilter(filterType), event);
             });
+
+            // Add event listeners for reset icons
+            const resetIcon = button.querySelector('.resetIcon');
+            if (resetIcon) {
+                resetIcon.addEventListener('click', (event) => {
+                    event.stopPropagation();
+                    const filterType = event.target.getAttribute('data-filter');
+                    resetFilter(filterType);
+                });
+            }
 
             // Keep existing specific element listeners for backward compatibility
             const filterIcon = button.querySelector('.filterIcon');

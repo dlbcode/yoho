@@ -105,6 +105,12 @@ const sliderFilter = {
         label.className = 'popup-label';
         filterPopup.appendChild(label);
         
+        // Update the close button to match resetIcon style
+        const closeButton = document.createElement('span');
+        closeButton.textContent = '✕'; // Use the same "✕" character as the reset button
+        closeButton.className = 'popup-close-button resetIcon-style';
+        filterPopup.appendChild(closeButton);
+        
         const valueLabel = document.createElement('div');
         valueLabel.id = `${filterType}ValueLabel`;
         valueLabel.className = 'filter-value-label';
@@ -113,7 +119,7 @@ const sliderFilter = {
         this.positionPopup(filterPopup, event);
         this.initializeSlider(filterPopup, filterType, data, valueLabel);
 
-                // After slider initialization, update with current values from state
+        // After slider initialization, update with current values from state
         setTimeout(() => {
             this.restoreFilterValues(filterPopup, filterType);
         }, 0);
@@ -130,13 +136,10 @@ const sliderFilter = {
         };
         
         // Add event listener for the close button
-        const closeButton = filterPopup.querySelector('.popup-close-button');
-        if (closeButton) {
-            closeButton.addEventListener('click', () => {
-                filterPopup.remove();
-                document.removeEventListener('click', outsideClickHandler, true);
-            });
-        }
+        closeButton.addEventListener('click', () => {
+            filterPopup.remove();
+            document.removeEventListener('click', outsideClickHandler, true);
+        });
         
         // Add the outside click handler
         document.addEventListener('click', outsideClickHandler, true);
