@@ -118,6 +118,9 @@ const setupWaypointInputListeners = (routeNumber) => {
             // Set processing flag to prevent race conditions
             inputState.isProcessingBlur = true;
             
+            // Store reference to overlay so we can check if it exists later
+            const existingOverlay = document.querySelector('.route-box-overlay');
+            
             // For mobile, revert UI changes
             if (inputState.isMobile() && inputState.isExpanded) {
                 revertInput(event.target);
@@ -126,6 +129,12 @@ const setupWaypointInputListeners = (routeNumber) => {
             
             // Use setTimeout to process waypoint changes after other handlers have run
             setTimeout(() => {
+                // Double-check that overlay was removed, and if not, remove it
+                if (existingOverlay && document.body.contains(existingOverlay)) {
+                    existingOverlay.remove();
+                }
+                
+                // Remaining code for waypoint processing...
                 const fromInput = document.querySelector(`#waypoint-input-${routeNumber * 2 + 1}`);
                 const toInput = document.querySelector(`#waypoint-input-${routeNumber * 2 + 2}`);
                 
@@ -239,17 +248,37 @@ const addBackButton = (input) => {
 };
 
 const revertInput = (input) => {
-    input.classList.remove('expanded-input');
-    const suggestionsDiv = document.getElementById(`${input.id}Suggestions`);
-    if (suggestionsDiv) suggestionsDiv.classList.remove('expanded-suggestions');
-    const backButton = input.parentElement.querySelector('.back-button');
-    if (backButton) backButton.remove();
-    
-    // Remove overlay with fade out animation
+    // Don't proceed if no input is provided
+    if (!input) return;
+
+    // First check if we need to handle an overlay
     const overlay = document.querySelector('.route-box-overlay');
     if (overlay) {
+        // Start removing the overlay immediately
         overlay.classList.remove('active');
-        setTimeout(() => overlay.remove(), 200);
+        // Store a reference so we can be sure to remove it later
+        const overlayToRemove = overlay;
+        setTimeout(() => {
+            if (document.body.contains(overlayToRemove)) {
+                overlayToRemove.remove();
+            }
+        }, 300); // Slightly longer timeout to ensure animation completes
+    }
+    
+    // Apply changes to input
+    input.classList.remove('expanded-input');
+    
+    // Handle suggestions
+    const suggestionsDiv = document.getElementById(`${input.id}Suggestions`);
+    if (suggestionsDiv) {
+        suggestionsDiv.classList.remove('expanded-suggestions');
+        suggestionsDiv.style.display = 'none'; // Explicitly hide
+    }
+    
+    // Handle back button
+    const backButton = input.parentElement?.querySelector('.back-button');
+    if (backButton) {
+        backButton.remove();
     }
 };
 
@@ -513,5 +542,14 @@ const createMobileOverlay = debounce(() => {
         overlay.classList.add('active');
     });
 }, 100);
+
+const cleanupOverlays = () => {
+    document.querySelectorAll('.route-box-overlay').forEach(overlay => {
+        overlay.remove();
+    });
+};
+
+// Call this function when the document loads
+document.addEventListener('DOMContentLoaded', cleanupOverlays);
 
 export { routeBox };
