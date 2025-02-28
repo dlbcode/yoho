@@ -9,13 +9,19 @@ export function initDatePicker(inputId, routeNumber) {
     const isDateRange = currentRouteDate.includes(' to ');
 
     const dateInput = document.getElementById(inputId);
+    
+    // Fix: Only set defaultDate if currentRouteDate is not 'any'
+    const defaultDate = currentRouteDate === 'any' ? 
+        [] : // Empty array for 'any' dates
+        currentRouteDate.split(' to ');
+    
     let fp = flatpickr(dateInput, {
         disableMobile: true,
         enableTime: false,
         dateFormat: "Y-m-d",
-        defaultDate: currentRouteDate.split(' to '),
+        defaultDate: defaultDate,
         minDate: routeNumber === 0 ? "today" : appState.routeDates[routeNumber - 1]?.depart || "today",
-        mode: currentRouteDate === 'any' ? 'any' : (isDateRange ? 'range' : 'single'),
+        mode: currentRouteDate === 'any' ? 'single' : (isDateRange ? 'range' : 'single'),
         altInput: true,
         altFormat: "D, d M", // This will display the date as 'Fri, 10 May'
         static: true, // Make positioning static,
