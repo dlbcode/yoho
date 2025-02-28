@@ -123,6 +123,11 @@ const sliderFilter = {
         this.positionPopup(filterPopup, event);
         this.initializeSlider(filterPopup, filterType, data, valueLabel);
 
+        // After slider initialization, update with current values from state
+        setTimeout(() => {
+            this.restoreFilterValues(filterPopup, filterType);
+        }, 0);
+
         document.addEventListener('click', (e) => {
             if (!filterPopup.contains(e.target) && e.target !== event.target) {
                 filterPopup.classList.add('hidden');
@@ -170,11 +175,15 @@ const sliderFilter = {
 
     getSliderSettings: function (filterType, data) {
         if (['departure', 'arrival'].includes(filterType)) {
+            // Read current values from filter state if available
+            const currentValues = appState.filterState?.[filterType];
+            const start = currentValues ? [currentValues.start, currentValues.end] : [data.min || 0, data.max || 24];
+            
             return {
-                start: [data.min || 0, data.max || 24],
+                start: start,
                 connect: true,
                 range: { 'min': 0, 'max': 24 },
-                step: 1,  // Changed from 0.5 to 1
+                step: 1,
                 tooltips: [this.createTooltip(true), this.createTooltip(true)]
             };
         } else if (filterType === 'price' && data?.min !== undefined && data?.max !== undefined) {
@@ -256,6 +265,44 @@ const sliderFilter = {
 
         label.textContent = labelText;
         updateFilterState(filterType, newValues);
+    },
+
+    // Add new function to restore filter values
+    restoreFilterValues: function(popup, filterType) {
+        const slider = popup.querySelector(`#${filterType}Slider`);
+        const valueLabel = popup.querySelector(`#${filterType}ValueLabel`);
+        
+        if (!slider || !slider.noUiSlider) return;
+        
+        // Get current filter values from state
+        const filterValues = appState.filterState?.[filterType];
+        
+        if (filterType === 'price') {
+            const currentValue = filterValues?.value;
+            if (currentValue !== null && currentValue !== undefined) {
+                slider.noUiSlider.set(currentValue);
+            }
+        } else if (['departure', 'arrival'].includes(filterType) && filterValues) {
+            slider.noUiSlider.set([filterValues.start, filterValues.end]);
+            
+            // Update value label
+            if (valueLabel) {
+                const start = filterValues.start;
+                const end = filterValues.end;
+                
+                const formatTimeAmPm = (value) => {
+                    const hours = Math.floor(value);
+                    const period = hours < 12 || hours === 24 ? 'am' : 'pm';
+                    const displayHours = hours % 12 === 0 ? 12 : hours % 12;
+                    return `${displayHours}${period}`;
+                };
+                
+                const labelText = (start === 0 && end === 24) ? 'Anytime' :
+                    `${formatTimeAmPm(start)} - ${formatTimeAmPm(end)}`;
+                    
+                valueLabel.textContent = labelText;
+            }
+        }
     }
 };
 
