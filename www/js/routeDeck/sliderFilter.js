@@ -33,20 +33,17 @@ const sliderFilter = {
         const isFilterElement = clickedElement.getAttribute('data-filter') === filterType || 
                               clickedElement.closest(`[data-filter="${filterType}"]`);
         
+        // Remove any existing popups
+        document.querySelectorAll('.filter-popup').forEach(popup => {
+            popup.remove();
+        });
+        
+        // If we clicked on the same filter that had an open popup, don't create a new one
         if (existingPopup && isFilterElement) {
-            // If clicking the same filter button that created this popup, close it
-            existingPopup.classList.add('hidden');
-            setTimeout(() => existingPopup.remove(), 300);
             toggleFilterResetIcon(filterType); // Ensure reset icon is shown if filter is active
             return;
         }
         
-        // Remove any existing popups
-        document.querySelectorAll('.filter-popup').forEach(popup => {
-            popup.classList.add('hidden');
-            setTimeout(() => popup.remove(), 300);
-        });
-
         // Create new popup
         this.createAndShowPopup(filterType, data, event);
     },
@@ -75,8 +72,7 @@ const sliderFilter = {
         
         // If popup already exists, just close it and return
         if (existingPopup) {
-            existingPopup.classList.add('hidden');
-            setTimeout(() => existingPopup.remove(), 300);
+            existingPopup.remove(); // Immediately remove instead of hiding with timeout
             return;
         }
 
@@ -108,13 +104,7 @@ const sliderFilter = {
         label.textContent = filterType.charAt(0).toUpperCase() + filterType.slice(1);
         label.className = 'popup-label';
         filterPopup.appendChild(label);
-
-        const closeButton = document.createElement('span');
-        closeButton.innerHTML = '✕';
-        closeButton.className = 'popup-close-button';
-        closeButton.addEventListener('click', () => filterPopup.classList.add('hidden'));
-        filterPopup.appendChild(closeButton);
-
+        
         const valueLabel = document.createElement('div');
         valueLabel.id = `${filterType}ValueLabel`;
         valueLabel.className = 'filter-value-label';
@@ -123,17 +113,33 @@ const sliderFilter = {
         this.positionPopup(filterPopup, event);
         this.initializeSlider(filterPopup, filterType, data, valueLabel);
 
-        // After slider initialization, update with current values from state
+                // After slider initialization, update with current values from state
         setTimeout(() => {
             this.restoreFilterValues(filterPopup, filterType);
         }, 0);
-
-        document.addEventListener('click', (e) => {
-            if (!filterPopup.contains(e.target) && e.target !== event.target) {
-                filterPopup.classList.add('hidden');
+        
+        // Create a named handler function that we can remove later
+        const outsideClickHandler = (e) => {
+            // Check if the click is outside the popup and not on the filter button
+            if (!filterPopup.contains(e.target) && 
+                !e.target.closest(`[data-filter="${filterType}"]`)) {
+                filterPopup.remove();
+                document.removeEventListener('click', outsideClickHandler, true);
             }
             toggleFilterResetIcon(filterType);
-        }, true);
+        };
+        
+        // Add event listener for the close button
+        const closeButton = filterPopup.querySelector('.popup-close-button');
+        if (closeButton) {
+            closeButton.addEventListener('click', () => {
+                filterPopup.remove();
+                document.removeEventListener('click', outsideClickHandler, true);
+            });
+        }
+        
+        // Add the outside click handler
+        document.addEventListener('click', outsideClickHandler, true);
     },
 
     positionPopup: function (popup, event) {
