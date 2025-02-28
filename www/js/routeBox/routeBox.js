@@ -8,6 +8,15 @@ import { removeRoute, removeRouteButton } from './removeRoute.js';
 import { routeHandling } from '../routeHandling.js';
 import { setupRouteContent } from '../infoPane.js';
 
+// Debounce function to prevent rapid repeated calls
+const debounce = (func, wait) => {
+    let timeout;
+    return function(...args) {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => func.apply(this, args), wait);
+    };
+};
+
 const loadCSS = (href) => {
     const link = document.createElement('link');
     link.rel = 'stylesheet';
@@ -51,119 +60,182 @@ const enableSwapButtonIfNeeded = () => {
 const setupWaypointInputListeners = (routeNumber) => {
     ['from-input', 'to-input'].forEach((className, i) => {
         const input = document.querySelector(`#waypoint-input-${routeNumber * 2 + i + 1}`);
+        
+        // Track state in a single object for this input
+        const inputState = {
+            isInitialFocus: true,
+            isExpanded: false,
+            isProcessingBlur: false,
+            hasSuggestions: false,
+            isMobile: () => window.innerWidth <= 600
+        };
+        
+        // Only add the input event once
         input.addEventListener('input', enableSwapButtonIfNeeded);
         
-        // Add a flag to track if this is the initial focus after route switching
-        let isInitialFocus = true;
-        
         input.addEventListener('focus', (event) => {
-            // For mobile screens, create the overlay AND expand the input
-            if (window.innerWidth <= 600 && !appState.searchResultsLoading) {
-                createMobileOverlay();
-                expandInput(event.target);
-            } 
-            // For desktop, only expand on non-initial focus and only when actually needed
-            else if (!isInitialFocus && window.innerWidth > 600 && !appState.searchResultsLoading) {
-                // On desktop, we might only want to manage suggestions visibility without full expansion
-                const suggestionsDiv = document.getElementById(`${event.target.id}Suggestions`);
-                if (suggestionsDiv && suggestionsDiv.children.length > 0) {
-                    suggestionsDiv.style.display = 'block';
+            // Prevent focus handling during search or while processing blur
+            if (appState.searchResultsLoading || inputState.isProcessingBlur) return;
+            
+            const suggestionsDiv = document.getElementById(`${event.target.id}Suggestions`);
+            inputState.hasSuggestions = suggestionsDiv && suggestionsDiv.children.length > 0;
+            
+            // Mobile handling
+            if (inputState.isMobile()) {
+                if (!inputState.isExpanded) {
+                    createMobileOverlay();
+                    expandInput(event.target);
+                    inputState.isExpanded = true;
                 }
+            } 
+            // Desktop handling
+            else if (!inputState.isInitialFocus && inputState.hasSuggestions) {
+                suggestionsDiv.style.display = 'block';
             }
             
-            // Clear the flag after first focus
-            isInitialFocus = false;
+            // Always select text for better UX, using requestAnimationFrame for performance
+            requestAnimationFrame(() => event.target.select());
             
-            // Still select text for better UX
-            setTimeout(() => event.target.select(), 0);
+            // Clear the initial focus flag
+            inputState.isInitialFocus = false;
         });
         
         input.addEventListener('keydown', (event) => {
             if (event.key === 'Enter') {
                 event.preventDefault();
-                // Only focus the next field if not on mobile
-                if (i === 0 && window.innerWidth > 600) {
-                    document.querySelector(`#waypoint-input-${routeNumber * 2 + 2}`)?.focus();
+                
+                // Only focus the next field if not on mobile and this is the first input
+                if (i === 0 && !inputState.isMobile()) {
+                    const nextInput = document.querySelector(`#waypoint-input-${routeNumber * 2 + 2}`);
+                    if (nextInput) nextInput.focus();
                 } else {
                     input.blur();
                 }
             }
         });
         
-        input.addEventListener('blur', async (event) => {
-            if (window.innerWidth <= 600) revertInput(event.target);
-            const fromInput = document.querySelector(`#waypoint-input-${routeNumber * 2 + 1}`);
-            const toInput = document.querySelector(`#waypoint-input-${routeNumber * 2 + 2}`);
+        input.addEventListener('blur', (event) => {
+            // Set processing flag to prevent race conditions
+            inputState.isProcessingBlur = true;
             
-            // Only process waypoint removal if the input field was manually cleared
-            // and not during route switching or search results loading
-            if (input.value === '' && fromInput.value !== '' && toInput.value !== '' && 
-                appState.waypoints.length > 0 && !appState.isRouteSwitching && 
-                !appState.searchResultsLoading) {
-                
-                const waypointIndex = parseInt(input.id.replace('waypoint-input-', '')) - 1;
-                if (waypointIndex >= 0 && waypointIndex < appState.waypoints.length && 
-                    appState.waypoints[waypointIndex].iata_code !== '') {
-                    
-                    updateState('removeWaypoint', waypointIndex, 'routeBox.setupWaypointInputListeners');
-                    routeHandling.updateRoutesArray();
-                }
+            // For mobile, revert UI changes
+            if (inputState.isMobile() && inputState.isExpanded) {
+                revertInput(event.target);
+                inputState.isExpanded = false;
             }
+            
+            // Use setTimeout to process waypoint changes after other handlers have run
+            setTimeout(() => {
+                const fromInput = document.querySelector(`#waypoint-input-${routeNumber * 2 + 1}`);
+                const toInput = document.querySelector(`#waypoint-input-${routeNumber * 2 + 2}`);
+                
+                // Only process waypoint removal if conditions are met and we're not in a special state
+                if (input.value === '' && 
+                    fromInput?.value !== '' && 
+                    toInput?.value !== '' && 
+                    appState.waypoints.length > 0 && 
+                    !appState.isRouteSwitching && 
+                    !appState.searchResultsLoading) {
+                    
+                    const waypointIndex = parseInt(input.id.replace('waypoint-input-', '')) - 1;
+                    if (waypointIndex >= 0 && 
+                        waypointIndex < appState.waypoints.length && 
+                        appState.waypoints[waypointIndex]?.iata_code !== '') {
+                        
+                        // Use requestAnimationFrame to batch DOM updates
+                        requestAnimationFrame(() => {
+                            updateState('removeWaypoint', waypointIndex, 'routeBox.setupWaypointInputListeners');
+                            routeHandling.updateRoutesArray();
+                        });
+                    }
+                }
+                
+                inputState.isProcessingBlur = false;
+            }, 100); // Small delay to ensure other handlers have executed
         });
     });
+    
+    // Initialize the swap button state
     enableSwapButtonIfNeeded();
 };
 
 const expandInput = (input) => {
-    // Don't expand input during search results loading
-    if (appState.searchResultsLoading) return;
+    // Don't expand input during search results loading or if already expanded
+    if (appState.searchResultsLoading || input.classList.contains('expanded-input')) return;
 
-    input.classList.add('expanded-input');
-    const suggestionsDiv = document.getElementById(`${input.id}Suggestions`);
-    
-    if (suggestionsDiv) {
-        suggestionsDiv.classList.add('expanded-suggestions');
+    // Use a single function to manage expanded state
+    const setExpandedState = (isExpanded) => {
+        input.classList.toggle('expanded-input', isExpanded);
         
-        // Force reposition the suggestions div with a high z-index to ensure it's above everything
-        if (window.innerWidth <= 600) {
-            Object.assign(suggestionsDiv.style, {
-                position: 'fixed',
-                top: '50px',
-                left: '0',
-                width: '100%',
-                maxHeight: 'calc(100vh - 50px)',
-                zIndex: '10000', // Ensure it's higher than the infoPane
-                display: suggestionsDiv.children.length > 0 ? 'block' : 'none'
+        const suggestionsDiv = document.getElementById(`${input.id}Suggestions`);
+        if (!suggestionsDiv) return;
+        
+        suggestionsDiv.classList.toggle('expanded-suggestions', isExpanded);
+        
+        if (isExpanded && window.innerWidth <= 600) {
+            // Consistently position the suggestions div for mobile
+            requestAnimationFrame(() => {
+                Object.assign(suggestionsDiv.style, {
+                    position: 'fixed',
+                    top: '50px',
+                    left: '0',
+                    width: '100%',
+                    maxHeight: 'calc(100vh - 50px)',
+                    zIndex: '10000',
+                    display: suggestionsDiv.children.length > 0 ? 'block' : 'none'
+                });
             });
+            
+            // Add back button for mobile screens if not already present
+            if (!input.parentElement.querySelector('.back-button')) {
+                addBackButton(input);
+            }
         }
-    }
+    };
+    
+    // Set to expanded state
+    setExpandedState(true);
+};
 
-    // Only add back button for mobile screens
-    if (window.innerWidth <= 600) {
-        const inputWrapper = input.parentElement;
-        const backButton = createElement('button', { className: 'back-button', content: `
+const addBackButton = (input) => {
+    const inputWrapper = input.parentElement;
+    const backButton = createElement('button', { 
+        className: 'back-button', 
+        content: `
             <svg viewBox="0 0 24 24">
                 <line x1="22" y1="12" x2="4" y2="12" />
                 <line x1="12" y1="3" x2="3" y2="12" />
                 <line x1="12" y1="21" x2="3" y2="12" />
             </svg>
-        `});
-        backButton.onclick = (event) => {
-            event.preventDefault();
-            event.stopPropagation();
-            input.value = '';
-            // Remove overlay when back button is clicked
-            const overlay = document.querySelector('.route-box-overlay');
-            if (overlay) {
-                overlay.classList.remove('active');
-                setTimeout(() => overlay.remove(), 200);
-            }
-            updateState('removeWaypoint', parseInt(input.id.replace('waypoint-input-', '')) - 1, 'routeBox.expandInput');
-            routeHandling.updateRoutesArray();
-            input.blur();
-        };
-        inputWrapper.appendChild(backButton);
-    }
+        `
+    });
+    
+    // Use a debounced handler for the back button to prevent double-firing
+    const handler = debounce((event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        
+        // Clear input value
+        input.value = '';
+        
+        // Remove overlay with animation
+        const overlay = document.querySelector('.route-box-overlay');
+        if (overlay) {
+            overlay.classList.remove('active');
+            setTimeout(() => overlay.remove(), 200);
+        }
+        
+        // Process waypoint removal
+        const waypointIndex = parseInt(input.id.replace('waypoint-input-', '')) - 1;
+        updateState('removeWaypoint', waypointIndex, 'routeBox.expandInput');
+        routeHandling.updateRoutesArray();
+        
+        // Blur input to close keyboard
+        input.blur();
+    }, 300);
+    
+    backButton.onclick = handler;
+    inputWrapper.appendChild(backButton);
 };
 
 const revertInput = (input) => {
@@ -419,21 +491,27 @@ const routeBox = {
     },
 };
 
-// Add this new function to create a mobile-specific overlay
-const createMobileOverlay = () => {
+// Improved mobile overlay creation with debouncing
+const createMobileOverlay = debounce(() => {
+    // Early return if we're already processing or if search results are loading
+    if (appState.searchResultsLoading) return;
+    
     // Remove any existing overlay first
     const existingOverlay = document.querySelector('.route-box-overlay');
     if (existingOverlay) existingOverlay.remove();
     
     // Create and add overlay as a child of route-box
     const routeBox = document.querySelector('.route-box');
+    if (!routeBox) return;
+    
     const overlay = document.createElement('div');
     overlay.className = 'route-box-overlay mobile-overlay';
     routeBox.appendChild(overlay);
     
-    // Trigger reflow then add active class for transition
-    overlay.offsetHeight;
-    overlay.classList.add('active');
-};
+    // Use requestAnimationFrame for smoother transitions
+    requestAnimationFrame(() => {
+        overlay.classList.add('active');
+    });
+}, 100);
 
 export { routeBox };
