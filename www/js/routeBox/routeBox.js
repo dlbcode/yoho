@@ -57,9 +57,10 @@ const setupWaypointInputListeners = (routeNumber) => {
         let isInitialFocus = true;
         
         input.addEventListener('focus', (event) => {
-            // For mobile screens, create the overlay without expanding the input
+            // For mobile screens, create the overlay AND expand the input
             if (window.innerWidth <= 600 && !appState.searchResultsLoading) {
                 createMobileOverlay();
+                expandInput(event.target); // Add this line to create the back button
             } 
             // For desktop, use the existing expandInput functionality
             else if (!isInitialFocus && window.innerWidth > 600 && !appState.searchResultsLoading) {
