@@ -443,11 +443,14 @@
   background-color: #2a4f7c;
   color: #ccc;
   position: absolute;
-  z-index: 100;  /* Keep suggestions above overlay */
+  z-index: 10000 !important; /* Higher than infoPane */
   max-height: 200px;
   overflow-y: auto;
   display: none;
   -webkit-overflow-scrolling: touch; /* Enable smooth scrolling for touch devices */
+  border: 1px solid #525252;
+  border-radius: 5px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
 [id$='Suggestions'] div {

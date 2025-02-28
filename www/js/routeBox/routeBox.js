@@ -116,8 +116,25 @@ const expandInput = (input) => {
 
     input.classList.add('expanded-input');
     const suggestionsDiv = document.getElementById(`${input.id}Suggestions`);
-    if (suggestionsDiv) suggestionsDiv.classList.add('expanded-suggestions');
+    
+    if (suggestionsDiv) {
+        suggestionsDiv.classList.add('expanded-suggestions');
+        
+        // Force reposition the suggestions div with a high z-index to ensure it's above everything
+        if (window.innerWidth <= 600) {
+            Object.assign(suggestionsDiv.style, {
+                position: 'fixed',
+                top: '50px',
+                left: '0',
+                width: '100%',
+                maxHeight: 'calc(100vh - 50px)',
+                zIndex: '10000', // Ensure it's higher than the infoPane
+                display: suggestionsDiv.children.length > 0 ? 'block' : 'none'
+            });
+        }
+    }
 
+    // Rest of the function remains the same
     const inputWrapper = input.parentElement;
     const backButton = createElement('button', { className: 'back-button', content: `
         <svg viewBox="0 0 24 24">
@@ -280,11 +297,25 @@ const routeBox = {
     },
 
     createSuggestionsDiv(index) {
+        // Remove any existing suggestion div with the same ID
+        const existingDiv = document.getElementById(`waypoint-input-${index + 1}Suggestions`);
+        if (existingDiv) {
+            existingDiv.remove();
+        }
+        
         const suggestionsDiv = createElement('div', { 
             id: `waypoint-input-${index + 1}Suggestions`, 
             className: 'suggestions' 
         });
-        document.getElementById('infoPane').appendChild(suggestionsDiv);
+        
+        // Attach suggestions directly to body for consistent stacking context
+        document.body.appendChild(suggestionsDiv);
+        
+        // Add mobile-specific class if needed
+        if (window.innerWidth <= 600) {
+            suggestionsDiv.classList.add('mobile-suggestions');
+        }
+        
         return suggestionsDiv;
     },
 

@@ -70,13 +70,14 @@ function setupAutocompleteForField(fieldId) {
     });
 
     const setSuggestionBoxPosition = () => {
+        if (!suggestionBox) return;
+        
         const isMobile = window.innerWidth <= 600;
-        const waypointContainer = inputField.closest('.waypoint-inputs-container');
-        const containerRect = waypointContainer.getBoundingClientRect();
         const inputRect = inputField.getBoundingClientRect();
         const maxMenuHeight = 200;
         
         if (isMobile) {
+            // On mobile, position is always fixed at the top
             Object.assign(suggestionBox.style, {
                 position: 'fixed',
                 top: '50px',
@@ -87,25 +88,23 @@ function setupAutocompleteForField(fieldId) {
                 zIndex: '10000'
             });
         } else {
+            // For desktop, position below input field
             const viewportHeight = window.innerHeight;
             const spaceBelow = viewportHeight - inputRect.bottom;
             const spaceAbove = inputRect.top;
             const showAbove = spaceBelow < maxMenuHeight && spaceAbove >= maxMenuHeight;
-            const actualHeight = Math.min(suggestionBox.scrollHeight, maxMenuHeight);
             
             Object.assign(suggestionBox.style, {
-                position: 'fixed',
-                width: `${containerRect.width}px`,
-                left: `${containerRect.left}px`,
-                maxHeight: '200px',
-                zIndex: '1000',
-                top: showAbove ? 
-                    `${inputRect.top - actualHeight}px` : 
-                    `${inputRect.bottom}px`
+                position: 'fixed', // Use fixed instead of absolute for consistent positioning
+                width: `${inputRect.width}px`,
+                left: `${inputRect.left}px`,
+                maxHeight: `${maxMenuHeight}px`,
+                zIndex: '10000',
+                top: showAbove ? `${inputRect.top - maxMenuHeight}px` : `${inputRect.bottom}px`
             });
         }
-
-        // Maintain visibility if suggestions exist
+        
+        // Ensure visibility
         if (suggestionBox.children.length > 0) {
             suggestionBox.style.display = 'block';
         }
@@ -238,6 +237,8 @@ function setupAutocompleteForField(fieldId) {
 
 function updateSuggestions(inputId, airports) {
     const suggestionBox = document.getElementById(inputId + 'Suggestions');
+    if (!suggestionBox) return;
+    
     suggestionBox.innerHTML = '';
     let selectionHandledByTouch = false;
 
@@ -275,7 +276,34 @@ function updateSuggestions(inputId, airports) {
         suggestionBox.appendChild(div);
     });
 
-    if (airports.length > 0) suggestionBox.style.display = 'block';
+    if (airports.length > 0) {
+        // Force higher z-index and display
+        suggestionBox.style.display = 'block';
+        suggestionBox.style.zIndex = '10000'; 
+        
+        // If input is expanded, ensure suggestions are positioned correctly
+        const inputField = document.getElementById(inputId);
+        if (inputField?.classList.contains('expanded-input')) {
+            Object.assign(suggestionBox.style, {
+                position: 'fixed',
+                top: '50px',
+                left: '0',
+                width: '100%',
+                maxHeight: 'calc(100vh - 50px)'
+            });
+        } else if (inputField) {
+            // Get positioning from the input
+            const rect = inputField.getBoundingClientRect();
+            if (window.innerWidth > 600) {
+                Object.assign(suggestionBox.style, {
+                    position: 'fixed',
+                    top: `${rect.bottom}px`,
+                    left: `${rect.left}px`,
+                    width: `${rect.width}px`
+                });
+            }
+        }
+    }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -341,20 +369,3 @@ export function getIataFromField(inputId) {
 }
 
 export { setupAutocompleteForField, fetchAirportByIata };
-
-function createSuggestionsDiv(index) {
-    const suggestionsDiv = createElement('div', { 
-        id: `waypoint-input-${index + 1}Suggestions`, 
-        className: 'suggestions'
-    });
-    
-    // Append to body instead of infoPane to ensure consistent positioning context
-    document.body.appendChild(suggestionsDiv);
-    
-    // Add mobile-specific class
-    if (window.innerWidth <= 600) {
-        suggestionsDiv.classList.add('mobile-suggestions');
-    }
-    
-    return suggestionsDiv;
-}
