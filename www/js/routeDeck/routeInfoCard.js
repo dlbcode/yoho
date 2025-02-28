@@ -197,8 +197,8 @@ function routeInfoCard(cardElement, fullFlightData, routeIds, routeIndex) {
 
         fullFlightData.route.forEach((segmentData, idx) => {
             const selectedRouteIndex = routeIndex + idx;
-            const departureDate = segmentData.local_departure || new Date(segmentData.dTime * 1000).toISOString();
-            const arrivalDate = segmentData.local_arrival || new Date(segmentData.aTime * 1000).toISOString();
+            const departureDate = segmentData.local_departure ? new Date(segmentData.local_departure).toISOString().split('T')[0] : new Date(segmentData.dTime * 1000).toISOString().split('T')[0];
+            const arrivalDate = segmentData.local_arrival ? new Date(segmentData.local_arrival).toISOString().split('T')[0] : new Date(segmentData.aTime * 1000).toISOString().split('T')[0];
 
             appState.selectedRoutes[selectedRouteIndex] = {
                 displayData: {
@@ -214,16 +214,17 @@ function routeInfoCard(cardElement, fullFlightData, routeIds, routeIndex) {
                 routeNumber: routeIndex,
                 routeDates: { depart: departureDate, return: null }
             };
+
+            // Update the route dates in appState
+            if (!appState.routeDates[selectedRouteIndex]) appState.routeDates[selectedRouteIndex] = {};
+            appState.routeDates[selectedRouteIndex].depart = departureDate;
         });
 
         replaceWaypointsForCurrentRoute(intermediaryIatas, routeIndex);
 
-        if (!appState.routeDates[routeIndex]) appState.routeDates[routeIndex] = {};
-        appState.routeDates[routeIndex].depart = fullFlightData.route[0].local_departure;
-
         updateState('updateRouteDate', {
             routeNumber: routeIndex,
-            depart: fullFlightData.route[0].local_departure,
+            depart: fullFlightData.route[0].local_departure.split('T')[0],
             return: null
         });
 
