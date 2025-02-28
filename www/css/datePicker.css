@@ -161,7 +161,15 @@ span.flatpickr-weekday {
   width: 100% !important;
 }
 
+body > .flatpickr-calendar {
+  z-index: 9999999 !important;
+  position: fixed !important;
+  /* Ensure other styles are applied */
+  background-color: #333 !important;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5) !important;
+}
+
 .flatpickr-calendar {
   transition: top 0.2s ease-out;
-  z-index: 999999 !important;
+  z-index: 9999999 !important;
 }

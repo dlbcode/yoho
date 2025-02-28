@@ -35,6 +35,9 @@ export function initDatePicker(inputId, routeNumber) {
             updateState('updateRouteDate', { routeNumber, ...appState.routeDates[routeNumber] }, 'datePicker.initDatePicker');
         },
         onReady: (selectedDates, dateStr, instance) => {
+            // Move the calendar to the document body to avoid z-index issues
+            document.body.appendChild(instance.calendarContainer);
+            
             const CALENDAR_HEIGHT = 308; // Updated to match your specified height
             const positionCalendar = () => {
                 if (!instance.isOpen) return; // Only reposition if calendar is open
@@ -48,6 +51,7 @@ export function initDatePicker(inputId, routeNumber) {
                 
                 // Reset any previous positioning
                 calendar.style.position = 'fixed';
+                calendar.style.zIndex = '9999999'; // Extremely high z-index
                 
                 // For return date input (second date picker), align to right edge
                 if (dateType === 'return') {
