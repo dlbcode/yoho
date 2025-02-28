@@ -3,6 +3,7 @@ import { pathDrawing } from './pathDrawing.js';
 import { eventManager } from './eventManager.js';
 import { appState, updateState } from './stateManager.js';
 import { lineManager } from './lineManager.js';
+import { cacheManager } from './utils/cacheManager.js';
 
 const flightMap = {
     markers: {},
@@ -19,6 +20,8 @@ const flightMap = {
 
             map.on('zoomend', this.updateVisibleMarkers);
             map.on('moveend', this.updateVisibleMarkers);
+
+            cacheManager.clearOldCacheEntries();
 
             this.fetchAndDisplayAirports();
         } else {
@@ -265,29 +268,38 @@ const flightMap = {
             console.error('IATA code is empty');
             return;
         }
-    
+
         const cacheKey = `routes_${iata}_${appState.routeDirection}`;
-        const cachedData = localStorage.getItem(cacheKey);
-    
-        if (cachedData && (Date.now() - JSON.parse(cachedData).timestamp < this.cacheDuration)) {
-            appState.directRoutes[iata] = JSON.parse(cachedData).data;
-            console.info('Route data loaded from localStorage');
+        
+        // Try to get from cache first
+        const cachedRoutes = cacheManager.getFromCache(cacheKey);
+        if (cachedRoutes) {
+            appState.directRoutes[iata] = cachedRoutes;
+            console.info('Route data loaded from localStorage cache');
             return;
         }
-    
+
         try {
             const direction = appState.routeDirection;
             const response = await fetch(`https://yonderhop.com/api/directRoutes?origin=${iata}&direction=${direction}`);
             const routes = await response.json();
+            
             if (!routes || !routes.length) {
                 console.error('No routes found for IATA:', iata);
                 return;
             }
-    
-            // Store the routes in localStorage with a timestamp
-            localStorage.setItem(cacheKey, JSON.stringify({ data: routes, timestamp: Date.now() })); 
+            
+            // Optimize data before storing
+            const optimizedRoutes = cacheManager.optimizeRouteData(routes);
+            
+            // Store the optimized routes in localStorage
+            const stored = cacheManager.storeInCache(cacheKey, optimizedRoutes);
+            if (!stored) {
+                console.warn('Could not cache routes for', iata);
+            }
+            
+            // Update app state with the original full data
             appState.directRoutes[iata] = routes;
-    
             console.info('Route data fetched from API and cached');
         } catch (error) {
             console.error('Error fetching routes:', error);
@@ -328,6 +340,17 @@ const flightMap = {
                 map.removeLayer(marker);
             }
         });
+    },
+
+    clearRouteCache() {
+        // Clear all route-related cache items
+        for (let i = localStorage.length - 1; i >= 0; i--) {
+            const key = localStorage.key(i);
+            if (key.startsWith('routes_')) {
+                localStorage.removeItem(key);
+            }
+        }
+        console.info('Route cache cleared');
     }
 };
 
