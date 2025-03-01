@@ -544,8 +544,18 @@ const createMobileOverlay = (() => {
             
             const overlay = document.createElement('div');
             overlay.className = 'route-box-overlay mobile-overlay';
-            routeBox.appendChild(overlay);
             overlay.style.zIndex = '90';
+            
+            // Add click handler to overlay to prevent click-through
+            overlay.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                // Optional: blur any active input when clicking overlay
+                document.activeElement?.blur();
+            });
+            
+            routeBox.appendChild(overlay);
             currentOverlay = overlay;
             
             // Add active class after a brief delay to trigger animation

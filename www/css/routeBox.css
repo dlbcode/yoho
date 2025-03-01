@@ -641,6 +641,7 @@
 .route-box-overlay.active {
   opacity: 1;
   visibility: visible;
+  pointer-events: auto; /* Enable pointer events when active */
 }
 
 /* Add to your routeBox.css file */
@@ -648,6 +649,12 @@
     /* Mobile specific styles */
     z-index: 999;
     background-color: rgba(0, 0, 0, 0.7); /* Darker overlay for mobile */
+    position: fixed; /* Use fixed positioning to cover the entire viewport */
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    pointer-events: auto; /* Enable pointer events for mobile */
 }
 
 /* Update dropdown position classes to ensure consistent spacing */
