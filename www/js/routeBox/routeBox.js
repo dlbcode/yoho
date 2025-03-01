@@ -545,6 +545,7 @@ const createMobileOverlay = (() => {
             const overlay = document.createElement('div');
             overlay.className = 'route-box-overlay mobile-overlay';
             routeBox.appendChild(overlay);
+            ovlerlay.style.zIndex = '90';
             currentOverlay = overlay;
             
             // Add active class after a brief delay to trigger animation
