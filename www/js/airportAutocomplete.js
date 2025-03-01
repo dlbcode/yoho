@@ -88,20 +88,30 @@ function setupAutocompleteForField(fieldId) {
                 zIndex: '10000'
             });
         } else {
-            // For desktop, position below input field
+            // For desktop, position relative to input field
             const viewportHeight = window.innerHeight;
             const spaceBelow = viewportHeight - inputRect.bottom;
             const spaceAbove = inputRect.top;
             const showAbove = spaceBelow < maxMenuHeight && spaceAbove >= maxMenuHeight;
             
             Object.assign(suggestionBox.style, {
-                position: 'fixed', // Use fixed instead of absolute for consistent positioning
+                position: 'fixed', // Use fixed positioning for consistency
                 width: `${inputRect.width}px`,
                 left: `${inputRect.left}px`,
                 maxHeight: `${Math.min(maxMenuHeight, showAbove ? spaceAbove : spaceBelow)}px`,
-                zIndex: '10000',
-                top: showAbove ? `${inputRect.top - Math.min(maxMenuHeight, spaceAbove)}px` : `${inputRect.bottom}px`
+                zIndex: '10000'
             });
+            
+            // Position menu above or below the input field, keeping it attached to the input
+            if (showAbove) {
+                // Position above: bottom of menu attaches to top of input
+                suggestionBox.style.bottom = `${viewportHeight - inputRect.top}px`;
+                suggestionBox.style.top = 'auto'; // Clear any previous top value
+            } else {
+                // Position below: top of menu attaches to bottom of input
+                suggestionBox.style.top = `${inputRect.bottom}px`;
+                suggestionBox.style.bottom = 'auto'; // Clear any previous bottom value
+            }
         }
         
         // Ensure visibility
