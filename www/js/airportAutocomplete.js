@@ -233,31 +233,42 @@ function setupAutocompleteForField(fieldId) {
         }
     });
 
-    addTrackedListener(inputField, 'blur', () => {
-        setTimeout(() => {
+    inputField.addEventListener('blur', () => {
+        // Use requestIdleCallback for non-critical operations if supported
+        const delayedTask = () => {
             const waypointIndex = parseInt(inputField.id.replace('waypoint-input-', '')) - 1;
-            const waypoint = appState.waypoints[waypointIndex];
+            
+            // Check conditions once and store in variables
             const currentValue = inputField.value;
-            
-            // Check if this is an "Any" destination that we should preserve
-            const isAnyDestination = 
-                currentValue === 'Any' || 
+            const isAnyDestination = currentValue === 'Any' || 
                 inputField.getAttribute('data-is-any-destination') === 'true' ||
-                (waypoint && (waypoint.iata_code === 'Any' || waypoint.isAnyDestination === true));
+                (appState.waypoints[waypointIndex] && 
+                 (appState.waypoints[waypointIndex].iata_code === 'Any' || 
+                  appState.waypoints[waypointIndex].isAnyDestination === true));
             
-            // Don't clear "Any" destination fields
+            const isEmpty = currentValue === '';
+            const shouldRemoveWaypoint = !isAnyDestination && isEmpty && 
+                appState.waypoints.length > 0 && !window.preserveAnyDestination;
+            
             if (!isAnyDestination) {
                 clearInputField(inputField);
                 toggleSuggestionBox(false);
                 
-                // Only remove empty waypoints that aren't "Any" destinations
-                if (currentValue === '' && appState.waypoints.length > 0 && !window.preserveAnyDestination) {
+                // Only attempt to remove waypoint if conditions are met
+                if (shouldRemoveWaypoint) {
                     updateState('removeWaypoint', waypointIndex, 'airportAutocomplete.addEventListener3');
                 }
             } else {
                 toggleSuggestionBox(false);
             }
-        }, 300);
+        };
+        
+        // Use requestIdleCallback if available, otherwise setTimeout
+        if ('requestIdleCallback' in window) {
+            window.requestIdleCallback(delayedTask, { timeout: 300 });
+        } else {
+            setTimeout(delayedTask, 300);
+        }
     });
 
     if (!window.outsideClickListenerAdded) {
