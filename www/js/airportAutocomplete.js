@@ -182,11 +182,20 @@ function setupAutocompleteForField(fieldId) {
                 updateSuggestions(fieldId, airports);
                 suggestionBox.style.display = 'block';
                 setSuggestionBoxPosition();
+                
+                // Automatically highlight the first suggestion
+                currentFocus = 0;
+                const items = suggestionBox.getElementsByTagName('div');
+                if (items.length > 0) {
+                    updateActiveItem(items);
+                }
             } else {
                 suggestionBox.style.display = 'none';
+                currentFocus = -1;
             }
         } else {
             suggestionBox.style.display = 'none';
+            currentFocus = -1;
         }
     }, 200); // 200ms delay
 
@@ -218,17 +227,33 @@ function setupAutocompleteForField(fieldId) {
         if (e.key === 'Escape') {
             toggleSuggestionBox(false);
             clearInputField();
+            currentFocus = -1;
         } else if (e.key === 'ArrowDown') {
-            currentFocus++;
-            updateActiveItem(suggestionBox.getElementsByTagName('div'));
+            if (suggestionBox.style.display === 'block') {
+                currentFocus++;
+                updateActiveItem(suggestionBox.getElementsByTagName('div'));
+            }
         } else if (e.key === 'ArrowUp') {
-            currentFocus--;
-            updateActiveItem(suggestionBox.getElementsByTagName('div'));
+            if (suggestionBox.style.display === 'block') {
+                currentFocus--;
+                updateActiveItem(suggestionBox.getElementsByTagName('div'));
+            }
         } else if (e.key === 'Enter') {
             e.preventDefault();
-            if (currentFocus > -1) {
+            if (suggestionBox.style.display === 'block') {
                 const items = suggestionBox.getElementsByTagName('div');
-                if (items) items[currentFocus].click();
+                if (items && items.length > 0) {
+                    // If we have a focused item, click it
+                    if (currentFocus >= 0 && currentFocus < items.length) {
+                        items[currentFocus].click();
+                    } 
+                    // If no item is focused but suggestions exist, click the first one
+                    else if (items.length > 0) {
+                        currentFocus = 0;
+                        updateActiveItem(items);
+                        items[0].click();
+                    }
+                }
             }
         }
     });
@@ -279,8 +304,14 @@ function setupAutocompleteForField(fieldId) {
     function updateActiveItem(items) {
         if (!items || items.length === 0) return false;
         const itemsArray = Array.from(items);
+        
+        // Clear any existing active item
         itemsArray.forEach(item => item.classList.remove('autocomplete-active'));
+        
+        // Ensure currentFocus wraps around properly
         currentFocus = ((currentFocus % itemsArray.length) + itemsArray.length) % itemsArray.length;
+        
+        // Set new active item
         const activeItem = itemsArray[currentFocus];
         if (activeItem) {
             activeItem.classList.add('autocomplete-active');
@@ -313,9 +344,14 @@ function updateSuggestions(inputId, airports) {
     suggestionBox.innerHTML = '';
     let selectionHandledByTouch = false;
 
-    airports.forEach(airport => {
+    airports.forEach((airport, index) => {
         const div = document.createElement('div');
         div.textContent = `${airport.name} (${airport.iata_code}) - ${airport.city}, ${airport.country}`;
+        
+        // Highlight the first item by default
+        if (index === 0) {
+            div.classList.add('autocomplete-active');
+        }
 
         const selectionHandler = (e) => {
             setTimeout(() => {
