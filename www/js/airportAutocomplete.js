@@ -5,6 +5,15 @@ import { uiHandling } from './uiHandling.js';
 let currentPositionMode = null;
 let resizeObserver = null;
 
+// Add this debounce function at the top of the file
+function debounce(func, wait) {
+    let timeout;
+    return function(...args) {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => func.apply(this, args), wait);
+    };
+}
+
 async function fetchAirports(query) {
     try {
         const response = await fetch(`https://yonderhop.com/api/airports?query=${query}`);
@@ -52,7 +61,41 @@ function setupAutocompleteForField(fieldId) {
     inputField.setAttribute('name', 'waypoint-input-' + Date.now());
     inputField.setAttribute('readonly', true);
 
-    inputField.addEventListener('focus', async () => {
+    // Create a listener registry for cleanup
+    const listeners = new Map();
+    
+    // Function to add event listeners with automatic tracking
+    const addTrackedListener = (element, event, handler, options) => {
+        element.addEventListener(event, handler, options);
+        if (!listeners.has(element)) listeners.set(element, []);
+        listeners.get(element).push({ event, handler });
+    };
+    
+    // Function to remove all tracked listeners
+    const cleanup = () => {
+        listeners.forEach((eventList, element) => {
+            if (element) {
+                eventList.forEach(({ event, handler }) => {
+                    element.removeEventListener(event, handler);
+                });
+            }
+        });
+        listeners.clear();
+        
+        // Clean up observer
+        if (resizeObserver) {
+            resizeObserver.disconnect();
+            resizeObserver = null;
+        }
+        
+        window.visualViewport?.removeEventListener('resize', handleResize);
+        window.removeEventListener('orientationchange', handleResize);
+    };
+    
+    // Store cleanup function on the input element
+    inputField.airportAutocompleteCleanup = cleanup;
+
+    addTrackedListener(inputField, 'focus', async () => {
         inputField.removeAttribute('readonly');
         initialInputValue = inputField.value;
         setSuggestionBoxPosition();
@@ -76,47 +119,36 @@ function setupAutocompleteForField(fieldId) {
         const inputRect = inputField.getBoundingClientRect();
         const maxMenuHeight = 200;
         
+        // Base styles for all cases
+        const baseStyles = {
+            position: 'fixed',
+            zIndex: '10000',
+            display: suggestionBox.children.length > 0 ? 'block' : 'none'
+        };
+        
         if (isMobile) {
-            // On mobile, position is always fixed at the top
-            Object.assign(suggestionBox.style, {
-                position: 'fixed',
+            // Mobile styles
+            Object.assign(suggestionBox.style, baseStyles, {
                 top: '50px',
                 left: '0',
                 width: '100%',
                 maxHeight: 'calc(100vh - 50px)',
-                minHeight: 'none',
-                zIndex: '10000'
+                minHeight: 'none'
             });
         } else {
-            // For desktop, position relative to input field
+            // Desktop positioning logic
             const viewportHeight = window.innerHeight;
             const spaceBelow = viewportHeight - inputRect.bottom;
             const spaceAbove = inputRect.top;
             const showAbove = spaceBelow < maxMenuHeight && spaceAbove >= maxMenuHeight;
             
-            Object.assign(suggestionBox.style, {
-                position: 'fixed', // Use fixed positioning for consistency
+            Object.assign(suggestionBox.style, baseStyles, {
                 width: `${inputRect.width}px`,
                 left: `${inputRect.left}px`,
                 maxHeight: `${Math.min(maxMenuHeight, showAbove ? spaceAbove : spaceBelow)}px`,
-                zIndex: '10000'
+                [showAbove ? 'bottom' : 'top']: `${showAbove ? viewportHeight - inputRect.top : inputRect.bottom}px`,
+                [showAbove ? 'top' : 'bottom']: 'auto'
             });
-            
-            // Position menu above or below the input field, keeping it attached to the input
-            if (showAbove) {
-                // Position above: bottom of menu attaches to top of input
-                suggestionBox.style.bottom = `${viewportHeight - inputRect.top}px`;
-                suggestionBox.style.top = 'auto'; // Clear any previous top value
-            } else {
-                // Position below: top of menu attaches to bottom of input
-                suggestionBox.style.top = `${inputRect.bottom}px`;
-                suggestionBox.style.bottom = 'auto'; // Clear any previous bottom value
-            }
-        }
-        
-        // Ensure visibility
-        if (suggestionBox.children.length > 0) {
-            suggestionBox.style.display = 'block';
         }
     };
 
@@ -139,7 +171,7 @@ function setupAutocompleteForField(fieldId) {
     currentPositionMode = null;
 
     // Show suggestions only when there are results
-    inputField.addEventListener('input', async () => {
+    const debouncedInputHandler = debounce(async () => {
         const query = inputField.value;
         if (query.length >= 2) {
             const airports = await fetchAirports(query);
@@ -153,7 +185,9 @@ function setupAutocompleteForField(fieldId) {
         } else {
             suggestionBox.style.display = 'none';
         }
-    });
+    }, 200); // 200ms delay
+
+    addTrackedListener(inputField, 'input', debouncedInputHandler);
 
     const toggleSuggestionBox = (display) => {
         suggestionBox.style.display = display ? 'block' : 'none';
@@ -177,7 +211,7 @@ function setupAutocompleteForField(fieldId) {
         }
     };
 
-    inputField.addEventListener('keydown', (e) => {
+    addTrackedListener(inputField, 'keydown', (e) => {
         if (e.key === 'Escape') {
             toggleSuggestionBox(false);
             clearInputField();
@@ -196,7 +230,7 @@ function setupAutocompleteForField(fieldId) {
         }
     });
 
-    inputField.addEventListener('blur', () => {
+    addTrackedListener(inputField, 'blur', () => {
         setTimeout(() => {
             const waypointIndex = parseInt(inputField.id.replace('waypoint-input-', '')) - 1;
             const waypoint = appState.waypoints[waypointIndex];
