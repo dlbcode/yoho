@@ -165,25 +165,19 @@ const uiHandling = {
             left = 5; // 5px padding from viewport edge
         }
 
-        // Calculate vertical position
-        let top = buttonRect.top - dropdownHeight - 2; // Try above first
-        dropdownList.classList.add('dropdown-up');
-
-        // If not enough space above, position below
-        if (top < 0) {
-            top = buttonRect.bottom + 2;
+        // Calculate vertical position - check space below vs. above
+        const spaceBelow = viewportHeight - buttonRect.bottom;
+        const spaceAbove = buttonRect.top;
+        
+        let top;
+        if (spaceBelow >= dropdownHeight || spaceBelow > spaceAbove) {
+            // Position below - directly touching the bottom of the button
+            top = buttonRect.bottom;
             dropdownList.classList.remove('dropdown-up');
-            
-            // If also not enough space below, choose the side with more space
-            if (top + dropdownHeight > viewportHeight) {
-                const spaceAbove = buttonRect.top;
-                const spaceBelow = viewportHeight - buttonRect.bottom;
-                
-                if (spaceAbove > spaceBelow) {
-                    top = buttonRect.top - dropdownHeight - 2;
-                    dropdownList.classList.add('dropdown-up');
-                }
-            }
+        } else {
+            // Position above - directly touching the top of the button
+            top = buttonRect.top - dropdownHeight;
+            dropdownList.classList.add('dropdown-up');
         }
 
         // Apply calculated position

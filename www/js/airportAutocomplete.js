@@ -98,9 +98,9 @@ function setupAutocompleteForField(fieldId) {
                 position: 'fixed', // Use fixed instead of absolute for consistent positioning
                 width: `${inputRect.width}px`,
                 left: `${inputRect.left}px`,
-                maxHeight: `${maxMenuHeight}px`,
+                maxHeight: `${Math.min(maxMenuHeight, showAbove ? spaceAbove : spaceBelow)}px`,
                 zIndex: '10000',
-                top: showAbove ? `${inputRect.top - maxMenuHeight}px` : `${inputRect.bottom}px`
+                top: showAbove ? `${inputRect.top - Math.min(maxMenuHeight, spaceAbove)}px` : `${inputRect.bottom}px`
             });
         }
         
