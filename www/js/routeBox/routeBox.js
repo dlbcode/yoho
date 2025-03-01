@@ -521,27 +521,41 @@ const routeBox = {
 };
 
 // Improved mobile overlay creation with debouncing
-const createMobileOverlay = debounce(() => {
-    // Early return if we're already processing or if search results are loading
-    if (appState.searchResultsLoading) return;
+const createMobileOverlay = (() => {
+    let currentOverlay = null;
+    let debounceTimeout = null;
     
-    // Remove any existing overlay first
-    const existingOverlay = document.querySelector('.route-box-overlay');
-    if (existingOverlay) existingOverlay.remove();
-    
-    // Create and add overlay as a child of route-box
-    const routeBox = document.querySelector('.route-box');
-    if (!routeBox) return;
-    
-    const overlay = document.createElement('div');
-    overlay.className = 'route-box-overlay mobile-overlay';
-    routeBox.appendChild(overlay);
-    
-    // Use requestAnimationFrame for smoother transitions
-    requestAnimationFrame(() => {
-        overlay.classList.add('active');
-    });
-}, 100);
+    return () => {
+        // Clear any pending debounce
+        if (debounceTimeout) clearTimeout(debounceTimeout);
+        
+        // Early return if already processing or if search results are loading
+        if (appState.searchResultsLoading) return;
+        
+        debounceTimeout = setTimeout(() => {
+            // Remove existing overlay if there is one
+            if (currentOverlay && document.body.contains(currentOverlay)) {
+                currentOverlay.remove();
+            }
+            
+            // Create and add a new overlay
+            const routeBox = document.querySelector('.route-box');
+            if (!routeBox) return;
+            
+            const overlay = document.createElement('div');
+            overlay.className = 'route-box-overlay mobile-overlay';
+            routeBox.appendChild(overlay);
+            currentOverlay = overlay;
+            
+            // Add active class after a brief delay to trigger animation
+            requestAnimationFrame(() => {
+                if (overlay && document.body.contains(overlay)) {
+                    overlay.classList.add('active');
+                }
+            });
+        }, 100);
+    };
+})();
 
 const cleanupOverlays = () => {
     document.querySelectorAll('.route-box-overlay').forEach(overlay => {

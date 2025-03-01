@@ -90,6 +90,9 @@ function setupAutocompleteForField(fieldId) {
         
         window.visualViewport?.removeEventListener('resize', handleResize);
         window.removeEventListener('orientationchange', handleResize);
+
+        // Disconnect observer
+        suggestionObserver && suggestionObserver.disconnect();
     };
     
     // Store cleanup function on the input element
@@ -277,6 +280,19 @@ function setupAutocompleteForField(fieldId) {
             });
         }
     }
+
+    // Add at the beginning of setupAutocompleteForField
+    const suggestionObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                // Suggestion box is visible, update position
+                setSuggestionBoxPosition();
+            }
+        });
+    }, { threshold: 0.1 });
+
+    // Observe the suggestion box
+    suggestionBox && suggestionObserver.observe(suggestionBox);
 }
 
 function updateSuggestions(inputId, airports) {
