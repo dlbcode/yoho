@@ -1,6 +1,6 @@
 .route-box {
   position: relative;
-  z-index: 1;
+  z-index: 20; /* Was 1 - now at base level for route box components */
   background-color: #222;
   width: 100%;
   margin: 0 auto;
@@ -326,7 +326,7 @@
   width: 100%;
   box-sizing: border-box; /* Ensure padding is included in the width */
   position: relative;
-  z-index: 10;
+  z-index: 25; /* Was 10 - above route-box */
 }
 
 .travelers-dropdown-btn:hover,
@@ -369,7 +369,7 @@
   position: absolute;
   top: 100%;
   left: 0;
-  z-index: 100; /* Ensure this is higher than infoPane and mapPane */
+  z-index: 80; /* Was 100 - should be above most UI elements but below suggestions */
   padding: 5px;
   margin: 0;
   background-color: #222;
@@ -425,7 +425,7 @@
   background-color: #2a4f7c;
   color: #ccc;
   position: absolute;
-  z-index: 10000 !important; /* Higher than infoPane */
+  z-index: 90 !important; /* Was 10000 - highest UI dropdown element */
   max-height: 200px;
   overflow-y: auto;
   display: none;
@@ -466,7 +466,7 @@
     width: 100%;
     height: auto;
     background-color: #222;
-    z-index: 100;
+    z-index: 85; /* Was 100 - high priority on mobile */
     padding: 0px 0px 0px 40px !important;
     font-size: 18px;
     box-sizing: border-box;
@@ -491,7 +491,7 @@
     background: none;
     border: none;
     cursor: pointer;
-    z-index: 10001;
+    z-index: 95; /* Was 10001 - highest UI element on mobile */
     display: flex;
     align-items: center;
   }
@@ -520,7 +520,7 @@
     padding: 0 !important;
     border: none !important;
     border-radius: 0 !important;
-    z-index: 100 !important;
+    z-index: 90 !important; /* Was 100 - high UI priority */
   }
 
   /* Style suggestion items for better touch targets */
@@ -617,7 +617,7 @@
   visibility: hidden;
   transition: opacity 0.2s ease-in-out;
   pointer-events: none;
-  z-index: 90;
+  z-index: 50; /* Was 90 - below dropdowns but above basic UI */
 }
 
 .route-box-overlay.active {
@@ -629,7 +629,7 @@
 /* Add to your routeBox.css file */
 .route-box-overlay.mobile-overlay {
     /* Mobile specific styles */
-    z-index: 999;
+    z-index: 85; /* Was 999 - should be high but below suggestions */
     background-color: rgba(0, 0, 0, 0.7); /* Darker overlay for mobile */
     position: fixed; /* Use fixed positioning to cover the entire viewport */
     top: 0;

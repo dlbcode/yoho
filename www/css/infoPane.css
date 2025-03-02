@@ -10,7 +10,7 @@
   max-height: calc(100vh - var(--bottom-bar-height));
   display: flex;
   flex-direction: column;
-  z-index: 1000;
+  z-index: 60;
   background-color: #1d1d1d;
   /* Remove border-top and handle it with pseudo-element instead */
   height: 50px; /* Default to collapsed height */
@@ -25,7 +25,7 @@
   right: 0;
   height: 3px;
   background-color: #0060bb;
-  z-index: 1002; /* Increased from 1 to be higher than routeBoxContainer (1001) */
+  z-index: 65; /* Was 1002 - now higher than infoPane but lower than route buttons */
 }
 
 #infoPane.loading::before {
@@ -38,7 +38,7 @@
   background-image: linear-gradient(90deg, #0060bb 25%, #ffffff 50%, #0060bb 75%);
   background-size: 200% 100%;
   animation: loadingAnimation 1s linear infinite;
-  z-index: 1002; /* Match the standard border z-index for consistency */
+  z-index: 65; /* Match the standard border z-index for consistency */
 }
 
 #infoPane.search-results {
@@ -68,7 +68,7 @@
   display: flex;
   align-items: center;
   background-color: #222;
-  z-index: 1001;
+  z-index: 62; /* Was 1001 - slightly higher than base infoPane */
 }
 
 #menu-bar {
@@ -112,7 +112,7 @@
   border: none;
   cursor: pointer;
   flex-shrink: 0;
-  z-index: 1050;
+  z-index: 70; /* Was 1050 - should be above route buttons */
 }
 
 .plus-button img {
@@ -180,14 +180,14 @@
 .route-info-button:hover {
   background: linear-gradient(135deg, #234b79 50%, #1a3452 50%);
   color: #fff;
-  z-index: 100 !important;
+  z-index: 68 !important; /* Was 100 - should be below plus button but above other route buttons */
 }
 
 /* Alternate hover gradient for even-indexed buttons */
 .route-info-button.even-button:hover {
   background: linear-gradient(315deg, #234b79 50%, #1a3452 50%);
   color: #fff;
-  z-index: 100 !important;
+  z-index: 68 !important;
 }
 
 /* Make selected buttons appear with a green color scheme */
@@ -196,7 +196,7 @@
   color: #ccc;
   border: none;
   flex-shrink: 0;
-  z-index: 50 !important;
+  z-index: 67 !important; /* Was 50 - should be above normal route buttons */
 }
 
 /* Alternate gradient direction for even-indexed selected buttons */
@@ -205,9 +205,9 @@
 }
 
 /* Dynamic z-index calculation for route buttons */
-/* We use a high base value (1000) and subtract the child index to ensure earlier buttons appear on top */
+/* We use a base value (60-65) and subtract the child index to ensure earlier buttons appear on top */
 #menu-bar .route-info-button {
-  z-index: calc(1000 - var(--button-index, 0));
+  z-index: calc(66 - var(--button-index, 0)); /* Was 1000, now scales from 66 down */
 }
 
 /* Set custom property for each button based on its position */
@@ -391,7 +391,7 @@ tr:hover {
   width: 100%;
   flex-shrink: 0; /* Prevent container from shrinking */
   background-color: #1d1d1d;
-  z-index: 1001;
+  z-index: 61; /* Was 1001 - slightly above infoPane base */
 }
 
 .content-wrapper {

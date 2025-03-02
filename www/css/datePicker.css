@@ -5,7 +5,7 @@
   cursor: pointer;
   width: 104px;
   padding-bottom: 6px;
-  z-index: 1000;
+  z-index: 75; /* Was 1000 - should match other dropdowns */
 }
 
 .select-wrapper .date-mode-select, .select-wrapper .option, .select-wrapper .selected-option {
@@ -162,7 +162,7 @@ span.flatpickr-weekday {
 }
 
 body > .flatpickr-calendar {
-  z-index: 9999999 !important;
+  z-index: 95 !important; /* Was 9999999 - should be among highest elements */
   position: fixed !important;
   /* Ensure other styles are applied */
   background-color: #333 !important;
@@ -171,5 +171,5 @@ body > .flatpickr-calendar {
 
 .flatpickr-calendar {
   transition: top 0.2s ease-out;
-  z-index: 9999999 !important;
+  z-index: 95 !important; /* Was 9999999 - should be among highest elements */
 }

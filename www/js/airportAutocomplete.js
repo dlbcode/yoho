@@ -386,7 +386,7 @@ function updateSuggestions(inputId, airports) {
     if (airports.length > 0) {
         // Force higher z-index and display
         suggestionBox.style.display = 'block';
-        suggestionBox.style.zIndex = '10000'; 
+        suggestionBox.style.zIndex = '90'; // Was 10000 - now matches our new scale
         
         // If input is expanded, ensure suggestions are positioned correctly
         const inputField = document.getElementById(inputId);

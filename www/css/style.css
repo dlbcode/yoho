@@ -43,7 +43,7 @@ body::-webkit-scrollbar, [id$='Suggestions']::-webkit-scrollbar {
   position: relative;
   flex-grow: 1;
   overflow: hidden;
-  z-index: 1;
+  z-index: 10; /* Was 1 - base level for map */
 }
 
 @media (max-width: 768px) {
@@ -64,7 +64,7 @@ a[href="https://yonderhop.com"]:hover {
   width: 30px;
   height: 30px;
   margin-right: 5px;
-  z-index: 5000;
+  z-index: 40; /* Was 5000 - should be visible above map but below UI elements */
 }
 
 .hidden {
@@ -132,7 +132,7 @@ button.active, button:focus, a:active, button:active, input:focus, select:focus,
   padding: 5px;
   border-radius: 5px;
   box-shadow: 0 0 10px rgba(0,0,0,0.2);
-  z-index: 1000;
+  z-index: 70; /* Was 1000 - should be above most UI elements */
   pointer-events: none;
 }
 
@@ -140,7 +140,7 @@ button.active, button:focus, a:active, button:active, input:focus, select:focus,
   position: absolute;
   top: 5px;
   left: 5px;
-  z-index: 500;
+  z-index: 40; /* Was 500 - should match logo z-index */
 }
 
 .icon-dropdown {

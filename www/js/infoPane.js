@@ -406,4 +406,21 @@ function setupRouteContent(routeIndex) {
     return { contentWrapper, routeBoxElement };
 }
 
+function setSuggestionBoxPosition() {
+    if (!suggestionBox) return;
+    
+    const isMobile = window.innerWidth <= 600;
+    const inputRect = inputField.getBoundingClientRect();
+    const maxMenuHeight = 200;
+    
+    // Base styles for all cases
+    const baseStyles = {
+        position: 'fixed',
+        zIndex: '90', // Was 10000 - now matches our new scale
+        display: suggestionBox.children.length > 0 ? 'block' : 'none'
+    };
+    
+    /* ...existing code... */
+}
+
 export { infoPane, setupRouteContent };
