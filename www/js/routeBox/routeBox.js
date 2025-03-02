@@ -524,73 +524,54 @@ const routeBox = {
 const createMobileOverlay = (() => {
     let currentOverlay = null;
     let debounceTimeout = null;
-    let isBlurring = false; // Track if we're in the process of blurring
     
     return () => {
-        // Clear any pending debounce
         if (debounceTimeout) clearTimeout(debounceTimeout);
-        
-        // Early return if already processing or if search results are loading
         if (appState.searchResultsLoading) return;
         
         debounceTimeout = setTimeout(() => {
-            // Remove existing overlay if there is one
+            // Clean up existing overlay
             if (currentOverlay && document.body.contains(currentOverlay)) {
                 currentOverlay.remove();
             }
             
-            // Create and add a new overlay
             const routeBox = document.querySelector('.route-box');
             if (!routeBox) return;
             
+            // Create new overlay
             const overlay = document.createElement('div');
             overlay.className = 'route-box-overlay mobile-overlay';
             overlay.style.zIndex = '90';
             
-            // More robust click handler that prevents focus events
-            overlay.addEventListener('mousedown', (e) => {
+            // Simplified event handler for both mousedown and click
+            const handleOverlayInteraction = (e) => {
                 e.preventDefault();
                 e.stopPropagation();
                 
-                // Set the blurring flag
-                isBlurring = true;
-                
-                // Store reference to active input before blurring it
-                const activeInput = document.activeElement;
-                if (activeInput && activeInput.tagName === 'INPUT') {
-                    // Add a temporary event listener to capture and prevent focus events
-                    const preventFocus = (e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        activeInput.removeEventListener('focus', preventFocus, true);
-                        return false;
-                    };
+                // Blur the active input and prevent immediate refocus
+                if (document.activeElement && document.activeElement.tagName === 'INPUT') {
+                    const input = document.activeElement;
                     
-                    // Use capture phase to intercept the event before it reaches the input
-                    activeInput.addEventListener('focus', preventFocus, true);
+                    // Use passive event options for better performance
+                    const preventFocus = e => e.preventDefault();
                     
-                    // Blur the input
-                    activeInput.blur();
+                    // Capture the focus event to prevent it
+                    input.addEventListener('focus', preventFocus, { once: true, capture: true });
+                    input.blur();
                     
-                    // Clear the flag and remove the event listener after a short delay
-                    setTimeout(() => {
-                        isBlurring = false;
-                        activeInput.removeEventListener('focus', preventFocus, true);
-                    }, 300);
+                    // Clean up the event listener after a short delay
+                    setTimeout(() => input.removeEventListener('focus', preventFocus, true), 200);
                 }
-            });
+            };
             
-            // Still handle regular click to ensure we catch all interactions
-            overlay.addEventListener('click', (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-            });
+            // Add the handler to both events
+            overlay.addEventListener('mousedown', handleOverlayInteraction);
+            overlay.addEventListener('click', handleOverlayInteraction);
             
-            // Add overlay to routeBox
+            // Add to DOM and activate
             routeBox.appendChild(overlay);
             currentOverlay = overlay;
             
-            // Add active class after a brief delay to trigger animation
             requestAnimationFrame(() => {
                 if (overlay && document.body.contains(overlay)) {
                     overlay.classList.add('active');
