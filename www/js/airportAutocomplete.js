@@ -35,19 +35,37 @@ async function fetchAirportByIata(iata) {
     }
 }
 
+// Added selecting flag to track if selection is in progress
+let isSelectingItem = false;
+
 function handleSelection(e, inputId, airport) {
     const inputField = document.getElementById(inputId);
     const suggestionBox = document.getElementById(inputId + 'Suggestions');
     e.preventDefault();
     e.stopPropagation();
-
+    
+    // Set the flag to prevent blur from clearing
+    isSelectingItem = true;
+    
     inputField.value = `${airport.city}, (${airport.iata_code})`;
+    inputField.setAttribute('data-selected-iata', airport.iata_code);
+    
+    // Hide suggestions
     suggestionBox.style.display = 'none';
+    
+    // Dispatch custom event for airport selection
     document.dispatchEvent(new CustomEvent('airportSelected', {
         detail: { airport, fieldId: inputId }
     }));
-    inputField.setAttribute('data-selected-iata', airport.iata_code);
-    inputField.blur();
+    
+    // Use setTimeout to allow event to complete before blur
+    setTimeout(() => {
+        inputField.blur();
+        // Reset flag after a short delay
+        setTimeout(() => {
+            isSelectingItem = false;
+        }, 100);
+    }, 50);
 }
 
 function setupAutocompleteForField(fieldId) {
@@ -291,9 +309,19 @@ function setupAutocompleteForField(fieldId) {
         }
     });
 
-    inputField.addEventListener('blur', () => {
+    inputField.addEventListener('blur', (e) => {
+        // Don't process blur immediately if we're selecting an item
+        if (isSelectingItem) {
+            return;
+        }
+        
         // Use requestIdleCallback for non-critical operations if supported
         const delayedTask = () => {
+            // If a selection is in progress, don't process blur
+            if (isSelectingItem) {
+                return;
+            }
+            
             const waypointIndex = parseInt(inputField.id.replace('waypoint-input-', '')) - 1;
             
             // Check conditions once and store in variables
@@ -322,6 +350,7 @@ function setupAutocompleteForField(fieldId) {
         };
         
         // Use requestIdleCallback if available, otherwise setTimeout
+        // Increase delay to 200ms to give click events more time to process
         if ('requestIdleCallback' in window) {
             window.requestIdleCallback(delayedTask, { timeout: 300 });
         } else {
@@ -386,31 +415,47 @@ function updateSuggestions(inputId, airports) {
             div.classList.add('autocomplete-active');
         }
 
+        // Create a single handler for all selection events with improved reliability
         const selectionHandler = (e) => {
-            setTimeout(() => {
-                handleSelection(e, inputId, airport);
-            }, 100);
+            e.preventDefault();
+            e.stopPropagation();
+            
+            // Set flag to prevent blur handler from interfering
+            isSelectingItem = true;
+            
+            // Call handleSelection with proper arguments
+            handleSelection(e, inputId, airport);
         };
 
-        div.addEventListener('touchstart', (e) => {
-            selectionHandledByTouch = false;
-            div.style.pointerEvents = 'none';
-        }, { passive: true });
+        // For touch devices, use more reliable touch event handling
+        if ('ontouchstart' in window) {
+            div.addEventListener('touchstart', (e) => {
+                selectionHandledByTouch = false;
+            }, { passive: true });
 
-        div.addEventListener('touchmove', (e) => {
-            selectionHandledByTouch = true;
-        }, { passive: true });
+            div.addEventListener('touchmove', () => {
+                selectionHandledByTouch = true;
+            }, { passive: true });
 
-        div.addEventListener('touchend', (e) => {
-            div.style.pointerEvents = 'auto';
-            if (!selectionHandledByTouch) {
-                selectionHandler(e);
-            }
-            selectionHandledByTouch = false;
+            div.addEventListener('touchend', (e) => {
+                if (!selectionHandledByTouch) {
+                    selectionHandler(e);
+                }
+            });
+        }
+
+        // For mouse users, use mousedown instead of click for faster response
+        div.addEventListener('mousedown', (e) => {
+            selectionHandler(e);
+            // Prevent the blur event that would be triggered
+            e.preventDefault();
         });
 
+        // Keep the click handler as backup
         div.addEventListener('click', (e) => {
-            selectionHandler(e);
+            if (!isSelectingItem) {
+                selectionHandler(e);
+            }
         });
 
         suggestionBox.appendChild(div);
