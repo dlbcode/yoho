@@ -126,28 +126,46 @@ function createRouteCard(flight, endpoint, routeIndex, destination) {
     let departureDate, arrivalDate, returnDepartureDate, returnArrivalDate;
     
     if (isRoundTrip && flight.route && flight.route.length > 1) {
-        // Find the turning point in the route by looking for returning to origin
-        const originIata = flight.route[0].flyFrom;
-        const turningPointIndex = flight.route.findIndex((segment, idx) => 
-            idx > 0 && segment.flyTo === originIata);
-            
-        if (turningPointIndex !== -1) {
-            // Split into outbound and return segments
-            outboundSegments = flight.route.slice(0, turningPointIndex + 1);
-            returnSegments = flight.route.slice(turningPointIndex);
+        // Find where the return journey starts by looking for the 'return' flag in route segments
+        const returnStartIndex = flight.route.findIndex(segment => segment.return === 1);
+        
+        if (returnStartIndex !== -1) {
+            // Split into outbound and return segments based on the return flag
+            outboundSegments = flight.route.slice(0, returnStartIndex);
+            returnSegments = flight.route.slice(returnStartIndex);
             
             // Set dates for both segments
             departureDate = new Date(outboundSegments[0].local_departure || outboundSegments[0].dTime * 1000);
             arrivalDate = new Date(outboundSegments[outboundSegments.length - 1].local_arrival || 
-                                 outboundSegments[outboundSegments.length - 1].aTime * 1000);
+                                outboundSegments[outboundSegments.length - 1].aTime * 1000);
             
             returnDepartureDate = new Date(returnSegments[0].local_departure || returnSegments[0].dTime * 1000);
             returnArrivalDate = new Date(returnSegments[returnSegments.length - 1].local_arrival || 
-                                      returnSegments[returnSegments.length - 1].aTime * 1000);
+                                    returnSegments[returnSegments.length - 1].aTime * 1000);
         } else {
-            // Handle as one-way if no turning point found
-            departureDate = new Date(flight.local_departure || flight.dTime * 1000);
-            arrivalDate = new Date(flight.local_arrival || flight.aTime * 1000);
+            // Fallback: try to identify by looking for a segment that returns to origin
+            const originIata = flight.route[0].flyFrom;
+            const turningPointIndex = flight.route.findIndex((segment, idx) => 
+                idx > 0 && segment.flyTo === originIata);
+                
+            if (turningPointIndex !== -1) {
+                // Split into outbound and return segments
+                outboundSegments = flight.route.slice(0, turningPointIndex);
+                returnSegments = flight.route.slice(turningPointIndex);
+                
+                // Set dates for both segments
+                departureDate = new Date(outboundSegments[0].local_departure || outboundSegments[0].dTime * 1000);
+                arrivalDate = new Date(outboundSegments[outboundSegments.length - 1].local_arrival || 
+                                    outboundSegments[outboundSegments.length - 1].aTime * 1000);
+                
+                returnDepartureDate = new Date(returnSegments[0].local_departure || returnSegments[0].dTime * 1000);
+                returnArrivalDate = new Date(returnSegments[returnSegments.length - 1].local_arrival || 
+                                        returnSegments[returnSegments.length - 1].aTime * 1000);
+            } else {
+                // Handle as one-way if no turning point found
+                departureDate = new Date(flight.local_departure || flight.dTime * 1000);
+                arrivalDate = new Date(flight.local_arrival || flight.aTime * 1000);
+            }
         }
     } else {
         // Handle one-way trips
@@ -225,10 +243,10 @@ function createRouteCard(flight, endpoint, routeIndex, destination) {
                     <div class="return-journey">
                         <div class="journey-label">Return</div>
                         <div class="journey-details">
-                            <div class="arrival-section">
-                                <span class="arrival-date">${returnArrivalDateFormatted}</span>
-                                <span class="arrival-time">${formatTime(returnArrivalDate)}</span>
-                                <span class="arrival-code">${returnSegments[returnSegments.length - 1].flyTo}</span>
+                            <div class="departure-section">
+                                <span class="departure-date">${returnDepartDateFormatted}</span>
+                                <span class="departure-time">${formatTime(returnDepartureDate)}</span>
+                                <span class="departure-code">${returnSegments[0].flyFrom}</span>
                             </div>
 
                             <div class="route-indicator">
@@ -238,10 +256,10 @@ function createRouteCard(flight, endpoint, routeIndex, destination) {
                                 ${createRouteArrowSVG(numberOfReturnStops, returnSegments, true).outerHTML}
                             </div>
 
-                            <div class="departure-section">
-                                <span class="departure-date">${returnDepartDateFormatted}</span>
-                                <span class="departure-time">${formatTime(returnDepartureDate)}</span>
-                                <span class="departure-code">${returnSegments[0].flyFrom}</span>
+                            <div class="arrival-section">
+                                <span class="arrival-date">${returnArrivalDateFormatted}</span>
+                                <span class="arrival-time">${formatTime(returnArrivalDate)}</span>
+                                <span class="arrival-code">${returnSegments[returnSegments.length - 1].flyTo}</span>
                             </div>
                         </div>
                     </div>
