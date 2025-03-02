@@ -119,7 +119,7 @@ function setupAutocompleteForField(fieldId) {
     addTrackedListener(inputField, 'focus', async () => {
         inputField.removeAttribute('readonly');
         initialInputValue = inputField.value;
-        setSuggestionBoxPosition();
+        setSuggestionBoxPosition(inputField, suggestionBox);
 
         const iataCode = inputField.getAttribute('data-selected-iata') || getIataFromField(fieldId);
         if (iataCode) {
@@ -133,7 +133,7 @@ function setupAutocompleteForField(fieldId) {
         }
     });
 
-    const setSuggestionBoxPosition = () => {
+    const setSuggestionBoxPosition = (inputField, suggestionBox) => {
         if (!suggestionBox) return;
         
         const isMobile = window.innerWidth <= 600;
@@ -209,7 +209,7 @@ function setupAutocompleteForField(fieldId) {
     // Handle resize events
     const handleResize = () => {
         if (suggestionBox.style.display === 'block') {
-            setSuggestionBoxPosition();
+            setSuggestionBoxPosition(inputField, suggestionBox);
         }
     };
 
@@ -232,7 +232,7 @@ function setupAutocompleteForField(fieldId) {
             if (airports.length > 0) {
                 updateSuggestions(fieldId, airports);
                 suggestionBox.style.display = 'block';
-                setSuggestionBoxPosition();
+                setSuggestionBoxPosition(inputField, suggestionBox);
                 
                 // Automatically highlight the first suggestion
                 currentFocus = 0;
@@ -255,7 +255,7 @@ function setupAutocompleteForField(fieldId) {
     const toggleSuggestionBox = (display) => {
         suggestionBox.style.display = display ? 'block' : 'none';
         if (display) {
-            setSuggestionBoxPosition();
+            setSuggestionBoxPosition(inputField, suggestionBox);
         }
     };
 
@@ -390,7 +390,7 @@ function setupAutocompleteForField(fieldId) {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
                 // Suggestion box is visible, update position
-                setSuggestionBoxPosition();
+                setSuggestionBoxPosition(inputField, suggestionBox);
             }
         });
     }, { threshold: 0.1 });
@@ -399,11 +399,24 @@ function setupAutocompleteForField(fieldId) {
     suggestionBox && suggestionObserver.observe(suggestionBox);
 }
 
+// In airportAutocomplete.js or wherever suggestions are created
 function updateSuggestions(inputId, airports) {
     const suggestionBox = document.getElementById(inputId + 'Suggestions');
     if (!suggestionBox) return;
     
+    // Clear existing suggestions
     suggestionBox.innerHTML = '';
+    
+    // Ensure the suggestion box is appended to body for proper stacking
+    if (suggestionBox.parentElement !== document.body) {
+        document.body.appendChild(suggestionBox);
+    }
+    
+    // Force higher z-index and ensure it's outside infoPane stacking context
+    suggestionBox.style.position = 'fixed';  // Use fixed instead of absolute
+    suggestionBox.style.zIndex = '1000';     // Much higher than infoPane
+    
+    // Rest of your suggestion rendering code...
     let selectionHandledByTouch = false;
 
     airports.forEach((airport, index) => {
