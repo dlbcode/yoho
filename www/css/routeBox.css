@@ -568,8 +568,7 @@
 .waypoint-inputs-container .suggestions {
   position: absolute;
   top: 100%;
-  left: 0;
-  width: 100%;
+  width: auto; /* Allow width to be determined by JavaScript */
   box-sizing: border-box;
   z-index: 1001;
   /* Remove any hardcoded width like 372px */

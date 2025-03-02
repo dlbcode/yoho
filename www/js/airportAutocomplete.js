@@ -120,7 +120,13 @@ function setupAutocompleteForField(fieldId) {
         
         const isMobile = window.innerWidth <= 600;
         const inputRect = inputField.getBoundingClientRect();
+        const waypointContainer = document.querySelector('.waypoint-inputs-container');
+        const containerRect = waypointContainer ? waypointContainer.getBoundingClientRect() : null;
         const maxMenuHeight = 200;
+        
+        // Get the index to determine if this is origin or destination
+        const inputIndex = parseInt(fieldId.replace(/\D/g, ''), 10) % 2;
+        const isOriginField = inputIndex === 1; // First field (odd number)
         
         // Base styles for all cases
         const baseStyles = {
@@ -138,19 +144,46 @@ function setupAutocompleteForField(fieldId) {
                 maxHeight: 'calc(100vh - 50px)',
                 minHeight: 'none'
             });
-        } else {
-            // Desktop positioning logic
+        } else if (containerRect) {
+            // Desktop positioning with container reference
             const viewportHeight = window.innerHeight;
             const spaceBelow = viewportHeight - inputRect.bottom;
             const spaceAbove = inputRect.top;
             const showAbove = spaceBelow < maxMenuHeight && spaceAbove >= maxMenuHeight;
             
+            // Container-wide dropdown that aligns with input field edges
+            const suggestionWidth = containerRect.width;
+            
+            let left;
+            if (isOriginField) {
+                // For origin: align left edge with input left edge
+                left = inputRect.left;
+            } else {
+                // For destination: align right edge with input right edge
+                left = inputRect.right - suggestionWidth;
+            }
+            
+            // Ensure dropdown stays within viewport
+            if (left < 0) left = 0;
+            if (left + suggestionWidth > window.innerWidth) {
+                left = Math.max(0, window.innerWidth - suggestionWidth);
+            }
+            
             Object.assign(suggestionBox.style, baseStyles, {
-                width: `${inputRect.width}px`,
-                left: `${inputRect.left}px`,
+                width: `${suggestionWidth}px`,
+                left: `${left}px`,
                 maxHeight: `${Math.min(maxMenuHeight, showAbove ? spaceAbove : spaceBelow)}px`,
                 [showAbove ? 'bottom' : 'top']: `${showAbove ? viewportHeight - inputRect.top : inputRect.bottom}px`,
                 [showAbove ? 'top' : 'bottom']: 'auto'
+            });
+        } else {
+            // Fallback positioning if container isn't found
+            Object.assign(suggestionBox.style, baseStyles, {
+                width: `${inputRect.width}px`,
+                left: `${inputRect.left}px`,
+                maxHeight: `${maxMenuHeight}px`,
+                top: `${inputRect.bottom}px`,
+                bottom: 'auto'
             });
         }
     };
@@ -399,14 +432,39 @@ function updateSuggestions(inputId, airports) {
                 maxHeight: 'calc(100vh - 50px)'
             });
         } else if (inputField) {
-            // Get positioning from the input
-            const rect = inputField.getBoundingClientRect();
-            if (window.innerWidth > 600) {
+            // Get positioning from input field
+            const inputRect = inputField.getBoundingClientRect();
+            const waypointContainer = document.querySelector('.waypoint-inputs-container');
+            const containerRect = waypointContainer ? waypointContainer.getBoundingClientRect() : null;
+            
+            // Determine if this is origin or destination based on the input ID
+            const inputIndex = parseInt(inputId.replace(/\D/g, ''), 10) % 2;
+            const isOriginField = inputIndex === 1; // First field (odd number)
+            
+            if (containerRect && window.innerWidth > 600) {
+                // Container-wide dropdown that aligns with input field edges
+                const suggestionWidth = containerRect.width;
+                
+                let left;
+                if (isOriginField) {
+                    // For origin: align left edge with input left edge
+                    left = inputRect.left;
+                } else {
+                    // For destination: align right edge with input right edge
+                    left = inputRect.right - suggestionWidth;
+                }
+                
+                // Ensure dropdown stays within viewport
+                if (left < 0) left = 0;
+                if (left + suggestionWidth > window.innerWidth) {
+                    left = Math.max(0, window.innerWidth - suggestionWidth);
+                }
+                
                 Object.assign(suggestionBox.style, {
                     position: 'fixed',
-                    top: `${rect.bottom}px`,
-                    left: `${rect.left}px`,
-                    width: `${rect.width}px`
+                    top: `${inputRect.bottom}px`,
+                    left: `${left}px`,
+                    width: `${suggestionWidth}px`
                 });
             }
         }
