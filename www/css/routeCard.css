@@ -364,6 +364,54 @@
   overflow: visible;
 }
 
+/* Round-trip stacked journey details */
+.card-content.round-trip .journey-section {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  width: 100%;
+}
+
+.outbound-journey,
+.return-journey {
+  width: 100%;
+}
+
+.journey-details {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 8px;
+  align-items: center;
+  width: 100%;
+}
+
+.journey-label {
+  font-size: 0.8rem;
+  color: #888;
+  font-weight: 600;
+  margin-bottom: 5px;
+}
+
+/* Add a divider between outbound and return journey */
+.outbound-journey {
+  padding-bottom: 10px;
+  border-bottom: 1px dashed #ddd;
+}
+
+.return-journey {
+  padding-top: 5px;
+}
+
+/* Adjust width of route-indicator to maintain proportion */
+.route-indicator {
+  width: 100%;
+}
+
+/* Make sure the price section has enough space at bottom */
+.card-content.round-trip .price-section {
+  margin-top: 8px;
+}
+
 /* Media query */
 @media (max-width: 768px) {
   .card-header {

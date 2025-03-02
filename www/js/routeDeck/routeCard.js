@@ -198,10 +198,10 @@ function createRouteCard(flight, endpoint, routeIndex, destination) {
                     <div class="return-journey">
                         <div class="journey-label">Return</div>
                         <div class="journey-details">
-                            <div class="departure-section">
-                                <span class="departure-date">${returnDepartDateFormatted}</span>
-                                <span class="departure-time">${formatTime(returnDepartureDate)}</span>
-                                <span class="departure-code">${returnSegments[0].flyFrom}</span>
+                            <div class="arrival-section">
+                                <span class="arrival-date">${returnArrivalDateFormatted}</span>
+                                <span class="arrival-time">${formatTime(returnArrivalDate)}</span>
+                                <span class="arrival-code">${returnSegments[returnSegments.length - 1].flyTo}</span>
                             </div>
 
                             <div class="route-indicator">
@@ -211,10 +211,10 @@ function createRouteCard(flight, endpoint, routeIndex, destination) {
                                 ${createRouteArrowSVG(numberOfReturnStops, returnSegments).outerHTML}
                             </div>
 
-                            <div class="arrival-section">
-                                <span class="arrival-date">${returnArrivalDateFormatted}</span>
-                                <span class="arrival-time">${formatTime(returnArrivalDate)}</span>
-                                <span class="arrival-code">${returnSegments[returnSegments.length - 1].flyTo}</span>
+                            <div class="departure-section">
+                                <span class="departure-date">${returnDepartDateFormatted}</span>
+                                <span class="departure-time">${formatTime(returnDepartureDate)}</span>
+                                <span class="departure-code">${returnSegments[0].flyFrom}</span>
                             </div>
                         </div>
                     </div>
