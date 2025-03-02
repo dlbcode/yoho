@@ -41,7 +41,7 @@ function setCardAttributes(card, attributes) {
     }
 }
 
-function createRouteArrowSVG(stops, segments) {
+function createRouteArrowSVG(stops, segments, isReturn = false) {
     const svgNS = "http://www.w3.org/2000/svg";
     const svg = document.createElementNS(svgNS, "svg");
     svg.classList.add("route-arrow-svg");
@@ -49,32 +49,59 @@ function createRouteArrowSVG(stops, segments) {
 
     const line = document.createElementNS(svgNS, "line");
     line.classList.add("route-arrow-line");
-    line.setAttribute("x1", "0");
-    line.setAttribute("y1", "12");
-    line.setAttribute("x2", "100");
-    line.setAttribute("y2", "12");
+    
+    if (isReturn) {
+        // For return trips, flip the direction (right to left)
+        line.setAttribute("x1", "100");
+        line.setAttribute("y1", "12");
+        line.setAttribute("x2", "0");
+        line.setAttribute("y2", "12");
+    } else {
+        // For outbound trips (left to right)
+        line.setAttribute("x1", "0");
+        line.setAttribute("y1", "12");
+        line.setAttribute("x2", "100");
+        line.setAttribute("y2", "12");
+    }
+    
     svg.appendChild(line);
 
     const dotSpacing = 100 / (stops + 1);
     for (let i = 1; i <= stops; i++) {
         const dot = document.createElementNS(svgNS, "circle");
         dot.classList.add("route-arrow-dot");
-        dot.setAttribute("cx", dotSpacing * i);
+        
+        // Position dots based on direction
+        const position = isReturn ? 100 - (dotSpacing * i) : dotSpacing * i;
+        
+        dot.setAttribute("cx", position);
         dot.setAttribute("cy", "12");
-        dot.setAttribute("r", "4"); // Increase the radius of the dots
+        dot.setAttribute("r", "4");
         svg.appendChild(dot);
 
         const iata = document.createElementNS(svgNS, "text");
         iata.classList.add("route-arrow-iata");
-        iata.setAttribute("x", dotSpacing * i);
+        iata.setAttribute("x", position);
         iata.setAttribute("y", "25"); // Position below the dot
-        iata.textContent = segments[i - 1].flyTo;
+        
+        // For return trips, the IATA codes need to be reversed
+        const segmentIndex = isReturn ? stops - i : i - 1;
+        iata.textContent = segments[segmentIndex].flyTo;
+        
         svg.appendChild(iata);
     }
 
     const arrowHead = document.createElementNS(svgNS, "polygon");
     arrowHead.classList.add("route-arrow-head");
-    arrowHead.setAttribute("points", "100,8 108,12 100,16");
+    
+    if (isReturn) {
+        // Arrow pointing left for return trips
+        arrowHead.setAttribute("points", "0,12 8,8 8,16");
+    } else {
+        // Arrow pointing right for outbound trips
+        arrowHead.setAttribute("points", "100,8 108,12 100,16");
+    }
+    
     svg.appendChild(arrowHead);
 
     return svg;
@@ -208,7 +235,7 @@ function createRouteCard(flight, endpoint, routeIndex, destination) {
                                 <div class="duration">
                                     ${numberOfReturnStops > 0 ? `${numberOfReturnStops} stop${numberOfReturnStops > 1 ? 's' : ''}` : 'Direct'}
                                 </div>
-                                ${createRouteArrowSVG(numberOfReturnStops, returnSegments).outerHTML}
+                                ${createRouteArrowSVG(numberOfReturnStops, returnSegments, true).outerHTML}
                             </div>
 
                             <div class="departure-section">
