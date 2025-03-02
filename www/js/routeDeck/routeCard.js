@@ -1,6 +1,6 @@
 import { createRouteId } from './filterDeck.js';
 import { highlightRouteLines, resetRouteLines } from './routeHighlighting.js';
-import { routeInfoCard } from './routeInfoCard.js'; // Import the proper implementation
+import { appState } from '../stateManager.js';
 
 export function formatFlightDateTime(date) {
     const dayName = date.toLocaleDateString('en-US', { weekday: 'short' });
@@ -88,29 +88,64 @@ function createRouteCard(flight, endpoint, routeIndex, destination) {
     const routeId = createRouteId(flight.route);
     card.setAttribute('data-route-id', routeId);
     
-    const departureDate = endpoint === 'range' || destination === 'Any' 
-        ? new Date(flight.dTime * 1000)
-        : new Date(flight.local_departure);
-    const arrivalDate = endpoint === 'range' || destination === 'Any'
-        ? new Date(flight.aTime * 1000)
-        : new Date(flight.local_arrival);
-
-    const cardId = `deck-${routeIndex}-${flight.id}`;
+    // Get trip type from appState
+    const tripType = appState.routes[routeIndex]?.tripType || 'oneWay';
     
-    // Add stops data attribute
-    const numberOfStops = flight.route.length - 1;
+    // Determine if this is a round trip
+    const isRoundTrip = tripType === 'roundTrip';
+    
+    // Extract outbound and return segments for round trips
+    let outboundSegments, returnSegments;
+    let departureDate, arrivalDate, returnDepartureDate, returnArrivalDate;
+    
+    if (isRoundTrip && flight.route && flight.route.length > 1) {
+        // Find the turning point in the route by looking for returning to origin
+        const originIata = flight.route[0].flyFrom;
+        const turningPointIndex = flight.route.findIndex((segment, idx) => 
+            idx > 0 && segment.flyTo === originIata);
+            
+        if (turningPointIndex !== -1) {
+            // Split into outbound and return segments
+            outboundSegments = flight.route.slice(0, turningPointIndex + 1);
+            returnSegments = flight.route.slice(turningPointIndex);
+            
+            // Set dates for both segments
+            departureDate = new Date(outboundSegments[0].local_departure || outboundSegments[0].dTime * 1000);
+            arrivalDate = new Date(outboundSegments[outboundSegments.length - 1].local_arrival || 
+                                 outboundSegments[outboundSegments.length - 1].aTime * 1000);
+            
+            returnDepartureDate = new Date(returnSegments[0].local_departure || returnSegments[0].dTime * 1000);
+            returnArrivalDate = new Date(returnSegments[returnSegments.length - 1].local_arrival || 
+                                      returnSegments[returnSegments.length - 1].aTime * 1000);
+        } else {
+            // Handle as one-way if no turning point found
+            departureDate = new Date(flight.local_departure || flight.dTime * 1000);
+            arrivalDate = new Date(flight.local_arrival || flight.aTime * 1000);
+        }
+    } else {
+        // Handle one-way trips
+        departureDate = new Date(flight.local_departure || flight.dTime * 1000);
+        arrivalDate = new Date(flight.local_arrival || flight.aTime * 1000);
+    }
+
+    // Calculate stops for each segment
+    const numberOfOutboundStops = outboundSegments ? outboundSegments.length - 1 : flight.route.length - 1;
+    const numberOfReturnStops = returnSegments ? returnSegments.length - 1 : 0;
+    const totalStops = numberOfOutboundStops + numberOfReturnStops;
+
     // Set card attributes
     setCardAttributes(card, {
-        'data-card-id': cardId,
+        'data-card-id': `deck-${routeIndex}-${flight.id}`,
         'data-price': flight.price,
         'data-departure-time': departureDate.getHours() + departureDate.getMinutes() / 60,
         'data-arrival-time': arrivalDate.getHours() + arrivalDate.getMinutes() / 60,
         'data-price-range': getPriceRangeCategory(flight.price),
         'data-price-value': Math.round(flight.price),
-        'data-stops': numberOfStops
+        'data-stops': totalStops,
+        'data-trip-type': tripType
     });
     
-    // Format dates as "Thu, Aug 11"
+    // Format dates
     const formatDateShort = (date) => {
         return date.toLocaleDateString('en-US', { 
             weekday: 'short', 
@@ -121,42 +156,114 @@ function createRouteCard(flight, endpoint, routeIndex, destination) {
     
     const departDateFormatted = formatDateShort(departureDate);
     const arrivalDateFormatted = formatDateShort(arrivalDate);
-
-    card.innerHTML = `
-        <div class="card-content">
-            <div class="airline-section">
-                <img src="assets/airline_logos/70px/${flight.route[0].airline}.png" 
-                     alt="${flight.route[0].airline} Logo" 
-                     class="airline-logo">
-            </div>
-
-            <div class="journey-section">
-                <div class="departure-section">
-                    <span class="departure-date">${departDateFormatted}</span>
-                    <span class="departure-time">${formatTime(departureDate)}</span>
-                    <span class="departure-code">${flight.route[0].flyFrom}</span>
+    
+    // Create HTML content based on trip type
+    if (isRoundTrip && returnDepartureDate && returnArrivalDate) {
+        const returnDepartDateFormatted = formatDateShort(returnDepartureDate);
+        const returnArrivalDateFormatted = formatDateShort(returnArrivalDate);
+        
+        card.innerHTML = `
+            <div class="card-content round-trip">
+                <div class="airline-section">
+                    <img src="assets/airline_logos/70px/${flight.route[0].airline}.png" 
+                         alt="${flight.route[0].airline} Logo" 
+                         class="airline-logo">
                 </div>
 
-                <div class="route-indicator">
-                    <div class="duration">
-                        ${Math.floor(flight.duration.total / 3600)}h ${Math.floor((flight.duration.total % 3600) / 60)}m
+                <div class="journey-section">
+                    <div class="outbound-journey">
+                        <div class="journey-label">Outbound</div>
+                        <div class="journey-details">
+                            <div class="departure-section">
+                                <span class="departure-date">${departDateFormatted}</span>
+                                <span class="departure-time">${formatTime(departureDate)}</span>
+                                <span class="departure-code">${outboundSegments[0].flyFrom}</span>
+                            </div>
+
+                            <div class="route-indicator">
+                                <div class="duration">
+                                    ${numberOfOutboundStops > 0 ? `${numberOfOutboundStops} stop${numberOfOutboundStops > 1 ? 's' : ''}` : 'Direct'}
+                                </div>
+                                ${createRouteArrowSVG(numberOfOutboundStops, outboundSegments).outerHTML}
+                            </div>
+
+                            <div class="arrival-section">
+                                <span class="arrival-date">${arrivalDateFormatted}</span>
+                                <span class="arrival-time">${formatTime(arrivalDate)}</span>
+                                <span class="arrival-code">${outboundSegments[outboundSegments.length - 1].flyTo}</span>
+                            </div>
+                        </div>
                     </div>
-                    ${createRouteArrowSVG(flight.route.length - 1, flight.route).outerHTML}
+                    
+                    <div class="return-journey">
+                        <div class="journey-label">Return</div>
+                        <div class="journey-details">
+                            <div class="departure-section">
+                                <span class="departure-date">${returnDepartDateFormatted}</span>
+                                <span class="departure-time">${formatTime(returnDepartureDate)}</span>
+                                <span class="departure-code">${returnSegments[0].flyFrom}</span>
+                            </div>
+
+                            <div class="route-indicator">
+                                <div class="duration">
+                                    ${numberOfReturnStops > 0 ? `${numberOfReturnStops} stop${numberOfReturnStops > 1 ? 's' : ''}` : 'Direct'}
+                                </div>
+                                ${createRouteArrowSVG(numberOfReturnStops, returnSegments).outerHTML}
+                            </div>
+
+                            <div class="arrival-section">
+                                <span class="arrival-date">${returnArrivalDateFormatted}</span>
+                                <span class="arrival-time">${formatTime(returnArrivalDate)}</span>
+                                <span class="arrival-code">${returnSegments[returnSegments.length - 1].flyTo}</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
-                <div class="arrival-section">
-                    <span class="arrival-date">${arrivalDateFormatted}</span>
-                    <span class="arrival-time">${formatTime(arrivalDate)}</span>
-                    <span class="arrival-code">${flight.route[flight.route.length - 1].flyTo}</span>
+                <div class="price-section">
+                    <div class="card-price">$${Math.ceil(flight.price)}</div>
                 </div>
             </div>
+        `;
+    } else {
+        // One-way flight display (existing implementation)
+        card.innerHTML = `
+            <div class="card-content">
+                <div class="airline-section">
+                    <img src="assets/airline_logos/70px/${flight.route[0].airline}.png" 
+                         alt="${flight.route[0].airline} Logo" 
+                         class="airline-logo">
+                </div>
 
-            <div class="price-section">
-                <div class="card-price">$${Math.ceil(flight.price)}</div>
+                <div class="journey-section">
+                    <div class="departure-section">
+                        <span class="departure-date">${departDateFormatted}</span>
+                        <span class="departure-time">${formatTime(departureDate)}</span>
+                        <span class="departure-code">${flight.route[0].flyFrom}</span>
+                    </div>
+
+                    <div class="route-indicator">
+                        <div class="duration">
+                            ${Math.floor(flight.duration.total / 3600)}h ${Math.floor((flight.duration.total % 3600) / 60)}m
+                        </div>
+                        ${createRouteArrowSVG(flight.route.length - 1, flight.route).outerHTML}
+                    </div>
+
+                    <div class="arrival-section">
+                        <span class="arrival-date">${arrivalDateFormatted}</span>
+                        <span class="arrival-time">${formatTime(arrivalDate)}</span>
+                        <span class="arrival-code">${flight.route[flight.route.length - 1].flyTo}</span>
+                    </div>
+                </div>
+
+                <div class="price-section">
+                    <div class="card-price">$${Math.ceil(flight.price)}</div>
+                </div>
             </div>
-        </div>
-    `;
+        `;
+    }
 
+    // Add event listeners
     card.addEventListener('mouseover', () => highlightRouteLines(flight, card));
     card.addEventListener('mouseout', () => resetRouteLines(card));
 
