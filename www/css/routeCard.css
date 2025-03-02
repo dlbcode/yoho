@@ -412,6 +412,50 @@
   margin-top: 8px;
 }
 
+/* Consistent alignment for departure/arrival sections based on position */
+
+/* Left-side sections: right aligned */
+.journey-details > div:first-child {
+  align-items: flex-end;
+  text-align: right;
+}
+
+.journey-details > div:first-child span {
+  text-align: right;
+  width: 100%;
+}
+
+/* Right-side sections: left aligned */
+.journey-details > div:last-of-type:not(.route-indicator) {
+  align-items: flex-start;
+  text-align: left;
+}
+
+.journey-details > div:last-of-type:not(.route-indicator) span {
+  text-align: left;
+  width: 100%;
+}
+
+/* This overrides the previous default center text alignment */
+.departure-section,
+.arrival-section {
+  align-items: unset;
+  text-align: unset;
+}
+
+/* Ensure the route indicator remains centered */
+.route-indicator {
+  align-items: center;
+  text-align: center;
+}
+
+/* Ensure these styles don't get overridden */
+.journey-details > div:first-child span,
+.journey-details > div:last-of-type:not(.route-indicator) span {
+  width: 100%;
+  display: block;
+}
+
 /* Media query */
 @media (max-width: 768px) {
   .card-header {
