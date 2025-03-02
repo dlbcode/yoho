@@ -626,16 +626,16 @@
   pointer-events: auto; /* Enable pointer events when active */
 }
 
-/* Add to your routeBox.css file */
+/* Update mobile overlay to only cover the routeBox */
 .route-box-overlay.mobile-overlay {
     /* Mobile specific styles */
     z-index: 85; /* Was 999 - should be high but below suggestions */
     background-color: rgba(0, 0, 0, 0.7); /* Darker overlay for mobile */
-    position: fixed; /* Use fixed positioning to cover the entire viewport */
+    position: absolute; /* Changed from fixed to absolute to constrain to routeBox */
     top: 0;
     left: 0;
     right: 0;
-    bottom: 0;
+    bottom: 0; 
     pointer-events: auto; /* Enable pointer events for mobile */
 }
 
