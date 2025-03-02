@@ -309,7 +309,7 @@ const routeBox = {
             appState.routes[routeNumber] = { tripType: 'oneWay' };
         }
 
-        const container = createElement('div', { className: 'topRow' });
+        const container = createElement('div', { className: 'routeBoxElements' });
         const infoPane = document.getElementById('infoPane');
 
         const optionsContainer = createElement('div', { className: 'options-container' });

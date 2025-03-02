@@ -13,7 +13,7 @@
 }
 
 /* Container for all elements */
-.topRow {
+.routeBoxElements {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
@@ -126,7 +126,7 @@
 
 /* Media query for screens less than 800px */
 @media (max-width: 880px) {
-  .topRow {
+  .routeBoxElements {
     flex-direction: column;
     width: 100%;
   }
@@ -543,7 +543,7 @@
 }
 
 .options-container > div,
-.topRow > div {
+.routeBoxElements > div {
   flex: 1;
 }
 
