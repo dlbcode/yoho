@@ -524,6 +524,7 @@ const routeBox = {
 const createMobileOverlay = (() => {
     let currentOverlay = null;
     let debounceTimeout = null;
+    let isBlurring = false; // Track if we're in the process of blurring
     
     return () => {
         // Clear any pending debounce
@@ -546,15 +547,46 @@ const createMobileOverlay = (() => {
             overlay.className = 'route-box-overlay mobile-overlay';
             overlay.style.zIndex = '90';
             
-            // Add click handler to overlay to prevent click-through
-            overlay.addEventListener('click', (e) => {
+            // More robust click handler that prevents focus events
+            overlay.addEventListener('mousedown', (e) => {
                 e.preventDefault();
                 e.stopPropagation();
                 
-                // Optional: blur any active input when clicking overlay
-                document.activeElement?.blur();
+                // Set the blurring flag
+                isBlurring = true;
+                
+                // Store reference to active input before blurring it
+                const activeInput = document.activeElement;
+                if (activeInput && activeInput.tagName === 'INPUT') {
+                    // Add a temporary event listener to capture and prevent focus events
+                    const preventFocus = (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        activeInput.removeEventListener('focus', preventFocus, true);
+                        return false;
+                    };
+                    
+                    // Use capture phase to intercept the event before it reaches the input
+                    activeInput.addEventListener('focus', preventFocus, true);
+                    
+                    // Blur the input
+                    activeInput.blur();
+                    
+                    // Clear the flag and remove the event listener after a short delay
+                    setTimeout(() => {
+                        isBlurring = false;
+                        activeInput.removeEventListener('focus', preventFocus, true);
+                    }, 300);
+                }
             });
             
+            // Still handle regular click to ensure we catch all interactions
+            overlay.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+            });
+            
+            // Add overlay to routeBox
             routeBox.appendChild(overlay);
             currentOverlay = overlay;
             
