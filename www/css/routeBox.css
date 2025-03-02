@@ -565,12 +565,6 @@
   flex: 1;
 }
 
-.trip-type-container,
-.travelers-container,
-.waypoint-inputs-container {
-  position: relative;
-}
-
 /* Search and remove buttons */
 .search-button,
 .remove-button {
@@ -598,25 +592,10 @@
   position: relative;
 }
 
-.waypoint-inputs-container .suggestions {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  width: 100%;
-  box-sizing: border-box;
-  z-index: 1001;
-}
-
 .waypoint-input {
   height: 40px; /* Match container height */
   padding: 0 15px !important; /* Adjust padding to maintain text alignment */
   line-height: 40px; /* Center text vertically */
-}
-
-.travelers-dropdown li,
-.trip-type-dropdown li {
-  padding: 5px 8px;
-  cursor: pointer;
 }
 
 /* Add positioning helper class */
@@ -669,10 +648,4 @@
   top: 100%;
   bottom: auto !important;
   margin-top: 0; /* Remove margin to be right against the input */
-}
-
-/* Consistent suggestion dropdown positioning */
-[id$='Suggestions'] {
-  margin-top: 0;
-  margin-bottom: 0;
 }
