@@ -68,7 +68,8 @@
 }
 
 /* Style for the actual date input elements */
-.route-box .date-input {
+.route-box .date-input,
+.route-box .waypoint-input {
   display: block;
   background-color: #444;
   border: 1px solid #444;
@@ -78,10 +79,11 @@
   box-sizing: border-box;
 }
 
-.route-box .date-input:focus {
+.route-box .date-input:focus,
+.route-box .waypoint-input:focus {
   outline: none;
-  border: #2a4f7c;
   background-color: #2a4f7c;
+  border-radius: 5px;
 }
 
 .button-container {
@@ -120,12 +122,6 @@
   background-color: transparent;
   box-sizing: border-box;
   display: block;
-}
-
-.waypoint-input:focus {
-  outline: none;
-  background-color: #2a4f7c;
-  border-radius: 5px;
 }
 
 /* Media query for screens less than 800px */
@@ -302,20 +298,6 @@
   background-color: #222;
   border-radius: 50%;
   z-index: 1;
-}
-
-.route-box .waypoint-input {
-  background-color: transparent;
-  padding: 10px 15px; /* Increased padding for better touch interaction */
-  width: 100%;
-  box-sizing: border-box;
-  display: block;
-}
-
-.route-box .waypoint-input:focus {
-  outline: none;
-  background-color: #2a4f7c;
-  border-radius: 5px;
 }
 
 #topRow {
@@ -565,6 +547,12 @@
   flex: 1;
 }
 
+.trip-type-container,
+.travelers-container,
+.waypoint-inputs-container {
+  position: relative;
+}
+
 /* Search and remove buttons */
 .search-button,
 .remove-button {
@@ -592,10 +580,25 @@
   position: relative;
 }
 
+.waypoint-inputs-container .suggestions {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%;
+  box-sizing: border-box;
+  z-index: 1001;
+}
+
 .waypoint-input {
   height: 40px; /* Match container height */
   padding: 0 15px !important; /* Adjust padding to maintain text alignment */
   line-height: 40px; /* Center text vertically */
+}
+
+.travelers-dropdown li,
+.trip-type-dropdown li {
+  padding: 5px 8px;
+  cursor: pointer;
 }
 
 /* Add positioning helper class */
@@ -648,4 +651,10 @@
   top: 100%;
   bottom: auto !important;
   margin-top: 0; /* Remove margin to be right against the input */
+}
+
+/* Consistent suggestion dropdown positioning */
+[id$='Suggestions'] {
+  margin-top: 0;
+  margin-bottom: 0;
 }
