@@ -217,7 +217,6 @@ function createRouteCard(flight, endpoint, routeIndex, destination) {
 
                 <div class="journey-section">
                     <div class="outbound-journey">
-                        <div class="journey-label">Outbound</div>
                         <div class="journey-details">
                             <div class="departure-section">
                                 <span class="departure-date">${departDateFormatted}</span>
@@ -241,7 +240,6 @@ function createRouteCard(flight, endpoint, routeIndex, destination) {
                     </div>
                     
                     <div class="return-journey">
-                        <div class="journey-label">Return</div>
                         <div class="journey-details">
                             <div class="arrival-section">
                                 <span class="arrival-date">${returnArrivalDateFormatted}</span>

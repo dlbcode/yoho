@@ -368,13 +368,17 @@
 .card-content.round-trip .journey-section {
   display: flex;
   flex-direction: column;
-  gap: 15px;
+  gap: 10px;
   width: 100%;
 }
 
-.outbound-journey,
+.outbound-journey {
+  padding-bottom: 8px;
+  border-bottom: 1px dashed #ddd;
+}
+
 .return-journey {
-  width: 100%;
+  padding-top: 8px;
 }
 
 .journey-details {
@@ -394,12 +398,7 @@
 
 /* Add a divider between outbound and return journey */
 .outbound-journey {
-  padding-bottom: 10px;
   border-bottom: 1px dashed #ddd;
-}
-
-.return-journey {
-  padding-top: 5px;
 }
 
 /* Adjust width of route-indicator to maintain proportion */
