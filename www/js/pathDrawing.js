@@ -210,12 +210,18 @@ class Line {
     }
 
     remove() {
+        // Remove all visible line copies
         this.lineOffsetCopies.forEach(line => {
-            this.map.removeLayer(line);
+            if (line && this.map) this.map.removeLayer(line);
         });
         
-        if (this.invisibleLine) this.map.removeLayer(this.invisibleLine);
-        if (this.decoratedLine) this.map.removeLayer(this.decoratedLine);
+        // Remove all invisible line copies
+        this.invisibleLineOffsetCopies.forEach(line => {
+            if (line && this.map) this.map.removeLayer(line);
+        });
+        
+        // Remove decorated line if it exists
+        if (this.decoratedLine && this.map) this.map.removeLayer(this.decoratedLine);
     }
 }
 
