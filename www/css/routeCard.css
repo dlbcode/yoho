@@ -279,12 +279,6 @@
   width: 70px;
 }
 
-.arrival-section {
-  display: flex;
-  flex-direction: column;
-  min-width: 60px;
-}
-
 .departure-time,
 .arrival-time {
   color: #ddd;
@@ -368,17 +362,13 @@
 .card-content.round-trip .journey-section {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 0px;
   width: 100%;
 }
 
 .outbound-journey {
-  padding-bottom: 8px;
+  padding-bottom: 2px;
   border-bottom: 1px dashed #ddd;
-}
-
-.return-journey {
-  padding-top: 8px;
 }
 
 .journey-details {
