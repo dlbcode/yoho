@@ -75,18 +75,37 @@ class Line {
         return {
             weight: isInvisible ? 10 : this.weight,
             opacity: isInvisible ? 0.1 : 1,
-            color: isInvisible ? this.color : this.color,
+            color: this.color,
             wrap: false,
+            noClip: true, // Prevent clipping
             ...(this.type === 'dashed' ? { dashArray: '5, 10' } : {})
         };
     }
 
+    adjustForAntimeridian(latLng1, latLng2) {
+        const lonDiff = latLng2.lng - latLng1.lng;
+        if (Math.abs(lonDiff) > 180) {
+            if (lonDiff > 0) {
+                latLng2.lng -= 360;
+            } else {
+                latLng2.lng += 360;
+            }
+        }
+    }
+
     createVisibleLine() {
-        const coords = [
-            L.latLng(this.origin.latitude, this.origin.longitude),
-            L.latLng(this.destination.latitude, this.destination.longitude)
-        ];
-        return new L.Geodesic(coords, this.getBaseLineOptions()).addTo(this.map);
+        const latLngOne = L.latLng(this.origin.latitude, this.origin.longitude);
+        const latLngTwo = L.latLng(this.destination.latitude, this.destination.longitude);
+
+        // Draw identical lines at offsets -360, 0, +360 so one stays visible as you pan
+        [-360, 0, 360].forEach(offset => {
+            const shiftedOne = L.latLng(latLngOne.lat, latLngOne.lng + offset);
+            const shiftedTwo = L.latLng(latLngTwo.lat, latLngTwo.lng + offset);
+            new L.Geodesic([shiftedOne, shiftedTwo], this.getBaseLineOptions()).addTo(this.map);
+        });
+
+        // Return the "base" line if you need to reference it later
+        return new L.Geodesic([latLngOne, latLngTwo], this.getBaseLineOptions());
     }
 
     createInvisibleLine() {
