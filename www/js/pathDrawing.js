@@ -113,11 +113,23 @@ class Line {
     }
 
     createInvisibleLine() {
-        const coords = [
-            L.latLng(this.origin.latitude, this.origin.longitude),
-            L.latLng(this.destination.latitude, this.destination.longitude)
-        ];
-        return new L.Geodesic(coords, this.getBaseLineOptions(true)).addTo(this.map);
+        const latLngOne = L.latLng(this.origin.latitude, this.origin.longitude);
+        const latLngTwo = L.latLng(this.destination.latitude, this.destination.longitude);
+        
+        // Store all three invisible line copies
+        this.invisibleLineOffsetCopies = [];
+        
+        // Create identical invisible lines at the same offsets as visible lines
+        [-360, 0, 360].forEach(offset => {
+            const shiftedOne = L.latLng(latLngOne.lat, latLngOne.lng + offset);
+            const shiftedTwo = L.latLng(latLngTwo.lat, latLngTwo.lng + offset);
+            const invisibleLineAtOffset = new L.Geodesic([shiftedOne, shiftedTwo], 
+                this.getBaseLineOptions(true)).addTo(this.map);
+            this.invisibleLineOffsetCopies.push(invisibleLineAtOffset);
+        });
+        
+        // Return the "base" invisible line (0° offset)
+        return this.invisibleLineOffsetCopies[1];
     }
 
     createDecoratedLine() {
