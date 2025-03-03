@@ -97,15 +97,19 @@ class Line {
         const latLngOne = L.latLng(this.origin.latitude, this.origin.longitude);
         const latLngTwo = L.latLng(this.destination.latitude, this.destination.longitude);
 
+        // Store all three line copies for event handling and styling
+        this.lineOffsetCopies = [];
+
         // Draw identical lines at offsets -360, 0, +360 so one stays visible as you pan
         [-360, 0, 360].forEach(offset => {
             const shiftedOne = L.latLng(latLngOne.lat, latLngOne.lng + offset);
             const shiftedTwo = L.latLng(latLngTwo.lat, latLngTwo.lng + offset);
-            new L.Geodesic([shiftedOne, shiftedTwo], this.getBaseLineOptions()).addTo(this.map);
+            const lineAtOffset = new L.Geodesic([shiftedOne, shiftedTwo], this.getBaseLineOptions()).addTo(this.map);
+            this.lineOffsetCopies.push(lineAtOffset);
         });
 
-        // Return the "base" line if you need to reference it later
-        return new L.Geodesic([latLngOne, latLngTwo], this.getBaseLineOptions());
+        // Return the "base" line (0° offset) if you need to reference it later
+        return this.lineOffsetCopies[1]; // The middle element (0 offset)
     }
 
     createInvisibleLine() {
@@ -146,8 +150,10 @@ class Line {
             }
         };
 
-        // Bind events to both visible and invisible lines
-        bindLineEvents(this.visibleLine);
+        // Bind events to all visible line copies
+        this.lineOffsetCopies.forEach(line => bindLineEvents(line));
+        
+        // Bind events to invisible line
         bindLineEvents(this.invisibleLine);
         
         if (this.decoratedLine) {
@@ -173,9 +179,13 @@ class Line {
             opacity: 1,
             zIndex: 1000  // Use zIndex instead of setZIndexOffset
         };
-        // Remove the setZIndexOffset call since it's not available for polylines
-        this.visibleLine.bringToFront();
-        this.updateLineStyles([this.visibleLine, this.invisibleLine, this.decoratedLine], style);
+        
+        // Bring all copies to front and apply style
+        this.lineOffsetCopies.forEach(line => {
+            line.bringToFront();
+        });
+        
+        this.updateLineStyles([...this.lineOffsetCopies, this.invisibleLine, this.decoratedLine], style);
     }
 
     reset() {
@@ -184,13 +194,16 @@ class Line {
             weight: this.weight,
             opacity: 1
         };
-        this.updateLineStyles([this.visibleLine, this.invisibleLine, this.decoratedLine], style);
+        this.updateLineStyles([...this.lineOffsetCopies, this.invisibleLine, this.decoratedLine], style);
     }
 
     remove() {
-        map.removeLayer(this.visibleLine);
-        map.removeLayer(this.invisibleLine);
-        if (this.decoratedLine) map.removeLayer(this.decoratedLine);
+        this.lineOffsetCopies.forEach(line => {
+            this.map.removeLayer(line);
+        });
+        
+        if (this.invisibleLine) this.map.removeLayer(this.invisibleLine);
+        if (this.decoratedLine) this.map.removeLayer(this.decoratedLine);
     }
 }
 
