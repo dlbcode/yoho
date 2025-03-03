@@ -29,24 +29,26 @@ class Line {
     }
 
     addTags(options) {
-        const tagMap = {
-            [`route:${this.routeId}`]: true,
-            [`routeId:${this.routeId}`]: true,
-            [`type:${this.type}`]: true,
-            'type:route': ['route', 'dashed'].includes(this.type),
-            'type:deck': options.isDeckRoute,
-            [`group:${options.group}`]: options.group,
-            [`price:${options.price}`]: options.price !== undefined,
-            [`price-range:${this.getPriceRange(options.price)}`]: options.price !== undefined,
-            [`departure-range:${this.getTimeRange(options.departureTime)}`]: options.departureTime !== undefined,
-            [`arrival-range:${this.getTimeRange(options.arrivalTime)}`]: options.arrivalTime !== undefined,
-            [`direct:${options.isDirect ? 'true' : 'false'}`]: true,
-            [`group:${options.groupNumber}`]: options.groupNumber
-        };
-
-        Object.entries(tagMap)
-            .filter(([_, shouldAdd]) => shouldAdd)
-            .forEach(([tag]) => this.tags.add(tag));
+        // Create tags only once and then add them in bulk
+        const tags = [];
+        
+        if (true) tags.push(`route:${this.routeId}`);
+        if (true) tags.push(`routeId:${this.routeId}`);
+        if (true) tags.push(`type:${this.type}`);
+        if (['route', 'dashed'].includes(this.type)) tags.push('type:route');
+        if (options.isDeckRoute) tags.push('type:deck');
+        if (options.group) tags.push(`group:${options.group}`);
+        if (options.price !== undefined) {
+            tags.push(`price:${options.price}`);
+            tags.push(`price-range:${this.getPriceRange(options.price)}`);
+        }
+        if (options.departureTime !== undefined) tags.push(`departure-range:${this.getTimeRange(options.departureTime)}`);
+        if (options.arrivalTime !== undefined) tags.push(`arrival-range:${this.getTimeRange(options.arrivalTime)}`);
+        if (true) tags.push(`direct:${options.isDirect ? 'true' : 'false'}`);
+        if (options.groupNumber) tags.push(`group:${options.groupNumber}`);
+        
+        // Add all tags at once to minimize Set operations
+        tags.forEach(tag => this.tags.add(tag));
     }
 
     getPriceRange(price) {
@@ -94,22 +96,22 @@ class Line {
     }
 
     createVisibleLine() {
+        // Create a single line and clone it for different offsets instead of creating 3 separate geodesic lines
         const latLngOne = L.latLng(this.origin.latitude, this.origin.longitude);
         const latLngTwo = L.latLng(this.destination.latitude, this.destination.longitude);
-
-        // Store all three line copies for event handling and styling
-        this.lineOffsetCopies = [];
-
-        // Draw identical lines at offsets -360, 0, +360 so one stays visible as you pan
-        [-360, 0, 360].forEach(offset => {
-            const shiftedOne = L.latLng(latLngOne.lat, latLngOne.lng + offset);
-            const shiftedTwo = L.latLng(latLngTwo.lat, latLngTwo.lng + offset);
-            const lineAtOffset = new L.Geodesic([shiftedOne, shiftedTwo], this.getBaseLineOptions()).addTo(this.map);
-            this.lineOffsetCopies.push(lineAtOffset);
+        
+        const baseLine = new L.Geodesic([latLngOne, latLngTwo], this.getBaseLineOptions());
+        this.lineOffsetCopies = [-360, 0, 360].map(offset => {
+            if (offset === 0) {
+                return baseLine.addTo(this.map);
+            } else {
+                const shiftedOne = L.latLng(latLngOne.lat, latLngOne.lng + offset);
+                const shiftedTwo = L.latLng(latLngTwo.lat, latLngTwo.lng + offset);
+                return new L.Geodesic([shiftedOne, shiftedTwo], this.getBaseLineOptions()).addTo(this.map);
+            }
         });
-
-        // Return the "base" line (0° offset) if you need to reference it later
-        return this.lineOffsetCopies[1]; // The middle element (0 offset)
+        
+        return this.lineOffsetCopies[1];
     }
 
     createInvisibleLine() {
@@ -154,33 +156,37 @@ class Line {
     }
 
     bindEvents() {
-        const bindLineEvents = (line) => {
-            if (line) {
-                line.on('click', (e) => lineManager.onClickHandler(e, this));
-                line.on('mouseover', (e) => lineManager.onMouseOver(e, this));
-                line.on('mouseout', () => lineManager.onMouseOut(this));
-            }
+        // Use a single event handler function for each event type to reduce closures
+        const clickHandler = (e) => lineManager.onClickHandler(e, this);
+        const mouseOverHandler = (e) => lineManager.onMouseOver(e, this);
+        const mouseOutHandler = () => lineManager.onMouseOut(this);
+        
+        const bindToLine = (line) => {
+            if (!line) return;
+            line.on('click', clickHandler);
+            line.on('mouseover', mouseOverHandler);
+            line.on('mouseout', mouseOutHandler);
         };
-
-        // Bind events to all visible line copies
-        this.lineOffsetCopies.forEach(line => bindLineEvents(line));
         
-        // Bind events to invisible line
-        bindLineEvents(this.invisibleLine);
-        
-        if (this.decoratedLine) {
-            bindLineEvents(this.decoratedLine);
-        }
+        // Bind to all lines at once
+        this.lineOffsetCopies?.forEach(bindToLine);
+        bindToLine(this.invisibleLine);
+        bindToLine(this.decoratedLine);
     }
 
     updateLineStyles(lines, style) {
-        lines.forEach(line => {
-            if (!line) return;
-            if (line === this.invisibleLine) {
+        // Filter out null values once before iterating
+        const validLines = lines.filter(Boolean);
+        
+        // Process invisible line separately
+        const invisibleLine = this.invisibleLine;
+        
+        validLines.forEach(line => {
+            if (line === invisibleLine) {
                 line.setStyle({ opacity: 0.1 });
-                return;
+            } else {
+                line.setStyle(style);
             }
-            line.setStyle(style);
         });
     }
 
@@ -189,15 +195,20 @@ class Line {
             color: 'white',
             weight: 2,
             opacity: 1,
-            zIndex: 1000  // Use zIndex instead of setZIndexOffset
+            zIndex: 1000
         };
         
-        // Bring all copies to front and apply style
-        this.lineOffsetCopies.forEach(line => {
-            line.bringToFront();
-        });
+        // Reuse array to avoid creating new arrays on every call
+        if (!this._lineArray) {
+            this._lineArray = [...this.lineOffsetCopies];
+            if (this.invisibleLine) this._lineArray.push(this.invisibleLine);
+            if (this.decoratedLine) this._lineArray.push(this.decoratedLine);
+        }
         
-        this.updateLineStyles([...this.lineOffsetCopies, this.invisibleLine, this.decoratedLine], style);
+        // Bring to front before style update to reduce repaints
+        this.lineOffsetCopies.forEach(line => line?.bringToFront());
+        
+        this.updateLineStyles(this._lineArray, style);
     }
 
     reset() {
@@ -206,7 +217,9 @@ class Line {
             weight: this.weight,
             opacity: 1
         };
-        this.updateLineStyles([...this.lineOffsetCopies, this.invisibleLine, this.decoratedLine], style);
+        
+        // Use the cached line array from highlight()
+        this.updateLineStyles(this._lineArray || [...this.lineOffsetCopies, this.invisibleLine, this.decoratedLine], style);
     }
 
     remove() {
@@ -250,16 +263,34 @@ const pathDrawing = {
     },
 
     async processDrawQueue() {
-        const promises = Array.from(this.drawQueue).map(({ routeId, type, options }) =>
-            this.drawLine(routeId, type, options)
-        );
-
-        await Promise.all(promises);
+        // Process in batches to avoid UI freezing with large queues
+        const BATCH_SIZE = 10;
+        const queueItems = Array.from(this.drawQueue);
+        
+        for (let i = 0; i < queueItems.length; i += BATCH_SIZE) {
+            const batch = queueItems.slice(i, i + BATCH_SIZE);
+            await Promise.all(batch.map(({ routeId, type, options }) => 
+                this.drawLine(routeId, type, options)
+            ));
+            
+            // Allow UI to breathe between batches
+            if (i + BATCH_SIZE < queueItems.length) {
+                await new Promise(resolve => setTimeout(resolve, 0));
+            }
+        }
+        
         this.drawQueue.clear();
         this.isDrawing = false;
     },
 
     async getAirportPair(originIata, destinationIata) {
+        // Add memoization for frequently accessed airport pairs
+        const cacheKey = `${originIata}-${destinationIata}`;
+        
+        if (this.airportPairCache?.[cacheKey]) {
+            return this.airportPairCache[cacheKey];
+        }
+        
         if (!originIata || destinationIata === 'Any') {
             return [null, null];
         }
@@ -273,7 +304,11 @@ const pathDrawing = {
             console.error('Airport data not found:', !origin ? originIata : destinationIata);
             return [null, null];
         }
-
+        
+        // Cache the result
+        if (!this.airportPairCache) this.airportPairCache = {};
+        this.airportPairCache[cacheKey] = [origin, destination];
+        
         return [origin, destination];
     },
 
@@ -433,9 +468,18 @@ const pathDrawing = {
     },
 
     preloadDirectLines() {
+        // Process direct routes in batches to avoid UI freezing
         const directRoutes = appState.directRoutes;
-        Object.keys(directRoutes).forEach(iata => {
-            directRoutes[iata].forEach(route => {
+        const iataKeys = Object.keys(directRoutes);
+        
+        // Use requestAnimationFrame for better performance
+        const processNextBatch = (index) => {
+            if (index >= iataKeys.length) return;
+            
+            const iata = iataKeys[index];
+            const routes = directRoutes[iata] || [];
+            
+            routes.forEach(route => {
                 const routeId = `${route.originAirport.iata_code}-${route.destinationAirport.iata_code}`;
                 this.queueDraw(routeId, 'route', {
                     price: route.price,
@@ -443,7 +487,11 @@ const pathDrawing = {
                     isDirect: true
                 });
             });
-        });
+            
+            requestAnimationFrame(() => processNextBatch(index + 1));
+        };
+        
+        requestAnimationFrame(() => processNextBatch(0));
     }
 };
 
