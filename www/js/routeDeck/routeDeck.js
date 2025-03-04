@@ -425,10 +425,8 @@ async function fitMapToFlightRoute(flight) {
         
         if (crossesAntimeridian) {
             // Adjust the center point to be in the middle of the route, accounting for the antimeridian
-            // For routes crossing the antimeridian, we need to shift the center
             
             // Convert all longitudes to be in the same hemisphere (all positive or all negative)
-            // by adding or subtracting 360 degrees as needed
             const adjustedLongitudes = longitudes.map(lng => {
                 if (minLong < 0 && lng > 0) {
                     // If min is negative and this point is positive, make it negative too
@@ -446,44 +444,40 @@ async function fitMapToFlightRoute(flight) {
             // Calculate the center latitude
             const centerLat = validAirports.reduce((sum, airport) => sum + airport.latitude, 0) / validAirports.length;
             
-            // Set the view to the calculated center with an appropriate zoom level
-            const viewCenter = L.latLng(centerLat, centerLong);
-            console.log(`Setting view to center at [${centerLat}, ${centerLong}]`);
-            
-            // Find a zoom level that fits the route
-            // Calculate the maximum distance between any two points
-            let maxDistance = 0;
-            for (let i = 0; i < validAirports.length; i++) {
-                for (let j = i + 1; j < validAirports.length; j++) {
-                    const pointA = L.latLng(validAirports[i].latitude, adjustedLongitudes[i]);
-                    const pointB = L.latLng(validAirports[j].latitude, adjustedLongitudes[j]);
-                    const distance = pointA.distanceTo(pointB);
-                    maxDistance = Math.max(maxDistance, distance);
-                }
-            }
-            
-            // Estimate zoom level based on distance
-            // This is an approximation - you may need to adjust the formula
-            const zoomLevel = Math.min(
-                Math.max(
-                    2, // Minimum zoom level
-                    Math.floor(14 - Math.log(maxDistance / 10000) / Math.log(2))
-                ),
-                5 // Maximum zoom level for world view
+            // Create adjusted latLng points for fitBounds
+            const waypoints = validAirports.map((airport, idx) => 
+                L.latLng(airport.latitude, adjustedLongitudes[idx])
             );
             
-            console.log(`Setting zoom level to ${zoomLevel} for distance ${maxDistance}m`);
-            map.setView(viewCenter, zoomLevel);
+            // Create a bounds object to determine the appropriate zoom level
+            const bounds = L.latLngBounds(waypoints);
+            
+            // Get the appropriate zoom that would fit these bounds
+            // We need to temporarily set the view center first
+            const originalCenter = map.getCenter();
+            const originalZoom = map.getZoom();
+            
+            // Temporarily move the map to calculate proper zoom
+            map.setView([centerLat, centerLong], originalZoom, {animate: false});
+            
+            // Get the zoom level that would fit the bounds
+            const fitZoom = map.getBoundsZoom(bounds, false, [50, 50]);
+            
+            // Now set the view with the calculated center and zoom
+            map.setView([centerLat, centerLong], fitZoom, {animate: true});
+            
+            console.log(`Set view to center at [${centerLat}, ${centerLong}] with zoom ${fitZoom}`);
         } else {
             // For routes that don't cross the antimeridian, we can use the standard fitBounds
             const waypoints = validAirports.map(airport => L.latLng(airport.latitude, airport.longitude));
             console.log(`Successfully retrieved coordinates for ${waypoints.length} airports`);
             
-            // Fit the map to the bounds of the waypoints
             if (waypoints.length > 1) {
-                map.fitBounds(L.latLngBounds(waypoints), { padding: [50, 50] });
+                // Create bounds and fit the map to them with padding
+                const bounds = L.latLngBounds(waypoints);
+                map.fitBounds(bounds, { padding: [50, 50], animate: true });
             } else if (waypoints.length === 1) {
-                map.setView(waypoints[0], 5);
+                map.setView(waypoints[0], 5, {animate: true});
             }
         }
     } catch (error) {
