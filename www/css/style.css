@@ -140,7 +140,7 @@ button.active, button:focus, a:active, button:active, input:focus, select:focus,
   position: absolute;
   top: 5px;
   left: 5px;
-  z-index: 40; /* Was 500 - should match logo z-index */
+  z-index: 801; /* Was 500 - should match logo z-index */
 }
 
 .icon-dropdown {

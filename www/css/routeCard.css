@@ -279,12 +279,6 @@
   width: 70px;
 }
 
-.arrival-section {
-  display: flex;
-  flex-direction: column;
-  min-width: 60px;
-}
-
 .departure-time,
 .arrival-time {
   color: #ddd;
@@ -362,6 +356,93 @@
   font-weight: 400;
   white-space: nowrap;
   overflow: visible;
+}
+
+/* Round-trip stacked journey details */
+.card-content.round-trip .journey-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0px;
+  width: 100%;
+}
+
+.outbound-journey {
+  padding-bottom: 2px;
+  border-bottom: 1px dashed #ddd;
+}
+
+.journey-details {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 8px;
+  align-items: center;
+  width: 100%;
+}
+
+.journey-label {
+  font-size: 0.8rem;
+  color: #888;
+  font-weight: 600;
+  margin-bottom: 5px;
+}
+
+/* Add a divider between outbound and return journey */
+.outbound-journey {
+  border-bottom: 1px dashed #ddd;
+}
+
+/* Adjust width of route-indicator to maintain proportion */
+.route-indicator {
+  width: 100%;
+}
+
+/* Make sure the price section has enough space at bottom */
+.card-content.round-trip .price-section {
+  margin-top: 8px;
+}
+
+/* Consistent alignment for departure/arrival sections based on position */
+
+/* Left-side sections: right aligned */
+.journey-details > div:first-child {
+  align-items: flex-end;
+  text-align: right;
+}
+
+.journey-details > div:first-child span {
+  text-align: right;
+  width: 100%;
+}
+
+/* Right-side sections: left aligned */
+.journey-details > div:last-of-type:not(.route-indicator) {
+  align-items: flex-start;
+  text-align: left;
+}
+
+.journey-details > div:last-of-type:not(.route-indicator) span {
+  text-align: left;
+  width: 100%;
+}
+
+/* This overrides the previous default center text alignment */
+.departure-section,
+.arrival-section {
+  align-items: unset;
+  text-align: unset;
+}
+
+/* Ensure the route indicator remains centered */
+.route-indicator {
+  align-items: center;
+  text-align: center;
+}
+
+/* Ensure these styles don't get overridden */
+.journey-details > div:first-child span,
+.journey-details > div:last-of-type:not(.route-indicator) span {
+  width: 100%;
+  display: block;
 }
 
 /* Media query */
