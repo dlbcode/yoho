@@ -50,7 +50,7 @@ function getTripTypes(typesParam) {
 
 const map = L.map('map', {
     zoomControl: false,
-    minZoom: 2,
+    minZoom: 1,
     maxZoom: 19,
     worldCopyJump: true
 }).setView([0, 0], 4);

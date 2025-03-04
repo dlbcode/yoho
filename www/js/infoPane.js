@@ -296,14 +296,43 @@ const infoPane = {
         // If either waypoint is missing, don't adjust the map
         if (!originWaypoint || !destinationWaypoint) return;
         
-        const group = [originWaypoint, destinationWaypoint]
-            .filter(wp => wp)
-            .map(airport => L.latLng(airport.latitude, airport.longitude));
+        const points = [originWaypoint, destinationWaypoint]
+            .filter(wp => wp && wp.latitude && wp.longitude);
+        
+        if (points.length < 2) return;
 
-        if (group.length > 1) {
+        // Check if route crosses the antimeridian
+        const longitudes = points.map(point => point.longitude);
+        const minLong = Math.min(...longitudes);
+        const maxLong = Math.max(...longitudes);
+        const spansDegrees = maxLong - minLong;
+        const crossesAntimeridian = spansDegrees > 180;
+        
+        if (crossesAntimeridian) {
+            // Adjust longitudes to be in the same hemisphere
+            const adjustedLongitudes = longitudes.map(lng => {
+                if (minLong < 0 && lng > 0) {
+                    // If min is negative and this point is positive, make it negative
+                    return lng - 360;
+                } else if (minLong > 0 && lng < 0) {
+                    // If min is positive and this point is negative, make it positive
+                    return lng + 360;
+                }
+                return lng;
+            });
+            
+            // Create the adjusted latLng points
+            const adjustedPoints = points.map((point, idx) => 
+                L.latLng(point.latitude, adjustedLongitudes[idx])
+            );
+            
+            // Create a bounds object with adjusted coordinates
+            const bounds = L.latLngBounds(adjustedPoints);
+            map.fitBounds(bounds, { padding: [50, 50] });
+        } else {
+            // Standard bounds fitting for non-antimeridian crossing routes
+            const group = points.map(point => L.latLng(point.latitude, point.longitude));
             map.fitBounds(L.latLngBounds(group), { padding: [50, 50] });
-        } else if (group.length === 1) {
-            map.setView(group[0], 4);
         }
     }
 };
