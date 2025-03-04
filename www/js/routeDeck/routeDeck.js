@@ -8,6 +8,8 @@ import { setupRouteContent, infoPane } from '../infoPane.js';
 import { infoPaneHeight } from '../utils/infoPaneHeightManager.js';
 import { lineManager } from '../lineManager.js';
 import { createRouteCard } from './routeCard.js'; // Import createRouteCard
+import { map } from '../map.js';
+import { flightMap } from '../flightMap.js';
 
 // Add to the updateState function before making any state changes
 
@@ -327,7 +329,13 @@ function attachRowEventHandlers(card, flight, index, data, routeIndex) {
         const routeIdString = card.getAttribute('data-route-id');
         const routeIds = routeIdString.split('|');
         const fullFlightData = data[index];
-        routeInfoCard(card, fullFlightData, routeIds, routeIndex); // Use card instead of row
+        
+        // Fit the map to the route coordinates - now handles the Promise
+        fitMapToFlightRoute(flight).catch(err => 
+            console.error("Error handling map view adjustment:", err)
+        );
+        
+        routeInfoCard(card, fullFlightData, routeIds, routeIndex);
     });
 
     card.addEventListener('mouseover', () => {
@@ -360,6 +368,63 @@ function attachRowEventHandlers(card, flight, index, data, routeIndex) {
     card.addEventListener('mouseout', () => {
         handleRouteLineVisibility(flight, routeIndex, false);
     });
+}
+
+// New function to fit the map to a flight's route
+async function fitMapToFlightRoute(flight) {
+    // Skip if map view changes are prevented
+    if (appState.preventMapViewChange) {
+        console.log("Map view change prevented by flag");
+        return;
+    }
+    
+    if (!flight.route || flight.route.length === 0) {
+        console.log("No route segments to fit map to");
+        return;
+    }
+    
+    try {
+        // Collect all unique IATA codes in the route
+        const iataSet = new Set();
+        flight.route.forEach(segment => {
+            if (segment.flyFrom) iataSet.add(segment.flyFrom);
+            if (segment.flyTo) iataSet.add(segment.flyTo);
+        });
+        
+        const iataList = [...iataSet];
+        
+        if (iataList.length === 0) {
+            console.error("No IATA codes found in flight route", flight);
+            return;
+        }
+        
+        console.log(`Found ${iataList.length} unique airports in route`);
+        
+        // Get airport data for each IATA code
+        const airportsPromises = iataList.map(iata => flightMap.getAirportDataByIata(iata));
+        const airportsData = await Promise.all(airportsPromises);
+        
+        // Filter out any null results and convert to LatLng objects
+        const waypoints = airportsData
+            .filter(airport => airport && airport.latitude && airport.longitude)
+            .map(airport => L.latLng(airport.latitude, airport.longitude));
+        
+        if (waypoints.length === 0) {
+            console.error("Could not find coordinates for any airports in the route");
+            return;
+        }
+        
+        console.log(`Successfully retrieved coordinates for ${waypoints.length} airports`);
+        
+        // Fit the map to the bounds of the waypoints
+        if (waypoints.length > 1) {
+            map.fitBounds(L.latLngBounds(waypoints), { padding: [50, 50] });
+        } else if (waypoints.length === 1) {
+            map.setView(waypoints[0], 5);
+        }
+    } catch (error) {
+        console.error("Error fitting map to flight route:", error);
+    }
 }
 
 function buildApiUrl(origin, destination, departDate, returnDate) {
