@@ -172,18 +172,93 @@ function updateLineVisibility(visibleRouteIds, maxPrice) {
             }
         }
 
-        const isVisible = visibleRouteIds.has(line.routeId) &&
-                         (!maxPrice || (price && price <= maxPrice));
-
-        const opacity = isVisible ? 1 : 0;
-        line.visibleLine.setStyle({ opacity });
-
-        if (isVisible) {
-            map.addLayer(line.visibleLine);
-            map.addLayer(line.invisibleLine);
+        // Check for route visibility - handle potential antimeridian crossing routes
+        let isVisibleRoute = false;
+        
+        // First check original route ID
+        if (visibleRouteIds.has(line.routeId)) {
+            isVisibleRoute = true;
         } else {
-            map.removeLayer(line.visibleLine);
-            map.removeLayer(line.invisibleLine);
+            // Handle potential reverse direction or alternate forms
+            const [origin, destination] = line.routeId.split('-');
+            
+            // Check reverse direction
+            const reverseId = `${destination}-${origin}`;
+            if (visibleRouteIds.has(reverseId)) {
+                isVisibleRoute = true;
+            }
+            
+            // Check if this is part of a multi-segment route that's visible
+            for (const routeId of visibleRouteIds) {
+                if (routeId.includes(origin) || routeId.includes(destination)) {
+                    const segments = routeId.split('-');
+                    for (let i = 0; i < segments.length - 1; i++) {
+                        if ((segments[i] === origin && segments[i+1] === destination) || 
+                            (segments[i] === destination && segments[i+1] === origin)) {
+                            isVisibleRoute = true;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        
+        const isVisible = isVisibleRoute && (!maxPrice || (price && price <= maxPrice));
+
+        // Update all copies of the line (including those that cross the antimeridian)
+        if (line.lineOffsetCopies) {
+            line.lineOffsetCopies.forEach(offsetLine => {
+                if (!offsetLine) return;
+                const opacity = isVisible ? 1 : 0;
+                offsetLine.setStyle({ opacity });
+                
+                if (isVisible) {
+                    if (!map.hasLayer(offsetLine)) map.addLayer(offsetLine);
+                } else {
+                    if (map.hasLayer(offsetLine)) map.removeLayer(offsetLine);
+                }
+            });
+            
+            // Also handle invisible line offset copies if they exist
+            if (line.invisibleLineOffsetCopies) {
+                line.invisibleLineOffsetCopies.forEach(invisibleLine => {
+                    if (!invisibleLine) return;
+                    // For invisible lines, keep the opacity low but still respect visibility
+                    const opacity = isVisible ? 0.1 : 0;
+                    invisibleLine.setStyle({ opacity });
+                    
+                    if (isVisible) {
+                        if (!map.hasLayer(invisibleLine)) map.addLayer(invisibleLine);
+                    } else {
+                        if (map.hasLayer(invisibleLine)) map.removeLayer(invisibleLine);
+                    }
+                });
+            }
+        } else {
+            // Handle cases where lineOffsetCopies isn't available
+            const opacity = isVisible ? 1 : 0;
+            
+            if (line.visibleLine) {
+                line.visibleLine.setStyle({ opacity });
+                
+                if (isVisible) {
+                    if (!map.hasLayer(line.visibleLine)) map.addLayer(line.visibleLine);
+                } else {
+                    if (map.hasLayer(line.visibleLine)) map.removeLayer(line.visibleLine);
+                }
+            }
+            
+            // Handle invisible line separately
+            if (line.invisibleLine) {
+                // For invisible lines, keep the opacity low but still respect visibility
+                line.invisibleLine.setStyle({ opacity: isVisible ? 0.1 : 0 });
+                
+                if (isVisible) {
+                    if (!map.hasLayer(line.invisibleLine)) map.addLayer(line.invisibleLine);
+                } else {
+                    if (map.hasLayer(line.invisibleLine)) map.removeLayer(line.invisibleLine);
+                }
+            }
         }
     });
 }

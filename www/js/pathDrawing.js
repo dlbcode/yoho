@@ -168,8 +168,13 @@ class Line {
             line.on('mouseout', mouseOutHandler);
         };
         
-        // Bind to all lines at once
+        // Bind to all visible line copies
         this.lineOffsetCopies?.forEach(bindToLine);
+        
+        // Bind to all invisible line copies
+        this.invisibleLineOffsetCopies?.forEach(bindToLine);
+        
+        // For backward compatibility, also bind to these properties directly
         bindToLine(this.invisibleLine);
         bindToLine(this.decoratedLine);
     }
