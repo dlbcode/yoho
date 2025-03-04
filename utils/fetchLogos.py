@@ -1,6 +1,32 @@
 import json
 import os
 import requests
+import sys
+
+def download_airline_logo(airline_code, output_dir):
+    # Create the output directory if it doesn't exist
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+    print(f"Output directory '{output_dir}' is ready.")
+
+    logo_url = f"https://www.gstatic.com/flights/airline_logos/70px/{airline_code}.png"
+    try:
+        response = requests.get(logo_url)
+        print(f"Attempting to download logo for {airline_code} from URL: {logo_url}")
+        
+        if response.status_code == 200:
+            # Save the logo file
+            logo_path = os.path.join(output_dir, f"{airline_code}.png")
+            with open(logo_path, 'wb') as f:
+                f.write(response.content)
+            print(f"Downloaded logo for {airline_code}")
+            return True
+        else:
+            print(f"Failed to download logo for {airline_code}. HTTP status code: {response.status_code}")
+            return False
+    except Exception as e:
+        print(f"Error downloading logo for {airline_code}. Error: {e}")
+        return False
 
 def download_airline_logos(airline_codes_file, output_dir):
     # Create the output directory if it doesn't exist
@@ -35,8 +61,15 @@ def download_airline_logos(airline_codes_file, output_dir):
         except Exception as e:
             print(f"Error downloading logo for {name} ({code}). Error: {e}")
 
-# Configuration: path to the JSON file and output directory for logos
-airline_codes_file = 'airlines.json'
+# Configuration
 output_dir = '70px'
 
-download_airline_logos(airline_codes_file, output_dir)
+# Check if an airline code is provided as a command-line argument
+if __name__ == "__main__":
+    if len(sys.argv) > 1:
+        airline_code = sys.argv[1].upper()  # Convert to uppercase for consistency
+        download_airline_logo(airline_code, output_dir)
+    else:
+        # Default behavior: use the JSON file
+        airline_codes_file = 'airlines.json'
+        download_airline_logos(airline_codes_file, output_dir)
