@@ -1,5 +1,5 @@
 import { map } from './map.js';
-import { appState, updateState } from './stateManager.js';
+import { appState } from './stateManager.js';
 import { flightMap } from './flightMap.js';
 import { lineManager } from './lineManager.js';
 

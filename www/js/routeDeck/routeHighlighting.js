@@ -1,6 +1,6 @@
 import { pathDrawing, Line } from '../pathDrawing.js';
 import { lineManager } from '../lineManager.js';
-import { createRouteId } from './filterDeck.js';
+import { createRouteId } from './deckFilter.js';
 import { map } from '../map.js';
 import { flightMap } from '../flightMap.js';
 import { appState } from '../stateManager.js';

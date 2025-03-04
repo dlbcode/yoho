@@ -1,18 +1,14 @@
 import { appState, updateState } from '../stateManager.js';
 import { sliderFilter } from './sliderFilter.js';
-import { createSortButton } from './sortDeck.js';
-import { pathDrawing } from '../pathDrawing.js';
-import { routeInfoCard, setSelectedRouteCard } from './routeInfoCard.js';
-import { applyFilters, initializeFilterState, resetFilter } from './filterDeck.js';
+import { setSelectedRouteCard } from './routeInfoCard.js';
+import { applyFilters, initializeFilterState, resetFilter } from './deckFilter.js';
 import { setupRouteContent, infoPane } from '../infoPane.js';
 import { infoPaneHeight } from '../utils/infoPaneHeightManager.js';
 import { lineManager } from '../lineManager.js';
 import { createRouteCard } from './routeCard.js';
-import { map } from '../map.js';
-import { flightMap } from '../flightMap.js';
-import { createFilterControls } from './filterControls.js';
-import { drawFlightLines, handleRouteLineVisibility, fitMapToFlightRoute } from './routeHighlighting.js';
-import { buildApiUrl } from './apiService.js';
+import { createDeckFilterControls } from './deckFilterControls.js';
+import { drawFlightLines } from './routeHighlighting.js';
+import { buildApiUrl } from './deckApiService.js';
 import { attachCardEventHandlers } from './cardEventHandlers.js';
 
 // Add to the updateState function before making any state changes
@@ -116,8 +112,8 @@ function buildRouteDeck(routeIndex) {
                 contentWrapper.appendChild(existingRouteBox);
             }
 
-            const filterControls = createFilterControls();
-            contentWrapper.appendChild(filterControls);
+            const deckFilterControls = createDeckFilterControls();
+            contentWrapper.appendChild(deckFilterControls);
 
             const cardsContainer = document.createElement('div');
             cardsContainer.className = 'route-cards-container';

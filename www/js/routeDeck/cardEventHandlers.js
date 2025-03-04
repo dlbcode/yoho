@@ -1,5 +1,5 @@
 import { routeInfoCard } from './routeInfoCard.js';
-import { createRouteId } from './filterDeck.js';
+import { createRouteId } from './deckFilter.js';
 import { pathDrawing, Line } from '../pathDrawing.js';
 import { drawFlightLines, handleRouteLineVisibility, fitMapToFlightRoute } from './routeHighlighting.js';
 

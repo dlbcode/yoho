@@ -4,9 +4,9 @@ import { createSortButton } from './sortDeck.js';
  * Creates filter controls for the route deck
  * @returns {HTMLElement} The filter controls container element
  */
-function createFilterControls() {
-    const filterControls = document.createElement('div');
-    filterControls.className = 'filter-controls';
+function createDeckFilterControls() {
+    const deckFilterControls = document.createElement('div');
+    deckFilterControls.className = 'filter-controls';
     
     // Create a separate container for filter buttons
     const filterButtonsContainer = document.createElement('div');
@@ -41,13 +41,13 @@ function createFilterControls() {
     sortControls.className = 'sort-controls';
     sortControls.appendChild(createSortButton());
 
-    filterControls.appendChild(filterButtonsContainer);
-    filterControls.appendChild(sortControls);
+    deckFilterControls.appendChild(filterButtonsContainer);
+    deckFilterControls.appendChild(sortControls);
 
     // Setup scroll indicator
     setupScrollIndicator(filterButtonsContainer);
 
-    return filterControls;
+    return deckFilterControls;
 }
 
 // Use a throttled version to reduce calculations
@@ -126,4 +126,4 @@ function setupScrollIndicator(filterButtonsContainer) {
     }
 }
 
-export { createFilterControls, updateScrollIndicator, setupScrollIndicator };
+export { createDeckFilterControls, updateScrollIndicator, setupScrollIndicator };

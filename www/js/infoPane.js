@@ -1,7 +1,6 @@
 import { appState, updateState } from './stateManager.js';
-import { pathDrawing } from './pathDrawing.js';
 import { map } from './map.js';
-import { applyFilters } from './routeDeck/filterDeck.js';
+import { applyFilters } from './routeDeck/deckFilter.js';
 import { uiHandling } from './uiHandling.js';
 import { routeBox } from './routeBox/routeBox.js';
 import { lineManager } from './lineManager.js';

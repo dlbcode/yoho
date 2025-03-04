@@ -3,7 +3,7 @@ import { pathDrawing } from '../pathDrawing.js';
 import { flightMap } from '../flightMap.js';
 import { map } from '../map.js';
 import { lineManager } from '../lineManager.js';
-import { constructFilterTags, createRouteId } from './filterDeck.js';
+import { constructFilterTags, createRouteId } from './deckFilter.js';
 import { highlightRouteLines, resetRouteLines } from './routeHighlighting.js';
 import { formatFlightDateTime } from './routeCard.js'; // Import formatFlightDateTime
 

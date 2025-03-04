@@ -1,5 +1,5 @@
 import { appState } from '../stateManager.js';
-import { applyFilters, toggleFilterResetIcon, updateFilterHeaders, updateFilterState } from './filterDeck.js';
+import { applyFilters, toggleFilterResetIcon, updateFilterHeaders, updateFilterState } from './deckFilter.js';
 
 appState.filterState = {
     departure: { start: 0, end: 24 },
