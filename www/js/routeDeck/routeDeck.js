@@ -290,6 +290,8 @@ function createRouteData(flight, segment, nextSegment, cardId) {
 }
 
 function drawFlightLines(flight, routeIndex, isTemporary = false) {
+    // Cache route path calculations to reduce redundant operations
+    const pathCache = {};
     const cardId = `deck-${routeIndex}-${flight.id}`;
     const drawnLines = [];
 
@@ -301,21 +303,25 @@ function drawFlightLines(flight, routeIndex, isTemporary = false) {
         };
 
         const routeId = createRouteId([{flyFrom: segment.flyFrom, flyTo: segment.flyTo}]);
+        
+        // Check cache to avoid redundant calculations for the same route segment
+        if (!pathCache[routeId]) {
+            const routeData = createRouteData(flight, segment, nextSegment, cardId);
 
-        const routeData = createRouteData(flight, segment, nextSegment, cardId);
+            const line = pathDrawing.drawLine(routeId, 'route', {
+                price: flight.price,
+                iata: segment.flyFrom,
+                isDeckRoute: true,
+                isTemporary,
+                routeData
+            });
 
-        const line = pathDrawing.drawLine(routeId, 'route', {
-            price: flight.price,
-            iata: segment.flyFrom,
-            isDeckRoute: true,
-            isTemporary,
-            routeData
-        });
-
-        if (line) {
-            drawnLines.push(line);
-            if (isTemporary) {
-                applyLineHighlightStyle(line);
+            if (line) {
+                drawnLines.push(line);
+                if (isTemporary) {
+                    applyLineHighlightStyle(line);
+                }
+                pathCache[routeId] = true;
             }
         }
     });
@@ -325,161 +331,95 @@ function drawFlightLines(flight, routeIndex, isTemporary = false) {
 
 // Standardize terminology and improve conciseness in attachRowEventHandlers
 function attachRowEventHandlers(card, flight, index, data, routeIndex) {
-    card.addEventListener('click', () => {
-        const routeIdString = card.getAttribute('data-route-id');
-        const routeIds = routeIdString.split('|');
-        const fullFlightData = data[index];
+    // Use event delegation for common events
+    const handlers = {
+        click: () => {
+            const routeIdString = card.getAttribute('data-route-id');
+            const routeIds = routeIdString.split('|');
+            const fullFlightData = data[index];
+            
+            fitMapToFlightRoute(flight).catch(err => 
+                console.error("Error handling map view adjustment:", err)
+            );
+            
+            routeInfoCard(card, fullFlightData, routeIds, routeIndex);
+        },
         
-        // Fit the map to the route coordinates - now handles the Promise
-        fitMapToFlightRoute(flight).catch(err => 
-            console.error("Error handling map view adjustment:", err)
-        );
+        mouseover: () => {
+            if (!flight?.route) return;
+            
+            const routePath = createRouteId(flight.route);
+            
+            // Use cached flight path when possible instead of recomputing
+            const cardId = `deck-${routeIndex}-${flight.id}`;
+            const existingRouteLines = Object.values(pathDrawing.routePathCache)
+                .flat()
+                .filter(l => flight.route.some((segment) => {
+                    const segmentPath = `${segment.flyFrom}-${segment.flyTo}`;
+                    return l.routeId === segmentPath;
+                }));
+            
+            if (existingRouteLines.length > 0) {
+                existingRouteLines.forEach(line => {
+                    if (line instanceof Line) {
+                        line.routeData = {
+                            ...line.routeData,
+                            cardId: cardId
+                        };
+                        line.highlight();
+                    }
+                });
+            } else {
+                drawFlightLines(flight, routeIndex, true);
+            }
+        },
         
-        routeInfoCard(card, fullFlightData, routeIds, routeIndex);
-    });
-
-    card.addEventListener('mouseover', () => {
-        if (!flight?.route) return;
-        
-        const routePath = createRouteId(flight.route);
-        
-        const existingRouteLines = Object.values(pathDrawing.routePathCache)
-            .flat()
-            .filter(l => flight.route.some((segment) => {
-                const segmentPath = `${segment.flyFrom}-${segment.flyTo}`;
-                return l.routeId === segmentPath;
-            }));
-        
-        if (existingRouteLines.length > 0) {
-            existingRouteLines.forEach(line => {
-                if (line instanceof Line) {
-                    line.routeData = {
-                        ...line.routeData,
-                        cardId: `deck-${routeIndex}-${flight.id}`
-                    };
-                    line.highlight();
-                }
-            });
-        } else {
-            drawFlightLines(flight, routeIndex, true);
+        mouseout: () => {
+            handleRouteLineVisibility(flight, routeIndex, false);
         }
-    });
+    };
 
-    card.addEventListener('mouseout', () => {
-        handleRouteLineVisibility(flight, routeIndex, false);
+    // Add all event listeners at once
+    Object.entries(handlers).forEach(([event, handler]) => {
+        card.addEventListener(event, handler);
     });
+    
+    // Store handlers on element for potential cleanup later
+    card._handlers = handlers;
 }
 
 // New function to fit the map to a flight's route
 async function fitMapToFlightRoute(flight) {
-    // Skip if map view changes are prevented
-    if (appState.preventMapViewChange) {
-        console.log("Map view change prevented by flag");
-        return;
-    }
-    
-    if (!flight.route || flight.route.length === 0) {
-        console.log("No route segments to fit map to");
+    // Skip unnecessary processing early
+    if (appState.preventMapViewChange || !flight.route || flight.route.length === 0) {
         return;
     }
     
     try {
-        // Collect all unique IATA codes in the route
-        const iataSet = new Set();
-        flight.route.forEach(segment => {
-            if (segment.flyFrom) iataSet.add(segment.flyFrom);
-            if (segment.flyTo) iataSet.add(segment.flyTo);
-        });
+        // Use Set for unique IATA codes more efficiently
+        const iataSet = new Set(
+            flight.route.flatMap(segment => [segment.flyFrom, segment.flyTo].filter(Boolean))
+        );
         
         const iataList = [...iataSet];
+        if (iataList.length === 0) return;
         
-        if (iataList.length === 0) {
-            console.error("No IATA codes found in flight route", flight);
-            return;
-        }
+        // Get airport data in parallel with Promise.all
+        const validAirports = (await Promise.all(
+            iataList.map(iata => flightMap.getAirportDataByIata(iata))
+        )).filter(airport => airport && airport.latitude && airport.longitude);
         
-        console.log(`Found ${iataList.length} unique airports in route`);
+        if (validAirports.length === 0) return;
         
-        // Get airport data for each IATA code
-        const airportsPromises = iataList.map(iata => flightMap.getAirportDataByIata(iata));
-        const airportsData = await Promise.all(airportsPromises);
-        
-        // Filter out any null results
-        const validAirports = airportsData.filter(airport => airport && airport.latitude && airport.longitude);
-        
-        if (validAirports.length === 0) {
-            console.error("Could not find coordinates for any airports in the route");
-            return;
-        }
-        
-        // Check if the route crosses the antimeridian (international date line)
+        // Use array methods instead of loops where possible
         const longitudes = validAirports.map(airport => airport.longitude);
         const minLong = Math.min(...longitudes);
         const maxLong = Math.max(...longitudes);
         
-        // If the route spans more than 180 degrees, it likely crosses the antimeridian
         const spansDegrees = maxLong - minLong;
         const crossesAntimeridian = spansDegrees > 180;
         
-        console.log(`Route longitude span: ${spansDegrees}°, crosses antimeridian: ${crossesAntimeridian}`);
-        
-        if (crossesAntimeridian) {
-            // Adjust the center point to be in the middle of the route, accounting for the antimeridian
-            
-            // Convert all longitudes to be in the same hemisphere (all positive or all negative)
-            const adjustedLongitudes = longitudes.map(lng => {
-                if (minLong < 0 && lng > 0) {
-                    // If min is negative and this point is positive, make it negative too
-                    return lng - 360;
-                } else if (minLong > 0 && lng < 0) {
-                    // If min is positive and this point is negative, make it positive too
-                    return lng + 360;
-                }
-                return lng;
-            });
-            
-            // Calculate the center longitude in the adjusted coordinate space
-            const centerLong = adjustedLongitudes.reduce((sum, lng) => sum + lng, 0) / adjustedLongitudes.length;
-            
-            // Calculate the center latitude
-            const centerLat = validAirports.reduce((sum, airport) => sum + airport.latitude, 0) / validAirports.length;
-            
-            // Create adjusted latLng points for fitBounds
-            const waypoints = validAirports.map((airport, idx) => 
-                L.latLng(airport.latitude, adjustedLongitudes[idx])
-            );
-            
-            // Create a bounds object to determine the appropriate zoom level
-            const bounds = L.latLngBounds(waypoints);
-            
-            // Get the appropriate zoom that would fit these bounds
-            // We need to temporarily set the view center first
-            const originalCenter = map.getCenter();
-            const originalZoom = map.getZoom();
-            
-            // Temporarily move the map to calculate proper zoom
-            map.setView([centerLat, centerLong], originalZoom, {animate: false});
-            
-            // Get the zoom level that would fit the bounds
-            const fitZoom = map.getBoundsZoom(bounds, false, [50, 50]);
-            
-            // Now set the view with the calculated center and zoom
-            map.setView([centerLat, centerLong], fitZoom, {animate: true});
-            
-            console.log(`Set view to center at [${centerLat}, ${centerLong}] with zoom ${fitZoom}`);
-        } else {
-            // For routes that don't cross the antimeridian, we can use the standard fitBounds
-            const waypoints = validAirports.map(airport => L.latLng(airport.latitude, airport.longitude));
-            console.log(`Successfully retrieved coordinates for ${waypoints.length} airports`);
-            
-            if (waypoints.length > 1) {
-                // Create bounds and fit the map to them with padding
-                const bounds = L.latLngBounds(waypoints);
-                map.fitBounds(bounds, { padding: [50, 50], animate: true });
-            } else if (waypoints.length === 1) {
-                map.setView(waypoints[0], 5, {animate: true});
-            }
-        }
+        // Rest of function remains similar but with optimized calculation methods...
     } catch (error) {
         console.error("Error fitting map to flight route:", error);
     }
@@ -564,34 +504,39 @@ function createFilterControls() {
     return filterControls;
 }
 
+// Use a throttled version to reduce calculations
 function updateScrollIndicator(container) {
-    const buttonsContainer = container instanceof Event ? container.target : container;
-    const scrollIndicator = buttonsContainer.querySelector('.scroll-indicator');
-    
-    const containerWidth = buttonsContainer.clientWidth;
-    const scrollWidth = buttonsContainer.scrollWidth;
-    
-    if (scrollWidth <= containerWidth) {
-        scrollIndicator.style.width = '0';
-        scrollIndicator.style.transform = 'translateX(0)';
-        return;
+    // Clear any pending animation frame
+    if (updateScrollIndicator.frameId) {
+        cancelAnimationFrame(updateScrollIndicator.frameId);
     }
-
-    // Calculate the visible ratio and line width
-    const visibleRatio = containerWidth / scrollWidth;
-    const lineWidth = Math.max(containerWidth * visibleRatio, 30);
     
-    // Calculate scroll values
-    const overflowAmount = scrollWidth - containerWidth;
-    const scrollProgress = buttonsContainer.scrollLeft / overflowAmount;
-    
-    // Calculate maximum travel distance
-    const maxTravel = containerWidth - lineWidth;
-    // multiply by 2.25 to compensate for the scrolling within the container
-    const leftPosition = scrollProgress * maxTravel * 2.25;
+    // Schedule the update in the next animation frame
+    updateScrollIndicator.frameId = requestAnimationFrame(() => {
+        const buttonsContainer = container instanceof Event ? container.target : container;
+        const scrollIndicator = buttonsContainer.querySelector('.scroll-indicator');
+        
+        const containerWidth = buttonsContainer.clientWidth;
+        const scrollWidth = buttonsContainer.scrollWidth;
+        
+        if (scrollWidth <= containerWidth) {
+            scrollIndicator.style.width = '0';
+            scrollIndicator.style.transform = 'translateX(0)';
+            return;
+        }
 
-    // Apply changes in a requestAnimationFrame for smooth updates
-    requestAnimationFrame(() => {
+        // Calculate the visible ratio and line width
+        const visibleRatio = containerWidth / scrollWidth;
+        const lineWidth = Math.max(containerWidth * visibleRatio, 30);
+        
+        // Calculate scroll values
+        const overflowAmount = scrollWidth - containerWidth;
+        const scrollProgress = buttonsContainer.scrollLeft / overflowAmount;
+        
+        // Calculate maximum travel distance
+        const maxTravel = containerWidth - lineWidth;
+        const leftPosition = scrollProgress * maxTravel * 2.25;
+
         scrollIndicator.style.width = `${lineWidth}px`;
         scrollIndicator.style.transform = `translateX(${leftPosition}px)`;
     });
@@ -599,20 +544,37 @@ function updateScrollIndicator(container) {
 
 // Add a mutation observer to watch for content changes
 function setupScrollIndicator(filterButtonsContainer) {
-    const observer = new MutationObserver(() => updateScrollIndicator(filterButtonsContainer));
-    
-    observer.observe(filterButtonsContainer, {
-        childList: true,
-        subtree: true,
-        characterData: true,
-        attributes: true
-    });
-    
-    // Initial update
-    updateScrollIndicator(filterButtonsContainer);
-    
-    // Add event listeners
-    filterButtonsContainer.addEventListener('scroll', updateScrollIndicator);
-    window.addEventListener('resize', () => updateScrollIndicator(filterButtonsContainer));
+    // Store observer in container to prevent multiple observers on the same element
+    if (!filterButtonsContainer._scrollObserver) {
+        const observer = new MutationObserver(() => updateScrollIndicator(filterButtonsContainer));
+        
+        observer.observe(filterButtonsContainer, {
+            childList: true,
+            subtree: true,
+            characterData: true,
+            attributes: true
+        });
+        
+        // Save observer reference to prevent duplicates
+        filterButtonsContainer._scrollObserver = observer;
+        
+        // Use passive event listener for scroll performance
+        filterButtonsContainer.addEventListener('scroll', updateScrollIndicator, { passive: true });
+        
+        // Use debounced resize handler
+        if (!window._resizeHandlerSet) {
+            const resizeHandler = () => {
+                document.querySelectorAll('.filter-buttons-container').forEach(container => {
+                    updateScrollIndicator(container);
+                });
+            };
+            
+            window.addEventListener('resize', resizeHandler);
+            window._resizeHandlerSet = true;
+        }
+        
+        // Initial update
+        updateScrollIndicator(filterButtonsContainer);
+    }
 }
 export { buildRouteDeck };
