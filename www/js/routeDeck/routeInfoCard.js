@@ -5,7 +5,8 @@ import { map } from '../map.js';
 import { lineManager } from '../lineManager.js';
 import { constructFilterTags, createRouteId } from './deckFilter.js';
 import { highlightRouteLines, resetRouteLines } from './routeHighlighting.js';
-import { formatFlightDateTime } from './routeCard.js'; // Import formatFlightDateTime
+import { formatFlightDateTime } from './routeCard.js'; 
+import { airlineLogoManager } from '../utils/airlineLogoManager.js';
 
 const formatTime = (date) => date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 const bagIcon = `<svg fill="#aaa" height="20px" width="20px" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 248.35 248.35" xml:space="preserve"><g><path d="M186.057,66.136h-15.314V19.839C170.743,8.901,161.844,0,150.904,0H97.448c-10.938,0-19.84,8.901-19.84,19.839v46.296H62.295c-9.567,0-17.324,7.757-17.324,17.324V214.26c0,9.571,7.759,17.326,17.324,17.326h2.323v12.576c0,2.315,1.876,4.188,4.186,4.188h19.811c2.315,0,4.188-1.876,4.188-4.188v-12.576h62.741v12.576c0,2.315,1.878,4.188,4.188,4.188h19.809c2.317,0,4.188-1.876,4.188-4.188v-12.576h2.326c9.567,0,17.324-7.757,17.324-17.326V83.46C203.381,73.891,195.624,66.136,186.057,66.136z M157.514,66.135H90.832V19.839c0-3.646,2.967-6.613,6.613-6.613h53.456c3.646,0,6.613,2.967,6.613,6.613V66.135z"/></g></svg>`;
@@ -18,14 +19,21 @@ function formatLayover(flight, idx) {
     return `${Math.floor(layoverDuration / 60)}h ${layoverDuration % 60}m`;
 }
 
-function generateSegmentDetails(flight) {
-    return `<div class="route-details">${flight.route.map((segment, idx, arr) => {
+async function generateSegmentDetails(flight) {
+    let segmentsHtml = '';
+    
+    for (let idx = 0; idx < flight.route.length; idx++) {
+        const segment = flight.route[idx];
+        const arr = flight.route;
+        
         const departureDate = segment.local_departure ? new Date(segment.local_departure) : new Date(segment.dTime * 1000);
         const arrivalDate = segment.local_arrival ? new Date(segment.local_arrival) : new Date(segment.aTime * 1000);
         const departureTime = formatTime(departureDate);
         const arrivalTime = formatTime(arrivalDate);
         const duration = ((arrivalDate - departureDate) / 3600000).toFixed(1) + ' hrs';
-        const airlineLogoUrl = `assets/airline_logos/70px/${segment.airline}.png`;
+        
+        // Get the airline logo URL using our manager
+        const airlineLogoUrl = await airlineLogoManager.getLogoUrl(segment.airline);
         const isLastSegment = idx === arr.length - 1;
 
         let segmentHtml = '';
@@ -79,11 +87,13 @@ function generateSegmentDetails(flight) {
                 </div>`;
         }
 
-        return segmentHtml;
-    }).join('')}</div>`;
+        segmentsHtml += segmentHtml;
+    }
+    
+    return `<div class="route-details">${segmentsHtml}</div>`;
 }
 
-function routeInfoCard(cardElement, fullFlightData, routeIds, routeIndex) {
+async function routeInfoCard(cardElement, fullFlightData, routeIds, routeIndex) {
     const routeId = createRouteId(fullFlightData.route);
     let existingDetailCard = cardElement.nextSibling;
 
@@ -98,6 +108,8 @@ function routeInfoCard(cardElement, fullFlightData, routeIds, routeIndex) {
     // Create detail card
     const detailCard = document.createElement('div');
     detailCard.className = 'route-info-card';
+    
+    // First set the basic structure
     detailCard.innerHTML = `
         <div class="card-details">
             <div class="detail-group">
@@ -134,7 +146,7 @@ function routeInfoCard(cardElement, fullFlightData, routeIds, routeIndex) {
             </div>
             <div class='segments-wrapper' style='display: flex; flex-direction: column; align-items: flex-start;'>
                 <div class='segments' style='display: flex; flex-direction: card; align-items: flex-start;'>
-                    ${generateSegmentDetails(fullFlightData)}
+                    <div class="loading-segments">Loading segment details...</div>
                 </div>                
             </div>
         </div>
@@ -142,6 +154,11 @@ function routeInfoCard(cardElement, fullFlightData, routeIds, routeIndex) {
 
     cardElement.parentNode.insertBefore(detailCard, cardElement.nextSibling);
     highlightRoute(cardElement.getAttribute('data-route-id'));
+
+    // Now add the segment details with airline logos
+    const segmentsContainer = detailCard.querySelector('.segments');
+    const segmentDetails = await generateSegmentDetails(fullFlightData);
+    segmentsContainer.innerHTML = segmentDetails;
 
     detailCard.addEventListener('mouseover', () => highlightRouteLines(fullFlightData, cardElement));
     detailCard.addEventListener('mouseout', () => resetRouteLines(cardElement));

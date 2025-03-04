@@ -1,6 +1,7 @@
 import { createRouteId } from './deckFilter.js';
 import { highlightRouteLines, resetRouteLines } from './routeHighlighting.js';
 import { appState } from '../stateManager.js';
+import { airlineLogoManager } from '../utils/airlineLogoManager.js';
 
 export function formatFlightDateTime(date) {
     const dayName = date.toLocaleDateString('en-US', { weekday: 'short' });
@@ -202,17 +203,50 @@ function createRouteCard(flight, endpoint, routeIndex, destination) {
     const departDateFormatted = formatDateShort(departureDate);
     const arrivalDateFormatted = formatDateShort(arrivalDate);
     
-    // Create HTML content based on trip type
-    if (isRoundTrip && returnDepartureDate && returnArrivalDate) {
-        const returnDepartDateFormatted = formatDateShort(returnDepartureDate);
-        const returnArrivalDateFormatted = formatDateShort(returnArrivalDate);
+    // Instead of hardcoding the logo URL, we'll use our logo manager
+    const airlineCode = flight.route[0].airline;
+    
+    // Create the card content but wait to set the airline logo
+    card.innerHTML = generateCardContent(flight, departDateFormatted, arrivalDateFormatted, 
+        tripType, isRoundTrip, returnDepartDateFormatted, returnArrivalDateFormatted, 
+        numberOfOutboundStops, numberOfReturnStops, outboundSegments, returnSegments, 
+        departureDate, arrivalDate, returnDepartureDate, returnArrivalDate);
+
+    // Find the airline logo img and update it once loaded
+    const airlineLogoImg = card.querySelector('.airline-logo');
+    if (airlineLogoImg) {
+        // Set a loading state
+        airlineLogoImg.src = 'assets/loading-spinner.gif';
         
-        card.innerHTML = `
+        // Fetch the proper logo URL
+        airlineLogoManager.getLogoUrl(airlineCode)
+            .then(logoUrl => {
+                airlineLogoImg.src = logoUrl;
+            })
+            .catch(error => {
+                console.error('Error loading airline logo:', error);
+                airlineLogoImg.src = airlineLogoManager.getFallbackLogoUrl();
+            });
+    }
+
+    // Add event listeners
+    card.addEventListener('mouseover', () => highlightRouteLines(flight, card));
+    card.addEventListener('mouseout', () => resetRouteLines(card));
+
+    return card;
+}
+
+// Helper function to generate the card HTML structure
+function generateCardContent(flight, departDateFormatted, arrivalDateFormatted, 
+    tripType, isRoundTrip, returnDepartDateFormatted, returnArrivalDateFormatted,
+    numberOfOutboundStops, numberOfReturnStops, outboundSegments, returnSegments,
+    departureDate, arrivalDate, returnDepartureDate, returnArrivalDate) {
+
+    if (isRoundTrip && returnDepartureDate && returnArrivalDate) {
+        return `
             <div class="card-content round-trip">
                 <div class="airline-section">
-                    <img src="assets/airline_logos/70px/${flight.route[0].airline}.png" 
-                         alt="${flight.route[0].airline} Logo" 
-                         class="airline-logo">
+                    <img src="" alt="${flight.route[0].airline} Logo" class="airline-logo">
                 </div>
 
                 <div class="journey-section">
@@ -269,13 +303,11 @@ function createRouteCard(flight, endpoint, routeIndex, destination) {
             </div>
         `;
     } else {
-        // One-way flight display (existing implementation)
-        card.innerHTML = `
+        // One-way flight display
+        return `
             <div class="card-content">
                 <div class="airline-section">
-                    <img src="assets/airline_logos/70px/${flight.route[0].airline}.png" 
-                         alt="${flight.route[0].airline} Logo" 
-                         class="airline-logo">
+                    <img src="" alt="${flight.route[0].airline} Logo" class="airline-logo">
                 </div>
 
                 <div class="journey-section">
@@ -305,12 +337,6 @@ function createRouteCard(flight, endpoint, routeIndex, destination) {
             </div>
         `;
     }
-
-    // Add event listeners
-    card.addEventListener('mouseover', () => highlightRouteLines(flight, card));
-    card.addEventListener('mouseout', () => resetRouteLines(card));
-
-    return card;
 }
 
 export { createRouteCard };

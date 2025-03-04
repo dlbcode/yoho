@@ -63,6 +63,9 @@ MongoClient.connect(mongoUrl, { useNewUrlParser: true, useUnifiedTopology: true 
   const range = require('./api/range');
   range(app, db, tequila);
 
+  // Add the new airline logos service
+  const airlineLogos = require('./api/airlineLogos');
+  airlineLogos(app);
 }); 
 
 app.listen(port, () => {
