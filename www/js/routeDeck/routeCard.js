@@ -166,12 +166,16 @@ function createRouteCard(flight, endpoint, routeIndex, destination) {
                 // Handle as one-way if no turning point found
                 departureDate = new Date(flight.local_departure || flight.dTime * 1000);
                 arrivalDate = new Date(flight.local_arrival || flight.aTime * 1000);
+                outboundSegments = flight.route; // Treat all segments as outbound
+                returnSegments = null;
             }
         }
     } else {
         // Handle one-way trips
         departureDate = new Date(flight.local_departure || flight.dTime * 1000);
         arrivalDate = new Date(flight.local_arrival || flight.aTime * 1000);
+        outboundSegments = flight.route; // Treat all segments as outbound
+        returnSegments = null;
     }
 
     // Calculate stops for each segment
@@ -202,6 +206,10 @@ function createRouteCard(flight, endpoint, routeIndex, destination) {
     
     const departDateFormatted = formatDateShort(departureDate);
     const arrivalDateFormatted = formatDateShort(arrivalDate);
+    
+    // Format return dates only if they exist
+    const returnDepartDateFormatted = returnDepartureDate ? formatDateShort(returnDepartureDate) : null;
+    const returnArrivalDateFormatted = returnArrivalDate ? formatDateShort(returnArrivalDate) : null;
     
     // Instead of hardcoding the logo URL, we'll use our logo manager
     const airlineCode = flight.route[0].airline;
@@ -242,7 +250,7 @@ function generateCardContent(flight, departDateFormatted, arrivalDateFormatted,
     numberOfOutboundStops, numberOfReturnStops, outboundSegments, returnSegments,
     departureDate, arrivalDate, returnDepartureDate, returnArrivalDate) {
 
-    if (isRoundTrip && returnDepartureDate && returnArrivalDate) {
+    if (isRoundTrip && returnSegments && returnDepartDateFormatted && returnArrivalDateFormatted) {
         return `
             <div class="card-content round-trip">
                 <div class="airline-section">
