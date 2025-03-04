@@ -412,14 +412,39 @@ async function fitMapToFlightRoute(flight) {
         if (validAirports.length === 0) return;
         
         // Use array methods instead of loops where possible
+        const latitudes = validAirports.map(airport => airport.latitude);
         const longitudes = validAirports.map(airport => airport.longitude);
+        
+        const minLat = Math.min(...latitudes);
+        const maxLat = Math.max(...latitudes);
         const minLong = Math.min(...longitudes);
         const maxLong = Math.max(...longitudes);
         
         const spansDegrees = maxLong - minLong;
         const crossesAntimeridian = spansDegrees > 180;
         
-        // Rest of function remains similar but with optimized calculation methods...
+        if (crossesAntimeridian) {
+            // Special handling for routes crossing the antimeridian (180° longitude)
+            const adjustedLongitudes = longitudes.map(lon => lon < 0 ? lon + 360 : lon);
+            const adjustedMinLong = Math.min(...adjustedLongitudes);
+            const adjustedMaxLong = Math.max(...adjustedLongitudes);
+            
+            // Center around the middle of the adjusted longitudes
+            const centerLong = ((adjustedMinLong + adjustedMaxLong) / 2) % 360;
+            const centerLat = (minLat + maxLat) / 2;
+            
+            // Fit the map to the bounds
+            map.fitBounds([
+                [minLat, centerLong - 180],
+                [maxLat, centerLong + 180]
+            ]);
+        } else {
+            // Normal case - create bounds and fit map
+            map.fitBounds([
+                [minLat, minLong],
+                [maxLat, maxLong]
+            ]);
+        }
     } catch (error) {
         console.error("Error fitting map to flight route:", error);
     }
