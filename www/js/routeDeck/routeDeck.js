@@ -404,23 +404,87 @@ async function fitMapToFlightRoute(flight) {
         const airportsPromises = iataList.map(iata => flightMap.getAirportDataByIata(iata));
         const airportsData = await Promise.all(airportsPromises);
         
-        // Filter out any null results and convert to LatLng objects
-        const waypoints = airportsData
-            .filter(airport => airport && airport.latitude && airport.longitude)
-            .map(airport => L.latLng(airport.latitude, airport.longitude));
+        // Filter out any null results
+        const validAirports = airportsData.filter(airport => airport && airport.latitude && airport.longitude);
         
-        if (waypoints.length === 0) {
+        if (validAirports.length === 0) {
             console.error("Could not find coordinates for any airports in the route");
             return;
         }
         
-        console.log(`Successfully retrieved coordinates for ${waypoints.length} airports`);
+        // Check if the route crosses the antimeridian (international date line)
+        const longitudes = validAirports.map(airport => airport.longitude);
+        const minLong = Math.min(...longitudes);
+        const maxLong = Math.max(...longitudes);
         
-        // Fit the map to the bounds of the waypoints
-        if (waypoints.length > 1) {
-            map.fitBounds(L.latLngBounds(waypoints), { padding: [50, 50] });
-        } else if (waypoints.length === 1) {
-            map.setView(waypoints[0], 5);
+        // If the route spans more than 180 degrees, it likely crosses the antimeridian
+        const spansDegrees = maxLong - minLong;
+        const crossesAntimeridian = spansDegrees > 180;
+        
+        console.log(`Route longitude span: ${spansDegrees}°, crosses antimeridian: ${crossesAntimeridian}`);
+        
+        if (crossesAntimeridian) {
+            // Adjust the center point to be in the middle of the route, accounting for the antimeridian
+            // For routes crossing the antimeridian, we need to shift the center
+            
+            // Convert all longitudes to be in the same hemisphere (all positive or all negative)
+            // by adding or subtracting 360 degrees as needed
+            const adjustedLongitudes = longitudes.map(lng => {
+                if (minLong < 0 && lng > 0) {
+                    // If min is negative and this point is positive, make it negative too
+                    return lng - 360;
+                } else if (minLong > 0 && lng < 0) {
+                    // If min is positive and this point is negative, make it positive too
+                    return lng + 360;
+                }
+                return lng;
+            });
+            
+            // Calculate the center longitude in the adjusted coordinate space
+            const centerLong = adjustedLongitudes.reduce((sum, lng) => sum + lng, 0) / adjustedLongitudes.length;
+            
+            // Calculate the center latitude
+            const centerLat = validAirports.reduce((sum, airport) => sum + airport.latitude, 0) / validAirports.length;
+            
+            // Set the view to the calculated center with an appropriate zoom level
+            const viewCenter = L.latLng(centerLat, centerLong);
+            console.log(`Setting view to center at [${centerLat}, ${centerLong}]`);
+            
+            // Find a zoom level that fits the route
+            // Calculate the maximum distance between any two points
+            let maxDistance = 0;
+            for (let i = 0; i < validAirports.length; i++) {
+                for (let j = i + 1; j < validAirports.length; j++) {
+                    const pointA = L.latLng(validAirports[i].latitude, adjustedLongitudes[i]);
+                    const pointB = L.latLng(validAirports[j].latitude, adjustedLongitudes[j]);
+                    const distance = pointA.distanceTo(pointB);
+                    maxDistance = Math.max(maxDistance, distance);
+                }
+            }
+            
+            // Estimate zoom level based on distance
+            // This is an approximation - you may need to adjust the formula
+            const zoomLevel = Math.min(
+                Math.max(
+                    2, // Minimum zoom level
+                    Math.floor(14 - Math.log(maxDistance / 10000) / Math.log(2))
+                ),
+                5 // Maximum zoom level for world view
+            );
+            
+            console.log(`Setting zoom level to ${zoomLevel} for distance ${maxDistance}m`);
+            map.setView(viewCenter, zoomLevel);
+        } else {
+            // For routes that don't cross the antimeridian, we can use the standard fitBounds
+            const waypoints = validAirports.map(airport => L.latLng(airport.latitude, airport.longitude));
+            console.log(`Successfully retrieved coordinates for ${waypoints.length} airports`);
+            
+            // Fit the map to the bounds of the waypoints
+            if (waypoints.length > 1) {
+                map.fitBounds(L.latLngBounds(waypoints), { padding: [50, 50] });
+            } else if (waypoints.length === 1) {
+                map.setView(waypoints[0], 5);
+            }
         }
     } catch (error) {
         console.error("Error fitting map to flight route:", error);
