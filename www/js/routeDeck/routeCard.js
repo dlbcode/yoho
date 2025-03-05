@@ -224,7 +224,7 @@ function createRouteCard(flight, endpoint, routeIndex, destination) {
     const airlineLogoImg = card.querySelector('.airline-logo');
     if (airlineLogoImg) {
         // Set a loading state
-        airlineLogoImg.src = 'assets/loading-spinner.gif';
+        airlineLogoImg.src = 'assets/loading_blocks.gif';
         
         // Fetch the proper logo URL
         airlineLogoManager.getLogoUrl(airlineCode)
