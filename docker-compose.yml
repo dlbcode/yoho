@@ -75,6 +75,7 @@ services:
     volumes:
       - node_modules:/app/node_modules
       - nodejs_app:/app
+      - ./www:/usr/src/app/www
     deploy:
       resources:
         limits:

@@ -3,43 +3,88 @@ const path = require('path');
 const axios = require('axios');
 
 module.exports = function(app) {
-  const logoBaseDir = path.join(__dirname, '../../../../www/assets/airline_logos/70px');
+  // Find the best www root directory based on environment
+  const wwwRoot = (() => {
+    // Check production Docker environment
+    if (process.env.NODE_ENV === 'production' && fs.existsSync('/usr/src/app/www')) {
+      return '/usr/src/app/www';
+    }
+    
+    // Try common paths
+    const possiblePaths = [
+      path.resolve(__dirname, '../../../../www'),
+      '/var/www',
+      '/usr/src/app/www',
+      process.env.WWW_ROOT
+    ];
+    
+    for (const testPath of possiblePaths) {
+      if (testPath && fs.existsSync(testPath)) {
+        return testPath;
+      }
+    }
+    
+    // Fallback to current directory
+    const fallbackPath = path.join(process.cwd(), 'www');
+    fs.mkdirSync(fallbackPath, { recursive: true });
+    return fallbackPath;
+  })();
   
-  // Ensure the logo directory exists
-  if (!fs.existsSync(logoBaseDir)) {
-    fs.mkdirSync(logoBaseDir, { recursive: true });
-  }
+  // Define asset paths
+  const logoBaseDir = path.join(wwwRoot, 'assets/airline_logos/70px');
+  const fallbackLogoPath = path.join(wwwRoot, 'assets/airline_logos/fallback_airline_logo.png');
   
-  app.get('/api/airline-logo/:code', async (req, res) => {
+  // Ensure directories exist
+  [logoBaseDir, path.dirname(fallbackLogoPath)].forEach(dir => {
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
+  });
+  
+  // Register the route for both paths to handle Nginx proxy configuration
+  app.get('/api/airlineLogos/:code', handleLogoRequest);
+  app.get('/airlineLogos/:code', handleLogoRequest);
+
+  // Logo request handler
+  async function handleLogoRequest(req, res) {
     const airlineCode = req.params.code.toUpperCase();
     const logoPath = path.join(logoBaseDir, `${airlineCode}.png`);
     
-    // Check if we already have the logo
+    // Return existing logo if available
     if (fs.existsSync(logoPath)) {
       return res.sendFile(logoPath);
     }
     
-    // Logo doesn't exist, try to fetch it
     try {
-      const logoUrl = `https://www.gstatic.com/flights/airline_logos/70px/${airlineCode}.png`;
+      // Fetch logo from Google's CDN
       const response = await axios({
         method: 'get',
-        url: logoUrl,
-        responseType: 'arraybuffer'
+        url: `https://www.gstatic.com/flights/airline_logos/70px/${airlineCode}.png`,
+        responseType: 'arraybuffer',
+        validateStatus: status => status < 500
       });
       
       if (response.status === 200) {
-        // Save the logo file
+        // Save fetched logo and return it
         fs.writeFileSync(logoPath, response.data);
-        console.log(`Downloaded logo for airline: ${airlineCode}`);
         return res.sendFile(logoPath);
-      } else {
-        // Return a 404 if the logo couldn't be found
-        return res.status(404).send('Airline logo not found');
       }
+      
+      // Logo not found on CDN, serve fallback
+      return serveFallbackLogo(res);
     } catch (error) {
-      console.error(`Error fetching logo for ${airlineCode}:`, error.message);
-      res.status(500).send('Error fetching airline logo');
+      // Handle errors by serving fallback logo
+      return serveFallbackLogo(res);
     }
-  });
+  }
+  
+  // Helper function to serve the fallback logo
+  function serveFallbackLogo(res) {
+    if (fs.existsSync(fallbackLogoPath)) {
+      return res.sendFile(fallbackLogoPath);
+    } else {
+      // If fallback doesn't exist for some reason, send 404
+      return res.status(404).send('Airline logo not found');
+    }
+  }
 };
