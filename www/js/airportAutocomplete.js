@@ -14,24 +14,90 @@ function debounce(func, wait) {
     };
 }
 
+// At the top of your file, add these utility functions
+
+function createEventHandler(handlerFn) {
+    return function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        handlerFn.apply(this, arguments);
+    };
+}
+
+function addMultiEventListener(element, events, handler, options = {}) {
+    events.forEach(event => element.addEventListener(event, handler, options));
+    return () => events.forEach(event => element.removeEventListener(event, handler));
+}
+
+// Replace the fetch functions with more robust versions
+
 async function fetchAirports(query) {
+    if (!query || query.length < 2) return [];
+    
     try {
-        const response = await fetch(`https://yonderhop.com/api/airports?query=${query}`);
+        const encodedQuery = encodeURIComponent(query.trim());
+        const response = await fetch(`https://yonderhop.com/api/airports?query=${encodedQuery}`);
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error: ${response.status}`);
+        }
+        
         return await response.json();
     } catch (error) {
-        console.warn('Airport not found');
+        console.warn('Error fetching airports:', error);
         return [];
     }
 }
 
 async function fetchAirportByIata(iata) {
+    if (!iata) return null;
+    
     try {
-        const response = await fetch(`https://yonderhop.com/api/airports?iata=${iata}`);
+        const encodedIata = encodeURIComponent(iata.trim());
+        const response = await fetch(`https://yonderhop.com/api/airports?iata=${encodedIata}`);
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error: ${response.status}`);
+        }
+        
         const airports = await response.json();
         return airports.length > 0 ? airports[0] : null;
     } catch (error) {
-        console.error('Failed to fetch airport data', error);
+        console.error('Failed to fetch airport data:', error);
         return null;
+    }
+}
+
+// Add this class to manage event listeners more efficiently
+
+class ListenerManager {
+    constructor() {
+        this.listeners = new Map();
+    }
+    
+    add(element, event, handler, options) {
+        element.addEventListener(event, handler, options);
+        if (!this.listeners.has(element)) {
+            this.listeners.set(element, []);
+        }
+        this.listeners.get(element).push({ event, handler });
+        return this;
+    }
+    
+    addMultiple(element, events, handler, options) {
+        events.forEach(event => this.add(element, event, handler, options));
+        return this;
+    }
+    
+    cleanup() {
+        this.listeners.forEach((eventList, element) => {
+            if (element) {
+                eventList.forEach(({ event, handler }) => {
+                    element.removeEventListener(event, handler);
+                });
+            }
+        });
+        this.listeners.clear();
     }
 }
 
@@ -80,25 +146,16 @@ function setupAutocompleteForField(fieldId) {
     inputField.setAttribute('readonly', true);
 
     // Create a listener registry for cleanup
-    const listeners = new Map();
+    const listenerManager = new ListenerManager();
     
     // Function to add event listeners with automatic tracking
     const addTrackedListener = (element, event, handler, options) => {
-        element.addEventListener(event, handler, options);
-        if (!listeners.has(element)) listeners.set(element, []);
-        listeners.get(element).push({ event, handler });
+        listenerManager.add(element, event, handler, options);
     };
     
     // Function to remove all tracked listeners
     const cleanup = () => {
-        listeners.forEach((eventList, element) => {
-            if (element) {
-                eventList.forEach(({ event, handler }) => {
-                    element.removeEventListener(event, handler);
-                });
-            }
-        });
-        listeners.clear();
+        listenerManager.cleanup();
         
         // Clean up observer
         if (resizeObserver) {
@@ -139,8 +196,10 @@ function setupAutocompleteForField(fieldId) {
         }
     });
 
-    const setSuggestionBoxPosition = (inputField, suggestionBox) => {
-        if (!suggestionBox) return;
+    // Replace the complex setSuggestionBoxPosition function with this cleaner version
+
+    function setSuggestionBoxPosition(inputField, suggestionBox) {
+        if (!suggestionBox || !inputField) return;
         
         const isMobile = window.innerWidth <= 600;
         const inputRect = inputField.getBoundingClientRect();
@@ -148,20 +207,19 @@ function setupAutocompleteForField(fieldId) {
         const containerRect = waypointContainer ? waypointContainer.getBoundingClientRect() : null;
         const maxMenuHeight = 200;
         
-        // Get the index to determine if this is origin or destination
-        const inputIndex = parseInt(fieldId.replace(/\D/g, ''), 10) % 2;
-        const isOriginField = inputIndex === 1; // First field (odd number)
+        // Get input index to determine if origin or destination
+        const inputIndex = parseInt(inputField.id.replace(/\D/g, ''), 10) % 2;
+        const isOriginField = inputIndex === 1;
         
-        // Base styles for all cases
-        const baseStyles = {
+        // Build style object based on conditions
+        const styles = {
             position: 'fixed',
             zIndex: '10000',
             display: suggestionBox.children.length > 0 ? 'block' : 'none'
         };
         
         if (isMobile) {
-            // Mobile styles
-            Object.assign(suggestionBox.style, baseStyles, {
+            Object.assign(styles, {
                 top: '50px',
                 left: '0',
                 width: '100%',
@@ -169,31 +227,20 @@ function setupAutocompleteForField(fieldId) {
                 minHeight: 'none'
             });
         } else if (containerRect) {
-            // Desktop positioning with container reference
             const viewportHeight = window.innerHeight;
             const spaceBelow = viewportHeight - inputRect.bottom;
             const spaceAbove = inputRect.top;
             const showAbove = spaceBelow < maxMenuHeight && spaceAbove >= maxMenuHeight;
             
-            // Container-wide dropdown that aligns with input field edges
             const suggestionWidth = containerRect.width;
             
-            let left;
-            if (isOriginField) {
-                // For origin: align left edge with input left edge
-                left = inputRect.left;
-            } else {
-                // For destination: align right edge with input right edge
-                left = inputRect.right - suggestionWidth;
-            }
+            // Calculate left position
+            let left = isOriginField ? inputRect.left : (inputRect.right - suggestionWidth);
             
-            // Ensure dropdown stays within viewport
-            if (left < 0) left = 0;
-            if (left + suggestionWidth > window.innerWidth) {
-                left = Math.max(0, window.innerWidth - suggestionWidth);
-            }
+            // Keep within viewport bounds
+            left = Math.max(0, Math.min(left, window.innerWidth - suggestionWidth));
             
-            Object.assign(suggestionBox.style, baseStyles, {
+            Object.assign(styles, {
                 width: `${suggestionWidth}px`,
                 left: `${left}px`,
                 maxHeight: `${Math.min(maxMenuHeight, showAbove ? spaceAbove : spaceBelow)}px`,
@@ -201,8 +248,7 @@ function setupAutocompleteForField(fieldId) {
                 [showAbove ? 'top' : 'bottom']: 'auto'
             });
         } else {
-            // Fallback positioning if container isn't found
-            Object.assign(suggestionBox.style, baseStyles, {
+            Object.assign(styles, {
                 width: `${inputRect.width}px`,
                 left: `${inputRect.left}px`,
                 maxHeight: `${maxMenuHeight}px`,
@@ -210,7 +256,10 @@ function setupAutocompleteForField(fieldId) {
                 bottom: 'auto'
             });
         }
-    };
+        
+        // Apply all styles at once
+        Object.assign(suggestionBox.style, styles);
+    }
 
     // Handle resize events
     const handleResize = () => {
@@ -405,7 +454,8 @@ function setupAutocompleteForField(fieldId) {
     suggestionBox && suggestionObserver.observe(suggestionBox);
 }
 
-// In airportAutocomplete.js or wherever suggestions are created
+// Replace the updateSuggestions function with this cleaner version
+
 function updateSuggestions(inputId, airports) {
     const suggestionBox = document.getElementById(inputId + 'Suggestions');
     if (!suggestionBox) return;
@@ -413,107 +463,30 @@ function updateSuggestions(inputId, airports) {
     // Clear existing suggestions
     suggestionBox.innerHTML = '';
     
-    // Ensure the suggestion box is appended to body for proper stacking
+    // Move to body if needed
     if (suggestionBox.parentElement !== document.body) {
         document.body.appendChild(suggestionBox);
     }
     
-    // Force higher z-index and ensure it's outside infoPane stacking context
-    suggestionBox.style.position = 'fixed';  // Use fixed instead of absolute
-    suggestionBox.style.zIndex = '1000';     // Much higher than infoPane
-    
-    // Extract waypoint index from the input ID
+    // Get UI state information
     const waypointIndex = parseInt(inputId.replace('waypoint-input-', '')) - 1;
-    
-    // Determine if this is an origin or destination
     const isOriginField = waypointIndex % 2 === 0;
     const pairIndex = isOriginField ? waypointIndex + 1 : waypointIndex - 1;
-    
-    // Check if corresponding pair waypoint is "Any"
     const pairWaypoint = appState.waypoints[pairIndex];
     const isPairAny = pairWaypoint && 
         (pairWaypoint.iata_code === 'Any' || pairWaypoint.isAnyDestination);
-    
-    // Add the "Anywhere" option if there are no airports or it's an empty search
-    // AND the pair waypoint is not already set to "Any"
-    const isEmptySearch = airports.length === 0;
     const inputField = document.getElementById(inputId);
+    const isEmptySearch = airports.length === 0;
     
-    // Show "Anywhere" option only if the paired waypoint is NOT already "Any"
+    // Add "Anywhere" option if needed
     if ((isEmptySearch || inputField.hasAttribute('data-show-anywhere-option')) && !isPairAny) {
-        // Create the "Anywhere" option
         const anywhereDiv = document.createElement('div');
         anywhereDiv.className = 'anywhere-suggestion';
         anywhereDiv.textContent = 'Anywhere';
-        
-        // Add a special attribute to identify this as the "Anywhere" option
         anywhereDiv.setAttribute('data-is-anywhere', 'true');
         
-        // Create a single handler for "Anywhere" selection
-        const anywhereHandler = (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            
-            // Set flag to prevent blur handler from interfering
-            isSelectingItem = true;
-            
-            // Extract waypoint index from the input ID
-            const waypointIndex = parseInt(inputId.replace('waypoint-input-', '')) - 1;
-            
-            // Determine if this is an origin or destination
-            const isOriginField = waypointIndex % 2 === 0;
-            const pairIndex = isOriginField ? waypointIndex + 1 : waypointIndex - 1;
-            
-            // Check if corresponding pair waypoint is also "Any"
-            const pairWaypoint = appState.waypoints[pairIndex];
-            const isPairAny = pairWaypoint && 
-                (pairWaypoint.iata_code === 'Any' || pairWaypoint.isAnyDestination);
-            
-            // If this is an origin and the destination is already "Any", show an alert
-            // BUT ONLY if we're not loading from URL (add a check for this)
-            if (isOriginField && isPairAny && !window.isLoadingFromUrl) {
-                alert("Both origin and destination cannot be set to 'Anywhere'");
-                suggestionBox.style.display = 'none';
-                isSelectingItem = false;
-                return;
-            }
-            
-            // Create a special "Any" airport object with more specific type info
-            const anyDestination = {
-                iata_code: 'Any',
-                city: 'Anywhere',
-                country: '',
-                name: isOriginField ? 'Any Origin' : 'Any Destination',
-                isAnyDestination: true,
-                isAnyOrigin: isOriginField // Add this flag to distinguish origin vs destination
-            };
-            
-            // Set the input value
-            inputField.value = 'Anywhere';
-            inputField.setAttribute('data-selected-iata', 'Any');
-            inputField.setAttribute('data-is-any-destination', 'true');
-            
-            // Hide suggestions
-            suggestionBox.style.display = 'none';
-            
-            // Update state with the "Any" destination
-            if (waypointIndex >= 0 && waypointIndex < appState.waypoints.length) {
-                updateState('updateWaypoint', { index: waypointIndex, data: anyDestination }, 
-                           'airportAutocomplete.anywhereSelection');
-            } else {
-                updateState('addWaypoint', anyDestination, 'airportAutocomplete.anywhereSelection');
-            }
-            
-            // Blur the input field after selection
-            setTimeout(() => {
-                inputField.blur();
-                setTimeout(() => {
-                    isSelectingItem = false;
-                }, 100);
-            }, 50);
-        };
+        const anywhereHandler = createAnywhereHandler(inputId, inputField, suggestionBox, isOriginField, pairIndex, isPairAny);
         
-        // Add event listeners for the "Anywhere" option
         if ('ontouchstart' in window) {
             anywhereDiv.addEventListener('touchend', anywhereHandler);
         }
@@ -523,118 +496,99 @@ function updateSuggestions(inputId, airports) {
         suggestionBox.appendChild(anywhereDiv);
     }
     
-    // Rest of the original function remains the same
-    let selectionHandledByTouch = false;
-
+    // Add airport suggestions
     airports.forEach((airport, index) => {
         const div = document.createElement('div');
         div.textContent = `${airport.name} (${airport.iata_code}) - ${airport.city}, ${airport.country}`;
         
-        // Highlight the first item by default
         if (index === 0) {
             div.classList.add('autocomplete-active');
         }
 
-        // Create a single handler for all selection events with improved reliability
-        const selectionHandler = (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            
-            // Set flag to prevent blur handler from interfering
-            isSelectingItem = true;
-            
-            // Call handleSelection with proper arguments
-            handleSelection(e, inputId, airport);
-        };
-
-        // For touch devices, use more reliable touch event handling
+        const selectionHandler = createSelectionHandler(inputId, airport);
+        
+        // Touch event handling
         if ('ontouchstart' in window) {
-            div.addEventListener('touchstart', (e) => {
-                selectionHandledByTouch = false;
-            }, { passive: true });
-
-            div.addEventListener('touchmove', () => {
-                selectionHandledByTouch = true;
-            }, { passive: true });
-
+            let selectionHandledByTouch = false;
+            div.addEventListener('touchstart', () => { selectionHandledByTouch = false; }, { passive: true });
+            div.addEventListener('touchmove', () => { selectionHandledByTouch = true; }, { passive: true });
             div.addEventListener('touchend', (e) => {
-                if (!selectionHandledByTouch) {
-                    selectionHandler(e);
-                }
+                if (!selectionHandledByTouch) selectionHandler(e);
             });
         }
-
-        // For mouse users, use mousedown instead of click for faster response
-        div.addEventListener('mousedown', (e) => {
-            selectionHandler(e);
-            // Prevent the blur event that would be triggered
-            e.preventDefault();
-        });
-
-        // Keep the click handler as backup
+        
+        div.addEventListener('mousedown', selectionHandler);
         div.addEventListener('click', (e) => {
-            if (!isSelectingItem) {
-                selectionHandler(e);
-            }
+            if (!isSelectingItem) selectionHandler(e);
         });
-
+        
         suggestionBox.appendChild(div);
     });
-
-    // Only show suggestion box if we have content
+    
+    // Show suggestion box and position it correctly
     if (suggestionBox.children.length > 0) {
-        // Force higher z-index and display
         suggestionBox.style.display = 'block';
-        suggestionBox.style.zIndex = '90'; // Was 10000 - now matches our new scale
+        suggestionBox.style.zIndex = '90';
         
-        // If input is expanded, ensure suggestions are positioned correctly
         const inputField = document.getElementById(inputId);
-        if (inputField?.classList.contains('expanded-input')) {
-            Object.assign(suggestionBox.style, {
-                position: 'fixed',
-                top: '50px',
-                left: '0',
-                width: '100%',
-                maxHeight: 'calc(100vh - 50px)'
-            });
-        } else if (inputField) {
-            // Get positioning from input field
-            const inputRect = inputField.getBoundingClientRect();
-            const waypointContainer = document.querySelector('.waypoint-inputs-container');
-            const containerRect = waypointContainer ? waypointContainer.getBoundingClientRect() : null;
-            
-            // Determine if this is origin or destination based on the input ID
-            const inputIndex = parseInt(inputId.replace(/\D/g, ''), 10) % 2;
-            const isOriginField = inputIndex === 1; // First field (odd number)
-            
-            if (containerRect && window.innerWidth > 600) {
-                // Container-wide dropdown that aligns with input field edges
-                const suggestionWidth = containerRect.width;
-                
-                let left;
-                if (isOriginField) {
-                    // For origin: align left edge with input left edge
-                    left = inputRect.left;
-                } else {
-                    // For destination: align right edge with input right edge
-                    left = inputRect.right - suggestionWidth;
-                }
-                
-                // Ensure dropdown stays within viewport
-                if (left < 0) left = 0;
-                if (left + suggestionWidth > window.innerWidth) {
-                    left = Math.max(0, window.innerWidth - suggestionWidth);
-                }
-                
-                Object.assign(suggestionBox.style, {
-                    position: 'fixed',
-                    top: `${inputRect.bottom}px`,
-                    left: `${left}px`,
-                    width: `${suggestionWidth}px`
-                });
-            }
+        if (inputField) {
+            setSuggestionBoxPosition(inputField, suggestionBox);
         }
     }
+}
+
+// Helper functions for updateSuggestions
+function createAnywhereHandler(inputId, inputField, suggestionBox, isOriginField, pairIndex, isPairAny) {
+    return function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        isSelectingItem = true;
+        
+        const waypointIndex = parseInt(inputId.replace('waypoint-input-', '')) - 1;
+        
+        if (isOriginField && isPairAny && !window.isLoadingFromUrl) {
+            alert("Both origin and destination cannot be set to 'Anywhere'");
+            suggestionBox.style.display = 'none';
+            isSelectingItem = false;
+            return;
+        }
+        
+        const anyDestination = {
+            iata_code: 'Any',
+            city: 'Anywhere',
+            country: '',
+            name: isOriginField ? 'Any Origin' : 'Any Destination',
+            isAnyDestination: true,
+            isAnyOrigin: isOriginField
+        };
+        
+        inputField.value = 'Anywhere';
+        inputField.setAttribute('data-selected-iata', 'Any');
+        inputField.setAttribute('data-is-any-destination', 'true');
+        
+        suggestionBox.style.display = 'none';
+        
+        if (waypointIndex >= 0 && waypointIndex < appState.waypoints.length) {
+            updateState('updateWaypoint', { index: waypointIndex, data: anyDestination }, 'airportAutocomplete.anywhereSelection');
+        } else {
+            updateState('addWaypoint', anyDestination, 'airportAutocomplete.anywhereSelection');
+        }
+        
+        setTimeout(() => {
+            inputField.blur();
+            setTimeout(() => { isSelectingItem = false; }, 100);
+        }, 50);
+    };
+}
+
+function createSelectionHandler(inputId, airport) {
+    return function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        isSelectingItem = true;
+        handleSelection(e, inputId, airport);
+    };
 }
 
 document.addEventListener('DOMContentLoaded', () => {
