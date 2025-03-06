@@ -103,11 +103,14 @@ const setupWaypointInputListeners = (routeNumber) => {
         input.addEventListener('keydown', (event) => {
             if (event.key === 'Enter') {
                 event.preventDefault();
-                
                 // Only focus the next field if not on mobile and this is the first input
                 if (i === 0 && !inputState.isMobile()) {
                     const nextInput = document.querySelector(`#waypoint-input-${routeNumber * 2 + 2}`);
-                    if (nextInput) nextInput.focus();
+                    if (nextInput && !nextInput.value.trim()) {
+                        nextInput.focus();
+                    } else {
+                        input.blur();
+                    }
                 } else {
                     input.blur();
                 }
