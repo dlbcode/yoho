@@ -196,71 +196,6 @@ function setupAutocompleteForField(fieldId) {
         }
     });
 
-    // Replace the complex setSuggestionBoxPosition function with this cleaner version
-
-    function setSuggestionBoxPosition(inputField, suggestionBox) {
-        if (!suggestionBox || !inputField) return;
-        
-        const isMobile = window.innerWidth <= 600;
-        const inputRect = inputField.getBoundingClientRect();
-        const waypointContainer = document.querySelector('.waypoint-inputs-container');
-        const containerRect = waypointContainer ? waypointContainer.getBoundingClientRect() : null;
-        const maxMenuHeight = 200;
-        
-        // Get input index to determine if origin or destination
-        const inputIndex = parseInt(inputField.id.replace(/\D/g, ''), 10) % 2;
-        const isOriginField = inputIndex === 1;
-        
-        // Build style object based on conditions
-        const styles = {
-            position: 'fixed',
-            zIndex: '10000',
-            display: suggestionBox.children.length > 0 ? 'block' : 'none'
-        };
-        
-        if (isMobile) {
-            Object.assign(styles, {
-                top: '50px',
-                left: '0',
-                width: '100%',
-                maxHeight: 'calc(100vh - 50px)',
-                minHeight: 'none'
-            });
-        } else if (containerRect) {
-            const viewportHeight = window.innerHeight;
-            const spaceBelow = viewportHeight - inputRect.bottom;
-            const spaceAbove = inputRect.top;
-            const showAbove = spaceBelow < maxMenuHeight && spaceAbove >= maxMenuHeight;
-            
-            const suggestionWidth = containerRect.width;
-            
-            // Calculate left position
-            let left = isOriginField ? inputRect.left : (inputRect.right - suggestionWidth);
-            
-            // Keep within viewport bounds
-            left = Math.max(0, Math.min(left, window.innerWidth - suggestionWidth));
-            
-            Object.assign(styles, {
-                width: `${suggestionWidth}px`,
-                left: `${left}px`,
-                maxHeight: `${Math.min(maxMenuHeight, showAbove ? spaceAbove : spaceBelow)}px`,
-                [showAbove ? 'bottom' : 'top']: `${showAbove ? viewportHeight - inputRect.top : inputRect.bottom}px`,
-                [showAbove ? 'top' : 'bottom']: 'auto'
-            });
-        } else {
-            Object.assign(styles, {
-                width: `${inputRect.width}px`,
-                left: `${inputRect.left}px`,
-                maxHeight: `${maxMenuHeight}px`,
-                top: `${inputRect.bottom}px`,
-                bottom: 'auto'
-            });
-        }
-        
-        // Apply all styles at once
-        Object.assign(suggestionBox.style, styles);
-    }
-
     // Handle resize events
     const handleResize = () => {
         if (suggestionBox.style.display === 'block') {
@@ -654,3 +589,67 @@ export function getIataFromField(inputId) {
 }
 
 export { setupAutocompleteForField, fetchAirportByIata };
+
+// Move this function outside of setupAutocompleteForField
+function setSuggestionBoxPosition(inputField, suggestionBox) {
+    if (!suggestionBox || !inputField) return;
+    
+    const isMobile = window.innerWidth <= 600;
+    const inputRect = inputField.getBoundingClientRect();
+    const waypointContainer = document.querySelector('.waypoint-inputs-container');
+    const containerRect = waypointContainer ? waypointContainer.getBoundingClientRect() : null;
+    const maxMenuHeight = 200;
+    
+    // Get input index to determine if origin or destination
+    const inputIndex = parseInt(inputField.id.replace(/\D/g, ''), 10) % 2;
+    const isOriginField = inputIndex === 1;
+    
+    // Build style object based on conditions
+    const styles = {
+        position: 'fixed',
+        zIndex: '10000',
+        display: suggestionBox.children.length > 0 ? 'block' : 'none'
+    };
+    
+    if (isMobile) {
+        Object.assign(styles, {
+            top: '50px',
+            left: '0',
+            width: '100%',
+            maxHeight: 'calc(100vh - 50px)',
+            minHeight: 'none'
+        });
+    } else if (containerRect) {
+        const viewportHeight = window.innerHeight;
+        const spaceBelow = viewportHeight - inputRect.bottom;
+        const spaceAbove = inputRect.top;
+        const showAbove = spaceBelow < maxMenuHeight && spaceAbove >= maxMenuHeight;
+        
+        const suggestionWidth = containerRect.width;
+        
+        // Calculate left position
+        let left = isOriginField ? inputRect.left : (inputRect.right - suggestionWidth);
+        
+        // Keep within viewport bounds
+        left = Math.max(0, Math.min(left, window.innerWidth - suggestionWidth));
+        
+        Object.assign(styles, {
+            width: `${suggestionWidth}px`,
+            left: `${left}px`,
+            maxHeight: `${Math.min(maxMenuHeight, showAbove ? spaceAbove : spaceBelow)}px`,
+            [showAbove ? 'bottom' : 'top']: `${showAbove ? viewportHeight - inputRect.top : inputRect.bottom}px`,
+            [showAbove ? 'top' : 'bottom']: 'auto'
+        });
+    } else {
+        Object.assign(styles, {
+            width: `${inputRect.width}px`,
+            left: `${inputRect.left}px`,
+            maxHeight: `${maxMenuHeight}px`,
+            top: `${inputRect.bottom}px`,
+            bottom: 'auto'
+        });
+    }
+    
+    // Apply all styles at once
+    Object.assign(suggestionBox.style, styles);
+}
