@@ -155,11 +155,16 @@ window.updateState = updateState;
 
 function updateUrl() {
     const params = new URLSearchParams(window.location.search);
-    const waypointIatas = appState.waypoints.map(wp => wp.iata_code).join(',');
+    
+    // Preserve "Any" waypoints in URL
+    const waypointIatas = appState.waypoints.map(wp => wp?.iata_code || '').join(',');
+    
+    // Don't remove "Any" from the URL
+    waypointIatas ? params.set('waypoints', waypointIatas) : params.delete('waypoints');
+    
     const dates = Object.entries(appState.routeDates).map(([key, value]) => `${key}:depart:${value.depart},${key}:return:${value.return ?? 'null'}`).join(',');
     const types = appState.routes.map((route, index) => `${index}:${route.tripType}`).join(',');
 
-    waypointIatas ? params.set('waypoints', waypointIatas) : params.delete('waypoints');
     dates ? params.set('dates', dates) : params.delete('dates');
     types ? params.set('types', types) : params.delete('types');
     appState.routeDirection !== defaultDirection ? params.set('direction', appState.routeDirection) : params.delete('direction');

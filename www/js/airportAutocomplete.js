@@ -458,20 +458,22 @@ function updateSuggestions(inputId, airports) {
                 (pairWaypoint.iata_code === 'Any' || pairWaypoint.isAnyDestination);
             
             // If this is an origin and the destination is already "Any", show an alert
-            if (isOriginField && isPairAny) {
+            // BUT ONLY if we're not loading from URL (add a check for this)
+            if (isOriginField && isPairAny && !window.isLoadingFromUrl) {
                 alert("Both origin and destination cannot be set to 'Anywhere'");
                 suggestionBox.style.display = 'none';
                 isSelectingItem = false;
                 return;
             }
             
-            // Create a special "Any" airport object
+            // Create a special "Any" airport object with more specific type info
             const anyDestination = {
                 iata_code: 'Any',
                 city: 'Anywhere',
                 country: '',
-                name: 'Any Destination',
-                isAnyDestination: true
+                name: isOriginField ? 'Any Origin' : 'Any Destination',
+                isAnyDestination: true,
+                isAnyOrigin: isOriginField // Add this flag to distinguish origin vs destination
             };
             
             // Set the input value

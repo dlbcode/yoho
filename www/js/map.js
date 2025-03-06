@@ -20,8 +20,37 @@ async function initMapFunctions() {
 
 async function getWaypoints(waypointParam) {
     if (!waypointParam) return null;
+    
+    // Set a flag to indicate we're loading from URL
+    window.isLoadingFromUrl = true;
+    
     const waypointIatas = waypointParam.split(',').map(decodeURIComponent);
-    const airports = await Promise.all(waypointIatas.map(iata => flightMap.getAirportDataByIata(iata)));
+    const airports = await Promise.all(waypointIatas.map(async iata => {
+        // Special handling for "Any" waypoints
+        if (iata === 'Any') {
+            // Check if this is an origin (index is even)
+            const index = waypointIatas.indexOf(iata);
+            const isOrigin = index % 2 === 0;
+            
+            return {
+                iata_code: 'Any',
+                city: 'Anywhere',
+                country: '',
+                name: isOrigin ? 'Any Origin' : 'Any Destination',
+                isAnyDestination: true,
+                isAnyOrigin: isOrigin
+            };
+        }
+        
+        // Normal airport fetch for non-Any waypoints
+        return flightMap.getAirportDataByIata(iata);
+    }));
+    
+    // Reset the flag after a short delay
+    setTimeout(() => {
+        window.isLoadingFromUrl = false;
+    }, 1000);
+    
     return airports.filter(Boolean);
 }
 

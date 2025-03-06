@@ -9,7 +9,13 @@ const routeHandling = {
         lineManager.clearLines('route');
         
         let newRoutes = [];
-        const waypoints = appState.routeDirection === 'to' ? 
+        
+        // Don't reverse waypoints if origin is "Any" - add a check here
+        const hasAnyOrigin = appState.waypoints.some((wp, i) => 
+            i % 2 === 0 && wp && (wp.iata_code === 'Any' || wp.isAnyOrigin));
+        
+        // Only apply routeDirection logic if we don't have an "Any" origin
+        const waypoints = (appState.routeDirection === 'to' && !hasAnyOrigin) ? 
             [...appState.waypoints].reverse() : 
             appState.waypoints;
 
