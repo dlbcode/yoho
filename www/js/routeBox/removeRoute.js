@@ -7,6 +7,7 @@ import { setupRouteContent } from '../infoPane.js';
 import { domManager } from '../utils/domManager.js';
 import { infoPane } from '../infoPane.js';
 import { infoPaneHeight } from '../utils/infoPaneHeightManager.js';
+import { showRouteRemovalModal } from './routeRemovalModal.js';
 
 const removeRoute = (routeNumber) => {
     // Get the infoPane element before removing content
@@ -65,12 +66,29 @@ const removeRoute = (routeNumber) => {
     adjustMapSize();
 };
 
-// No changes needed for removeRouteButton
+// Updated to use modal for selected routes
 const removeRouteButton = (container, routeNumber) => {
     const removeButton = document.createElement('button');
     removeButton.className = 'remove-button';
     removeButton.dataset.routeNumber = routeNumber;
-    removeButton.onclick = () => removeRoute(routeNumber);
+    
+    // Update the click handler to check if this is a selected route
+    removeButton.onclick = () => {
+        // Check if this is a selected route with a group
+        const isSelectedRoute = appState.selectedRoutes[routeNumber] !== undefined;
+        const groupNumber = appState.selectedRoutes[routeNumber]?.group;
+        const hasMultipleSegments = isSelectedRoute && 
+            Object.values(appState.selectedRoutes).filter(route => route.group === groupNumber).length > 1;
+        
+        if (isSelectedRoute && hasMultipleSegments) {
+            // Show the removal modal for selected routes with multiple segments
+            showRouteRemovalModal(routeNumber);
+        } else {
+            // Perform direct removal for non-selected routes or single-segment routes
+            removeRoute(routeNumber);
+        }
+    };
+    
     removeButton.innerHTML = `<img src="./assets/trash_icon.svg" alt="Remove" style="width: 20px; height: 20px;">`; // Use trash icon
     if (container instanceof HTMLElement) {
         container.appendChild(removeButton);

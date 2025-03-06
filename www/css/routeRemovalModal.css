@@ -1,0 +1,85 @@
+.route-removal-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.route-removal-modal.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.route-removal-modal-content {
+  background-color: #222;
+  padding: 20px;
+  border-radius: 5px;
+  border: 1px solid #525252;
+  width: 90%;
+  max-width: 400px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+}
+
+.route-removal-modal h3 {
+  color: #ccc;
+  margin-top: 0;
+  margin-bottom: 15px;
+  font-size: 18px;
+  font-weight: 500;
+  text-align: center;
+}
+
+.route-removal-options {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.route-removal-options button {
+  padding: 15px;
+  text-align: left;
+  background-color: #333;
+  border: none;
+  border-radius: 5px;
+  color: #ccc;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.route-removal-options button:hover {
+  background-color: #3b7897;
+}
+
+.option-title {
+  font-weight: 500;
+  margin-bottom: 5px;
+}
+
+.option-route {
+  font-size: 14px;
+  color: #8ab4d8;
+}
+
+/* Mobile-specific adjustments */
+@media (max-width: 600px) {
+  .route-removal-modal-content {
+    width: 95%;
+    padding: 15px;
+  }
+  
+  .route-removal-options button {
+    padding: 12px;
+  }
+}
