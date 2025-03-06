@@ -241,6 +241,17 @@ function setupAutocompleteForField(fieldId) {
     const debouncedInputHandler = debounce(async () => {
         const query = inputField.value;
         
+        // Always ensure "data-paired-with-anywhere" is up to date
+        const waypointIndex = getWaypointIndexFromId(inputField.id);
+        const isOriginField = waypointIndex % 2 === 0;
+        const pairIndex = isOriginField ? waypointIndex + 1 : waypointIndex - 1;
+        const pairField = document.getElementById(`waypoint-input-${pairIndex + 1}`);
+        
+        // If the pair field no longer has "Anywhere", remove the paired attribute
+        if (pairField && !isAnywhereField(pairField)) {
+            inputField.removeAttribute('data-paired-with-anywhere');
+        }
+        
         if (query.length >= 2) {
             const airports = await fetchAirports(query);
             if (airports.length > 0) {
@@ -343,8 +354,7 @@ function setupAutocompleteForField(fieldId) {
             
             // Check conditions once and store in variables
             const currentValue = inputField.value;
-            const isAnyDestination = currentValue === 'Any' || 
-                inputField.getAttribute('data-is-any-destination') === 'true' ||
+            const isAnyDestination = isAnywhereField(inputField) || 
                 (appState.waypoints[waypointIndex] && 
                  (appState.waypoints[waypointIndex].iata_code === 'Any' || 
                   appState.waypoints[waypointIndex].isAnyDestination === true));
@@ -356,6 +366,13 @@ function setupAutocompleteForField(fieldId) {
             if (!isAnyDestination) {
                 clearInputField(inputField);
                 toggleSuggestionBox(false);
+                
+                // When clearing a field, also remove the attributes that might prevent "Anywhere" from appearing
+                if (isEmpty) {
+                    inputField.removeAttribute('data-is-any-destination');
+                    inputField.removeAttribute('data-paired-with-anywhere');
+                    inputField.removeAttribute('data-selected-iata');
+                }
                 
                 // Only attempt to remove waypoint if conditions are met
                 if (shouldRemoveWaypoint) {
@@ -538,13 +555,10 @@ function createAnywhereHandler(inputId, inputField, suggestionBox, isOriginField
         
         const waypointIndex = getWaypointIndexFromId(inputId);
         
-        // Check if both would be "Anywhere" - consolidate this logic
+        // Use the helper function for cleaner code
         const pairInputId = `waypoint-input-${pairIndex + 1}`;
         const pairField = document.getElementById(pairInputId);
-        const pairFieldHasAnywhere = pairField && 
-            (pairField.value === 'Anywhere' || 
-             pairField.getAttribute('data-is-any-destination') === 'true' ||
-             pairField.getAttribute('data-selected-iata') === 'Any');
+        const pairFieldHasAnywhere = isAnywhereField(pairField);
         
         // Use early return pattern to simplify flow
         if (isOriginField && (isPairAny || pairFieldHasAnywhere) && !window.isLoadingFromUrl) {
@@ -579,6 +593,15 @@ function createAnywhereHandler(inputId, inputField, suggestionBox, isOriginField
         // Handle focus transition with a single setTimeout
         focusNextFieldAfterSelection(isOriginField, waypointIndex, inputField);
     };
+}
+
+// Add this helper function to standardize "Anywhere" checks
+function isAnywhereField(field) {
+    return field && (
+        field.value === 'Anywhere' || 
+        field.getAttribute('data-is-any-destination') === 'true' ||
+        field.getAttribute('data-selected-iata') === 'Any'
+    );
 }
 
 // Helper function to focus next field
