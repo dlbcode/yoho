@@ -182,7 +182,7 @@ function setupAutocompleteForField(fieldId) {
         initialInputValue = inputField.value;
         
         // Get waypoint index and check if this is an origin field
-        const waypointIndex = parseInt(fieldId.replace('waypoint-input-', '')) - 1;
+        const waypointIndex = getWaypointIndexFromId(fieldId);
         const isOriginField = waypointIndex % 2 === 0;
         
         // If this is an origin field and we just set destination to "Anywhere", handle specially
@@ -339,7 +339,7 @@ function setupAutocompleteForField(fieldId) {
                 return;
             }
             
-            const waypointIndex = parseInt(inputField.id.replace('waypoint-input-', '')) - 1;
+            const waypointIndex = getWaypointIndexFromId(inputField.id);
             
             // Check conditions once and store in variables
             const currentValue = inputField.value;
@@ -431,7 +431,7 @@ function updateSuggestions(inputId, airports) {
     }
     
     // Get UI state information
-    const waypointIndex = parseInt(inputId.replace('waypoint-input-', '')) - 1;
+    const waypointIndex = getWaypointIndexFromId(inputId);
     const isOriginField = waypointIndex % 2 === 0;
     
     // Determine paired waypoint
@@ -536,9 +536,9 @@ function createAnywhereHandler(inputId, inputField, suggestionBox, isOriginField
         
         isSelectingItem = true;
         
-        const waypointIndex = parseInt(inputId.replace('waypoint-input-', '')) - 1;
+        const waypointIndex = getWaypointIndexFromId(inputId);
         
-        // Additional check for the paired field's value
+        // Check if both would be "Anywhere" - consolidate this logic
         const pairInputId = `waypoint-input-${pairIndex + 1}`;
         const pairField = document.getElementById(pairInputId);
         const pairFieldHasAnywhere = pairField && 
@@ -546,10 +546,8 @@ function createAnywhereHandler(inputId, inputField, suggestionBox, isOriginField
              pairField.getAttribute('data-is-any-destination') === 'true' ||
              pairField.getAttribute('data-selected-iata') === 'Any');
         
-        // Use both state and DOM info to determine if pair has "Anywhere"
-        const effectiveIsPairAny = isPairAny || pairFieldHasAnywhere;
-        
-        if (isOriginField && effectiveIsPairAny && !window.isLoadingFromUrl) {
+        // Use early return pattern to simplify flow
+        if (isOriginField && (isPairAny || pairFieldHasAnywhere) && !window.isLoadingFromUrl) {
             alert("Both origin and destination cannot be set to 'Anywhere'");
             suggestionBox.style.display = 'none';
             isSelectingItem = false;
@@ -565,54 +563,49 @@ function createAnywhereHandler(inputId, inputField, suggestionBox, isOriginField
             isAnyOrigin: isOriginField
         };
         
-        // Immediately update the DOM with the "Anywhere" attributes
+        // Update DOM and state in sequence
         inputField.value = 'Anywhere';
         inputField.setAttribute('data-selected-iata', 'Any');
         inputField.setAttribute('data-is-any-destination', 'true');
-        
-        // Hide suggestions right away
         suggestionBox.style.display = 'none';
         
         // Update state
-        if (waypointIndex >= 0 && waypointIndex < appState.waypoints.length) {
-            updateState('updateWaypoint', { index: waypointIndex, data: anyDestination }, 'airportAutocomplete.anywhereSelection');
-        } else {
-            updateState('addWaypoint', anyDestination, 'airportAutocomplete.anywhereSelection');
-        }
+        updateState(
+            waypointIndex >= 0 && waypointIndex < appState.waypoints.length ? 'updateWaypoint' : 'addWaypoint', 
+            waypointIndex >= 0 && waypointIndex < appState.waypoints.length ? { index: waypointIndex, data: anyDestination } : anyDestination, 
+            'airportAutocomplete.anywhereSelection'
+        );
         
-        // Use a longer delay to ensure state is properly updated before focusing other field
+        // Handle focus transition with a single setTimeout
+        focusNextFieldAfterSelection(isOriginField, waypointIndex, inputField);
+    };
+}
+
+// Helper function to focus next field
+function focusNextFieldAfterSelection(isOriginField, waypointIndex, inputField) {
+    setTimeout(() => {
+        inputField.blur();
+        
         setTimeout(() => {
-            inputField.blur();
+            isSelectingItem = false;
             
-            // Increase delay to ensure DOM updates are complete
-            setTimeout(() => {
-                isSelectingItem = false;
+            // If not mobile and the other waypoint input is empty, focus it
+            if (window.innerWidth > 600) {
+                const otherIndex = isOriginField ? waypointIndex + 1 : waypointIndex - 1;
+                const otherField = document.getElementById(`waypoint-input-${otherIndex + 1}`);
                 
-                // If not mobile and the other waypoint input is empty, focus it
-                if (window.innerWidth > 600) {
-                    const otherIndex = isOriginField ? waypointIndex + 1 : waypointIndex - 1;
-                    const otherField = document.getElementById(`waypoint-input-${otherIndex + 1}`);
-                    
-                    if (otherField && !otherField.value.trim()) {
-                        // This is the key fix - force an update of the suggestions before focusing
-                        // This ensures the "Anywhere" status of the current field is recognized
-                        if (!isOriginField) {  // If this is destination with "Anywhere"
-                            // Update global flag to track this special case
-                            window.justSelectedAnywhereDestination = true;
-                            
-                            // Modify focus behavior to update suggestions properly
-                            otherField.focus();
-                            
-                            // Update suggestions manually with empty list to force proper pair checking
-                            updateSuggestions(`waypoint-input-${otherIndex + 1}`, []);
-                        } else {
-                            otherField.focus();
-                        }
+                if (otherField && !otherField.value.trim()) {
+                    if (!isOriginField) {  // If this is destination with "Anywhere"
+                        window.justSelectedAnywhereDestination = true;
+                        otherField.focus();
+                        updateSuggestions(`waypoint-input-${otherIndex + 1}`, []);
+                    } else {
+                        otherField.focus();
                     }
                 }
-            }, 200); // Increased from 100ms to 200ms
-        }, 100); // Increased from 50ms to 100ms
-    };
+            }
+        }, 200);
+    }, 100);
 }
 
 function createSelectionHandler(inputId, airport) {
@@ -624,19 +617,21 @@ function createSelectionHandler(inputId, airport) {
         // Get the input field 
         const inputField = document.getElementById(inputId);
         
-        // IMPORTANT: Clear any "Anywhere" related attributes when selecting a specific airport
+        // IMPORTANT: Clear any "Anywhere" related attributes
         inputField.removeAttribute('data-is-any-destination');
         inputField.removeAttribute('data-paired-with-anywhere');
         
         // Handle the selection
         handleSelection(e, inputId, airport);
 
-        // If not mobile and the other waypoint input is empty, focus it
+        // Reuse focus logic
+        const waypointIndex = getWaypointIndexFromId(inputId);
+        const isOriginField = (waypointIndex % 2 === 0);
+        
+        // Focus next field without the delays since handleSelection already has them
         if (window.innerWidth > 600) {
-            const waypointIndex = parseInt(inputId.replace('waypoint-input-', '')) - 1;
-            const isOriginField = (waypointIndex % 2 === 0);
-            const pairIndex = isOriginField ? waypointIndex + 1 : waypointIndex - 1;
-            const otherField = document.getElementById(`waypoint-input-${pairIndex + 1}`);
+            const otherIndex = isOriginField ? waypointIndex + 1 : waypointIndex - 1;
+            const otherField = document.getElementById(`waypoint-input-${otherIndex + 1}`);
             if (otherField && !otherField.value.trim()) {
                 otherField.focus();
             }
@@ -647,7 +642,7 @@ function createSelectionHandler(inputId, airport) {
 document.addEventListener('DOMContentLoaded', () => {
     document.addEventListener('airportSelected', (event) => {
         const { airport, fieldId } = event.detail;
-        const waypointIndex = parseInt(fieldId.replace('waypoint-input-', '')) - 1;
+        const waypointIndex = getWaypointIndexFromId(fieldId);
 
         if (waypointIndex >= 0 && waypointIndex < appState.waypoints.length) {
             updateState('updateWaypoint', { index: waypointIndex, data: airport }, 'airportAutocomplete.addEventListener1');
@@ -770,4 +765,8 @@ function setSuggestionBoxPosition(inputField, suggestionBox) {
     
     // Apply all styles at once
     Object.assign(suggestionBox.style, styles);
+}
+
+function getWaypointIndexFromId(inputId) {
+    return parseInt(inputId.replace('waypoint-input-', '')) - 1;
 }
