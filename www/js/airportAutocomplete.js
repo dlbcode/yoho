@@ -217,6 +217,7 @@ function setupAutocompleteForField(fieldId) {
     // Show suggestions only when there are results
     const debouncedInputHandler = debounce(async () => {
         const query = inputField.value;
+        
         if (query.length >= 2) {
             const airports = await fetchAirports(query);
             if (airports.length > 0) {
@@ -231,12 +232,15 @@ function setupAutocompleteForField(fieldId) {
                     updateActiveItem(items);
                 }
             } else {
-                suggestionBox.style.display = 'none';
-                currentFocus = -1;
+                // Show just the "Anywhere" option when no results found
+                updateSuggestions(fieldId, []);
+                setSuggestionBoxPosition(inputField, suggestionBox);
             }
-        } else {
-            suggestionBox.style.display = 'none';
-            currentFocus = -1;
+        } else if (query.length < 2) {
+            // Show just the "Anywhere" option when field is empty or has 1 character
+            // This covers both empty field and 1-character cases
+            updateSuggestions(fieldId, []);
+            setSuggestionBoxPosition(inputField, suggestionBox);
         }
     }, 200); // 200ms delay
 
