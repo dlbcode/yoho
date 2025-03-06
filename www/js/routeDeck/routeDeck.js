@@ -29,7 +29,33 @@ function buildRouteDeck(routeIndex) {
     // Get origin and destination information
     const dateRange = appState.routeDates[routeIndex] ?? {};
     let origin = appState.waypoints[routeIndex * 2]?.iata_code;
-    let destination = appState.waypoints[(routeIndex * 2) + 1]?.iata_code || 'Any';
+    let destination = appState.waypoints[(routeIndex * 2) + 1]?.iata_code;
+
+    // Special handling for "Any" origin searches
+    if (origin === 'Any') {
+        // Create a special waypoint object that won't be cleared
+        updateState('updateWaypoint', { 
+            index: (routeIndex * 2), 
+            data: {
+                iata_code: 'Any',
+                name: 'Any Origin',
+                isAnyDestination: true // Reuse the same flag for simplicity
+            }
+        }, 'buildRouteDeck');
+        
+        // Mark the input field
+        const originInput = document.getElementById(`waypoint-input-${(routeIndex * 2) + 1}`);
+        if (originInput) {
+            originInput.value = 'Anywhere';
+            originInput.setAttribute('data-is-any-destination', 'true');
+        }
+        
+        // Enable protection mode
+        window.preserveAnyDestination = true;
+        setTimeout(() => {
+            window.preserveAnyDestination = false;
+        }, 1000);
+    }
 
     // Special handling for "Any" destination searches
     if (destination === 'Any') {
@@ -46,7 +72,7 @@ function buildRouteDeck(routeIndex) {
         // Mark the input field
         const destInput = document.getElementById(`waypoint-input-${(routeIndex * 2) + 2}`);
         if (destInput) {
-            destInput.value = 'Any';
+            destInput.value = 'Anywhere';
             destInput.setAttribute('data-is-any-destination', 'true');
         }
         

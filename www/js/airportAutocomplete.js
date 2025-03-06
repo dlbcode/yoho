@@ -120,12 +120,8 @@ function setupAutocompleteForField(fieldId) {
         inputField.removeAttribute('readonly');
         initialInputValue = inputField.value;
         
-        // Determine if this is a destination field (even numbers are destination fields)
-        const inputIndex = parseInt(fieldId.replace(/\D/g, ''), 10) % 2;
-        const isDestinationField = inputIndex === 0; // Even indices are destination fields
-        
-        // Show the "Anywhere" option for destination fields when focused
-        if (isDestinationField && !inputField.value) {
+        // Show the "Anywhere" option when any field is focused and empty
+        if (!inputField.value) {
             // Create and show the suggestion box with just the "Anywhere" option
             updateSuggestions(fieldId, []);
             setSuggestionBoxPosition(inputField, suggestionBox);
@@ -429,10 +425,10 @@ function updateSuggestions(inputId, airports) {
     // Add the "Anywhere" option if there are no airports or it's an empty search
     const isEmptySearch = airports.length === 0;
     const inputField = document.getElementById(inputId);
-    const isDestinationField = parseInt(inputId.replace(/\D/g, ''), 10) % 2 === 0; // Even indices are destination fields
-
-    // Only show "Anywhere" option for destination fields or when explicitly requested
-    if (isDestinationField || inputField.hasAttribute('data-show-anywhere-option')) {
+    
+    // Show "Anywhere" option for both origin and destination fields
+    // Either because it's empty search or the input has the attribute
+    if (isEmptySearch || inputField.hasAttribute('data-show-anywhere-option')) {
         // Create the "Anywhere" option
         const anywhereDiv = document.createElement('div');
         anywhereDiv.className = 'anywhere-suggestion';
@@ -448,6 +444,26 @@ function updateSuggestions(inputId, airports) {
             
             // Set flag to prevent blur handler from interfering
             isSelectingItem = true;
+            
+            // Extract waypoint index from the input ID
+            const waypointIndex = parseInt(inputId.replace('waypoint-input-', '')) - 1;
+            
+            // Determine if this is an origin or destination
+            const isOriginField = waypointIndex % 2 === 0;
+            const pairIndex = isOriginField ? waypointIndex + 1 : waypointIndex - 1;
+            
+            // Check if corresponding pair waypoint is also "Any"
+            const pairWaypoint = appState.waypoints[pairIndex];
+            const isPairAny = pairWaypoint && 
+                (pairWaypoint.iata_code === 'Any' || pairWaypoint.isAnyDestination);
+            
+            // If this is an origin and the destination is already "Any", show an alert
+            if (isOriginField && isPairAny) {
+                alert("Both origin and destination cannot be set to 'Anywhere'");
+                suggestionBox.style.display = 'none';
+                isSelectingItem = false;
+                return;
+            }
             
             // Create a special "Any" airport object
             const anyDestination = {
@@ -465,9 +481,6 @@ function updateSuggestions(inputId, airports) {
             
             // Hide suggestions
             suggestionBox.style.display = 'none';
-            
-            // Extract waypoint index from the input ID
-            const waypointIndex = parseInt(inputId.replace('waypoint-input-', '')) - 1;
             
             // Update state with the "Any" destination
             if (waypointIndex >= 0 && waypointIndex < appState.waypoints.length) {
@@ -496,6 +509,7 @@ function updateSuggestions(inputId, airports) {
         suggestionBox.appendChild(anywhereDiv);
     }
     
+    // Rest of the original function remains the same
     let selectionHandledByTouch = false;
 
     airports.forEach((airport, index) => {

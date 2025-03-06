@@ -35,15 +35,15 @@ function updateState(key, value, calledFrom) {
         const waypointIndex = value;
         const waypoint = appState.waypoints[waypointIndex];
         
-        // Check for "Any" destination markers
-        const isAnyDestination = 
+        // Check for "Any" destination markers - update to handle both origin and destination
+        const isAnyWaypoint = 
             (waypoint && (waypoint.iata_code === 'Any' || waypoint.isAnyDestination === true)) ||
             window.preserveAnyDestination ||
             document.getElementById(`waypoint-input-${waypointIndex + 1}`)?.getAttribute('data-is-any-destination') === 'true';
         
-        // Skip the removal for "Any" destinations
-        if (isAnyDestination) {
-            console.log(`Preserving "Any" destination at index ${waypointIndex}`);
+        // Skip the removal for "Any" waypoints (both origin and destination)
+        if (isAnyWaypoint) {
+            console.log(`Preserving "Any" waypoint at index ${waypointIndex}`);
             shouldContinue = false; // Don't proceed with the state change
         }
     }

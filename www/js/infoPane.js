@@ -78,12 +78,24 @@ const infoPane = {
             const originElement = document.createElement('span');
             originElement.className = 'origin-iata';
             originElement.textContent = origin;
+            
+            // Add special styling for "Any" origins
+            if (origin === 'Any') {
+                originElement.classList.add('any-waypoint');
+            }
+            
             button.appendChild(originElement);
             
             // Create destination element (lower right)
             const destElement = document.createElement('span');
             destElement.className = 'dest-iata';
             destElement.textContent = destination;
+            
+            // Add special styling for "Any" destinations
+            if (destination === 'Any') {
+                destElement.classList.add('any-waypoint');
+            }
+            
             button.appendChild(destElement);
             
             button.onclick = this.handleRouteButtonClick.bind(this, routeIndex);
@@ -103,8 +115,17 @@ const infoPane = {
             uiHandling.attachDateTooltip(button, routeIndex);
 
             // Use a single event listener for both mouseover and mouseout
-            button.addEventListener('mouseover', () => this.applyToLines([`route:${origin}-${destination}`], 'highlight'));
-            button.addEventListener('mouseout', () => this.applyToLines([`route:${origin}-${destination}`], 'reset'));
+            button.addEventListener('mouseover', () => {
+                // Only highlight if neither origin nor destination is "Any"
+                if (origin !== 'Any' && destination !== 'Any') {
+                    this.applyToLines([`route:${origin}-${destination}`], 'highlight');
+                }
+            });
+            button.addEventListener('mouseout', () => {
+                if (origin !== 'Any' && destination !== 'Any') {
+                    this.applyToLines([`route:${origin}-${destination}`], 'reset');
+                }
+            });
         });
 
         if (appState.waypoints.length === 0 || appState.waypoints.length % 2 === 0) {
@@ -292,8 +313,11 @@ const infoPane = {
             appState.waypoints[routeIndex * 2 + 1]
         ];
         
-        // If either waypoint is missing, don't adjust the map
-        if (!originWaypoint || !destinationWaypoint) return;
+        // If either waypoint is missing or has iata_code=Any, don't adjust the map
+        if (!originWaypoint || !destinationWaypoint || 
+            originWaypoint.iata_code === 'Any' || destinationWaypoint.iata_code === 'Any') {
+            return;
+        }
         
         const points = [originWaypoint, destinationWaypoint]
             .filter(wp => wp && wp.latitude && wp.longitude);

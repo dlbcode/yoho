@@ -291,10 +291,29 @@ const setWaypointInputs = (routeNumber) => {
     console.log('Setting waypoint inputs:', { fromWaypoint, toWaypoint });
 
     if (fromInput) {
-        fromInput.value = fromWaypoint ? `${fromWaypoint.city}, (${fromWaypoint.iata_code})` : '';
+        if (!fromWaypoint) {
+            fromInput.value = '';
+        } else if (fromWaypoint.iata_code === 'Any' || fromWaypoint.isAnyDestination) {
+            fromInput.value = 'Anywhere';
+            fromInput.setAttribute('data-selected-iata', 'Any');
+            fromInput.setAttribute('data-is-any-destination', 'true');
+        } else {
+            fromInput.value = `${fromWaypoint.city}, (${fromWaypoint.iata_code})`;
+            fromInput.setAttribute('data-selected-iata', fromWaypoint.iata_code);
+        }
     }
+    
     if (toInput) {
-        toInput.value = toWaypoint ? `${toWaypoint.city}, (${toWaypoint.iata_code})` : '';
+        if (!toWaypoint) {
+            toInput.value = '';
+        } else if (toWaypoint.iata_code === 'Any' || toWaypoint.isAnyDestination) {
+            toInput.value = 'Anywhere';
+            toInput.setAttribute('data-selected-iata', 'Any');
+            toInput.setAttribute('data-is-any-destination', 'true');
+        } else {
+            toInput.value = `${toWaypoint.city}, (${toWaypoint.iata_code})`;
+            toInput.setAttribute('data-selected-iata', toWaypoint.iata_code);
+        }
     }
 };
 

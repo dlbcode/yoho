@@ -13,8 +13,13 @@ const routeHandling = {
             [...appState.waypoints].reverse() : 
             appState.waypoints;
 
-        // Batch fetch routes
-        const uniqueIataCodes = [...new Set(waypoints.map(wp => wp.iata_code))];
+        // Batch fetch routes for non-Any waypoints
+        const uniqueIataCodes = [...new Set(
+            waypoints
+                .filter(wp => wp && wp.iata_code && wp.iata_code !== 'Any')
+                .map(wp => wp.iata_code)
+        )];
+        
         await Promise.all(
             uniqueIataCodes
                 .filter(code => !appState.directRoutes[code])
@@ -39,6 +44,31 @@ const routeHandling = {
                     price: null,
                     tripType: appState.routes[i/2]?.tripType || 'oneWay'
                 });
+                continue;
+            }
+
+            // Special handling for Any origin or Any destination
+            if (fromWaypoint.iata_code === 'Any' || toWaypoint.iata_code === 'Any') {
+                const routeData = {
+                    origin: fromWaypoint.iata_code,
+                    destination: toWaypoint.iata_code,
+                    isDirect: false,
+                    isSelected: isSelected,
+                    price: isSelected ? appState.selectedRoutes[routeIndex]?.displayData?.price || null : null,
+                    tripType: appState.routes[i/2]?.tripType || 'oneWay'
+                };
+                
+                // If this is an "Any" origin route, add flag
+                if (fromWaypoint.iata_code === 'Any') {
+                    routeData.hasAnyOrigin = true;
+                }
+                
+                // If this is an "Any" destination route, add flag
+                if (toWaypoint.iata_code === 'Any') {
+                    routeData.hasAnyDestination = true;
+                }
+                
+                newRoutes.push(routeData);
                 continue;
             }
 
