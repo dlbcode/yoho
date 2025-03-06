@@ -61,7 +61,7 @@ module.exports = function(app, db, tequila) {
             // Fetch data from all search circles in parallel
             await Promise.all(searchCircles.map(async (radiusParam) => {
                 try {
-                    const apiUrl = `https://api.tequila.kiwi.com/v2/search?fly_from=${radiusParam}&fly_to=${destination}&date_from=${encodedDates.from}&date_to=${encodedDates.to}&limit=${limit}&one_for_city=1&price_to=${priceTo}`;
+                    const apiUrl = `https://api.tequila.kiwi.com/v2/search?fly_from=${radiusParam}&fly_to=${destination}&date_from=${encodedDates.from}&date_to=${encodedDates.to}&limit=${limit}&price_to=${priceTo}`;
                     
                     const response = await axios.get(apiUrl, {
                         headers: { 'apikey': tequila.headers.apikey }
