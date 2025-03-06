@@ -119,8 +119,18 @@ function setupAutocompleteForField(fieldId) {
     addTrackedListener(inputField, 'focus', async () => {
         inputField.removeAttribute('readonly');
         initialInputValue = inputField.value;
-        setSuggestionBoxPosition(inputField, suggestionBox);
-
+        
+        // Determine if this is a destination field (even numbers are destination fields)
+        const inputIndex = parseInt(fieldId.replace(/\D/g, ''), 10) % 2;
+        const isDestinationField = inputIndex === 0; // Even indices are destination fields
+        
+        // Show the "Anywhere" option for destination fields when focused
+        if (isDestinationField && !inputField.value) {
+            // Create and show the suggestion box with just the "Anywhere" option
+            updateSuggestions(fieldId, []);
+            setSuggestionBoxPosition(inputField, suggestionBox);
+        }
+        
         const iataCode = inputField.getAttribute('data-selected-iata') || getIataFromField(fieldId);
         if (iataCode) {
             const airport = await fetchAirportByIata(iataCode);
@@ -416,7 +426,76 @@ function updateSuggestions(inputId, airports) {
     suggestionBox.style.position = 'fixed';  // Use fixed instead of absolute
     suggestionBox.style.zIndex = '1000';     // Much higher than infoPane
     
-    // Rest of your suggestion rendering code...
+    // Add the "Anywhere" option if there are no airports or it's an empty search
+    const isEmptySearch = airports.length === 0;
+    const inputField = document.getElementById(inputId);
+    const isDestinationField = parseInt(inputId.replace(/\D/g, ''), 10) % 2 === 0; // Even indices are destination fields
+
+    // Only show "Anywhere" option for destination fields or when explicitly requested
+    if (isDestinationField || inputField.hasAttribute('data-show-anywhere-option')) {
+        // Create the "Anywhere" option
+        const anywhereDiv = document.createElement('div');
+        anywhereDiv.className = 'anywhere-suggestion';
+        anywhereDiv.textContent = 'Anywhere';
+        
+        // Add a special attribute to identify this as the "Anywhere" option
+        anywhereDiv.setAttribute('data-is-anywhere', 'true');
+        
+        // Create a single handler for "Anywhere" selection
+        const anywhereHandler = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            // Set flag to prevent blur handler from interfering
+            isSelectingItem = true;
+            
+            // Create a special "Any" airport object
+            const anyDestination = {
+                iata_code: 'Any',
+                city: 'Anywhere',
+                country: '',
+                name: 'Any Destination',
+                isAnyDestination: true
+            };
+            
+            // Set the input value
+            inputField.value = 'Anywhere';
+            inputField.setAttribute('data-selected-iata', 'Any');
+            inputField.setAttribute('data-is-any-destination', 'true');
+            
+            // Hide suggestions
+            suggestionBox.style.display = 'none';
+            
+            // Extract waypoint index from the input ID
+            const waypointIndex = parseInt(inputId.replace('waypoint-input-', '')) - 1;
+            
+            // Update state with the "Any" destination
+            if (waypointIndex >= 0 && waypointIndex < appState.waypoints.length) {
+                updateState('updateWaypoint', { index: waypointIndex, data: anyDestination }, 
+                           'airportAutocomplete.anywhereSelection');
+            } else {
+                updateState('addWaypoint', anyDestination, 'airportAutocomplete.anywhereSelection');
+            }
+            
+            // Blur the input field after selection
+            setTimeout(() => {
+                inputField.blur();
+                setTimeout(() => {
+                    isSelectingItem = false;
+                }, 100);
+            }, 50);
+        };
+        
+        // Add event listeners for the "Anywhere" option
+        if ('ontouchstart' in window) {
+            anywhereDiv.addEventListener('touchend', anywhereHandler);
+        }
+        anywhereDiv.addEventListener('mousedown', anywhereHandler);
+        anywhereDiv.addEventListener('click', anywhereHandler);
+        
+        suggestionBox.appendChild(anywhereDiv);
+    }
+    
     let selectionHandledByTouch = false;
 
     airports.forEach((airport, index) => {
@@ -474,7 +553,8 @@ function updateSuggestions(inputId, airports) {
         suggestionBox.appendChild(div);
     });
 
-    if (airports.length > 0) {
+    // Only show suggestion box if we have content
+    if (suggestionBox.children.length > 0) {
         // Force higher z-index and display
         suggestionBox.style.display = 'block';
         suggestionBox.style.zIndex = '90'; // Was 10000 - now matches our new scale

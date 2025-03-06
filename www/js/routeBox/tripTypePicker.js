@@ -71,7 +71,33 @@ export function tripTypePicker(routeNumber) {
     return tripTypeContainer;
 }
 
+// This is a suggestion for an update to handle "Anywhere" values properly in trip type changes
+// Note: I don't have access to this file directly so you'll need to adapt this to your codebase
+
 export function handleTripTypeChange(tripType, routeNumber) {
+    // Update your existing code to recognize "Anywhere" as a valid destination
+    const fromInput = document.getElementById(`waypoint-input-${routeNumber * 2 + 1}`);
+    const toInput = document.getElementById(`waypoint-input-${routeNumber * 2 + 2}`);
+    
+    // Update the routes array with the new trip type
+    updateState('tripType', { routeNumber: routeNumber, tripType: tripType }, 'tripTypePicker.handleTripTypeChange');
+    
+    // Check if the destination is set to "Anywhere" and handle accordingly
+    // This allows "Anywhere" to be a valid destination for any trip type
+    if (toInput?.value === 'Anywhere' || 
+        toInput?.getAttribute('data-is-any-destination') === 'true' ||
+        (appState.waypoints[routeNumber * 2 + 1] && 
+         (appState.waypoints[routeNumber * 2 + 1].iata_code === 'Any' || 
+          appState.waypoints[routeNumber * 2 + 1].isAnyDestination === true))) {
+        
+        // If destination is "Anywhere", preserve it for any trip type
+        window.preserveAnyDestination = true;
+        setTimeout(() => {
+            window.preserveAnyDestination = false;
+        }, 500);
+    }
+    
+    // Rest of your code for handling trip type changes...
     const dateInputsContainer = document.querySelector('.date-inputs-container');
     if (dateInputsContainer) {
         dateInputsContainer.innerHTML = '';
