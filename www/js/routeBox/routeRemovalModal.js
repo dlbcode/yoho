@@ -59,16 +59,23 @@ export function showRouteRemovalModal(routeNumber) {
     
     // Add header and buttons
     modalContent.innerHTML = `
-        <h3>Remove Route</h3>
+        <h3>Remove</h3>
         <div class="route-removal-options">
-            <button class="remove-segment-btn">
-                <div class="option-title">Remove segment</div>
-                <div class="option-route">${routeSegmentName}</div>
-            </button>
-            <button class="remove-route-btn">
-                <div class="option-title">Remove entire route</div>
-                <div class="option-route">${fullRouteName}</div>
-            </button>
+            <div class="option-container">
+                <div class="option-title">Segment</div>
+                <button class="remove-segment-btn">
+                    <div class="option-route">${routeSegmentName}</div>
+                </button>
+            </div>
+            <div class="option-container">
+                <div class="option-title">Entire route</div>
+                <button class="remove-route-btn">
+                    <div class="option-route">${fullRouteName}</div>
+                </button>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="cancel-btn">Cancel</button>
         </div>
     `;
     
@@ -79,6 +86,7 @@ export function showRouteRemovalModal(routeNumber) {
     // Add event listeners
     const removeSegmentBtn = modal.querySelector('.remove-segment-btn');
     const removeRouteBtn = modal.querySelector('.remove-route-btn');
+    const cancelBtn = modal.querySelector('.cancel-btn');
     
     // Click on segment button - remove just this segment
     removeSegmentBtn.addEventListener('click', () => {
@@ -93,6 +101,11 @@ export function showRouteRemovalModal(routeNumber) {
         [...groupRoutes].reverse().forEach(routeIndex => {
             removeRoute(routeIndex);
         });
+    });
+    
+    // Cancel button click handler
+    cancelBtn.addEventListener('click', () => {
+        closeModal();
     });
     
     // Close modal on outside click

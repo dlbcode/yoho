@@ -21,19 +21,19 @@
 
 .route-removal-modal-content {
   background-color: #222;
-  padding: 20px;
+  padding: 15px;
   border-radius: 5px;
   border: 1px solid #525252;
-  width: 90%;
-  max-width: 400px;
+  width: 85%;
+  max-width: 320px;
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
 }
 
 .route-removal-modal h3 {
   color: #ccc;
   margin-top: 0;
-  margin-bottom: 15px;
-  font-size: 18px;
+  margin-bottom: 12px;
+  font-size: 16px;
   font-weight: 500;
   text-align: center;
 }
@@ -41,45 +41,76 @@
 .route-removal-options {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
+}
+
+.option-container {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .route-removal-options button {
-  padding: 15px;
-  text-align: left;
-  background-color: #333;
+  padding: 8px;
+  text-align: center;
+  background-color: #5e0c01; /* Using routeBox remove button color */
   border: none;
-  border-radius: 5px;
-  color: #ccc;
+  border-radius: 4px;
+  color: #fff;
   cursor: pointer;
   transition: background-color 0.2s ease;
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
+  justify-content: center;
+  align-items: center;
+  min-height: 36px;
+  font-size: 13px;
 }
 
 .route-removal-options button:hover {
-  background-color: #3b7897;
+  background-color: #2d0500;
 }
 
 .option-title {
   font-weight: 500;
-  margin-bottom: 5px;
+  color: #ccc;
+  margin-left: 2px;
+  font-size: 13px;
 }
 
 .option-route {
-  font-size: 14px;
-  color: #8ab4d8;
+  font-size: 13px;
+  color: #fff;
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 12px;
+}
+
+.cancel-btn {
+  background-color: #0f2f56;
+  border: none;
+  border-radius: 4px;
+  color: #ccc;
+  cursor: pointer;
+  padding: 6px 12px;
+  font-size: 12px;
+  transition: background-color 0.2s ease;
+}
+
+.cancel-btn:hover {
+  background-color: #2a4f7c;
 }
 
 /* Mobile-specific adjustments */
 @media (max-width: 600px) {
   .route-removal-modal-content {
-    width: 95%;
-    padding: 15px;
+    width: 90%;
+    padding: 12px;
   }
   
   .route-removal-options button {
-    padding: 12px;
+    padding: 10px;
   }
 }
