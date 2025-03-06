@@ -516,7 +516,19 @@ function createAnywhereHandler(inputId, inputField, suggestionBox, isOriginField
         
         setTimeout(() => {
             inputField.blur();
-            setTimeout(() => { isSelectingItem = false; }, 100);
+            setTimeout(() => {
+                isSelectingItem = false;
+                
+                // If not mobile and the other waypoint input is empty, focus it
+                if (window.innerWidth > 600) {
+                    const isOriginField = (waypointIndex % 2 === 0);
+                    const otherIndex = isOriginField ? waypointIndex + 1 : waypointIndex - 1;
+                    const otherField = document.getElementById(`waypoint-input-${otherIndex + 1}`);
+                    if (otherField && !otherField.value.trim()) {
+                        otherField.focus();
+                    }
+                }
+            }, 100);
         }, 50);
     };
 }
@@ -527,6 +539,17 @@ function createSelectionHandler(inputId, airport) {
         e.stopPropagation();
         isSelectingItem = true;
         handleSelection(e, inputId, airport);
+
+        // If not mobile and the other waypoint input is empty, focus it
+        if (window.innerWidth > 600) {
+            const waypointIndex = parseInt(inputId.replace('waypoint-input-', '')) - 1;
+            const isOriginField = (waypointIndex % 2 === 0);
+            const pairIndex = isOriginField ? waypointIndex + 1 : waypointIndex - 1;
+            const otherField = document.getElementById(`waypoint-input-${pairIndex + 1}`);
+            if (otherField && !otherField.value.trim()) {
+                otherField.focus();
+            }
+        }
     };
 }
 
