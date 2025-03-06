@@ -1,5 +1,4 @@
 const express = require('express');
-//const Amadeus = require('amadeus');
 const axios = require('axios');
 const MongoClient = require('mongodb').MongoClient;
 const app = express();
@@ -54,6 +53,9 @@ MongoClient.connect(mongoUrl, { useNewUrlParser: true, useUnifiedTopology: true 
   const cheapestFlights = require('./api/cheapestFlights');
   cheapestFlights(app, db, tequila);
 
+  const cheapestFlightsTo = require('./api/cheapestFlightsTo');
+  cheapestFlightsTo(app, db, tequila);
+
   const aggregateRoutes = require('./api/aggregateRoutes');
   aggregateRoutes(app, airportsCollection, routesCollection);
 
@@ -63,7 +65,6 @@ MongoClient.connect(mongoUrl, { useNewUrlParser: true, useUnifiedTopology: true 
   const range = require('./api/range');
   range(app, db, tequila);
 
-  // Add the new airline logos service
   const airlineLogos = require('./api/airlineLogos');
   airlineLogos(app);
 }); 
