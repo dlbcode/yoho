@@ -422,13 +422,25 @@ function updateSuggestions(inputId, airports) {
     suggestionBox.style.position = 'fixed';  // Use fixed instead of absolute
     suggestionBox.style.zIndex = '1000';     // Much higher than infoPane
     
+    // Extract waypoint index from the input ID
+    const waypointIndex = parseInt(inputId.replace('waypoint-input-', '')) - 1;
+    
+    // Determine if this is an origin or destination
+    const isOriginField = waypointIndex % 2 === 0;
+    const pairIndex = isOriginField ? waypointIndex + 1 : waypointIndex - 1;
+    
+    // Check if corresponding pair waypoint is "Any"
+    const pairWaypoint = appState.waypoints[pairIndex];
+    const isPairAny = pairWaypoint && 
+        (pairWaypoint.iata_code === 'Any' || pairWaypoint.isAnyDestination);
+    
     // Add the "Anywhere" option if there are no airports or it's an empty search
+    // AND the pair waypoint is not already set to "Any"
     const isEmptySearch = airports.length === 0;
     const inputField = document.getElementById(inputId);
     
-    // Show "Anywhere" option for both origin and destination fields
-    // Either because it's empty search or the input has the attribute
-    if (isEmptySearch || inputField.hasAttribute('data-show-anywhere-option')) {
+    // Show "Anywhere" option only if the paired waypoint is NOT already "Any"
+    if ((isEmptySearch || inputField.hasAttribute('data-show-anywhere-option')) && !isPairAny) {
         // Create the "Anywhere" option
         const anywhereDiv = document.createElement('div');
         anywhereDiv.className = 'anywhere-suggestion';
