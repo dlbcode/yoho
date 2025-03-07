@@ -360,63 +360,75 @@ class InputManager {
         }
     }
     
+    // Optimize the positionSuggestionBox method which is called frequently
     positionSuggestionBox(inputId) {
         const inputField = document.getElementById(inputId);
         const suggestionBox = this.suggestionBoxes[inputId];
         
         if (!suggestionBox || !inputField) return;
-
+    
         const isMobile = this.isMobile();
-        const inputRect = inputField.getBoundingClientRect();
-        const waypointContainer = document.querySelector('.waypoint-inputs-container');
-        const containerRect = waypointContainer ? waypointContainer.getBoundingClientRect() : null;
-        const maxMenuHeight = 200;
-
-        const waypointIndex = parseInt(inputField.id.replace(/\D/g, ''), 10) - 1;
-        const isOriginField = waypointIndex % 2 === 0;
-
-        const styles = {
-            position: 'fixed',
-            zIndex: '10000',
-            display: suggestionBox.children.length > 0 ? 'block' : 'none',
-        };
-
+        
+        // Mobile optimization - use fixed positioning for all mobile suggestion boxes
         if (isMobile) {
-            Object.assign(styles, {
+            Object.assign(suggestionBox.style, {
+                position: 'fixed',
+                zIndex: '10000',
+                display: suggestionBox.children.length > 0 ? 'block' : 'none',
                 top: '50px',
                 left: '0',
                 width: '100%',
                 maxHeight: 'calc(100vh - 50px)',
                 minHeight: 'none',
             });
-        } else if (containerRect) {
-            const viewportHeight = window.innerHeight;
-            const spaceBelow = viewportHeight - inputRect.bottom;
-            const spaceAbove = inputRect.top;
-            const showAbove = spaceBelow < maxMenuHeight && spaceAbove >= maxMenuHeight;
-
-            const suggestionWidth = containerRect.width;
-            let left = isOriginField ? inputRect.left : (inputRect.right - suggestionWidth);
-            left = Math.max(0, Math.min(left, window.innerWidth - suggestionWidth));
-
-            Object.assign(styles, {
-                width: `${suggestionWidth}px`,
-                left: `${left}px`,
-                maxHeight: `${Math.min(maxMenuHeight, showAbove ? spaceAbove : spaceBelow)}px`,
-                [showAbove ? 'bottom' : 'top']: `${showAbove ? viewportHeight - inputRect.top : inputRect.bottom}px`,
-                [showAbove ? 'top' : 'bottom']: 'auto',
-            });
-        } else {
-            Object.assign(styles, {
+            return;
+        }
+        
+        // Desktop positioning - optimize calculations
+        const inputRect = inputField.getBoundingClientRect();
+        const waypointContainer = document.querySelector('.waypoint-inputs-container');
+        const containerRect = waypointContainer ? waypointContainer.getBoundingClientRect() : null;
+        
+        if (!containerRect) {
+            // Fallback if container not found
+            Object.assign(suggestionBox.style, {
+                position: 'fixed',
+                zIndex: '10000',
+                display: suggestionBox.children.length > 0 ? 'block' : 'none',
                 width: `${inputRect.width}px`,
                 left: `${inputRect.left}px`,
-                maxHeight: `${maxMenuHeight}px`,
+                maxHeight: '200px',
                 top: `${inputRect.bottom}px`,
                 bottom: 'auto',
             });
+            return;
         }
-
-        Object.assign(suggestionBox.style, styles);
+        
+        // Optimized positioning calculation
+        const viewportHeight = window.innerHeight;
+        const maxMenuHeight = 200;
+        const spaceBelow = viewportHeight - inputRect.bottom;
+        const spaceAbove = inputRect.top;
+        const showAbove = spaceBelow < maxMenuHeight && spaceAbove >= maxMenuHeight;
+        
+        const waypointIndex = parseInt(inputField.id.replace(/\D/g, ''), 10) - 1;
+        const isOriginField = waypointIndex % 2 === 0;
+        
+        const suggestionWidth = containerRect.width;
+        let left = isOriginField ? inputRect.left : (inputRect.right - suggestionWidth);
+        left = Math.max(0, Math.min(left, window.innerWidth - suggestionWidth));
+        
+        // Apply all styles at once for better performance
+        Object.assign(suggestionBox.style, {
+            position: 'fixed',
+            zIndex: '10000',
+            display: suggestionBox.children.length > 0 ? 'block' : 'none',
+            width: `${suggestionWidth}px`,
+            left: `${left}px`,
+            maxHeight: `${Math.min(maxMenuHeight, showAbove ? spaceAbove : spaceBelow)}px`,
+            [showAbove ? 'bottom' : 'top']: `${showAbove ? viewportHeight - inputRect.top : inputRect.bottom}px`,
+            [showAbove ? 'top' : 'bottom']: 'auto',
+        });
     }
     
     expandInput(inputId) {
@@ -550,15 +562,16 @@ class InputManager {
         });
     }
     
+    // Optimize the syncInputWithWaypoint method
     syncInputWithWaypoint(inputId) {
         const inputField = document.getElementById(inputId);
         if (!inputField) return;
         
-        // Use the existing placeholder - no need to reset it
-        
         const waypointIndex = parseInt(inputId.replace(/\D/g, ''), 10) - 1;
         const waypoint = appState.waypoints[waypointIndex];
+        const inputState = this.inputStates[inputId] || {};
         
+        // Reset if no waypoint
         if (!waypoint) {
             inputField.value = '';
             inputField.removeAttribute('data-selected-iata');
@@ -572,26 +585,22 @@ class InputManager {
             return;
         }
         
-        if (waypoint.iata_code === 'Any' || waypoint.isAnyDestination || waypoint.isAnyOrigin) {
-            inputField.value = 'Anywhere';
-            inputField.setAttribute('data-selected-iata', 'Any');
-            inputField.setAttribute('data-is-any-destination', 'true');
-            inputField.readOnly = true;
-            
-            if (this.inputStates[inputId]) {
-                this.inputStates[inputId].previousValidValue = 'Anywhere';
-                this.inputStates[inputId].previousIataCode = 'Any';
-            }
-        } else {
-            inputField.value = `${waypoint.city}, (${waypoint.iata_code})`;
-            inputField.setAttribute('data-selected-iata', waypoint.iata_code);
-            inputField.removeAttribute('data-is-any-destination');
-            inputField.readOnly = true;
-            
-            if (this.inputStates[inputId]) {
-                this.inputStates[inputId].previousValidValue = inputField.value;
-                this.inputStates[inputId].previousIataCode = waypoint.iata_code;
-            }
+        // Handle "Anywhere" case
+        const isAnyDestination = waypoint.iata_code === 'Any' || 
+                                waypoint.isAnyDestination || 
+                                waypoint.isAnyOrigin;
+        
+        // Set all values at once
+        inputField.value = isAnyDestination ? 'Anywhere' : `${waypoint.city}, (${waypoint.iata_code})`;
+        inputField.setAttribute('data-selected-iata', isAnyDestination ? 'Any' : waypoint.iata_code);
+        isAnyDestination ? inputField.setAttribute('data-is-any-destination', 'true') :
+                          inputField.removeAttribute('data-is-any-destination');
+        inputField.readOnly = true;
+        
+        // Update input state
+        if (this.inputStates[inputId]) {
+            this.inputStates[inputId].previousValidValue = inputField.value;
+            this.inputStates[inputId].previousIataCode = isAnyDestination ? 'Any' : waypoint.iata_code;
         }
     }
     
