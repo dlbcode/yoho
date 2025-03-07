@@ -85,11 +85,12 @@ export const updateSuggestions = (inputId, airports) => {
     ));
 
     const inputField = document.getElementById(inputId);
+    let hasAddedSuggestions = false;
 
     // Show "Anywhere" option if appropriate
     if (airports.length === 0 && !isPairAny) {
         const anywhereDiv = document.createElement('div');
-        anywhereDiv.className = 'anywhere-suggestion';
+        anywhereDiv.className = 'anywhere-suggestion selected'; // Add 'selected' class by default
         anywhereDiv.textContent = 'Anywhere';
         anywhereDiv.setAttribute('data-is-anywhere', 'true');
         anywhereDiv.setAttribute('role', 'option');
@@ -165,6 +166,12 @@ export const updateSuggestions = (inputId, airports) => {
         });
 
         suggestionBox.appendChild(anywhereDiv);
+        hasAddedSuggestions = true;
+        
+        // Set the selected suggestion index to 0 (first item)
+        if (inputManager.inputStates[inputId]) {
+            inputManager.inputStates[inputId].selectedSuggestionIndex = 0;
+        }
     }
 
     // Add airport options
@@ -173,6 +180,16 @@ export const updateSuggestions = (inputId, airports) => {
         div.textContent = `${airport.name} (${airport.iata_code}) - ${airport.city}, ${airport.country}`;
         div.setAttribute('role', 'option');
         div.id = `${inputId}-suggestion-${index}`;
+        
+        // Add 'selected' class to the first item if no 'Anywhere' option is present
+        if (index === 0 && !hasAddedSuggestions) {
+            div.classList.add('selected');
+            hasAddedSuggestions = true;
+            // Set the selected suggestion index to 0 (first item)
+            if (inputManager.inputStates[inputId]) {
+                inputManager.inputStates[inputId].selectedSuggestionIndex = 0;
+            }
+        }
         
         div.addEventListener('click', (e) => {
             e.preventDefault();
