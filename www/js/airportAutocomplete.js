@@ -11,7 +11,7 @@ const debounce = (func, delay) => {
     };
 };
 
-// Fetch airports by query
+// API functions
 const fetchAirports = async (query) => {
     if (!query || query.length < 2) return [];
     try {
@@ -25,12 +25,10 @@ const fetchAirports = async (query) => {
     }
 };
 
-// Fetch airport by IATA code
 export const fetchAirportByIata = async (iata) => {
     if (!iata) return null;
     try {
-        const encodedIata = encodeURIComponent(iata.trim());
-        const response = await fetch(`https://yonderhop.com/api/airports?iata=${encodedIata}`);
+        const response = await fetch(`https://yonderhop.com/api/airports?iata=${encodeURIComponent(iata.trim())}`);
         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
         const airports = await response.json();
         return airports.length > 0 ? airports[0] : null;
@@ -38,6 +36,17 @@ export const fetchAirportByIata = async (iata) => {
         console.error('Failed to fetch airport data:', error);
         return null;
     }
+};
+
+// Helper functions
+const getWaypointIndex = (inputId) => parseInt(inputId.replace(/\D/g, ''), 10) - 1;
+const isOriginField = (waypointIndex) => waypointIndex % 2 === 0;
+const getPairIndex = (waypointIndex, isOrigin) => isOrigin ? waypointIndex + 1 : waypointIndex - 1;
+
+export const getIataFromField = (inputId) => {
+    const fieldValue = document.getElementById(inputId)?.value || '';
+    const iataCodeMatch = fieldValue.match(/\b([A-Z]{3})\b/);
+    return iataCodeMatch ? iataCodeMatch[1] : null;
 };
 
 // Update suggestions in the suggestion box
@@ -59,29 +68,25 @@ export const updateSuggestions = (inputId, airports) => {
     }
 
     // Calculate waypoint index and check if pair is "Any"
-    const waypointIndex = parseInt(inputId.replace(/\D/g, ''), 10) - 1;
-    const isOriginField = waypointIndex % 2 === 0;
-    const pairIndex = isOriginField ? waypointIndex + 1 : waypointIndex - 1;
+    const waypointIndex = getWaypointIndex(inputId);
+    const isOrigin = isOriginField(waypointIndex);
+    const pairIndex = getPairIndex(waypointIndex, isOrigin);
     const pairField = document.getElementById(`waypoint-input-${pairIndex + 1}`);
-
-    const pairFieldHasAnywhere = pairField && (
+    
+    const pairWaypoint = (pairIndex >= 0 && pairIndex < appState.waypoints.length) ? appState.waypoints[pairIndex] : null;
+    const isPairAny = (pairField && (
         pairField.value === 'Anywhere' ||
         pairField.getAttribute('data-is-any-destination') === 'true' ||
         pairField.getAttribute('data-selected-iata') === 'Any'
-    );
-    const pairWaypoint = (pairIndex >= 0 && pairIndex < appState.waypoints.length)
-        ? appState.waypoints[pairIndex]
-        : null;
-    const isPairAny = pairFieldHasAnywhere ||
-        (pairWaypoint && (
-            pairWaypoint.iata_code === 'Any' ||
-            pairWaypoint.isAnyDestination === true ||
-            pairWaypoint.isAnyOrigin === true
-        ));
+    )) || (pairWaypoint && (
+        pairWaypoint.iata_code === 'Any' ||
+        pairWaypoint.isAnyDestination === true ||
+        pairWaypoint.isAnyOrigin === true
+    ));
 
     const inputField = document.getElementById(inputId);
 
-    // Show "Anywhere" only if there are no airport suggestions and the pair isn't "Any"
+    // Show "Anywhere" option if appropriate
     if (airports.length === 0 && !isPairAny) {
         const anywhereDiv = document.createElement('div');
         anywhereDiv.className = 'anywhere-suggestion';
@@ -94,59 +99,51 @@ export const updateSuggestions = (inputId, airports) => {
             e.preventDefault();
             e.stopPropagation();
             
-            // Don’t allow both origin & destination to be "Anywhere"
-            if (isOriginField && isPairAny && !window.isLoadingFromUrl) {
+            if (isOrigin && isPairAny && !window.isLoadingFromUrl) {
                 alert("Both origin and destination cannot be set to 'Anywhere'");
                 suggestionBox.style.display = 'none';
                 return;
             }
 
-            // Create waypoint data for "Any"
             const anyDestination = {
                 iata_code: 'Any',
                 city: 'Anywhere',
                 country: '',
-                name: isOriginField ? 'Any Origin' : 'Any Destination',
-                isAnyDestination: !isOriginField,
-                isAnyOrigin: isOriginField,
+                name: isOrigin ? 'Any Origin' : 'Any Destination',
+                isAnyDestination: !isOrigin,
+                isAnyOrigin: isOrigin,
             };
 
-            // Update input field
             inputField.value = 'Anywhere';
             inputField.setAttribute('data-selected-iata', 'Any');
             inputField.setAttribute('data-is-any-destination', 'true');
             suggestionBox.style.display = 'none';
 
-            // Update inputManager
             if (inputManager.inputStates[inputId]) {
                 inputManager.inputStates[inputId].previousValidValue = 'Anywhere';
                 inputManager.inputStates[inputId].previousIataCode = 'Any';
             }
 
-            // Flag the paired field
             if (pairField) {
                 pairField.setAttribute('data-paired-with-anywhere', 'true');
             }
 
-            // Update appState
             if (waypointIndex >= 0 && waypointIndex < appState.waypoints.length) {
                 updateState('updateWaypoint', { index: waypointIndex, data: anyDestination }, 'airportAutocomplete.anywhereSelection');
             } else {
                 updateState('addWaypoint', anyDestination, 'airportAutocomplete.anywhereSelection');
             }
 
-            // Blur and optionally focus the next field
             setTimeout(() => {
                 inputField.blur();
                 setTimeout(() => {
                     if (window.innerWidth > 600) {
-                        const otherIndex = isOriginField ? waypointIndex + 1 : waypointIndex - 1;
-                        const otherField = document.getElementById(`waypoint-input-${otherIndex + 1}`);
+                        const otherField = document.getElementById(`waypoint-input-${pairIndex + 1}`);
                         if (otherField && !otherField.value.trim()) {
-                            if (!isOriginField) {
+                            if (!isOrigin) {
                                 window.justSelectedAnywhereDestination = true;
                                 otherField.focus();
-                                updateSuggestions(`waypoint-input-${otherIndex + 1}`, []);
+                                updateSuggestions(`waypoint-input-${pairIndex + 1}`, []);
                             } else {
                                 otherField.focus();
                             }
@@ -156,13 +153,13 @@ export const updateSuggestions = (inputId, airports) => {
             }, 100);
         });
 
-        // Hover effect for keyboard nav
         anywhereDiv.addEventListener('mouseenter', () => {
             anywhereDiv.classList.add('selected');
             if (inputManager.inputStates[inputId]) {
                 inputManager.inputStates[inputId].selectedSuggestionIndex = 0;
             }
         });
+        
         anywhereDiv.addEventListener('mouseleave', () => {
             anywhereDiv.classList.remove('selected');
         });
@@ -181,51 +178,32 @@ export const updateSuggestions = (inputId, airports) => {
             e.preventDefault();
             e.stopPropagation();
             
-            // Update input field
             inputField.value = `${airport.city}, (${airport.iata_code})`;
             inputField.setAttribute('data-selected-iata', airport.iata_code);
             inputField.removeAttribute('data-is-any-destination');
             inputField.removeAttribute('data-paired-with-anywhere');
             
-            // Update previous valid values in inputManager
             if (inputManager.inputStates[inputId]) {
                 inputManager.inputStates[inputId].previousValidValue = inputField.value;
                 inputManager.inputStates[inputId].previousIataCode = airport.iata_code;
             }
             
-            // Hide suggestion box
             suggestionBox.style.display = 'none';
-            
-            // Trigger airportSelected event
-            document.dispatchEvent(new CustomEvent('airportSelected', { 
-                detail: { airport, fieldId: inputId } 
-            }));
-            
-            // Blur the input field
+            document.dispatchEvent(new CustomEvent('airportSelected', { detail: { airport, fieldId: inputId } }));
             inputField.blur();
         });
         
-        // Add hover effect for keyboard navigation
         div.addEventListener('mouseenter', () => {
-            // Remove selected class from all items
-            Array.from(suggestionBox.querySelectorAll('div')).forEach(
-                item => item.classList.remove('selected')
-            );
-            
-            // Add selected class to this item
+            Array.from(suggestionBox.querySelectorAll('div')).forEach(item => item.classList.remove('selected'));
             div.classList.add('selected');
             
-            // Update selected index
             if (inputManager.inputStates[inputId]) {
-                const allOptions = Array.from(suggestionBox.querySelectorAll('div'));
-                inputManager.inputStates[inputId].selectedSuggestionIndex = allOptions.indexOf(div);
+                inputManager.inputStates[inputId].selectedSuggestionIndex = 
+                    Array.from(suggestionBox.querySelectorAll('div')).indexOf(div);
             }
         });
         
-        div.addEventListener('mouseleave', () => {
-            div.classList.remove('selected');
-        });
-        
+        div.addEventListener('mouseleave', () => div.classList.remove('selected'));
         suggestionBox.appendChild(div);
     });
 
@@ -236,60 +214,41 @@ export const updateSuggestions = (inputId, airports) => {
     inputManager.positionSuggestionBox(inputId);
 };
 
-// Get IATA code from field value
-export const getIataFromField = (inputId) => {
-    const fieldValue = document.getElementById(inputId)?.value || '';
-    const iataCodeMatch = fieldValue.match(/\b([A-Z]{3})\b/);
-    return iataCodeMatch ? iataCodeMatch[1] : null;
-};
-
 // Setup autocomplete functionality for a given field
 export const setupAutocompleteForField = (fieldId) => {
-    // First set up the input field with the inputManager
     const inputField = inputManager.setupWaypointInput(fieldId);
     if (!inputField) return;
 
-    // Add specific airport autocomplete functionality
     const debouncedInputHandler = debounce(async () => {
         const query = inputField.value;
         if (query.length >= 2) {
-            const airports = await fetchAirports(query);
-            updateSuggestions(fieldId, airports);
+            updateSuggestions(fieldId, await fetchAirports(query));
         } else if (query.length === 0) {
-            // Show empty suggestions for focus cases
             updateSuggestions(fieldId, []);
         }
     }, 200);
 
-    // Override the inputManager's input handler with our specific one
+    // Override the inputManager's input handler
     inputField.removeEventListener('input', inputManager.inputStates[fieldId].handlers.input);
     inputField.addEventListener('input', (e) => {
-        // Reset selection index when user types
         if (inputManager.inputStates[fieldId]) {
             inputManager.inputStates[fieldId].selectedSuggestionIndex = -1;
         }
-        
-        // Clear the paired-with-anywhere attribute when typing in a field
         inputField.removeAttribute('data-paired-with-anywhere');
-        
         debouncedInputHandler(e);
     });
 
-    // Add special data attribute for initial empty state
     if (!inputField.value) {
         inputField.setAttribute('data-show-anywhere-option', 'true');
     }
 
-    // Return cleanup function for component lifecycle management
-    return () => {
-        inputManager.cleanupInputListeners(fieldId);
-    };
+    return () => inputManager.cleanupInputListeners(fieldId);
 };
 
 document.addEventListener('DOMContentLoaded', () => {
     document.addEventListener('airportSelected', (event) => {
         const { airport, fieldId } = event.detail;
-        const waypointIndex = parseInt(fieldId.replace(/\D/g, ''), 10) - 1;
+        const waypointIndex = getWaypointIndex(fieldId);
 
         // Update state based on selection
         if (waypointIndex >= 0 && waypointIndex < appState.waypoints.length) {
@@ -302,8 +261,14 @@ document.addEventListener('DOMContentLoaded', () => {
         if (airport && airport.latitude && airport.longitude) {
             const latLng = L.latLng(airport.latitude, airport.longitude);
             const currentLatLng = map.getCenter();
-            const adjustedLatLng = adjustLatLngForShortestPath(currentLatLng, latLng);
-            map.flyTo(adjustedLatLng, 4, { animate: true, duration: 0.5 });
+            
+            // Handle date line crossing
+            let targetLng = latLng.lng;
+            const lngDifference = targetLng - currentLatLng.lng;
+            if (lngDifference > 180) targetLng -= 360;
+            else if (lngDifference < -180) targetLng += 360;
+            
+            map.flyTo(L.latLng(latLng.lat, targetLng), 4, { animate: true, duration: 0.5 });
         }
 
         // Focus next empty input field on desktop
@@ -311,21 +276,6 @@ document.addEventListener('DOMContentLoaded', () => {
             inputManager.setFocusToNextUnsetInput();
         }
     });
-
-    const adjustLatLngForShortestPath = (currentLatLng, targetLatLng) => {
-        let currentLng = currentLatLng.lng;
-        let targetLng = targetLatLng.lng;
-        let lngDifference = targetLng - currentLng;
-
-        // Handle date line crossing
-        if (lngDifference > 180) {
-            targetLng -= 360;
-        } else if (lngDifference < -180) {
-            targetLng += 360;
-        }
-
-        return L.latLng(targetLatLng.lat, targetLng);
-    };
 
     // Set up autocomplete for waypoint inputs when waypoints change
     document.addEventListener('stateChange', (event) => {
