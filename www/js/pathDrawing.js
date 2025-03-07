@@ -296,6 +296,39 @@ const pathDrawing = {
             return this.airportPairCache[cacheKey];
         }
         
+        // Create a placeholder object for "Any" origin/destination
+        const createAnyPlaceholder = (isOrigin = true) => ({
+            iata_code: 'Any',
+            city: 'Anywhere',
+            country: '',
+            name: isOrigin ? 'Any Origin' : 'Any Destination',
+            latitude: null,
+            longitude: null
+        });
+        
+        // Handle Any origin
+        if (originIata === 'Any') {
+            const destination = destinationIata !== 'Any' ? 
+                await flightMap.getAirportDataByIata(destinationIata) : 
+                null;
+                
+            const result = [createAnyPlaceholder(true), destination];
+            this.airportPairCache = this.airportPairCache || {};
+            this.airportPairCache[cacheKey] = result;
+            return result;
+        }
+        
+        // Handle Any destination
+        if (destinationIata === 'Any') {
+            const origin = await flightMap.getAirportDataByIata(originIata);
+            
+            const result = [origin, createAnyPlaceholder(false)];
+            this.airportPairCache = this.airportPairCache || {};
+            this.airportPairCache[cacheKey] = result;
+            return result;
+        }
+        
+        // Original logic for normal airport pairs
         if (!originIata || destinationIata === 'Any') {
             return [null, null];
         }
@@ -320,7 +353,61 @@ const pathDrawing = {
     async drawLine(routeId, type, options) {
         const [originIata, destinationIata] = routeId.split('-');
         const [originAirport, destinationAirport] = await this.getAirportPair(originIata, destinationIata);
+        
+        // If we don't have an origin airport at all, abort
         if (!originAirport) return;
+
+        // For "Any" routes, we cannot draw a line, but we should still store route data
+        const isAnyRouteType = originAirport.iata_code === 'Any' || (destinationAirport && destinationAirport.iata_code === 'Any');
+        
+        if (isAnyRouteType) {
+            // For "Any" routes, just store the data without drawing a line
+            const anyRouteData = {
+                // For deck routes, preserve existing deck-specific data
+                ...(options.routeData || {}),
+                cardId: options.cardId || options.routeData?.cardId,
+                // Add common route information
+                routeInfo: {
+                    originAirport: {
+                        cityFrom: originAirport.city,
+                        flyFrom: originAirport.iata_code,
+                        name: originAirport.name
+                    },
+                    destinationAirport: {
+                        cityTo: destinationAirport?.city || 'Anywhere',
+                        flyTo: destinationAirport?.iata_code || 'Any',
+                        name: destinationAirport?.name || 'Any Destination'
+                    },
+                    price: options.price,
+                    date: options.date,
+                    isDirect: options.isDirect || false,
+                    fullRoute: [{
+                        cityFrom: originAirport.city,
+                        flyFrom: originAirport.iata_code
+                    }, {
+                        cityTo: destinationAirport?.city || 'Anywhere',
+                        flyTo: destinationAirport?.iata_code || 'Any'
+                    }]
+                },
+                // Add empty tags Set to make it compatible with line filtering
+                tags: new Set([
+                    `route:${routeId}`,
+                    `routeId:${routeId}`,
+                    `type:${type}`,
+                    ...(type === 'route' || type === 'dashed' ? ['type:route'] : []),
+                    ...(options.isDeckRoute ? ['type:deck'] : []),
+                    ...(options.group ? [`group:${options.group}`] : []),
+                    `direct:${options.isDirect ? 'true' : 'false'}`
+                ]),
+                // Add dummy remove method for compatibility with lineManager
+                remove: function() {}
+            };
+            
+            // Store the route data in the cache
+            this.routePathCache[routeId] = this.routePathCache[routeId] || [];
+            this.routePathCache[routeId].push(anyRouteData);
+            return;
+        }
 
         // Construct routeData based on the line type and available information
         const routeData = {
