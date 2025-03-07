@@ -225,44 +225,50 @@ export const updateSuggestions = (inputId, airports) => {
 
     // Add a single event delegation handler for the suggestion box
     if (!suggestionBox._hasEventListeners) {
-        // Mouse click handler
-        suggestionBox.addEventListener('click', function(e) {
+        // Create a single unified handler for all user interactions
+        const handleSuggestionInteraction = function(e) {
+            // Prevent default only for touch events to avoid scrolling issues
+            if (e.type.startsWith('touch') && e.cancelable) {
+                e.preventDefault();
+            }
+            
             const suggestion = e.target.closest('div');
             if (!suggestion) return;
             
-            handleSuggestionSelection(inputId, suggestion);
+            // For start events (mousedown/touchstart), just select the item
+            if (e.type === 'mousedown' || e.type === 'touchstart') {
+                // Clear all selected items
+                Array.from(this.querySelectorAll('div')).forEach(item => item.classList.remove('selected'));
+                
+                // Highlight the target item
+                suggestion.classList.add('selected');
+                
+                if (inputManager.inputStates[inputId]) {
+                    inputManager.inputStates[inputId].selectedSuggestionIndex = 
+                        Array.from(this.querySelectorAll('div')).indexOf(suggestion);
+                }
+                
+                return;
+            }
+            
+            // For end events (click/touchend), handle the selection
+            if (e.type === 'click' || e.type === 'touchend') {
+                // Stop propagation for touchend to prevent ghost clicks
+                if (e.type === 'touchend') {
+                    e.stopPropagation();
+                }
+                
+                handleSuggestionSelection(inputId, suggestion);
+            }
+        };
+        
+        // Attach unified event handlers with delegation
+        ['mousedown', 'click', 'touchstart', 'touchend'].forEach(eventType => {
+            const options = eventType.startsWith('touch') ? { passive: false } : false;
+            suggestionBox.addEventListener(eventType, handleSuggestionInteraction, options);
         });
         
-        // Touch handlers with event delegation
-        suggestionBox.addEventListener('touchstart', function(e) {
-            const suggestion = e.target.closest('div');
-            if (!suggestion) return;
-            
-            e.preventDefault();
-            
-            // Clear all selected items
-            Array.from(this.querySelectorAll('div')).forEach(item => item.classList.remove('selected'));
-            
-            // Highlight the touched item
-            suggestion.classList.add('selected');
-            
-            if (inputManager.inputStates[inputId]) {
-                inputManager.inputStates[inputId].selectedSuggestionIndex = 
-                    Array.from(this.querySelectorAll('div')).indexOf(suggestion);
-            }
-        }, { passive: false });
-        
-        suggestionBox.addEventListener('touchend', function(e) {
-            const suggestion = e.target.closest('div');
-            if (!suggestion) return;
-            
-            e.preventDefault();
-            e.stopPropagation();
-            
-            handleSuggestionSelection(inputId, suggestion);
-        }, { passive: false });
-        
-        // Mouse hover handlers with event delegation
+        // Add mouseover for desktop hover behavior
         suggestionBox.addEventListener('mouseover', function(e) {
             const suggestion = e.target.closest('div');
             if (!suggestion) return;
