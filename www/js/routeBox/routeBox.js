@@ -182,9 +182,16 @@ const routeBox = {
         // Check if route has valid waypoints - simplify validation
         const hasValidWaypoint = () => {
             const fromIndex = routeNumber * 2;
+            const toIndex = fromIndex + 1;
+            
+            // If only destination is set, ensure we report valid
+            if (!appState.waypoints[fromIndex] && appState.waypoints[toIndex]) {
+                return true;
+            }
+            
             return Boolean(
                 appState.waypoints[fromIndex]?.iata_code || 
-                appState.waypoints[fromIndex + 1]?.iata_code
+                appState.waypoints[toIndex]?.iata_code
             );
         };
 
@@ -208,6 +215,14 @@ const routeBox = {
 
         searchButton.onclick = () => {
             if (!hasValidWaypoint()) return;
+            
+            const fromIndex = routeNumber * 2;
+            const toIndex = fromIndex + 1;
+            
+            // If destination set but no origin, create "Any" origin
+            if (!appState.waypoints[fromIndex] && appState.waypoints[toIndex]) {
+                updateState('fixWaypointOrder', {origin: fromIndex, destination: toIndex}, 'routeBox.searchButton');
+            }
             
             const infoPane = document.getElementById('infoPane');
             infoPane.classList.add('search-results');

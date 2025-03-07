@@ -19,6 +19,17 @@ const routeHandling = {
             [...appState.waypoints].reverse() : 
             appState.waypoints;
 
+        // Ensure waypoint pairs are properly ordered
+        // If we have an odd number of waypoints and last one isn't "Any", add "Any" as destination
+        if (waypoints.length % 2 !== 0 && waypoints[waypoints.length - 1] && 
+            waypoints[waypoints.length - 1].iata_code !== 'Any') {
+            waypoints.push({
+                iata_code: 'Any',
+                city: 'Anywhere',
+                isAnyDestination: true
+            });
+        }
+
         // Batch fetch routes for non-Any waypoints
         const uniqueIataCodes = [...new Set(
             waypoints

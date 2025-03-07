@@ -34,6 +34,24 @@ const stateHandlers = {
         if (!appState.waypoints.length || !appState.selectedRoutes[0]) {
             appState.currentView = 'trip';
         }
+    },
+    // Add a new handler for waypoint order issues
+    fixWaypointOrder: (indices) => {
+        if (appState.waypoints[indices.destination] && !appState.waypoints[indices.origin]) {
+            // Add "Any" origin when a destination is set first
+            appState.waypoints[indices.origin] = {
+                iata_code: 'Any',
+                city: 'Anywhere',
+                country: '',
+                name: 'Any Origin',
+                isAnyOrigin: true,
+                isAnyDestination: false
+            };
+            
+            // Update the input field
+            const inputId = `waypoint-input-${indices.origin + 1}`;
+            inputManager.syncInputWithWaypoint(inputId);
+        }
     }
 };
 

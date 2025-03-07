@@ -318,13 +318,45 @@ document.addEventListener('DOMContentLoaded', () => {
     document.addEventListener('airportSelected', (event) => {
         const { airport, fieldId } = event.detail;
         const waypointIndex = getWaypointIndex(fieldId);
-
-        // Update app state
-        if (waypointIndex >= 0 && waypointIndex < appState.waypoints.length) {
-            updateState('updateWaypoint', { index: waypointIndex, data: airport }, 'airportAutocomplete.addEventListener1');
-        } else {
-            updateState('addWaypoint', airport, 'airportAutocomplete.addEventListener2');
+        const isOrigin = isOriginField(waypointIndex);
+        const routeIndex = Math.floor(waypointIndex / 2);
+        
+        // Ensure waypoints array has correct slots
+        while (appState.waypoints.length <= waypointIndex) {
+            appState.waypoints.push(null);
         }
+        
+        // If we're setting a destination first, ensure there's a placeholder for the origin
+        if (!isOrigin && !appState.waypoints[waypointIndex-1]) {
+            // Create an "Any" origin placeholder if we're selecting destination first
+            const anyOrigin = {
+                iata_code: 'Any',
+                city: 'Anywhere',
+                country: '',
+                name: 'Any Origin',
+                isAnyDestination: false,
+                isAnyOrigin: true,
+            };
+            appState.waypoints[waypointIndex-1] = anyOrigin;
+            
+            // Update the origin input field
+            const originField = document.getElementById(`waypoint-input-${waypointIndex}`);
+            if (originField) {
+                originField.value = 'Anywhere';
+                originField.setAttribute('data-selected-iata', 'Any');
+                originField.setAttribute('data-is-any-destination', 'true');
+                
+                // Update input state
+                const originInputId = `waypoint-input-${waypointIndex}`;
+                if (inputManager.inputStates[originInputId]) {
+                    inputManager.inputStates[originInputId].previousValidValue = 'Anywhere';
+                    inputManager.inputStates[originInputId].previousIataCode = 'Any';
+                }
+            }
+        }
+
+        // Update app state with the airport at the correct index
+        updateState('updateWaypoint', { index: waypointIndex, data: airport }, 'airportAutocomplete.addEventListener1');
 
         // Update map if location data exists
         if (airport?.latitude && airport?.longitude) {
