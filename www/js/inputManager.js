@@ -116,9 +116,14 @@ class InputManager {
                 this.expandInput(inputId);
                 inputState.isExpanded = true;
             }
-        } else if (suggestionBox && suggestionBox.children.length > 0) {
+        } else if (suggestionBox) {
+            // Always position the suggestion box on focus, even if empty
             this.positionSuggestionBox(inputId);
-            suggestionBox.style.display = 'block';
+            
+            // Only show if it has content
+            if (suggestionBox.children.length > 0) {
+                suggestionBox.style.display = 'block';
+            }
         }
         
         requestAnimationFrame(() => inputField.select());
@@ -136,7 +141,8 @@ class InputManager {
 
         if (!inputField.value.trim()) {
           updateSuggestions(inputId, []);
-          suggestionBox.style.display = 'block';
+          // After updating suggestions, position the box again
+          setTimeout(() => this.positionSuggestionBox(inputId), 0);
         }
         
         inputState.isInitialFocus = false;

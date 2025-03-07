@@ -9,23 +9,24 @@ import { routeHandling } from '../routeHandling.js';
 import { setupRouteContent } from '../infoPane.js';
 import { inputManager } from '../inputManager.js';
 
-// Debounce function to prevent rapid repeated calls
+// Simplified debounce function
 const debounce = (func, wait) => {
     let timeout;
-    return function(...args) {
+    return (...args) => {
         clearTimeout(timeout);
-        timeout = setTimeout(() => func.apply(this, args), wait);
+        timeout = setTimeout(() => func(...args), wait);
     };
 };
 
-const loadCSS = (href) => {
+// Load required CSS files
+['css/routeBox.css', 'css/datePicker.css'].forEach(href => {
     const link = document.createElement('link');
     link.rel = 'stylesheet';
     link.href = href;
     document.head.appendChild(link);
-};
-['css/routeBox.css', 'css/datePicker.css'].forEach(loadCSS);
+});
 
+// Simplified element creation utility
 const createElement = (tag, { id, className, content } = {}) => {
     const element = document.createElement(tag);
     if (id) element.id = id;
@@ -34,15 +35,14 @@ const createElement = (tag, { id, className, content } = {}) => {
     return element;
 };
 
-// Modify createWaypointInput to return elements separately so that the suggestions div
-// can be appended directly to the waypoint-inputs-container.
+// Consolidated waypoint input creation
 const createWaypointInput = (index, placeholder, waypoint) => {
     const inputWrapper = createElement('div', { className: 'input-wrapper' });
     const input = createElement('input', { 
         id: `waypoint-input-${index + 1}`, 
         className: 'waypoint-input', 
-        value: waypoint ? `${waypoint.city}, (${waypoint.iata_code})` : '', 
-        placeholder: placeholder // Add this line to set the placeholder
+        value: waypoint ? `${waypoint.city}, (${waypoint.iata_code})` : '',
+        placeholder
     });
     input.type = 'text';
     inputWrapper.appendChild(input);
@@ -63,8 +63,6 @@ const setWaypointInputs = (routeNumber) => {
     [`waypoint-input-${routeNumber * 2 + 1}`, `waypoint-input-${routeNumber * 2 + 2}`].forEach(
         inputId => inputManager.syncInputWithWaypoint(inputId)
     );
-    
-    // Update swap button state after inputs are updated
     enableSwapButtonIfNeeded();
 };
 
@@ -80,53 +78,47 @@ const routeBox = {
         }
 
         const container = createElement('div', { className: 'routeBoxElements' });
-        const infoPane = document.getElementById('infoPane');
 
+        // Add options container (trip type & travelers)
         const optionsContainer = createElement('div', { className: 'options-container' });
         optionsContainer.append(tripTypePicker(routeNumber), travelersPicker(routeNumber));
         container.append(optionsContainer);
 
+        // Add waypoint inputs container
         const waypointInputsContainer = createElement('div', { className: 'waypoint-inputs-container' });
         let firstEmptyInput = null;
         
-        // Add explicit placeholders for each input
-        const placeholders = ['From', 'Where to?'];
-        placeholders.forEach((placeholder, i) => {
+        // Add waypoint inputs with placeholders
+        ['From', 'Where to?'].forEach((placeholder, i) => {
             const index = routeNumber * 2 + i;
             const { inputWrapper, input } = createWaypointInput(index, placeholder, appState.waypoints[index]);
-            input.placeholder = placeholder; // Explicitly set the placeholder
             inputWrapper.classList.add(i === 0 ? 'from-input' : 'to-input');
             waypointInputsContainer.append(inputWrapper);
             
-            // Create an empty div for suggestions that will be populated by inputManager
-            const suggestionsDiv = createElement('div', { 
+            // Create suggestions div
+            createElement('div', { 
                 id: `waypoint-input-${index + 1}Suggestions`, 
                 className: 'suggestions' 
             });
-            
-            // We no longer append suggestions directly to the input wrapper
-            // They'll be managed by the inputManager
             
             if (!firstEmptyInput && !appState.waypoints[index]) {
                 firstEmptyInput = input;
             }
             
-            // Add input event listener for swap button
             input.addEventListener('input', enableSwapButtonIfNeeded);
         });
+        
+        // Add swap button between inputs
         waypointInputsContainer.insertBefore(this.createSwapButton(routeNumber), waypointInputsContainer.children[1]);
         container.append(waypointInputsContainer);
 
-        const dateInputsContainer = createElement('div', { className: 'date-inputs-container' });
-        container.append(dateInputsContainer);
+        // Add date inputs container
+        container.append(createElement('div', { className: 'date-inputs-container' }));
 
+        // Add button container with search and remove buttons
         const buttonContainer = createElement('div', { className: 'button-container' });
-        
-        // Clean up previous search button if it exists
         const existingButton = buttonContainer.querySelector('.search-button');
-        if (existingButton?.cleanup) {
-            existingButton.cleanup();
-        }
+        if (existingButton?.cleanup) existingButton.cleanup();
         
         buttonContainer.append(this.createSearchButton(routeNumber));
         removeRouteButton(buttonContainer, routeNumber);
@@ -134,15 +126,22 @@ const routeBox = {
 
         routeBoxElement.append(container);
 
-        // Use setupAutocompleteForField which now uses inputManager internally
-        [`waypoint-input-${routeNumber * 2 + 1}`, `waypoint-input-${routeNumber * 2 + 2}`].forEach(id => 
-            setupAutocompleteForField(id)
-        );
+        // Setup autocomplete for waypoint inputs
+        const inputIds = [`waypoint-input-${routeNumber * 2 + 1}`, `waypoint-input-${routeNumber * 2 + 2}`];
+        inputIds.forEach(id => setupAutocompleteForField(id));
+        
+        // Position suggestion boxes after a short delay to ensure DOM is fully rendered
+        setTimeout(() => {
+            inputIds.forEach(id => {
+                if (inputManager.suggestionBoxes[id]) {
+                    inputManager.positionSuggestionBox(id);
+                }
+            });
+        }, 50);
 
-        // Set up waypoint values
         setWaypointInputs(routeNumber);
 
-        // Only focus if not first route box and screen width > 880px
+        // Focus first empty input if appropriate
         if (firstEmptyInput && (routeNumber > 0 || window.innerWidth > 600)) {
             firstEmptyInput.focus();
         }
@@ -152,27 +151,22 @@ const routeBox = {
 
     removeExistingRouteBox() {
         const routeBoxContainer = document.getElementById('routeBoxContainer');
-        if (routeBoxContainer) {
-            routeBoxContainer.innerHTML = '';
-        }
+        if (routeBoxContainer) routeBoxContainer.innerHTML = '';
     },
 
-    createRouteBox: function() {
-        const routeBoxElement = document.createElement('div');
-        routeBoxElement.className = 'route-box';
-        return routeBoxElement;
+    createRouteBox() {
+        return createElement('div', { className: 'route-box' });
     },
 
     createSwapButton(routeNumber) {
         const swapButtonContainer = createElement('div', { className: 'swap-button-container' });
         const swapButtonWrapper = createElement('div', { className: 'swap-button-wrapper' });
         const swapButton = createElement('button', { 
-            className: 'swap-route-button', 
+            className: 'swap-route-button disabled', 
             content: '&#8646;',
-            title: 'Swap waypoints',
-            disabled: true 
+            title: 'Swap waypoints'
         });
-        swapButton.classList.add('disabled');
+        swapButton.disabled = true;
         swapButton.onclick = () => this.handleSwapButtonClick(routeNumber);
         
         swapButtonWrapper.appendChild(swapButton);
@@ -186,51 +180,38 @@ const routeBox = {
             content: 'Search'
         });
 
-        // Function to check if route has valid waypoints (either origin OR destination)
+        // Check if route has valid waypoints
         const hasValidWaypoint = () => {
             const fromWaypoint = appState.waypoints[routeNumber * 2];
             const toWaypoint = appState.waypoints[routeNumber * 2 + 1];
             return Boolean(fromWaypoint?.iata_code || toWaypoint?.iata_code);
         };
 
-        // Function to update button state
         const updateButtonState = () => {
             const isEnabled = hasValidWaypoint();
             searchButton.disabled = !isEnabled;
             searchButton.classList.toggle('disabled', !isEnabled);
         };
 
-        // Create a bound listener for this button instance
-        const handleStateChange = () => {
-            // Use requestAnimationFrame to ensure we get the latest state
-            requestAnimationFrame(updateButtonState);
-        };
+        const handleStateChange = () => requestAnimationFrame(updateButtonState);
 
-        // Set initial state
         updateButtonState();
 
-        // Add state change listener with explicit check for waypoints
-        document.addEventListener('stateChange', (event) => {
-            if (event.detail.key === 'waypoints' || 
-                event.detail.key === 'addWaypoint' || 
-                event.detail.key === 'removeWaypoint' || 
-                event.detail.key === 'updateWaypoint') {
+        // Add state change listener for relevant waypoint changes
+        const stateChangeHandler = (event) => {
+            if (['waypoints', 'addWaypoint', 'removeWaypoint', 'updateWaypoint'].includes(event.detail.key)) {
                 handleStateChange();
             }
-        });
-
-        // Clean up listener when button is removed
-        searchButton.cleanup = () => {
-            document.removeEventListener('stateChange', handleStateChange);
         };
+        document.addEventListener('stateChange', stateChangeHandler);
+
+        searchButton.cleanup = () => document.removeEventListener('stateChange', stateChangeHandler);
 
         searchButton.onclick = () => {
             if (!hasValidWaypoint()) return;
             
             const infoPane = document.getElementById('infoPane');
             infoPane.classList.add('search-results');
-            
-            // Set a temporary flag to prevent input expansion during search results loading
             appState.searchResultsLoading = true;
             
             buildRouteDeck(routeNumber).then(() => {
@@ -243,14 +224,10 @@ const routeBox = {
                     infoPaneElement.classList.remove('collapsed');
                     infoPaneElement.classList.add('expanded');
                     adjustMapSize();
-                    
-                    // Clear the search results loading flag
-                    setTimeout(() => {
-                        appState.searchResultsLoading = false;
-                    }, 500);
+                    setTimeout(() => appState.searchResultsLoading = false, 500);
                 });
 
-                // Ensure the destination waypoint is set to 'Any'
+                // Set destination to 'Any' if empty
                 const toInput = document.getElementById(`waypoint-input-${routeNumber * 2 + 2}`);
                 if (toInput && !toInput.value) {
                     toInput.value = 'Any';
@@ -265,7 +242,7 @@ const routeBox = {
     handleSwapButtonClick(routeNumber) {
         const inputs = document.querySelectorAll('.waypoint-inputs-container input[type="text"]');
         if (inputs.length === 2) {
-            // Store the IATA and values before swapping
+            // Store data before swapping
             const inputId1 = inputs[0].id;
             const inputId2 = inputs[1].id;
             const value1 = inputs[0].value;
@@ -275,57 +252,75 @@ const routeBox = {
             const isAny1 = inputs[0].getAttribute('data-is-any-destination') === 'true';
             const isAny2 = inputs[1].getAttribute('data-is-any-destination') === 'true';
 
-            // Swap values, IATA codes and any-destination attributes
-            [inputs[0].value, inputs[1].value] = [inputs[1].value, inputs[0].value];
+            // Swap values
+            inputs[0].value = value2;
+            inputs[1].value = value1;
             
-            if (iata1 && iata2) {
-                inputs[0].setAttribute('data-selected-iata', iata2);
-                inputs[1].setAttribute('data-selected-iata', iata1);
-            } else {
-                if (iata2) inputs[0].setAttribute('data-selected-iata', iata2);
-                else inputs[0].removeAttribute('data-selected-iata');
-                
-                if (iata1) inputs[1].setAttribute('data-selected-iata', iata1);
-                else inputs[1].removeAttribute('data-selected-iata');
-            }
+            // Swap IATA codes
+            inputs[0].setAttribute('data-selected-iata', iata2 || '');
+            inputs[1].setAttribute('data-selected-iata', iata1 || '');
+            if (!iata2) inputs[0].removeAttribute('data-selected-iata');
+            if (!iata1) inputs[1].removeAttribute('data-selected-iata');
             
-            if (isAny1) inputs[1].setAttribute('data-is-any-destination', 'true');
-            else inputs[1].removeAttribute('data-is-any-destination');
+            // Swap "any destination" attributes
+            isAny1 ? inputs[1].setAttribute('data-is-any-destination', 'true') : 
+                    inputs[1].removeAttribute('data-is-any-destination');
+            isAny2 ? inputs[0].setAttribute('data-is-any-destination', 'true') : 
+                    inputs[0].removeAttribute('data-is-any-destination');
             
-            if (isAny2) inputs[0].setAttribute('data-is-any-destination', 'true');
-            else inputs[0].removeAttribute('data-is-any-destination');
-            
-            // Update previous valid values in inputManager
+            // Update input manager states
             if (inputManager.inputStates[inputId1]) {
-                inputManager.inputStates[inputId1].previousValidValue = inputs[0].value;
+                inputManager.inputStates[inputId1].previousValidValue = value2;
                 inputManager.inputStates[inputId1].previousIataCode = iata2;
             }
             
             if (inputManager.inputStates[inputId2]) {
-                inputManager.inputStates[inputId2].previousValidValue = inputs[1].value;
+                inputManager.inputStates[inputId2].previousValidValue = value1;
                 inputManager.inputStates[inputId2].previousIataCode = iata1;
             }
             
             // Update appState waypoints
             const idx = routeNumber * 2;
-            [appState.waypoints[idx], appState.waypoints[idx + 1]] = [appState.waypoints[idx + 1], appState.waypoints[idx]];
-            if (appState.waypoints[idx] && appState.waypoints[idx + 1]) routeHandling.updateRoutesArray();
+            [appState.waypoints[idx], appState.waypoints[idx + 1]] = 
+                [appState.waypoints[idx + 1], appState.waypoints[idx]];
+            
+            if (appState.waypoints[idx] && appState.waypoints[idx + 1]) {
+                routeHandling.updateRoutesArray();
+            }
             updateUrl();
         }
     },
 };
 
-// Replace createMobileOverlay with a simple wrapper around inputManager
-const createMobileOverlay = () => {
-    inputManager.createMobileOverlay();
-};
+// Simplified mobile overlay functions
+const createMobileOverlay = () => inputManager.createMobileOverlay();
+const cleanupOverlays = () => inputManager.cleanup();
 
-// Replace cleanupOverlays with inputManager's cleanup
-const cleanupOverlays = () => {
-    inputManager.cleanup();
-};
-
-// Call this function when the document loads
-document.addEventListener('DOMContentLoaded', cleanupOverlays);
+document.addEventListener('DOMContentLoaded', () => {
+    cleanupOverlays();
+    
+    // Listen for route boxes being added to reposition suggestion boxes
+    const observer = new MutationObserver(mutations => {
+        mutations.forEach(mutation => {
+            if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
+                mutation.addedNodes.forEach(node => {
+                    if (node.classList && node.classList.contains('route-box')) {
+                        // Position all suggestion boxes after a route box is added
+                        setTimeout(() => {
+                            Object.keys(inputManager.suggestionBoxes).forEach(id => {
+                                inputManager.positionSuggestionBox(id);
+                            });
+                        }, 100);
+                    }
+                });
+            }
+        });
+    });
+    
+    const container = document.getElementById('routeBoxContainer');
+    if (container) {
+        observer.observe(container, { childList: true, subtree: true });
+    }
+});
 
 export { routeBox };

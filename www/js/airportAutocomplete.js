@@ -241,6 +241,13 @@ export const setupAutocompleteForField = (fieldId) => {
     if (!inputField.value) {
         inputField.setAttribute('data-show-anywhere-option', 'true');
     }
+    
+    // Ensure suggestion box is properly positioned after setup
+    setTimeout(() => {
+        if (inputManager.suggestionBoxes[fieldId]) {
+            inputManager.positionSuggestionBox(fieldId);
+        }
+    }, 0);
 
     return () => inputManager.cleanupInputListeners(fieldId);
 };
