@@ -65,14 +65,14 @@ const updateSuggestions = (inputId, airports) => {
     const pairInputId = `waypoint-input-${pairIndex + 1}`;
     const pairField = document.getElementById(pairInputId);
 
-    // Check if paired field has "Anywhere" set
+    // Improved check for paired field having "Anywhere" set
     const pairFieldHasAnywhere = pairField && (
         pairField.value === 'Anywhere' ||
         pairField.getAttribute('data-is-any-destination') === 'true' ||
         pairField.getAttribute('data-selected-iata') === 'Any'
     );
 
-    // Check if paired waypoint has "Any" flag
+    // Check if paired waypoint has "Any" flag - also look for both isAnyDestination and isAnyOrigin
     const pairWaypoint = (pairIndex >= 0 && pairIndex < appState.waypoints.length) ?
         appState.waypoints[pairIndex] : null;
 
@@ -83,11 +83,11 @@ const updateSuggestions = (inputId, airports) => {
 
     const inputField = document.getElementById(inputId);
     const isEmptySearch = airports.length === 0;
-    const isPairedWithAnywhere = inputField.getAttribute('data-paired-with-anywhere') === 'true';
+    
+    // Remove the isPairedWithAnywhere variable and rely on the more comprehensive isPairAny check
 
-    // Add "Anywhere" option if needed
-    if ((isEmptySearch || inputField.hasAttribute('data-show-anywhere-option')) &&
-        !isPairAny && !isPairedWithAnywhere) {
+    // Add "Anywhere" option if needed - only if pair is not "Any"
+    if ((isEmptySearch || inputField.hasAttribute('data-show-anywhere-option')) && !isPairAny) {
         const anywhereDiv = document.createElement('div');
         anywhereDiv.className = 'anywhere-suggestion';
         anywhereDiv.textContent = 'Anywhere';
@@ -99,10 +99,8 @@ const updateSuggestions = (inputId, airports) => {
             e.preventDefault();
             e.stopPropagation();
 
-            const effectiveIsPairAny = isPairAny || pairFieldHasAnywhere;
-
             // Don't allow both origin and destination to be "Any"
-            if (isOriginField && effectiveIsPairAny && !window.isLoadingFromUrl) {
+            if (isOriginField && isPairAny && !window.isLoadingFromUrl) {
                 alert("Both origin and destination cannot be set to 'Anywhere'");
                 suggestionBox.style.display = 'none';
                 return;
@@ -123,6 +121,11 @@ const updateSuggestions = (inputId, airports) => {
             inputField.setAttribute('data-selected-iata', 'Any');
             inputField.setAttribute('data-is-any-destination', 'true');
             suggestionBox.style.display = 'none';
+
+            // Update paired field to indicate it's paired with "Anywhere"
+            if (pairField) {
+                pairField.setAttribute('data-paired-with-anywhere', 'true');
+            }
 
             // Update waypoint in state
             if (waypointIndex >= 0 && waypointIndex < appState.waypoints.length) {
@@ -264,6 +267,10 @@ export const setupAutocompleteForField = (fieldId) => {
         if (inputManager.inputStates[fieldId]) {
             inputManager.inputStates[fieldId].selectedSuggestionIndex = -1;
         }
+        
+        // Clear the paired-with-anywhere attribute when typing in a field
+        inputField.removeAttribute('data-paired-with-anywhere');
+        
         debouncedInputHandler(e);
     });
 
