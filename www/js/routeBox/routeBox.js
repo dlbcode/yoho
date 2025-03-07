@@ -265,7 +265,48 @@ const routeBox = {
     handleSwapButtonClick(routeNumber) {
         const inputs = document.querySelectorAll('.waypoint-inputs-container input[type="text"]');
         if (inputs.length === 2) {
+            // Store the IATA and values before swapping
+            const inputId1 = inputs[0].id;
+            const inputId2 = inputs[1].id;
+            const value1 = inputs[0].value;
+            const value2 = inputs[1].value;
+            const iata1 = inputs[0].getAttribute('data-selected-iata');
+            const iata2 = inputs[1].getAttribute('data-selected-iata');
+            const isAny1 = inputs[0].getAttribute('data-is-any-destination') === 'true';
+            const isAny2 = inputs[1].getAttribute('data-is-any-destination') === 'true';
+
+            // Swap values, IATA codes and any-destination attributes
             [inputs[0].value, inputs[1].value] = [inputs[1].value, inputs[0].value];
+            
+            if (iata1 && iata2) {
+                inputs[0].setAttribute('data-selected-iata', iata2);
+                inputs[1].setAttribute('data-selected-iata', iata1);
+            } else {
+                if (iata2) inputs[0].setAttribute('data-selected-iata', iata2);
+                else inputs[0].removeAttribute('data-selected-iata');
+                
+                if (iata1) inputs[1].setAttribute('data-selected-iata', iata1);
+                else inputs[1].removeAttribute('data-selected-iata');
+            }
+            
+            if (isAny1) inputs[1].setAttribute('data-is-any-destination', 'true');
+            else inputs[1].removeAttribute('data-is-any-destination');
+            
+            if (isAny2) inputs[0].setAttribute('data-is-any-destination', 'true');
+            else inputs[0].removeAttribute('data-is-any-destination');
+            
+            // Update previous valid values in inputManager
+            if (inputManager.inputStates[inputId1]) {
+                inputManager.inputStates[inputId1].previousValidValue = inputs[0].value;
+                inputManager.inputStates[inputId1].previousIataCode = iata2;
+            }
+            
+            if (inputManager.inputStates[inputId2]) {
+                inputManager.inputStates[inputId2].previousValidValue = inputs[1].value;
+                inputManager.inputStates[inputId2].previousIataCode = iata1;
+            }
+            
+            // Update appState waypoints
             const idx = routeNumber * 2;
             [appState.waypoints[idx], appState.waypoints[idx + 1]] = [appState.waypoints[idx + 1], appState.waypoints[idx]];
             if (appState.waypoints[idx] && appState.waypoints[idx + 1]) routeHandling.updateRoutesArray();

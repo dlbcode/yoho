@@ -37,7 +37,9 @@ class InputManager {
                 hasSuggestions: false,
                 selectedIata: null,
                 isAnyDestination: false,
-                selectedSuggestionIndex: -1 // Add tracking for keyboard navigation
+                selectedSuggestionIndex: -1, // Add tracking for keyboard navigation
+                previousValidValue: '', // Track the previous valid value
+                previousIataCode: null, // Track the previous valid IATA code
             };
         }
         return this.inputStates[inputId];
@@ -140,6 +142,10 @@ class InputManager {
         
         if (!inputField || !inputState || inputState.isProcessingBlur) return;
         
+        // Store current valid value before user starts typing
+        inputState.previousValidValue = inputField.value;
+        inputState.previousIataCode = inputField.getAttribute('data-selected-iata');
+        
         // Remove readonly attribute to allow typing
         inputField.removeAttribute('readonly');
         
@@ -191,10 +197,46 @@ class InputManager {
         // Set processing flag to prevent race conditions
         inputState.isProcessingBlur = true;
         
+        // Get current input value and check if it's valid
+        const currentValue = inputField.value.trim();
+        const selectedIata = inputField.getAttribute('data-selected-iata');
+        
+        // Check if a valid selection was made
+        const isValidSelection = 
+            (currentValue === 'Anywhere' && selectedIata === 'Any') || 
+            (selectedIata && selectedIata !== 'Any' && currentValue.includes(`(${selectedIata})`));
+        
+        // If no valid selection, revert to previous valid value
+        if (currentValue && !isValidSelection) {
+            // Restore previous value if available, otherwise clear the field
+            if (inputState.previousValidValue) {
+                inputField.value = inputState.previousValidValue;
+                
+                // Also restore the data attribute
+                if (inputState.previousIataCode) {
+                    inputField.setAttribute('data-selected-iata', inputState.previousIataCode);
+                } else {
+                    inputField.removeAttribute('data-selected-iata');
+                }
+                
+                // If it was "Anywhere", restore that attribute too
+                if (inputState.previousValidValue === 'Anywhere') {
+                    inputField.setAttribute('data-is-any-destination', 'true');
+                } else {
+                    inputField.removeAttribute('data-is-any-destination');
+                }
+            } else {
+                // Clear field if no previous valid value
+                inputField.value = '';
+                inputField.removeAttribute('data-selected-iata');
+                inputField.removeAttribute('data-is-any-destination');
+            }
+        }
+        
         // Store existing value for waypoint handling
-        const currentValue = inputField.value;
+        const finalValue = inputField.value;
         const isAnyDestination = 
-            currentValue === 'Anywhere' ||
+            finalValue === 'Anywhere' ||
             inputField.getAttribute('data-is-any-destination') === 'true';
             
         // For mobile, revert UI changes
@@ -214,7 +256,7 @@ class InputManager {
             
             // Process waypoint changes if needed
             if (!isAnyDestination && !window.preserveAnyDestination && 
-                currentValue === '' && appState.waypoints.length > 0 && 
+                finalValue === '' && appState.waypoints.length > 0 && 
                 !appState.isRouteSwitching && !appState.searchResultsLoading) {
                 
                 const waypointIndex = parseInt(inputId.replace(/\D/g, ''), 10) - 1;
@@ -606,6 +648,12 @@ class InputManager {
             inputField.value = '';
             inputField.removeAttribute('data-selected-iata');
             inputField.removeAttribute('data-is-any-destination');
+            
+            // Update previous valid value when syncing
+            if (this.inputStates[inputId]) {
+                this.inputStates[inputId].previousValidValue = '';
+                this.inputStates[inputId].previousIataCode = null;
+            }
             return;
         }
         
@@ -613,10 +661,22 @@ class InputManager {
             inputField.value = 'Anywhere';
             inputField.setAttribute('data-selected-iata', 'Any');
             inputField.setAttribute('data-is-any-destination', 'true');
+            
+            // Update previous valid value
+            if (this.inputStates[inputId]) {
+                this.inputStates[inputId].previousValidValue = 'Anywhere';
+                this.inputStates[inputId].previousIataCode = 'Any';
+            }
         } else {
             inputField.value = `${waypoint.city}, (${waypoint.iata_code})`;
             inputField.setAttribute('data-selected-iata', waypoint.iata_code);
             inputField.removeAttribute('data-is-any-destination');
+            
+            // Update previous valid value
+            if (this.inputStates[inputId]) {
+                this.inputStates[inputId].previousValidValue = inputField.value;
+                this.inputStates[inputId].previousIataCode = waypoint.iata_code;
+            }
         }
     }
     

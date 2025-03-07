@@ -122,6 +122,12 @@ const updateSuggestions = (inputId, airports) => {
             inputField.setAttribute('data-is-any-destination', 'true');
             suggestionBox.style.display = 'none';
 
+            // Update previous valid values in inputManager
+            if (inputManager.inputStates[inputId]) {
+                inputManager.inputStates[inputId].previousValidValue = 'Anywhere';
+                inputManager.inputStates[inputId].previousIataCode = 'Any';
+            }
+
             // Update paired field to indicate it's paired with "Anywhere"
             if (pairField) {
                 pairField.setAttribute('data-paired-with-anywhere', 'true');
@@ -186,6 +192,12 @@ const updateSuggestions = (inputId, airports) => {
             inputField.setAttribute('data-selected-iata', airport.iata_code);
             inputField.removeAttribute('data-is-any-destination');
             inputField.removeAttribute('data-paired-with-anywhere');
+            
+            // Update previous valid values in inputManager
+            if (inputManager.inputStates[inputId]) {
+                inputManager.inputStates[inputId].previousValidValue = inputField.value;
+                inputManager.inputStates[inputId].previousIataCode = airport.iata_code;
+            }
             
             // Hide suggestion box
             suggestionBox.style.display = 'none';
