@@ -96,7 +96,8 @@ export const updateSuggestions = (inputId, airports) => {
         anywhereDiv.setAttribute('role', 'option');
         anywhereDiv.id = `${inputId}-anywhere-option`;
         
-        anywhereDiv.addEventListener('click', (e) => {
+        // Create a shared handler for both click and touch events
+        const handleAnywhereSelection = (e) => {
             e.preventDefault();
             e.stopPropagation();
             
@@ -152,8 +153,22 @@ export const updateSuggestions = (inputId, airports) => {
                     }
                 }, 200);
             }, 100);
-        });
+        };
 
+        // Add both click and touch events using the same handler
+        anywhereDiv.addEventListener('click', handleAnywhereSelection);
+        anywhereDiv.addEventListener('touchstart', function(e) {
+            // Prevent default to avoid delayed click event
+            e.preventDefault();
+            Array.from(suggestionBox.querySelectorAll('div')).forEach(item => item.classList.remove('selected'));
+            anywhereDiv.classList.add('selected');
+            
+            if (inputManager.inputStates[inputId]) {
+                inputManager.inputStates[inputId].selectedSuggestionIndex = 0;
+            }
+        }, { passive: false });
+        anywhereDiv.addEventListener('touchend', handleAnywhereSelection);
+        
         anywhereDiv.addEventListener('mouseenter', () => {
             anywhereDiv.classList.add('selected');
             if (inputManager.inputStates[inputId]) {
