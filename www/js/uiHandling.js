@@ -1,5 +1,6 @@
 import { appState, updateState } from "./stateManager.js";
 import { adjustMapSize } from "./map.js";
+import { inputManager } from "./inputManager.js";
 
 let estimatedBottomBarHeight = 0;
 
@@ -30,21 +31,9 @@ const setBottomBarHeight = () => {
 };
 
 const uiHandling = {
+    // Replace with delegation to inputManager
     setFocusToNextUnsetInput() {
-        // Skip focusing on mobile devices
-        if (window.innerWidth <= 600) {
-            return;
-        }
-
-        const waypointInputs = document.querySelectorAll('.waypoint-input[type="text"]');
-        requestAnimationFrame(() => {
-            for (let input of waypointInputs) {
-                if (!input.value) {
-                    input.focus();
-                    break;
-                }
-            }
-        });
+        inputManager.setFocusToNextUnsetInput();
     },
 
     initInfoPaneDragButton: function () {

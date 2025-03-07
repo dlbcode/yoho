@@ -5,6 +5,7 @@ import { uiHandling } from './uiHandling.js';
 import { routeBox } from './routeBox/routeBox.js';
 import { lineManager } from './lineManager.js';
 import { infoPaneHeight } from './utils/infoPaneHeightManager.js';
+import { inputManager } from './inputManager.js'; // Add new import
 
 const infoPane = {
     routeDecks: new Map(),
@@ -456,23 +457,6 @@ function setupRouteContent(routeIndex) {
     applyFilters();
 
     return { contentWrapper, routeBoxElement };
-}
-
-function setSuggestionBoxPosition() {
-    if (!suggestionBox) return;
-    
-    const isMobile = window.innerWidth <= 600;
-    const inputRect = inputField.getBoundingClientRect();
-    const maxMenuHeight = 200;
-    
-    // Base styles for all cases
-    const baseStyles = {
-        position: 'fixed',
-        zIndex: '90', // Was 10000 - now matches our new scale
-        display: suggestionBox.children.length > 0 ? 'block' : 'none'
-    };
-    
-    /* ...existing code... */
 }
 
 export { infoPane, setupRouteContent };
