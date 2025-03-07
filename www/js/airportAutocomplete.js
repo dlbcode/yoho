@@ -49,6 +49,99 @@ export const getIataFromField = (inputId) => {
     return iataCodeMatch ? iataCodeMatch[1] : null;
 };
 
+// Handle suggestion selection - consolidated function
+const handleSuggestionSelection = (inputId, suggestion) => {
+    const inputField = document.getElementById(inputId);
+    if (!inputField) return;
+    
+    const isAnywhereOption = suggestion.getAttribute('data-is-anywhere') === 'true';
+    const waypointIndex = getWaypointIndex(inputId);
+    const isOrigin = isOriginField(waypointIndex);
+    const pairIndex = getPairIndex(waypointIndex, isOrigin);
+    const pairField = document.getElementById(`waypoint-input-${pairIndex + 1}`);
+    
+    if (isAnywhereOption) {
+        // Handle "Anywhere" selection
+        const isPairAny = pairField && 
+            (pairField.value === 'Anywhere' || 
+             pairField.getAttribute('data-is-any-destination') === 'true' || 
+             pairField.getAttribute('data-selected-iata') === 'Any');
+        
+        if (isOrigin && isPairAny && !window.isLoadingFromUrl) {
+            alert("Both origin and destination cannot be set to 'Anywhere'");
+            return;
+        }
+        
+        const anyDestination = {
+            iata_code: 'Any',
+            city: 'Anywhere',
+            country: '',
+            name: isOrigin ? 'Any Origin' : 'Any Destination',
+            isAnyDestination: !isOrigin,
+            isAnyOrigin: isOrigin,
+        };
+
+        inputField.value = 'Anywhere';
+        inputField.setAttribute('data-selected-iata', 'Any');
+        inputField.setAttribute('data-is-any-destination', 'true');
+
+        if (inputManager.inputStates[inputId]) {
+            inputManager.inputStates[inputId].previousValidValue = 'Anywhere';
+            inputManager.inputStates[inputId].previousIataCode = 'Any';
+        }
+
+        if (pairField) {
+            pairField.setAttribute('data-paired-with-anywhere', 'true');
+        }
+
+        if (waypointIndex >= 0 && waypointIndex < appState.waypoints.length) {
+            updateState('updateWaypoint', { index: waypointIndex, data: anyDestination }, 'airportAutocomplete.anywhereSelection');
+        } else {
+            updateState('addWaypoint', anyDestination, 'airportAutocomplete.anywhereSelection');
+        }
+
+        setTimeout(() => {
+            inputField.blur();
+            setTimeout(() => {
+                if (window.innerWidth > 600) {
+                    if (pairField && !pairField.value.trim()) {
+                        if (!isOrigin) {
+                            window.justSelectedAnywhereDestination = true;
+                            pairField.focus();
+                            updateSuggestions(`waypoint-input-${pairIndex + 1}`, []);
+                        } else {
+                            pairField.focus();
+                        }
+                    }
+                }
+            }, 200);
+        }, 100);
+    } else {
+        // Handle airport selection
+        const index = parseInt(suggestion.getAttribute('data-index'), 10);
+        const airport = suggestion._airport;
+        
+        if (!airport) return;
+        
+        inputField.value = `${airport.city}, (${airport.iata_code})`;
+        inputField.setAttribute('data-selected-iata', airport.iata_code);
+        inputField.removeAttribute('data-is-any-destination');
+        inputField.removeAttribute('data-paired-with-anywhere');
+        
+        if (inputManager.inputStates[inputId]) {
+            inputManager.inputStates[inputId].previousValidValue = inputField.value;
+            inputManager.inputStates[inputId].previousIataCode = airport.iata_code;
+        }
+        
+        document.dispatchEvent(new CustomEvent('airportSelected', { detail: { airport, fieldId: inputId } }));
+        inputField.blur();
+    }
+    
+    // Hide suggestion box regardless of selection type
+    const suggestionBox = document.getElementById(`${inputId}Suggestions`);
+    if (suggestionBox) suggestionBox.style.display = 'none';
+};
+
 // Update suggestions in the suggestion box
 export const updateSuggestions = (inputId, airports) => {
     const suggestionBox = document.getElementById(`${inputId}Suggestions`);
@@ -96,90 +189,6 @@ export const updateSuggestions = (inputId, airports) => {
         anywhereDiv.setAttribute('role', 'option');
         anywhereDiv.id = `${inputId}-anywhere-option`;
         
-        // Create a shared handler for both click and touch events
-        const handleAnywhereSelection = (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            
-            if (isOrigin && isPairAny && !window.isLoadingFromUrl) {
-                alert("Both origin and destination cannot be set to 'Anywhere'");
-                suggestionBox.style.display = 'none';
-                return;
-            }
-
-            const anyDestination = {
-                iata_code: 'Any',
-                city: 'Anywhere',
-                country: '',
-                name: isOrigin ? 'Any Origin' : 'Any Destination',
-                isAnyDestination: !isOrigin,
-                isAnyOrigin: isOrigin,
-            };
-
-            inputField.value = 'Anywhere';
-            inputField.setAttribute('data-selected-iata', 'Any');
-            inputField.setAttribute('data-is-any-destination', 'true');
-            suggestionBox.style.display = 'none';
-
-            if (inputManager.inputStates[inputId]) {
-                inputManager.inputStates[inputId].previousValidValue = 'Anywhere';
-                inputManager.inputStates[inputId].previousIataCode = 'Any';
-            }
-
-            if (pairField) {
-                pairField.setAttribute('data-paired-with-anywhere', 'true');
-            }
-
-            if (waypointIndex >= 0 && waypointIndex < appState.waypoints.length) {
-                updateState('updateWaypoint', { index: waypointIndex, data: anyDestination }, 'airportAutocomplete.anywhereSelection');
-            } else {
-                updateState('addWaypoint', anyDestination, 'airportAutocomplete.anywhereSelection');
-            }
-
-            setTimeout(() => {
-                inputField.blur();
-                setTimeout(() => {
-                    if (window.innerWidth > 600) {
-                        const otherField = document.getElementById(`waypoint-input-${pairIndex + 1}`);
-                        if (otherField && !otherField.value.trim()) {
-                            if (!isOrigin) {
-                                window.justSelectedAnywhereDestination = true;
-                                otherField.focus();
-                                updateSuggestions(`waypoint-input-${pairIndex + 1}`, []);
-                            } else {
-                                otherField.focus();
-                            }
-                        }
-                    }
-                }, 200);
-            }, 100);
-        };
-
-        // Add both click and touch events using the same handler
-        anywhereDiv.addEventListener('click', handleAnywhereSelection);
-        anywhereDiv.addEventListener('touchstart', function(e) {
-            // Prevent default to avoid delayed click event
-            e.preventDefault();
-            Array.from(suggestionBox.querySelectorAll('div')).forEach(item => item.classList.remove('selected'));
-            anywhereDiv.classList.add('selected');
-            
-            if (inputManager.inputStates[inputId]) {
-                inputManager.inputStates[inputId].selectedSuggestionIndex = 0;
-            }
-        }, { passive: false });
-        anywhereDiv.addEventListener('touchend', handleAnywhereSelection);
-        
-        anywhereDiv.addEventListener('mouseenter', () => {
-            anywhereDiv.classList.add('selected');
-            if (inputManager.inputStates[inputId]) {
-                inputManager.inputStates[inputId].selectedSuggestionIndex = 0;
-            }
-        });
-        
-        anywhereDiv.addEventListener('mouseleave', () => {
-            anywhereDiv.classList.remove('selected');
-        });
-
         suggestionBox.appendChild(anywhereDiv);
         hasAddedSuggestions = true;
         
@@ -195,64 +204,80 @@ export const updateSuggestions = (inputId, airports) => {
         div.textContent = `${airport.name} (${airport.iata_code}) - ${airport.city}, ${airport.country}`;
         div.setAttribute('role', 'option');
         div.id = `${inputId}-suggestion-${index}`;
+        div.setAttribute('data-index', index);
+        
+        // Store airport data directly on the element
+        div._airport = airport;
         
         // Add 'selected' class to the first item if no 'Anywhere' option is present
         if (index === 0 && !hasAddedSuggestions) {
             div.classList.add('selected');
             hasAddedSuggestions = true;
+            
             // Set the selected suggestion index to 0 (first item)
             if (inputManager.inputStates[inputId]) {
                 inputManager.inputStates[inputId].selectedSuggestionIndex = 0;
             }
         }
         
-        // Add both click and touch events
-        const handleSelection = (e) => {
+        suggestionBox.appendChild(div);
+    });
+
+    // Add a single event delegation handler for the suggestion box
+    if (!suggestionBox._hasEventListeners) {
+        // Mouse click handler
+        suggestionBox.addEventListener('click', function(e) {
+            const suggestion = e.target.closest('div');
+            if (!suggestion) return;
+            
+            handleSuggestionSelection(inputId, suggestion);
+        });
+        
+        // Touch handlers with event delegation
+        suggestionBox.addEventListener('touchstart', function(e) {
+            const suggestion = e.target.closest('div');
+            if (!suggestion) return;
+            
+            e.preventDefault();
+            
+            // Clear all selected items
+            Array.from(this.querySelectorAll('div')).forEach(item => item.classList.remove('selected'));
+            
+            // Highlight the touched item
+            suggestion.classList.add('selected');
+            
+            if (inputManager.inputStates[inputId]) {
+                inputManager.inputStates[inputId].selectedSuggestionIndex = 
+                    Array.from(this.querySelectorAll('div')).indexOf(suggestion);
+            }
+        }, { passive: false });
+        
+        suggestionBox.addEventListener('touchend', function(e) {
+            const suggestion = e.target.closest('div');
+            if (!suggestion) return;
+            
             e.preventDefault();
             e.stopPropagation();
             
-            inputField.value = `${airport.city}, (${airport.iata_code})`;
-            inputField.setAttribute('data-selected-iata', airport.iata_code);
-            inputField.removeAttribute('data-is-any-destination');
-            inputField.removeAttribute('data-paired-with-anywhere');
-            
-            if (inputManager.inputStates[inputId]) {
-                inputManager.inputStates[inputId].previousValidValue = inputField.value;
-                inputManager.inputStates[inputId].previousIataCode = airport.iata_code;
-            }
-            
-            suggestionBox.style.display = 'none';
-            document.dispatchEvent(new CustomEvent('airportSelected', { detail: { airport, fieldId: inputId } }));
-            inputField.blur();
-        };
-        
-        div.addEventListener('click', handleSelection);
-        div.addEventListener('touchstart', function(e) {
-            // Prevent mouseenter/mouseleave from firing after touch
-            e.preventDefault();
-            Array.from(suggestionBox.querySelectorAll('div')).forEach(item => item.classList.remove('selected'));
-            div.classList.add('selected');
-            
-            if (inputManager.inputStates[inputId]) {
-                inputManager.inputStates[inputId].selectedSuggestionIndex = 
-                    Array.from(suggestionBox.querySelectorAll('div')).indexOf(div);
-            }
+            handleSuggestionSelection(inputId, suggestion);
         }, { passive: false });
-        div.addEventListener('touchend', handleSelection);
         
-        div.addEventListener('mouseenter', () => {
-            Array.from(suggestionBox.querySelectorAll('div')).forEach(item => item.classList.remove('selected'));
-            div.classList.add('selected');
+        // Mouse hover handlers with event delegation
+        suggestionBox.addEventListener('mouseover', function(e) {
+            const suggestion = e.target.closest('div');
+            if (!suggestion) return;
+            
+            Array.from(this.querySelectorAll('div')).forEach(item => item.classList.remove('selected'));
+            suggestion.classList.add('selected');
             
             if (inputManager.inputStates[inputId]) {
                 inputManager.inputStates[inputId].selectedSuggestionIndex = 
-                    Array.from(suggestionBox.querySelectorAll('div')).indexOf(div);
+                    Array.from(this.querySelectorAll('div')).indexOf(suggestion);
             }
         });
         
-        div.addEventListener('mouseleave', () => div.classList.remove('selected'));
-        suggestionBox.appendChild(div);
-    });
+        suggestionBox._hasEventListeners = true;
+    }
 
     // Final UI updates
     inputField.setAttribute('aria-expanded', suggestionBox.children.length > 0 ? 'true' : 'false');
