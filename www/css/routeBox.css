@@ -458,6 +458,12 @@
   margin-bottom: 0;
 }
 
+/* Add this style to the existing file for keyboard navigation */
+.suggestions div.selected {
+    background-color: #346197;
+    border-left: 3px solid #4d9bff;
+}
+
 @media (max-width: 600px) {
   .waypoint-input:focus {
     position: fixed;

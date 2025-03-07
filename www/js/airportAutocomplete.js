@@ -47,6 +47,11 @@ const updateSuggestions = (inputId, airports) => {
 
     // Clear existing suggestions
     suggestionBox.innerHTML = '';
+    
+    // Reset selected suggestion index
+    if (inputManager.inputStates[inputId]) {
+        inputManager.inputStates[inputId].selectedSuggestionIndex = -1;
+    }
 
     // Make sure suggestion box is attached to body
     if (suggestionBox.parentElement !== document.body) {
@@ -87,6 +92,8 @@ const updateSuggestions = (inputId, airports) => {
         anywhereDiv.className = 'anywhere-suggestion';
         anywhereDiv.textContent = 'Anywhere';
         anywhereDiv.setAttribute('data-is-anywhere', 'true');
+        anywhereDiv.setAttribute('role', 'option');
+        anywhereDiv.id = `${inputId}-anywhere-option`;
 
         anywhereDiv.addEventListener('click', (e) => {
             e.preventDefault();
@@ -145,13 +152,28 @@ const updateSuggestions = (inputId, airports) => {
             }, 100);
         });
 
+        // Add hover effect for keyboard navigation
+        anywhereDiv.addEventListener('mouseenter', () => {
+            anywhereDiv.classList.add('selected');
+            if (inputManager.inputStates[inputId]) {
+                inputManager.inputStates[inputId].selectedSuggestionIndex = 0;
+            }
+        });
+
+        anywhereDiv.addEventListener('mouseleave', () => {
+            anywhereDiv.classList.remove('selected');
+        });
+
         suggestionBox.appendChild(anywhereDiv);
     }
 
     // Add airport options
-    airports.forEach((airport) => {
+    airports.forEach((airport, index) => {
         const div = document.createElement('div');
         div.textContent = `${airport.name} (${airport.iata_code}) - ${airport.city}, ${airport.country}`;
+        div.setAttribute('role', 'option');
+        div.id = `${inputId}-suggestion-${index}`;
+        
         div.addEventListener('click', (e) => {
             e.preventDefault();
             e.stopPropagation();
@@ -174,8 +196,33 @@ const updateSuggestions = (inputId, airports) => {
             inputField.blur();
         });
         
+        // Add hover effect for keyboard navigation
+        div.addEventListener('mouseenter', () => {
+            // Remove selected class from all items
+            Array.from(suggestionBox.querySelectorAll('div')).forEach(
+                item => item.classList.remove('selected')
+            );
+            
+            // Add selected class to this item
+            div.classList.add('selected');
+            
+            // Update selected index
+            if (inputManager.inputStates[inputId]) {
+                const allOptions = Array.from(suggestionBox.querySelectorAll('div'));
+                inputManager.inputStates[inputId].selectedSuggestionIndex = allOptions.indexOf(div);
+            }
+        });
+        
+        div.addEventListener('mouseleave', () => {
+            div.classList.remove('selected');
+        });
+        
         suggestionBox.appendChild(div);
     });
+
+    // Update ARIA attributes for accessibility
+    inputField.setAttribute('aria-expanded', suggestionBox.children.length > 0 ? 'true' : 'false');
+    inputField.setAttribute('aria-controls', suggestionBox.id);
 
     // Update visibility and position
     suggestionBox.style.display = suggestionBox.children.length > 0 ? 'block' : 'none';
@@ -212,7 +259,13 @@ export const setupAutocompleteForField = (fieldId) => {
 
     // Override the inputManager's input handler with our specific one
     inputField.removeEventListener('input', inputManager.inputStates[fieldId].handlers.input);
-    inputField.addEventListener('input', debouncedInputHandler);
+    inputField.addEventListener('input', (e) => {
+        // Reset selection index when user types
+        if (inputManager.inputStates[fieldId]) {
+            inputManager.inputStates[fieldId].selectedSuggestionIndex = -1;
+        }
+        debouncedInputHandler(e);
+    });
 
     // Add special data attribute for initial empty state
     if (!inputField.value) {

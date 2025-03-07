@@ -36,7 +36,8 @@ class InputManager {
                 isProcessingBlur: false,
                 hasSuggestions: false,
                 selectedIata: null,
-                isAnyDestination: false
+                isAnyDestination: false,
+                selectedSuggestionIndex: -1 // Add tracking for keyboard navigation
             };
         }
         return this.inputStates[inputId];
@@ -60,6 +61,9 @@ class InputManager {
         // Set necessary attributes
         inputField.setAttribute('autocomplete', 'new-password');
         inputField.setAttribute('name', `waypoint-input-${Date.now()}`);
+        inputField.setAttribute('role', 'combobox');
+        inputField.setAttribute('aria-autocomplete', 'list');
+        inputField.setAttribute('aria-expanded', 'false');
         
         // Create or reference suggestion box
         const suggestionBox = this.ensureSuggestionBox(inputId);
@@ -101,6 +105,7 @@ class InputManager {
         suggestionBox = document.createElement('div');
         suggestionBox.id = `${inputId}Suggestions`;
         suggestionBox.className = 'suggestions';
+        suggestionBox.setAttribute('role', 'listbox');
         
         // Add to DOM at body level for consistent positioning
         document.body.appendChild(suggestionBox);
@@ -231,27 +236,125 @@ class InputManager {
      * Handle input keydown event
      */
     handleKeyDown(inputId, event) {
-        if (event.key === 'Enter') {
-            event.preventDefault();
-            
-            if (!this.isMobile()) {
-                const inputNumber = parseInt(inputId.replace(/\D/g, ''), 10);
-                const isOriginField = (inputNumber - 1) % 2 === 0;
+        const inputField = document.getElementById(inputId);
+        const suggestionBox = this.suggestionBoxes[inputId];
+        const inputState = this.inputStates[inputId];
+        
+        if (!suggestionBox || !inputField || !inputState) return;
+        
+        const suggestions = Array.from(suggestionBox.querySelectorAll('div'));
+        const isVisible = suggestionBox.style.display === 'block' && suggestions.length > 0;
+        
+        // Reset selection index if suggestions aren't visible
+        if (!isVisible) {
+            inputState.selectedSuggestionIndex = -1;
+            // Process Enter key for non-suggestion cases
+            if (event.key === 'Enter') {
+                event.preventDefault();
                 
-                if (isOriginField) {
-                    // If this is an origin field, focus destination field
-                    const destId = `waypoint-input-${inputNumber + 1}`;
-                    const destField = document.getElementById(destId);
+                if (!this.isMobile()) {
+                    const inputNumber = parseInt(inputId.replace(/\D/g, ''), 10);
+                    const isOriginField = (inputNumber - 1) % 2 === 0;
                     
-                    if (destField && !destField.value.trim()) {
-                        requestAnimationFrame(() => destField.focus());
-                        return;
+                    if (isOriginField) {
+                        // If this is an origin field, focus destination field
+                        const destId = `waypoint-input-${inputNumber + 1}`;
+                        const destField = document.getElementById(destId);
+                        
+                        if (destField && !destField.value.trim()) {
+                            requestAnimationFrame(() => destField.focus());
+                            return;
+                        }
                     }
                 }
+                
+                // Otherwise blur this field
+                event.target.blur();
             }
-            
-            // Otherwise blur this field
-            event.target.blur();
+            return;
+        }
+        
+        switch (event.key) {
+            case 'ArrowDown':
+                event.preventDefault();
+                this.navigateSuggestion(inputId, 1);
+                break;
+                
+            case 'ArrowUp':
+                event.preventDefault();
+                this.navigateSuggestion(inputId, -1);
+                break;
+                
+            case 'Enter':
+                event.preventDefault();
+                if (inputState.selectedSuggestionIndex >= 0 && 
+                    inputState.selectedSuggestionIndex < suggestions.length) {
+                    // Trigger click on the selected suggestion
+                    suggestions[inputState.selectedSuggestionIndex].click();
+                } else if (suggestions.length > 0) {
+                    // If no selection but suggestions exist, select the first one
+                    suggestions[0].click();
+                } else {
+                    // No suggestions, move to next field or blur
+                    const inputNumber = parseInt(inputId.replace(/\D/g, ''), 10);
+                    const isOriginField = (inputNumber - 1) % 2 === 0;
+                    
+                    if (isOriginField && !this.isMobile()) {
+                        const destId = `waypoint-input-${inputNumber + 1}`;
+                        const destField = document.getElementById(destId);
+                        if (destField && !destField.value.trim()) {
+                            requestAnimationFrame(() => destField.focus());
+                        }
+                    } else {
+                        inputField.blur();
+                    }
+                }
+                break;
+                
+            case 'Escape':
+                event.preventDefault();
+                suggestionBox.style.display = 'none';
+                inputState.selectedSuggestionIndex = -1;
+                break;
+                
+            case 'Tab':
+                // Hide suggestions but allow default tab behavior
+                suggestionBox.style.display = 'none';
+                inputState.selectedSuggestionIndex = -1;
+                break;
+        }
+    }
+    
+    /**
+     * Navigate through suggestions using keyboard
+     */
+    navigateSuggestion(inputId, direction) {
+        const suggestionBox = this.suggestionBoxes[inputId];
+        const inputState = this.inputStates[inputId];
+        
+        if (!suggestionBox || !inputState) return;
+        
+        const suggestions = Array.from(suggestionBox.querySelectorAll('div'));
+        if (!suggestions.length) return;
+        
+        // Remove current selection if any
+        suggestions.forEach(item => item.classList.remove('selected'));
+        
+        // Calculate new index with wrapping
+        let newIndex = inputState.selectedSuggestionIndex + direction;
+        if (newIndex < 0) newIndex = suggestions.length - 1;
+        if (newIndex >= suggestions.length) newIndex = 0;
+        
+        // Set new selection
+        inputState.selectedSuggestionIndex = newIndex;
+        const selectedItem = suggestions[newIndex];
+        selectedItem.classList.add('selected');
+        selectedItem.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+        
+        // Set aria attributes for accessibility
+        const inputField = document.getElementById(inputId);
+        if (inputField) {
+            inputField.setAttribute('aria-activedescendant', selectedItem.id || '');
         }
     }
     
@@ -259,9 +362,13 @@ class InputManager {
      * Handle input event - fetch suggestions
      */
     handleInput(inputId, event) {
+        // Reset selection index when user types
+        if (this.inputStates[inputId]) {
+            this.inputStates[inputId].selectedSuggestionIndex = -1;
+        }
+        
         // Implementation to fetch airport suggestions would go here
         // This would be connected to the airport autocomplete functionality
-        // For now, we just need this placeholder to handle the debounced input event
     }
     
     /**
