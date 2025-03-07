@@ -674,12 +674,6 @@
   visibility: visible !important;
 }
 
-/* Fix for empty inputs to properly display placeholders */
-.waypoint-input:not([value]),
-.waypoint-input[value=""] {
-  background-color: transparent !important;
-}
-
 /* Additional placeholder visibility rule for empty inputs */
 .waypoint-input:empty::before {
   content: attr(placeholder);
