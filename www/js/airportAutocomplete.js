@@ -41,13 +41,13 @@ export const fetchAirportByIata = async (iata) => {
 };
 
 // Update suggestions in the suggestion box
-const updateSuggestions = (inputId, airports) => {
+export const updateSuggestions = (inputId, airports) => {
     const suggestionBox = document.getElementById(`${inputId}Suggestions`);
     if (!suggestionBox) return;
 
     // Clear existing suggestions
     suggestionBox.innerHTML = '';
-    
+
     // Reset selected suggestion index
     if (inputManager.inputStates[inputId]) {
         inputManager.inputStates[inputId].selectedSuggestionIndex = -1;
@@ -58,55 +58,50 @@ const updateSuggestions = (inputId, airports) => {
         document.body.appendChild(suggestionBox);
     }
 
-    // Calculate waypoint index and determine field type
+    // Calculate waypoint index and check if pair is "Any"
     const waypointIndex = parseInt(inputId.replace(/\D/g, ''), 10) - 1;
     const isOriginField = waypointIndex % 2 === 0;
     const pairIndex = isOriginField ? waypointIndex + 1 : waypointIndex - 1;
-    const pairInputId = `waypoint-input-${pairIndex + 1}`;
-    const pairField = document.getElementById(pairInputId);
+    const pairField = document.getElementById(`waypoint-input-${pairIndex + 1}`);
 
-    // Improved check for paired field having "Anywhere" set
     const pairFieldHasAnywhere = pairField && (
         pairField.value === 'Anywhere' ||
         pairField.getAttribute('data-is-any-destination') === 'true' ||
         pairField.getAttribute('data-selected-iata') === 'Any'
     );
-
-    // Check if paired waypoint has "Any" flag - also look for both isAnyDestination and isAnyOrigin
-    const pairWaypoint = (pairIndex >= 0 && pairIndex < appState.waypoints.length) ?
-        appState.waypoints[pairIndex] : null;
-
-    const isPairAny = pairFieldHasAnywhere || (pairWaypoint &&
-        (pairWaypoint.iata_code === 'Any' ||
-         pairWaypoint.isAnyDestination === true ||
-         pairWaypoint.isAnyOrigin === true));
+    const pairWaypoint = (pairIndex >= 0 && pairIndex < appState.waypoints.length)
+        ? appState.waypoints[pairIndex]
+        : null;
+    const isPairAny = pairFieldHasAnywhere ||
+        (pairWaypoint && (
+            pairWaypoint.iata_code === 'Any' ||
+            pairWaypoint.isAnyDestination === true ||
+            pairWaypoint.isAnyOrigin === true
+        ));
 
     const inputField = document.getElementById(inputId);
-    const isEmptySearch = airports.length === 0;
-    
-    // Remove the isPairedWithAnywhere variable and rely on the more comprehensive isPairAny check
 
-    // Add "Anywhere" option if needed - only if pair is not "Any"
-    if ((isEmptySearch || inputField.hasAttribute('data-show-anywhere-option')) && !isPairAny) {
+    // Show "Anywhere" only if there are no airport suggestions and the pair isn't "Any"
+    if (airports.length === 0 && !isPairAny) {
         const anywhereDiv = document.createElement('div');
         anywhereDiv.className = 'anywhere-suggestion';
         anywhereDiv.textContent = 'Anywhere';
         anywhereDiv.setAttribute('data-is-anywhere', 'true');
         anywhereDiv.setAttribute('role', 'option');
         anywhereDiv.id = `${inputId}-anywhere-option`;
-
+        
         anywhereDiv.addEventListener('click', (e) => {
             e.preventDefault();
             e.stopPropagation();
-
-            // Don't allow both origin and destination to be "Any"
+            
+            // Don’t allow both origin & destination to be "Anywhere"
             if (isOriginField && isPairAny && !window.isLoadingFromUrl) {
                 alert("Both origin and destination cannot be set to 'Anywhere'");
                 suggestionBox.style.display = 'none';
                 return;
             }
 
-            // Create waypoint data for "Any" destination
+            // Create waypoint data for "Any"
             const anyDestination = {
                 iata_code: 'Any',
                 city: 'Anywhere',
@@ -122,25 +117,25 @@ const updateSuggestions = (inputId, airports) => {
             inputField.setAttribute('data-is-any-destination', 'true');
             suggestionBox.style.display = 'none';
 
-            // Update previous valid values in inputManager
+            // Update inputManager
             if (inputManager.inputStates[inputId]) {
                 inputManager.inputStates[inputId].previousValidValue = 'Anywhere';
                 inputManager.inputStates[inputId].previousIataCode = 'Any';
             }
 
-            // Update paired field to indicate it's paired with "Anywhere"
+            // Flag the paired field
             if (pairField) {
                 pairField.setAttribute('data-paired-with-anywhere', 'true');
             }
 
-            // Update waypoint in state
+            // Update appState
             if (waypointIndex >= 0 && waypointIndex < appState.waypoints.length) {
                 updateState('updateWaypoint', { index: waypointIndex, data: anyDestination }, 'airportAutocomplete.anywhereSelection');
             } else {
                 updateState('addWaypoint', anyDestination, 'airportAutocomplete.anywhereSelection');
             }
 
-            // Handle blur and focus next field if needed
+            // Blur and optionally focus the next field
             setTimeout(() => {
                 inputField.blur();
                 setTimeout(() => {
@@ -161,14 +156,13 @@ const updateSuggestions = (inputId, airports) => {
             }, 100);
         });
 
-        // Add hover effect for keyboard navigation
+        // Hover effect for keyboard nav
         anywhereDiv.addEventListener('mouseenter', () => {
             anywhereDiv.classList.add('selected');
             if (inputManager.inputStates[inputId]) {
                 inputManager.inputStates[inputId].selectedSuggestionIndex = 0;
             }
         });
-
         anywhereDiv.addEventListener('mouseleave', () => {
             anywhereDiv.classList.remove('selected');
         });
@@ -235,15 +229,10 @@ const updateSuggestions = (inputId, airports) => {
         suggestionBox.appendChild(div);
     });
 
-    // Update ARIA attributes for accessibility
+    // Final UI updates
     inputField.setAttribute('aria-expanded', suggestionBox.children.length > 0 ? 'true' : 'false');
-    inputField.setAttribute('aria-controls', suggestionBox.id);
-
-    // Update visibility and position
     suggestionBox.style.display = suggestionBox.children.length > 0 ? 'block' : 'none';
     suggestionBox.style.zIndex = '90';
-    
-    // Use inputManager to position the suggestion box
     inputManager.positionSuggestionBox(inputId);
 };
 

@@ -1,6 +1,6 @@
 import { appState, updateState } from './stateManager.js';
 import { map } from './map.js';
-import { fetchAirportByIata } from './airportAutocomplete.js';
+import { fetchAirportByIata, updateSuggestions } from './airportAutocomplete.js';
 
 /**
  * InputManager - Centralized management for waypoint input fields
@@ -138,9 +138,8 @@ class InputManager {
     handleFocus(inputId, event) {
         const inputField = document.getElementById(inputId);
         const inputState = this.inputStates[inputId];
-        const suggestionBox = this.suggestionBoxes[inputId];
-        
-        if (!inputField || !inputState || inputState.isProcessingBlur) return;
+        const suggestionBox = this.suggestionBoxes[inputId];     
+        if (!inputField || !inputState) return;
         
         // Store current valid value before user starts typing
         inputState.previousValidValue = inputField.value;
@@ -179,6 +178,12 @@ class InputManager {
                     }
                 })
                 .catch(error => console.warn('Error flying to airport:', error));
+        }
+
+        if (!inputField.value.trim()) {
+          // Make sure airportAutocomplete's updateSuggestions is accessible here
+          updateSuggestions(inputId, []);
+          suggestionBox.style.display = 'block';
         }
         
         inputState.isInitialFocus = false;
