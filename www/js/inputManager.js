@@ -2,10 +2,6 @@ import { appState, updateState } from './stateManager.js';
 import { map } from './map.js';
 import { fetchAirportByIata, updateSuggestions } from './airportAutocomplete.js';
 
-/**
- * InputManager - Centralized management for waypoint input fields
- * Handles focus, blur, suggestions, and mobile/desktop specific behaviors
- */
 class InputManager {
     constructor() {
         this.debounceTimers = {};
@@ -13,9 +9,6 @@ class InputManager {
         this.inputStates = {};
     }
 
-    /**
-     * Debounce helper function
-     */
     debounce(func, delay, id) {
         const timerId = id || Math.random().toString(36);
         return (...args) => {
@@ -25,9 +18,6 @@ class InputManager {
         };
     }
 
-    /**
-     * Initialize input state tracking for a specific field
-     */
     initInputState(inputId) {
         if (!this.inputStates[inputId]) {
             this.inputStates[inputId] = {
@@ -37,17 +27,14 @@ class InputManager {
                 hasSuggestions: false,
                 selectedIata: null,
                 isAnyDestination: false,
-                selectedSuggestionIndex: -1, // Add tracking for keyboard navigation
-                previousValidValue: '', // Track the previous valid value
-                previousIataCode: null, // Track the previous valid IATA code
+                selectedSuggestionIndex: -1,
+                previousValidValue: '',
+                previousIataCode: null,
             };
         }
         return this.inputStates[inputId];
     }
 
-    /**
-     * Setup a waypoint input field with all event handlers
-     */
     setupWaypointInput(inputId, options = {}) {
         const inputField = document.getElementById(inputId);
         if (!inputField) return null;
@@ -57,7 +44,6 @@ class InputManager {
         const isOriginField = waypointIndex % 2 === 0;
         const inputState = this.initInputState(inputId);
         
-        // Clean up any previous event listeners
         this.cleanupInputListeners(inputId);
         
         // Set necessary attributes
@@ -67,10 +53,8 @@ class InputManager {
         inputField.setAttribute('aria-autocomplete', 'list');
         inputField.setAttribute('aria-expanded', 'false');
         
-        // Create or reference suggestion box
         const suggestionBox = this.ensureSuggestionBox(inputId);
         
-        // Set up event handlers with proper binding
         const handlers = {
             focus: this.handleFocus.bind(this, inputId),
             blur: this.handleBlur.bind(this, inputId),
@@ -78,49 +62,32 @@ class InputManager {
             keydown: this.handleKeyDown.bind(this, inputId)
         };
         
-        // Attach all events to input field
         Object.entries(handlers).forEach(([event, handler]) => {
             inputField.addEventListener(event, handler);
         });
         
-        // Store handler references for cleanup
         inputState.handlers = handlers;
-        
-        // Initialize from waypoint data if available
         this.syncInputWithWaypoint(inputId);
         
         return inputField;
     }
     
-    /**
-     * Create or ensure a suggestion box exists for an input
-     */
     ensureSuggestionBox(inputId) {
         let suggestionBox = document.getElementById(`${inputId}Suggestions`);
         
-        // Remove existing suggestion box if it exists
-        if (suggestionBox) {
-            suggestionBox.remove();
-        }
+        if (suggestionBox) suggestionBox.remove();
         
-        // Create new suggestion box
         suggestionBox = document.createElement('div');
         suggestionBox.id = `${inputId}Suggestions`;
         suggestionBox.className = 'suggestions';
         suggestionBox.setAttribute('role', 'listbox');
         
-        // Add to DOM at body level for consistent positioning
         document.body.appendChild(suggestionBox);
-        
-        // Store reference
         this.suggestionBoxes[inputId] = suggestionBox;
         
         return suggestionBox;
     }
     
-    /**
-     * Clean up event listeners for an input
-     */
     cleanupInputListeners(inputId) {
         const inputField = document.getElementById(inputId);
         const inputState = this.inputStates[inputId];
@@ -132,43 +99,30 @@ class InputManager {
         }
     }
     
-    /**
-     * Handle input focus event
-     */
     handleFocus(inputId, event) {
         const inputField = document.getElementById(inputId);
         const inputState = this.inputStates[inputId];
         const suggestionBox = this.suggestionBoxes[inputId];     
         if (!inputField || !inputState) return;
         
-        // Store current valid value before user starts typing
         inputState.previousValidValue = inputField.value;
         inputState.previousIataCode = inputField.getAttribute('data-selected-iata');
         
-        // Remove readonly attribute to allow typing
         inputField.removeAttribute('readonly');
         
-        // Handle mobile-specific behavior
         if (this.isMobile()) {
             if (!inputState.isExpanded) {
                 this.createMobileOverlay();
                 this.expandInput(inputId);
                 inputState.isExpanded = true;
             }
-        } else {
-            // Handle desktop behavior
-            if (suggestionBox && suggestionBox.children.length > 0) {
-                this.positionSuggestionBox(inputId);
-                suggestionBox.style.display = 'block';
-            }
+        } else if (suggestionBox && suggestionBox.children.length > 0) {
+            this.positionSuggestionBox(inputId);
+            suggestionBox.style.display = 'block';
         }
         
-        // Select all text for better UX
-        requestAnimationFrame(() => {
-            inputField.select();
-        });
+        requestAnimationFrame(() => inputField.select());
         
-        // Check if we need to fly to the selected airport
         const iataCode = inputField.getAttribute('data-selected-iata');
         if (iataCode && iataCode !== 'Any') {
             fetchAirportByIata(iataCode)
@@ -181,7 +135,6 @@ class InputManager {
         }
 
         if (!inputField.value.trim()) {
-          // Make sure airportAutocomplete's updateSuggestions is accessible here
           updateSuggestions(inputId, []);
           suggestionBox.style.display = 'block';
         }
@@ -189,9 +142,6 @@ class InputManager {
         inputState.isInitialFocus = false;
     }
     
-    /**
-     * Handle input blur event
-     */
     handleBlur(inputId, event) {
         const inputField = document.getElementById(inputId);
         const inputState = this.inputStates[inputId];
@@ -199,67 +149,52 @@ class InputManager {
         
         if (!inputField || !inputState) return;
         
-        // Set processing flag to prevent race conditions
         inputState.isProcessingBlur = true;
         
-        // Get current input value and check if it's valid
         const currentValue = inputField.value.trim();
         const selectedIata = inputField.getAttribute('data-selected-iata');
         
-        // Check if a valid selection was made
         const isValidSelection = 
             (currentValue === 'Anywhere' && selectedIata === 'Any') || 
             (selectedIata && selectedIata !== 'Any' && currentValue.includes(`(${selectedIata})`));
         
-        // If no valid selection, revert to previous valid value
         if (currentValue && !isValidSelection) {
-            // Restore previous value if available, otherwise clear the field
             if (inputState.previousValidValue) {
                 inputField.value = inputState.previousValidValue;
                 
-                // Also restore the data attribute
                 if (inputState.previousIataCode) {
                     inputField.setAttribute('data-selected-iata', inputState.previousIataCode);
                 } else {
                     inputField.removeAttribute('data-selected-iata');
                 }
                 
-                // If it was "Anywhere", restore that attribute too
                 if (inputState.previousValidValue === 'Anywhere') {
                     inputField.setAttribute('data-is-any-destination', 'true');
                 } else {
                     inputField.removeAttribute('data-is-any-destination');
                 }
             } else {
-                // Clear field if no previous valid value
                 inputField.value = '';
                 inputField.removeAttribute('data-selected-iata');
                 inputField.removeAttribute('data-is-any-destination');
             }
         }
         
-        // Store existing value for waypoint handling
         const finalValue = inputField.value;
         const isAnyDestination = 
             finalValue === 'Anywhere' ||
             inputField.getAttribute('data-is-any-destination') === 'true';
             
-        // For mobile, revert UI changes
         if (this.isMobile() && inputState.isExpanded) {
             this.revertInput(inputId);
             inputState.isExpanded = false;
         }
         
-        // Hide suggestion box after a delay to allow for selection
         setTimeout(() => {
-            if (suggestionBox) {
-                suggestionBox.style.display = 'none';
-            }
+            if (suggestionBox) suggestionBox.style.display = 'none';
             
-            // Set readonly back for better mobile behavior
             inputField.setAttribute('readonly', true);
             
-            // Process waypoint changes if needed
             if (!isAnyDestination && !window.preserveAnyDestination && 
                 finalValue === '' && appState.waypoints.length > 0 && 
                 !appState.isRouteSwitching && !appState.searchResultsLoading) {
@@ -274,14 +209,10 @@ class InputManager {
                 }
             }
             
-            // Reset processing flag
             inputState.isProcessingBlur = false;
         }, 300);
     }
     
-    /**
-     * Handle input keydown event
-     */
     handleKeyDown(inputId, event) {
         const inputField = document.getElementById(inputId);
         const suggestionBox = this.suggestionBoxes[inputId];
@@ -292,10 +223,8 @@ class InputManager {
         const suggestions = Array.from(suggestionBox.querySelectorAll('div'));
         const isVisible = suggestionBox.style.display === 'block' && suggestions.length > 0;
         
-        // Reset selection index if suggestions aren't visible
         if (!isVisible) {
             inputState.selectedSuggestionIndex = -1;
-            // Process Enter key for non-suggestion cases
             if (event.key === 'Enter') {
                 event.preventDefault();
                 
@@ -304,7 +233,6 @@ class InputManager {
                     const isOriginField = (inputNumber - 1) % 2 === 0;
                     
                     if (isOriginField) {
-                        // If this is an origin field, focus destination field
                         const destId = `waypoint-input-${inputNumber + 1}`;
                         const destField = document.getElementById(destId);
                         
@@ -315,7 +243,6 @@ class InputManager {
                     }
                 }
                 
-                // Otherwise blur this field
                 event.target.blur();
             }
             return;
@@ -336,13 +263,10 @@ class InputManager {
                 event.preventDefault();
                 if (inputState.selectedSuggestionIndex >= 0 && 
                     inputState.selectedSuggestionIndex < suggestions.length) {
-                    // Trigger click on the selected suggestion
                     suggestions[inputState.selectedSuggestionIndex].click();
                 } else if (suggestions.length > 0) {
-                    // If no selection but suggestions exist, select the first one
                     suggestions[0].click();
                 } else {
-                    // No suggestions, move to next field or blur
                     const inputNumber = parseInt(inputId.replace(/\D/g, ''), 10);
                     const isOriginField = (inputNumber - 1) % 2 === 0;
                     
@@ -365,16 +289,12 @@ class InputManager {
                 break;
                 
             case 'Tab':
-                // Hide suggestions but allow default tab behavior
                 suggestionBox.style.display = 'none';
                 inputState.selectedSuggestionIndex = -1;
                 break;
         }
     }
     
-    /**
-     * Navigate through suggestions using keyboard
-     */
     navigateSuggestion(inputId, direction) {
         const suggestionBox = this.suggestionBoxes[inputId];
         const inputState = this.inputStates[inputId];
@@ -384,43 +304,29 @@ class InputManager {
         const suggestions = Array.from(suggestionBox.querySelectorAll('div'));
         if (!suggestions.length) return;
         
-        // Remove current selection if any
         suggestions.forEach(item => item.classList.remove('selected'));
         
-        // Calculate new index with wrapping
         let newIndex = inputState.selectedSuggestionIndex + direction;
         if (newIndex < 0) newIndex = suggestions.length - 1;
         if (newIndex >= suggestions.length) newIndex = 0;
         
-        // Set new selection
         inputState.selectedSuggestionIndex = newIndex;
         const selectedItem = suggestions[newIndex];
         selectedItem.classList.add('selected');
         selectedItem.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
         
-        // Set aria attributes for accessibility
         const inputField = document.getElementById(inputId);
         if (inputField) {
             inputField.setAttribute('aria-activedescendant', selectedItem.id || '');
         }
     }
     
-    /**
-     * Handle input event - fetch suggestions
-     */
-    handleInput(inputId, event) {
-        // Reset selection index when user types
+    handleInput(inputId) {
         if (this.inputStates[inputId]) {
             this.inputStates[inputId].selectedSuggestionIndex = -1;
         }
-        
-        // Implementation to fetch airport suggestions would go here
-        // This would be connected to the airport autocomplete functionality
     }
     
-    /**
-     * Position suggestion box based on input position
-     */
     positionSuggestionBox(inputId) {
         const inputField = document.getElementById(inputId);
         const suggestionBox = this.suggestionBoxes[inputId];
@@ -480,9 +386,6 @@ class InputManager {
         Object.assign(suggestionBox.style, styles);
     }
     
-    /**
-     * Expand input for mobile view
-     */
     expandInput(inputId) {
         const inputField = document.getElementById(inputId);
         const suggestionBox = this.suggestionBoxes[inputId];
@@ -507,13 +410,9 @@ class InputManager {
             }
         }
         
-        // Add back button
         this.addBackButton(inputId);
     }
     
-    /**
-     * Add back button for mobile expanded view
-     */
     addBackButton(inputId) {
         const inputField = document.getElementById(inputId);
         if (!inputField || inputField.parentElement.querySelector('.back-button')) return;
@@ -532,37 +431,29 @@ class InputManager {
             event.preventDefault();
             event.stopPropagation();
             
-            // Clear input value
             inputField.value = '';
             
-            // Remove overlay with animation
             const overlay = document.querySelector('.route-box-overlay');
             if (overlay) {
                 overlay.classList.remove('active');
                 setTimeout(() => overlay.remove(), 200);
             }
             
-            // Process waypoint removal
             const waypointIndex = parseInt(inputId.replace(/\D/g, ''), 10) - 1;
             updateState('removeWaypoint', waypointIndex, 'inputManager.backButton');
             
-            // Blur input to close keyboard
             inputField.blur();
         }, 300, `back-${inputId}`);
         
         inputField.parentElement.appendChild(backButton);
     }
     
-    /**
-     * Revert input from expanded state
-     */
     revertInput(inputId) {
         const inputField = document.getElementById(inputId);
         const suggestionBox = this.suggestionBoxes[inputId];
         
         if (!inputField) return;
         
-        // Handle overlay
         const overlay = document.querySelector('.route-box-overlay');
         if (overlay) {
             overlay.classList.remove('active');
@@ -573,49 +464,38 @@ class InputManager {
             }, 300);
         }
         
-        // Revert input
         inputField.classList.remove('expanded-input');
         
-        // Handle suggestions
         if (suggestionBox) {
             suggestionBox.classList.remove('expanded-suggestions');
             suggestionBox.style.display = 'none';
         }
         
-        // Remove back button
         const backButton = inputField.parentElement?.querySelector('.back-button');
         if (backButton) {
             backButton.remove();
         }
     }
     
-    /**
-     * Create overlay for mobile view
-     */
     createMobileOverlay() {
-        // Remove any existing overlay
         const existingOverlay = document.querySelector('.route-box-overlay');
         if (existingOverlay) {
             existingOverlay.remove();
         }
         
-        // Skip if we're loading search results
         if (appState.searchResultsLoading) return;
         
         const routeBox = document.querySelector('.route-box');
         if (!routeBox) return;
         
-        // Create overlay
         const overlay = document.createElement('div');
         overlay.className = 'route-box-overlay mobile-overlay';
         overlay.style.zIndex = '90';
         
-        // Handle overlay interaction
         const handleOverlayInteraction = (e) => {
             e.preventDefault();
             e.stopPropagation();
             
-            // Blur active input
             if (document.activeElement && document.activeElement.tagName === 'INPUT') {
                 const input = document.activeElement;
                 const preventFocus = e => e.preventDefault();
@@ -628,10 +508,8 @@ class InputManager {
         overlay.addEventListener('mousedown', handleOverlayInteraction);
         overlay.addEventListener('click', handleOverlayInteraction);
         
-        // Add to DOM
         routeBox.appendChild(overlay);
         
-        // Activate with animation
         requestAnimationFrame(() => {
             if (overlay && document.body.contains(overlay)) {
                 overlay.classList.add('active');
@@ -639,9 +517,6 @@ class InputManager {
         });
     }
     
-    /**
-     * Update input field with waypoint data
-     */
     syncInputWithWaypoint(inputId) {
         const inputField = document.getElementById(inputId);
         if (!inputField) return;
@@ -654,7 +529,6 @@ class InputManager {
             inputField.removeAttribute('data-selected-iata');
             inputField.removeAttribute('data-is-any-destination');
             
-            // Update previous valid value when syncing
             if (this.inputStates[inputId]) {
                 this.inputStates[inputId].previousValidValue = '';
                 this.inputStates[inputId].previousIataCode = null;
@@ -667,7 +541,6 @@ class InputManager {
             inputField.setAttribute('data-selected-iata', 'Any');
             inputField.setAttribute('data-is-any-destination', 'true');
             
-            // Update previous valid value
             if (this.inputStates[inputId]) {
                 this.inputStates[inputId].previousValidValue = 'Anywhere';
                 this.inputStates[inputId].previousIataCode = 'Any';
@@ -677,7 +550,6 @@ class InputManager {
             inputField.setAttribute('data-selected-iata', waypoint.iata_code);
             inputField.removeAttribute('data-is-any-destination');
             
-            // Update previous valid value
             if (this.inputStates[inputId]) {
                 this.inputStates[inputId].previousValidValue = inputField.value;
                 this.inputStates[inputId].previousIataCode = waypoint.iata_code;
@@ -685,21 +557,12 @@ class InputManager {
         }
     }
     
-    /**
-     * Utility function to check if on mobile
-     */
     isMobile() {
         return window.innerWidth <= 600;
     }
     
-    /**
-     * Set focus to next empty input field
-     */
     setFocusToNextUnsetInput() {
-        // Skip focusing on mobile devices
-        if (this.isMobile()) {
-            return;
-        }
+        if (this.isMobile()) return;
 
         const waypointInputs = document.querySelectorAll('.waypoint-input[type="text"]');
         requestAnimationFrame(() => {
@@ -712,35 +575,27 @@ class InputManager {
         });
     }
     
-    /**
-     * Cleanup all input managers and related elements
-     */
     cleanup() {
-        // Remove all suggestion boxes
         Object.values(this.suggestionBoxes).forEach(box => {
             if (box && document.body.contains(box)) {
                 box.remove();
             }
         });
         
-        // Clear all overlays
         document.querySelectorAll('.route-box-overlay').forEach(overlay => {
             overlay.remove();
         });
         
-        // Clean up all input listeners
         Object.keys(this.inputStates).forEach(inputId => {
             this.cleanupInputListeners(inputId);
         });
         
-        // Reset state
         this.suggestionBoxes = {};
         this.inputStates = {};
         this.debounceTimers = {};
     }
 }
 
-// Create singleton instance
 const inputManager = new InputManager();
 
 export { inputManager };
