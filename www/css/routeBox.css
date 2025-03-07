@@ -436,12 +436,14 @@
 }
 
 [id$='Suggestions'] div {
-  padding: 5px;
+  padding: 10px;
   border-top: 1px solid #26303c;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent; /* Remove tap highlight on touch devices */
   touch-action: none; /* Prevent browser handling of touch events */
-  min-height: 44px; /* Minimum comfortable touch target size */
+  min-height: 40px; /* Minimum comfortable touch target size */
+  display: flex;
+  align-items: center;
 }
 
 /* Base suggestion styles */
