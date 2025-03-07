@@ -664,16 +664,13 @@
   margin-bottom: 0;
 }
 
-.waypoint-input::placeholder {
+/* Consolidated placeholder styles - replaces all the individual placeholder rules */
+.waypoint-input::placeholder,
+.waypoint-input::-webkit-input-placeholder,
+.waypoint-input::-moz-placeholder,
+.waypoint-input[readonly]::placeholder {
   color: #999 !important;
   opacity: 1 !important;
-  visibility: visible !important;
-}
-
-/* Ensure readonly input fields show their placeholders */
-.waypoint-input[readonly]::placeholder {
-  color: #999 !important; 
-  opacity: 0.8 !important;
   visibility: visible !important;
 }
 
@@ -683,19 +680,7 @@
   background-color: transparent !important;
 }
 
-/* Force placeholder visibility in various browsers */
-.waypoint-input::-webkit-input-placeholder { /* Chrome/Safari/Opera */
-  opacity: 1 !important;
-  color: #999 !important;
-  visibility: visible !important;
-}
-
-.waypoint-input::-moz-placeholder { /* Firefox */
-  opacity: 1 !important;
-  color: #999 !important;
-  visibility: visible !important;
-}
-
+/* Additional placeholder visibility rule for empty inputs */
 .waypoint-input:empty::before {
   content: attr(placeholder);
   color: #999;

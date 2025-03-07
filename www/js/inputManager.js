@@ -57,10 +57,9 @@ class InputManager {
         inputField.setAttribute('aria-autocomplete', 'list');
         inputField.setAttribute('aria-expanded', 'false');
         
-        // Ensure placeholder is set
+        // Set placeholder once - the CSS will handle visibility
         if (originalPlaceholder) {
             inputField.placeholder = originalPlaceholder;
-            inputField.setAttribute('placeholder', originalPlaceholder);
         }
         
         const suggestionBox = this.ensureSuggestionBox(inputId);
@@ -171,8 +170,8 @@ class InputManager {
         const currentValue = inputField.value.trim();
         const selectedIata = inputField.getAttribute('data-selected-iata');
         
-        // Store the placeholder for restoration
-        const placeholder = inputField.getAttribute('placeholder') || '';
+        // Cache the placeholder - no need to set it again if already present
+        const placeholder = inputField.placeholder;
         
         const isValidSelection = 
             (currentValue === 'Anywhere' && selectedIata === 'Any') || 
@@ -213,16 +212,8 @@ class InputManager {
         setTimeout(() => {
             if (suggestionBox) suggestionBox.style.display = 'none';
             
-            if (finalValue.trim()) {
-                inputField.setAttribute('readonly', true);
-            } else {
-                inputField.removeAttribute('readonly');
-                // Restore placeholder
-                if (placeholder) {
-                    inputField.placeholder = placeholder;
-                    inputField.setAttribute('placeholder', placeholder);
-                }
-            }
+            // Simplify readonly state management
+            inputField.readOnly = Boolean(finalValue.trim());
             
             if (!isAnyDestination && !window.preserveAnyDestination && 
                 finalValue === '' && appState.waypoints.length > 0 && 
@@ -550,8 +541,7 @@ class InputManager {
         const inputField = document.getElementById(inputId);
         if (!inputField) return;
         
-        // Store the original placeholder
-        const originalPlaceholder = inputField.getAttribute('placeholder') || '';
+        // Use the existing placeholder - no need to reset it
         
         const waypointIndex = parseInt(inputId.replace(/\D/g, ''), 10) - 1;
         const waypoint = appState.waypoints[waypointIndex];
@@ -560,13 +550,7 @@ class InputManager {
             inputField.value = '';
             inputField.removeAttribute('data-selected-iata');
             inputField.removeAttribute('data-is-any-destination');
-            inputField.removeAttribute('readonly');
-            
-            // Ensure placeholder is still set after clearing
-            if (originalPlaceholder) {
-                inputField.placeholder = originalPlaceholder;
-                inputField.setAttribute('placeholder', originalPlaceholder);
-            }
+            inputField.readOnly = false;
             
             if (this.inputStates[inputId]) {
                 this.inputStates[inputId].previousValidValue = '';
@@ -579,7 +563,7 @@ class InputManager {
             inputField.value = 'Anywhere';
             inputField.setAttribute('data-selected-iata', 'Any');
             inputField.setAttribute('data-is-any-destination', 'true');
-            inputField.setAttribute('readonly', true);
+            inputField.readOnly = true;
             
             if (this.inputStates[inputId]) {
                 this.inputStates[inputId].previousValidValue = 'Anywhere';
@@ -589,7 +573,7 @@ class InputManager {
             inputField.value = `${waypoint.city}, (${waypoint.iata_code})`;
             inputField.setAttribute('data-selected-iata', waypoint.iata_code);
             inputField.removeAttribute('data-is-any-destination');
-            inputField.setAttribute('readonly', true);
+            inputField.readOnly = true;
             
             if (this.inputStates[inputId]) {
                 this.inputStates[inputId].previousValidValue = inputField.value;

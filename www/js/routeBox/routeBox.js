@@ -44,15 +44,10 @@ const createWaypointInput = (index, placeholder, waypoint) => {
         value: waypoint ? `${waypoint.city}, (${waypoint.iata_code})` : ''
     });
     input.type = 'text';
-    input.placeholder = placeholder; // Set placeholder as a property not just attribute
-    input.setAttribute('placeholder', placeholder); // Also set as attribute to be sure
+    input.placeholder = placeholder;
     
-    // Make sure the input is not readonly when empty
-    if (!waypoint) {
-        input.removeAttribute('readonly');
-    } else {
-        input.setAttribute('readonly', 'true');
-    }
+    // Make input readonly only when it has a value
+    input.readOnly = Boolean(waypoint);
     
     inputWrapper.appendChild(input);
     return { inputWrapper, input };
