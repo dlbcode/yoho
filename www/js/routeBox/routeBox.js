@@ -41,10 +41,19 @@ const createWaypointInput = (index, placeholder, waypoint) => {
     const input = createElement('input', { 
         id: `waypoint-input-${index + 1}`, 
         className: 'waypoint-input', 
-        value: waypoint ? `${waypoint.city}, (${waypoint.iata_code})` : '',
-        placeholder
+        value: waypoint ? `${waypoint.city}, (${waypoint.iata_code})` : ''
     });
     input.type = 'text';
+    input.placeholder = placeholder; // Set placeholder as a property not just attribute
+    input.setAttribute('placeholder', placeholder); // Also set as attribute to be sure
+    
+    // Make sure the input is not readonly when empty
+    if (!waypoint) {
+        input.removeAttribute('readonly');
+    } else {
+        input.setAttribute('readonly', 'true');
+    }
+    
     inputWrapper.appendChild(input);
     return { inputWrapper, input };
 };

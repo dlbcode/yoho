@@ -2,6 +2,12 @@ import { appState, updateState } from "./stateManager.js";
 import { adjustMapSize } from "./map.js";
 import { inputManager } from "./inputManager.js";
 
+// Add CSS for placeholder fix
+const placeholderFixCss = document.createElement('link');
+placeholderFixCss.rel = 'stylesheet';
+placeholderFixCss.href = 'css/placeholder-fix.css';
+document.head.appendChild(placeholderFixCss);
+
 let estimatedBottomBarHeight = 0;
 
 const estimateBottomBarHeight = () => {

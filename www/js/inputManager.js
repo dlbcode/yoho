@@ -46,12 +46,22 @@ class InputManager {
         
         this.cleanupInputListeners(inputId);
         
+        // Store the original placeholder
+        const originalPlaceholder = inputField.getAttribute('placeholder') || 
+            (isOriginField ? 'From' : 'Where to?');
+        
         // Set necessary attributes
         inputField.setAttribute('autocomplete', 'new-password');
         inputField.setAttribute('name', `waypoint-input-${Date.now()}`);
         inputField.setAttribute('role', 'combobox');
         inputField.setAttribute('aria-autocomplete', 'list');
         inputField.setAttribute('aria-expanded', 'false');
+        
+        // Ensure placeholder is set
+        if (originalPlaceholder) {
+            inputField.placeholder = originalPlaceholder;
+            inputField.setAttribute('placeholder', originalPlaceholder);
+        }
         
         const suggestionBox = this.ensureSuggestionBox(inputId);
         
@@ -108,6 +118,7 @@ class InputManager {
         inputState.previousValidValue = inputField.value;
         inputState.previousIataCode = inputField.getAttribute('data-selected-iata');
         
+        // Always remove readonly on focus
         inputField.removeAttribute('readonly');
         
         if (this.isMobile()) {
@@ -160,6 +171,9 @@ class InputManager {
         const currentValue = inputField.value.trim();
         const selectedIata = inputField.getAttribute('data-selected-iata');
         
+        // Store the placeholder for restoration
+        const placeholder = inputField.getAttribute('placeholder') || '';
+        
         const isValidSelection = 
             (currentValue === 'Anywhere' && selectedIata === 'Any') || 
             (selectedIata && selectedIata !== 'Any' && currentValue.includes(`(${selectedIata})`));
@@ -199,7 +213,16 @@ class InputManager {
         setTimeout(() => {
             if (suggestionBox) suggestionBox.style.display = 'none';
             
-            inputField.setAttribute('readonly', true);
+            if (finalValue.trim()) {
+                inputField.setAttribute('readonly', true);
+            } else {
+                inputField.removeAttribute('readonly');
+                // Restore placeholder
+                if (placeholder) {
+                    inputField.placeholder = placeholder;
+                    inputField.setAttribute('placeholder', placeholder);
+                }
+            }
             
             if (!isAnyDestination && !window.preserveAnyDestination && 
                 finalValue === '' && appState.waypoints.length > 0 && 
@@ -527,6 +550,9 @@ class InputManager {
         const inputField = document.getElementById(inputId);
         if (!inputField) return;
         
+        // Store the original placeholder
+        const originalPlaceholder = inputField.getAttribute('placeholder') || '';
+        
         const waypointIndex = parseInt(inputId.replace(/\D/g, ''), 10) - 1;
         const waypoint = appState.waypoints[waypointIndex];
         
@@ -534,6 +560,13 @@ class InputManager {
             inputField.value = '';
             inputField.removeAttribute('data-selected-iata');
             inputField.removeAttribute('data-is-any-destination');
+            inputField.removeAttribute('readonly');
+            
+            // Ensure placeholder is still set after clearing
+            if (originalPlaceholder) {
+                inputField.placeholder = originalPlaceholder;
+                inputField.setAttribute('placeholder', originalPlaceholder);
+            }
             
             if (this.inputStates[inputId]) {
                 this.inputStates[inputId].previousValidValue = '';
@@ -546,6 +579,7 @@ class InputManager {
             inputField.value = 'Anywhere';
             inputField.setAttribute('data-selected-iata', 'Any');
             inputField.setAttribute('data-is-any-destination', 'true');
+            inputField.setAttribute('readonly', true);
             
             if (this.inputStates[inputId]) {
                 this.inputStates[inputId].previousValidValue = 'Anywhere';
@@ -555,6 +589,7 @@ class InputManager {
             inputField.value = `${waypoint.city}, (${waypoint.iata_code})`;
             inputField.setAttribute('data-selected-iata', waypoint.iata_code);
             inputField.removeAttribute('data-is-any-destination');
+            inputField.setAttribute('readonly', true);
             
             if (this.inputStates[inputId]) {
                 this.inputStates[inputId].previousValidValue = inputField.value;
