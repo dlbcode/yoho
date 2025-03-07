@@ -138,6 +138,19 @@ class InputManager {
         
         requestAnimationFrame(() => inputField.select());
         
+        // Add touchstart event to suggestion box for better mobile interaction
+        if (suggestionBox && this.isMobile()) {
+            if (!suggestionBox._hasTouchListener) {
+                suggestionBox.addEventListener('touchstart', (e) => {
+                    // Prevent default to avoid additional events
+                    if (e.target !== suggestionBox) {
+                        e.preventDefault();
+                    }
+                }, { passive: false });
+                suggestionBox._hasTouchListener = true;
+            }
+        }
+        
         const iataCode = inputField.getAttribute('data-selected-iata');
         if (iataCode && iataCode !== 'Any') {
             fetchAirportByIata(iataCode)

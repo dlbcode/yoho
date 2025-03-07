@@ -191,7 +191,8 @@ export const updateSuggestions = (inputId, airports) => {
             }
         }
         
-        div.addEventListener('click', (e) => {
+        // Add both click and touch events
+        const handleSelection = (e) => {
             e.preventDefault();
             e.stopPropagation();
             
@@ -208,7 +209,21 @@ export const updateSuggestions = (inputId, airports) => {
             suggestionBox.style.display = 'none';
             document.dispatchEvent(new CustomEvent('airportSelected', { detail: { airport, fieldId: inputId } }));
             inputField.blur();
-        });
+        };
+        
+        div.addEventListener('click', handleSelection);
+        div.addEventListener('touchstart', function(e) {
+            // Prevent mouseenter/mouseleave from firing after touch
+            e.preventDefault();
+            Array.from(suggestionBox.querySelectorAll('div')).forEach(item => item.classList.remove('selected'));
+            div.classList.add('selected');
+            
+            if (inputManager.inputStates[inputId]) {
+                inputManager.inputStates[inputId].selectedSuggestionIndex = 
+                    Array.from(suggestionBox.querySelectorAll('div')).indexOf(div);
+            }
+        }, { passive: false });
+        div.addEventListener('touchend', handleSelection);
         
         div.addEventListener('mouseenter', () => {
             Array.from(suggestionBox.querySelectorAll('div')).forEach(item => item.classList.remove('selected'));

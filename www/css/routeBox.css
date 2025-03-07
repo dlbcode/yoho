@@ -440,6 +440,8 @@
   border-top: 1px solid #26303c;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent; /* Remove tap highlight on touch devices */
+  touch-action: none; /* Prevent browser handling of touch events */
+  min-height: 44px; /* Minimum comfortable touch target size */
 }
 
 /* Base suggestion styles */
@@ -533,6 +535,23 @@
   [id$='Suggestions'] div {
     padding: 15px !important;
     border-bottom: 1px solid #26303c !important;
+    min-height: 44px !important;
+    display: flex;
+    align-items: center;
+  }
+
+  /* Add active state for touch devices */
+  [id$='Suggestions'] div:active {
+    background-color: #346197;
+  }
+
+  /* Style suggestion items for better touch targets */
+  [id$='Suggestions'] div {
+    padding: 15px !important;
+    border-bottom: 1px solid #26303c !important;
+    min-height: 44px !important;
+    display: flex;
+    align-items: center;
   }
 
   .mobile-suggestions {
