@@ -142,7 +142,7 @@ class InputManager {
         if (!inputField.value.trim()) {
           updateSuggestions(inputId, []);
           // After updating suggestions, position the box again
-          setTimeout(() => this.positionSuggestionBox(inputId), 0);
+          this.positionSuggestionBox(inputId);
         }
         
         inputState.isInitialFocus = false;
