@@ -2,21 +2,19 @@ import { appState, updateState } from './stateManager.js';
 import { map } from './map.js';
 import { inputManager } from './inputManager.js';
 
-// Utility function for debouncing
-const debounce = (func, delay) => {
-    let timeoutId;
-    return (...args) => {
-        clearTimeout(timeoutId);
-        timeoutId = setTimeout(() => func(...args), delay);
-    };
-};
+// Core utility functions
+const getWaypointIndex = (inputId) => parseInt(inputId.replace(/\D/g, ''), 10) - 1;
+const isOriginField = (waypointIndex) => waypointIndex % 2 === 0;
+const getPairIndex = (waypointIndex, isOrigin) => isOrigin ? waypointIndex + 1 : waypointIndex - 1;
 
-// API functions
-const fetchAirports = async (query) => {
-    if (!query || query.length < 2) return [];
+// Simplified API functions with shared fetch logic
+const fetchAirportsBase = async (params) => {
     try {
-        const encodedQuery = encodeURIComponent(query.trim());
-        const response = await fetch(`https://yonderhop.com/api/airports?query=${encodedQuery}`);
+        const queryString = Object.entries(params)
+            .map(([key, value]) => `${key}=${encodeURIComponent(value.trim())}`)
+            .join('&');
+        
+        const response = await fetch(`https://yonderhop.com/api/airports?${queryString}`);
         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
         return await response.json();
     } catch (error) {
@@ -25,12 +23,15 @@ const fetchAirports = async (query) => {
     }
 };
 
+export const fetchAirports = async (query) => {
+    if (!query || query.length < 2) return [];
+    return fetchAirportsBase({ query });
+};
+
 export const fetchAirportByIata = async (iata) => {
     if (!iata) return null;
     try {
-        const response = await fetch(`https://yonderhop.com/api/airports?iata=${encodeURIComponent(iata.trim())}`);
-        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-        const airports = await response.json();
+        const airports = await fetchAirportsBase({ iata });
         return airports.length > 0 ? airports[0] : null;
     } catch (error) {
         console.error('Failed to fetch airport data:', error);
@@ -38,18 +39,13 @@ export const fetchAirportByIata = async (iata) => {
     }
 };
 
-// Helper functions
-const getWaypointIndex = (inputId) => parseInt(inputId.replace(/\D/g, ''), 10) - 1;
-const isOriginField = (waypointIndex) => waypointIndex % 2 === 0;
-const getPairIndex = (waypointIndex, isOrigin) => isOrigin ? waypointIndex + 1 : waypointIndex - 1;
-
 export const getIataFromField = (inputId) => {
     const fieldValue = document.getElementById(inputId)?.value || '';
     const iataCodeMatch = fieldValue.match(/\b([A-Z]{3})\b/);
     return iataCodeMatch ? iataCodeMatch[1] : null;
 };
 
-// Handle suggestion selection - consolidated function
+// Consolidated function for handling suggestion selection
 const handleSuggestionSelection = (inputId, suggestion) => {
     const inputField = document.getElementById(inputId);
     if (!inputField) return;
@@ -60,8 +56,8 @@ const handleSuggestionSelection = (inputId, suggestion) => {
     const pairIndex = getPairIndex(waypointIndex, isOrigin);
     const pairField = document.getElementById(`waypoint-input-${pairIndex + 1}`);
     
+    // Handle "Anywhere" option or airport selection
     if (isAnywhereOption) {
-        // Handle "Anywhere" selection
         const isPairAny = pairField && 
             (pairField.value === 'Anywhere' || 
              pairField.getAttribute('data-is-any-destination') === 'true' || 
@@ -72,6 +68,7 @@ const handleSuggestionSelection = (inputId, suggestion) => {
             return;
         }
         
+        // Create "Anywhere" waypoint object
         const anyDestination = {
             iata_code: 'Any',
             city: 'Anywhere',
@@ -81,10 +78,12 @@ const handleSuggestionSelection = (inputId, suggestion) => {
             isAnyOrigin: isOrigin,
         };
 
+        // Update field attributes
         inputField.value = 'Anywhere';
         inputField.setAttribute('data-selected-iata', 'Any');
         inputField.setAttribute('data-is-any-destination', 'true');
 
+        // Update input state if available
         if (inputManager.inputStates[inputId]) {
             inputManager.inputStates[inputId].previousValidValue = 'Anywhere';
             inputManager.inputStates[inputId].previousIataCode = 'Any';
@@ -94,50 +93,53 @@ const handleSuggestionSelection = (inputId, suggestion) => {
             pairField.setAttribute('data-paired-with-anywhere', 'true');
         }
 
+        // Update app state
         if (waypointIndex >= 0 && waypointIndex < appState.waypoints.length) {
             updateState('updateWaypoint', { index: waypointIndex, data: anyDestination }, 'airportAutocomplete.anywhereSelection');
         } else {
             updateState('addWaypoint', anyDestination, 'airportAutocomplete.anywhereSelection');
         }
 
+        // Handle focus for mobile/desktop
         setTimeout(() => {
             inputField.blur();
-            setTimeout(() => {
-                if (window.innerWidth > 600) {
-                    if (pairField && !pairField.value.trim()) {
-                        if (!isOrigin) {
-                            window.justSelectedAnywhereDestination = true;
-                            pairField.focus();
-                            updateSuggestions(`waypoint-input-${pairIndex + 1}`, []);
-                        } else {
-                            pairField.focus();
-                        }
+            if (window.innerWidth > 600 && pairField && !pairField.value.trim()) {
+                setTimeout(() => {
+                    if (!isOrigin) {
+                        window.justSelectedAnywhereDestination = true;
                     }
-                }
-            }, 200);
+                    pairField.focus();
+                    if (!isOrigin) {
+                        updateSuggestions(`waypoint-input-${pairIndex + 1}`, []);
+                    }
+                }, 200);
+            }
         }, 100);
     } else {
-        // Handle airport selection
-        const index = parseInt(suggestion.getAttribute('data-index'), 10);
+        // Handle specific airport selection
         const airport = suggestion._airport;
-        
         if (!airport) return;
         
+        // Update input field with airport data
         inputField.value = `${airport.city}, (${airport.iata_code})`;
         inputField.setAttribute('data-selected-iata', airport.iata_code);
         inputField.removeAttribute('data-is-any-destination');
         inputField.removeAttribute('data-paired-with-anywhere');
         
+        // Update input state if available
         if (inputManager.inputStates[inputId]) {
             inputManager.inputStates[inputId].previousValidValue = inputField.value;
             inputManager.inputStates[inputId].previousIataCode = airport.iata_code;
         }
         
-        document.dispatchEvent(new CustomEvent('airportSelected', { detail: { airport, fieldId: inputId } }));
+        // Trigger airport selected event and blur the field
+        document.dispatchEvent(new CustomEvent('airportSelected', { 
+            detail: { airport, fieldId: inputId } 
+        }));
         inputField.blur();
     }
     
-    // Hide suggestion box regardless of selection type
+    // Hide suggestions
     const suggestionBox = document.getElementById(`${inputId}Suggestions`);
     if (suggestionBox) suggestionBox.style.display = 'none';
 };
@@ -147,43 +149,36 @@ export const updateSuggestions = (inputId, airports) => {
     const suggestionBox = document.getElementById(`${inputId}Suggestions`);
     if (!suggestionBox) return;
 
-    // Clear existing suggestions
+    // Clear suggestions and reset state
     suggestionBox.innerHTML = '';
-
-    // Reset selected suggestion index
     if (inputManager.inputStates[inputId]) {
         inputManager.inputStates[inputId].selectedSuggestionIndex = -1;
     }
-
-    // Make sure suggestion box is attached to body
+    
+    // Ensure box is in document
     if (suggestionBox.parentElement !== document.body) {
         document.body.appendChild(suggestionBox);
     }
 
-    // Calculate waypoint index and check if pair is "Any"
+    // Determine if "Anywhere" option is needed
     const waypointIndex = getWaypointIndex(inputId);
     const isOrigin = isOriginField(waypointIndex);
     const pairIndex = getPairIndex(waypointIndex, isOrigin);
     const pairField = document.getElementById(`waypoint-input-${pairIndex + 1}`);
     
-    const pairWaypoint = (pairIndex >= 0 && pairIndex < appState.waypoints.length) ? appState.waypoints[pairIndex] : null;
-    const isPairAny = (pairField && (
-        pairField.value === 'Anywhere' ||
-        pairField.getAttribute('data-is-any-destination') === 'true' ||
-        pairField.getAttribute('data-selected-iata') === 'Any'
-    )) || (pairWaypoint && (
-        pairWaypoint.iata_code === 'Any' ||
-        pairWaypoint.isAnyDestination === true ||
-        pairWaypoint.isAnyOrigin === true
-    ));
-
+    const isPairAny = pairField && 
+        (pairField.value === 'Anywhere' ||
+         pairField.getAttribute('data-is-any-destination') === 'true' ||
+         pairField.getAttribute('data-selected-iata') === 'Any') ||
+        (appState.waypoints[pairIndex]?.iata_code === 'Any');
+    
     const inputField = document.getElementById(inputId);
     let hasAddedSuggestions = false;
 
-    // Show "Anywhere" option if appropriate
+    // Add "Anywhere" option if appropriate
     if (airports.length === 0 && !isPairAny) {
         const anywhereDiv = document.createElement('div');
-        anywhereDiv.className = 'anywhere-suggestion selected'; // Add 'selected' class by default
+        anywhereDiv.className = 'anywhere-suggestion selected';
         anywhereDiv.textContent = 'Anywhere';
         anywhereDiv.setAttribute('data-is-anywhere', 'true');
         anywhereDiv.setAttribute('role', 'option');
@@ -192,29 +187,24 @@ export const updateSuggestions = (inputId, airports) => {
         suggestionBox.appendChild(anywhereDiv);
         hasAddedSuggestions = true;
         
-        // Set the selected suggestion index to 0 (first item)
         if (inputManager.inputStates[inputId]) {
             inputManager.inputStates[inputId].selectedSuggestionIndex = 0;
         }
     }
 
-    // Add airport options
+    // Add airport suggestions
     airports.forEach((airport, index) => {
         const div = document.createElement('div');
         div.textContent = `${airport.name} (${airport.iata_code}) - ${airport.city}, ${airport.country}`;
         div.setAttribute('role', 'option');
         div.id = `${inputId}-suggestion-${index}`;
         div.setAttribute('data-index', index);
-        
-        // Store airport data directly on the element
         div._airport = airport;
         
-        // Add 'selected' class to the first item if no 'Anywhere' option is present
         if (index === 0 && !hasAddedSuggestions) {
             div.classList.add('selected');
             hasAddedSuggestions = true;
             
-            // Set the selected suggestion index to 0 (first item)
             if (inputManager.inputStates[inputId]) {
                 inputManager.inputStates[inputId].selectedSuggestionIndex = 0;
             }
@@ -223,11 +213,10 @@ export const updateSuggestions = (inputId, airports) => {
         suggestionBox.appendChild(div);
     });
 
-    // Add a single event delegation handler for the suggestion box
+    // Add event delegation if not already present
     if (!suggestionBox._hasEventListeners) {
-        // Create a single unified handler for all user interactions
+        // Single handler for all interactions
         const handleSuggestionInteraction = function(e) {
-            // Prevent default only for touch events to avoid scrolling issues
             if (e.type.startsWith('touch') && e.cancelable) {
                 e.preventDefault();
             }
@@ -235,40 +224,32 @@ export const updateSuggestions = (inputId, airports) => {
             const suggestion = e.target.closest('div');
             if (!suggestion) return;
             
-            // For start events (mousedown/touchstart), just select the item
+            // For mousedown/touchstart, just highlight the item
             if (e.type === 'mousedown' || e.type === 'touchstart') {
-                // Clear all selected items
                 Array.from(this.querySelectorAll('div')).forEach(item => item.classList.remove('selected'));
-                
-                // Highlight the target item
                 suggestion.classList.add('selected');
                 
                 if (inputManager.inputStates[inputId]) {
                     inputManager.inputStates[inputId].selectedSuggestionIndex = 
                         Array.from(this.querySelectorAll('div')).indexOf(suggestion);
                 }
-                
                 return;
             }
             
-            // For end events (click/touchend), handle the selection
+            // For click/touchend, handle selection
             if (e.type === 'click' || e.type === 'touchend') {
-                // Stop propagation for touchend to prevent ghost clicks
-                if (e.type === 'touchend') {
-                    e.stopPropagation();
-                }
-                
+                if (e.type === 'touchend') e.stopPropagation();
                 handleSuggestionSelection(inputId, suggestion);
             }
         };
         
-        // Attach unified event handlers with delegation
+        // Attach event listeners
         ['mousedown', 'click', 'touchstart', 'touchend'].forEach(eventType => {
             const options = eventType.startsWith('touch') ? { passive: false } : false;
             suggestionBox.addEventListener(eventType, handleSuggestionInteraction, options);
         });
         
-        // Add mouseover for desktop hover behavior
+        // Add hover behavior
         suggestionBox.addEventListener('mouseover', function(e) {
             const suggestion = e.target.closest('div');
             if (!suggestion) return;
@@ -285,28 +266,29 @@ export const updateSuggestions = (inputId, airports) => {
         suggestionBox._hasEventListeners = true;
     }
 
-    // Final UI updates
+    // Update UI state
     inputField.setAttribute('aria-expanded', suggestionBox.children.length > 0 ? 'true' : 'false');
     suggestionBox.style.display = suggestionBox.children.length > 0 ? 'block' : 'none';
     suggestionBox.style.zIndex = '90';
     inputManager.positionSuggestionBox(inputId);
 };
 
-// Setup autocomplete functionality for a given field
+// Setup autocomplete for a field
 export const setupAutocompleteForField = (fieldId) => {
     const inputField = inputManager.setupWaypointInput(fieldId);
     if (!inputField) return;
 
-    const debouncedInputHandler = debounce(async () => {
+    // Debounce input handling
+    const debouncedInputHandler = inputManager.debounce(async () => {
         const query = inputField.value;
         if (query.length >= 2) {
             updateSuggestions(fieldId, await fetchAirports(query));
         } else if (query.length === 0) {
             updateSuggestions(fieldId, []);
         }
-    }, 200);
+    }, 200, `autocomplete-${fieldId}`);
 
-    // Override the inputManager's input handler
+    // Override inputManager's input handler
     inputField.removeEventListener('input', inputManager.inputStates[fieldId].handlers.input);
     inputField.addEventListener('input', (e) => {
         if (inputManager.inputStates[fieldId]) {
@@ -320,7 +302,7 @@ export const setupAutocompleteForField = (fieldId) => {
         inputField.setAttribute('data-show-anywhere-option', 'true');
     }
     
-    // Ensure suggestion box is properly positioned after setup
+    // Position suggestion box
     setTimeout(() => {
         if (inputManager.suggestionBoxes[fieldId]) {
             inputManager.positionSuggestionBox(fieldId);
@@ -330,20 +312,22 @@ export const setupAutocompleteForField = (fieldId) => {
     return () => inputManager.cleanupInputListeners(fieldId);
 };
 
+// Event listeners
 document.addEventListener('DOMContentLoaded', () => {
+    // Handle airport selection for updating state and UI
     document.addEventListener('airportSelected', (event) => {
         const { airport, fieldId } = event.detail;
         const waypointIndex = getWaypointIndex(fieldId);
 
-        // Update state based on selection
+        // Update app state
         if (waypointIndex >= 0 && waypointIndex < appState.waypoints.length) {
             updateState('updateWaypoint', { index: waypointIndex, data: airport }, 'airportAutocomplete.addEventListener1');
         } else {
             updateState('addWaypoint', airport, 'airportAutocomplete.addEventListener2');
         }
 
-        // Fly to selected airport location
-        if (airport && airport.latitude && airport.longitude) {
+        // Update map if location data exists
+        if (airport?.latitude && airport?.longitude) {
             const latLng = L.latLng(airport.latitude, airport.longitude);
             const currentLatLng = map.getCenter();
             
@@ -362,7 +346,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Set up autocomplete for waypoint inputs when waypoints change
+    // Set up autocomplete for new waypoints
     document.addEventListener('stateChange', (event) => {
         if (event.detail.key === 'waypoints') {
             event.detail.value.forEach((waypoint, index) => {
