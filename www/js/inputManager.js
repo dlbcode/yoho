@@ -585,22 +585,29 @@ class InputManager {
             return;
         }
         
-        // Handle "Anywhere" case
+        // Handle "Anywhere" case - make this check more explicit to avoid false positives
         const isAnyDestination = waypoint.iata_code === 'Any' || 
-                                waypoint.isAnyDestination || 
-                                waypoint.isAnyOrigin;
+                               waypoint.isAnyDestination === true || 
+                               waypoint.isAnyOrigin === true;
         
-        // Set all values at once
-        inputField.value = isAnyDestination ? 'Anywhere' : `${waypoint.city}, (${waypoint.iata_code})`;
-        inputField.setAttribute('data-selected-iata', isAnyDestination ? 'Any' : waypoint.iata_code);
-        isAnyDestination ? inputField.setAttribute('data-is-any-destination', 'true') :
-                          inputField.removeAttribute('data-is-any-destination');
+        // Set all values at once - make the logic more explicit for regular airports
+        if (isAnyDestination) {
+            inputField.value = 'Anywhere';
+            inputField.setAttribute('data-selected-iata', 'Any');
+            inputField.setAttribute('data-is-any-destination', 'true');
+        } else {
+            // For regular airports, always use city and iata code
+            inputField.value = `${waypoint.city}, (${waypoint.iata_code})`;
+            inputField.setAttribute('data-selected-iata', waypoint.iata_code);
+            inputField.removeAttribute('data-is-any-destination');
+        }
+        
         inputField.readOnly = true;
         
         // Update input state
         if (this.inputStates[inputId]) {
             this.inputStates[inputId].previousValidValue = inputField.value;
-            this.inputStates[inputId].previousIataCode = isAnyDestination ? 'Any' : waypoint.iata_code;
+            this.inputStates[inputId].previousIataCode = waypoint.iata_code;
         }
     }
     

@@ -58,12 +58,29 @@ const enableSwapButtonIfNeeded = () => {
 };
 
 const setWaypointInputs = (routeNumber) => {
-    // Let inputManager handle syncing waypoint inputs
-    [`waypoint-input-${routeNumber * 2 + 1}`, `waypoint-input-${routeNumber * 2 + 2}`].forEach(
-        inputId => inputManager.syncInputWithWaypoint(inputId)
-    );
+    // Let inputManager handle syncing waypoint inputs with more careful logging
+    const inputIds = [`waypoint-input-${routeNumber * 2 + 1}`, `waypoint-input-${routeNumber * 2 + 2}`];
+    
+    inputIds.forEach(inputId => {
+        const waypointIndex = parseInt(inputId.replace(/\D/g, ''), 10) - 1;
+        const waypoint = appState.waypoints[waypointIndex];
+        
+        console.log(`Syncing input ${inputId} with waypoint:`, waypoint);
+        inputManager.syncInputWithWaypoint(inputId);
+        
+        // Double-check the result
+        const inputField = document.getElementById(inputId);
+        if (inputField && waypoint && waypoint.iata_code !== 'Any' && inputField.value === 'Anywhere') {
+            console.error(`Incorrect sync for ${inputId}. Got 'Anywhere' but expected airport:`, waypoint);
+            // Force correct value as a fallback
+            inputField.value = `${waypoint.city}, (${waypoint.iata_code})`;
+            inputField.setAttribute('data-selected-iata', waypoint.iata_code);
+            inputField.removeAttribute('data-is-any-destination');
+        }
+    });
+    
     enableSwapButtonIfNeeded();
-};
+}
 
 const routeBox = {
     showRouteBox(event, routeNumber) {
