@@ -71,9 +71,17 @@ const uiHandling = {
         };
 
         const stopDrag = () => {
-            ['mousemove', 'mouseup', 'touchmove', 'touchend'].forEach(event => {
-                document.documentElement.removeEventListener(event, 
-                    event.includes('touch') ? doDrag : stopDrag, false);
+            // Use the same structure as when adding the event listeners
+            const events = {
+                'mousemove': doDrag,
+                'mouseup': stopDrag,
+                'touchmove': doDrag,
+                'touchend': stopDrag
+            };
+
+            Object.entries(events).forEach(([event, handler]) => {
+                document.documentElement.removeEventListener(event, handler, 
+                    event.includes('touch') ? { passive: false } : false);
             });
         };
 
