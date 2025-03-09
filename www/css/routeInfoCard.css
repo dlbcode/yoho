@@ -1,0 +1,58 @@
+.route-info-card-content {
+    display: flex;
+    background: #222;
+    color: #ddd;
+    padding: 1rem;
+    border-radius: 8px;
+    gap: 1rem;
+}
+.segments-container {
+    width: 66.66%;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+.segments-container .segment-info {
+    background: #333;
+    padding: 0.75rem;
+    border-radius: 4px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    /* ... mimic journey section sizing & positioning ... */
+}
+.booking-container {
+    width: 33.33%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    background: #333;
+    padding: 0.75rem;
+    border-radius: 4px;
+}
+.price-info {
+    font-size: 1.2rem;
+    font-weight: 600;
+    text-align: center;
+    margin-bottom: 1rem;
+}
+.select-button {
+    background-color: green;
+    color: #eee;
+    padding: 8px;
+    border: none;
+    cursor: pointer;
+    text-align: center;
+    border-radius: 4px;
+}
+.select-button:hover {
+    background-color: rgb(1, 171, 1);
+}
+.baggage-info {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    font-size: 1rem;
+    margin-top: 1rem;
+}

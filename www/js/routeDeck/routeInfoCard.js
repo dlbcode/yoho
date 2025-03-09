@@ -109,56 +109,25 @@ async function routeInfoCard(cardElement, fullFlightData, routeIds, routeIndex) 
     const detailCard = document.createElement('div');
     detailCard.className = 'route-info-card';
     
-    // First set the basic structure
+    // Redesigned detail card layout (segments + booking)
     detailCard.innerHTML = `
-        <div class="card-details">
-            <div class="detail-group">
-                <div class="detail-label">Airlines</div>
-                <div class="detail-value">${fullFlightData.airlines.join(", ")}</div>
+        <div class="route-info-card-content">
+            <div class="segments-container">
+                ${await generateSegmentDetails(fullFlightData)}
             </div>
-            <div class="detail-group">
-                <div class="detail-label">Stops</div>
-                <div class="detail-value">${fullFlightData.route.length - 1}</div>
-            </div>
-            <div class="detail-group">
-                <div class="detail-label">Departure</div>
-                <div class="detail-value" data-departure="${formatFlightDateTime(new Date(fullFlightData.dTime * 1000))}">${formatFlightDateTime(new Date(fullFlightData.dTime * 1000))}</div>
-            </div>
-            <div class="detail-group">
-                <div class="detail-label">Arrival</div>
-                <div class="detail-value" data-arrival="${formatFlightDateTime(new Date(fullFlightData.aTime * 1000))}">${formatFlightDateTime(new Date(fullFlightData.aTime * 1000))}</div>
-            </div>
-        </div>
-        <div class='route-details' style='display: flex; flex-direction: column; align-items: flex-start;'>
-            <div class='top-wrapper' style='display: flex; flex-direction: card; align-items: flex-start'>
-                <div class='left-wrapper' style='display: flex; flex-direction: column; align-items: flex-start; margin-right: 20px;'>
-                    <button id='selectRoute' class="select-button">
-                        <div style='font-size: 20px;'>${Math.ceil(fullFlightData.price)}</div>
-                        <div>Select</div>
-                    </button>
-                    <div class="info-box" style="display: flex; flex-direction: card; margin-top: 4px; padding-bottom: 2px; width: 100%;">
-                        <div class="bags-price" style="display: flex; flex-direction: column; align-items: center; margin-right: 5px;">
-                            ${bagIcon}
-                            <div style="padding: 2px 2px 4px 2px;font-size: 16px;color: #bbb;">${Math.ceil(fullFlightData.bags_price[1] * appState.eurToUsd)}</div>
-                        </div>
-                    </div>
+            <div class="booking-container">
+                <div class="price-info">$${Math.ceil(fullFlightData.price)}</div>
+                <button id="selectRoute" class="select-button">Select</button>
+                <div class="baggage-info">
+                    ${bagIcon}
+                    <span class="baggage-price">${Math.ceil(fullFlightData.bags_price[1] * appState.eurToUsd)}</span>
                 </div>
-            </div>
-            <div class='segments-wrapper' style='display: flex; flex-direction: column; align-items: flex-start;'>
-                <div class='segments' style='display: flex; flex-direction: card; align-items: flex-start;'>
-                    <div class="loading-segments">Loading segment details...</div>
-                </div>                
             </div>
         </div>
     `;
-
+    
     cardElement.parentNode.insertBefore(detailCard, cardElement.nextSibling);
     highlightRoute(cardElement.getAttribute('data-route-id'));
-
-    // Now add the segment details with airline logos
-    const segmentsContainer = detailCard.querySelector('.segments');
-    const segmentDetails = await generateSegmentDetails(fullFlightData);
-    segmentsContainer.innerHTML = segmentDetails;
 
     detailCard.addEventListener('mouseover', () => highlightRouteLines(fullFlightData, cardElement));
     detailCard.addEventListener('mouseout', () => resetRouteLines(cardElement));
