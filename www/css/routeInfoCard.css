@@ -1,58 +1,173 @@
+.route-info-card {
+    border-left: #007bff solid 3px;
+    background-color: #000 !important;
+    margin-top: 10px;
+}
+
 .route-info-card-content {
     display: flex;
-    background: #222;
-    color: #ddd;
-    padding: 1rem;
-    border-radius: 8px;
-    gap: 1rem;
+    flex-direction: column;
+    padding: 10px;
 }
-.segments-container {
-    width: 66.66%;
+
+.segment-container {
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    margin-bottom: 10px;
+    border-bottom: 1px dashed #666;
+    padding-bottom: 10px;
 }
-.segments-container .segment-info {
-    background: #333;
-    padding: 0.75rem;
-    border-radius: 4px;
-    display: flex;
-    justify-content: space-between;
+
+.route-info-card .segment-details {
+    display: flex !important;
     align-items: center;
-    /* ... mimic journey section sizing & positioning ... */
+    width: 100%;
+    flex-direction: row; /* Ensure items are laid out in a row */
 }
-.booking-container {
-    width: 33.33%;
+
+.airline-section {
+    display: inline-flex;
+    align-items: center;
+    width: 50px; /* Set a fixed width for the airline section */
+    margin-right: 10px; /* Add some spacing between the logo and journey */
+    flex-shrink: 0; /* Prevent the airline section from shrinking */
+}
+
+.airline-logo {
+    width: 40px;
+    height: 40px;
+    object-fit: contain;
+}
+
+.journey-section {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    flex-grow: 1; /* Allow journey section to take up remaining space */
+    flex-wrap: wrap; /* Add flex-wrap to handle content wrapping */
+    min-width: 0; /* Add min-width: 0 to allow shrinking */
+    width: auto; /* Allow journey-section to take only the space it needs */
+    flex: 1; /* Add flex: 1 to journey-section */
+}
+
+.departure-section,
+.arrival-section,
+.route-indicator {
+    flex: 1; /* Allow sections to share available space */
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
-    background: #333;
-    padding: 0.75rem;
-    border-radius: 4px;
+    min-width: 70px;
+    width: 70px;
+    margin-top: 2px;
+    align-items: center;
+    text-align: center;
 }
-.price-info {
+
+.departure-time,
+.arrival-time {
+    color: #ddd;
+    font-size: 1rem;
+    font-weight: 600;
+    white-space: nowrap;
+    width: 70px;
+}
+
+.departure-code,
+.arrival-code {
+    color: #888;
+    font-size: 0.8rem;
+}
+
+.route-indicator {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: #666;
+    font-size: 1.2rem;
+}
+
+.duration-section {
+    color: #ddd;
+    font-size: 0.7rem;
+    min-width: 80px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+}
+
+.price-section {
+    display: flex;
+    align-items: center;
+}
+
+.price-amount {
+    color: #4caf50;
     font-size: 1.2rem;
     font-weight: 600;
-    text-align: center;
-    margin-bottom: 1rem;
+    min-width: 80px;
+    text-align: right;
 }
+
+.route-arrow-svg {
+    width: 100%;
+    height: 40px;
+}
+
+.route-arrow-line {
+    stroke: #999;
+    stroke-width: 1;
+}
+
+.route-arrow-dot {
+    fill: #007bff;
+    r: 4;
+}
+
+.route-arrow-head {
+    fill: #999;
+}
+
+.route-arrow-iata {
+    fill: #ccc;
+    font-size: 0.7rem;
+    text-anchor: middle;
+    dominant-baseline: hanging;
+}
+
+.booking-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 10px;
+}
+
+.price-info {
+    color: #ddd;
+    font-size: 1.5rem;
+    margin-bottom: 10px;
+}
+
 .select-button {
     background-color: green;
     color: #eee;
-    padding: 8px;
+    padding: 10px 20px;
     border: none;
     cursor: pointer;
     text-align: center;
-    border-radius: 4px;
+    margin-bottom: 10px;
 }
+
 .select-button:hover {
     background-color: rgb(1, 171, 1);
+    color: #eee;
 }
+
 .baggage-info {
     display: flex;
     align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    font-size: 1rem;
-    margin-top: 1rem;
+    color: #aaa;
+}
+
+.baggage-price {
+    margin-left: 5px;
 }

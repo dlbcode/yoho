@@ -9,7 +9,7 @@ import { formatFlightDateTime } from './routeCard.js';
 import { airlineLogoManager } from '../utils/airlineLogoManager.js';
 
 const formatTime = (date) => date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-const bagIcon = `<svg fill="#aaa" height="20px" width="20px" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 248.35 248.35" xml:space="preserve"><g><path d="M186.057,66.136h-15.314V19.839C170.743,8.901,161.844,0,150.904,0H97.448c-10.938,0-19.84,8.901-19.84,19.839v46.296H62.295c-9.567,0-17.324,7.757-17.324,17.324V214.26c0,9.571,7.759,17.326,17.324,17.326h2.323v12.576c0,2.315,1.876,4.188,4.186,4.188h19.811c2.315,0,4.188-1.876,4.188-4.188v-12.576h62.741v12.576c0,2.315,1.878,4.188,4.188,4.188h19.809c2.317,0,4.188-1.876,4.188-4.188v-12.576h2.326c9.567,0,17.324-7.757,17.324-17.326V83.46C203.381,73.891,195.624,66.136,186.057,66.136z M157.514,66.135H90.832V19.839c0-3.646,2.967-6.613,6.613-6.613h53.456c3.646,0,6.613,2.967,6.613,6.613V66.135z"/></g></svg>`;
+const bagIcon = `<svg fill="#aaa" height="20px" width="20px" version="1.1" id="Layer_1" xmlns="http://www.w3.org/1999/xlink" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 248.35 248.35" xml:space="preserve"><g><path d="M186.057,66.136h-15.314V19.839C170.743,8.901,161.844,0,150.904,0H97.448c-10.938,0-19.84,8.901-19.84,19.839v46.296H62.295c-9.567,0-17.324,7.757-17.324,17.324V214.26c0,9.571,7.759,17.326,17.324,17.326h2.323v12.576c0,2.315,1.876,4.188,4.186,4.188h19.811c2.315,0,4.188-1.876,4.188-4.188v-12.576h62.741v12.576c0,2.315,1.878,4.188,4.188,4.188h19.809c2.317,0,4.188-1.876,4.188-4.188v-12.576h2.326c9.567,0,17.324-7.757,17.324-17.326V83.46C203.381,73.891,195.624,66.136,186.057,66.136z M157.514,66.135H90.832V19.839c0-3.646,2.967-6.613,6.613-6.613h53.456c3.646,0,6.613,2.967,6.613,6.613V66.135z"/></g></svg>`;
 
 function formatLayover(flight, idx) {
     if (idx >= flight.route.length - 1) return '';
@@ -24,73 +24,45 @@ async function generateSegmentDetails(flight) {
     
     for (let idx = 0; idx < flight.route.length; idx++) {
         const segment = flight.route[idx];
-        const arr = flight.route;
-        
         const departureDate = segment.local_departure ? new Date(segment.local_departure) : new Date(segment.dTime * 1000);
         const arrivalDate = segment.local_arrival ? new Date(segment.local_arrival) : new Date(segment.aTime * 1000);
         const departureTime = formatTime(departureDate);
         const arrivalTime = formatTime(arrivalDate);
         const duration = ((arrivalDate - departureDate) / 3600000).toFixed(1) + ' hrs';
-        
-        // Get the airline logo URL using our manager
         const airlineLogoUrl = await airlineLogoManager.getLogoUrl(segment.airline);
-        const isLastSegment = idx === arr.length - 1;
 
-        let segmentHtml = '';
-
-        if (idx === 0) {
-            segmentHtml += `
-                <div class="departure" style="margin-right: 2px;" data-origin="${segment.flyFrom}">
-                    <div>${segment.flyFrom} (${segment.cityFrom})</div>
-                    <div style="color: #999;">Depart: <span style="color: #ccc;">${departureTime}</span></div>
-                </div>
-                <div class="duration" data-origin="${segment.flyFrom}" data-destination="${segment.flyTo}">
-                    <div style="position: relative; margin-top: 12px; color: #ccc;">
-                        ${duration}
-                        <svg style="position: absolute; bottom: 12px; left: 0px; width: 100%; height: 30px; overflow: visible;">
-                            <path d="M2,35 Q45,-2 88,35" stroke="#666" fill="transparent" stroke-width="2" stroke-dasharray="1,4" stroke-dashoffset="6" stroke-linecap="round"></path>
-                        </svg>
+        segmentsHtml += `
+            <div class="segment-container">
+                <div class="segment-details">
+                    <div class="airline-section">
+                        <img src="${airlineLogoUrl}" alt="${segment.airline} Logo" class="airline-logo">
                     </div>
-                    <img src="${airlineLogoUrl}" alt="${segment.airline} Logo" style="width: 60px; height: 60px; object-fit: contain; object-position: center; border-radius: 5px;"/>
-                </div>`;
-        } else {
-            const layoverDuration = formatLayover(flight, idx - 1);
-            const previousArrivalTime = flight.route[idx - 1].local_arrival ? formatTime(new Date(flight.route[idx - 1].local_arrival)) : formatTime(new Date(flight.route[idx - 1].aTime * 1000));
-            const recheckBagsText = flight.route[idx - 1].bags_recheck_required ? '<div style="color: #FFBF00;">- Recheck bags</div>' : '';
 
-            segmentHtml += `
-                <div class="layover" data-layover="${flight.route[idx - 1].flyTo}">
-                    <div>${flight.route[idx - 1].flyTo} (${segment.cityFrom})</div>
-                    <div style="color: #999;">Arrive: <span style="color: #ccc;">${previousArrivalTime}</span></div>
-                    <div style="text-align: center; color: #999;">&darr;</div>
-                    <div style="color: #999;">Layover: <span style="color: #ccc;">${layoverDuration}</span></div>
-                    ${recheckBagsText}
-                    <div style="text-align: center; color: #999;">&darr;</div>
-                    <div style="color: #999;">Depart: <span style="color: #ccc;">${departureTime}</span></div>
-                </div>
-                <div class="duration" data-origin="${segment.flyFrom}" data-destination="${segment.flyTo}">
-                    <div style="position: relative; margin-top: 12px; color: #ccc;">
-                        ${duration}
-                        <svg style="position: absolute; bottom: 12px; left: 0px; width: 100%; height: 30px; overflow: visible;">
-                            <path d="M2,35 Q45,-2 88,35" stroke="#666" fill="transparent" stroke-width="2" stroke-dasharray="1,4" stroke-dashoffset="6" stroke-linecap="round"></path>
-                        </svg>
+                    <div class="journey-section">
+                        <div class="departure-section">
+                            <span class="departure-time">${departureTime}</span>
+                            <span class="departure-code">${segment.flyFrom}</span>
+                            <span class="departure-date">${departureDate.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}</span>
+                        </div>
+
+                        <div class="route-indicator">
+                            <div class="duration-section">
+                                ${duration}
+                            </div>
+                        </div>
+
+                        <div class="arrival-section">
+                            <span class="arrival-time">${arrivalTime}</span>
+                            <span class="arrival-code">${segment.flyTo}</span>
+                            <span class="arrival-date">${arrivalDate.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}</span>
+                        </div>
                     </div>
-                    <img src="${airlineLogoUrl}" alt="${segment.airline} Logo" style="width: 60px; height: 60px; object-fit: contain; object-position: center; border-radius: 5px;"/>
-                </div>`;
-        }
-
-        if (isLastSegment) {
-            segmentHtml += `
-                <div class="destination" data-destination="${segment.flyTo}">
-                    <div>${segment.flyTo} (${segment.cityTo})</div>
-                    <div style="color: #999;">Arrive: <span style="color: #ccc;">${arrivalTime}</span></div>
-                </div>`;
-        }
-
-        segmentsHtml += segmentHtml;
+                </div>
+            </div>
+        `;
     }
     
-    return `<div class="route-details">${segmentsHtml}</div>`;
+    return segmentsHtml;
 }
 
 async function routeInfoCard(cardElement, fullFlightData, routeIds, routeIndex) {
