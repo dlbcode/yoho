@@ -27,6 +27,31 @@ function createDayNightBar(departureDate, arrivalDate, durationHours) {
     const minutes = Math.round((durationHours - hours) * 60);
     const durationText = `${hours}h ${minutes}m`;
     
+    // Check if flight crosses midnight
+    const departureDayNumber = departureDate.getDate();
+    const arrivalDayNumber = arrivalDate.getDate();
+    const crossesMidnight = departureDayNumber !== arrivalDayNumber;
+    
+    let dayTransitionHtml = '';
+    
+    if (crossesMidnight) {
+        // Calculate midnight position as a percentage of total flight duration
+        const departureDateMidnight = new Date(departureDate);
+        departureDateMidnight.setHours(24, 0, 0, 0); // Set to midnight
+        
+        const timeToMidnight = departureDateMidnight - departureDate; // ms until midnight
+        const flightDuration = arrivalDate - departureDate; // total flight duration in ms
+        
+        const midnightPositionPercent = (timeToMidnight / flightDuration) * 100;
+        
+        // Simplified HTML without day labels
+        dayTransitionHtml = `
+            <div class="day-transition" style="left: ${midnightPositionPercent}%;">
+                <div class="day-transition-line"></div>
+            </div>
+        `;
+    }
+    
     return `
         <div class="flight-day-night-bar">
             <div class="bar-content">
@@ -38,6 +63,7 @@ function createDayNightBar(departureDate, arrivalDate, durationHours) {
                                      isDepartureDay ? 'day-night' : 'night-day'}">
                     <span class="duration-text">${durationText}</span>
                 </div>
+                ${dayTransitionHtml}
                 <div class="bar-endpoint arrival-time-indicator ${isArrivalDay ? 'daytime' : 'nighttime'}">
                     <img src="/assets/${isArrivalDay ? 'sun' : 'moon'}.svg" alt="${isArrivalDay ? 'Day' : 'Night'}" class="time-icon">
                 </div>

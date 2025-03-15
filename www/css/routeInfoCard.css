@@ -180,6 +180,33 @@
     background: linear-gradient(90deg, #1E3F66 0%, #5DA9E9 100%);
 }
 
+/* Day transition indicator styles */
+.day-transition {
+    position: absolute;
+    height: 100%;
+    z-index: 4;
+    pointer-events: none;
+    width: 10px;
+    margin-left: -5px; /* Center the transition indicator */
+}
+
+.day-transition-line {
+    position: absolute;
+    height: 10px; /* Match the bar height */
+    width: 2px;
+    background-color: #ffffff;
+    top: 7px; /* Align with the bar */
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+/* Adjust for layover bars */
+.layover-line .day-before, 
+.layover-line .day-after {
+    background: rgba(198, 95, 4, 0.8);
+    top: -4px; /* Ensure consistent positioning */
+}
+
 .duration-text {
     color: #fff;
     font-size: 0.7rem;
@@ -344,6 +371,11 @@
 
 .layover-line.layover-night-day {
     background: linear-gradient(90deg, #C65F04 0%, #FF9E4D 100%); /* Orange gradient for night-day */
+}
+
+.layover-line .day-transition-labels {
+    background: rgba(198, 95, 4, 0.8);
+    top: -35px;
 }
 
 .layover-duration-text {
