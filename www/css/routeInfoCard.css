@@ -118,6 +118,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    margin-top: 18px; /* Add margin to make space for the text above */
+    position: relative; /* Ensure positioning context for absolute elements */
 }
 
 .bar-content {
@@ -187,6 +189,9 @@
     z-index: 3;
     position: absolute;
     white-space: nowrap;
+    top: -18px; /* Position above the bar instead of on it */
+    left: 50%; /* Center horizontally */
+    transform: translateX(-50%); /* Ensure perfect centering */
 }
 
 .duration-section {
@@ -290,6 +295,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    margin-top: 18px; /* Add margin to make space for the text above */
+    position: relative; /* Ensure positioning context for absolute elements */
 }
 
 .layover-endpoint {
@@ -348,6 +355,9 @@
     z-index: 3;
     position: absolute;
     white-space: nowrap;
+    top: -18px; /* Position above the bar instead of on it */
+    left: 50%; /* Center horizontally */
+    transform: translateX(-50%); /* Ensure perfect centering */
 }
 
 .layover-info {
