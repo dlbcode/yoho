@@ -46,6 +46,37 @@ function createDayNightBar(departureDate, arrivalDate, durationHours) {
     `;
 }
 
+// Create day/night layover bar visualization
+function createLayoverBar(arrivalDate, departureDate, layoverDurationHours) {
+    const isArrivalDay = isDaytime(arrivalDate);
+    const isDepartureDay = isDaytime(departureDate);
+    
+    // Format layover duration for display
+    const hours = Math.floor(layoverDurationHours);
+    const minutes = Math.round((layoverDurationHours - hours) * 60);
+    const layoverText = `${hours}h ${minutes}m layover`;
+    
+    return `
+        <div class="layover-container">
+            <div class="layover-day-night-bar">
+                <div class="bar-content">
+                    <div class="bar-endpoint layover-endpoint ${isArrivalDay ? 'layover-daytime' : 'layover-nighttime'}">
+                        <img src="/assets/${isArrivalDay ? 'sun' : 'moon'}.svg" alt="${isArrivalDay ? 'Day' : 'Night'}" class="time-icon">
+                    </div>
+                    <div class="bar-line layover-line ${isArrivalDay && isDepartureDay ? 'layover-day-day' : 
+                                         !isArrivalDay && !isDepartureDay ? 'layover-night-night' : 
+                                         isArrivalDay ? 'layover-day-night' : 'layover-night-day'}">
+                        <span class="layover-duration-text">${layoverText}</span>
+                    </div>
+                    <div class="bar-endpoint layover-endpoint ${isDepartureDay ? 'layover-daytime' : 'layover-nighttime'}">
+                        <img src="/assets/${isDepartureDay ? 'sun' : 'moon'}.svg" alt="${isDepartureDay ? 'Day' : 'Night'}" class="time-icon">
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
 function formatLayover(flight, idx) {
     if (idx >= flight.route.length - 1) return '';
     const arrivalTime = flight.route[idx].local_arrival ? new Date(flight.route[idx].local_arrival) : new Date(flight.route[idx].aTime * 1000);
@@ -90,9 +121,22 @@ async function generateSegmentDetails(flight) {
                             <span class="arrival-date">${arrivalDate.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}</span>
                         </div>
                     </div>
+                </div>`;
+                
+        // Add layover information if this isn't the last segment
+        if (idx < flight.route.length - 1) {
+            const nextSegment = flight.route[idx + 1];
+            const nextDepartureDate = nextSegment.local_departure ? new Date(nextSegment.local_departure) : new Date(nextSegment.dTime * 1000);
+            const layoverDurationHours = (nextDepartureDate - arrivalDate) / 3600000;
+            
+            segmentsHtml += `
+                <div class="layover-info">
+                    ${createLayoverBar(arrivalDate, nextDepartureDate, layoverDurationHours)}
                 </div>
-            </div>
-        `;
+            `;
+        }
+        
+        segmentsHtml += `</div>`;
     }
     
     return segmentsHtml;
