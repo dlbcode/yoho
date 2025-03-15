@@ -63,6 +63,30 @@
     text-align: center;
 }
 
+/* Right-align text in departure section */
+.departure-section {
+    align-items: flex-end; /* Right align departure elements */
+}
+
+.departure-section .departure-time,
+.departure-section .departure-code,
+.departure-section .departure-date {
+    text-align: right;
+    width: 100%;
+}
+
+/* Left-align text in arrival section for consistency */
+.arrival-section {
+    align-items: flex-start; /* Left align arrival elements */
+}
+
+.arrival-section .arrival-time,
+.arrival-section .arrival-code,
+.arrival-section .arrival-date {
+    text-align: left;
+    width: 100%;
+}
+
 .departure-time,
 .arrival-time {
     color: #ddd;
