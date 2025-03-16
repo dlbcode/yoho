@@ -40,8 +40,25 @@ function createDayNightBar(departureDate, arrivalDate, durationHours) {
         const departureDateMidnight = new Date(departureDate);
         departureDateMidnight.setHours(24, 0, 0, 0); // Set to midnight
         
-        const timeToMidnight = departureDateMidnight - departureDate; // ms until midnight
-        const flightDuration = arrivalDate - departureDate; // total flight duration in ms
+        // Check if flight crosses International Date Line
+        const isDayLineCrossing = (arrivalDate - departureDate) > 24 * 60 * 60 * 1000 && 
+                                 durationHours < 24;
+        
+        // Calculate correct flight duration accounting for timezone differences
+        let timeToMidnight, flightDuration;
+        
+        if (isDayLineCrossing) {
+            // Use the provided durationHours for actual flight time
+            flightDuration = durationHours * 60 * 60 * 1000;
+            timeToMidnight = departureDateMidnight - departureDate;
+            if (timeToMidnight > flightDuration) {
+                // Adjust midnight if it falls outside the real flight duration
+                timeToMidnight = flightDuration * 0.3; // Fallback to 30% mark
+            }
+        } else {
+            timeToMidnight = departureDateMidnight - departureDate;
+            flightDuration = arrivalDate - departureDate;
+        }
         
         const midnightPositionPercent = (timeToMidnight / flightDuration) * 100;
         
