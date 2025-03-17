@@ -56,7 +56,7 @@ function createDayNightBar(departureDate, arrivalDate, durationHours) {
         idlCrossingHtml = `
             <div class="day-transition idl-transition" style="left: ${idlPositionPercent}%;">
                 <div class="idl-transition-line"></div>
-                <div class="idl-label">IDL</div>
+                <div class="idl-label">+1 IDL</div>
             </div>
         `;
         
@@ -88,8 +88,9 @@ function createDayNightBar(departureDate, arrivalDate, durationHours) {
         midnightPositionPercent = Math.max(minPositionPercent, Math.min(maxPositionPercent, midnightPositionPercent));
         
         dayTransitionHtml = `
-            <div class="day-transition" style="left: ${midnightPositionPercent}%;">
-                <div class="day-transition-line"></div>
+            <div class="day-transition midnight-transition" style="left: ${midnightPositionPercent}%;">
+                <div class="midnight-transition-line"></div>
+                <div class="midnight-label">+1</div>
             </div>
         `;
         

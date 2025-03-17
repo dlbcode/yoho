@@ -191,14 +191,26 @@
     margin-left: -5px; /* Center the transition indicator */
 }
 
-.day-transition-line {
+/* Midnight transition indicator */
+.midnight-transition-line {
     position: absolute;
-    height: 10px; /* Match the bar height */
+    height: 14px; /* Match the IDL line height */
     width: 2px;
-    background-color: #ffffff;
-    top: 7px; /* Align with the bar */
+    background-color: #ffffff; /* Keep white color for midnight line */
+    top: 5px; /* Align with the bar like IDL */
     left: 50%;
     transform: translateX(-50%);
+}
+
+.midnight-label {
+    position: absolute;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #ffffff; /* White color to match the line */
+    font-size: 0.6rem;
+    font-weight: bold;
+    white-space: nowrap;
 }
 
 /* International Date Line indicator styles */
