@@ -33,48 +33,74 @@ function createDayNightBar(departureDate, arrivalDate, durationHours) {
     const crossesMidnight = departureDayNumber !== arrivalDayNumber;
     
     let dayTransitionHtml = '';
+    let idlCrossingHtml = '';
     let debugText = '';
     
-    if (crossesMidnight) {
+    // Check if flight crosses International Date Line
+    const timeDiff = arrivalDate - departureDate;
+    const flightDuration = durationHours * 60 * 60 * 1000;
+    const isDayLineCrossing = (timeDiff > 24 * 60 * 60 * 1000 && durationHours < 24) ||
+                             (timeDiff < 0 && durationHours < 24);
+    
+    // Define the safe display area (accounting for endpoints)
+    const minPositionPercent = 8; // Keep transitions away from start endpoint
+    const maxPositionPercent = 92; // Keep transitions away from end endpoint
+    
+    // Add International Date Line indicator if applicable
+    if (isDayLineCrossing) {
+        // For IDL crossings, place the indicator at 75% of the flight duration
+        // but constrain to visible area
+        let idlPositionPercent = 75;
+        idlPositionPercent = Math.max(minPositionPercent, Math.min(maxPositionPercent, idlPositionPercent));
+        
+        idlCrossingHtml = `
+            <div class="day-transition idl-transition" style="left: ${idlPositionPercent}%;">
+                <div class="idl-transition-line"></div>
+                <div class="idl-label">IDL</div>
+            </div>
+        `;
+        
+        debugText = `
+            <div class="debug-midnight-position">
+                IDL crossing detected (${Math.round(timeDiff/60000)}m time diff / ${Math.round(durationHours * 60)}m flight)
+            </div>
+        `;
+    }
+    
+    // Add midnight transition indicator if this crosses a calendar day
+    // but is not just an IDL crossing alone
+    if (crossesMidnight && (!isDayLineCrossing || timeDiff > 0)) {
         // Calculate midnight position as a percentage of total flight duration
         const departureDateMidnight = new Date(departureDate);
-        departureDateMidnight.setHours(24, 0, 0, 0); // Set to midnight
+        departureDateMidnight.setHours(0, 0, 0, 0); // Set to midnight
+        departureDateMidnight.setDate(departureDateMidnight.getDate() + 1); // Next day at midnight
         
-        // Check if flight crosses International Date Line
-        const isDayLineCrossing = (arrivalDate - departureDate) > 24 * 60 * 60 * 1000 && 
-                                 durationHours < 24;
+        let timeToMidnight = departureDateMidnight - departureDate;
         
-        // Calculate correct flight duration accounting for timezone differences
-        let timeToMidnight, flightDuration;
-        
-        if (isDayLineCrossing) {
-            // Use the provided durationHours for actual flight time
-            flightDuration = durationHours * 60 * 60 * 1000;
-            timeToMidnight = departureDateMidnight - departureDate;
-            if (timeToMidnight > flightDuration) {
-                // Adjust midnight if it falls outside the real flight duration
-                timeToMidnight = flightDuration * 0.3; // Fallback to 30% mark
-            }
-        } else {
-            timeToMidnight = departureDateMidnight - departureDate;
-            flightDuration = arrivalDate - departureDate;
+        // Handle edge cases
+        if (timeToMidnight <= 0 || timeToMidnight > flightDuration) {
+            // If midnight calculation is off, use a reasonable fallback
+            timeToMidnight = flightDuration * 0.5; // Place at 50% of flight
         }
         
-        const midnightPositionPercent = (timeToMidnight / flightDuration) * 100;
+        // Calculate position percentage and constrain to visible area
+        let midnightPositionPercent = (timeToMidnight / flightDuration) * 100;
+        midnightPositionPercent = Math.max(minPositionPercent, Math.min(maxPositionPercent, midnightPositionPercent));
         
-        // Simplified HTML without day labels
         dayTransitionHtml = `
             <div class="day-transition" style="left: ${midnightPositionPercent}%;">
                 <div class="day-transition-line"></div>
             </div>
         `;
         
-        // Add debug text
-        debugText = `
-            <div class="debug-midnight-position">
-                Midnight at ${midnightPositionPercent.toFixed(1)}% (${Math.round(timeToMidnight/60000)}m to midnight / ${Math.round(flightDuration/60000)}m flight)
-            </div>
-        `;
+        // Only show debug text for midnight if IDL debug text isn't showing
+        if (!debugText) {
+            debugText = `
+                <div class="debug-midnight-position">
+                    Midnight at ${midnightPositionPercent.toFixed(1)}% (${Math.round(timeToMidnight/60000)}m to midnight / ${Math.round(flightDuration/60000)}m flight)
+                </div>
+            `;
+        }
     }
     
     return `
@@ -89,6 +115,7 @@ function createDayNightBar(departureDate, arrivalDate, durationHours) {
                     <span class="duration-text">${durationText}</span>
                 </div>
                 ${dayTransitionHtml}
+                ${idlCrossingHtml}
                 <div class="bar-endpoint arrival-time-indicator ${isArrivalDay ? 'daytime' : 'nighttime'}">
                     <img src="/assets/${isArrivalDay ? 'sun' : 'moon'}.svg" alt="${isArrivalDay ? 'Day' : 'Night'}" class="time-icon">
                 </div>

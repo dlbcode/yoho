@@ -201,6 +201,37 @@
     transform: translateX(-50%);
 }
 
+/* International Date Line indicator styles */
+.idl-transition {
+    position: absolute;
+    height: 100%;
+    z-index: 5;
+    pointer-events: none;
+    width: 10px;
+    margin-left: -5px;
+}
+
+.idl-transition-line {
+    position: absolute;
+    height: 14px; /* Make the IDL line taller than the midnight line */
+    width: 2px;
+    background-color: #ff5722; /* Distinctive color for IDL */
+    top: 5px; /* Align with the bar */
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.idl-label {
+    position: absolute;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #ff5722;
+    font-size: 0.6rem;
+    font-weight: bold;
+    white-space: nowrap;
+}
+
 /* Adjust for layover bars */
 .layover-line .day-before, 
 .layover-line .day-after {
