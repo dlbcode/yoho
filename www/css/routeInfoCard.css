@@ -431,6 +431,22 @@
     background: linear-gradient(90deg, #C65F04 0%, #FF9E4D 100%); /* Orange gradient for night-day */
 }
 
+.layover-line.layover-day-night-day {
+    background: linear-gradient(90deg, 
+        #FF9E4D 0%, 
+        #C65F04 40%, 
+        #C65F04 60%, 
+        #FF9E4D 100%);
+}
+
+.layover-line.layover-night-day-night {
+    background: linear-gradient(90deg, 
+        #C65F04 0%, 
+        #FF9E4D 40%, 
+        #FF9E4D 60%, 
+        #C65F04 100%);
+}
+
 .layover-line .day-transition-labels {
     background: rgba(198, 95, 4, 0.8);
     top: -35px;
@@ -448,6 +464,48 @@
     top: -18px; /* Position above the bar instead of on it */
     left: 50%; /* Center horizontally */
     transform: translateX(-50%); /* Ensure perfect centering */
+}
+
+.sunrise-transition-line {
+    position: absolute;
+    height: 14px;
+    width: 2px;
+    background-color: #FFD700; /* Gold color for sunrise */
+    top: 5px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.sunrise-label {
+    position: absolute;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #FFD700; /* Gold color to match the line */
+    font-size: 0.6rem;
+    font-weight: bold;
+    white-space: nowrap;
+}
+
+.sunset-transition-line {
+    position: absolute;
+    height: 14px;
+    width: 2px;
+    background-color: #FF8C00; /* Dark orange color for sunset */
+    top: 5px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.sunset-label {
+    position: absolute;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #FF8C00; /* Dark orange color to match the line */
+    font-size: 0.6rem;
+    font-weight: bold;
+    white-space: nowrap;
 }
 
 .layover-info {

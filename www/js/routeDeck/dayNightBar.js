@@ -73,6 +73,89 @@ function calculateTransitions(departureDate, arrivalDate, durationHours, segment
     `).join('');
 }
 
+function calculateLayoverTransitions(arrivalDate, departureDate, layoverDurationHours) {
+    const layoverDurationMs = layoverDurationHours * 3600000;
+    const transitions = [];
+    
+    // Check for date boundary crossings (midnight)
+    const crossesMidnight = arrivalDate.getDate() !== departureDate.getDate();
+    
+    // Calculate sunrise/sunset transitions during the layover
+    const startHour = arrivalDate.getHours();
+    const endHour = departureDate.getHours();
+    const startDate = new Date(arrivalDate);
+    
+    // Check for sunrise (6AM) transition
+    if (layoverDurationHours > 2) {  // Only check for longer layovers
+        let nextSunrise = new Date(startDate);
+        // If we're before 6AM, sunrise is today
+        if (startHour < 6) {
+            nextSunrise.setHours(6, 0, 0, 0);
+        } 
+        // Otherwise, sunrise is tomorrow
+        else {
+            nextSunrise.setDate(nextSunrise.getDate() + 1);
+            nextSunrise.setHours(6, 0, 0, 0);
+        }
+        
+        // Only add if sunrise happens during the layover
+        if (nextSunrise > arrivalDate && nextSunrise < departureDate) {
+            const sunrisePos = ((nextSunrise - arrivalDate) / layoverDurationMs) * 100;
+            transitions.push({
+                positionPercent: sunrisePos,
+                label: 'Sunrise',
+                labelClass: 'sunrise-label',
+                lineClass: 'sunrise-transition-line'
+            });
+        }
+        
+        // Check for sunset (18:00/6PM) transition
+        let nextSunset = new Date(startDate);
+        // If we're before 6PM, sunset is today
+        if (startHour < 18) {
+            nextSunset.setHours(18, 0, 0, 0);
+        } 
+        // Otherwise, sunset is tomorrow
+        else {
+            nextSunset.setDate(nextSunset.getDate() + 1);
+            nextSunset.setHours(18, 0, 0, 0);
+        }
+        
+        // Only add if sunset happens during the layover
+        if (nextSunset > arrivalDate && nextSunset < departureDate) {
+            const sunsetPos = ((nextSunset - arrivalDate) / layoverDurationMs) * 100;
+            transitions.push({
+                positionPercent: sunsetPos,
+                label: 'Sunset',
+                labelClass: 'sunset-label',
+                lineClass: 'sunset-transition-line'
+            });
+        }
+    }
+    
+    // Add midnight transition if needed
+    if (crossesMidnight) {
+        let timeToMidnight = new Date(arrivalDate).setHours(24, 0, 0, 0) - arrivalDate;
+        if (timeToMidnight <= 0 || timeToMidnight >= layoverDurationMs) {
+            timeToMidnight = layoverDurationMs * 0.5;
+        }
+        const midnightPos = (timeToMidnight / layoverDurationMs) * 100;
+        transitions.push({
+            positionPercent: midnightPos,
+            label: '+1',
+            labelClass: 'midnight-label',
+            lineClass: 'midnight-transition-line'
+        });
+    }
+
+    return transitions.map(t => `
+        <div class="day-transition" style="left: ${Math.min(90, Math.max(10, t.positionPercent))}%;">
+            <div class="${t.lineClass}"></div>
+            <div class="${t.labelClass}">${t.label}</div>
+        </div>
+    `).join('');
+}
+
 // Create day/night flight bar visualization
 function createDayNightBar(departureDate, arrivalDate, durationHours, segment) {
     const isDepartureDay = isDaytime(departureDate);
@@ -118,10 +201,58 @@ function createLayoverBar(arrivalDate, departureDate, layoverDurationHours) {
     const minutes = Math.round((layoverDurationHours - hours) * 60);
     const layoverText = `${hours}h ${minutes}m layover`;
     
-    // Determine the CSS class for the layover bar based on day/night transitions
-    const layoverLineClass = isArrivalDay && isDepartureDay ? 'layover-day-day' : 
-                           !isArrivalDay && !isDepartureDay ? 'layover-night-night' : 
-                           isArrivalDay ? 'layover-day-night' : 'layover-night-day';
+    const transitionsHtml = calculateLayoverTransitions(arrivalDate, departureDate, layoverDurationHours);
+    
+    // For longer layovers, determine more accurately if we have day-night transitions
+    let layoverLineClass;
+    
+    if (layoverDurationHours > 12) {
+        // For layovers > 12 hours, we need to consider day/night cycles
+        const startHour = arrivalDate.getHours();
+        const endHour = departureDate.getHours();
+        const hoursSpan = layoverDurationHours % 24; // Handle multi-day layovers
+        
+        // Check if we cross the 6AM or 6PM boundaries
+        const crossesMorning = (startHour < 6 && endHour >= 6) || (startHour >= 6 && endHour < 6 && layoverDurationHours > 24);
+        const crossesEvening = (startHour < 18 && endHour >= 18) || (startHour >= 18 && endHour < 18 && layoverDurationHours > 24);
+        
+        if (isArrivalDay) {
+            // Starting in daytime
+            if (isDepartureDay) {
+                // Ending in daytime
+                if (crossesEvening && crossesMorning) {
+                    layoverLineClass = 'layover-day-night-day'; // day -> night -> day
+                } else if (crossesEvening) {
+                    layoverLineClass = 'layover-day-night'; // day -> night
+                } else {
+                    layoverLineClass = 'layover-day-day'; // day all the way
+                }
+            } else {
+                // Ending in nighttime
+                layoverLineClass = 'layover-day-night'; // day -> night
+            }
+        } else {
+            // Starting in nighttime
+            if (isDepartureDay) {
+                // Ending in daytime
+                layoverLineClass = 'layover-night-day'; // night -> day
+            } else {
+                // Ending in nighttime
+                if (crossesMorning && crossesEvening) {
+                    layoverLineClass = 'layover-night-day-night'; // night -> day -> night
+                } else if (crossesMorning) {
+                    layoverLineClass = 'layover-night-day'; // night -> day
+                } else {
+                    layoverLineClass = 'layover-night-night'; // night all the way
+                }
+            }
+        }
+    } else {
+        // For shorter layovers, stick with simple transitions
+        layoverLineClass = isArrivalDay && isDepartureDay ? 'layover-day-day' : 
+                         !isArrivalDay && !isDepartureDay ? 'layover-night-night' : 
+                         isArrivalDay ? 'layover-day-night' : 'layover-night-day';
+    }
     
     return `
         <div class="layover-container">
@@ -142,6 +273,7 @@ function createLayoverBar(arrivalDate, departureDate, layoverDurationHours) {
                                 </div>
                                 <div class="bar-line layover-line ${layoverLineClass}">
                                     <span class="layover-duration-text">${layoverText}</span>
+                                    ${transitionsHtml}
                                 </div>
                                 <div class="bar-endpoint layover-endpoint ${isDepartureDay ? 'layover-daytime' : 'layover-nighttime'}">
                                     <img src="/assets/${isDepartureDay ? 'sun' : 'moon'}.svg" alt="${isDepartureDay ? 'Day' : 'Night'}" class="time-icon">
