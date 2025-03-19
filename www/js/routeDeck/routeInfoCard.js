@@ -137,16 +137,33 @@ function createLayoverBar(arrivalDate, departureDate, layoverDurationHours) {
     
     return `
         <div class="layover-container">
-            <div class="layover-day-night-bar">
-                <div class="bar-content">
-                    <div class="bar-endpoint layover-endpoint ${isArrivalDay ? 'layover-daytime' : 'layover-nighttime'}">
-                        <img src="/assets/${isArrivalDay ? 'sun' : 'moon'}.svg" alt="${isArrivalDay ? 'Day' : 'Night'}" class="time-icon">
+            <div class="layover-wrapper">
+                <div class="airline-section layover-spacer">
+                    <!-- Empty airline logo space to match flight segment structure -->
+                </div>
+                <div class="journey-section">
+                    <div class="departure-section">
+                        <!-- Empty departure section to maintain width -->
                     </div>
-                    <div class="bar-line layover-line ${layoverLineClass}">
-                        <span class="layover-duration-text">${layoverText}</span>
+                    
+                    <div class="route-indicator">
+                        <div class="layover-day-night-bar">
+                            <div class="bar-content">
+                                <div class="bar-endpoint layover-endpoint ${isArrivalDay ? 'layover-daytime' : 'layover-nighttime'}">
+                                    <img src="/assets/${isArrivalDay ? 'sun' : 'moon'}.svg" alt="${isArrivalDay ? 'Day' : 'Night'}" class="time-icon">
+                                </div>
+                                <div class="bar-line layover-line ${layoverLineClass}">
+                                    <span class="layover-duration-text">${layoverText}</span>
+                                </div>
+                                <div class="bar-endpoint layover-endpoint ${isDepartureDay ? 'layover-daytime' : 'layover-nighttime'}">
+                                    <img src="/assets/${isDepartureDay ? 'sun' : 'moon'}.svg" alt="${isDepartureDay ? 'Day' : 'Night'}" class="time-icon">
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <div class="bar-endpoint layover-endpoint ${isDepartureDay ? 'layover-daytime' : 'layover-nighttime'}">
-                        <img src="/assets/${isDepartureDay ? 'sun' : 'moon'}.svg" alt="${isDepartureDay ? 'Day' : 'Night'}" class="time-icon">
+                    
+                    <div class="arrival-section">
+                        <!-- Empty arrival section to maintain width -->
                     </div>
                 </div>
             </div>

@@ -362,14 +362,26 @@
     justify-content: center;
 }
 
+/* Add this new class to ensure proper alignment */
+.layover-wrapper {
+    display: flex;
+    width: 100%;
+    align-items: center;
+}
+
+.layover-spacer {
+    width: 24px; /* Same width as airline-logo container */
+    flex-shrink: 0;
+}
+
 .layover-day-night-bar {
-    width: 80%;
+    width: 100%; /* Use full width instead of 80% */
     height: 18px;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-top: 18px; /* Add margin to make space for the text above */
-    position: relative; /* Ensure positioning context for absolute elements */
+    margin-top: 18px;
+    position: relative;
 }
 
 .layover-endpoint {
