@@ -28,8 +28,6 @@
 .airline-section {
     display: inline-flex;
     align-items: center;
-    width: 50px; /* Set a fixed width for the airline section */
-    margin-right: 10px; /* Add some spacing between the logo and journey */
     flex-shrink: 0; /* Prevent the airline section from shrinking */
 }
 
@@ -40,32 +38,33 @@
 }
 
 .journey-section {
-    display: inline-flex;
+    display: flex; /* Change from inline-flex to flex */
     align-items: center;
     gap: 10px;
-    flex-grow: 1; /* Allow journey section to take up remaining space */
-    flex-wrap: wrap; /* Add flex-wrap to handle content wrapping */
-    min-width: 0; /* Add min-width: 0 to allow shrinking */
-    width: auto; /* Allow journey-section to take only the space it needs */
-    flex: 1; /* Add flex: 1 to journey-section */
+    width: 100%; /* Ensure it takes full width */
+    flex-wrap: nowrap; /* Prevent wrapping */
+    min-width: 0; /* Allow container to shrink */
 }
 
 .departure-section,
-.arrival-section,
-.route-indicator {
-    flex: 1; /* Allow sections to share available space */
+.arrival-section {
+    flex: 0 0 70px; /* Fixed width, no grow, no shrink */
     display: flex;
     flex-direction: column;
-    min-width: 70px;
     width: 70px;
     margin-top: 2px;
-    align-items: center;
     text-align: center;
 }
 
-/* Right-align text in departure section */
-.departure-section {
-    align-items: flex-end; /* Right align departure elements */
+.route-indicator {
+    flex: 1 1 0%; /* Grow and shrink as needed, with 0% basis */
+    min-width: 0; /* Allow it to shrink below min content */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: #666;
+    font-size: 1.2rem;
+    margin-top: 2px;
 }
 
 .departure-section .departure-time,
@@ -103,12 +102,16 @@
 }
 
 .route-indicator {
+    flex: 1 1 auto; /* Set flex-grow to 1 to fill available space */
     display: flex;
     flex-direction: column;
     align-items: center;
     color: #666;
     font-size: 1.2rem;
     width: 100%;
+    min-width: 100px; /* Ensure minimum size for readability */
+    max-width: none; /* Remove max-width constraint */
+    margin-top: 2px;
 }
 
 /* Day/Night flight bar styles */
@@ -463,4 +466,15 @@
     width: 100%;
     display: block;
     clear: both;
+}
+
+/* Add a media query for smaller screens */
+@media screen and (max-width: 576px) {
+    .journey-section {
+        justify-content: space-between; /* Better spacing on small screens */
+    }
+    
+    .route-indicator {
+        flex: 1 1 auto; /* Allow the route indicator to grow and take remaining space */
+    }
 }
