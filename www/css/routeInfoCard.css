@@ -38,12 +38,12 @@
 }
 
 .journey-section {
-    display: flex; /* Change from inline-flex to flex */
+    display: flex;
     align-items: center;
     gap: 10px;
-    width: 100%; /* Ensure it takes full width */
-    flex-wrap: nowrap; /* Prevent wrapping */
-    min-width: 0; /* Allow container to shrink */
+    width: 100%;
+    flex-wrap: nowrap;
+    min-width: 0;
 }
 
 .departure-section,
@@ -53,12 +53,11 @@
     flex-direction: column;
     width: 70px;
     margin-top: 2px;
-    text-align: center;
 }
 
 .route-indicator {
-    flex: 1 1 0%; /* Grow and shrink as needed, with 0% basis */
-    min-width: 0; /* Allow it to shrink below min content */
+    flex: 1 1 auto; /* This makes it grow to fill available space */
+    min-width: 0; /* Allows content to shrink if needed */
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -67,22 +66,11 @@
     margin-top: 2px;
 }
 
-.departure-section .departure-time,
-.departure-section .departure-code,
-.departure-section .departure-date {
-    text-align: right;
-    width: 100%;
-}
-
-/* Left-align text in arrival section for consistency */
-.arrival-section {
-    align-items: flex-start; /* Left align arrival elements */
-}
-
-.arrival-section .arrival-time,
-.arrival-section .arrival-code,
-.arrival-section .arrival-date {
-    text-align: left;
+.departure-date,
+.arrival-date {
+    color: #888;
+    font-size: 0.7rem;
+    order: 1;
     width: 100%;
 }
 
@@ -92,13 +80,24 @@
     font-size: 1rem;
     font-weight: 600;
     white-space: nowrap;
-    width: 70px;
+    order: 2;
+    width: 100%;
 }
 
 .departure-code,
 .arrival-code {
     color: #888;
     font-size: 0.8rem;
+    order: 3;
+    width: 100%;
+}
+
+.departure-section {
+    text-align: right;
+}
+
+.arrival-section {
+    text-align: left;
 }
 
 .route-indicator {
