@@ -17,15 +17,35 @@ function isDaytime(date) {
     return hours >= 6 && hours < 18;
 }
 
-function calculateTransitions(departureDate, arrivalDate, durationHours) {
+function calculateTransitions(departureDate, arrivalDate, durationHours, segment) {
     const flightDuration = durationHours * 60 * 60 * 1000;
     const timeDiff = arrivalDate - departureDate;
     const crossesMidnight = departureDate.getDate() !== arrivalDate.getDate();
-    const isDayLineCrossing = (
-        timeDiff > flightDuration * 1.5 && durationHours < 24
-    ) || (
-        timeDiff < 0 && durationHours < 24
-    );
+    
+    // Add geographic check to prevent false IDL crossings
+    const isDayLineCrossing = (() => {
+        // Get origin and destination data
+        const origin = flightMap.airportDataCache[segment.flyFrom];
+        const destination = flightMap.airportDataCache[segment.flyTo];
+        
+        // If we have geographic data, check if the flight actually crosses the IDL
+        if (origin && destination) {
+            // IDL is approximately at 180° longitude
+            const crossesIDL = 
+                (origin.longitude < 0 && destination.longitude > 150) || 
+                (origin.longitude > 150 && destination.longitude < 0);
+                
+            // Only return true if we have a significant time difference AND geographic evidence
+            return crossesIDL && (
+                (timeDiff > flightDuration * 1.5 && durationHours < 24) || 
+                (timeDiff < 0 && durationHours < 24)
+            );
+        }
+        
+        // Fall back to time-based detection if we don't have geographic data
+        return (timeDiff > flightDuration * 1.5 && durationHours < 24) || 
+               (timeDiff < 0 && durationHours < 24);
+    })();
 
     const transitions = [];
     // IDL transition
@@ -66,7 +86,7 @@ function calculateTransitions(departureDate, arrivalDate, durationHours) {
 }
 
 // Create day/night flight bar visualization
-function createDayNightBar(departureDate, arrivalDate, durationHours) {
+function createDayNightBar(departureDate, arrivalDate, durationHours, segment) {
     const isDepartureDay = isDaytime(departureDate);
     const isArrivalDay = isDaytime(arrivalDate);
     
@@ -75,7 +95,7 @@ function createDayNightBar(departureDate, arrivalDate, durationHours) {
     const minutes = Math.round((durationHours - hours) * 60);
     const durationText = `${hours}h ${minutes}m`;
     
-    const transitionsHtml = calculateTransitions(departureDate, arrivalDate, durationHours);
+    const transitionsHtml = calculateTransitions(departureDate, arrivalDate, durationHours, segment);
     
     // Determine the CSS class for the bar based on day/night transitions
     const barLineClass = isDepartureDay && isArrivalDay ? 'day-day' : 
@@ -241,7 +261,7 @@ async function generateSegmentDetails(flight) {
                         </div>
 
                         <div class="route-indicator">
-                            ${createDayNightBar(departureDate, arrivalDate, durationHours)}
+                            ${createDayNightBar(departureDate, arrivalDate, durationHours, segment)}
                         </div>
 
                         <div class="arrival-section">
