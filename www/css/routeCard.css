@@ -237,7 +237,6 @@
 .card-content {
   display: grid;
   grid-template-columns: auto 1fr auto;
-  gap: 10px;
   align-items: center;
   width: 100%;
 }
@@ -471,7 +470,7 @@
     text-align: right;
     flex-shrink: 0; /* Prevent shrinking */
     font-size: 0.9rem; /* Reduced from 1.1rem */
-    padding: 5px 10px 5px 5px;
+    padding: 5px 5px 5px 5px;
   }
 
   .route-segment {
