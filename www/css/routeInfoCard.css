@@ -181,37 +181,6 @@
     background: linear-gradient(90deg, #1E3F66 0%, #5DA9E9 100%);
 }
 
-/* Add these new classes for the enhanced day/night bar visualization */
-
-.bar-line.day-night-segments {
-    background: linear-gradient(90deg, var(--day-night-segments));
-}
-
-/* For debugging day/night segments */
-.day-night-segment-markers {
-    position: absolute;
-    width: 100%;
-    height: 3px;
-    bottom: -4px;
-    display: flex;
-    z-index: 3;
-}
-
-.segment-marker {
-    position: absolute;
-    width: 2px;
-    height: 3px;
-    background-color: rgba(255, 255, 255, 0.5);
-}
-
-.segment-marker-label {
-    position: absolute;
-    top: 4px;
-    font-size: 0.5rem;
-    color: #888;
-    transform: translateX(-50%);
-}
-
 /* Day transition indicator styles */
 .day-transition {
     position: absolute;
@@ -494,17 +463,4 @@
     width: 100%;
     display: block;
     clear: both;
-}
-
-.debug-info {
-    font-size: 0.6rem;
-    color: #888;
-    margin-top: 6px;
-    padding: 4px;
-    border-radius: 3px;
-    background-color: rgba(0, 0, 0, 0.2);
-}
-
-.debug-line {
-    margin-bottom: 2px;
 }

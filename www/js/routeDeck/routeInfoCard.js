@@ -17,55 +17,11 @@ function isDaytime(date) {
     return hours >= 6 && hours < 18;
 }
 
-// Simplified sunrise/sunset calculation using standard approximation
-function getSunriseSunset(date, lat) {
-    // Use a simplified model - assumes sunrise around 6AM and sunset around 6PM
-    // with adjustments for latitude and season
-    const day = new Date(date).getDate();
-    const month = new Date(date).getMonth();
-    
-    // Seasonal adjustment (approximation)
-    let seasonAdjustment = 0;
-    
-    // Northern hemisphere seasons
-    if (lat >= 0) {
-        // Summer: longer days in northern hemisphere
-        if (month >= 4 && month <= 8) {
-            seasonAdjustment = 1; 
-        }
-        // Winter: shorter days in northern hemisphere
-        else if (month >= 10 || month <= 2) {
-            seasonAdjustment = -1;
-        }
-    } 
-    // Southern hemisphere (opposite seasons)
-    else {
-        // Summer in southern hemisphere
-        if (month >= 10 || month <= 2) {
-            seasonAdjustment = 1;
-        }
-        // Winter in southern hemisphere
-        else if (month >= 4 && month <= 8) {
-            seasonAdjustment = -1;
-        }
-    }
-    
-    // Latitude adjustment - higher latitudes have more extreme day/night variation
-    const latitudeImpact = Math.min(3, Math.abs(lat) / 30); 
-    const totalAdjustment = seasonAdjustment * latitudeImpact;
-    
-    // Base sunrise/sunset times (6AM/6PM) adjusted for season and latitude
-    const sunrise = new Date(date);
-    sunrise.setHours(6 - totalAdjustment, 0, 0, 0);
-    
-    const sunset = new Date(date);
-    sunset.setHours(18 + totalAdjustment, 0, 0, 0);
-    
-    return { sunrise, sunset };
-}
-
 // Create day/night flight bar visualization
-function createDayNightBar(departureDate, arrivalDate, durationHours, segment) {
+function createDayNightBar(departureDate, arrivalDate, durationHours) {
+    const isDepartureDay = isDaytime(departureDate);
+    const isArrivalDay = isDaytime(arrivalDate);
+    
     // Format duration for display
     const hours = Math.floor(durationHours);
     const minutes = Math.round((durationHours - hours) * 60);
@@ -76,43 +32,77 @@ function createDayNightBar(departureDate, arrivalDate, durationHours, segment) {
     const arrivalDayNumber = arrivalDate.getDate();
     const crossesMidnight = departureDayNumber !== arrivalDayNumber;
     
+    let dayTransitionHtml = '';
+    let idlCrossingHtml = '';
+    let debugText = '';
+    
     // Check if flight crosses International Date Line
     const timeDiff = arrivalDate - departureDate;
     const flightDuration = durationHours * 60 * 60 * 1000;
-    const crossesIDL = Math.abs(timeDiff - flightDuration) > 12 * 60 * 60 * 1000;
+    const isDayLineCrossing = (timeDiff > 24 * 60 * 60 * 1000 && durationHours < 24) ||
+                             (timeDiff < 0 && durationHours < 24);
     
-    // Get day/night segments along the flight path
-    const segments = calculateDayNightSegments(departureDate, arrivalDate, durationHours, segment);
-    
-    // Create transition indicators
-    let transitionHtml = '';
+    // Define the safe display area (accounting for endpoints)
+    const minPositionPercent = 8; // Keep transitions away from start endpoint
+    const maxPositionPercent = 92; // Keep transitions away from end endpoint
     
     // Add International Date Line indicator if applicable
-    if (crossesIDL) {
-        const idlPosition = 75; // Position IDL indicator at 75% of flight
-        transitionHtml += `
-            <div class="day-transition idl-transition" style="left: ${idlPosition}%;">
+    if (isDayLineCrossing) {
+        // For IDL crossings, place the indicator at 75% of the flight duration
+        // but constrain to visible area
+        let idlPositionPercent = 75;
+        idlPositionPercent = Math.max(minPositionPercent, Math.min(maxPositionPercent, idlPositionPercent));
+        
+        idlCrossingHtml = `
+            <div class="day-transition idl-transition" style="left: ${idlPositionPercent}%;">
                 <div class="idl-transition-line"></div>
-                <div class="idl-label">IDL</div>
+                <div class="idl-label">+1 IDL</div>
+            </div>
+        `;
+        
+        debugText = `
+            <div class="debug-midnight-position">
+                IDL crossing detected (${Math.round(timeDiff/60000)}m time diff / ${Math.round(durationHours * 60)}m flight)
             </div>
         `;
     }
     
     // Add midnight transition indicator if this crosses a calendar day
-    if (crossesMidnight && !crossesIDL) {
-        // Calculate midnight position (roughly middle of flight for simplicity)
-        const midnightPosition = 50;
-        transitionHtml += `
-            <div class="day-transition midnight-transition" style="left: ${midnightPosition}%;">
+    // but is not just an IDL crossing alone
+    if (crossesMidnight && (!isDayLineCrossing || timeDiff > 0)) {
+        // Calculate midnight position as a percentage of total flight duration
+        const departureDateMidnight = new Date(departureDate);
+        departureDateMidnight.setHours(0, 0, 0, 0); // Set to midnight
+        departureDateMidnight.setDate(departureDateMidnight.getDate() + 1); // Next day at midnight
+        
+        let timeToMidnight = departureDateMidnight - departureDate;
+        
+        // Handle edge cases
+        if (timeToMidnight <= 0 || timeToMidnight > flightDuration) {
+            // If midnight calculation is off, use a reasonable fallback
+            timeToMidnight = flightDuration * 0.5; // Place at 50% of flight
+        }
+        
+        // Calculate position percentage and constrain to visible area
+        let midnightPositionPercent = (timeToMidnight / flightDuration) * 100;
+        midnightPositionPercent = Math.max(minPositionPercent, Math.min(maxPositionPercent, midnightPositionPercent));
+        
+        dayTransitionHtml = `
+            <div class="day-transition midnight-transition" style="left: ${midnightPositionPercent}%;">
                 <div class="midnight-transition-line"></div>
                 <div class="midnight-label">+1</div>
             </div>
         `;
+        
+        // Only show debug text for midnight if IDL debug text isn't showing
+        if (!debugText) {
+            debugText = `
+                <div class="debug-midnight-position">
+                    Midnight at ${midnightPositionPercent.toFixed(1)}% (${Math.round(timeToMidnight/60000)}m to midnight / ${Math.round(flightDuration/60000)}m flight)
+                </div>
+            `;
+        }
     }
-    
-    // Get departure and arrival day/night state
-    const isDepartureDay = isDaytime(departureDate);
-    const isArrivalDay = isDaytime(arrivalDate);
     
     return `
         <div class="flight-day-night-bar">
@@ -120,80 +110,20 @@ function createDayNightBar(departureDate, arrivalDate, durationHours, segment) {
                 <div class="bar-endpoint departure-time-indicator ${isDepartureDay ? 'daytime' : 'nighttime'}">
                     <img src="/assets/${isDepartureDay ? 'sun' : 'moon'}.svg" alt="${isDepartureDay ? 'Day' : 'Night'}" class="time-icon">
                 </div>
-                <div class="bar-line day-night-segments" style="--day-night-segments: ${segments.gradientStyle}">
+                <div class="bar-line ${isDepartureDay && isArrivalDay ? 'day-day' : 
+                                     !isDepartureDay && !isArrivalDay ? 'night-night' : 
+                                     isDepartureDay ? 'day-night' : 'night-day'}">
                     <span class="duration-text">${durationText}</span>
                 </div>
-                ${transitionHtml}
+                ${dayTransitionHtml}
+                ${idlCrossingHtml}
                 <div class="bar-endpoint arrival-time-indicator ${isArrivalDay ? 'daytime' : 'nighttime'}">
                     <img src="/assets/${isArrivalDay ? 'sun' : 'moon'}.svg" alt="${isArrivalDay ? 'Day' : 'Night'}" class="time-icon">
                 </div>
             </div>
+            ${debugText}
         </div>
     `;
-}
-
-// Simplified calculation of day/night segments
-function calculateDayNightSegments(departureDate, arrivalDate, durationHours, segment) {
-    // Get origin and destination coordinates
-    const originData = flightMap.airportDataCache[segment.flyFrom] || { latitude: 0, longitude: 0 };
-    const destData = flightMap.airportDataCache[segment.flyTo] || { latitude: 0, longitude: 0 };
-    
-    const dayColor = "#5DA9E9"; // Day color (light blue)
-    const nightColor = "#1E3F66"; // Night color (dark blue)
-    
-    // Determine conditions at departure and arrival
-    const isDepartDay = isDaytime(departureDate);
-    const isArrivalDay = isDaytime(arrivalDate);
-    
-    // Simple constant-time implementation
-    // For short flights (under 3 hours), just use the departure and arrival states
-    if (durationHours < 3) {
-        if (isDepartDay && isArrivalDay) {
-            return { gradientStyle: `${dayColor} 0%, ${dayColor} 100%` };
-        } else if (!isDepartDay && !isArrivalDay) {
-            return { gradientStyle: `${nightColor} 0%, ${nightColor} 100%` };
-        } else if (isDepartDay) {
-            return { gradientStyle: `${dayColor} 0%, ${nightColor} 100%` };
-        } else {
-            return { gradientStyle: `${nightColor} 0%, ${dayColor} 100%` };
-        }
-    }
-    
-    // For longer flights, create a more detailed gradient
-    const colorStops = [];
-    colorStops.push(`${isDepartDay ? dayColor : nightColor} 0%`);
-    
-    // Sample points along the flight path
-    const numSamples = Math.min(5, Math.max(3, Math.floor(durationHours / 2)));
-    let lastCondition = isDepartDay ? "day" : "night";
-    
-    for (let i = 1; i < numSamples; i++) {
-        const progress = i / numSamples;
-        const position = Math.round(progress * 100);
-        
-        // Calculate time at this point in the flight
-        const pointTime = new Date(departureDate.getTime() + progress * durationHours * 3600000);
-        
-        // Interpolate latitude and longitude
-        const lat = originData.latitude + progress * (destData.latitude - originData.latitude);
-        
-        // Check if it's daytime at this point
-        const { sunrise, sunset } = getSunriseSunset(pointTime, lat);
-        const isDay = pointTime >= sunrise && pointTime <= sunset;
-        const currentCondition = isDay ? "day" : "night";
-        
-        // If condition changed, add a transition point
-        if (currentCondition !== lastCondition) {
-            colorStops.push(`${lastCondition === "day" ? dayColor : nightColor} ${position}%`);
-            colorStops.push(`${currentCondition === "day" ? dayColor : nightColor} ${position}%`);
-            lastCondition = currentCondition;
-        }
-    }
-    
-    // Add the final stop
-    colorStops.push(`${isArrivalDay ? dayColor : nightColor} 100%`);
-    
-    return { gradientStyle: colorStops.join(", ") };
 }
 
 // Create day/night layover bar visualization
@@ -334,7 +264,7 @@ async function generateSegmentDetails(flight) {
                         </div>
 
                         <div class="route-indicator">
-                            ${createDayNightBar(departureDate, arrivalDate, durationHours, segment)}
+                            ${createDayNightBar(departureDate, arrivalDate, durationHours)}
                         </div>
 
                         <div class="arrival-section">
@@ -415,7 +345,7 @@ async function routeInfoCard(cardElement, fullFlightData, routeIds, routeIndex) 
 
     const fetchAndDisplayAirportData = async (origin, destination) => {
         const originData = flightMap.airportDataCache[origin];
-        const destData = flightMap.airportDataCache[dest];
+        const destData = flightMap.airportDataCache[destination];
         
         if (originData && destData) {
             map.fitBounds([
