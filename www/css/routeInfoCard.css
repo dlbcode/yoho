@@ -3,6 +3,8 @@
     margin-top: -10px; /* Changed from 10px to 0px */
     border-bottom-left-radius: 8px;
     border-bottom-right-radius: 8px;
+    border: 1px solid #444; /* Add subtle border */
+    border-top: none; /* No border at top where it connects to route card */
 }
 
 .route-info-card-content {
