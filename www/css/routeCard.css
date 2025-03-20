@@ -521,3 +521,78 @@
     margin-top: 2px;
   }
 }
+
+/* Add this new section for evenly spaced horizontal content on non-mobile screens */
+@media screen and (min-width: 768px) {
+    .route-card .card-content {
+        justify-content: space-between; /* Evenly distribute space */
+    }
+    
+    .journey-section {
+        justify-content: space-between; /* Even spacing between journey elements */
+        flex: 1; /* Take up all available space between airline and price */
+    }
+    
+    /* Make sure route-indicator grows to fill available space */
+    .route-indicator {
+        flex: 1 1 auto; /* Grow and shrink as needed */
+        min-width: 100px; /* Ensure minimum width for readability */
+    }
+    
+    /* For round trip cards, keep proper spacing in journey details */
+    .journey-details {
+        justify-content: space-between;
+        width: 100%;
+    }
+
+    /* Fix spacing issues in journey details */
+    .journey-details > div.route-indicator {
+        flex: 1 1 auto; /* Allow grow and shrink as needed */
+    }
+
+    /* Keep the card-content as grid with proper column distribution */
+    .route-card .card-content {
+        grid-template-columns: auto minmax(0, 1fr) auto;
+        column-gap: 15px; /* Add some spacing between grid columns */
+    }
+    
+    /* Change journey-section from flexbox to grid for better control */
+    .journey-section {
+        display: grid;
+        grid-template-columns: minmax(65px, auto) minmax(100px, 1fr) minmax(65px, auto);
+        width: 100%;
+        gap: 20px; /* Add consistent spacing between journey elements */
+    }
+    
+    /* Fix the width of departure and arrival sections */
+    .departure-section,
+    .arrival-section {
+        min-width: 65px;
+        max-width: 100px; /* Limit maximum width */
+        width: auto; /* Allow flexibility within constraints */
+    }
+    
+    /* Control the route indicator size */
+    .route-indicator {
+        width: 100%;
+        min-width: 0; /* Allow to shrink if needed */
+        max-width: none; /* Remove any max-width constraints */
+    }
+    
+    /* For round trip cards */
+    .journey-details {
+        display: grid;
+        grid-template-columns: minmax(65px, auto) minmax(100px, 1fr) minmax(65px, auto);
+        gap: 20px;
+        width: 100%;
+    }
+}
+
+/* Ensure these styles don't affect the route info card */
+.route-info-card .journey-section {
+    display: flex; /* Keep the original flexbox layout for route info cards */
+}
+
+.route-info-card .layover-container .journey-section {
+    justify-content: center; /* Keep layovers centered */
+}
