@@ -244,7 +244,6 @@
 .airline-section {
   display: flex;
   align-items: center;
-  margin-right: 10px;
 }
 
 .airline-logo {
@@ -263,8 +262,8 @@
 .arrival-section {
   display: flex;
   flex-direction: column;
-  min-width: 70px;
-  width: 70px;
+  min-width: 65px;
+  width: 65px;
   margin-top: 2px;
   align-items: center;
   text-align: center; /* Ensure text is centered */

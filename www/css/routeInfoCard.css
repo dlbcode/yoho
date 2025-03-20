@@ -48,10 +48,10 @@
 
 .departure-section,
 .arrival-section {
-    flex: 0 0 70px; /* Fixed width, no grow, no shrink */
+    flex: 0 0 65px; /* Fixed width, no grow, no shrink */
     display: flex;
     flex-direction: column;
-    width: 70px;
+    width: 65px;
     margin-top: 2px;
 }
 
@@ -144,6 +144,10 @@
 
 .bar-endpoint.daytime {
     background-color: #5DA9E9;
+}
+
+.bar-endpoint.daytime .time-icon {
+    filter: brightness(0) saturate(100%) invert(14%) sepia(19%) saturate(1692%) hue-rotate(183deg) brightness(94%) contrast(93%); /* Color #1e3f66 filter for sun icon */
 }
 
 .bar-endpoint.nighttime {
