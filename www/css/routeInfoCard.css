@@ -387,32 +387,34 @@
 .layover-endpoint {
     width: 18px;
     height: 18px;
-    border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     position: relative;
     z-index: 2;
+    background-color: transparent;
+    border: none; /* Remove border completely */
+    padding: 0 5px; /* Add padding to create space between icon and line */
 }
 
-.layover-endpoint.layover-daytime {
-    background-color: #FF9E4D; /* Orange for daytime */
+.layover-endpoint.layover-daytime .time-icon {
+    filter: brightness(0) saturate(100%) invert(70%) sepia(56%) saturate(773%) hue-rotate(331deg) brightness(105%) contrast(101%); /* Orange filter for day SVG */
 }
 
-.layover-endpoint.layover-nighttime {
-    background-color: #C65F04; /* Darker orange for nighttime */
+.layover-endpoint.layover-nighttime .time-icon {
+    filter: brightness(0) saturate(100%) invert(22%) sepia(82%) saturate(2093%) hue-rotate(22deg) brightness(95%) contrast(102%); /* Dark orange filter for night SVG */
 }
 
 .layover-line {
     flex-grow: 1;
-    height: 8px;
+    height: 1px; /* Changed from 8px to 1px */
     position: relative;
     z-index: 1;
-    margin: 0 -9px;
+    margin: 0; /* Remove negative margins */
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 4px;
+    border-radius: 0; /* Removed border radius since it's 1px now */
 }
 
 .layover-line.layover-day-day {
@@ -458,12 +460,12 @@
     background: rgba(198, 95, 4, 0.8); /* Translucent orange-brown background */
     padding: 2px 6px;
     border-radius: 8px;
-    z-index: 3;
+    z-index: 10; /* Increased z-index to appear above other elements */
     position: absolute;
     white-space: nowrap;
-    top: -18px; /* Position above the bar instead of on it */
+    top: 50%; /* Center vertically */
     left: 50%; /* Center horizontally */
-    transform: translateX(-50%); /* Ensure perfect centering */
+    transform: translate(-50%, -50%); /* Perfect centering both horizontally and vertically */
 }
 
 .sunrise-transition-line {
@@ -546,4 +548,19 @@
     .route-indicator {
         flex: 1 1 auto; /* Allow the route indicator to grow and take remaining space */
     }
+}
+
+/* Adjust transition indicators in layover bars */
+.layover-day-night-bar .day-transition .midnight-transition-line,
+.layover-day-night-bar .day-transition .idl-transition-line,
+.layover-day-night-bar .day-transition .sunrise-transition-line,
+.layover-day-night-bar .day-transition .sunset-transition-line {
+    top: 0px; /* Raise by 5px from original 5px position */
+}
+
+.layover-day-night-bar .day-transition .midnight-label,
+.layover-day-night-bar .day-transition .idl-label,
+.layover-day-night-bar .day-transition .sunrise-label,
+.layover-day-night-bar .day-transition .sunset-label {
+    top: 16px; /* Raise by 5px from original 20px position */
 }
