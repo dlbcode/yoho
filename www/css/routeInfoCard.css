@@ -142,6 +142,37 @@
     z-index: 2;
 }
 
+/* New tail fin shape for departure endpoint */
+.bar-endpoint.departure-time-indicator {
+    border-radius: 0; /* Remove circle shape */
+    clip-path: polygon(
+        0 0,       /* Top-left corner */
+        0 100%,    /* Bottom-left corner - keeping straight left edge */
+        20% 100%,  /* Start of bottom wing curve */
+        80% 60%,   /* Bottom wing curve control point */
+        100% 50%,  /* Right tip of the shape - center point */
+        80% 40%,   /* Top wing curve control point */
+        20% 0%,    /* End of top wing curve */
+        0 0        /* Back to top-left corner */
+    );
+    width: 24px; /* Slightly wider for better proportions with dual wings */
+    height: 42px; /* Keep height consistent */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Ensure the icon is perfectly centered in the airplane shape */
+.bar-endpoint.departure-time-indicator .time-icon {
+    position: relative;
+    left: -2px; /* Slight adjustment to center in the visible area */
+}
+
+/* Keep arrival endpoint as a circle */
+.bar-endpoint.arrival-time-indicator {
+    /* Circle shape is preserved */
+}
+
 .bar-endpoint.daytime {
     background-color: #5DA9E9;
 }
