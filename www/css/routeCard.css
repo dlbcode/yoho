@@ -275,7 +275,6 @@
   font-size: 1rem;
   font-weight: 600;
   white-space: nowrap;
-  width: 70px;
 }
 
 .departure-time,
@@ -567,7 +566,7 @@
     /* Fix the width of departure and arrival sections */
     .departure-section,
     .arrival-section {
-        min-width: 65px;
+        min-width: 70px;
         max-width: 100px; /* Limit maximum width */
         width: auto; /* Allow flexibility within constraints */
     }
@@ -585,6 +584,12 @@
         grid-template-columns: minmax(65px, auto) minmax(100px, 1fr) minmax(65px, auto);
         gap: 20px;
         width: 100%;
+    }
+
+    .segment-details {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0px;
     }
 }
 

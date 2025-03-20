@@ -22,6 +22,7 @@
     display: flex !important;
     align-items: center;
     width: 100%;
+    gap: 15px;
     flex-direction: row; /* Ensure items are laid out in a row */
 }
 
@@ -82,6 +83,10 @@
     white-space: nowrap;
     order: 2;
     width: 100%;
+}
+
+.departure-section .departure-time, .departure-code, .departure-date {
+    text-align: right;
 }
 
 .departure-code,
@@ -394,6 +399,7 @@
 .layover-wrapper {
     display: flex;
     width: 100%;
+    gap: 15px;
     align-items: center;
 }
 
@@ -574,6 +580,10 @@
     
     .route-indicator {
         flex: 1 1 auto; /* Allow the route indicator to grow and take remaining space */
+    }
+
+    .route-info-card .segment-details {
+        gap: 0px;
     }
 }
 
