@@ -1,7 +1,8 @@
 .route-info-card {
-    border-left: #007bff solid 3px;
     background-color: #000 !important;
-    margin-top: 10px;
+    margin-top: -10px; /* Changed from 10px to 0px */
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
 }
 
 .route-info-card-content {
@@ -399,13 +400,12 @@
 .layover-wrapper {
     display: flex;
     width: 100%;
-    gap: 15px;
+
     align-items: center;
 }
 
 .layover-spacer {
-    width: 24px; /* Same width as airline-logo container */
-    flex-shrink: 0;
+    width: 40px; /* Same width as airline-logo container */
 }
 
 .layover-day-night-bar {
@@ -584,6 +584,10 @@
 
     .route-info-card .segment-details {
         gap: 0px;
+    }
+
+    .layover-spacer {
+        width: 24px; /* Same width as airline-logo container */
     }
 }
 

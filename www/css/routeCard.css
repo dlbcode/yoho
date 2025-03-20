@@ -1,7 +1,6 @@
 .route-cards-container {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
   padding: 0.5rem;
   width: 100%;
   box-sizing: border-box;
@@ -9,21 +8,18 @@
 
 .route-card {
   background: #333;
+  margin-top: 10px;
   border-radius: 8px;
   padding: 0px 10px 0px 10px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
   transition: all 0.2s ease;
+  z-index: 100;
 }
 
 .route-card:hover {
   background: #2a2a2a;
   transform: translateY(-2px);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-}
-
-.route-card.selected {
-  border-left-color: #007bff;
-  background: #000;
 }
 
 .card-header {
@@ -168,7 +164,6 @@
 
 /* Route info card */
 .route-info-card {
-  border-left: #007bff solid 3px;
   background-color: #000 !important;
 }
 
