@@ -168,11 +168,6 @@
     left: -2px; /* Slight adjustment to center in the visible area */
 }
 
-/* Keep arrival endpoint as a circle */
-.bar-endpoint.arrival-time-indicator {
-    /* Circle shape is preserved */
-}
-
 .bar-endpoint.daytime {
     background-color: #5DA9E9;
 }
@@ -595,4 +590,35 @@
 .layover-day-night-bar .day-transition .sunrise-label,
 .layover-day-night-bar .day-transition .sunset-label {
     top: 16px; /* Raise by 5px from original 20px position */
+}
+
+/* Layover start and end time styles */
+.layover-start-time,
+.layover-end-time {
+    color: #ccc;
+    font-size: 0.7rem;
+    padding: 2px 6px;
+    z-index: 3;
+    position: absolute;
+    white-space: nowrap;
+    top: 50%; /* Center vertically with the icon */
+    transform: translateY(-50%); /* Perfect vertical centering */
+}
+
+.layover-start-time {
+    right: 100%; /* Position entirely to the left of the icon */
+    margin-right: 5px; /* Add some space between text and icon */
+}
+
+.layover-end-time {
+    left: 100%; /* Position entirely to the right of the icon */
+    margin-left: 5px; /* Add some space between icon and text */
+}
+
+/* Make sure they don't overlap with the layover duration on small screens */
+@media screen and (max-width: 576px) {
+    .layover-start-time,
+    .layover-end-time {
+        font-size: 0.65rem; /* Slightly smaller on mobile */
+    }
 }

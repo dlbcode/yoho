@@ -201,6 +201,10 @@ function createLayoverBar(arrivalDate, departureDate, layoverDurationHours) {
     const minutes = Math.round((layoverDurationHours - hours) * 60);
     const layoverText = `${hours}h ${minutes}m layover`;
     
+    // Format the arrival and departure times
+    const arrivalTime = formatTime(arrivalDate);
+    const departureTime = formatTime(departureDate);
+    
     const transitionsHtml = calculateLayoverTransitions(arrivalDate, departureDate, layoverDurationHours);
     
     // For longer layovers, determine more accurately if we have day-night transitions
@@ -268,6 +272,7 @@ function createLayoverBar(arrivalDate, departureDate, layoverDurationHours) {
                     <div class="route-indicator">
                         <div class="layover-day-night-bar">
                             <div class="bar-content">
+                                <span class="layover-start-time">${arrivalTime}</span>
                                 <div class="bar-endpoint layover-endpoint ${isArrivalDay ? 'layover-daytime' : 'layover-nighttime'}">
                                     <img src="/assets/${isArrivalDay ? 'sun' : 'moon'}.svg" alt="${isArrivalDay ? 'Day' : 'Night'}" class="time-icon">
                                 </div>
@@ -278,6 +283,7 @@ function createLayoverBar(arrivalDate, departureDate, layoverDurationHours) {
                                 <div class="bar-endpoint layover-endpoint ${isDepartureDay ? 'layover-daytime' : 'layover-nighttime'}">
                                     <img src="/assets/${isDepartureDay ? 'sun' : 'moon'}.svg" alt="${isDepartureDay ? 'Day' : 'Night'}" class="time-icon">
                                 </div>
+                                <span class="layover-end-time">${departureTime}</span>
                             </div>
                         </div>
                     </div>
@@ -291,9 +297,15 @@ function createLayoverBar(arrivalDate, departureDate, layoverDurationHours) {
     `;
 }
 
+// Need to add the formatTime function if it's not already imported
+function formatTime(date) {
+    return date.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+}
+
 export {
     isDaytime,
     calculateTransitions,
     createDayNightBar,
-    createLayoverBar
+    createLayoverBar,
+    formatTime  // Add formatTime to exports if you added it here
 };
