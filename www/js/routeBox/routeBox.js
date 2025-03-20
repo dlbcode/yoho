@@ -245,6 +245,12 @@ const routeBox = {
             infoPane.classList.add('search-results');
             appState.searchResultsLoading = true;
             
+            // Fix waypoint inconsistencies before building route deck
+            if (appState.waypoints[toIndex] && appState.waypoints[toIndex].iata_code !== 'Any') {
+                // Ensure isAnyDestination is false for valid IATA destinations
+                appState.waypoints[toIndex].isAnyDestination = false;
+            }
+            
             buildRouteDeck(routeNumber).then(() => {
                 const infoPaneElement = document.getElementById('infoPane');
                 const viewportHeight = window.visualViewport ? window.visualViewport.height : window.innerHeight;
