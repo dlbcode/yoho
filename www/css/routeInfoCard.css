@@ -359,7 +359,6 @@
 /* Layover day/night bar styles */
 .layover-container {
     width: 100%;
-    padding: 8px 0;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -383,7 +382,6 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-top: 5px;
     position: relative;
 }
 
@@ -515,7 +513,7 @@
 
 .layover-info {
     margin: 0;
-    padding: 0;
+    padding: 0 0 10px 0;
     width: 100%;
     display: flex;
     justify-content: center;
