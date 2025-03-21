@@ -315,32 +315,6 @@
     text-align: right;
 }
 
-.route-arrow-svg {
-    width: 100%;
-    height: 40px;
-}
-
-.route-arrow-line {
-    stroke: #999;
-    stroke-width: 1;
-}
-
-.route-arrow-dot {
-    fill: #007bff;
-    r: 4;
-}
-
-.route-arrow-head {
-    fill: #999;
-}
-
-.route-arrow-iata {
-    fill: #ccc;
-    font-size: 0.7rem;
-    text-anchor: middle;
-    dominant-baseline: hanging;
-}
-
 .booking-container {
     display: flex;
     flex-direction: row;
