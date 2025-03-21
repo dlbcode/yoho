@@ -327,34 +327,6 @@
   text-align: right;
 }
 
-/* Remove duplicate SVG styles from routeInfoCard.css since they're identical */
-
-.route-arrow-svg {
-  width: 100%;
-  height: 40px; /* Increase height to accommodate IATAs */
-}
-
-.route-arrow-line {
-  stroke: #999;
-  stroke-width: 1;
-}
-
-.route-arrow-dot {
-  fill: #007bff; /* Change to application theme blue */
-  r: 4; /* Increase the radius of the dots */
-}
-
-.route-arrow-head {
-  fill: #999;
-}
-
-.route-arrow-iata {
-  fill: #ccc;
-  font-size: 0.7rem;
-  text-anchor: middle;
-  dominant-baseline: hanging;
-}
-
 .departure-date,
 .arrival-date {
   display: block;
