@@ -20,7 +20,18 @@ const bagIcon = `<svg fill="#aaa" height="20px" width="20px" version="1.1" id="L
 async function generateSegmentDetails(flight) {
     let segmentsHtml = '';
     
+    // Find where the return journey starts, if this is a round-trip flight
+    const returnStartIndex = flight.route.findIndex(segment => segment.return === 1);
+    const hasReturnSegments = returnStartIndex !== -1;
+    
     for (let idx = 0; idx < flight.route.length; idx++) {
+        // Insert the round-trip divider if this is the first return segment
+        if (hasReturnSegments && idx === returnStartIndex) {
+            segmentsHtml += `
+                <div class="round-trip-divider"></div>
+            `;
+        }
+        
         const segment = flight.route[idx];
         const departureDate = segment.local_departure ? new Date(segment.local_departure) : new Date(segment.dTime * 1000);
         const arrivalDate = segment.local_arrival ? new Date(segment.local_arrival) : new Date(segment.aTime * 1000);
