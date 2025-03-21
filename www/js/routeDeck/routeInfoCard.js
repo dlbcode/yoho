@@ -165,16 +165,23 @@ async function generateSegmentDetails(flight) {
                 </div>`;
                 
         // Add layover information if this isn't the last segment
+        // And skip if this segment is the last outbound segment in a round trip
         if (idx < flight.route.length - 1) {
-            const nextSegment = flight.route[idx + 1];
-            const nextDepartureDate = nextSegment.local_departure ? new Date(nextSegment.local_departure) : new Date(nextSegment.dTime * 1000);
-            const layoverDurationHours = (nextDepartureDate - arrivalDate) / 3600000;
+            // Check if this is the boundary between outbound and return journeys
+            const isOutboundReturnBoundary = hasReturnSegments && idx === returnStartIndex - 1;
             
-            segmentsHtml += `
-                <div class="layover-info">
-                    ${createLayoverBar(arrivalDate, nextDepartureDate, layoverDurationHours)}
-                </div>
-            `;
+            // Only add layover if this is NOT the boundary between outbound and return
+            if (!isOutboundReturnBoundary) {
+                const nextSegment = flight.route[idx + 1];
+                const nextDepartureDate = nextSegment.local_departure ? new Date(nextSegment.local_departure) : new Date(nextSegment.dTime * 1000);
+                const layoverDurationHours = (nextDepartureDate - arrivalDate) / 3600000;
+                
+                segmentsHtml += `
+                    <div class="layover-info">
+                        ${createLayoverBar(arrivalDate, nextDepartureDate, layoverDurationHours)}
+                    </div>
+                `;
+            }
         }
         
         segmentsHtml += `</div>`;
