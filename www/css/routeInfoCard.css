@@ -612,7 +612,7 @@
 }
 
 .round-trip-divider::after {
-    content: "Return flight";
+    content: attr(data-destination-text);
     display: inline-block;
     background-color: #222;
     padding: 0 15px;

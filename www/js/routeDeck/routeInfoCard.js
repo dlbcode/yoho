@@ -15,7 +15,7 @@ import {
 } from './dayNightBar.js';
 
 const formatTime = (date) => date.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
-const bagIcon = `<svg fill="#aaa" height="20px" width="20px" version="1.1" id="Layer_1" xmlns="http://www.w3.org/1999/xlink" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 248.35 248.35" xml:space="preserve"><g><path d="M186.057,66.136h-15.314V19.839C170.743,8.901,161.844,0,150.904,0H97.448c-10.938,0-19.84,8.901-19.84,19.839v46.296H62.295c-9.567,0-17.324,7.757-17.324,17.324V214.26c0,9.571,7.759,17.326,17.324,17.326h2.323v12.576c0,2.315,1.876,4.188,4.186,4.188h19.811c2.315,0,4.188-1.876,4.188-4.188v-12.576h62.741v12.576c0,2.315,1.878,4.188,4.188,4.188h19.809c2.317,0,4.188-1.876,4.188-4.188v-12.576h2.326c9.567,0,17.324-7.757,17.324-17.326V83.46C203.381,73.891,195.624,66.136,186.057,66.136z M157.514,66.135H90.832V19.839c0-3.646,2.967-6.613,6.613-6.613h53.456c3.646,0,6.613,2.967,6.613,6.613V66.135z"/></g></svg>`;
+const bagIcon = `<svg fill="#aaa" height="20px" width="20px" version="1.1" id="Layer_1" xmlns="http://www.w3.org/1999/xlink" xmlns="http://www.w3.org/1999/xlink" viewBox="0 0 248.35 248.35" xml:space="preserve"><g><path d="M186.057,66.136h-15.314V19.839C170.743,8.901,161.844,0,150.904,0H97.448c-10.938,0-19.84,8.901-19.84,19.839v46.296H62.295c-9.567,0-17.324,7.757-17.324,17.324V214.26c0,9.571,7.759,17.326,17.324,17.326h2.323v12.576c0,2.315,1.876,4.188,4.186,4.188h19.811c2.315,0,4.188-1.876,4.188-4.188v-12.576h62.741v12.576c0,2.315,1.878,4.188,4.188,4.188h19.809c2.317,0,4.188-1.876,4.188-4.188v-12.576h2.326c9.567,0,17.324-7.757,17.324-17.326V83.46C203.381,73.891,195.624,66.136,186.057,66.136z M157.514,66.135H90.832V19.839c0-3.646,2.967-6.613,6.613-6.613h53.456c3.646,0,6.613,2.967,6.613,6.613V66.135z"/></g></svg>`;
 
 async function generateSegmentDetails(flight) {
     let segmentsHtml = '';
@@ -24,11 +24,37 @@ async function generateSegmentDetails(flight) {
     const returnStartIndex = flight.route.findIndex(segment => segment.return === 1);
     const hasReturnSegments = returnStartIndex !== -1;
     
+    // If this is a round trip, calculate the days at destination and get destination name
+    let daysAtDestination = '';
+    let destinationCity = '';
+    
+    if (hasReturnSegments && returnStartIndex > 0) {
+        // Last outbound segment arrival
+        const arrivalAtDestination = flight.route[returnStartIndex - 1].local_arrival 
+            ? new Date(flight.route[returnStartIndex - 1].local_arrival) 
+            : new Date(flight.route[returnStartIndex - 1].aTime * 1000);
+            
+        // First return segment departure
+        const departureFromDestination = flight.route[returnStartIndex].local_departure 
+            ? new Date(flight.route[returnStartIndex].local_departure) 
+            : new Date(flight.route[returnStartIndex].dTime * 1000);
+            
+        // Calculate days difference (accounting for partial days)
+        const msPerDay = 1000 * 60 * 60 * 24;
+        const daysDiff = Math.round((departureFromDestination - arrivalAtDestination) / msPerDay);
+        
+        // Get destination city name (from cityTo of the last outbound segment)
+        destinationCity = flight.route[returnStartIndex - 1].cityTo || 
+                         flight.route[returnStartIndex - 1].flyTo;
+                         
+        daysAtDestination = `${daysDiff} day${daysDiff !== 1 ? 's' : ''} in ${destinationCity}`;
+    }
+    
     for (let idx = 0; idx < flight.route.length; idx++) {
         // Insert the round-trip divider if this is the first return segment
         if (hasReturnSegments && idx === returnStartIndex) {
             segmentsHtml += `
-                <div class="round-trip-divider"></div>
+                <div class="round-trip-divider" data-destination-text="${daysAtDestination}"></div>
             `;
         }
         
