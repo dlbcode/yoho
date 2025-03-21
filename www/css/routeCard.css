@@ -384,9 +384,8 @@
   margin-bottom: 5px;
 }
 
-/* Add a divider between outbound and return journey */
-.outbound-journey {
-  border-bottom: 1px dashed #ddd;
+.card-content.round-trip .outbound-journey .journey-details {
+  border-bottom: 1px dashed #ddd; /* added dashed line */
 }
 
 /* Adjust width of route-indicator to maintain proportion */
