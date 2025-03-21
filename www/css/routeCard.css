@@ -180,10 +180,10 @@
 }
 
 .select-button {
-  background-color: green;
+  background-color: #092200;
+  border: 1px solid green;
   color: #eee;
   padding: 6px 0;
-  border: none;
   cursor: pointer;
   text-align: center;
   display: block;
