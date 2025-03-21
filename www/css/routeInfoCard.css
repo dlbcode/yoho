@@ -354,36 +354,58 @@
 
 .booking-container {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     align-items: center;
+    justify-content: space-between;
     padding-top: 10px;
+    width: 100%;
 }
 
-.price-info {
-    color: #ddd;
-    font-size: 1.5rem;
-    margin-bottom: 10px;
-}
-
-.select-button {
-    background-color: green;
+.route-info-card .booking-container .select-button {
+    background-color: #092200;
     color: #eee;
     padding: 10px 20px;
-    border: none;
+    border: 1px solid green;
     cursor: pointer;
     text-align: center;
-    margin-bottom: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 50%; /* Take up half the width */
 }
+
+.route-info-card .booking-container .select-button:hover {
+    background-color: rgb(1, 171, 1);
+    color: #eee;
+}
+
+.route-info-card .booking-container .price-info {
+    color: #ddd;
+    font-size: 1.5rem;
+    margin-bottom: 5px;
+    display: block;
+}
+
+.route-info-card .booking-container .select-label {
+    display: block;
+}
+
 
 .select-button:hover {
     background-color: rgb(1, 171, 1);
     color: #eee;
 }
 
+.select-label {
+    display: block;
+}
+
 .baggage-info {
     display: flex;
     align-items: center;
     color: #aaa;
+    margin-left: 15px; /* Add space between button and baggage info */
 }
 
 .baggage-price {
