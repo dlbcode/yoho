@@ -220,22 +220,25 @@ function createRouteCard(flight, endpoint, routeIndex, destination) {
         numberOfOutboundStops, numberOfReturnStops, outboundSegments, returnSegments, 
         departureDate, arrivalDate, returnDepartureDate, returnArrivalDate);
 
-    // Find the airline logo img and update it once loaded
-    const airlineLogoImg = card.querySelector('.airline-logo');
-    if (airlineLogoImg) {
-        // Set a loading state
-        airlineLogoImg.src = 'assets/loading_blocks.gif';
+    // Find all airline logos instead of just one
+    const airlineLogoImgs = card.querySelectorAll('.airline-logo');
+
+    airlineLogoImgs.forEach((img, i) => {
+        // Show loading placeholder
+        img.src = 'assets/loading_blocks.gif';
         
-        // Fetch the proper logo URL
-        airlineLogoManager.getLogoUrl(airlineCode)
-            .then(logoUrl => {
-                airlineLogoImg.src = logoUrl;
-            })
+        // For round-trip, use outbound airline for first logo, return airline for second
+        const segmentAirline = (isRoundTrip && i === 1 && returnSegments)
+            ? returnSegments[0].airline
+            : outboundSegments[0].airline;
+
+        airlineLogoManager.getLogoUrl(segmentAirline)
+            .then(logoUrl => { img.src = logoUrl; })
             .catch(error => {
                 console.error('Error loading airline logo:', error);
-                airlineLogoImg.src = airlineLogoManager.getFallbackLogoUrl();
+                img.src = airlineLogoManager.getFallbackLogoUrl();
             });
-    }
+    });
 
     // Add event listeners
     card.addEventListener('mouseover', () => highlightRouteLines(flight, card));
