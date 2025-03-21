@@ -285,7 +285,10 @@ const flightMap = {
             const routes = await response.json();
             
             if (!routes || !routes.length) {
-                console.error('No routes found for IATA:', iata);
+                console.info(`No routes found for IATA: ${iata}`);
+                // Store empty array to prevent repeated failed requests
+                appState.directRoutes[iata] = [];
+                cacheManager.storeInCache(cacheKey, []);
                 return;
             }
             
@@ -303,6 +306,9 @@ const flightMap = {
             console.info('Route data fetched from API and cached');
         } catch (error) {
             console.error('Error fetching routes:', error);
+            // Store empty array to prevent repeated failed requests
+            appState.directRoutes[iata] = [];
+            cacheManager.storeInCache(cacheKey, []);
         }
     },
 
