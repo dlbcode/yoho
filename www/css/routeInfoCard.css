@@ -90,7 +90,9 @@
     width: 100%;
 }
 
-.departure-section .departure-time, .departure-code, .departure-date {
+.departure-section .departure-time,
+.departure-section .departure-code,
+.departure-section .departure-date {
     text-align: right;
 }
 
@@ -380,16 +382,6 @@
     font-size: 12px;
 }
 
-
-.select-button:hover {
-    background-color: rgb(1, 171, 1);
-    color: #eee;
-}
-
-.select-label {
-    display: block;
-}
-
 .baggage-info {
     display: flex;
     align-items: center;
@@ -567,22 +559,6 @@
 /* Ensure segments have proper spacing */
 .segments-container .segment-container:not(:last-child) {
     margin-bottom: 5px;
-}
-
-/* Debug text for midnight position */
-.debug-midnight-position {
-    color: #666;
-    font-size: 0.7rem;
-    text-align: center;
-    margin-top: 4px;
-    opacity: 0.7;
-    font-family: monospace;
-    padding: 2px;
-    background-color: rgba(0, 0, 0, 0.1);
-    border-radius: 3px;
-    width: 100%;
-    display: block;
-    clear: both;
 }
 
 /* Add a media query for smaller screens */

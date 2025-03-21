@@ -287,15 +287,6 @@
   font-size: 1.2rem;
 }
 
-.duration-section {
-  color: #ddd;
-  font-size: 0.7rem;
-  min-width: 80px;
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
-}
-
 .price-section {
   display: flex;
   align-items: center;
@@ -389,50 +380,6 @@
 /* Make sure the price section has enough space at bottom */
 .card-content.round-trip .price-section {
   margin-top: 8px;
-}
-
-/* Consistent alignment for departure/arrival sections based on position */
-
-/* Left-side sections: right aligned */
-.journey-details > div:first-child {
-  align-items: flex-end;
-  text-align: right;
-}
-
-.journey-details > div:first-child span {
-  text-align: right;
-  width: 100%;
-}
-
-/* Right-side sections: left aligned */
-.journey-details > div:last-of-type:not(.route-indicator) {
-  align-items: flex-start;
-  text-align: left;
-}
-
-.journey-details > div:last-of-type:not(.route-indicator) span {
-  text-align: left;
-  width: 100%;
-}
-
-/* This overrides the previous default center text alignment */
-.departure-section,
-.arrival-section {
-  align-items: unset;
-  text-align: unset;
-}
-
-/* Ensure the route indicator remains centered */
-.route-indicator {
-  align-items: center;
-  text-align: center;
-}
-
-/* Ensure these styles don't get overridden */
-.journey-details > div:first-child span,
-.journey-details > div:last-of-type:not(.route-indicator) span {
-  width: 100%;
-  display: block;
 }
 
 /* Media query */
