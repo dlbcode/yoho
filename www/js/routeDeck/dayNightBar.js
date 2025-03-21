@@ -175,12 +175,12 @@ function createDayNightBar(departureDate, arrivalDate, durationHours, segment) {
     
     return `
         <div class="flight-day-night-bar">
+            <span class="duration-text">${durationText}</span>
             <div class="bar-content">
                 <div class="bar-endpoint departure-time-indicator ${isDepartureDay ? 'daytime' : 'nighttime'}">
                     <img src="/assets/${isDepartureDay ? 'sun' : 'moon'}.svg" alt="${isDepartureDay ? 'Day' : 'Night'}" class="time-icon">
                 </div>
                 <div class="bar-line ${barLineClass}">
-                    <span class="duration-text">${durationText}</span>
                 </div>
                 ${transitionsHtml}
                 <div class="bar-endpoint arrival-time-indicator ${isArrivalDay ? 'daytime' : 'nighttime'}">
