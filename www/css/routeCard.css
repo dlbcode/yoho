@@ -240,6 +240,7 @@
 .airline-section {
   display: flex;
   align-items: center;
+  margin-right: 1rem;
 }
 
 .airline-logo {

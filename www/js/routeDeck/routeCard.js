@@ -253,11 +253,10 @@ function generateCardContent(flight, departDateFormatted, arrivalDateFormatted,
     if (isRoundTrip && returnSegments && returnDepartDateFormatted && returnArrivalDateFormatted) {
         return `
             <div class="card-content round-trip">
-                <div class="airline-section">
-                    <img src="" alt="${flight.route[0].airline} Logo" class="airline-logo">
-                </div>
-
                 <div class="journey-section">
+                    <div class="airline-section">
+                        <img src="" alt="${flight.route[0].airline} Logo" class="airline-logo">
+                    </div>
                     <div class="outbound-journey">
                         <div class="journey-details">
                             <div class="departure-section">
@@ -314,11 +313,10 @@ function generateCardContent(flight, departDateFormatted, arrivalDateFormatted,
         // One-way flight display
         return `
             <div class="card-content">
-                <div class="airline-section">
-                    <img src="" alt="${flight.route[0].airline} Logo" class="airline-logo">
-                </div>
-
                 <div class="journey-section">
+                    <div class="airline-section">
+                        <img src="" alt="${flight.route[0].airline} Logo" class="airline-logo">
+                    </div>
                     <div class="departure-section">
                         <span class="departure-date">${departDateFormatted}</span>
                         <span class="departure-time">${formatTime(departureDate)}</span>
