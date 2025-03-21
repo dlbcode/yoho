@@ -169,14 +169,14 @@ async function routeInfoCard(cardElement, fullFlightData, routeIds, routeIndex) 
                 ${await generateSegmentDetails(fullFlightData)}
             </div>
             <div class="booking-container">
-                <button id="selectRoute" class="select-button">
-                    <span class="price-info">$${Math.ceil(fullFlightData.price)}</span>
-                    <span class="select-label">Select flight</span>
-                </button>
                 <div class="baggage-info">
                     ${bagIcon}
                     <span class="baggage-price">${Math.ceil(fullFlightData.bags_price[1] * appState.eurToUsd)}</span>
                 </div>
+                <button id="selectRoute" class="select-button">
+                    <span class="price-info">$${Math.ceil(fullFlightData.price)}</span>
+                    <span class="select-label">Select flight</span>
+                </button>
             </div>
         </div>
     `;

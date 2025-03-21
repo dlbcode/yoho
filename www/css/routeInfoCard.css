@@ -3,14 +3,13 @@
     margin-top: -10px; /* Changed from 10px to 0px */
     border-bottom-left-radius: 8px;
     border-bottom-right-radius: 8px;
-    border: 1px solid #444; /* Add subtle border */
-    border-top: none; /* No border at top where it connects to route card */
 }
 
 .route-info-card-content {
     display: flex;
     flex-direction: column;
     padding: 10px;
+    margin-top: 10px;
 }
 
 .segment-container {
@@ -293,15 +292,14 @@
 .duration-text {
     color: #fff;
     font-size: 0.7rem;
-    background: rgba(0, 0, 0, 0.5);
+    background: #2f4382;
     padding: 2px 6px;
     border-radius: 8px;
-    z-index: 3;
     position: absolute;
     white-space: nowrap;
-    top: -18px; /* Position above the bar instead of on it */
     left: 50%; /* Center horizontally */
     transform: translateX(-50%); /* Ensure perfect centering */
+    z-index: 100;
 }
 
 .duration-section {
@@ -366,6 +364,7 @@
     color: #eee;
     padding: 10px 20px;
     border: 1px solid green;
+    border-radius: 8px;
     cursor: pointer;
     text-align: center;
     display: flex;
@@ -376,7 +375,7 @@
 }
 
 .route-info-card .booking-container .select-button:hover {
-    background-color: rgb(1, 171, 1);
+    background-color: #0f4406;
     color: #eee;
 }
 
@@ -389,6 +388,7 @@
 
 .route-info-card .booking-container .select-label {
     display: block;
+    font-size: 12px;
 }
 
 
@@ -507,14 +507,14 @@
 }
 
 .layover-line .day-transition-labels {
-    background: rgba(198, 95, 4, 0.8);
+    background: #642F01;
     top: -35px;
 }
 
 .layover-duration-text {
-    color: #fff;
+    color: #eee;
     font-size: 0.7rem;
-    background: rgba(198, 95, 4, 0.8); /* Translucent orange-brown background */
+    background: #663911; /* Translucent orange-brown background */
     padding: 2px 6px;
     border-radius: 8px;
     z-index: 10; /* Increased z-index to appear above other elements */

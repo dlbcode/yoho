@@ -4,6 +4,7 @@
   padding: 0.5rem;
   width: 100%;
   box-sizing: border-box;
+  background-color: #111;;
 }
 
 .route-card {
@@ -153,22 +154,22 @@
   align-items: center;
   gap: 0.5em;
   font-size: 0.9em;
-  color: #ccc; /* New color for total duration text */
+  color: #eee; /* New color for total duration text */
   margin-left: 1rem;
   flex-grow: 1;
 }
 
 .duration-text {
-  color: #999; /* New color for duration label */
+  color: #ccc; /* New color for duration label */
 }
 
 /* Route info card */
 .route-info-card {
-  background-color: #000 !important;
+  background-color: #242424 !important;
 }
 
 .route-info-card-header {
-  background-color: #333 !important;
+  background-color: #253555 !important;
 }
 
 .route-details {
