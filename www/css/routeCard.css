@@ -409,7 +409,7 @@
     text-align: right;
     flex-shrink: 0; /* Prevent shrinking */
     font-size: 0.9rem; /* Reduced from 1.1rem */
-    padding: 5px 5px 5px 5px;
+    padding-bottom: 10px;
   }
 
   .route-segment {
