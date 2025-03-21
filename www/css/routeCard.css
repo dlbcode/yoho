@@ -361,9 +361,12 @@
   width: 100%;
 }
 
-.outbound-journey {
-  padding-bottom: 2px;
-  border-bottom: 1px dashed #ddd;
+.outbound-journey,
+.return-journey {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 1rem;
 }
 
 .journey-details {

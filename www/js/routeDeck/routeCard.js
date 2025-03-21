@@ -254,10 +254,10 @@ function generateCardContent(flight, departDateFormatted, arrivalDateFormatted,
         return `
             <div class="card-content round-trip">
                 <div class="journey-section">
-                    <div class="airline-section">
-                        <img src="" alt="${flight.route[0].airline} Logo" class="airline-logo">
-                    </div>
                     <div class="outbound-journey">
+                        <div class="airline-section">
+                            <img src="" alt="${flight.route[0].airline} Logo" class="airline-logo">
+                        </div>
                         <div class="journey-details">
                             <div class="departure-section">
                                 <span class="departure-date">${departDateFormatted}</span>
@@ -281,6 +281,9 @@ function generateCardContent(flight, departDateFormatted, arrivalDateFormatted,
                     </div>
                     
                     <div class="return-journey">
+                        <div class="airline-section">
+                            <img src="" alt="${returnSegments[0].airline} Logo" class="airline-logo">
+                        </div>
                         <div class="journey-details">
                             <div class="arrival-section">
                                 <span class="arrival-date">${returnArrivalDateFormatted}</span>
