@@ -1,5 +1,5 @@
 import { appState, updateState } from '../stateManager.js';
-import { setupRouteContent } from '../infoPane.js';
+import { infoPaneHeight } from '../utils/infoPaneHeightManager.js';
 
 const selectedRoute = {
     displaySelectedRouteInfo: function(routeIndex) {
@@ -10,8 +10,14 @@ const selectedRoute = {
             return;
         }
 
-        // Use setupRouteContent to create consistent structure
-        const { contentWrapper } = setupRouteContent(routeIndex);
+        // Clear existing content first
+        const infoPaneContent = document.getElementById('infoPaneContent');
+        infoPaneContent.innerHTML = '';
+
+        // Create content wrapper directly without using setupRouteContent
+        const contentWrapper = document.createElement('div');
+        contentWrapper.className = 'content-wrapper';
+        infoPaneContent.appendChild(contentWrapper);
 
         // Add change route button in a consistent location
         const buttonContainer = document.createElement('div');
@@ -32,23 +38,48 @@ const selectedRoute = {
 
         // Add route details
         const detailsContainer = document.createElement('div');
-        detailsContainer.className = 'route-details-container';
-
-        // Display route data
-        if (selectedRouteDetails.fullData) {
-            Object.entries(selectedRouteDetails.fullData)
-                .filter(([key, value]) => 
-                    typeof value === 'string' || 
-                    typeof value === 'number')
-                .forEach(([key, value]) => {
-                    const detail = document.createElement('div');
-                    detail.className = 'route-detail-item';
-                    detail.textContent = `${key}: ${value}`;
-                    detailsContainer.appendChild(detail);
-                });
-        }
-
+        detailsContainer.className = 'selected-route-container';
+        
+        // Create a nice display of the route information
+        const routeDetails = selectedRouteDetails.displayData;
+        
+        detailsContainer.innerHTML = `
+            <div class="selected-route-header">
+                <h2>${routeDetails.route}</h2>
+                <div class="selected-route-price">$${routeDetails.price}</div>
+            </div>
+            <div class="selected-route-info">
+                <div class="info-row">
+                    <div class="info-label">Departure:</div>
+                    <div class="info-value">${new Date(routeDetails.departure).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}</div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">Airline:</div>
+                    <div class="info-value">${routeDetails.airline}</div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">Book here:</div>
+                    <div class="info-value"><a href="${routeDetails.deep_link}" target="_blank" class="booking-link">Book Flight</a></div>
+                </div>
+            </div>
+        `;
+        
         contentWrapper.appendChild(detailsContainer);
+        
+        // Make sure infoPane is expanded
+        const infoPane = document.getElementById('infoPane');
+        infoPane.classList.remove('collapsed');
+        infoPane.classList.add('expanded');
+        
+        // Set the appropriate info pane height
+        infoPaneHeight.setHeight('content', {
+            contentElement: detailsContainer,
+            contentHeight: detailsContainer.offsetHeight + infoPaneHeight.MENU_BAR_HEIGHT + 20
+        });
+        
+        // Update current view and route index
+        appState.currentView = 'selectedRoute';
+        appState.currentRouteIndex = routeIndex;
     }
 };
 

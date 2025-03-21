@@ -148,8 +148,19 @@ const infoPane = {
             return;
         }
 
-        const { routeBoxElement } = setupRouteContent(routeIndex);
-        this.fitMapToRoute(routeIndex);
+        // Check if this is a selected route
+        if (appState.selectedRoutes[routeIndex]) {
+            // Import the selectedRoute module if not already imported
+            import('./routeDeck/selectedRoute.js').then(({ selectedRoute }) => {
+                // Don't need to call setupRouteContent first, let the selectedRoute module handle it
+                selectedRoute.displaySelectedRouteInfo(routeIndex);
+                this.fitMapToRoute(routeIndex);
+            });
+        } else {
+            // Only call setupRouteContent for non-selected routes
+            const { routeBoxElement } = setupRouteContent(routeIndex);
+            this.fitMapToRoute(routeIndex);
+        }
         
         // Reset the flag after a short delay to allow for inputs to initialize
         setTimeout(() => {
