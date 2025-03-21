@@ -273,13 +273,6 @@
   white-space: nowrap;
 }
 
-.departure-time,
-.arrival-time {
-  color: #ddd;
-  font-size: 1rem;
-  font-weight: 600;
-}
-
 .departure-code,
 .arrival-code {
   color: #888;
