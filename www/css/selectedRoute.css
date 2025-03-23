@@ -59,7 +59,7 @@
   height: 40px;
   object-fit: contain;
   background-color: #fff;
-  border-radius: 50%;
+  border-radius: 8px;
   padding: 4px;
 }
 

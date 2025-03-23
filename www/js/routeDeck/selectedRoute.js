@@ -43,11 +43,32 @@ const selectedRoute = {
         const airlineLogo = await airlineLogoManager.getLogoUrl(routeDetails.airline);
         
         // Calculate flight duration and time of day
+        // Make sure we're properly constructing Date objects from the string dates
         const departureDate = new Date(routeDetails.departure);
         const arrivalDate = new Date(routeDetails.arrival);
+
+        // If fullData contains more precise time information, use that instead
+        const departureDateWithTime = fullData && fullData.local_departure ? 
+            new Date(fullData.local_departure) : 
+            fullData && fullData.dTime ? 
+                new Date(fullData.dTime * 1000) : 
+                departureDate;
+                
+        const arrivalDateWithTime = fullData && fullData.local_arrival ? 
+            new Date(fullData.local_arrival) : 
+            fullData && fullData.aTime ? 
+                new Date(fullData.aTime * 1000) : 
+                arrivalDate;
+
         const flightDuration = this.calculateDuration(fullData);
-        const departureTimeOfDay = this.getTimeOfDay(departureDate);
-        const arrivalTimeOfDay = this.getTimeOfDay(arrivalDate);
+        const departureTimeOfDay = this.getTimeOfDay(departureDateWithTime);
+        const arrivalTimeOfDay = this.getTimeOfDay(arrivalDateWithTime);
+        
+        // Format flight times correctly using the more precise dates
+        const formattedDepartureTime = this.formatFlightTime(departureDateWithTime);
+        const formattedArrivalTime = this.formatFlightTime(arrivalDateWithTime);
+        const formattedDepartureDate = this.formatFlightDate(departureDateWithTime);
+        const formattedArrivalDate = this.formatFlightDate(arrivalDateWithTime);
         
         // Create the HTML structure for the flight details page
         const detailsContainer = document.createElement('div');
@@ -90,8 +111,8 @@ const selectedRoute = {
             <div class="flight-main-details">
                 <div class="flight-timeline">
                     <div class="timeline-node departure">
-                        <div class="timeline-time">${formatFlightDateTime(departureDate, 'time')}</div>
-                        <div class="timeline-date">${formatFlightDateTime(departureDate, 'date')}</div>
+                        <div class="timeline-time">${formattedDepartureTime}</div>
+                        <div class="timeline-date">${formattedDepartureDate}</div>
                         <div class="timeline-label">${departureTimeOfDay} Departure</div>
                     </div>
                     
@@ -100,8 +121,8 @@ const selectedRoute = {
                     </div>
                     
                     <div class="timeline-node arrival">
-                        <div class="timeline-time">${formatFlightDateTime(arrivalDate, 'time')}</div>
-                        <div class="timeline-date">${formatFlightDateTime(arrivalDate, 'date')}</div>
+                        <div class="timeline-time">${formattedArrivalTime}</div>
+                        <div class="timeline-date">${formattedArrivalDate}</div>
                         <div class="timeline-label">${arrivalTimeOfDay} Arrival</div>
                     </div>
                 </div>
@@ -243,6 +264,45 @@ const selectedRoute = {
         if (hours >= 12 && hours < 18) return 'Afternoon';
         if (hours >= 18 && hours < 22) return 'Evening';
         return 'Night';
+    },
+    
+    // New helper functions for consistent time and date formatting
+    formatFlightTime: function(date) {
+        // Ensure we have a valid date
+        if (!(date instanceof Date) || isNaN(date)) {
+            console.error("Invalid date provided to formatFlightTime:", date);
+            return "Invalid Time";
+        }
+        
+        try {
+            return date.toLocaleTimeString('en-US', { 
+                hour: 'numeric', 
+                minute: '2-digit',
+                hour12: true
+            });
+        } catch (e) {
+            console.error("Error formatting flight time:", e);
+            return "Time Error";
+        }
+    },
+    
+    formatFlightDate: function(date) {
+        // Ensure we have a valid date
+        if (!(date instanceof Date) || isNaN(date)) {
+            console.error("Invalid date provided to formatFlightDate:", date);
+            return "Invalid Date";
+        }
+        
+        try {
+            return date.toLocaleDateString('en-US', { 
+                weekday: 'short', 
+                month: 'short', 
+                day: 'numeric' 
+            });
+        } catch (e) {
+            console.error("Error formatting flight date:", e);
+            return "Date Error";
+        }
     }
 };
 
