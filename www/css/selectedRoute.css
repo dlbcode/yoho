@@ -340,4 +340,11 @@
   .flight-extras {
     flex-direction: column;
   }
+
+  .back-button {
+    position: relative;
+    top: auto;
+    left: auto;
+    margin-bottom: 20px;
+  }
 }
