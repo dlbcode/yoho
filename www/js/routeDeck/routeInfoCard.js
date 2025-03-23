@@ -320,6 +320,9 @@ async function routeInfoCard(cardElement, fullFlightData, routeIds, routeIndex) 
                 lines.forEach(line => line.addTag('status:selected'));
             }
         });
+
+        // Call selectRoute to update the state and markers
+        selectRoute(fullFlightData.route);
     });
 
     cardElement.classList.add('route-info-card', 'route-info-card-header');
@@ -396,6 +399,12 @@ function replaceWaypointsForCurrentRoute(intermediaryIatas, routeIndex) {
 
     appState.waypoints = [...before, ...updatedSegment, ...after];
     updateState('updateWaypoint', appState.waypoints);
+}
+
+function selectRoute(route) {
+    appState.selectedRoute = route.map(segment => segment.flyFrom);
+    appState.selectedRoute.push(route[route.length - 1].flyTo); // Add the final destination
+    flightMap.updateVisibleMarkers();
 }
 
 export { routeInfoCard, setSelectedRouteCard };

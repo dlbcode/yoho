@@ -312,7 +312,10 @@ const flightMap = {
         }
     },
 
-    shouldDisplayAirport(airportWeight, currentZoom) {
+    shouldDisplayAirport(airportWeight, currentZoom, isSelectedRoute = false) {
+        if (isSelectedRoute) {
+            return true;
+        }
         return airportWeight <= currentZoom - 1;
     },
 
@@ -321,7 +324,8 @@ const flightMap = {
         const currentBounds = map.getBounds();
 
         Object.values(this.airportDataCache).forEach(airport => {
-            if (this.shouldDisplayAirport(airport.weight, currentZoom) &&
+            const isSelectedRoute = appState.selectedRoute?.includes(airport.iata_code);
+            if (this.shouldDisplayAirport(airport.weight, currentZoom, isSelectedRoute) &&
                 currentBounds.contains(L.latLng(airport.latitude, airport.longitude)) &&
                 !this.markers[airport.iata_code]) {
                 this.addMarker(airport);
@@ -334,7 +338,8 @@ const flightMap = {
         Object.keys(this.markers).forEach(iata => {
             const marker = this.markers[iata];
             const isWaypoint = appState.waypoints.some(wp => wp.iata_code === iata);
-            if (isWaypoint || this.shouldDisplayAirport(marker.airportWeight, currentZoom)) {
+            const isSelectedRoute = appState.selectedRoute?.includes(iata);
+            if (isWaypoint || this.shouldDisplayAirport(marker.airportWeight, currentZoom, isSelectedRoute)) {
                 if (currentBounds.contains(marker.getLatLng())) {
                     if (!map.hasLayer(marker)) {
                         marker.addTo(map);
@@ -342,8 +347,6 @@ const flightMap = {
                 } else if (!isWaypoint) {
                     map.removeLayer(marker);
                 }
-            } else if (!isWaypoint) {
-                map.removeLayer(marker);
             }
         });
     },
