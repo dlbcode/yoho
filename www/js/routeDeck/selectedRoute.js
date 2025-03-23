@@ -145,7 +145,7 @@ const selectedRoute = {
             
             <div class="flight-extras">
                 <div class="baggage-info">
-                    <svg class="baggage-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M17.03,14H12V16H17.03M5,12.5A1.5,1.5,0,0,0,3.5,14A1.5,1.5,0,0,0,5,15.5A1.5,1.5,0,0,0,6.5,14A1.5,1.5,0,0,0,5,12.5M12,5A3,3,0,0,0,9,8V9H19V18H9V19A3,3,0,0,0,12,22A3,3,0,0,0,15,19V8A3,3,0,0,0,12,5M5,9.5A1.5,1.5,0,0,0,3.5,11A1.5,1.5,0,0,0,5,12.5A1.5,1.5,0,0,0,6.5,11A1.5,1.5,0,0,0,5,9.5M5,6.5A1.5,1.5,0,0,0,3.5,8A1.5,1.5,0,0,0,5,9.5A1.5,1.5,0,0,0,6.5,8A1.5,1.5,0,0,0,5,6.5M5,3.5A1.5,1.5,0,0,0,3.5,5A1.5,1.5,0,0,0,5,6.5A1.5,1.5,0,0,0,6.5,5A1.5,1.5,0,0,0,5,3.5Z" /></svg>
+                    <img src="assets/baggage-icon.svg" alt="Baggage" class="baggage-icon">
                     <div class="baggage-details">
                         <div class="baggage-title">Checked Baggage</div>
                         <div class="baggage-price">$${Math.ceil(fullData?.bags_price?.[1] * appState.eurToUsd || 30)}</div>

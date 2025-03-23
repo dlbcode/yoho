@@ -260,6 +260,7 @@
   width: 28px;
   height: 28px;
   color: #ccc;
+  filter: brightness(1.5); /* Add filter to maintain the light gray color */
 }
 
 .baggage-details {
@@ -346,5 +347,54 @@
     top: auto;
     left: auto;
     margin-bottom: 20px;
+  }
+
+  /* Fix for back button disappearing on small screens */
+  .flight-header {
+    flex-direction: column;
+    gap: 10px;
+    align-items: flex-start;
+  }
+  
+  .back-button {
+    width: 100%;
+    margin-bottom: 5px;
+  }
+  
+  .back-button .change-route-button {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .flight-price {
+    align-self: center;
+  }
+}
+
+/* Very small screens (mobile) */
+@media (max-width: 480px) {
+  .city-pair {
+    flex-direction: column;
+    gap: 5px;
+  }
+  
+  .route-line {
+    transform: rotate(90deg);
+    margin: 10px 0;
+  }
+  
+  .route-summary {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+  
+  .flight-duration {
+    margin-top: 10px;
+    text-align: center;
+  }
+  
+  .timeline-node {
+    width: 80px;
   }
 }
