@@ -283,7 +283,11 @@ async function routeInfoCard(cardElement, fullFlightData, routeIds, routeIndex) 
 
         fullFlightData.route.forEach((segmentData, idx) => {
             const selectedRouteIndex = routeIndex + idx;
-            const departureDate = segmentData.local_departure ? new Date(segmentData.local_departure).toISOString().split('T')[0] : new Date(segmentData.dTime * 1000).toISOString().split('T')[0];
+            const departureDate = segmentData.local_departure ? 
+                new Date(segmentData.local_departure).toISOString().split('T')[0] : 
+                (segmentData.dTime ? 
+                    new Date(segmentData.dTime * 1000).toISOString().split('T')[0] : 
+                    new Date().toISOString().split('T')[0]); // Fallback to current date if both are missing
             const arrivalDate = segmentData.local_arrival ? new Date(segmentData.local_arrival).toISOString().split('T')[0] : new Date(segmentData.aTime * 1000).toISOString().split('T')[0];
 
             appState.selectedRoutes[selectedRouteIndex] = {
