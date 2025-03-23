@@ -85,19 +85,19 @@
 
 .route-line {
   position: relative;
-  height: 2px;
+  height: 1px;
   width: 100px;
   background-color: #6ba5ff;
-  margin: 0 5px;
+  margin: 0 5px 1px 0;
 }
 
 .plane-icon {
   position: absolute;
   width: 24px;
   height: 24px;
-  top: 50%;
+  top: calc(50%);
   left: 50%;
-  transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%) rotate(90deg);
   color: #6ba5ff;
 }
 
