@@ -12,6 +12,34 @@ import { formatFlightDateTime } from './routeCard.js';
     document.head.appendChild(link);
 })();
 
+// Cache for airline names
+let airlineNamesCache = null;
+
+// Function to load airline names from JSON file
+async function loadAirlineNames() {
+    if (airlineNamesCache) {
+        return airlineNamesCache;
+    }
+    
+    try {
+        const response = await fetch('./assets/airlines.json');
+        if (!response.ok) {
+            throw new Error(`Failed to load airlines.json: ${response.status}`);
+        }
+        airlineNamesCache = await response.json();
+        return airlineNamesCache;
+    } catch (error) {
+        console.error('Error loading airline names:', error);
+        return {};
+    }
+}
+
+// Function to get full airline name from code
+async function getAirlineName(airlineCode) {
+    const airlines = await loadAirlineNames();
+    return airlines[airlineCode] || airlineCode;
+}
+
 const selectedRoute = {
     displaySelectedRouteInfo: async function(routeIndex) {
         const selectedRouteDetails = appState.selectedRoutes[String(routeIndex)];
@@ -41,6 +69,9 @@ const selectedRoute = {
         
         // Get airline logo
         const airlineLogo = await airlineLogoManager.getLogoUrl(routeDetails.airline);
+        
+        // Get full airline name
+        const airlineName = await getAirlineName(routeDetails.airline);
         
         // Calculate flight duration and time of day
         // Make sure we're properly constructing Date objects from the string dates
@@ -87,8 +118,8 @@ const selectedRoute = {
             
             <div class="flight-overview">
                 <div class="airline-details">
-                    <img src="${airlineLogo}" alt="${routeDetails.airline}" class="airline-logo">
-                    <div class="airline-name">${routeDetails.airline}</div>
+                    <img src="${airlineLogo}" alt="${airlineName}" class="airline-logo">
+                    <div class="airline-name">${airlineName}</div>
                 </div>
                 
                 <div class="route-summary">
