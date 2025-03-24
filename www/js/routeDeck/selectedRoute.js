@@ -4,6 +4,7 @@ import { flightMap } from '../flightMap.js';
 import { airlineLogoManager } from '../utils/airlineLogoManager.js';
 import { formatFlightDateTime } from './routeCard.js';
 import { selectedRouteGroup, generateRouteDescription as generateGroupRouteDescription } from './selectedRouteGroup.js';
+import { calculateFlightDuration } from '../utils/durationCalc.js';
 
 // Load the selectedRoute CSS
 (function loadSelectedRouteCSS() {
@@ -403,27 +404,8 @@ const selectedRoute = {
     },
     
     calculateDuration: function(flightData) {
-        // Extract duration in hours and minutes
-        let durationHours = 0;
-        let durationMinutes = 0;
-        
-        if (flightData.duration) {
-            if (typeof flightData.duration.flight === 'number') {
-                durationHours = Math.floor(flightData.duration.flight / 3600);
-                durationMinutes = Math.floor((flightData.duration.flight % 3600) / 60);
-            } else if (typeof flightData.duration === 'number') {
-                durationHours = Math.floor(flightData.duration / 3600);
-                durationMinutes = Math.floor((flightData.duration % 3600) / 60);
-            }
-        } else if (flightData.fly_duration) {
-            const durMatch = flightData.fly_duration.match(/(\d+)h\s*(?:(\d+)m)?/);
-            if (durMatch) {
-                durationHours = parseInt(durMatch[1]) || 0;
-                durationMinutes = parseInt(durMatch[2]) || 0;
-            }
-        }
-        
-        return `${durationHours}h ${durationMinutes}`;
+        // Use the shared utility function
+        return calculateFlightDuration(flightData, true);
     },
     
     getTimeOfDay: function(date) {

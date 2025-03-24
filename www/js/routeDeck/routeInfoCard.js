@@ -13,6 +13,7 @@ import {
     createDayNightBar, 
     createLayoverBar 
 } from './dayNightBar.js';
+import { calculateFlightDuration, calculateDurationHours } from '../utils/durationCalc.js';
 
 const formatTime = (date) => date.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
 // Replace inline SVG with reference to external file
@@ -65,77 +66,9 @@ async function generateSegmentDetails(flight) {
         const departureTime = formatTime(departureDate);
         const arrivalTime = formatTime(arrivalDate);
         
-        // Calculate proper flight duration - prioritize API-provided duration values
-        let durationHours;
-        
-        // First priority: segment.duration.flight (most accurate for actual flight time)
-        if (segment.duration && typeof segment.duration.flight === 'number') {
-            durationHours = segment.duration.flight / 3600;
-        } 
-        // Second priority: segment.duration total (if available as a number)
-        else if (segment.duration && typeof segment.duration === 'number') {
-            durationHours = segment.duration / 3600;
-        }
-        // Third priority: Parse the fly_duration string
-        else if (segment.fly_duration) {
-            const durMatch = segment.fly_duration.match(/(\d+)h\s*(?:(\d+)m)?/);
-            if (durMatch) {
-                const hours = parseInt(durMatch[1]) || 0;
-                const mins = parseInt(durMatch[2]) || 0;
-                durationHours = hours + mins/60;
-            } else {
-                // Fourth priority: Look for a flying_time property (some APIs provide this)
-                if (segment.flying_time) {
-                    durationHours = segment.flying_time / 3600; // Assuming seconds
-                }
-                // Last resort: Use the parent flight's duration if available and this is a single-segment flight
-                else if (flight.duration && flight.route.length === 1) {
-                    durationHours = flight.duration.flight 
-                        ? flight.duration.flight / 3600 
-                        : flight.duration / 3600;
-                }
-                // Final fallback: Estimate from timestamps (least accurate, affected by timezones)
-                else {
-                    // A reasonable flight time shouldn't exceed 20 hours for a single segment
-                    const rawDuration = (arrivalDate - departureDate) / 3600000;
-                    durationHours = rawDuration > 20 ? 
-                        // If over 20 hours, it's probably a timezone/date issue - make an educated guess
-                        Math.min(rawDuration % 24, 20) : 
-                        rawDuration;
-                }
-            }
-        }
-        // If all else fails, use a reasonable fallback
-        else {
-            // Get the great circle distance between airports and estimate flight time
-            const origin = flightMap.airportDataCache[segment.flyFrom];
-            const destination = flightMap.airportDataCache[segment.flyTo];
-            
-            if (origin && destination) {
-                // Calculate approximate flight time based on distance
-                // Typical commercial aircraft: ~500 mph = ~800 km/h
-                const lat1 = origin.latitude * Math.PI / 180;
-                const lon1 = origin.longitude * Math.PI / 180;
-                const lat2 = destination.latitude * Math.PI / 180;
-                const lon2 = destination.longitude * Math.PI / 180;
-                
-                // Haversine formula for distance
-                const R = 6371; // Earth's radius in km
-                const dLat = lat2 - lat1;
-                const dLon = lon2 - lon1;
-                const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-                          Math.cos(lat1) * Math.cos(lat2) *
-                          Math.sin(dLon/2) * Math.sin(dLon/2);
-                const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-                const distance = R * c; // Distance in km
-                
-                // Estimate flight time: distance/speed + 0.5h for takeoff/landing
-                durationHours = distance / 800 + 0.5;
-            } else {
-                // If we can't even calculate distance, use a modest default
-                durationHours = 3; // Default to 3 hours if we can't calculate
-            }
-        }
+        // Calculate proper flight duration using the shared utility
+        const durationResult = calculateFlightDuration(segment, false);
+        const durationHours = calculateDurationHours(durationResult);
         
         const airlineLogoUrl = await airlineLogoManager.getLogoUrl(segment.airline);
 
