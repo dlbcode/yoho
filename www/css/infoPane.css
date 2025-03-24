@@ -469,3 +469,9 @@ tr:hover {
   flex: 1;
   min-height: 0; /* Add this to ensure proper flex scrolling */
 }
+
+.group-route-button + .group-route-button .top-border,
+.group-route-button + .group-route-button .bottom-border {
+  left: -1px;
+  width: calc(100% + 1px);
+}
