@@ -332,6 +332,14 @@ async function routeInfoCard(cardElement, fullFlightData, routeIds, routeIndex) 
 
         // Call selectRoute to update the state and markers
         selectRoute(fullFlightData.route);
+        
+        // Import the selectedRoute module and display the selected route info
+        import('../routeDeck/selectedRoute.js').then(({ selectedRoute }) => {
+            // Small timeout to ensure state updates are processed
+            setTimeout(() => {
+                selectedRoute.displaySelectedRouteInfo(routeIndex);
+            }, 100);
+        });
     });
 
     cardElement.classList.add('route-info-card', 'route-info-card-header');

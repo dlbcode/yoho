@@ -253,6 +253,9 @@ const selectedRoute = {
         // Update current view and route index
         appState.currentView = 'selectedRoute';
         appState.currentRouteIndex = routeIndex;
+
+        // Update the route button visual state to show it's selected
+        this.updateRouteButtonState(routeIndex);
     },
     
     // Helper functions
@@ -333,6 +336,21 @@ const selectedRoute = {
         } catch (e) {
             console.error("Error formatting flight date:", e);
             return "Date Error";
+        }
+    },
+
+    // New method to update the visual state of the route button
+    updateRouteButtonState: function(routeIndex) {
+        // Clear any previous selected state from other buttons
+        document.querySelectorAll('.route-info-button').forEach(button => {
+            button.classList.remove('selected-route-button');
+        });
+        
+        // Add selected state to the current route button
+        const buttonId = `route-button-${routeIndex}`;
+        const button = document.getElementById(buttonId);
+        if (button) {
+            button.classList.add('selected-route-button');
         }
     }
 };
