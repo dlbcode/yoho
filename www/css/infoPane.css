@@ -201,9 +201,22 @@
 
 /* New style for the currently active route button */
 .active-route-button {
-  border: 1px solid white !important;
-  box-shadow: 0 0 2px rgba(255, 255, 255, 0.5);
-  z-index: 69 !important; /* Higher than hover (68) to ensure the border is visible */
+  box-shadow: inset 0 0 0 1px white, 0 0 2px rgba(255, 255, 255, 0.5) !important;
+  border: none !important; /* Ensure no border is used */
+  z-index: 69 !important; /* Higher than hover (68) to ensure the shadow is visible */
+  position: relative; /* Ensure position context for the pseudo-element */
+}
+
+/* Add a visible bottom border for active route button using pseudo-element */
+.active-route-button::before {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background-color: white;
+  z-index: 70; /* Above the button itself */
 }
 
 /* Alternate gradient direction for even-indexed selected buttons */
