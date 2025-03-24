@@ -111,6 +111,9 @@ const selectedRouteGroup = {
         const infoPaneContent = document.getElementById('infoPaneContent');
         infoPaneContent.innerHTML = '';
         
+        // Add group-route-button class to all route buttons belonging to this group
+        this.updateGroupRouteButtonStyles(groupId);
+        
         // Create content wrapper
         const contentWrapper = document.createElement('div');
         contentWrapper.className = 'content-wrapper';
@@ -261,8 +264,11 @@ const selectedRouteGroup = {
             // Return to the first segment in the group
             const firstSegmentIndex = journeyData.segments[0].index;
             
+            // Remove group-route-button class from all buttons
+            this.removeGroupButtonStyles();
+            
             // Remove active-route-button class from all buttons first
-            document.querySelectorAll('.route-info-button').forEach(button => {
+            document.queryAll('.route-info-button').forEach(button => {
                 button.classList.remove('active-route-button');
             });
             
@@ -274,6 +280,9 @@ const selectedRouteGroup = {
         segmentButtons.forEach(button => {
             const segmentIndex = button.getAttribute('data-segment-index');
             button.addEventListener('click', () => {
+                // Remove group-route-button class from all buttons
+                this.removeGroupButtonStyles();
+                
                 // Remove active-route-button class from all buttons first
                 document.querySelectorAll('.route-info-button').forEach(button => {
                     button.classList.remove('active-route-button');
@@ -290,6 +299,9 @@ const selectedRouteGroup = {
             row.addEventListener('click', (event) => {
                 // Avoid triggering if clicking on the button itself
                 if (event.target.closest('.view-segment-button')) return;
+                
+                // Remove group-route-button class from all buttons
+                this.removeGroupButtonStyles();
                 
                 // Remove active-route-button class from all buttons first
                 document.querySelectorAll('.route-info-button').forEach(button => {
@@ -329,6 +341,67 @@ const selectedRouteGroup = {
         infoPaneHeight.setHeight('content', {
             contentElement: journeyContainer,
             contentHeight: Math.min(window.innerHeight * 0.8, journeyContainer.scrollHeight + 50)
+        });
+    },
+    
+    // Updated function to update route button styles for the group view
+    updateGroupRouteButtonStyles: function(groupId) {
+        // First, remove any existing group-route-button styling
+        this.removeGroupButtonStyles();
+        
+        // Get all segments that belong to this group and sort them by index
+        const groupSegments = Object.entries(appState.selectedRoutes)
+            .filter(([_, route]) => route.group === groupId)
+            .map(([index, _]) => parseInt(index))
+            .sort((a, b) => a - b); // Sort numerically
+        
+        // If there are no segments, return
+        if (groupSegments.length === 0) return;
+        
+        // Add appropriate classes to each button
+        groupSegments.forEach((segmentIndex, i) => {
+            const buttonId = `route-button-${segmentIndex}`;
+            const button = document.getElementById(buttonId);
+            if (button) {
+                // Add base group-route-button class to all buttons
+                button.classList.add('group-route-button');
+                
+                // Create and add top border element
+                const topBorder = document.createElement('div');
+                topBorder.className = 'top-border';
+                button.appendChild(topBorder);
+                
+                // Create and add bottom border element
+                const bottomBorder = document.createElement('div');
+                bottomBorder.className = 'bottom-border';
+                button.appendChild(bottomBorder);
+                
+                // Add first-button class to the first button
+                if (i === 0) {
+                    button.classList.add('group-route-button-first');
+                }
+                
+                // Add last-button class to the last button
+                if (i === groupSegments.length - 1) {
+                    button.classList.add('group-route-button-last');
+                }
+            }
+        });
+    },
+    
+    // Updated function to remove all group button styles
+    removeGroupButtonStyles: function() {
+        document.querySelectorAll('.group-route-button').forEach(button => {
+            button.classList.remove('group-route-button');
+            button.classList.remove('group-route-button-first');
+            button.classList.remove('group-route-button-last');
+            
+            // Remove the border elements
+            const topBorder = button.querySelector('.top-border');
+            if (topBorder) button.removeChild(topBorder);
+            
+            const bottomBorder = button.querySelector('.bottom-border');
+            if (bottomBorder) button.removeChild(bottomBorder);
         });
     }
 };

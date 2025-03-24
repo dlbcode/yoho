@@ -219,6 +219,46 @@
   z-index: 70; /* Above the button itself */
 }
 
+/* New style for buttons in the active route group - replace existing group-route-button class */
+.group-route-button {
+  position: relative; /* Ensure position context for pseudo-elements */
+  z-index: 67 !important; /* Same z-index as selected-route-button */
+  box-shadow: none !important; /* Remove the individual border box-shadow */
+}
+
+/* Top and bottom borders for all buttons in the group - rename from ::before and ::after to avoid conflicts */
+.group-route-button .top-border {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background-color: #70a1ff;
+  z-index: 70;
+}
+
+.group-route-button .bottom-border {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background-color: #70a1ff;
+  z-index: 70;
+}
+
+/* Left border only for the first button in a group */
+.group-route-button-first {
+  border-left: 1px solid #70a1ff !important;
+}
+
+/* Right border only for the last button in a group */
+.group-route-button-last {
+  border-right: 1px solid #70a1ff !important;
+}
+
 /* Alternate gradient direction for even-indexed selected buttons */
 .selected-route-button.even-button {
   background: linear-gradient(315deg, #004600 50%, #003500 50%) !important;
@@ -249,6 +289,7 @@
   opacity: 0.9;
   filter: brightness(2.2);
   transform: none; /* No rotation */
+  z-index: 71; /* Make sure the plane icon is always on top */
 }
 
 #infoPaneContent {

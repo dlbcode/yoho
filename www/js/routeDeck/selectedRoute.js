@@ -116,6 +116,11 @@ function generateFullJourneyData(currentGroupId) {
 
 const selectedRoute = {
     displaySelectedRouteInfo: async function(routeIndex) {
+        // Remove group-route-button class from all buttons first
+        if (selectedRouteGroup && typeof selectedRouteGroup.removeGroupButtonStyles === 'function') {
+            selectedRouteGroup.removeGroupButtonStyles();
+        }
+        
         const selectedRouteDetails = appState.selectedRoutes[String(routeIndex)];
 
         if (!selectedRouteDetails) {
