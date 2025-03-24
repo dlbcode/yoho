@@ -94,7 +94,7 @@ function generateRouteDescription(groupId, currentSegmentIndex = null) {
                      tabindex="0">
                      ${segment.segment}
                 </span>`;
-    }).join(', ');
+    }).join(' > ');
 }
 
 const selectedRouteGroup = {

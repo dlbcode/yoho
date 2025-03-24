@@ -100,7 +100,7 @@
 
 .route-segment:not(.current-segment):hover {
   color: #fff;
-  text-decoration: underline;
+  text-decoration: none;
 }
 
 .route-segment:active {
@@ -111,6 +111,8 @@
   color: #6ba5ff;
   font-weight: 500;
   cursor: default;
+  background-color: #6ba5ff66;
+  border-radius: 4px;
 }
 
 /* Add a subtle indicator to show segments are clickable */
