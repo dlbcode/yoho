@@ -47,7 +47,8 @@ function generateRouteDescription(routeIndex) {
     const selectedRoute = appState.selectedRoutes[routeIndex];
     if (!selectedRoute) return '';
     
-    // Use the shared function from selectedRouteGroup
+    // Use the shared function from selectedRouteGroup, but ensure we're using our own icons
+    // This ensures we're consistent across both views
     return generateGroupRouteDescription(selectedRoute.group, routeIndex);
 }
 

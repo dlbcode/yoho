@@ -111,8 +111,8 @@
   color: #6ba5ff;
   font-weight: 500;
   cursor: default;
-  background-color: #6ba5ff66;
-  border-radius: 4px;
+  border-bottom: 2px solid #6ba5ff; /* Add a 2px solid underline matching the text color */
+  padding-bottom: 2px; /* Add a bit of padding to separate text from underline */
 }
 
 /* Add a subtle indicator to show segments are clickable */
@@ -137,6 +137,17 @@
   outline: none;
   box-shadow: 0 0 0 2px rgba(107, 165, 255, 0.4);
   border-radius: 2px;
+}
+
+/* Add styling for the route segment plane icon */
+.route-segment-plane {
+  display: inline-block;
+  vertical-align: middle;
+  margin: 0 4px;
+  color: #6ba5ff;
+  transform: translateY(-1px) rotate(90deg);
+  width: 14px;
+  height: 14px;
 }
 
 .back-button .change-route-button {
