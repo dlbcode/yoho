@@ -234,7 +234,7 @@
   left: 0;
   right: 0;
   height: 1px;
-  background-color: #70a1ff;
+  background-color: white;
   z-index: 70;
 }
 
@@ -244,19 +244,19 @@
   bottom: 0;
   left: 0;
   right: 0;
-  height: 1px;
-  background-color: #70a1ff;
-  z-index: 70;
+  height: 2px;
+  background-color: white;
+  z-index: 70; /* Ensure it's visible above the button */
 }
 
 /* Left border only for the first button in a group */
 .group-route-button-first {
-  border-left: 1px solid #70a1ff !important;
+  border-left: 1px solid white !important;
 }
 
 /* Right border only for the last button in a group */
 .group-route-button-last {
-  border-right: 1px solid #70a1ff !important;
+  border-right: 1px solid white !important;
 }
 
 /* Alternate gradient direction for even-indexed selected buttons */
