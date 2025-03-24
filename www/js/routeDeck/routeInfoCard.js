@@ -314,7 +314,11 @@ async function routeInfoCard(cardElement, fullFlightData, routeIds, routeIndex) 
 
         updateState('updateRouteDate', {
             routeNumber: routeIndex,
-            depart: fullFlightData.route[0].local_departure.split('T')[0],
+            depart: fullFlightData.route[0].local_departure ? 
+                fullFlightData.route[0].local_departure.split('T')[0] : 
+                (fullFlightData.route[0].dTime ? 
+                    new Date(fullFlightData.route[0].dTime * 1000).toISOString().split('T')[0] : 
+                    new Date().toISOString().split('T')[0]),
             return: null
         });
 
