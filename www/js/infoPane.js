@@ -158,6 +158,11 @@ const infoPane = {
         // Set a flag to prevent line clearing during route switching
         appState.isRouteSwitching = true;
 
+        // Remove active-route-button class from all buttons
+        document.querySelectorAll('.route-info-button').forEach(button => {
+            button.classList.remove('active-route-button');
+        });
+
         // Simplify height check and collapse logic
         if (routeIndex === appState.currentRouteIndex &&
             document.getElementById('infoPane').offsetHeight > infoPaneHeight.MENU_BAR_HEIGHT) {
@@ -173,6 +178,9 @@ const infoPane = {
                 // Don't need to call setupRouteContent first, let the selectedRoute module handle it
                 selectedRoute.displaySelectedRouteInfo(routeIndex);
                 this.fitMapToRoute(routeIndex);
+                
+                // Add active-route-button class to the current button
+                document.getElementById(`route-button-${routeIndex}`).classList.add('active-route-button');
             });
         } else {
             // Only call setupRouteContent for non-selected routes
@@ -406,6 +414,17 @@ function setupRouteContent(routeIndex) {
 
     // Clear deck-specific lines when switching routes
     lineManager.clearLinesByTags(['type:deck']);
+
+    // Remove active-route-button class from all buttons
+    document.querySelectorAll('.route-info-button').forEach(button => {
+        button.classList.remove('active-route-button');
+    });
+
+    // Add active-route-button class to the current button
+    const currentButton = document.getElementById(`route-button-${routeIndex}`);
+    if (currentButton) {
+        currentButton.classList.add('active-route-button');
+    }
 
     let contentWrapper;
     let routeBoxElement;

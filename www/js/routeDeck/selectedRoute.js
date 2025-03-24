@@ -481,6 +481,11 @@ const selectedRoute = {
         // Get the group ID for the current route
         const currentGroupId = selectedRouteDetails.group;
         
+        // First, remove active-route-button class from all buttons
+        document.querySelectorAll('.route-info-button').forEach(button => {
+            button.classList.remove('active-route-button');
+        });
+        
         // Find all route indices that belong to this same group
         const groupRouteIndices = Object.entries(appState.selectedRoutes)
             .filter(([_, route]) => route.group === currentGroupId)
@@ -504,6 +509,11 @@ const selectedRoute = {
                 // Preserve even-button class if needed
                 if (idx % 2 === 1) {
                     button.classList.add('even-button');
+                }
+                
+                // Add active-route-button class to the currently displayed route
+                if (idx === parseInt(routeIndex)) {
+                    button.classList.add('active-route-button');
                 }
             }
         });

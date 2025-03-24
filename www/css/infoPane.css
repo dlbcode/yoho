@@ -199,6 +199,13 @@
   z-index: 67 !important; /* Was 50 - should be above normal route buttons */
 }
 
+/* New style for the currently active route button */
+.active-route-button {
+  border: 1px solid white !important;
+  box-shadow: 0 0 2px rgba(255, 255, 255, 0.5);
+  z-index: 69 !important; /* Higher than hover (68) to ensure the border is visible */
+}
+
 /* Alternate gradient direction for even-indexed selected buttons */
 .selected-route-button.even-button {
   background: linear-gradient(315deg, #004600 50%, #003500 50%) !important;

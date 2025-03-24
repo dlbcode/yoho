@@ -260,6 +260,12 @@ const selectedRouteGroup = {
         backButton.addEventListener('click', () => {
             // Return to the first segment in the group
             const firstSegmentIndex = journeyData.segments[0].index;
+            
+            // Remove active-route-button class from all buttons first
+            document.querySelectorAll('.route-info-button').forEach(button => {
+                button.classList.remove('active-route-button');
+            });
+            
             callbacks.onReturnToSegment(firstSegmentIndex);
         });
         
@@ -268,6 +274,11 @@ const selectedRouteGroup = {
         segmentButtons.forEach(button => {
             const segmentIndex = button.getAttribute('data-segment-index');
             button.addEventListener('click', () => {
+                // Remove active-route-button class from all buttons first
+                document.querySelectorAll('.route-info-button').forEach(button => {
+                    button.classList.remove('active-route-button');
+                });
+                
                 callbacks.onViewSegment(parseInt(segmentIndex));
             });
         });
@@ -279,6 +290,12 @@ const selectedRouteGroup = {
             row.addEventListener('click', (event) => {
                 // Avoid triggering if clicking on the button itself
                 if (event.target.closest('.view-segment-button')) return;
+                
+                // Remove active-route-button class from all buttons first
+                document.querySelectorAll('.route-info-button').forEach(button => {
+                    button.classList.remove('active-route-button');
+                });
+                
                 callbacks.onViewSegment(parseInt(segmentIndex));
             });
         });
