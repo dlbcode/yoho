@@ -67,6 +67,36 @@ function generateFullJourneyData(currentGroupId) {
     };
 }
 
+// Generate route description for a route group - similar to the one in selectedRoute.js
+function generateRouteDescription(groupId, currentSegmentIndex = null) {
+    // Find all routes that belong to the same group
+    const routeSegments = Object.entries(appState.selectedRoutes)
+        .filter(([_, route]) => route.group === groupId)
+        .map(([idx, route]) => {
+            // Extract origin and destination from the route
+            const [origin, destination] = route.displayData.route.split(' > ');
+            return {
+                index: parseInt(idx),
+                segment: `${origin}-${destination}`,
+                origin,
+                destination
+            };
+        })
+        // Sort by route index to ensure correct order
+        .sort((a, b) => a.index - b.index);
+
+    // Create HTML with segments - none highlighted when viewing the full journey
+    return routeSegments.map(segment => {
+        const isCurrentSegment = currentSegmentIndex !== null && segment.index === parseInt(currentSegmentIndex);
+        return `<span class="route-segment ${isCurrentSegment ? 'current-segment' : ''}" 
+                     data-route-index="${segment.index}" 
+                     role="button"
+                     tabindex="0">
+                     ${segment.segment}
+                </span>`;
+    }).join(', ');
+}
+
 const selectedRouteGroup = {
     // Display full journey information for the entire route group
     displayFullJourneyInfo: async function(groupId, formatHelpers) {
@@ -103,6 +133,9 @@ const selectedRouteGroup = {
         const originAirport = await this.getAirportInfo(journeyData.overallOrigin);
         const destAirport = await this.getAirportInfo(journeyData.overallDestination);
         
+        // Generate the route segments description
+        const routeDescription = generateRouteDescription(groupId);
+        
         // Create the HTML structure for the full journey overview
         journeyContainer.innerHTML = `
             <div class="flight-header">
@@ -113,6 +146,7 @@ const selectedRouteGroup = {
                     </button>
                 </div>
                 <div class="overall-route active-route">${journeyData.overallOrigin}-${journeyData.overallDestination}</div>
+                <div class="route-description">${routeDescription}</div>
                 <div class="flight-price">$${Math.ceil(journeyData.totalPrice)}</div>
             </div>
             
@@ -249,6 +283,31 @@ const selectedRouteGroup = {
             });
         });
         
+        // Add event listeners for route segment clicks after the content is added to DOM
+        const routeSegments = journeyContainer.querySelectorAll('.route-segment');
+        routeSegments.forEach(segment => {
+            segment.addEventListener('click', (event) => {
+                const clickedSegmentIndex = parseInt(event.currentTarget.getAttribute('data-route-index'));
+                if (!isNaN(clickedSegmentIndex)) {
+                    // Prevent default navigation behavior
+                    event.preventDefault();
+                    // Navigate to the clicked segment
+                    callbacks.onViewSegment(clickedSegmentIndex);
+                }
+            });
+            
+            // Handle keyboard navigation (Enter/Space)
+            segment.addEventListener('keydown', (event) => {
+                if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    const clickedSegmentIndex = parseInt(event.currentTarget.getAttribute('data-route-index'));
+                    if (!isNaN(clickedSegmentIndex)) {
+                        callbacks.onViewSegment(clickedSegmentIndex);
+                    }
+                }
+            });
+        });
+        
         // Set appropriate info pane height
         infoPaneHeight.setHeight('content', {
             contentElement: journeyContainer,
@@ -257,4 +316,4 @@ const selectedRouteGroup = {
     }
 };
 
-export { selectedRouteGroup, generateFullJourneyData };
+export { selectedRouteGroup, generateFullJourneyData, generateRouteDescription };

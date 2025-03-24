@@ -3,7 +3,7 @@ import { infoPaneHeight } from '../utils/infoPaneHeightManager.js';
 import { flightMap } from '../flightMap.js';
 import { airlineLogoManager } from '../utils/airlineLogoManager.js';
 import { formatFlightDateTime } from './routeCard.js';
-import { selectedRouteGroup } from './selectedRouteGroup.js';
+import { selectedRouteGroup, generateRouteDescription as generateGroupRouteDescription } from './selectedRouteGroup.js';
 
 // Load the selectedRoute CSS
 (function loadSelectedRouteCSS() {
@@ -45,34 +45,9 @@ async function getAirlineName(airlineCode) {
 function generateRouteDescription(routeIndex) {
     const selectedRoute = appState.selectedRoutes[routeIndex];
     if (!selectedRoute) return '';
-
-    const currentGroupId = selectedRoute.group;
-    // Find all routes that belong to the same group
-    const routeSegments = Object.entries(appState.selectedRoutes)
-        .filter(([_, route]) => route.group === currentGroupId)
-        .map(([idx, route]) => {
-            // Extract origin and destination from the route
-            const [origin, destination] = route.displayData.route.split(' > ');
-            return {
-                index: parseInt(idx),
-                segment: `${origin}-${destination}`,
-                origin,
-                destination
-            };
-        })
-        // Sort by route index to ensure correct order
-        .sort((a, b) => a.index - b.index);
-
-    // Create HTML with highlighted current segment and make segments clickable
-    return routeSegments.map(segment => {
-        const isCurrentSegment = segment.index === parseInt(routeIndex);
-        return `<span class="route-segment ${isCurrentSegment ? 'current-segment' : ''}" 
-                     data-route-index="${segment.index}" 
-                     role="button"
-                     tabindex="0">
-                     ${segment.segment}
-                </span>`;
-    }).join(', ');
+    
+    // Use the shared function from selectedRouteGroup
+    return generateGroupRouteDescription(selectedRoute.group, routeIndex);
 }
 
 // New function to generate the overall route summary
