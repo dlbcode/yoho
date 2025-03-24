@@ -287,12 +287,37 @@ async function routeInfoCard(cardElement, fullFlightData, routeIds, routeIndex) 
             });
         }, 200);
         
-        // Import the selectedRoute module and display the selected route info
-        import('../routeDeck/selectedRoute.js').then(({ selectedRoute }) => {
-            // Small timeout to ensure state updates are processed
-            setTimeout(() => {
-                selectedRoute.displaySelectedRouteInfo(routeIndex);
-            }, 100);
+        // Import the selectedRouteGroup module and display the full journey info instead of just the first segment
+        import('../routeDeck/selectedRouteGroup.js').then(({ selectedRouteGroup }) => {
+            // Import the selectedRoute module to get access to the format helpers
+            import('../routeDeck/selectedRoute.js').then(({ selectedRoute }) => {
+                // Small timeout to ensure state updates are processed
+                setTimeout(() => {
+                    // Create format helpers object to pass to the selectedRouteGroup module
+                    const formatHelpers = {
+                        formatFlightTime: selectedRoute.formatFlightTime,
+                        formatFlightDate: selectedRoute.formatFlightDate
+                    };
+                    
+                    // Display the full journey view for the new group ID
+                    selectedRouteGroup.displayFullJourneyInfo(newRouteGroupId, formatHelpers).then(({ journeyContainer, journeyData }) => {
+                        if (journeyContainer && journeyData) {
+                            // Set up event listeners for the journey view
+                            selectedRouteGroup.setupJourneyEventListeners(
+                                journeyContainer,
+                                journeyData,
+                                {
+                                    onReturnToSegment: (segmentIndex) => selectedRoute.displaySelectedRouteInfo(segmentIndex),
+                                    onViewSegment: (segmentIndex) => selectedRoute.displaySelectedRouteInfo(segmentIndex)
+                                }
+                            );
+                            
+                            // Update current view
+                            appState.currentView = 'fullJourney';
+                        }
+                    });
+                }, 100);
+            });
         });
     });
 
