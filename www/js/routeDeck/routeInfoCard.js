@@ -281,8 +281,13 @@ async function routeInfoCard(cardElement, fullFlightData, routeIds, routeIndex) 
         const intermediaryIatas = fullFlightData.route.map(segment => segment.flyFrom);
         intermediaryIatas.push(fullFlightData.route[fullFlightData.route.length - 1].flyTo);
 
+        // Track all segment indices that belong to this route group
+        const routeSegmentIndices = [];
+
         fullFlightData.route.forEach((segmentData, idx) => {
             const selectedRouteIndex = routeIndex + idx;
+            routeSegmentIndices.push(selectedRouteIndex); // Track this segment index
+            
             const departureDate = segmentData.local_departure ? 
                 new Date(segmentData.local_departure).toISOString().split('T')[0] : 
                 (segmentData.dTime ? 
@@ -332,6 +337,22 @@ async function routeInfoCard(cardElement, fullFlightData, routeIds, routeIndex) 
 
         // Call selectRoute to update the state and markers
         selectRoute(fullFlightData.route);
+        
+        // Update all route buttons belonging to this group to ensure they remain selected
+        setTimeout(() => {
+            // Force update of route button states for all segments in this group
+            routeSegmentIndices.forEach(segmentIndex => {
+                const buttonId = `route-button-${segmentIndex}`;
+                const segmentButton = document.getElementById(buttonId);
+                if (segmentButton) {
+                    segmentButton.classList.add('selected-route-button');
+                    // Preserve even-button class if present
+                    if (segmentIndex % 2 === 1) {
+                        segmentButton.classList.add('even-button');
+                    }
+                }
+            });
+        }, 200);
         
         // Import the selectedRoute module and display the selected route info
         import('../routeDeck/selectedRoute.js').then(({ selectedRoute }) => {

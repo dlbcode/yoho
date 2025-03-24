@@ -215,7 +215,7 @@ const selectedRoute = {
                     </div>
                     <div class="airport-info">
                         <div class="info-item">
-                            <svg class="info-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M12,11.5A2.5,2.5,0,0,1,9.5,9A2.5,2.5,0,0,1,12,6.5A2.5,2.5,0,0,1,14.5,9A2.5,2.5,0,0,1,12,11.5M12,2A7,7,0,0,0,5,9C5,14.25,12,22,12,22C12,22,19,14.25,19,9A7,7,0,0,0,12,2Z" /></svg>
+                            <svg class="info-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M12,11.5A2.5,2.5,0,0,1,9.5,9A2.5,2.5,0,0,1,12,6.5A2.5,2.5,0,0,1,14.5,9A2.5,2.5,0,0,1,12,11.5M12,2A7,7,0,0,0,5,9C5,11.38,6.67,13.42,9,13.9V16H7V18H9V20H7V22H17V20H15V18H17V16H15V13.9C17.33,13.42,19,11.38,19,9A7,7,0,0,0,12,2M12,4A5,5,0,0,1,17,9C17,11.21,14.76,13,12,13C9.24,13,7,11.21,7,9A5,5,0,0,1,12,4M14,15V20H10V15H14Z" /></svg>
                             <span>${destAirport?.city || 'Unknown City'}, ${destAirport?.country || 'Country'}</span>
                         </div>
                         <div class="info-item">
@@ -372,17 +372,43 @@ const selectedRoute = {
 
     // New method to update the visual state of the route button
     updateRouteButtonState: function(routeIndex) {
-        // Clear any previous selected state from other buttons
+        // Get the current route details
+        const selectedRouteDetails = appState.selectedRoutes[String(routeIndex)];
+        
+        if (!selectedRouteDetails) {
+            console.error(`Cannot update button state - route details not found for index: ${routeIndex}`);
+            return;
+        }
+        
+        // Get the group ID for the current route
+        const currentGroupId = selectedRouteDetails.group;
+        
+        // Find all route indices that belong to this same group
+        const groupRouteIndices = Object.entries(appState.selectedRoutes)
+            .filter(([_, route]) => route.group === currentGroupId)
+            .map(([idx, _]) => parseInt(idx));
+        
+        // First, clear selection from all buttons not in this group
         document.querySelectorAll('.route-info-button').forEach(button => {
-            button.classList.remove('selected-route-button');
+            const buttonIndex = parseInt(button.id.replace('route-button-', ''));
+            if (!groupRouteIndices.includes(buttonIndex)) {
+                button.classList.remove('selected-route-button');
+            }
         });
         
-        // Add selected state to the current route button
-        const buttonId = `route-button-${routeIndex}`;
-        const button = document.getElementById(buttonId);
-        if (button) {
-            button.classList.add('selected-route-button');
-        }
+        // Now, ensure all buttons in this group are selected
+        groupRouteIndices.forEach(idx => {
+            const buttonId = `route-button-${idx}`;
+            const button = document.getElementById(buttonId);
+            
+            if (button) {
+                button.classList.add('selected-route-button');
+                // Preserve even-button class if needed
+                if (idx % 2 === 1) {
+                    button.classList.add('even-button');
+                }
+            }
+        });
     }
 };
 

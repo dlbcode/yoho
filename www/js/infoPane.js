@@ -53,6 +53,23 @@ const infoPane = {
         const menuBar = document.getElementById('menu-bar');
         menuBar.innerHTML = '';
 
+        // Create a set of all selected route indices to check against
+        const selectedRouteIndices = new Set();
+        
+        // Include all segment indices that are part of a selected route group
+        Object.entries(appState.selectedRoutes).forEach(([index, route]) => {
+            selectedRouteIndices.add(parseInt(index));
+            
+            // If this segment belongs to a group, find all segments with the same group
+            if (route.group !== undefined) {
+                Object.entries(appState.selectedRoutes).forEach(([otherIndex, otherRoute]) => {
+                    if (otherRoute.group === route.group) {
+                        selectedRouteIndices.add(parseInt(otherIndex));
+                    }
+                });
+            }
+        });
+
         appState.waypoints.forEach((_, index) => {
             const routeIndex = Math.floor(index / 2);
             const buttonId = `route-button-${routeIndex}`;
@@ -106,8 +123,9 @@ const infoPane = {
                 this.fitMapToRoute(routeIndex);
             }
 
-            // Ensure selected button class is applied while maintaining the even-button class if needed
-            if (appState.selectedRoutes.hasOwnProperty(routeIndex)) {
+            // Check if this route index is in our set of selected routes
+            // This ensures all segments in a multi-segment route are properly marked
+            if (selectedRouteIndices.has(routeIndex)) {
                 button.classList.add('selected-route-button');
             } else {
                 button.classList.remove('selected-route-button');
