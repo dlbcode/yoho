@@ -353,23 +353,25 @@
 
   /* Fix for back button disappearing on small screens */
   .flight-header {
-    flex-direction: column;
+    flex-direction: row; /* Keep as row instead of column */
+    justify-content: space-between; /* Keep space between button and price */
+    flex-wrap: nowrap; /* Prevent wrapping */
     gap: 10px;
-    align-items: flex-start;
+    align-items: center; /* Center align items */
   }
   
   .back-button {
-    width: 100%;
-    margin-bottom: 5px;
+    width: auto; /* Auto width instead of 100% */
+    margin-bottom: 0; /* Remove bottom margin */
   }
   
   .back-button .change-route-button {
-    width: 100%;
+    width: auto; /* Auto width instead of 100% */
     justify-content: center;
   }
   
   .flight-price {
-    align-self: center;
+    flex-shrink: 0; /* Prevent the price from shrinking */
   }
 }
 
@@ -399,4 +401,8 @@
   .timeline-node {
     width: 80px;
   }
+}
+
+.back-button {
+  width: auto; /* Override the 100% width setting from media queries */
 }
