@@ -12,6 +12,33 @@
   margin-bottom: 20px;
 }
 
+/* New styles for the route description */
+.route-description {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  font-size: 14px;
+  color: #bbb;
+  padding: 4px 8px;
+  margin: 0 8px;
+  background-color: rgba(30, 30, 30, 0.5);
+  border-radius: 4px;
+  flex: 1;
+  max-width: 50%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.route-segment {
+  padding: 0 3px;
+}
+
+.current-segment {
+  color: #6ba5ff;
+  font-weight: 500;
+}
+
 .back-button .change-route-button {
   display: flex;
   align-items: center;
@@ -398,6 +425,26 @@
   .flight-price {
     flex-shrink: 0; /* Prevent the price from shrinking */
   }
+
+  .flight-header {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  
+  .route-description {
+    order: 3;
+    flex-basis: 100%;
+    max-width: 100%;
+    margin: 8px 0 0;
+  }
+  
+  .back-button {
+    flex-basis: auto;
+  }
+  
+  .flight-price {
+    flex-basis: auto;
+  }
 }
 
 /* Very small screens (mobile) */
@@ -425,6 +472,10 @@
   
   .timeline-node {
     width: 80px;
+  }
+
+  .route-description {
+    text-align: center;
   }
 }
 

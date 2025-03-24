@@ -40,6 +40,33 @@ async function getAirlineName(airlineCode) {
     return airlines[airlineCode] || airlineCode;
 }
 
+// Generate route description for a route group
+function generateRouteDescription(routeIndex) {
+    const selectedRoute = appState.selectedRoutes[routeIndex];
+    if (!selectedRoute) return '';
+
+    const currentGroupId = selectedRoute.group;
+    // Find all routes that belong to the same group
+    const routeSegments = Object.entries(appState.selectedRoutes)
+        .filter(([_, route]) => route.group === currentGroupId)
+        .map(([idx, route]) => {
+            // Extract origin and destination from the route
+            const [origin, destination] = route.displayData.route.split(' > ');
+            return {
+                index: parseInt(idx),
+                segment: `${origin}-${destination}`
+            };
+        })
+        // Sort by route index to ensure correct order
+        .sort((a, b) => a.index - b.index);
+
+    // Create HTML with highlighted current segment
+    return routeSegments.map(segment => {
+        const isCurrentSegment = segment.index === parseInt(routeIndex);
+        return `<span class="route-segment ${isCurrentSegment ? 'current-segment' : ''}">${segment.segment}</span>`;
+    }).join(', ');
+}
+
 const selectedRoute = {
     displaySelectedRouteInfo: async function(routeIndex) {
         const selectedRouteDetails = appState.selectedRoutes[String(routeIndex)];
@@ -101,6 +128,9 @@ const selectedRoute = {
         const formattedDepartureDate = this.formatFlightDate(departureDateWithTime);
         const formattedArrivalDate = this.formatFlightDate(arrivalDateWithTime);
         
+        // Generate the route description
+        const routeDescription = generateRouteDescription(routeIndex);
+        
         // Create the HTML structure for the flight details page
         const detailsContainer = document.createElement('div');
         detailsContainer.className = 'selected-route-container';
@@ -113,6 +143,7 @@ const selectedRoute = {
                         Change Flight
                     </button>
                 </div>
+                <div class="route-description">${routeDescription}</div>
                 <div class="flight-price">$${Math.ceil(routeDetails.price)}</div>
             </div>
             
