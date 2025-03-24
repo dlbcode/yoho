@@ -60,10 +60,15 @@ function generateRouteDescription(routeIndex) {
         // Sort by route index to ensure correct order
         .sort((a, b) => a.index - b.index);
 
-    // Create HTML with highlighted current segment
+    // Create HTML with highlighted current segment and make segments clickable
     return routeSegments.map(segment => {
         const isCurrentSegment = segment.index === parseInt(routeIndex);
-        return `<span class="route-segment ${isCurrentSegment ? 'current-segment' : ''}">${segment.segment}</span>`;
+        return `<span class="route-segment ${isCurrentSegment ? 'current-segment' : ''}" 
+                     data-route-index="${segment.index}" 
+                     role="button"
+                     tabindex="0">
+                     ${segment.segment}
+                </span>`;
     }).join(', ');
 }
 
@@ -269,6 +274,33 @@ const selectedRoute = {
                 detail: { key: 'changeView', value: 'routeDeck' } 
             }));
         });
+        
+        // Add event listeners for route segment clicks after the content is added to DOM
+        setTimeout(() => {
+            const routeSegments = document.querySelectorAll('.route-segment');
+            routeSegments.forEach(segment => {
+                segment.addEventListener('click', (event) => {
+                    const clickedSegmentIndex = parseInt(event.currentTarget.getAttribute('data-route-index'));
+                    if (!isNaN(clickedSegmentIndex) && clickedSegmentIndex !== routeIndex) {
+                        // Prevent default navigation behavior
+                        event.preventDefault();
+                        // Display the selected route info for the clicked segment
+                        this.displaySelectedRouteInfo(clickedSegmentIndex);
+                    }
+                });
+                
+                // Handle keyboard navigation (Enter/Space)
+                segment.addEventListener('keydown', (event) => {
+                    if (event.key === 'Enter' || event.key === ' ') {
+                        event.preventDefault();
+                        const clickedSegmentIndex = parseInt(event.currentTarget.getAttribute('data-route-index'));
+                        if (!isNaN(clickedSegmentIndex) && clickedSegmentIndex !== routeIndex) {
+                            this.displaySelectedRouteInfo(clickedSegmentIndex);
+                        }
+                    }
+                });
+            });
+        }, 0);
         
         // Make sure infoPane is expanded
         const infoPane = document.getElementById('infoPane');

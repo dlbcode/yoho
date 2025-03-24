@@ -12,7 +12,7 @@
   margin-bottom: 20px;
 }
 
-/* New styles for the route description */
+/* Updated styles for the route description and clickable segments */
 .route-description {
   display: flex;
   align-items: center;
@@ -32,11 +32,48 @@
 
 .route-segment {
   padding: 0 3px;
+  cursor: pointer;
+  transition: color 0.2s ease, transform 0.1s ease;
+  position: relative;
+}
+
+.route-segment:not(.current-segment):hover {
+  color: #fff;
+  text-decoration: underline;
+}
+
+.route-segment:active {
+  transform: translateY(1px);
 }
 
 .current-segment {
   color: #6ba5ff;
   font-weight: 500;
+  cursor: default;
+}
+
+/* Add a subtle indicator to show segments are clickable */
+.route-segment:not(.current-segment)::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 3px;
+  right: 3px;
+  height: 1px;
+  background-color: #6ba5ff;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.route-segment:not(.current-segment):hover::after {
+  opacity: 1;
+}
+
+/* Add focus styles for keyboard navigation */
+.route-segment:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(107, 165, 255, 0.4);
+  border-radius: 2px;
 }
 
 .back-button .change-route-button {
