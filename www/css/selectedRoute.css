@@ -23,6 +23,8 @@
   padding: 8px 12px;
   cursor: pointer;
   transition: all 0.2s ease;
+  width: fit-content; /* Ensure button only takes the width it needs */
+  max-width: 150px; /* Set a maximum width */
 }
 
 .back-button .change-route-button:hover {
