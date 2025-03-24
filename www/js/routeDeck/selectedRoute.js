@@ -379,11 +379,8 @@ const selectedRoute = {
         infoPane.classList.remove('collapsed');
         infoPane.classList.add('expanded');
         
-        // Set the appropriate info pane height with more space for the detailed content
-        infoPaneHeight.setHeight('content', {
-            contentElement: detailsContainer,
-            contentHeight: Math.min(window.innerHeight * 0.7, detailsContainer.scrollHeight + 50)
-        });
+        // Set the appropriate info pane height with consistent sizing
+        infoPaneHeight.setRouteDetailsHeight(detailsContainer);
         
         // Update current view and route index
         appState.currentView = 'selectedRoute';

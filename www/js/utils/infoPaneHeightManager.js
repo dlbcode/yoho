@@ -111,6 +111,18 @@ export const infoPaneHeight = {
                 this.setHeight('content', { contentElement: routeBox });
             }
         }
+    },
+
+    // Add a new standardized method for route details views
+    setRouteDetailsHeight: function(contentElement) {
+        // Use consistent 75% of window height as maximum for all route detail views
+        const maxHeight = window.innerHeight * 0.50;
+        const contentHeight = Math.min(maxHeight, contentElement.scrollHeight + 50);
+        
+        this.setHeight('content', {
+            contentElement,
+            contentHeight: contentHeight
+        });
     }
 };
 

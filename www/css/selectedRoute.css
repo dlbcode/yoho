@@ -5,21 +5,45 @@
   font-family: "Google Sans", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
+/* Updated flight-header styles for consistent element heights */
 .flight-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 20px;
+  flex-wrap: nowrap;
+  gap: 10px;
+  height: 40px; /* Set consistent height for the container */
 }
 
-/* Updated styles for the overall route to make it look clickable */
+/* Updated change-route-button to match height */
+.back-button .change-route-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: transparent;
+  color: #6ba5ff;
+  border: 1px solid #3b4559;
+  border-radius: 4px;
+  padding: 6px 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  width: fit-content;
+  max-width: 150px;
+  white-space: nowrap;
+  height: 36px; /* Consistent height */
+  box-sizing: border-box;
+}
+
+/* Update overall-route to match height */
 .overall-route {
   display: flex;
   align-items: center;
+  justify-content: center;
   font-size: 16px;
   font-weight: 500;
   color: #ffffff;
-  padding: 4px 10px;
+  padding: 0 10px;
   margin-right: 8px;
   background-color: rgba(107, 165, 255, 0.2);
   border-radius: 4px;
@@ -28,6 +52,8 @@
   text-overflow: ellipsis;
   cursor: pointer;
   transition: all 0.2s ease;
+  height: 36px; /* Consistent height */
+  box-sizing: border-box;
 }
 
 .overall-route:hover {
@@ -43,17 +69,16 @@
 .overall-route.active-route {
   background-color: rgba(107, 165, 255, 0.5);
   color: #ffffff;
-  font-weight: bold;
 }
 
-/* Updated styles for the route description and clickable segments */
+/* Update route-description to match height */
 .route-description {
   display: flex;
   align-items: center;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   font-size: 14px;
   color: #bbb;
-  padding: 4px 8px;
+  padding: 0 10px;
   margin: 0 8px;
   background-color: rgba(30, 30, 30, 0.5);
   border-radius: 4px;
@@ -62,6 +87,8 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  height: 36px; /* Consistent height */
+  box-sizing: border-box;
 }
 
 .route-segment {
@@ -118,12 +145,14 @@
   color: #6ba5ff;
   border: 1px solid #3b4559;
   border-radius: 4px;
-  padding: 8px 12px;
+  padding: 6px 12px;
   cursor: pointer;
   transition: all 0.2s ease;
   width: fit-content; /* Ensure button only takes the width it needs */
   max-width: 150px; /* Set a maximum width */
   white-space: nowrap; /* Prevent text wrapping */
+  height: 36px; /* Consistent height */
+  box-sizing: border-box;
 }
 
 /* Style for the arrow SVG to ensure consistent appearance */
@@ -142,13 +171,19 @@
   background-color: rgba(107, 165, 255, 0.1);
 }
 
+/* Update flight-price to match height */
 .flight-price {
-  font-size: 26px;
+  font-size: 20px;
   font-weight: 600;
   color: #39a7ff;
   background-color: rgba(57, 167, 255, 0.1);
-  padding: 8px 15px;
-  border-radius: 8px;
+  padding: 0 15px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 36px; /* Consistent height */
+  box-sizing: border-box;
 }
 
 .flight-overview {
@@ -675,6 +710,8 @@
     flex-wrap: nowrap; /* Prevent wrapping */
     gap: 10px;
     align-items: center; /* Center align items */
+    height: auto;
+    min-height: 40px;
   }
   
   .back-button {

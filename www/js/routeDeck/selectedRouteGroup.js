@@ -338,10 +338,7 @@ const selectedRouteGroup = {
         });
         
         // Set appropriate info pane height
-        infoPaneHeight.setHeight('content', {
-            contentElement: journeyContainer,
-            contentHeight: Math.min(window.innerHeight * 0.8, journeyContainer.scrollHeight + 50)
-        });
+        infoPaneHeight.setRouteDetailsHeight(journeyContainer);
     },
     
     // Updated function to update route button styles for the group view
