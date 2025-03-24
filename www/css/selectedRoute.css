@@ -12,6 +12,22 @@
   margin-bottom: 20px;
 }
 
+/* New styles for the overall route */
+.overall-route {
+  display: flex;
+  align-items: center;
+  font-size: 16px;
+  font-weight: 500;
+  color: #ffffff;
+  padding: 4px 10px;
+  margin-right: 8px;
+  background-color: rgba(107, 165, 255, 0.2);
+  border-radius: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 /* Updated styles for the route description and clickable segments */
 .route-description {
   display: flex;
@@ -468,6 +484,13 @@
     gap: 8px;
   }
   
+  .overall-route {
+    order: 2;
+    margin-right: 0;
+    margin-left: auto;
+    font-size: 14px;
+  }
+  
   .route-description {
     order: 3;
     flex-basis: 100%;
@@ -509,6 +532,11 @@
   
   .timeline-node {
     width: 80px;
+  }
+
+  .overall-route {
+    padding: 3px 6px;
+    font-size: 13px;
   }
 
   .route-description {

@@ -54,7 +54,9 @@ function generateRouteDescription(routeIndex) {
             const [origin, destination] = route.displayData.route.split(' > ');
             return {
                 index: parseInt(idx),
-                segment: `${origin}-${destination}`
+                segment: `${origin}-${destination}`,
+                origin,
+                destination
             };
         })
         // Sort by route index to ensure correct order
@@ -70,6 +72,32 @@ function generateRouteDescription(routeIndex) {
                      ${segment.segment}
                 </span>`;
     }).join(', ');
+}
+
+// New function to generate the overall route summary
+function generateOverallRoute(routeIndex) {
+    const selectedRoute = appState.selectedRoutes[routeIndex];
+    if (!selectedRoute) return '';
+
+    const currentGroupId = selectedRoute.group;
+    // Find all routes that belong to the same group
+    const routeSegments = Object.entries(appState.selectedRoutes)
+        .filter(([_, route]) => route.group === currentGroupId)
+        .map(([_, route]) => {
+            // Extract origin and destination from the route
+            const [origin, destination] = route.displayData.route.split(' > ');
+            return { origin, destination };
+        })
+        // Sort by route index to ensure correct order
+        .sort((a, b) => a.index - b.index);
+    
+    if (routeSegments.length === 0) return '';
+    
+    // Get first origin and last destination for overall route
+    const firstOrigin = routeSegments[0].origin;
+    const lastDestination = routeSegments[routeSegments.length - 1].destination;
+    
+    return `${firstOrigin}-${lastDestination}`;
 }
 
 const selectedRoute = {
@@ -136,6 +164,9 @@ const selectedRoute = {
         // Generate the route description
         const routeDescription = generateRouteDescription(routeIndex);
         
+        // Generate the overall route
+        const overallRoute = generateOverallRoute(routeIndex);
+        
         // Create the HTML structure for the flight details page
         const detailsContainer = document.createElement('div');
         detailsContainer.className = 'selected-route-container';
@@ -148,6 +179,7 @@ const selectedRoute = {
                         Change Flight
                     </button>
                 </div>
+                <div class="overall-route">${overallRoute}</div>
                 <div class="route-description">${routeDescription}</div>
                 <div class="flight-price">$${Math.ceil(routeDetails.price)}</div>
             </div>
