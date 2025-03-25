@@ -520,6 +520,7 @@
 
   .flight-price {
     flex-shrink: 0; /* Prevent the price from shrinking */
+    order: 3; /* Ensure price stays on the right */
   }
 
   .flight-header {
@@ -528,14 +529,14 @@
   }
   
   .overall-route {
-    order: 2;
+    order: 1; /* Ensure route stays on the left */
     margin-right: 0;
-    margin-left: auto;
+    margin-left: 0; /* Remove auto margin that was pushing it right */
     font-size: 14px;
   }
   
   .route-description {
-    order: 3;
+    order: 4; /* Push description below everything */
     flex-basis: 100%;
     max-width: 100%;
     margin: 8px 0 0;
