@@ -26,10 +26,15 @@ function buildRouteDeck(routeIndex) {
     lineManager.clearLinesByTags(['type:deck']);
     initializeFilterState();
 
-    // Get origin and destination information
-    const dateRange = appState.routeDates[routeIndex] ?? {};
-    let origin = appState.waypoints[routeIndex * 2]?.iata_code;
-    let destination = appState.waypoints[(routeIndex * 2) + 1]?.iata_code;
+    // Get origin and destination information - first check new route structure
+    const routeData = appState.routeData[routeIndex];
+    const dateRange = routeData ? 
+        { depart: routeData.departDate, return: routeData.returnDate } : 
+        (appState.routeDates[routeIndex] ?? {});
+    
+    // Get origin and destination from routeData if available, otherwise fallback to waypoints
+    let origin = routeData?.origin?.iata_code || appState.waypoints[routeIndex * 2]?.iata_code;
+    let destination = routeData?.destination?.iata_code || appState.waypoints[(routeIndex * 2) + 1]?.iata_code;
 
     // Special handling for "Any" origin searches
     if (origin === 'Any') {
@@ -92,6 +97,15 @@ function buildRouteDeck(routeIndex) {
                 index: (routeIndex * 2) + 1, 
                 data: { iata_code: 'Any', isAnyDestination: true } 
             }, 'buildRouteDeck');
+        }
+        
+        // Also update route data structure if it exists
+        if (appState.routeData[routeIndex]) {
+            appState.routeData[routeIndex].destination = {
+                iata_code: 'Any',
+                name: 'Any Destination',
+                isAnyDestination: true
+            };
         }
     }
 

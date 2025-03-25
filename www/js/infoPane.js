@@ -70,12 +70,31 @@ const infoPane = {
             }
         });
 
-        appState.waypoints.forEach((_, index) => {
-            const routeIndex = Math.floor(index / 2);
+        // Use routeData if available, otherwise fall back to waypoints
+        const routeCount = Math.max(
+            appState.routeData ? appState.routeData.length : 0,
+            Math.ceil(appState.waypoints.length / 2)
+        );
+        
+        for (let routeIndex = 0; routeIndex < routeCount; routeIndex++) {
+            // Skip empty routes
+            const routeData = appState.routeData[routeIndex];
+            if (routeData && routeData.isEmpty) continue;
+            
             const buttonId = `route-button-${routeIndex}`;
             let button = document.getElementById(buttonId) || document.createElement('button');
-            const origin = appState.waypoints[routeIndex * 2]?.iata_code || 'Any';
-            const destination = appState.waypoints[routeIndex * 2 + 1]?.iata_code || 'Any';
+            
+            // Get origin and destination - use routeData if available
+            const origin = routeData ? 
+                routeData.origin?.iata_code : 
+                appState.waypoints[routeIndex * 2]?.iata_code;
+                
+            const destination = routeData ? 
+                routeData.destination?.iata_code : 
+                appState.waypoints[routeIndex * 2 + 1]?.iata_code;
+            
+            // Skip if both origin and destination are missing
+            if (!origin && !destination) continue;
             
             if (!button.id) {
                 button.id = buttonId;
@@ -95,10 +114,10 @@ const infoPane = {
             // Create origin element (upper left)
             const originElement = document.createElement('span');
             originElement.className = 'origin-iata';
-            originElement.textContent = origin;
+            originElement.textContent = origin || 'Any';
             
             // Add special styling for "Any" origins
-            if (origin === 'Any') {
+            if (origin === 'Any' || !origin) {
                 originElement.classList.add('any-waypoint');
             }
             
@@ -107,10 +126,10 @@ const infoPane = {
             // Create destination element (lower right)
             const destElement = document.createElement('span');
             destElement.className = 'dest-iata';
-            destElement.textContent = destination;
+            destElement.textContent = destination || 'Any';
             
             // Add special styling for "Any" destinations
-            if (destination === 'Any') {
+            if (destination === 'Any' || !destination) {
                 destElement.classList.add('any-waypoint');
             }
             
@@ -131,23 +150,30 @@ const infoPane = {
                 button.classList.remove('selected-route-button');
             }
 
-            uiHandling.attachDateTooltip(button, routeIndex);
+            // Get date range from routeData if available, otherwise use routeDates
+            const dateRange = routeData ? 
+                { depart: routeData.departDate, return: routeData.returnDate } : 
+                appState.routeDates[routeIndex];
+                
+            uiHandling.attachDateTooltip(button, routeIndex, dateRange);
 
             // Use a single event listener for both mouseover and mouseout
             button.addEventListener('mouseover', () => {
                 // Only highlight if neither origin nor destination is "Any"
-                if (origin !== 'Any' && destination !== 'Any') {
+                if (origin && destination && origin !== 'Any' && destination !== 'Any') {
                     this.applyToLines([`route:${origin}-${destination}`], 'highlight');
                 }
             });
             button.addEventListener('mouseout', () => {
-                if (origin !== 'Any' && destination !== 'Any') {
+                if (origin && destination && origin !== 'Any' && destination !== 'Any') {
                     this.applyToLines([`route:${origin}-${destination}`], 'reset');
                 }
             });
-        });
+        }
 
-        if (appState.waypoints.length === 0 || appState.waypoints.length % 2 === 0) {
+        // Add plus button if there are no routes or if all routes have both origin and destination
+        const allRoutesComplete = appState.routeData.every(r => !r || r.isEmpty || (r.origin && r.destination));
+        if (routeCount === 0 || allRoutesComplete) {
             this.addPlusButton();
         }
     },
@@ -364,10 +390,15 @@ const infoPane = {
             return;
         }
         
-        const [originWaypoint, destinationWaypoint] = [
-            appState.waypoints[routeIndex * 2],
-            appState.waypoints[routeIndex * 2 + 1]
-        ];
+        // Use routeData if available, otherwise fall back to waypoints
+        const routeData = appState.routeData[routeIndex];
+        const originWaypoint = routeData ? 
+            routeData.origin : 
+            appState.waypoints[routeIndex * 2];
+            
+        const destinationWaypoint = routeData ? 
+            routeData.destination : 
+            appState.waypoints[routeIndex * 2 + 1];
         
         // If either waypoint is missing or has iata_code=Any, don't adjust the map
         if (!originWaypoint || !destinationWaypoint || 

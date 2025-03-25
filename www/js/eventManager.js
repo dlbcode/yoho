@@ -1,6 +1,6 @@
 import { map, blueDotIcon } from './map.js';
 import { flightMap } from './flightMap.js';
-import { appState, updateState } from './stateManager.js';
+import { appState, updateState, parseUrlRoutes } from './stateManager.js';
 import { routeHandling } from './routeHandling.js';
 import { mapHandling } from './mapHandling.js';
 import { lineManager } from './lineManager.js';
@@ -15,7 +15,11 @@ const handleWaypointChange = () => {
     
     // Don't clear deck lines if we're just handling an "Any" destination
     // or if we're in the middle of a route switch
-    const isAnyDestinationChange = appState.waypoints.some(wp => wp && wp.iata_code === 'Any' && wp.isAnyDestination);
+    const isAnyDestinationChange = appState.waypoints.some(wp => wp && wp.iata_code === 'Any' && wp.isAnyDestination) ||
+                                 appState.routeData.some(r => r && (
+                                     (r.origin?.iata_code === 'Any' && r.origin?.isAnyOrigin) || 
+                                     (r.destination?.iata_code === 'Any' && r.destination?.isAnyDestination)
+                                 ));
     
     if (!isAnyDestinationChange && !appState.isRouteSwitching) {
         routeHandling.updateRoutesArray();
@@ -75,18 +79,9 @@ const eventManager = {
     },
 
     handlePopState(event) {
-        const params = new URLSearchParams(window.location.search);
-        appState.waypoints = params.get('waypoints') ? params.get('waypoints').split(',').map(iata => ({ iata_code: iata })) : [];
-        appState.routeDates = {};
-        if (params.has('dates')) {
-            params.get('dates').split(',').forEach(pair => {
-                let [routeNumber, type, date] = pair.split(':');
-                if (!appState.routeDates[routeNumber]) {
-                    appState.routeDates[routeNumber] = { depart: null, return: null };
-                }
-                appState.routeDates[routeNumber][type] = date;
-            });
-        }
+        // Use the new URL parsing function from stateManager
+        parseUrlRoutes();
+        
         document.querySelector('.airport-selection').innerHTML = '';
         mapHandling.updateMarkerIcons();
         routeHandling.updateRoutesArray();

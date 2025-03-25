@@ -34,14 +34,32 @@ const removeRoute = (routeNumber) => {
         lineManager.clearLines('route', routeNumber);
     }
 
-    // Remove state
-    Object.keys(appState.selectedRoutes).forEach(key => {
-        if (appState.selectedRoutes[key].group === groupNumber) {
-            updateState('removeSelectedRoute', parseInt(key), 'removeRoute.removeRouteButton2');
+    // Remove selected route 
+    if (appState.selectedRoutes[routeNumber]) {
+        if (groupNumber) {
+            // Remove all routes in the group
+            Object.keys(appState.selectedRoutes).forEach(key => {
+                if (appState.selectedRoutes[key].group === groupNumber) {
+                    updateState('removeSelectedRoute', parseInt(key), 'removeRoute');
+                }
+            });
+        } else {
+            updateState('removeSelectedRoute', routeNumber, 'removeRoute');
         }
-    });
+    }
 
-    updateState('removeWaypoints', { routeNumber }, 'removeRoute.removeRouteButton2');
+    // Mark the route as empty in routeData
+    if (appState.routeData[routeNumber]) {
+        appState.routeData[routeNumber] = { isEmpty: true };
+        
+        // Also update legacy waypoints for compatibility
+        updateState('removeWaypoints', { routeNumber }, 'removeRoute');
+    } else {
+        // If routeData doesn't exist yet, just remove waypoints
+        updateState('removeWaypoints', { routeNumber }, 'removeRoute');
+    }
+    
+    // Remove route dates
     delete appState.routeDates[routeNumber];
 
     // Setup next view

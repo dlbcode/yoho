@@ -6,6 +6,7 @@ import { inputManager } from './inputManager.js';
 const getWaypointIndex = (inputId) => parseInt(inputId.replace(/\D/g, ''), 10) - 1;
 const isOriginField = (waypointIndex) => waypointIndex % 2 === 0;
 const getPairIndex = (waypointIndex, isOrigin) => isOrigin ? waypointIndex + 1 : waypointIndex - 1;
+const getRouteNumber = (waypointIndex) => Math.floor(waypointIndex / 2);
 
 // Simplified API functions with shared fetch logic
 const fetchAirportsBase = async (params) => {
@@ -52,16 +53,34 @@ const handleSuggestionSelection = (inputId, suggestion) => {
     
     const isAnywhereOption = suggestion.getAttribute('data-is-anywhere') === 'true';
     const waypointIndex = getWaypointIndex(inputId);
+    const routeNumber = getRouteNumber(waypointIndex);
     const isOrigin = isOriginField(waypointIndex);
+    
+    // Get route data for this route
+    let routeData = appState.routeData[routeNumber];
+    if (!routeData) {
+        routeData = {
+            tripType: 'oneWay',
+            travelers: 1,
+            departDate: null,
+            returnDate: null
+        };
+        appState.routeData[routeNumber] = routeData;
+    }
+    
+    // Get pair field info
     const pairIndex = getPairIndex(waypointIndex, isOrigin);
     const pairField = document.getElementById(`waypoint-input-${pairIndex + 1}`);
+    const pairWaypointType = isOrigin ? 'destination' : 'origin';
     
     // Handle "Anywhere" option or airport selection
     if (isAnywhereOption) {
+        // Check if pair is also "Any" - prevent both being "Any"
         const isPairAny = pairField && 
             (pairField.value === 'Anywhere' || 
              pairField.getAttribute('data-is-any-destination') === 'true' || 
-             pairField.getAttribute('data-selected-iata') === 'Any');
+             pairField.getAttribute('data-selected-iata') === 'Any') ||
+            routeData[pairWaypointType]?.iata_code === 'Any';
         
         if (isOrigin && isPairAny && !window.isLoadingFromUrl) {
             alert("Both origin and destination cannot be set to 'Anywhere'");
@@ -82,6 +101,7 @@ const handleSuggestionSelection = (inputId, suggestion) => {
         inputField.value = 'Anywhere';
         inputField.setAttribute('data-selected-iata', 'Any');
         inputField.setAttribute('data-is-any-destination', 'true');
+        inputField.readOnly = true;
 
         // Update input state if available
         if (inputManager.inputStates[inputId]) {
@@ -93,12 +113,18 @@ const handleSuggestionSelection = (inputId, suggestion) => {
             pairField.setAttribute('data-paired-with-anywhere', 'true');
         }
 
-        // Update app state
-        if (waypointIndex >= 0 && waypointIndex < appState.waypoints.length) {
-            updateState('updateWaypoint', { index: waypointIndex, data: anyDestination }, 'airportAutocomplete.anywhereSelection');
+        // Update app state - both routeData and waypoints
+        if (isOrigin) {
+            routeData.origin = anyDestination;
         } else {
-            updateState('addWaypoint', anyDestination, 'airportAutocomplete.anywhereSelection');
+            routeData.destination = anyDestination;
         }
+        
+        // Also update waypoints for compatibility
+        updateState('updateWaypoint', { 
+            index: waypointIndex, 
+            data: anyDestination 
+        }, 'airportAutocomplete.anywhereSelection');
 
         // Handle focus for mobile/desktop
         setTimeout(() => {
@@ -120,11 +146,16 @@ const handleSuggestionSelection = (inputId, suggestion) => {
         const airport = suggestion._airport;
         if (!airport) return;
         
+        // Ensure we don't have isAnyDestination/isAnyOrigin flags set
+        airport.isAnyDestination = false;
+        airport.isAnyOrigin = false;
+        
         // Update input field with airport data
         inputField.value = `${airport.city}, (${airport.iata_code})`;
         inputField.setAttribute('data-selected-iata', airport.iata_code);
         inputField.removeAttribute('data-is-any-destination');
         inputField.removeAttribute('data-paired-with-anywhere');
+        inputField.readOnly = true;
         
         // Update input state if available
         if (inputManager.inputStates[inputId]) {
@@ -132,10 +163,24 @@ const handleSuggestionSelection = (inputId, suggestion) => {
             inputManager.inputStates[inputId].previousIataCode = airport.iata_code;
         }
         
+        // Update route data
+        if (isOrigin) {
+            routeData.origin = airport;
+        } else {
+            routeData.destination = airport;
+        }
+        
+        // Update waypoints for compatibility
+        updateState('updateWaypoint', { 
+            index: waypointIndex, 
+            data: airport 
+        }, 'airportAutocomplete.airportSelection');
+        
         // Trigger airport selected event and blur the field
         document.dispatchEvent(new CustomEvent('airportSelected', { 
             detail: { airport, fieldId: inputId } 
         }));
+        
         inputField.blur();
     }
     
@@ -295,6 +340,7 @@ export const setupAutocompleteForField = (fieldId) => {
             inputManager.inputStates[fieldId].selectedSuggestionIndex = -1;
         }
         inputField.removeAttribute('data-paired-with-anywhere');
+        inputField.readOnly = false;
         debouncedInputHandler(e);
     });
 
@@ -318,17 +364,31 @@ document.addEventListener('DOMContentLoaded', () => {
     document.addEventListener('airportSelected', (event) => {
         const { airport, fieldId } = event.detail;
         const waypointIndex = getWaypointIndex(fieldId);
+        const routeNumber = getRouteNumber(waypointIndex);
         const isOrigin = isOriginField(waypointIndex);
-        const routeIndex = Math.floor(waypointIndex / 2);
         
-        // Ensure waypoints array has correct slots
-        while (appState.waypoints.length <= waypointIndex) {
-            appState.waypoints.push(null);
+        // Get or create route data
+        let routeData = appState.routeData[routeNumber];
+        if (!routeData) {
+            routeData = {
+                tripType: 'oneWay',
+                travelers: 1,
+                departDate: null,
+                returnDate: null
+            };
+            appState.routeData[routeNumber] = routeData;
         }
         
-        // If we're setting a destination first, ensure there's a placeholder for the origin
-        if (!isOrigin && !appState.waypoints[waypointIndex-1]) {
-            // Create an "Any" origin placeholder if we're selecting destination first
+        // Update the appropriate field in routeData
+        if (isOrigin) {
+            routeData.origin = airport;
+        } else {
+            routeData.destination = airport;
+        }
+        
+        // If we're setting a destination first, ensure there's an origin
+        if (!isOrigin && !routeData.origin) {
+            // Create an "Any" origin
             const anyOrigin = {
                 iata_code: 'Any',
                 city: 'Anywhere',
@@ -337,7 +397,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 isAnyDestination: false,
                 isAnyOrigin: true,
             };
-            appState.waypoints[waypointIndex-1] = anyOrigin;
+            
+            routeData.origin = anyOrigin;
+            
+            // Also update waypoints for compatibility
+            updateState('updateWaypoint', { 
+                index: waypointIndex - 1, 
+                data: anyOrigin 
+            }, 'airportAutocomplete.anyOriginForDestination');
             
             // Update the origin input field
             const originField = document.getElementById(`waypoint-input-${waypointIndex}`);
@@ -345,6 +412,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 originField.value = 'Anywhere';
                 originField.setAttribute('data-selected-iata', 'Any');
                 originField.setAttribute('data-is-any-destination', 'true');
+                originField.readOnly = true;
                 
                 // Update input state
                 const originInputId = `waypoint-input-${waypointIndex}`;
@@ -354,15 +422,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
         }
-
-        // Important: Clear any isAnyDestination/isAnyOrigin flags when setting a real airport
-        if (airport && airport.iata_code !== 'Any') {
-            airport.isAnyDestination = false;
-            airport.isAnyOrigin = false;
-        }
-
-        // Update app state with the airport at the correct index
-        updateState('updateWaypoint', { index: waypointIndex, data: airport }, 'airportAutocomplete.addEventListener1');
 
         // Update map if location data exists
         if (airport?.latitude && airport?.longitude) {
@@ -386,12 +445,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Set up autocomplete for new waypoints
     document.addEventListener('stateChange', (event) => {
-        if (event.detail.key === 'waypoints') {
-            event.detail.value.forEach((waypoint, index) => {
-                const fieldId = `waypoint-input-${index + 1}`;
-                const field = document.getElementById(fieldId);
-                if (field && field.value !== "Any") {
-                    setupAutocompleteForField(fieldId);
+        if (event.detail.key === 'updateRouteDate' || 
+            event.detail.key === 'addWaypoint' || 
+            event.detail.key === 'updateWaypoint') {
+                
+            // Find all input fields that need autocomplete
+            const inputFields = document.querySelectorAll('.waypoint-input');
+            inputFields.forEach(field => {
+                if (field.id) {
+                    setupAutocompleteForField(field.id);
                 }
             });
         }

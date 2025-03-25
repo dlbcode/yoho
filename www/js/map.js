@@ -4,78 +4,21 @@ import { infoPane } from './infoPane.js';
 import { mapHandling } from './mapHandling.js';
 
 async function initMapFunctions() {
+    // With our new URL format, we no longer need to parse waypoints, dates, and tripTypes separately
+    // Instead, our parseUrlRoutes function now handles everything
+
+    // Just set the route direction if specified
     const params = new URLSearchParams(window.location.search);
-    const waypoints = await getWaypoints(params.get('waypoints'));
-    const routeDates = getRouteDates(params.get('dates'));
-    const tripTypes = getTripTypes(params.get('types'));
     const routeDirection = params.get('direction') || 'from';
-
-    updateState('routeDirection', routeDirection, 'map.initMapFunctions1');
-    routeDates.forEach(routeDate => updateState('updateRouteDate', routeDate, 'map.initMapFunctions2'));
-    if (waypoints) updateState('addWaypoint', waypoints, 'map.initMapFunctions3');
-    Object.entries(tripTypes).forEach(([routeNumber, tripType]) => {
-        updateState('tripType', { routeNumber: parseInt(routeNumber, 10), tripType }, 'map.initMapFunctions4');
-    });
+    updateState('routeDirection', routeDirection, 'map.initMapFunctions');
+    
+    // The rest of the initialization will happen in parseUrlRoutes
 }
 
-async function getWaypoints(waypointParam) {
-    if (!waypointParam) return null;
-    
-    // Set a flag to indicate we're loading from URL
-    window.isLoadingFromUrl = true;
-    
-    const waypointIatas = waypointParam.split(',').map(decodeURIComponent);
-    const airports = await Promise.all(waypointIatas.map(async iata => {
-        // Special handling for "Any" waypoints
-        if (iata === 'Any') {
-            // Check if this is an origin (index is even)
-            const index = waypointIatas.indexOf(iata);
-            const isOrigin = index % 2 === 0;
-            
-            return {
-                iata_code: 'Any',
-                city: 'Anywhere',
-                country: '',
-                name: isOrigin ? 'Any Origin' : 'Any Destination',
-                isAnyDestination: true,
-                isAnyOrigin: isOrigin
-            };
-        }
-        
-        // Normal airport fetch for non-Any waypoints
-        return flightMap.getAirportDataByIata(iata);
-    }));
-    
-    // Reset the flag after a short delay
-    setTimeout(() => {
-        window.isLoadingFromUrl = false;
-    }, 1000);
-    
-    return airports.filter(Boolean);
-}
-
-function getRouteDates(routeDatesParam) {
-    if (!routeDatesParam) {
-        return [{ routeNumber: 0, depart: new Date().toISOString().split('T')[0], return: null }];
-    }
-    return routeDatesParam.split(',').reduce((acc, pair) => {
-        const [key, type, value] = pair.split(':');
-        const routeNumber = parseInt(key, 10);
-        const date = (value === 'null' || value === 'undefined') ? null : value;
-        if (!acc[routeNumber]) acc[routeNumber] = { routeNumber, depart: null, return: null };
-        acc[routeNumber][type] = date;
-        return acc;
-    }, []);
-}
-
-function getTripTypes(typesParam) {
-    if (!typesParam) return {};
-    return typesParam.split(',').reduce((acc, pair) => {
-        const [routeNumber, tripType] = pair.split(':');
-        acc[parseInt(routeNumber, 10)] = tripType;
-        return acc;
-    }, {});
-}
+// Remove these obsolete functions since they're no longer needed with the new URL format
+// async function getWaypoints(waypointParam) { ... }
+// function getRouteDates(routeDatesParam) { ... }
+// function getTripTypes(typesParam) { ... }
 
 const map = L.map('map', {
     zoomControl: false,

@@ -90,10 +90,11 @@ const uiHandling = {
     },
 
     // Simplified tooltip handlers using shared code
-    attachDateTooltip(element, routeNumber) {
+    attachDateTooltip(element, routeNumber, customDateRange) {
         let tooltipTimeout;
         
         const getTooltipText = () => {
+            // First try from selectedRoute if available
             const selectedRoute = appState.selectedRoutes[routeNumber];
             if (selectedRoute?.displayData) {
                 const { departure, arrival } = selectedRoute.displayData;
@@ -101,7 +102,25 @@ const uiHandling = {
                                  hour: 'numeric', minute: '2-digit', hour12: true };
                 return `${new Date(departure).toLocaleString('en-US', options)} to ${new Date(arrival).toLocaleString('en-US', options)}`;
             }
-            return appState.routeDates[routeNumber] || '';
+            
+            // Then try from routeData if available
+            const routeData = appState.routeData[routeNumber];
+            if (routeData && (routeData.departDate || routeData.returnDate)) {
+                return this.formatDateRangeTooltip(routeData.departDate, routeData.returnDate);
+            }
+            
+            // Next try from custom date range parameter
+            if (customDateRange) {
+                return this.formatDateRangeTooltip(customDateRange.depart, customDateRange.return);
+            }
+            
+            // Finally fall back to legacy routeDates
+            const dateRange = appState.routeDates[routeNumber];
+            if (dateRange) {
+                return this.formatDateRangeTooltip(dateRange.depart, dateRange.return);
+            }
+            
+            return '';
         };
         
         element.addEventListener('mouseover', function() {
@@ -116,6 +135,34 @@ const uiHandling = {
             clearTimeout(tooltipTimeout);
             uiHandling.hideDateTooltip();
         });
+    },
+    
+    // Helper method to format date range tooltip
+    formatDateRangeTooltip(departDate, returnDate) {
+        if (!departDate) return '';
+        
+        const formatDate = (dateStr) => {
+            if (!dateStr || dateStr === 'null') return '';
+            try {
+                const date = new Date(dateStr);
+                return date.toLocaleDateString('en-US', {
+                    weekday: 'short',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+            } catch (e) {
+                console.error('Error formatting date:', e);
+                return dateStr;
+            }
+        };
+        
+        const formattedDepart = formatDate(departDate);
+        const formattedReturn = formatDate(returnDate);
+        
+        return formattedReturn && formattedReturn !== 'null' ? 
+            `${formattedDepart} to ${formattedReturn}` : 
+            formattedDepart;
     },
 
     showDateTooltip(element, text) {
