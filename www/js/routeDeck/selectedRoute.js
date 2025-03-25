@@ -321,11 +321,79 @@ const selectedRoute = {
         // Add back button functionality
         const backButton = detailsContainer.querySelector('.change-route-button');
         backButton.addEventListener('click', () => {
-            appState.currentView = 'routeDeck';
-            appState.currentRouteIndex = routeIndex;
-            document.dispatchEvent(new CustomEvent('stateChange', { 
-                detail: { key: 'changeView', value: 'routeDeck' } 
-            }));
+            // Get the current route details to use for search
+            const selectedRouteDetails = appState.selectedRoutes[routeIndex];
+            
+            if (selectedRouteDetails) {
+                // Extract origin and destination from the current route
+                const [origin, destination] = selectedRouteDetails.displayData.route.split(' > ');
+                const departureDate = selectedRouteDetails.displayData.departure;
+                
+                // Make sure we have the waypoints in place for this route
+                if (!appState.waypoints[routeIndex * 2]) {
+                    updateState('updateWaypoint', { 
+                        index: routeIndex * 2, 
+                        data: {
+                            iata_code: origin,
+                            city: origin,
+                        }
+                    }, 'selectedRoute.backButton');
+                }
+                
+                if (!appState.waypoints[routeIndex * 2 + 1]) {
+                    updateState('updateWaypoint', { 
+                        index: routeIndex * 2 + 1, 
+                        data: {
+                            iata_code: destination,
+                            city: destination,
+                        }
+                    }, 'selectedRoute.backButton');
+                }
+                
+                // Update the route date if needed
+                if (departureDate) {
+                    const formattedDate = new Date(departureDate).toISOString().split('T')[0];
+                    updateState('updateRouteDate', {
+                        routeNumber: routeIndex,
+                        depart: formattedDate,
+                        return: null
+                    }, 'selectedRoute.backButton');
+                }
+                
+                // Set the current view to the route deck
+                appState.currentView = 'routeDeck';
+                appState.currentRouteIndex = routeIndex;
+                
+                // Start search - this will retrieve flights for this route
+                const infoPane = document.getElementById('infoPane');
+                infoPane.classList.add('search-results');
+                appState.searchResultsLoading = true;
+
+                // Build route deck with the current route index to search for flights
+                import('../routeDeck/routeDeck.js').then(({ buildRouteDeck }) => {
+                    buildRouteDeck(routeIndex).then(() => {
+                        // Once the deck is built, expand the pane
+                        const infoPaneElement = document.getElementById('infoPane');
+                        infoPaneElement.classList.remove('collapsed');
+                        infoPaneElement.classList.add('expanded');
+                        
+                        // Notify about the view change
+                        document.dispatchEvent(new CustomEvent('stateChange', { 
+                            detail: { key: 'changeView', value: 'routeDeck' } 
+                        }));
+                        
+                        // Reset loading state
+                        setTimeout(() => appState.searchResultsLoading = false, 500);
+                    });
+                });
+            } else {
+                // Fallback if no route details are available
+                appState.currentView = 'routeDeck';
+                appState.currentRouteIndex = routeIndex;
+                document.dispatchEvent(new CustomEvent('stateChange', { 
+                    detail: { key: 'changeView', value: 'routeDeck' } 
+                }));
+            }
         });
         
         // Add click functionality to the overall route element
