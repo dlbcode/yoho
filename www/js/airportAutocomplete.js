@@ -355,6 +355,12 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
+        // Important: Clear any isAnyDestination/isAnyOrigin flags when setting a real airport
+        if (airport && airport.iata_code !== 'Any') {
+            airport.isAnyDestination = false;
+            airport.isAnyOrigin = false;
+        }
+
         // Update app state with the airport at the correct index
         updateState('updateWaypoint', { index: waypointIndex, data: airport }, 'airportAutocomplete.addEventListener1');
 

@@ -311,7 +311,25 @@ const infoPane = {
 
     handlePlusButtonClick(event) {
         if (appState.waypoints.length > 0) {
-            updateState('addWaypoint', { ...appState.waypoints.at(-1) }, 'infoPane.handlePlusButtonClick');
+            // Get the last waypoint (most recent destination)
+            const lastWaypoint = { ...appState.waypoints.at(-1) };
+            
+            // Only copy the waypoint if it has a valid IATA code (not 'Any')
+            if (lastWaypoint && lastWaypoint.iata_code && lastWaypoint.iata_code !== 'Any') {
+                // Add a real copy of the waypoint to avoid reference issues
+                updateState('addWaypoint', { 
+                    ...lastWaypoint,
+                    isAnyDestination: false, // Ensure this isn't set as "Any" destination
+                    isAnyOrigin: false // Ensure this isn't set as "Any" origin
+                }, 'infoPane.handlePlusButtonClick');
+                
+                // Log that we're adding a specific airport waypoint
+                console.log('Adding specific airport waypoint:', lastWaypoint.iata_code);
+            } else {
+                // If last waypoint is 'Any' or invalid, create a blank waypoint
+                updateState('addWaypoint', {}, 'infoPane.handlePlusButtonClick');
+                console.log('Adding blank waypoint since previous was Any or invalid');
+            }
 
             const routeIndex = appState.routes.length - 1;
             const prevDates = appState.routeDates[routeIndex] || {};
