@@ -216,6 +216,25 @@ const selectedRouteGroup = {
                 <div class="journey-segments">
                 ${journeyData.segments.map((segment, index) => {
                     const segmentClass = index === journeyData.segments.length - 1 ? 'last-segment' : '';
+                    
+                    // Get more precise datetime information like in selectedRoute.js
+                    const departureDate = new Date(segment.routeDetails.departure);
+                    const arrivalDate = new Date(segment.routeDetails.arrival);
+                    
+                    // Use fullData for more precise times if available
+                    const fullData = segment.fullData;
+                    const departureDateWithTime = fullData && fullData.local_departure ? 
+                        new Date(fullData.local_departure) : 
+                        fullData && fullData.dTime ? 
+                            new Date(fullData.dTime * 1000) : 
+                            departureDate;
+                    
+                    const arrivalDateWithTime = fullData && fullData.local_arrival ? 
+                        new Date(fullData.local_arrival) : 
+                        fullData && fullData.aTime ? 
+                            new Date(fullData.aTime * 1000) : 
+                            arrivalDate;
+                    
                     return `
                         <div class="journey-segment ${segmentClass}" data-segment-index="${segment.index}">
                             <div class="segment-header">
@@ -232,14 +251,14 @@ const selectedRouteGroup = {
                                 </div>
                                 <div class="segment-times">
                                     <div class="segment-departure">
-                                        <div class="time">${formatHelpers.formatFlightTime(new Date(segment.routeDetails.departure))}</div>
-                                        <div class="date">${formatHelpers.formatFlightDate(new Date(segment.routeDetails.departure))}</div>
+                                        <div class="time">${formatHelpers.formatFlightTime(departureDateWithTime)}</div>
+                                        <div class="date">${formatHelpers.formatFlightDate(departureDateWithTime)}</div>
                                         <div class="airport">${segment.origin}</div>
                                     </div>
                                     <div class="segment-arrow">→</div>
                                     <div class="segment-arrival">
-                                        <div class="time">${formatHelpers.formatFlightTime(new Date(segment.routeDetails.arrival))}</div>
-                                        <div class="date">${formatHelpers.formatFlightDate(new Date(segment.routeDetails.arrival))}</div>
+                                        <div class="time">${formatHelpers.formatFlightTime(arrivalDateWithTime)}</div>
+                                        <div class="date">${formatHelpers.formatFlightDate(arrivalDateWithTime)}</div>
                                         <div class="airport">${segment.destination}</div>
                                     </div>
                                 </div>
