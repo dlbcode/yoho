@@ -13,6 +13,8 @@ const removeRoute = (routeNumber) => {
     // Get the infoPane element before removing content
     const infoPaneElement = document.getElementById('infoPane');
     
+    console.log(`Removing route ${routeNumber}`);
+    
     let selectedRouteIndex = routeNumber;
     let groupNumber = appState.selectedRoutes[selectedRouteIndex]?.group;
 
@@ -48,9 +50,19 @@ const removeRoute = (routeNumber) => {
         }
     }
 
+    // Critical fix: Make a backup of the route data before marking it as empty
+    // This ensures we have data to log if something is going wrong
+    const routeBeforeRemoval = { ...appState.routeData[routeNumber] };
+    console.log(`Route ${routeNumber} data before removal:`, routeBeforeRemoval);
+
     // Mark the route as empty in routeData
     if (appState.routeData[routeNumber]) {
-        appState.routeData[routeNumber] = { isEmpty: true };
+        // Set isEmpty flag but preserve origin and destination for debugging
+        appState.routeData[routeNumber] = { 
+            isEmpty: true,
+            _previousOrigin: routeBeforeRemoval.origin,
+            _previousDestination: routeBeforeRemoval.destination
+        };
         
         // Also update legacy waypoints for compatibility
         updateState('removeWaypoints', { routeNumber }, 'removeRoute');
@@ -82,6 +94,9 @@ const removeRoute = (routeNumber) => {
     mapHandling.updateMarkerIcons();
     routeHandling.updateRoutesArray();
     adjustMapSize();
+    
+    // Force URL update
+    updateState('updateRoutes', appState.routes, 'removeRoute');
 };
 
 // Updated to use modal for selected routes

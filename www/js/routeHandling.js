@@ -5,6 +5,8 @@ import { lineManager } from './lineManager.js';
 
 const routeHandling = {
     updateRoutesArray: async function() {
+        console.log("updateRoutesArray called, routeData:", appState.routeData);
+        
         // Clear all existing route lines before drawing new ones
         lineManager.clearLines('route');
         
@@ -12,13 +14,21 @@ const routeHandling = {
         
         // First check if we should use the new route data structure
         if (appState.routeData && appState.routeData.length > 0) {
+            console.log("Processing routeData for routes:", appState.routeData);
+            
             // Don't reverse waypoints if origin is "Any" - add a check here
             const hasAnyOrigin = appState.routeData.some(r => r && r.origin && r.origin.iata_code === 'Any');
             
             // Process each route in routeData
             for (let i = 0; i < appState.routeData.length; i++) {
                 const route = appState.routeData[i];
-                if (!route || route.isEmpty) continue;
+                if (!route || route.isEmpty) {
+                    console.log(`Skipping empty route at index ${i}`);
+                    continue;
+                }
+                
+                // Important: log what we're working with to diagnose issues
+                console.log(`Processing route ${i}:`, route);
                 
                 // Apply route direction logic if needed
                 let origin = route.origin;
@@ -30,7 +40,13 @@ const routeHandling = {
                 }
                 
                 // Skip if no origin or destination
-                if (!origin && !destination) continue;
+                if (!origin && !destination) {
+                    console.log(`Skipping route ${i} - missing both origin and destination`);
+                    continue;
+                }
+                
+                console.log(`Route ${i} origin:`, origin);
+                console.log(`Route ${i} destination:`, destination);
                 
                 const routeIndex = i;
                 const isSelected = !!appState.selectedRoutes[routeIndex];
@@ -57,6 +73,7 @@ const routeHandling = {
                         routeData.hasAnyDestination = true;
                     }
                     
+                    console.log(`Adding "Any" route ${i}:`, routeData);
                     newRoutes.push(routeData);
                     continue;
                 }
@@ -73,9 +90,10 @@ const routeHandling = {
 
                 // Only look up route if both origin and destination have valid IATA codes
                 if (origin?.iata_code && destination?.iata_code) {
+                    console.log(`Looking up route from ${origin.iata_code} to ${destination.iata_code}`);
                     const foundRoute = flightMap.findRoute(origin.iata_code, destination.iata_code);
                     if (foundRoute) {
-                        newRoutes.push({
+                        const newRoute = {
                             ...foundRoute,
                             isDirect: true,
                             isSelected: isSelected,
@@ -83,9 +101,11 @@ const routeHandling = {
                             price: routePrice !== null ? routePrice : foundRoute.price,
                             tripType: route.tripType || 'oneWay',
                             travelers: route.travelers || 1
-                        });
+                        };
+                        console.log(`Adding direct route ${i}:`, newRoute);
+                        newRoutes.push(newRoute);
                     } else {
-                        newRoutes.push({
+                        const newRoute = {
                             origin: origin.iata_code,
                             destination: destination.iata_code,
                             isDirect: false,
@@ -94,11 +114,13 @@ const routeHandling = {
                             price: routePrice,
                             tripType: route.tripType || 'oneWay',
                             travelers: route.travelers || 1
-                        });
+                        };
+                        console.log(`Adding indirect route ${i}:`, newRoute);
+                        newRoutes.push(newRoute);
                     }
                 } else {
                     // Handle case where one of them is missing
-                    newRoutes.push({
+                    const newRoute = {
                         origin: origin?.iata_code || 'Any',
                         destination: destination?.iata_code || 'Any',
                         isDirect: false,
@@ -106,11 +128,15 @@ const routeHandling = {
                         price: routePrice,
                         tripType: route.tripType || 'oneWay',
                         travelers: route.travelers || 1
-                    });
+                    };
+                    console.log(`Adding partial route ${i}:`, newRoute);
+                    newRoutes.push(newRoute);
                 }
             }
         } else {
             // Fall back to legacy logic using waypoints array
+            console.log("Using legacy waypoints array for routes:", appState.waypoints);
+            
             // Don't reverse waypoints if origin is "Any" - add a check here
             const hasAnyOrigin = appState.waypoints.some((wp, i) => 
                 i % 2 === 0 && wp && (wp.iata_code === 'Any' || wp.isAnyOrigin));
@@ -225,8 +251,9 @@ const routeHandling = {
         }
 
         // Update state and redraw
+        console.log("Final routes array:", newRoutes);
         updateState('updateRoutes', newRoutes, 'routeHandling.updateRoutesArray');
-        console.log('Updated routes:', appState.routes);
+        console.log('Updated routes in state:', appState.routes);
         await pathDrawing.drawLines();
     }
 };
