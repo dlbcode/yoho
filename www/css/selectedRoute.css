@@ -14,6 +14,8 @@
   flex-wrap: nowrap;
   gap: 10px;
   height: 40px; /* Set consistent height for the container */
+  position: relative; /* Add position relative to contain absolutely positioned children */
+  z-index: 5; /* Ensure it stays above other content but below global elements */
 }
 
 /* Back button style */
@@ -33,6 +35,8 @@
   white-space: nowrap;
   height: 36px; /* Consistent height */
   box-sizing: border-box;
+  position: relative; /* Ensure the button maintains its position in the flow */
+  z-index: 6; /* Higher than the header to ensure it's clickable */
 }
 
 /* Style for the arrow SVG to ensure consistent appearance */
@@ -504,11 +508,19 @@
     align-items: center; /* Center align items */
     height: auto;
     min-height: 40px;
+    position: sticky; /* Change from relative to sticky */
+    top: 0; /* Stick to the top of the container */
+    background-color: #1d1d1d; /* Match the container background */
+    padding-top: 10px; /* Add some padding at the top */
+    margin-top: -10px; /* Offset the padding to maintain visual spacing */
+    z-index: 10; /* Increase z-index to ensure it stays on top */
   }
   
   .back-button {
     width: auto; /* Auto width instead of 100% */
     margin-bottom: 0; /* Remove bottom margin */
+    position: static; /* Reset any positioning to keep it in the normal flow */
+    z-index: 11; /* Higher than the header */
   }
   
   .back-button .change-route-button {
