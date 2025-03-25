@@ -204,41 +204,6 @@
   background-color: rgba(107, 165, 255, 0.2);
 }
 
-/* Group button styling */
-.group-route-button {
-  position: relative;
-}
-
-.group-route-button .top-border,
-.group-route-button .bottom-border {
-  position: absolute;
-  left: 0;
-  right: 0;
-  height: 8px;
-  background-color: transparent;
-  z-index: 1;
-}
-
-.group-route-button .top-border {
-  top: -8px;
-  border-left: 2px dashed #3b4559;
-  border-right: 2px dashed #3b4559;
-}
-
-.group-route-button .bottom-border {
-  bottom: -8px;
-  border-left: 2px dashed #3b4559;
-  border-right: 2px dashed #3b4559;
-}
-
-.group-route-button-first .top-border {
-  display: none;
-}
-
-.group-route-button-last .bottom-border {
-  display: none;
-}
-
 /* Responsive styles for journey view */
 @media (max-width: 768px) {
   .journey-stats {
