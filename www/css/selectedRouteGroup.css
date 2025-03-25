@@ -1,0 +1,269 @@
+/* Styles for the full journey view */
+.journey-overview {
+  margin-bottom: 20px;
+}
+
+.journey-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.journey-summary h2 {
+  margin: 0 0 10px 0;
+  font-size: 20px;
+  font-weight: 600;
+  color: #fff;
+}
+
+.journey-stats {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+
+.journey-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.stat-label {
+  font-size: 12px;
+  color: #999;
+}
+
+.stat-value {
+  font-size: 16px;
+  color: #fff;
+  font-weight: 500;
+}
+
+.airline-logos {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 5px;
+}
+
+.airline-logo-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.small-airline-logo {
+  width: 30px;
+  height: 30px;
+  object-fit: contain;
+  background-color: #fff;
+  border-radius: 6px;
+  padding: 2px;
+}
+
+.airline-code {
+  font-size: 12px;
+  color: #ccc;
+}
+
+.journey-segments-container {
+  margin-bottom: 30px;
+}
+
+.journey-segments-container h3 {
+  margin: 0 0 15px 0;
+  font-size: 18px;
+  font-weight: 500;
+  color: #e0e0e0;
+}
+
+.journey-segments {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.journey-segment {
+  background-color: #222;
+  border-radius: 8px;
+  padding: 15px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  position: relative;
+}
+
+.journey-segment:hover {
+  background-color: #2a2a2a;
+}
+
+.journey-segment:not(.last-segment)::after {
+  content: '';
+  position: absolute;
+  bottom: -12px;
+  left: 20px;
+  right: 20px;
+  height: 8px;
+  border-left: 2px dashed #3b4559;
+  border-right: 2px dashed #3b4559;
+  border-bottom: 2px dashed #3b4559;
+  border-bottom-left-radius: 8px;
+  border-bottom-right-radius: 8px;
+  z-index: 0;
+}
+
+.segment-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #333;
+}
+
+.segment-number {
+  font-weight: 500;
+  color: #999;
+  font-size: 14px;
+}
+
+.segment-route {
+  font-weight: 600;
+  font-size: 16px;
+  color: #6ba5ff;
+}
+
+.segment-price {
+  font-weight: 600;
+  color: #39a7ff;
+}
+
+.segment-details {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.segment-airline {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.segment-times {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  justify-content: space-between;
+}
+
+.segment-departure, .segment-arrival {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.segment-arrow {
+  font-size: 20px;
+  color: #6ba5ff;
+}
+
+.time {
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.date {
+  font-size: 12px;
+  color: #999;
+}
+
+.airport {
+  font-size: 14px;
+  color: #e0e0e0;
+  font-weight: 500;
+}
+
+.view-segment-button {
+  background-color: rgba(107, 165, 255, 0.1);
+  color: #6ba5ff;
+  border: 1px solid #3b4559;
+  border-radius: 4px;
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-top: 5px;
+  width: 100%;
+  text-align: center;
+}
+
+.view-segment-button:hover {
+  background-color: rgba(107, 165, 255, 0.2);
+}
+
+/* Group button styling */
+.group-route-button {
+  position: relative;
+}
+
+.group-route-button .top-border,
+.group-route-button .bottom-border {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 8px;
+  background-color: transparent;
+  z-index: 1;
+}
+
+.group-route-button .top-border {
+  top: -8px;
+  border-left: 2px dashed #3b4559;
+  border-right: 2px dashed #3b4559;
+}
+
+.group-route-button .bottom-border {
+  bottom: -8px;
+  border-left: 2px dashed #3b4559;
+  border-right: 2px dashed #3b4559;
+}
+
+.group-route-button-first .top-border {
+  display: none;
+}
+
+.group-route-button-last .bottom-border {
+  display: none;
+}
+
+/* Responsive styles for journey view */
+@media (max-width: 768px) {
+  .journey-stats {
+    gap: 12px;
+  }
+  
+  .segment-times {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .segment-arrow {
+    transform: rotate(90deg);
+  }
+}
+
+@media (max-width: 480px) {
+  .segment-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
+  }
+  
+  .segment-price {
+    align-self: flex-end;
+    margin-top: -20px;
+  }
+}

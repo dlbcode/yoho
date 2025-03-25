@@ -3,6 +3,14 @@ import { infoPaneHeight } from '../utils/infoPaneHeightManager.js';
 import { flightMap } from '../flightMap.js';
 import { airlineLogoManager } from '../utils/airlineLogoManager.js';
 
+// Load the selectedRouteGroup CSS
+(function loadSelectedRouteGroupCSS() {
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = './css/selectedRouteGroup.css';
+    document.head.appendChild(link);
+})();
+
 // Function to load airline names from JSON file (similar to selectedRoute.js)
 let airlineNamesCache = null;
 
