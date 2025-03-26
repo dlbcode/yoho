@@ -96,16 +96,9 @@ const infoPane = {
             import('./routeDeck/selectedRoute.js').then(({ selectedRoute }) => {
                 selectedRoute.displaySelectedRouteInfo(routeIndex);
             });
-        } else if (appState.routeData[routeIndex]?.segmentGroup) {
-            // If the route belongs to a group, update the group route button styles
-            import('./routeDeck/selectedRouteGroup.js').then(({ selectedRouteGroup }) => {
-                selectedRouteGroup.updateGroupRouteButtonStyles(appState.routeData[routeIndex].segmentGroup);
-            });
         } else {
-            // Otherwise, update the route button state and display the route content
-            import('./routeDeck/selectedRoute.js').then(({ selectedRoute }) => {
-                selectedRoute.updateRouteButtonState(routeIndex);
-            });
+            // For non-selected routes, just show the route content
+            // No need to update styling for a non-selected route
             setupRouteContent(routeIndex);
         }
     },

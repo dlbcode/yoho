@@ -381,9 +381,11 @@ const selectedRouteGroup = {
     updateGroupRouteButtonStyles: function(groupId) {
         this.removeGroupButtonStyles();
 
-        const groupRouteIndices = appState.routeData
-            .map((route, index) => (route?.segmentGroup === groupId ? index : null))
-            .filter(index => index !== null);
+        // Get route indices from selectedRoutes that belong to this group
+        const groupRouteIndices = Object.entries(appState.selectedRoutes)
+            .filter(([_, route]) => route.group === groupId)
+            .map(([idx, _]) => parseInt(idx))
+            .sort((a, b) => a - b);
 
         if (groupRouteIndices.length === 0) return;
 
@@ -391,6 +393,7 @@ const selectedRouteGroup = {
             const button = document.getElementById(`route-button-${routeIndex}`);
             if (button) {
                 button.classList.add('group-route-button');
+                button.classList.add('selected-route-button');  // Always mark as selected
 
                 const topBorder = document.createElement('div');
                 topBorder.className = 'top-border';
