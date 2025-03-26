@@ -89,8 +89,16 @@ const infoPane = {
 
     // Add the missing handleRouteButtonClick method
     handleRouteButtonClick(routeIndex) {
-        // Call setupRouteContent with the route index
-        setupRouteContent(routeIndex);
+        // Check if this is a selected route
+        if (appState.selectedRoutes[routeIndex]) {
+            // This is a selected route - display the selected route info
+            import('./routeDeck/selectedRoute.js').then(({ selectedRoute }) => {
+                selectedRoute.displaySelectedRouteInfo(routeIndex);
+            });
+        } else {
+            // This is not a selected route - use standard setupRouteContent
+            setupRouteContent(routeIndex);
+        }
     },
 
     updateRouteButtons() {
@@ -573,6 +581,57 @@ function setupRouteContent(routeIndex) {
     const currentButton = document.getElementById(`route-button-${routeIndex}`);
     if (currentButton) {
         currentButton.classList.add('active-route-button');
+    }
+
+    // Check if this is a selected route segment without corresponding routeData
+    const selectedRouteData = appState.selectedRoutes[routeIndex];
+    if (selectedRouteData && (!appState.routeData[routeIndex] || appState.routeData[routeIndex].isEmpty)) {
+        // This is a segment of a multi-segment route that doesn't have routeData
+        // Extract route information from the selectedRoute to create routeData
+        const routeParts = selectedRouteData.displayData.route.split(' > ');
+        if (routeParts.length === 2) {
+            const origin = routeParts[0];
+            const destination = routeParts[1];
+            
+            // Get airport data if available in the cache
+            let originData = null;
+            let destinationData = null;
+            
+            if (window.flightMap && window.flightMap.airportDataCache) {
+                originData = window.flightMap.airportDataCache[origin] || { iata_code: origin, city: origin };
+                destinationData = window.flightMap.airportDataCache[destination] || { iata_code: destination, city: destination };
+            } else {
+                originData = { iata_code: origin, city: origin };
+                destinationData = { iata_code: destination, city: destination };
+            }
+            
+            // Create routeData for this segment
+            appState.routeData[routeIndex] = {
+                tripType: 'oneWay', // Default for segments
+                travelers: 1, // Default value
+                departDate: selectedRouteData.displayData.departure,
+                returnDate: null,
+                origin: originData,
+                destination: destinationData,
+                isSegment: true // Mark this as a segment for special handling
+            };
+            
+            // Add to waypoints array for backwards compatibility
+            while (appState.waypoints.length <= (routeIndex * 2 + 1)) {
+                appState.waypoints.push(null);
+            }
+            appState.waypoints[routeIndex * 2] = originData;
+            appState.waypoints[routeIndex * 2 + 1] = destinationData;
+            
+            // Update route dates
+            updateState('updateRouteDate', {
+                routeNumber: routeIndex,
+                depart: selectedRouteData.displayData.departure,
+                return: null
+            }, 'setupRouteContent');
+            
+            console.log(`Created routeData for segment ${routeIndex}:`, appState.routeData[routeIndex]);
+        }
     }
 
     let contentWrapper;
