@@ -502,6 +502,7 @@ const pathDrawing = {
         // Clear all existing lines first
         lineManager.clearLines('all');
         
+        // Use appState.routes for drawing because it has the processed data needed
         const promises = appState.routes.map((route, index) => {
             if (!route.origin || !route.destination) return Promise.resolve();
             

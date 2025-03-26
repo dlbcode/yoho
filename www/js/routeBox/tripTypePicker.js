@@ -75,43 +75,53 @@ export function tripTypePicker(routeNumber) {
 // Note: I don't have access to this file directly so you'll need to adapt this to your codebase
 
 export function handleTripTypeChange(tripType, routeNumber) {
-    // Get references to both input fields
-    const fromInput = document.getElementById(`waypoint-input-${routeNumber * 2 + 1}`);
-    const toInput = document.getElementById(`waypoint-input-${routeNumber * 2 + 2}`);
+    // Get the route data for this route number
+    const routeData = appState.routeData[routeNumber] || {};
     
     // Update the routes array with the new trip type
     updateState('tripType', { routeNumber: routeNumber, tripType: tripType }, 'tripTypePicker.handleTripTypeChange');
     
     // Check if origin is set to "Anywhere"
-    const isOriginAny = fromInput?.value === 'Anywhere' || 
+    const isOriginAny = routeData.origin?.iata_code === 'Any' || routeData.origin?.isAnyOrigin;
+    
+    // Check if destination is set to "Anywhere"
+    const isDestinationAny = routeData.destination?.iata_code === 'Any' || routeData.destination?.isAnyDestination;
+    
+    // If that didn't work, fall back to DOM and waypoints check for backwards compatibility
+    const fromInput = document.getElementById(`waypoint-input-${routeNumber * 2 + 1}`);
+    const toInput = document.getElementById(`waypoint-input-${routeNumber * 2 + 2}`);
+    
+    const isOriginAnyFallback = isOriginAny || fromInput?.value === 'Anywhere' || 
         fromInput?.getAttribute('data-is-any-destination') === 'true' ||
         (appState.waypoints[routeNumber * 2] && 
          (appState.waypoints[routeNumber * 2].iata_code === 'Any' || 
           appState.waypoints[routeNumber * 2].isAnyDestination === true));
     
-    // Check if destination is set to "Anywhere"
-    const isDestinationAny = toInput?.value === 'Anywhere' || 
+    const isDestinationAnyFallback = isDestinationAny || toInput?.value === 'Anywhere' || 
         toInput?.getAttribute('data-is-any-destination') === 'true' ||
         (appState.waypoints[routeNumber * 2 + 1] && 
          (appState.waypoints[routeNumber * 2 + 1].iata_code === 'Any' || 
           appState.waypoints[routeNumber * 2 + 1].isAnyDestination === true));
     
     // If both are "Anywhere", clear origin to prevent invalid state
-    if (isOriginAny && isDestinationAny) {
-        // Clear origin if both are "Anywhere"
+    if (isOriginAnyFallback && isDestinationAnyFallback) {
+        // Update routeData first
+        if (appState.routeData[routeNumber]) {
+            appState.routeData[routeNumber].origin = null;
+        }
+        
+        // Clear origin in DOM
         if (fromInput) {
             fromInput.value = '';
             fromInput.removeAttribute('data-selected-iata');
             fromInput.removeAttribute('data-is-any-destination');
         }
         
-        // Update the waypoint in the state
-        if (appState.waypoints[routeNumber * 2]) {
-            updateState('updateWaypoint', {
-                index: routeNumber * 2,
-                data: null
-            }, 'tripTypePicker.handleTripTypeChange.preventDualAny');
-        }
+        // Update the waypoint in the state for backwards compatibility
+        updateState('updateWaypoint', {
+            index: routeNumber * 2,
+            data: null
+        }, 'tripTypePicker.handleTripTypeChange.preventDualAny');
         
         // Preserve only the destination as "Anywhere"
         window.preserveAnyDestination = true;
@@ -120,7 +130,7 @@ export function handleTripTypeChange(tripType, routeNumber) {
         }, 500);
     }
     // If either origin or destination is "Anywhere" (but not both), preserve it
-    else if (isOriginAny || isDestinationAny) {
+    else if (isOriginAnyFallback || isDestinationAnyFallback) {
         window.preserveAnyDestination = true;
         setTimeout(() => {
             window.preserveAnyDestination = false;

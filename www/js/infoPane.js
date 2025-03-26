@@ -15,24 +15,62 @@ const infoPane = {
         document.getElementById('tripButton').addEventListener('click', this.handleTripButtonClick.bind(this));
         this.addPlusButton();
         
-        // Check if URL contains waypoints parameter
-        const urlParams = new URLSearchParams(window.location.search);
-        const hasWaypointsInUrl = urlParams.has('waypoints');
-        
-        // Only trigger plus button click if there are no waypoints and no waypoints in URL
-        if (appState.waypoints.length === 0 && !hasWaypointsInUrl) {
-            this.handlePlusButtonClick();
-        }
+        // Modified logic: Use setTimeout to ensure DOM is fully ready
+        setTimeout(() => {
+            // Check if there are no routes or waypoints
+            const hasNoRoutes = (
+                Array.isArray(appState.routeData) && appState.routeData.length === 0 ||
+                !appState.routeData || 
+                Object.keys(appState.routeData).length === 0
+            );
+            
+            const hasNoWaypoints = (
+                !Array.isArray(appState.waypoints) || 
+                appState.waypoints.length === 0 || 
+                !appState.waypoints.some(wp => wp)
+            );
+            
+            // Check URL for routes parameter
+            const urlParams = new URLSearchParams(window.location.search);
+            const hasRoutesInUrl = urlParams.has('routes');
+            
+            console.log("Initial load check - No routes:", hasNoRoutes, "No waypoints:", hasNoWaypoints, "Routes in URL:", hasRoutesInUrl);
+            
+            // Create initial routeBox if needed
+            if (hasNoRoutes && hasNoWaypoints && !hasRoutesInUrl) {
+                console.log("Creating initial routeBox");
+                this.handlePlusButtonClick();
+            } else if (hasRoutesInUrl && !document.querySelector('#routeBox')) {
+                // If routes are in URL but no routeBox is displayed, show the first route
+                console.log("Displaying first route from URL");
+                const firstRouteIndex = Object.keys(appState.routeData)
+                    .filter(key => appState.routeData[key] && !appState.routeData[key].isEmpty)
+                    .sort((a, b) => parseInt(a) - parseInt(b))[0] || 0;
+                    
+                setupRouteContent(parseInt(firstRouteIndex));
+            }
+        }, 100); // Short delay to ensure state is initialized
     },
 
     handleTripButtonClick() {
         appState.currentView = 'trip';
         this.displayContent();
 
-        const waypointsLatLng = appState.waypoints.map(({ latitude, longitude }) => [latitude, longitude]);
+        // Update to use routeData for fitting map bounds
+        const validRoutes = Object.values(appState.routeData).filter(r => r && !r.isEmpty);
+        const waypoints = [];
+        
+        validRoutes.forEach(route => {
+            if (route.origin && route.origin.latitude && route.origin.longitude) {
+                waypoints.push([route.origin.latitude, route.origin.longitude]);
+            }
+            if (route.destination && route.destination.latitude && route.destination.longitude) {
+                waypoints.push([route.destination.latitude, route.destination.longitude]);
+            }
+        });
 
-        if (waypointsLatLng.length > 0) {
-            map.fitBounds(L.latLngBounds(waypointsLatLng), { padding: [50, 50] });
+        if (waypoints.length > 0) {
+            map.fitBounds(L.latLngBounds(waypoints), { padding: [50, 50] });
         }
     },
 
@@ -47,6 +85,12 @@ const infoPane = {
         //const infoPaneContent = document.getElementById('infoPaneContent'); //Unused variable
         //const routeBox = document.getElementById('routeBox'); //Unused variable
         //const currentView = appState.currentView; //Unused variable
+    },
+
+    // Add the missing handleRouteButtonClick method
+    handleRouteButtonClick(routeIndex) {
+        // Call setupRouteContent with the route index
+        setupRouteContent(routeIndex);
     },
 
     updateRouteButtons() {
@@ -70,32 +114,63 @@ const infoPane = {
             }
         });
 
-        // Use routeData if available, otherwise fall back to waypoints
-        const routeCount = Math.max(
-            appState.routeData ? appState.routeData.length : 0,
-            Math.ceil(appState.waypoints.length / 2)
-        );
+        // Collect all route indices we need to display buttons for
+        const routeIndices = new Set();
         
-        for (let routeIndex = 0; routeIndex < routeCount; routeIndex++) {
-            // Skip empty routes
+        // First add indices from routeData
+        for (let i = 0; i < appState.routeData.length; i++) {
+            const routeData = appState.routeData[i];
+            if (routeData && !routeData.isEmpty) {
+                routeIndices.add(i);
+            }
+        }
+        
+        // Then add indices from selectedRoutes that might not be in routeData
+        Object.keys(appState.selectedRoutes).forEach(index => {
+            routeIndices.add(parseInt(index));
+        });
+        
+        // Sort indices to maintain consistent button order
+        const sortedIndices = Array.from(routeIndices).sort((a, b) => a - b);
+        
+        console.log("Creating route buttons for indices:", sortedIndices);
+        console.log("Selected route indices:", Array.from(selectedRouteIndices));
+        
+        // Create buttons for all routes in our combined set
+        for (const routeIndex of sortedIndices) {
+            // Get route data - first try routeData, then fall back to selectedRoutes
             const routeData = appState.routeData[routeIndex];
-            if (routeData && routeData.isEmpty) continue;
+            const selectedRoute = appState.selectedRoutes[routeIndex];
+            
+            // Skip empty routes with no selected route
+            if ((!routeData || routeData.isEmpty) && !selectedRoute) {
+                continue;
+            }
             
             const buttonId = `route-button-${routeIndex}`;
             let button = document.getElementById(buttonId) || document.createElement('button');
             
-            // Get origin and destination - use routeData if available
-            const origin = routeData ? 
-                routeData.origin?.iata_code : 
-                appState.waypoints[routeIndex * 2]?.iata_code;
-                
-            const destination = routeData ? 
-                routeData.destination?.iata_code : 
-                appState.waypoints[routeIndex * 2 + 1]?.iata_code;
+            // Get origin and destination - first try routeData, then fall back to selectedRoute
+            let origin, destination;
+            
+            if (routeData && !routeData.isEmpty) {
+                // Use data from routeData
+                origin = routeData.origin?.iata_code;
+                destination = routeData.destination?.iata_code;
+            } else if (selectedRoute) {
+                // Fall back to selectedRoute data
+                const routeParts = selectedRoute.displayData?.route?.split(' > ') || [];
+                origin = routeParts[0];
+                destination = routeParts[1];
+            } else {
+                // Skip if we can't determine origin/destination
+                continue;
+            }
             
             // Skip if both origin and destination are missing
             if (!origin && !destination) continue;
             
+            // Create or update button
             if (!button.id) {
                 button.id = buttonId;
                 button.className = 'route-info-button';
@@ -135,7 +210,8 @@ const infoPane = {
             
             button.appendChild(destElement);
             
-            button.onclick = this.handleRouteButtonClick.bind(this, routeIndex);
+            // Use the method reference for the click handler
+            button.onclick = () => this.handleRouteButtonClick(routeIndex);
 
             // Only fit map to route if we're not preventing map view changes
             if (!appState.preventMapViewChange) {
@@ -149,13 +225,24 @@ const infoPane = {
             } else {
                 button.classList.remove('selected-route-button');
             }
-
-            // Get date range from routeData if available, otherwise use routeDates
-            const dateRange = routeData ? 
-                { depart: routeData.departDate, return: routeData.returnDate } : 
-                appState.routeDates[routeIndex];
+            
+            // Get date range from the best available source
+            let dateRange;
+            if (routeData && !routeData.isEmpty) {
+                dateRange = { 
+                    depart: routeData.departDate,
+                    return: routeData.returnDate
+                };
+            } else if (selectedRoute) {
+                dateRange = selectedRoute.routeDates || {
+                    depart: selectedRoute.displayData?.departure,
+                    return: selectedRoute.displayData?.arrival
+                };
+            }
                 
-            uiHandling.attachDateTooltip(button, routeIndex, dateRange);
+            if (dateRange) {
+                uiHandling.attachDateTooltip(button, routeIndex, dateRange);
+            }
 
             // Use a single event listener for both mouseover and mouseout
             button.addEventListener('mouseover', () => {
@@ -171,53 +258,14 @@ const infoPane = {
             });
         }
 
-        // Add plus button if there are no routes or if all routes have both origin and destination
-        const allRoutesComplete = appState.routeData.every(r => !r || r.isEmpty || (r.origin && r.destination));
-        if (routeCount === 0 || allRoutesComplete) {
+        // Add plus button if appropriate - now check both structures
+        const allRoutesComplete = Object.values(appState.routeData).every(
+            r => !r || r.isEmpty || (r.origin && r.destination)
+        );
+        
+        if (sortedIndices.length === 0 || allRoutesComplete) {
             this.addPlusButton();
         }
-    },
-
-    handleRouteButtonClick(routeIndex, event) {
-        event.stopPropagation();
-
-        // Set a flag to prevent line clearing during route switching
-        appState.isRouteSwitching = true;
-
-        // Remove active-route-button class from all buttons
-        document.querySelectorAll('.route-info-button').forEach(button => {
-            button.classList.remove('active-route-button');
-        });
-
-        // Simplify height check and collapse logic
-        if (routeIndex === appState.currentRouteIndex &&
-            document.getElementById('infoPane').offsetHeight > infoPaneHeight.MENU_BAR_HEIGHT) {
-            infoPaneHeight.setHeight('collapse');
-            appState.isRouteSwitching = false; // Reset flag
-            return;
-        }
-
-        // Check if this is a selected route
-        if (appState.selectedRoutes[routeIndex]) {
-            // Import the selectedRoute module if not already imported
-            import('./routeDeck/selectedRoute.js').then(({ selectedRoute }) => {
-                // Don't need to call setupRouteContent first, let the selectedRoute module handle it
-                selectedRoute.displaySelectedRouteInfo(routeIndex);
-                this.fitMapToRoute(routeIndex);
-                
-                // Add active-route-button class to the current button
-                document.getElementById(`route-button-${routeIndex}`).classList.add('active-route-button');
-            });
-        } else {
-            // Only call setupRouteContent for non-selected routes
-            const { routeBoxElement } = setupRouteContent(routeIndex);
-            this.fitMapToRoute(routeIndex);
-        }
-        
-        // Reset the flag after a short delay to allow for inputs to initialize
-        setTimeout(() => {
-            appState.isRouteSwitching = false;
-        }, 500);
     },
 
     updateTripDeck(selectedRoutesArray) {
@@ -251,10 +299,14 @@ const infoPane = {
         return selectedRoutesArray.reduce((groupData, item, index) => {
             const group = item.group;
             const routeParts = item.displayData.route.split(' > '); // Extract route parts
+            
+            // Get route data for more consistent date access
+            const routeData = appState.routeData[item.routeNumber];
+            
             if (!groupData[group]) {
                 groupData[group] = {
-                    departure: appState.routeDates[item.routeNumber]?.depart,
-                    arrival: appState.routeDates[item.routeNumber]?.return,
+                    departure: routeData?.departDate,
+                    arrival: routeData?.returnDate,
                     price: item.displayData.price,
                     airlines: [item.displayData.airline],
                     stops: new Set(),
@@ -262,7 +314,7 @@ const infoPane = {
                     deep_link: item.displayData.deep_link
                 };
             } else {
-                groupData[group].arrival = appState.routeDates[item.routeNumber]?.return;
+                groupData[group].arrival = routeData?.returnDate;
                 groupData[group].airlines.push(item.displayData.airline);
             }
             groupData[group].route.push(routeParts[1]); // Use extracted route parts
@@ -336,47 +388,70 @@ const infoPane = {
     },
 
     handlePlusButtonClick(event) {
-        if (appState.waypoints.length > 0) {
-            // Get the last waypoint (most recent destination)
-            const lastWaypoint = { ...appState.waypoints.at(-1) };
+        // Get the last non-empty route
+        const validRoutes = Object.entries(appState.routeData)
+            .filter(([_, route]) => route && !route.isEmpty)
+            .sort((a, b) => parseInt(a) - parseInt(b));
+        
+        // Find the index for the new route - next available after the existing routes
+        let newRouteIndex = 0;
+        if (validRoutes.length > 0) {
+            newRouteIndex = parseInt(validRoutes[validRoutes.length - 1][0]) + 1;
+        }
+        
+        // Create new route data structure for this route
+        if (!appState.routeData[newRouteIndex]) {
+            // Get previous route data if available
+            const prevRouteIndex = newRouteIndex > 0 ? newRouteIndex - 1 : 0;
+            const prevRoute = appState.routeData[prevRouteIndex];
             
-            // Only copy the waypoint if it has a valid IATA code (not 'Any')
-            if (lastWaypoint && lastWaypoint.iata_code && lastWaypoint.iata_code !== 'Any') {
-                // Add a real copy of the waypoint to avoid reference issues
-                updateState('addWaypoint', { 
-                    ...lastWaypoint,
-                    isAnyDestination: false, // Ensure this isn't set as "Any" destination
-                    isAnyOrigin: false // Ensure this isn't set as "Any" origin
-                }, 'infoPane.handlePlusButtonClick');
-                
-                // Log that we're adding a specific airport waypoint
-                console.log('Adding specific airport waypoint:', lastWaypoint.iata_code);
-            } else {
-                // If last waypoint is 'Any' or invalid, create a blank waypoint
-                updateState('addWaypoint', {}, 'infoPane.handlePlusButtonClick');
-                console.log('Adding blank waypoint since previous was Any or invalid');
+            // Initialize with destination from previous route as origin if applicable
+            const origin = prevRoute && prevRoute.destination && prevRoute.destination.iata_code !== 'Any' 
+                ? { ...prevRoute.destination, isAnyDestination: false, isAnyOrigin: false }
+                : null;
+            
+            // Calculate departure date (day after previous route's return or departure date)
+            let departDate = new Date();
+            if (prevRoute) {
+                const baseDate = prevRoute.returnDate ? new Date(prevRoute.returnDate) : 
+                                  prevRoute.departDate ? new Date(prevRoute.departDate) : new Date();
+                if (!isNaN(baseDate)) {
+                    departDate = baseDate;
+                    departDate.setDate(departDate.getDate() + 1);
+                }
             }
-
-            const routeIndex = appState.routes.length - 1;
-            const prevDates = appState.routeDates[routeIndex] || {};
-
-            const baseDate = new Date(prevDates.return || prevDates.depart || Date.now());
-            const newDate = !isNaN(baseDate) ? baseDate : new Date();
-            newDate.setDate(newDate.getDate() + 1);
-
-            const formattedDate =
-                newDate.getFullYear() + '-' +
-                String(newDate.getMonth() + 1).padStart(2, '0') + '-' +
-                String(newDate.getDate()).padStart(2, '0');
-
+            
+            // Format date as YYYY-MM-DD
+            const formattedDate = departDate.toISOString().split('T')[0];
+            
+            // Create the new route data
+            appState.routeData[newRouteIndex] = {
+                tripType: 'oneWay', // Default to one-way
+                travelers: 1, // Default to 1 traveler
+                departDate: formattedDate,
+                returnDate: null,
+                origin: origin,
+                destination: null
+            };
+            
+            // Update waypoints for backward compatibility
+            if (origin) {
+                updateState('updateWaypoint', { 
+                    index: newRouteIndex * 2, 
+                    data: origin 
+                }, 'infoPane.handlePlusButtonClick');
+            }
+            
+            // Update route dates for backward compatibility
             updateState('updateRouteDate', {
-                routeNumber: routeIndex + 1,
+                routeNumber: newRouteIndex,
                 depart: formattedDate,
                 return: null
             }, 'infoPane.handlePlusButtonClick');
         }
 
-        setupRouteContent(appState.routes.length);
+        // Set up the route box UI with the new route index
+        setupRouteContent(newRouteIndex);
     },
 
     applyToLines(tags, action) {
@@ -390,15 +465,38 @@ const infoPane = {
             return;
         }
         
-        // Use routeData if available, otherwise fall back to waypoints
+        // Try to get route data from either routeData or selectedRoutes
         const routeData = appState.routeData[routeIndex];
-        const originWaypoint = routeData ? 
-            routeData.origin : 
-            appState.waypoints[routeIndex * 2];
-            
-        const destinationWaypoint = routeData ? 
-            routeData.destination : 
-            appState.waypoints[routeIndex * 2 + 1];
+        const selectedRoute = appState.selectedRoutes[routeIndex];
+        
+        if (!routeData && !selectedRoute) return;
+        
+        let originWaypoint, destinationWaypoint;
+        
+        if (routeData && !routeData.isEmpty) {
+            // Get waypoints from routeData - this is the preferred source
+            originWaypoint = routeData.origin;
+            destinationWaypoint = routeData.destination;
+        } else if (selectedRoute && selectedRoute.displayData) {
+            // Try to get waypoints from selectedRoute
+            const route = selectedRoute.displayData.route.split(' > ');
+            if (route.length >= 2) {
+                // We just have IATA codes here, not full waypoint objects
+                // We'll need to fetch the airport data
+                originWaypoint = { iata_code: route[0] };
+                destinationWaypoint = { iata_code: route[1] };
+                
+                // Try to get airport data from airportDataCache if available
+                if (window.flightMap && window.flightMap.airportDataCache) {
+                    if (window.flightMap.airportDataCache[originWaypoint.iata_code]) {
+                        originWaypoint = window.flightMap.airportDataCache[originWaypoint.iata_code];
+                    }
+                    if (window.flightMap.airportDataCache[destinationWaypoint.iata_code]) {
+                        destinationWaypoint = window.flightMap.airportDataCache[destinationWaypoint.iata_code];
+                    }
+                }
+            }
+        }
         
         // If either waypoint is missing or has iata_code=Any, don't adjust the map
         if (!originWaypoint || !destinationWaypoint || 
@@ -447,10 +545,12 @@ const infoPane = {
     }
 };
 
-document.querySelectorAll('.routeButton').forEach(button => {
-    button.addEventListener('click', handleRouteButtonClick);
-});
+// Remove the redundant event listeners since we now handle this in the infoPane object
+// document.querySelectorAll('.routeButton').forEach(button => {
+//     button.addEventListener('click', handleRouteButtonClick);
+// });
 
+// Keep this function but remove the duplicate event binding
 function handleRouteButtonClick(event) {
     const routeIndex = parseInt(event.target.dataset.routeIndex, 10);
     setupRouteContent(routeIndex);

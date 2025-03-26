@@ -15,13 +15,16 @@ const handleWaypointChange = () => {
     
     // Don't clear deck lines if we're just handling an "Any" destination
     // or if we're in the middle of a route switch
-    const isAnyDestinationChange = appState.waypoints.some(wp => wp && wp.iata_code === 'Any' && wp.isAnyDestination) ||
-                                 appState.routeData.some(r => r && (
-                                     (r.origin?.iata_code === 'Any' && r.origin?.isAnyOrigin) || 
-                                     (r.destination?.iata_code === 'Any' && r.destination?.isAnyDestination)
-                                 ));
+    const isAnyDestinationChange = appState.routeData.some(r => r && !r.isEmpty && (
+        (r.origin?.iata_code === 'Any') || 
+        (r.destination?.iata_code === 'Any')
+    ));
     
-    if (!isAnyDestinationChange && !appState.isRouteSwitching) {
+    // Fall back to checking waypoints for backward compatibility
+    const isAnyWaypointChange = isAnyDestinationChange || 
+        appState.waypoints.some(wp => wp && wp.iata_code === 'Any');
+    
+    if (!isAnyWaypointChange && !appState.isRouteSwitching) {
         routeHandling.updateRoutesArray();
         clearLinesForView('routeDeck');
     }

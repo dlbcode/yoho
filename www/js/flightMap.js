@@ -57,7 +57,17 @@ const flightMap = {
 
     getMarkerIcon(iata, type) {
         if (type === 'city') return greenDotIcon;
-        return appState.waypoints.some(wp => wp.iata_code === iata) ? magentaDotIcon : blueDotIcon;
+        
+        // Check if this iata is in any valid route as origin or destination
+        const isInRoute = appState.routeData.some(route => 
+            route && !route.isEmpty && (
+                (route.origin && route.origin.iata_code === iata) || 
+                (route.destination && route.destination.iata_code === iata)
+            )
+        );
+        
+        // Fall back to waypoints check for backwards compatibility
+        return isInRoute || appState.waypoints.some(wp => wp && wp.iata_code === iata) ? magentaDotIcon : blueDotIcon;
     },
 
     handleMarkerClick(airport, clickedMarker) {
@@ -337,7 +347,18 @@ const flightMap = {
 
         Object.keys(this.markers).forEach(iata => {
             const marker = this.markers[iata];
-            const isWaypoint = appState.waypoints.some(wp => wp.iata_code === iata);
+            
+            // Check if this iata is in any valid route as origin or destination
+            const isInRoute = appState.routeData.some(route => 
+                route && !route.isEmpty && (
+                    (route.origin && route.origin.iata_code === iata) || 
+                    (route.destination && route.destination.iata_code === iata)
+                )
+            );
+            
+            // Fall back to waypoints for backwards compatibility
+            const isWaypoint = isInRoute || appState.waypoints.some(wp => wp && wp.iata_code === iata);
+            
             const isSelectedRoute = appState.selectedRoute?.includes(iata);
             if (isWaypoint || this.shouldDisplayAirport(marker.airportWeight, currentZoom, isSelectedRoute)) {
                 if (currentBounds.contains(marker.getLatLng())) {

@@ -4,12 +4,33 @@ import { flightMap } from './flightMap.js';
 
 const mapHandling = {
     updateMarkerIcons: function () {
-        const waypointIataCodes = new Set(appState.waypoints.map(waypoint => waypoint.iata_code));
+        // Get all IATA codes from valid routes
+        const routeIataCodes = new Set();
+        
+        // Add all origin and destination IATAs from valid routes
+        appState.routeData.forEach(route => {
+            if (route && !route.isEmpty) {
+                if (route.origin?.iata_code) {
+                    routeIataCodes.add(route.origin.iata_code);
+                }
+                if (route.destination?.iata_code) {
+                    routeIataCodes.add(route.destination.iata_code);
+                }
+            }
+        });
+        
+        // For backward compatibility, also include waypoints
+        appState.waypoints.forEach(waypoint => {
+            if (waypoint?.iata_code) {
+                routeIataCodes.add(waypoint.iata_code);
+            }
+        });
 
+        // Update markers based on the collected IATA codes
         Object.entries(flightMap.markers).forEach(([iata, marker]) => {
-            const icon = waypointIataCodes.has(iata) ? magentaDotIcon : blueDotIcon;
+            const icon = routeIataCodes.has(iata) ? magentaDotIcon : blueDotIcon;
             marker.setIcon(icon);
-            this.updateMarkerTag(marker, waypointIataCodes.has(iata));
+            this.updateMarkerTag(marker, routeIataCodes.has(iata));
         });
     },
 
