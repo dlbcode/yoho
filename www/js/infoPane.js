@@ -89,14 +89,23 @@ const infoPane = {
 
     // Add the missing handleRouteButtonClick method
     handleRouteButtonClick(routeIndex) {
-        // Check if this is a selected route
-        if (appState.selectedRoutes[routeIndex]) {
-            // This is a selected route - display the selected route info
+        const selectedRoute = appState.selectedRoutes[routeIndex];
+
+        if (selectedRoute) {
+            // If the route is selected, display the selected route information page
             import('./routeDeck/selectedRoute.js').then(({ selectedRoute }) => {
                 selectedRoute.displaySelectedRouteInfo(routeIndex);
             });
+        } else if (appState.routeData[routeIndex]?.segmentGroup) {
+            // If the route belongs to a group, update the group route button styles
+            import('./routeDeck/selectedRouteGroup.js').then(({ selectedRouteGroup }) => {
+                selectedRouteGroup.updateGroupRouteButtonStyles(appState.routeData[routeIndex].segmentGroup);
+            });
         } else {
-            // This is not a selected route - use standard setupRouteContent
+            // Otherwise, update the route button state and display the route content
+            import('./routeDeck/selectedRoute.js').then(({ selectedRoute }) => {
+                selectedRoute.updateRouteButtonState(routeIndex);
+            });
             setupRouteContent(routeIndex);
         }
     },

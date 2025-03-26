@@ -523,51 +523,39 @@ const selectedRoute = {
 
     // New method to update the visual state of the route button
     updateRouteButtonState: function(routeIndex) {
-        // Get the current route details
-        const selectedRouteDetails = appState.selectedRoutes[String(routeIndex)];
-        
-        if (!selectedRouteDetails) {
-            console.error(`Cannot update button state - route details not found for index: ${routeIndex}`);
+        const routeData = appState.routeData[routeIndex];
+        if (!routeData) {
+            console.error(`Cannot update button state - route data not found for index: ${routeIndex}`);
             return;
         }
-        
-        // Get the group ID for the current route
-        const currentGroupId = selectedRouteDetails.group;
-        
-        // First, remove active-route-button class from all buttons
+
+        const currentGroupId = routeData.segmentGroup;
+
+        // Remove active-route-button class from all buttons
         document.querySelectorAll('.route-info-button').forEach(button => {
             button.classList.remove('active-route-button');
         });
-        
-        // Find all route indices that belong to this same group
-        const groupRouteIndices = Object.entries(appState.selectedRoutes)
-            .filter(([_, route]) => route.group === currentGroupId)
-            .map(([idx, _]) => parseInt(idx));
-        
-        // First, clear selection from all buttons not in this group
+
+        // Find all route indices in the same group
+        const groupRouteIndices = appState.routeData
+            .map((route, index) => (route?.segmentGroup === currentGroupId ? index : null))
+            .filter(index => index !== null);
+
+        // Clear selection for buttons not in this group
         document.querySelectorAll('.route-info-button').forEach(button => {
             const buttonIndex = parseInt(button.id.replace('route-button-', ''));
             if (!groupRouteIndices.includes(buttonIndex)) {
                 button.classList.remove('selected-route-button');
             }
         });
-        
-        // Now, ensure all buttons in this group are selected
+
+        // Ensure all buttons in the group are selected
         groupRouteIndices.forEach(idx => {
-            const buttonId = `route-button-${idx}`;
-            const button = document.getElementById(buttonId);
-            
+            const button = document.getElementById(`route-button-${idx}`);
             if (button) {
                 button.classList.add('selected-route-button');
-                // Preserve even-button class if needed
-                if (idx % 2 === 1) {
-                    button.classList.add('even-button');
-                }
-                
-                // Add active-route-button class to the currently displayed route
-                if (idx === parseInt(routeIndex)) {
-                    button.classList.add('active-route-button');
-                }
+                if (idx % 2 === 1) button.classList.add('even-button');
+                if (idx === routeIndex) button.classList.add('active-route-button');
             }
         });
     },

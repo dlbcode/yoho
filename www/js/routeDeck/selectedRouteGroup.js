@@ -379,45 +379,29 @@ const selectedRouteGroup = {
     
     // Updated function to update route button styles for the group view
     updateGroupRouteButtonStyles: function(groupId) {
-        // First, remove any existing group-route-button styling
         this.removeGroupButtonStyles();
-        
-        // Get all segments that belong to this group and sort them by index
-        const groupSegments = Object.entries(appState.selectedRoutes)
-            .filter(([_, route]) => route.group === groupId)
-            .map(([index, _]) => parseInt(index))
-            .sort((a, b) => a - b); // Sort numerically
-        
-        // If there are no segments, return
-        if (groupSegments.length === 0) return;
-        
-        // Add appropriate classes to each button
-        groupSegments.forEach((segmentIndex, i) => {
-            const buttonId = `route-button-${segmentIndex}`;
-            const button = document.getElementById(buttonId);
+
+        const groupRouteIndices = appState.routeData
+            .map((route, index) => (route?.segmentGroup === groupId ? index : null))
+            .filter(index => index !== null);
+
+        if (groupRouteIndices.length === 0) return;
+
+        groupRouteIndices.forEach((routeIndex, i) => {
+            const button = document.getElementById(`route-button-${routeIndex}`);
             if (button) {
-                // Add base group-route-button class to all buttons
                 button.classList.add('group-route-button');
-                
-                // Create and add top border element
+
                 const topBorder = document.createElement('div');
                 topBorder.className = 'top-border';
                 button.appendChild(topBorder);
-                
-                // Create and add bottom border element
+
                 const bottomBorder = document.createElement('div');
                 bottomBorder.className = 'bottom-border';
                 button.appendChild(bottomBorder);
-                
-                // Add first-button class to the first button
-                if (i === 0) {
-                    button.classList.add('group-route-button-first');
-                }
-                
-                // Add last-button class to the last button
-                if (i === groupSegments.length - 1) {
-                    button.classList.add('group-route-button-last');
-                }
+
+                if (i === 0) button.classList.add('group-route-button-first');
+                if (i === groupRouteIndices.length - 1) button.classList.add('group-route-button-last');
             }
         });
     },
