@@ -108,18 +108,79 @@ const infoPane = {
         // Create a set of all selected route indices to check against
         const selectedRouteIndices = new Set();
         
-        // Include all segment indices that are part of a selected route group
+        // First, find all segments that belong to groups and prepare segment data
+        const groupSegments = {};
         Object.entries(appState.selectedRoutes).forEach(([index, route]) => {
-            selectedRouteIndices.add(parseInt(index));
+            const routeIndex = parseInt(index);
+            selectedRouteIndices.add(routeIndex);
             
-            // If this segment belongs to a group, find all segments with the same group
+            // If this segment belongs to a group, store it for processing
             if (route.group !== undefined) {
+                if (!groupSegments[route.group]) {
+                    groupSegments[route.group] = [];
+                }
+                
+                // Store the segment with its index
+                groupSegments[route.group].push({
+                    index: routeIndex,
+                    route: route,
+                    displayData: route.displayData
+                });
+                
+                // Also add all segments in this group to selectedRouteIndices
                 Object.entries(appState.selectedRoutes).forEach(([otherIndex, otherRoute]) => {
                     if (otherRoute.group === route.group) {
                         selectedRouteIndices.add(parseInt(otherIndex));
                     }
                 });
             }
+        });
+        
+        // Process group segments to ensure routeData is properly created for each segment
+        Object.values(groupSegments).forEach(segments => {
+            // Sort segments by index to ensure correct order
+            segments.sort((a, b) => a.index - b.index);
+            
+            // For each segment, ensure routeData exists with correct origin/destination
+            segments.forEach((segment, i) => {
+                const routeIndex = segment.index;
+                
+                // Extract origin and destination from the segment's route data
+                const [origin, destination] = segment.displayData.route.split(' > ');
+                
+                // Create or update routeData for this segment
+                if (!appState.routeData[routeIndex] || appState.routeData[routeIndex].isEmpty) {
+                    // Get airport data for origin and destination
+                    let originData = { iata_code: origin, city: origin };
+                    let destinationData = { iata_code: destination, city: destination };
+                    
+                    // Try to get more complete airport data from cache
+                    if (window.flightMap && window.flightMap.airportDataCache) {
+                        if (window.flightMap.airportDataCache[origin]) {
+                            originData = window.flightMap.airportDataCache[origin];
+                        }
+                        if (window.flightMap.airportDataCache[destination]) {
+                            destinationData = window.flightMap.airportDataCache[destination];
+                        }
+                    }
+                    
+                    // Create routeData entry for this segment
+                    appState.routeData[routeIndex] = {
+                        tripType: 'oneWay', // Multi-segment routes use one-way segments
+                        travelers: 1, // Default value
+                        departDate: segment.displayData.departure,
+                        returnDate: null,
+                        origin: originData,
+                        destination: destinationData,
+                        isSegment: true, // Mark this as a segment
+                        isMultiSegment: true, // Mark as part of multi-segment route
+                        segmentGroup: segment.route.group, // Store the group ID
+                        segmentOrder: i // Store the order within the group
+                    };
+                    
+                    console.log(`Created routeData for segment ${routeIndex}:`, appState.routeData[routeIndex]);
+                }
+            });
         });
 
         // Collect all route indices we need to display buttons for
