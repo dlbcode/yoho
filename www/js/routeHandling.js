@@ -70,6 +70,16 @@ const routeHandling = {
                         travelers: route.travelers || 1
                     };
                     
+                    // Preserve the full origin and destination objects rather than just the IATA codes
+                    // This ensures we keep all metadata about Any origins/destinations
+                    if (origin) {
+                        routeData.originData = origin;
+                    }
+                    
+                    if (destination) {
+                        routeData.destinationData = destination;
+                    }
+                    
                     // If this is an "Any" origin route, add flag
                     if (origin && origin.iata_code === 'Any') {
                         routeData.hasAnyOrigin = true;

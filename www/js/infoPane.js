@@ -477,7 +477,10 @@ const infoPane = {
             const prevRoute = appState.routeData[prevRouteIndex];
             
             // Initialize with destination from previous route as origin if applicable
-            const origin = prevRoute && prevRoute.destination && prevRoute.destination.iata_code !== 'Any' 
+            // Only do this if the previous destination is not "Any" and is valid
+            const origin = prevRoute && prevRoute.destination && 
+                  prevRoute.destination.iata_code && 
+                  prevRoute.destination.iata_code !== 'Any' 
                 ? { ...prevRoute.destination, isAnyDestination: false, isAnyOrigin: false }
                 : null;
             
@@ -505,20 +508,14 @@ const infoPane = {
                 destination: null
             };
             
-            // Update waypoints for backward compatibility
-            if (origin) {
-                updateState('updateWaypoint', { 
-                    index: newRouteIndex * 2, 
-                    data: origin 
-                }, 'infoPane.handlePlusButtonClick');
-            }
-            
-            // Update route dates for backward compatibility
+            // Update routeDates for backward compatibility (we can phase this out eventually)
             updateState('updateRouteDate', {
                 routeNumber: newRouteIndex,
                 depart: formattedDate,
                 return: null
             }, 'infoPane.handlePlusButtonClick');
+            
+            console.log(`Added new route at index ${newRouteIndex}:`, appState.routeData[newRouteIndex]);
         }
 
         // Set up the route box UI with the new route index

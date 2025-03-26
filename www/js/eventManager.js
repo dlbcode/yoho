@@ -20,11 +20,10 @@ const handleWaypointChange = () => {
         (r.destination?.iata_code === 'Any')
     ));
     
-    // Fall back to checking waypoints for backward compatibility
-    const isAnyWaypointChange = isAnyDestinationChange || 
-        appState.waypoints.some(wp => wp && wp.iata_code === 'Any');
+    // No need to fall back to waypoints here - we should use routeData directly
+    // This eliminates a legacy dependency
     
-    if (!isAnyWaypointChange && !appState.isRouteSwitching) {
+    if (!isAnyDestinationChange && !appState.isRouteSwitching) {
         // Sync routeData with waypoints to ensure everything is consistent before updating routes
         if (routeHandling.syncRouteDataWithWaypoints) {
             routeHandling.syncRouteDataWithWaypoints();
