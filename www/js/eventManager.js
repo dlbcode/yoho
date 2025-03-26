@@ -25,6 +25,10 @@ const handleWaypointChange = () => {
         appState.waypoints.some(wp => wp && wp.iata_code === 'Any');
     
     if (!isAnyWaypointChange && !appState.isRouteSwitching) {
+        // Sync routeData with waypoints to ensure everything is consistent before updating routes
+        if (routeHandling.syncRouteDataWithWaypoints) {
+            routeHandling.syncRouteDataWithWaypoints();
+        }
         routeHandling.updateRoutesArray();
         clearLinesForView('routeDeck');
     }
@@ -38,13 +42,54 @@ const stateHandlers = {
     removeWaypoint: handleWaypointChange,
     updateWaypoint: handleWaypointChange,
     updateRoutes: () => {
-        if (!appState.waypoints.length || !appState.selectedRoutes[0]) {
+        // When routes are updated, check if they're valid and update the current view
+        const hasValidRoutes = appState.routeData.some(r => r && !r.isEmpty && 
+            ((r.origin && r.origin.iata_code) || (r.destination && r.destination.iata_code)));
+        
+        if (!hasValidRoutes && !appState.selectedRoutes[0]) {
             appState.currentView = 'trip';
         }
     },
     // Add a new handler for waypoint order issues
     fixWaypointOrder: (indices) => {
-        if (appState.waypoints[indices.destination] && !appState.waypoints[indices.origin]) {
+        // Check if a destination is set but not an origin in routeData
+        const routeNumber = Math.floor(indices.destination / 2);
+        const routeData = appState.routeData[routeNumber];
+        
+        // If we have a destination but no origin in a route, add "Any" origin
+        if (routeData && routeData.destination && !routeData.origin) {
+            // Create "Any" origin
+            const anyOrigin = {
+                iata_code: 'Any',
+                city: 'Anywhere',
+                country: '',
+                name: 'Any Origin',
+                isAnyOrigin: true,
+                isAnyDestination: false
+            };
+            
+            // Update routeData first
+            appState.routeData[routeNumber].origin = anyOrigin;
+            
+            // Update waypoints array for backwards compatibility
+            if (appState.waypoints[indices.origin] === undefined) {
+                while (appState.waypoints.length <= indices.origin) {
+                    appState.waypoints.push(null);
+                }
+            }
+            appState.waypoints[indices.origin] = anyOrigin;
+            
+            // Update the input field if it exists
+            const inputId = `waypoint-input-${indices.origin + 1}`;
+            const inputField = document.getElementById(inputId);
+            if (inputField) {
+                inputField.value = 'Anywhere';
+                inputField.setAttribute('data-selected-iata', 'Any');
+                inputField.setAttribute('data-is-any-destination', 'true');
+            }
+        }
+        // Similar check with legacy waypoints for backward compatibility
+        else if (appState.waypoints[indices.destination] && !appState.waypoints[indices.origin]) {
             // Add "Any" origin when a destination is set first
             appState.waypoints[indices.origin] = {
                 iata_code: 'Any',
@@ -87,6 +132,12 @@ const eventManager = {
         
         document.querySelector('.airport-selection').innerHTML = '';
         mapHandling.updateMarkerIcons();
+        
+        // Make sure routeData and waypoints are in sync
+        if (routeHandling.syncRouteDataWithWaypoints) {
+            routeHandling.syncRouteDataWithWaypoints();
+        }
+        
         routeHandling.updateRoutesArray();
         appState.currentView = 'trip';
     },

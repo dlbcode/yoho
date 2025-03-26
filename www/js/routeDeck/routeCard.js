@@ -109,15 +109,10 @@ function createRouteArrowSVG(stops, segments, isReturn = false) {
 }
 
 function createRouteCard(flight, endpoint, routeIndex, destination) {
-    const card = document.createElement('div');
-    card.className = 'route-card';
-    card.dataset.priceValue = flight.price;
     
-    const routeId = createRouteId(flight.route);
-    card.setAttribute('data-route-id', routeId);
-    
-    // Get trip type from appState
-    const tripType = appState.routes[routeIndex]?.tripType || 'oneWay';
+    // Get trip type from appState - prioritizing routeData over legacy routes
+    const routeData = appState.routeData[routeIndex];
+    const tripType = routeData?.tripType || appState.routes[routeIndex]?.tripType || 'oneWay';
     
     // Determine if this is a round trip
     const isRoundTrip = tripType === 'roundTrip';
@@ -163,21 +158,25 @@ function createRouteCard(flight, endpoint, routeIndex, destination) {
                 returnArrivalDate = new Date(returnSegments[returnSegments.length - 1].local_arrival || 
                                         returnSegments[returnSegments.length - 1].aTime * 1000);
             } else {
-                // Handle as one-way if no turning point found
-                departureDate = new Date(flight.local_departure || flight.dTime * 1000);
-                arrivalDate = new Date(flight.local_arrival || flight.aTime * 1000);
-                outboundSegments = flight.route; // Treat all segments as outbound
-                returnSegments = null;
+                // If we can't identify return segments, treat it as one-way
+                outboundSegments = flight.route;
+                departureDate = new Date(outboundSegments[0].local_departure || outboundSegments[0].dTime * 1000);
+                arrivalDate = new Date(outboundSegments[outboundSegments.length - 1].local_arrival || 
+                                    outboundSegments[outboundSegments.length - 1].aTime * 1000);
             }
         }
     } else {
-        // Handle one-way trips
-        departureDate = new Date(flight.local_departure || flight.dTime * 1000);
-        arrivalDate = new Date(flight.local_arrival || flight.aTime * 1000);
-        outboundSegments = flight.route; // Treat all segments as outbound
-        returnSegments = null;
+        // One-way trip or no explicit return segments
+        outboundSegments = flight.route;
+        departureDate = new Date(outboundSegments[0].local_departure || outboundSegments[0].dTime * 1000);
+        arrivalDate = new Date(outboundSegments[outboundSegments.length - 1].local_arrival || 
+                            outboundSegments[outboundSegments.length - 1].aTime * 1000);
     }
 
+    // Create the card element first
+    const card = document.createElement('div');
+    card.className = 'route-card';
+    
     // Calculate stops for each segment
     const numberOfOutboundStops = outboundSegments ? outboundSegments.length - 1 : flight.route.length - 1;
     const numberOfReturnStops = returnSegments ? returnSegments.length - 1 : 0;
@@ -192,7 +191,9 @@ function createRouteCard(flight, endpoint, routeIndex, destination) {
         'data-price-range': getPriceRangeCategory(flight.price),
         'data-price-value': Math.round(flight.price),
         'data-stops': totalStops,
-        'data-trip-type': tripType
+        'data-trip-type': tripType,
+        'data-route-id': createRouteId(flight.route),
+        'data-route-index': routeIndex
     });
     
     // Format dates

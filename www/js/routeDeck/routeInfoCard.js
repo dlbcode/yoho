@@ -228,6 +228,7 @@ async function routeInfoCard(cardElement, fullFlightData, routeIds, routeIndex) 
                     new Date().toISOString().split('T')[0]); // Fallback to current date if both are missing
             const arrivalDate = segmentData.local_arrival ? new Date(segmentData.local_arrival).toISOString().split('T')[0] : new Date(segmentData.aTime * 1000).toISOString().split('T')[0];
 
+            // Create the selectedRoute data
             appState.selectedRoutes[selectedRouteIndex] = {
                 displayData: {
                     departure: departureDate,
@@ -243,7 +244,28 @@ async function routeInfoCard(cardElement, fullFlightData, routeIds, routeIndex) 
                 routeDates: { depart: departureDate, return: null }
             };
 
-            // Update the route dates in appState
+            // Update routeData structure with the selected route
+            if (!appState.routeData[selectedRouteIndex]) {
+                appState.routeData[selectedRouteIndex] = {
+                    tripType: 'oneWay',
+                    travelers: 1,
+                    departDate: departureDate,
+                    returnDate: null,
+                    origin: { iata_code: segmentData.flyFrom },
+                    destination: { iata_code: segmentData.flyTo },
+                    selectedRoute: appState.selectedRoutes[selectedRouteIndex],
+                    isSegment: true
+                };
+            } else {
+                // Update existing routeData with the selected route info
+                appState.routeData[selectedRouteIndex].departDate = departureDate;
+                appState.routeData[selectedRouteIndex].origin = { iata_code: segmentData.flyFrom };
+                appState.routeData[selectedRouteIndex].destination = { iata_code: segmentData.flyTo };
+                appState.routeData[selectedRouteIndex].selectedRoute = appState.selectedRoutes[selectedRouteIndex];
+                appState.routeData[selectedRouteIndex].isSegment = true;
+            }
+
+            // Update legacy route dates 
             if (!appState.routeDates[selectedRouteIndex]) appState.routeDates[selectedRouteIndex] = {};
             appState.routeDates[selectedRouteIndex].depart = departureDate;
         });
@@ -366,7 +388,10 @@ function flyToLocation(iata) {
 }
 
 function replaceWaypointsForCurrentRoute(intermediaryIatas, routeIndex) {
-    const tripType = appState.routes[routeIndex]?.tripType || 'oneWay';
+    // Get trip type from routeData or fall back to routes
+    const routeData = appState.routeData[routeIndex];
+    const tripType = routeData?.tripType || appState.routes[routeIndex]?.tripType || 'oneWay';
+    
     const startIndex = tripType === 'roundTrip' ? 0 : routeIndex * 2;
     const before = appState.waypoints.slice(0, startIndex);
     const after = tripType === 'roundTrip' ? [] : appState.waypoints.slice((routeIndex + 1) * 2);

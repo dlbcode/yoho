@@ -37,6 +37,13 @@ const routeHandling = {
                 // If routeDirection is 'to' and we don't have "Any" origins, swap origin and destination
                 if (appState.routeDirection === 'to' && !hasAnyOrigin) {
                     [origin, destination] = [destination, origin];
+                    
+                    // Also update the routeData to reflect this swap
+                    appState.routeData[i] = {
+                        ...route,
+                        origin: destination,
+                        destination: origin
+                    };
                 }
                 
                 // Skip if no origin or destination
@@ -255,6 +262,53 @@ const routeHandling = {
         updateState('updateRoutes', newRoutes, 'routeHandling.updateRoutesArray');
         console.log('Updated routes in state:', appState.routes);
         await pathDrawing.drawLines();
+    },
+    
+    // Add a new method to ensure we have consistent data between routeData and waypoints
+    syncRouteDataWithWaypoints: function() {
+        // This ensures routeData is in sync with waypoints (which are used by some legacy code)
+        
+        // First convert waypoints to routeData format
+        for (let i = 0; i < appState.waypoints.length; i += 2) {
+            const routeIndex = Math.floor(i / 2);
+            const origin = appState.waypoints[i];
+            const destination = appState.waypoints[i + 1];
+            
+            if (origin || destination) {
+                // Initialize routeData entry if needed
+                if (!appState.routeData[routeIndex]) {
+                    appState.routeData[routeIndex] = {
+                        tripType: appState.routes[routeIndex]?.tripType || 'oneWay',
+                        travelers: appState.routes[routeIndex]?.travelers || 1,
+                        departDate: appState.routeDates[routeIndex]?.depart || null,
+                        returnDate: appState.routeDates[routeIndex]?.return || null,
+                        origin: origin,
+                        destination: destination
+                    };
+                } else {
+                    // Update existing entry
+                    appState.routeData[routeIndex].origin = origin;
+                    appState.routeData[routeIndex].destination = destination;
+                }
+            }
+        }
+        
+        // Then convert routeData back to waypoints
+        for (let i = 0; i < appState.routeData.length; i++) {
+            const routeData = appState.routeData[i];
+            if (routeData && !routeData.isEmpty) {
+                const originIndex = i * 2;
+                const destIndex = i * 2 + 1;
+                
+                // Make sure waypoints array is big enough
+                while (appState.waypoints.length <= destIndex) {
+                    appState.waypoints.push(null);
+                }
+                
+                appState.waypoints[originIndex] = routeData.origin;
+                appState.waypoints[destIndex] = routeData.destination;
+            }
+        }
     }
 };
 

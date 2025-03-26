@@ -644,9 +644,12 @@ function setupRouteContent(routeIndex) {
         currentButton.classList.add('active-route-button');
     }
 
+    // Get route data from the routeData structure
+    const routeData = appState.routeData[routeIndex];
+    
     // Check if this is a selected route segment without corresponding routeData
     const selectedRouteData = appState.selectedRoutes[routeIndex];
-    if (selectedRouteData && (!appState.routeData[routeIndex] || appState.routeData[routeIndex].isEmpty)) {
+    if (selectedRouteData && (!routeData || routeData.isEmpty)) {
         // This is a segment of a multi-segment route that doesn't have routeData
         // Extract route information from the selectedRoute to create routeData
         const routeParts = selectedRouteData.displayData.route.split(' > ');
