@@ -38,7 +38,7 @@ function updateState(key, value, calledFrom) {
         const routeNumber = Math.floor(waypointIndex / 2);
         const isOrigin = waypointIndex % 2 === 0;
         
-        // Get waypoint from routeData if available
+        // Check directly in routeData first - this is more reliable
         const routeData = appState.routeData[routeNumber];
         const waypoint = isOrigin ? routeData?.origin : routeData?.destination;
         
@@ -139,7 +139,7 @@ function updateState(key, value, calledFrom) {
                     const routeNumber = Math.floor(value.index / 2);
                     const isOrigin = value.index % 2 === 0;
                     
-                    // Ensure routeData exists
+                    // Ensure routeData exists - this is our source of truth
                     if (!appState.routeData[routeNumber]) {
                         appState.routeData[routeNumber] = {
                             tripType: 'oneWay',
@@ -149,14 +149,14 @@ function updateState(key, value, calledFrom) {
                         };
                     }
                     
-                    // Update origin or destination
+                    // Update origin or destination in routeData
                     if (isOrigin) {
                         appState.routeData[routeNumber].origin = value.data;
                     } else {
                         appState.routeData[routeNumber].destination = value.data;
                     }
                     
-                    // Update legacy structure for compatibility
+                    // Update legacy waypoints for compatibility
                     if (value.index < appState.waypoints.length) {
                         appState.waypoints[value.index] = value.data;
                     } else {
@@ -174,7 +174,7 @@ function updateState(key, value, calledFrom) {
                 const newRouteNumber = Math.floor(newWaypointIndex / 2);
                 const isNewOrigin = newWaypointIndex % 2 === 0;
                 
-                // Update in new routeData structure
+                // Update in routeData structure - our primary source of truth
                 if (!appState.routeData[newRouteNumber]) {
                     appState.routeData[newRouteNumber] = {
                         tripType: 'oneWay',
@@ -200,13 +200,13 @@ function updateState(key, value, calledFrom) {
                     const routeNumber = Math.floor(value / 2);
                     const isOrigin = value % 2 === 0;
                     
-                    // Update routeData structure
+                    // Update routeData structure first
                     if (appState.routeData[routeNumber]) {
                         if (isOrigin) {
-                            // Remove origin or set to null
+                            // Remove origin
                             delete appState.routeData[routeNumber].origin;
                         } else {
-                            // Remove destination or set to null
+                            // Remove destination
                             delete appState.routeData[routeNumber].destination;
                         }
                         
@@ -217,7 +217,7 @@ function updateState(key, value, calledFrom) {
                         }
                     }
                     
-                    // Update legacy structure
+                    // Update legacy waypoints
                     appState.waypoints.splice(value, 1);
                     appState.isEditingWaypoint = false;
                 }
@@ -226,14 +226,20 @@ function updateState(key, value, calledFrom) {
             case 'removeWaypoints':
                 const routeToRemove = value.routeNumber;
                 
-                // Remove from routeData 
-                appState.routeData[routeToRemove] = { isEmpty: true };
+                // Mark route as empty in routeData
+                appState.routeData[routeToRemove] = { 
+                    isEmpty: true, 
+                    _removedAt: new Date().toISOString() 
+                };
                 
                 // Remove associated dates
                 delete appState.routeDates[routeToRemove];
                 
-                // Update legacy structure
-                appState.waypoints.splice(routeToRemove * 2, 2);
+                // Update legacy waypoints
+                const waypointStart = routeToRemove * 2;
+                if (waypointStart < appState.waypoints.length) {
+                    appState.waypoints.splice(waypointStart, 2);
+                }
                 break;
 
             case 'updateRoutes':
