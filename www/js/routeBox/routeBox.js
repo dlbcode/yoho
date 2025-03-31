@@ -166,6 +166,14 @@ const routeBox = {
 
         console.log(`Setting up route box for route ${routeNumber} with data:`, appState.routeData[routeNumber]);
 
+        // Get the route data for this route - ensure it's defined before using it
+        const routeData = appState.routeData[routeNumber] || {
+            tripType: 'oneWay',
+            travelers: 1,
+            departDate: new Date().toISOString().split('T')[0],
+            returnDate: null
+        };
+
         const container = createElement('div', { className: 'routeBoxElements' });
 
         // Add options container (trip type & travelers)
@@ -175,12 +183,13 @@ const routeBox = {
 
         // Add waypoint inputs container
         const waypointInputsContainer = createElement('div', { className: 'waypoint-inputs-container' });
-        let firstEmptyInput = null;
+        
+        // Store input elements for later use
+        const inputElements = [];
         
         // Add waypoint inputs with placeholders
         ['From', 'Where to?'].forEach((placeholder, i) => {
             const isOrigin = i === 0;
-            const routeData = appState.routeData[routeNumber];
             const waypoint = isOrigin ? routeData?.origin : routeData?.destination;
             
             console.log(`Creating input for ${isOrigin ? 'origin' : 'destination'}:`, waypoint);
@@ -188,7 +197,15 @@ const routeBox = {
             const index = routeNumber * 2 + i;
             const { inputWrapper, input } = createWaypointInput(index, placeholder, waypoint);
             inputWrapper.classList.add(isOrigin ? 'from-input' : 'to-input');
+            
+            // Also add destination-input class to make it easier to select later
+            if (!isOrigin) {
+                inputWrapper.classList.add('destination-input');
+                input.classList.add('destination-input-field');
+            }
+            
             waypointInputsContainer.append(inputWrapper);
+            inputElements.push(input);
             
             // Create suggestions div
             const suggestionsDiv = createElement('div', { 
@@ -202,16 +219,24 @@ const routeBox = {
                 if (event.detail && event.detail.airport) {
                     // Update state with the selected airport
                     const waypointIndex = routeNumber * 2 + i;
+                    
+                    // Update routeData directly first to ensure it's immediately available
+                    if (isOrigin) {
+                        appState.routeData[routeNumber].origin = event.detail.airport;
+                    } else {
+                        appState.routeData[routeNumber].destination = event.detail.airport;
+                    }
+                    
+                    // Then update through updateState to ensure consistency
                     updateState('updateWaypoint', {
                         index: waypointIndex,
                         data: event.detail.airport
                     }, 'routeBox.setupRouteBox.airportSelected');
+                    
+                    // Force update of the input fields to ensure they reflect the latest state
+                    setTimeout(() => setWaypointInputs(routeNumber), 0);
                 }
             });
-            
-            if (!firstEmptyInput && !waypoint) {
-                firstEmptyInput = input;
-            }
             
             input.addEventListener('input', enableSwapButtonIfNeeded);
         });
@@ -247,15 +272,58 @@ const routeBox = {
             });
         });
 
+        // Force synchronization of input fields with routeData
         setWaypointInputs(routeNumber);
 
-        // Focus first empty input if appropriate
-        if (firstEmptyInput && (routeNumber > 0 || window.innerWidth > 600)) {
-            firstEmptyInput.focus();
+        // Skip focusing on initial page load for mobile
+        const shouldSkipFocus = routeNumber === 0 && window.innerWidth <= 600;
+        
+        if (!shouldSkipFocus) {
+            const originAutoPopulated = routeData && routeData._originAutoPopulated;
+            
+            // Check if we have an origin but no destination
+            const hasOrigin = routeData?.origin && routeData.origin.iata_code;
+            const hasDestination = routeData?.destination && routeData.destination.iata_code;
+            
+            // Initialize destination input for focusing
+            const destInput = inputElements[1];
+            
+            // If we have an origin (either auto-populated or not) but no destination, focus the destination field
+            if (hasOrigin && !hasDestination) {
+                console.log("Origin present but no destination, focusing destination input");
+                // Use a slightly longer timeout to ensure DOM is ready
+                setTimeout(() => {
+                    if (destInput) {
+                        destInput.focus();
+                        console.log("Destination input focused");
+                    }
+                }, 150);
+            }
+            // If neither origin nor destination is set, focus the origin field
+            else if (!hasOrigin) {
+                setTimeout(() => {
+                    const originInput = inputElements[0];
+                    if (originInput) {
+                        originInput.focus();
+                    }
+                }, 150);
+            }
         }
 
-        const routeData = appState.routeData[routeNumber];
         handleTripTypeChange(routeData.tripType || 'oneWay', routeNumber);
+        
+        // This is a special hook for focusing after plus button click
+        // It's only used for the immediate action after creating a new route
+        if (routeBoxElement._needsFocusOnDestination) {
+            setTimeout(() => {
+                const destInput = inputElements[1];
+                if (destInput) {
+                    destInput.focus();
+                    console.log("Destination input focused via special hook");
+                }
+                delete routeBoxElement._needsFocusOnDestination;
+            }, 150);
+        }
     },
 
     removeExistingRouteBox() {

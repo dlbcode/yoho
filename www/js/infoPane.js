@@ -470,6 +470,9 @@ const infoPane = {
             newRouteIndex = parseInt(validRoutes[validRoutes.length - 1][0]) + 1;
         }
         
+        // Track if we're auto-populating the origin
+        let originAutoPopulated = false;
+        
         // Create new route data structure for this route
         if (!appState.routeData[newRouteIndex]) {
             // Get previous route data if available
@@ -506,18 +509,31 @@ const infoPane = {
                             city: finalDestIata
                         };
                         console.log(`Using multi-segment final destination as origin:`, originData);
+                        originAutoPopulated = true;
                     }
                 }
             } 
             
             // If not part of multi-segment or we couldn't get the final destination,
             // fall back to the regular behavior
-            if (!originData) {
-                originData = prevRoute && prevRoute.destination && 
-                      prevRoute.destination.iata_code && 
-                      prevRoute.destination.iata_code !== 'Any' 
-                    ? { ...prevRoute.destination, isAnyDestination: false, isAnyOrigin: false }
-                    : null;
+            if (!originData && prevRoute && prevRoute.destination) {
+                // Make sure we have a complete object with all needed properties
+                // This fixes issues where waypoints become incomplete
+                originData = { 
+                    ...prevRoute.destination,
+                    isAnyDestination: false, 
+                    isAnyOrigin: false 
+                };
+                
+                // Make sure iata_code is preserved and not "Any"
+                if (originData.iata_code === 'Any') {
+                    console.log("Cannot use 'Any' destination as origin for new route");
+                    originData = null;
+                } else {
+                    originAutoPopulated = true;
+                }
+                
+                console.log(`Using previous route destination as origin:`, originData);
             }
             
             // Calculate departure date (day after previous route's return or departure date)
@@ -541,7 +557,8 @@ const infoPane = {
                 departDate: formattedDate,
                 returnDate: null,
                 origin: originData,
-                destination: null
+                destination: null,
+                _originAutoPopulated: originAutoPopulated // Flag to indicate origin was auto-populated
             };
             
             // Update routeDates for backward compatibility (we can phase this out eventually)
@@ -551,11 +568,31 @@ const infoPane = {
                 return: null
             }, 'infoPane.handlePlusButtonClick');
             
+            // Make sure waypoints array is correctly updated
+            if (originData) {
+                updateState('updateWaypoint', {
+                    index: newRouteIndex * 2,
+                    data: originData
+                }, 'infoPane.handlePlusButtonClick');
+            }
+            
             console.log(`Added new route at index ${newRouteIndex}:`, appState.routeData[newRouteIndex]);
         }
 
         // Set up the route box UI with the new route index
         setupRouteContent(newRouteIndex);
+
+        // Explicitly force focus on the destination input if origin was auto-populated
+        if (originAutoPopulated) {
+            // Use setTimeout to ensure the DOM is ready
+            setTimeout(() => {
+                const destInput = document.getElementById(`waypoint-input-${newRouteIndex * 2 + 2}`);
+                if (destInput) {
+                    console.log("Focusing destination input after auto-populating origin");
+                    destInput.focus();
+                }
+            }, 150);
+        }
     },
 
     applyToLines(tags, action) {
