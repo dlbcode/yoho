@@ -279,11 +279,13 @@ const routeBox = {
         const shouldSkipFocus = routeNumber === 0 && window.innerWidth <= 600;
         
         if (!shouldSkipFocus) {
-            const originAutoPopulated = routeData && routeData._originAutoPopulated;
+            const routeData = appState.routeData[routeNumber] || {};
+            const originAutoPopulated = routeData._originAutoPopulated;
+            const destinationNeedsEmptyFocus = routeData._destinationNeedsEmptyFocus;
             
             // Check if we have an origin but no destination
-            const hasOrigin = routeData?.origin && routeData.origin.iata_code;
-            const hasDestination = routeData?.destination && routeData.destination.iata_code;
+            const hasOrigin = routeData.origin && routeData.origin.iata_code;
+            const hasDestination = routeData.destination && routeData.destination.iata_code;
             
             // Initialize destination input for focusing
             const destInput = inputElements[1];
@@ -294,7 +296,22 @@ const routeBox = {
                 // Use a slightly longer timeout to ensure DOM is ready
                 setTimeout(() => {
                     if (destInput) {
-                        destInput.focus();
+                        // Check if we should do empty focus (for autocomplete suggestions)
+                        if (destinationNeedsEmptyFocus) {
+                            destInput.value = '';
+                            destInput.readOnly = false;
+                            destInput.focus();
+                            
+                            // Trigger the input event to show the suggestions
+                            destInput.dispatchEvent(new Event('input', { bubbles: true }));
+                            
+                            // Import and trigger suggestions
+                            import('../airportAutocomplete.js').then(({ updateSuggestions }) => {
+                                updateSuggestions(`waypoint-input-${routeNumber * 2 + 2}`, []);
+                            });
+                        } else {
+                            destInput.focus();
+                        }
                         console.log("Destination input focused");
                     }
                 }, 150);

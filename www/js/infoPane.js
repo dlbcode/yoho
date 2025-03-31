@@ -558,7 +558,8 @@ const infoPane = {
                 returnDate: null,
                 origin: originData,
                 destination: null,
-                _originAutoPopulated: originAutoPopulated // Flag to indicate origin was auto-populated
+                _originAutoPopulated: originAutoPopulated, // Flag to indicate origin was auto-populated
+                _destinationNeedsEmptyFocus: originAutoPopulated // Add this flag to indicate destination should be empty-focused
             };
             
             // Update routeDates for backward compatibility (we can phase this out eventually)
@@ -589,7 +590,13 @@ const infoPane = {
                 const destInput = document.getElementById(`waypoint-input-${newRouteIndex * 2 + 2}`);
                 if (destInput) {
                     console.log("Focusing destination input after auto-populating origin");
+                    // Clear any pre-filled value before focusing
+                    destInput.value = '';
+                    destInput.readOnly = false;
                     destInput.focus();
+                    
+                    // Trigger the input event to show the suggestions
+                    destInput.dispatchEvent(new Event('input', { bubbles: true }));
                 }
             }, 150);
         }

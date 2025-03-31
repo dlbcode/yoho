@@ -220,8 +220,17 @@ export const updateSuggestions = (inputId, airports) => {
     const inputField = document.getElementById(inputId);
     let hasAddedSuggestions = false;
 
-    // Add "Anywhere" option if appropriate
-    if (airports.length === 0 && !isPairAny) {
+    // Handle the empty input field with auto-focus scenario more explicitly
+    const routeNumber = Math.floor(waypointIndex / 2);
+    const emptyInputWithFocus = 
+        inputField && 
+        document.activeElement === inputField && 
+        !inputField.value.trim() && 
+        appState.routeData[routeNumber]?._destinationNeedsEmptyFocus &&
+        !isOrigin;
+
+    // If this is a focused empty field or airports array is empty and pair not "Any", add "Anywhere" option
+    if ((emptyInputWithFocus || (airports.length === 0 && inputField && inputField.value.trim() === '')) && !isPairAny) {
         const anywhereDiv = document.createElement('div');
         anywhereDiv.className = 'anywhere-suggestion selected';
         anywhereDiv.textContent = 'Anywhere';
@@ -235,6 +244,10 @@ export const updateSuggestions = (inputId, airports) => {
         if (inputManager.inputStates[inputId]) {
             inputManager.inputStates[inputId].selectedSuggestionIndex = 0;
         }
+        
+        // Make sure suggestion box is visible for empty focused field
+        suggestionBox.style.display = 'block';
+        inputManager.positionSuggestionBox(inputId);
     }
 
     // Add airport suggestions
@@ -309,6 +322,12 @@ export const updateSuggestions = (inputId, airports) => {
         });
         
         suggestionBox._hasEventListeners = true;
+    }
+
+    // Position the suggestion box even for empty inputs when needed
+    if (emptyInputWithFocus && suggestionBox.children.length > 0) {
+        inputManager.positionSuggestionBox(inputId);
+        suggestionBox.style.display = 'block';
     }
 
     // Update UI state
