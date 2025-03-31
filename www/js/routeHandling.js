@@ -156,30 +156,6 @@ const routeHandling = {
         updateState('updateRoutes', newRoutes, 'routeHandling.updateRoutesArray');
         console.log('Updated routes in state:', appState.routes);
         await pathDrawing.drawLines();
-    },
-    
-    // Updated method to ensure we have consistent data between routeData and waypoints
-    syncRouteDataWithWaypoints: function() {
-        // This ensures routeData is in sync with waypoints (which are used by some legacy code)
-        // We're keeping this solely for backward compatibility with other modules
-        // In the future, we should remove this method and ensure all code uses routeData directly
-        
-        // Only convert routeData back to waypoints for backward compatibility
-        for (let i = 0; i < appState.routeData.length; i++) {
-            const routeData = appState.routeData[i];
-            if (routeData && !routeData.isEmpty) {
-                const originIndex = i * 2;
-                const destIndex = i * 2 + 1;
-                
-                // Make sure waypoints array is big enough
-                while (appState.waypoints.length <= destIndex) {
-                    appState.waypoints.push(null);
-                }
-                
-                appState.waypoints[originIndex] = routeData.origin;
-                appState.waypoints[destIndex] = routeData.destination;
-            }
-        }
     }
 };
 

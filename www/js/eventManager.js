@@ -20,14 +20,7 @@ const handleWaypointChange = () => {
         (r.destination?.iata_code === 'Any')
     ));
     
-    // No need to fall back to waypoints here - we should use routeData directly
-    // This eliminates a legacy dependency
-    
     if (!isAnyDestinationChange && !appState.isRouteSwitching) {
-        // Sync routeData with waypoints to ensure everything is consistent before updating routes
-        if (routeHandling.syncRouteDataWithWaypoints) {
-            routeHandling.syncRouteDataWithWaypoints();
-        }
         routeHandling.updateRoutesArray();
         clearLinesForView('routeDeck');
     }
@@ -87,22 +80,6 @@ const stateHandlers = {
                 inputField.setAttribute('data-is-any-destination', 'true');
             }
         }
-        // Similar check with legacy waypoints for backward compatibility
-        else if (appState.waypoints[indices.destination] && !appState.waypoints[indices.origin]) {
-            // Add "Any" origin when a destination is set first
-            appState.waypoints[indices.origin] = {
-                iata_code: 'Any',
-                city: 'Anywhere',
-                country: '',
-                name: 'Any Origin',
-                isAnyOrigin: true,
-                isAnyDestination: false
-            };
-            
-            // Update the input field
-            const inputId = `waypoint-input-${indices.origin + 1}`;
-            inputManager.syncInputWithWaypoint(inputId);
-        }
     }
 };
 
@@ -131,11 +108,6 @@ const eventManager = {
         
         document.querySelector('.airport-selection').innerHTML = '';
         mapHandling.updateMarkerIcons();
-        
-        // Make sure routeData and waypoints are in sync
-        if (routeHandling.syncRouteDataWithWaypoints) {
-            routeHandling.syncRouteDataWithWaypoints();
-        }
         
         routeHandling.updateRoutesArray();
         appState.currentView = 'trip';
@@ -172,7 +144,7 @@ const eventManager = {
         const selectedAirportIata = appState.selectedAirport?.iata_code;
         if (selectedAirportIata) {
             const marker = flightMap.markers[selectedAirportIata];
-            const isWaypoint = appState.waypoints.some(wp => wp.iata_code === selectedAirportIata);
+            const isWaypoint = appState.routeData.some(r => r.origin?.iata_code === selectedAirportIata || r.destination?.iata_code === selectedAirportIata);
             if (!isWaypoint) {
                 marker?.setIcon(blueDotIcon);
             }
