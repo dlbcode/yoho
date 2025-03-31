@@ -98,45 +98,33 @@ function updateState(key, value, calledFrom) {
                 break;
 
             case 'tripType':
-                const routeNum = value.routeNumber;
+            case 'updateTravelers':
+                const routeNum = key === 'tripType' ? value.routeNumber : value.routeNumber;
+                const attrName = key === 'tripType' ? 'tripType' : 'travelers';
+                const attrValue = key === 'tripType' ? value.tripType : parseInt(value.travelers);
                 
                 // Ensure routeData exists
                 if (!appState.routeData[routeNum]) {
                     appState.routeData[routeNum] = {
-                        tripType: value.tripType,
-                        travelers: 1,
+                        tripType: key === 'tripType' ? attrValue : 'oneWay',
+                        travelers: key === 'updateTravelers' ? attrValue : 1,
                         departDate: null,
                         returnDate: null
                     };
                 } else {
-                    appState.routeData[routeNum].tripType = value.tripType;
+                    appState.routeData[routeNum][attrName] = attrValue;
                 }
                 
-                // Update legacy structure
-                if (!appState.routes[routeNum]) appState.routes[routeNum] = {};
-                appState.routes[routeNum].tripType = value.tripType;
-                break;
-
-            case 'updateTravelers':
-                if (value.routeNumber != null) {
-                    const routeNum = value.routeNumber;
-                    const travelers = parseInt(value.travelers);
-                    
-                    // Update in routeData
-                    if (!appState.routeData[routeNum]) {
-                        appState.routeData[routeNum] = {
-                            tripType: 'oneWay',
-                            travelers: travelers,
-                            departDate: null,
-                            returnDate: null
-                        };
-                    } else {
-                        appState.routeData[routeNum].travelers = travelers;
-                    }
-                    
-                    // Legacy structure update removed - routeData is now the source of truth
+                // Update legacy structure for tripType only
+                if (key === 'tripType') {
+                    if (!appState.routes[routeNum]) appState.routes[routeNum] = {};
+                    appState.routes[routeNum].tripType = attrValue;
                 }
-                shouldUpdateUrl = false;
+                
+                // Only update URL for tripType changes
+                if (key === 'updateTravelers') {
+                    shouldUpdateUrl = false;
+                }
                 break;
 
             case 'updateWaypoint':
