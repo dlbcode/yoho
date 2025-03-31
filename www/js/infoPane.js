@@ -475,14 +475,50 @@ const infoPane = {
             // Get previous route data if available
             const prevRouteIndex = newRouteIndex > 0 ? newRouteIndex - 1 : 0;
             const prevRoute = appState.routeData[prevRouteIndex];
+            let originData = null;
             
-            // Initialize with destination from previous route as origin if applicable
-            // Only do this if the previous destination is not "Any" and is valid
-            const origin = prevRoute && prevRoute.destination && 
-                  prevRoute.destination.iata_code && 
-                  prevRoute.destination.iata_code !== 'Any' 
-                ? { ...prevRoute.destination, isAnyDestination: false, isAnyOrigin: false }
-                : null;
+            // Check if previous route is part of a multi-segment group
+            const prevSelectedRoute = appState.selectedRoutes[prevRouteIndex];
+            const isMultiSegment = prevSelectedRoute && prevSelectedRoute.group !== undefined;
+            
+            if (isMultiSegment) {
+                // Find the last segment in this group to get the final destination
+                const groupId = prevSelectedRoute.group;
+                const groupSegments = Object.entries(appState.selectedRoutes)
+                    .filter(([_, route]) => route.group === groupId)
+                    .map(([idx, route]) => ({
+                        index: parseInt(idx),
+                        route: route
+                    }))
+                    .sort((a, b) => a.index - b.index);
+                
+                if (groupSegments.length > 0) {
+                    const lastSegment = groupSegments[groupSegments.length - 1];
+                    const lastSegmentRoute = lastSegment.route.displayData.route;
+                    const finalDestIata = lastSegmentRoute.split(' > ')[1]; // Get destination part
+                    
+                    console.log(`Found multi-segment route, final destination: ${finalDestIata}`);
+                    
+                    // Try to get detailed airport data
+                    if (window.flightMap && window.flightMap.airportDataCache && finalDestIata) {
+                        originData = window.flightMap.airportDataCache[finalDestIata] || { 
+                            iata_code: finalDestIata,
+                            city: finalDestIata
+                        };
+                        console.log(`Using multi-segment final destination as origin:`, originData);
+                    }
+                }
+            } 
+            
+            // If not part of multi-segment or we couldn't get the final destination,
+            // fall back to the regular behavior
+            if (!originData) {
+                originData = prevRoute && prevRoute.destination && 
+                      prevRoute.destination.iata_code && 
+                      prevRoute.destination.iata_code !== 'Any' 
+                    ? { ...prevRoute.destination, isAnyDestination: false, isAnyOrigin: false }
+                    : null;
+            }
             
             // Calculate departure date (day after previous route's return or departure date)
             let departDate = new Date();
@@ -504,7 +540,7 @@ const infoPane = {
                 travelers: 1, // Default to 1 traveler
                 departDate: formattedDate,
                 returnDate: null,
-                origin: origin,
+                origin: originData,
                 destination: null
             };
             

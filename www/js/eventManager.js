@@ -42,7 +42,7 @@ const stateHandlers = {
             appState.currentView = 'trip';
         }
     },
-    // Add a new handler for waypoint order issues
+    // Fix waypoint order issues by focusing on routeData
     fixWaypointOrder: (indices) => {
         // Check if a destination is set but not an origin in routeData
         const routeNumber = Math.floor(indices.destination / 2);
@@ -60,16 +60,14 @@ const stateHandlers = {
                 isAnyDestination: false
             };
             
-            // Update routeData first
+            // Update routeData
             appState.routeData[routeNumber].origin = anyOrigin;
             
-            // Update waypoints array for backwards compatibility
-            if (appState.waypoints[indices.origin] === undefined) {
-                while (appState.waypoints.length <= indices.origin) {
-                    appState.waypoints.push(null);
-                }
-            }
-            appState.waypoints[indices.origin] = anyOrigin;
+            // Explicitly use updateState to ensure proper synchronization
+            updateState('updateWaypoint', {
+                index: indices.origin,
+                data: anyOrigin
+            }, 'eventManager.fixWaypointOrder');
             
             // Update the input field if it exists
             const inputId = `waypoint-input-${indices.origin + 1}`;

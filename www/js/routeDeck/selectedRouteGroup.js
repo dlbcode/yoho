@@ -304,7 +304,7 @@ const selectedRouteGroup = {
             this.removeGroupButtonStyles();
             
             // Remove active-route-button class from all buttons first
-            document.queryAll('.route-info-button').forEach(button => {
+            document.querySelectorAll('.route-info-button').forEach(button => {
                 button.classList.remove('active-route-button');
             });
             

@@ -392,7 +392,7 @@ const routeBox = {
         // Update inputs to reflect the new state
         setWaypointInputs(routeNumber);
         
-        // Update waypoints array for compatibility
+        // Update waypoints array for compatibility - use updateState to ensure proper sync
         updateState('updateWaypoint', { 
             index: routeNumber * 2, 
             data: routeData.origin 

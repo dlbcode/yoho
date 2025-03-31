@@ -154,15 +154,9 @@ function updateState(key, value, calledFrom) {
                         appState.routeData[routeNumber].destination = value.data;
                     }
                     
-                    // Legacy waypoints update - maintained for transition period only
-                    if (value.index < appState.waypoints.length) {
-                        appState.waypoints[value.index] = value.data;
-                    } else {
-                        while (appState.waypoints.length <= value.index) {
-                            appState.waypoints.push(null);
-                        }
-                        appState.waypoints[value.index] = value.data;
-                    }
+                    // Legacy waypoints update in a more controlled way
+                    // This will be removed in phase 3
+                    syncWaypointToLegacyStructure(value.index, value.data);
                 }
                 break;
 
@@ -188,13 +182,14 @@ function updateState(key, value, calledFrom) {
                     appState.routeData[newRouteNumber].destination = newWaypoint;
                 }
                 
-                // Update legacy structure for compatibility
-                appState.waypoints.push(newWaypoint);
+                // Sync to legacy structure in a controlled way
+                syncWaypointToLegacyStructure(newWaypointIndex, newWaypoint);
+                
                 appState.isEditingWaypoint = true;
                 break;
 
             case 'removeWaypoint':
-                if (value >= 0 && value < appState.waypoints.length) {
+                if (value >= 0) {
                     const routeNumber = Math.floor(value / 2);
                     const isOrigin = value % 2 === 0;
                     
@@ -215,9 +210,11 @@ function updateState(key, value, calledFrom) {
                         }
                     }
                     
-                    // Update legacy waypoints
-                    appState.waypoints.splice(value, 1);
-                    appState.isEditingWaypoint = false;
+                    // Update legacy structure in a controlled way
+                    if (value < appState.waypoints.length) {
+                        appState.waypoints.splice(value, 1);
+                        appState.isEditingWaypoint = false;
+                    }
                 }
                 break;
 
@@ -233,11 +230,8 @@ function updateState(key, value, calledFrom) {
                 // Remove associated dates
                 delete appState.routeDates[routeToRemove];
                 
-                // Update legacy waypoints
-                const waypointStart = routeToRemove * 2;
-                if (waypointStart < appState.waypoints.length) {
-                    appState.waypoints.splice(waypointStart, 2);
-                }
+                // Update legacy waypoints in a controlled way
+                syncRouteRemovalToLegacyStructure(routeToRemove);
                 break;
 
             case 'updateRoutes':
@@ -348,6 +342,27 @@ function updateState(key, value, calledFrom) {
         if (shouldUpdateUrl) {
             updateUrl();
         }
+    }
+}
+
+// Helper function to synchronize routeData changes to legacy waypoints array
+// This will be removed in phase 3
+function syncWaypointToLegacyStructure(waypointIndex, waypointData) {
+    // Ensure the waypoints array is long enough
+    while (appState.waypoints.length <= waypointIndex) {
+        appState.waypoints.push(null);
+    }
+    
+    // Update the waypoint at the specified index
+    appState.waypoints[waypointIndex] = waypointData;
+}
+
+// Helper function to synchronize route removal to legacy waypoints array
+// This will be removed in phase 3
+function syncRouteRemovalToLegacyStructure(routeNumber) {
+    const waypointStart = routeNumber * 2;
+    if (waypointStart < appState.waypoints.length) {
+        appState.waypoints.splice(waypointStart, 2);
     }
 }
 
