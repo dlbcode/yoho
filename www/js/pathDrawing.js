@@ -475,8 +475,9 @@ const pathDrawing = {
 
     drawRoutePaths(iata, directRoutes, type = 'route') {
         directRoutes[iata]?.forEach(route => {
-            const routeId = `${route.originAirport.iata_code}-${route.destinationAirport.iata_code}`;
-            if (!route.originAirport || !route.destinationAirport) return console.error('Invalid route data:', route);
+            // Fix: Use proper routeId construction
+            const routeId = `${iata}-${route.destinationAirport.iata_code}`;
+            
             this.drawLine(routeId, type, {
                 price: route.price,
                 iata: iata,

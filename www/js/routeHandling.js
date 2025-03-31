@@ -105,7 +105,28 @@ const routeHandling = {
                 // Look up route if both origin and destination have valid IATA codes
                 if (origin?.iata_code && destination?.iata_code) {
                     console.log(`Looking up route from ${origin.iata_code} to ${destination.iata_code}`);
+                    
+                    // Bug fix: First ensure we have directRoutes loaded for the origin
+                    let isDirectRoute = false;
+                    
+                    // Check if directRoutes is already loaded for this origin
+                    if (!appState.directRoutes[origin.iata_code]) {
+                        try {
+                            // Fetch routes for this origin if not already available
+                            console.log(`Fetching directRoutes for ${origin.iata_code}`);
+                            await flightMap.fetchAndCacheRoutes(origin.iata_code);
+                        } catch (error) {
+                            console.error(`Error fetching direct routes for ${origin.iata_code}:`, error);
+                        }
+                    }
+                    
+                    // Now look for the direct route
                     const foundRoute = flightMap.findRoute(origin.iata_code, destination.iata_code);
+                    isDirectRoute = !!foundRoute;
+                    
+                    console.log(`Route from ${origin.iata_code} to ${destination.iata_code} isDirect:`, isDirectRoute);
+                    console.log('Found route:', foundRoute);
+                    
                     if (foundRoute) {
                         const newRoute = {
                             ...foundRoute,
