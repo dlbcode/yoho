@@ -127,9 +127,7 @@ function updateState(key, value, calledFrom) {
                         appState.routeData[routeNum].travelers = travelers;
                     }
                     
-                    // Update legacy structure
-                    if (!appState.routes[routeNum]) appState.routes[routeNum] = {};
-                    appState.routes[routeNum].travelers = travelers;
+                    // Legacy structure update removed - routeData is now the source of truth
                 }
                 shouldUpdateUrl = false;
                 break;
@@ -156,7 +154,7 @@ function updateState(key, value, calledFrom) {
                         appState.routeData[routeNumber].destination = value.data;
                     }
                     
-                    // Update legacy waypoints for compatibility
+                    // Legacy waypoints update - maintained for transition period only
                     if (value.index < appState.waypoints.length) {
                         appState.waypoints[value.index] = value.data;
                     } else {

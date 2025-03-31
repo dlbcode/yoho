@@ -51,11 +51,10 @@ const removeRoute = (routeNumber) => {
     }
 
     // Critical fix: Make a backup of the route data before marking it as empty
-    // This ensures we have data to log if something is going wrong
     const routeBeforeRemoval = { ...appState.routeData[routeNumber] };
     console.log(`Route ${routeNumber} data before removal:`, routeBeforeRemoval);
 
-    // Mark the route as empty in routeData
+    // Mark the route as empty in routeData - this is the source of truth
     if (appState.routeData[routeNumber]) {
         // Set isEmpty flag but preserve origin and destination for debugging
         appState.routeData[routeNumber] = { 
@@ -64,7 +63,8 @@ const removeRoute = (routeNumber) => {
             _previousDestination: routeBeforeRemoval.destination
         };
         
-        // Also update legacy waypoints for compatibility
+        // Update the legacy waypoints through the state manager
+        // This will be removed in the final phase
         updateState('removeWaypoints', { routeNumber }, 'removeRoute');
     } else {
         // If routeData doesn't exist yet, just remove waypoints

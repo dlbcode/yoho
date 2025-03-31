@@ -12,11 +12,11 @@ const routeHandling = {
         
         let newRoutes = [];
         
-        // Process each route in routeData
+        // Process each route in routeData - our source of truth
         if (appState.routeData && appState.routeData.length > 0) {
             console.log("Processing routeData for routes:", appState.routeData);
             
-            // Don't reverse waypoints if origin is "Any" - add a check here
+            // Check for "Any" origins directly in routeData
             const hasAnyOrigin = appState.routeData.some(r => r && r.origin && r.origin.iata_code === 'Any');
             
             // Process each route in routeData
@@ -27,7 +27,6 @@ const routeHandling = {
                     continue;
                 }
                 
-                // Important: log what we're working with to diagnose issues
                 console.log(`Processing route ${i}:`, route);
                 
                 // Apply route direction logic if needed
@@ -38,7 +37,7 @@ const routeHandling = {
                 if (appState.routeDirection === 'to' && !hasAnyOrigin) {
                     [origin, destination] = [destination, origin];
                     
-                    // Also update the routeData to reflect this swap
+                    // Update the routeData to reflect this swap
                     appState.routeData[i] = {
                         ...route,
                         origin: destination,
@@ -79,12 +78,11 @@ const routeHandling = {
                         routeData.destinationData = destination;
                     }
                     
-                    // If this is an "Any" origin route, add flag
+                    // Flag for "Any" waypoints
                     if (origin && origin.iata_code === 'Any') {
                         routeData.hasAnyOrigin = true;
                     }
                     
-                    // If this is an "Any" destination route, add flag
                     if (destination && destination.iata_code === 'Any') {
                         routeData.hasAnyDestination = true;
                     }
@@ -104,7 +102,7 @@ const routeHandling = {
                     }
                 }
 
-                // Only look up route if both origin and destination have valid IATA codes
+                // Look up route if both origin and destination have valid IATA codes
                 if (origin?.iata_code && destination?.iata_code) {
                     console.log(`Looking up route from ${origin.iata_code} to ${destination.iata_code}`);
                     const foundRoute = flightMap.findRoute(origin.iata_code, destination.iata_code);
@@ -113,7 +111,6 @@ const routeHandling = {
                             ...foundRoute,
                             isDirect: true,
                             isSelected: isSelected,
-                            // Use the selected route price if available, otherwise use the direct route price
                             price: routePrice !== null ? routePrice : foundRoute.price,
                             tripType: route.tripType || 'oneWay',
                             travelers: route.travelers || 1
@@ -126,7 +123,6 @@ const routeHandling = {
                             destination: destination.iata_code,
                             isDirect: false,
                             isSelected: isSelected,
-                            // Use the selected route price if available
                             price: routePrice,
                             tripType: route.tripType || 'oneWay',
                             travelers: route.travelers || 1
@@ -151,7 +147,7 @@ const routeHandling = {
             }
         }
 
-        // Update state and redraw
+        // Update state and redraw routes
         console.log("Final routes array:", newRoutes);
         updateState('updateRoutes', newRoutes, 'routeHandling.updateRoutesArray');
         console.log('Updated routes in state:', appState.routes);
