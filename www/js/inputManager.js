@@ -365,7 +365,18 @@ class InputManager {
         const inputField = document.getElementById(inputId);
         const suggestionBox = this.suggestionBoxes[inputId];
         
-        if (!suggestionBox || !inputField) return;
+        if (!suggestionBox) return;
+        
+        // If input doesn't exist anymore, clean up this suggestion box
+        if (!inputField || !document.body.contains(inputField)) {
+            console.log(`Input ${inputId} not found, cleaning up suggestion box`);
+            if (suggestionBox && document.body.contains(suggestionBox)) {
+                suggestionBox.remove();
+            }
+            delete this.suggestionBoxes[inputId];
+            delete this.inputStates[inputId];
+            return;
+        }
     
         const isMobile = this.isMobile();
         
@@ -386,11 +397,16 @@ class InputManager {
         
         // Desktop positioning - optimize calculations
         const inputRect = inputField.getBoundingClientRect();
-        const waypointContainer = document.querySelector('.waypoint-inputs-container');
-        const containerRect = waypointContainer ? waypointContainer.getBoundingClientRect() : null;
+        let waypointContainer = inputField.closest('.waypoint-inputs-container');
         
-        if (!containerRect) {
-            // Fallback if container not found
+        // If container not found in current DOM, find any other container as fallback
+        if (!waypointContainer) {
+            waypointContainer = document.querySelector('.waypoint-inputs-container');
+        }
+        
+        // Ensure we have a valid container to calculate from
+        if (!waypointContainer) {
+            // Fallback positioning if container not found
             Object.assign(suggestionBox.style, {
                 position: 'fixed',
                 zIndex: '10000',
@@ -404,7 +420,7 @@ class InputManager {
             return;
         }
         
-        // Optimized positioning calculation
+        const containerRect = waypointContainer.getBoundingClientRect();
         const viewportHeight = window.innerHeight;
         const maxMenuHeight = 200;
         const spaceBelow = viewportHeight - inputRect.bottom;
@@ -627,6 +643,49 @@ class InputManager {
                 }
             }
         });
+    }
+    
+    cleanupInput(inputId) {
+        console.log(`Cleaning up input ${inputId}`);
+        
+        // Remove suggestion box
+        if (this.suggestionBoxes[inputId]) {
+            const box = this.suggestionBoxes[inputId];
+            if (box && document.body.contains(box)) {
+                box.remove();
+            }
+            delete this.suggestionBoxes[inputId];
+        }
+        
+        // Clean up event listeners
+        this.cleanupInputListeners(inputId);
+        
+        // Remove input state
+        delete this.inputStates[inputId];
+        
+        // Clear debounce timers
+        delete this.debounceTimers[`autocomplete-${inputId}`];
+        delete this.debounceTimers[`input-${inputId}`];
+    }
+    
+    cleanupAll() {
+        console.log("Cleaning up all input resources");
+        
+        // Clean up all suggestion boxes
+        Object.keys(this.suggestionBoxes).forEach(inputId => {
+            this.cleanupInput(inputId);
+        });
+        
+        // Additional cleanup of any suggestion divs left in DOM
+        document.querySelectorAll('.suggestions').forEach(box => {
+            if (box.id && box.id.includes('Suggestions')) {
+                box.remove();
+            }
+        });
+        
+        this.suggestionBoxes = {};
+        this.inputStates = {};
+        this.debounceTimers = {};
     }
     
     cleanup() {

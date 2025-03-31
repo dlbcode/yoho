@@ -29,6 +29,13 @@ const appState = {
 
 function updateState(key, value, calledFrom) {
     console.log(`updateState called from: ${calledFrom}, key: ${key}, value:`, value);
+    
+    // Log the current state of routeData for debugging
+    if (key === 'removeWaypoint' || key === 'removeWaypoints' || 
+        key === 'updateWaypoint' || key === 'addWaypoint') {
+        console.log('Before routeData update:', JSON.parse(JSON.stringify(appState.routeData)));
+    }
+    
     let shouldUpdateUrl = true;
     let shouldContinue = true;
 
@@ -221,11 +228,8 @@ function updateState(key, value, calledFrom) {
             case 'removeWaypoints':
                 const routeToRemove = value.routeNumber;
                 
-                // Mark route as empty in routeData
-                appState.routeData[routeToRemove] = { 
-                    isEmpty: true, 
-                    _removedAt: new Date().toISOString() 
-                };
+                // Remove route from routeData completely instead of marking as empty
+                delete appState.routeData[routeToRemove];
                 
                 // Remove associated dates
                 delete appState.routeDates[routeToRemove];
@@ -342,6 +346,19 @@ function updateState(key, value, calledFrom) {
         if (shouldUpdateUrl) {
             updateUrl();
         }
+    }
+    
+    // Log the updated state of routeData for debugging
+    if (key === 'removeWaypoint' || key === 'removeWaypoints' || 
+        key === 'updateWaypoint' || key === 'addWaypoint') {
+        console.log('After routeData update:', JSON.parse(JSON.stringify(appState.routeData)));
+        
+        // Force route button update after any waypoint changes
+        setTimeout(() => {
+            import('./infoPane.js').then(({ infoPane }) => {
+                infoPane.updateRouteButtons();
+            });
+        }, 50);
     }
 }
 

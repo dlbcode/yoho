@@ -1,3 +1,5 @@
+import { inputManager } from '../inputManager.js';
+
 export const domManager = {
     setupBaseStructure(routeIndex) {
         const infoPaneContent = document.getElementById('infoPaneContent');
@@ -39,14 +41,33 @@ export const domManager = {
     },
 
     removeRouteStructure(routeNumber) {
-        const routeBox = document.getElementById('routeBox');
-        const routeBoxContainer = document.getElementById('routeBoxContainer');
-        const contentWrapper = document.querySelector('.content-wrapper');
-        const infoPane = document.getElementById('infoPane');
-
-        if (routeBox) routeBox.remove();
-        if (routeBoxContainer) routeBoxContainer.remove();
-        if (contentWrapper) contentWrapper.remove();
-        infoPane.classList.remove('search-results');
+        // First, collect all waypoint input IDs associated with this route for later cleanup
+        const inputsToCleanup = [];
+        
+        // Calculate input field IDs based on routeNumber
+        const originInputId = `waypoint-input-${routeNumber * 2 + 1}`;
+        const destInputId = `waypoint-input-${routeNumber * 2 + 2}`;
+        
+        // Add them to the cleanup list if they exist
+        const originInput = document.getElementById(originInputId);
+        const destInput = document.getElementById(destInputId);
+        
+        if (originInput) inputsToCleanup.push(originInputId);
+        if (destInput) inputsToCleanup.push(destInputId);
+        
+        // Remove the route box content
+        const routeBox = document.querySelector(`.route-box[data-route-number="${routeNumber}"]`);
+        if (routeBox) {
+            routeBox.innerHTML = '';
+            routeBox.remove();
+        }
+        
+        // Perform cleanup for each input field
+        inputsToCleanup.forEach(inputId => {
+            // Clean up suggestion boxes and input states
+            inputManager.cleanupInput(inputId);
+        });
+        
+        console.log(`Removed DOM structure for route ${routeNumber}`);
     }
 };

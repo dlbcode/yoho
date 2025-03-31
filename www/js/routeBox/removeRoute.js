@@ -18,6 +18,11 @@ const removeRoute = (routeNumber) => {
     let selectedRouteIndex = routeNumber;
     let groupNumber = appState.selectedRoutes[selectedRouteIndex]?.group;
 
+    // Get a list of all input ids before removal for later cleanup
+    const inputsToCleanup = Array.from(document.querySelectorAll('.waypoint-input'))
+        .filter(input => input.id && input.id.startsWith(`waypoint-input-`))
+        .map(input => input.id);
+
     // Remove DOM structure first
     domManager.removeRouteStructure(routeNumber);
 
@@ -56,15 +61,10 @@ const removeRoute = (routeNumber) => {
 
     // Mark the route as empty in routeData - this is the source of truth
     if (appState.routeData[routeNumber]) {
-        // Set isEmpty flag but preserve origin and destination for debugging
-        appState.routeData[routeNumber] = { 
-            isEmpty: true,
-            _previousOrigin: routeBeforeRemoval.origin,
-            _previousDestination: routeBeforeRemoval.destination
-        };
+        // Completely remove the route data instead of just marking it empty
+        delete appState.routeData[routeNumber];
         
         // Update the legacy waypoints through the state manager
-        // This will be removed in the final phase
         updateState('removeWaypoints', { routeNumber }, 'removeRoute');
     } else {
         // If routeData doesn't exist yet, just remove waypoints
@@ -97,6 +97,31 @@ const removeRoute = (routeNumber) => {
     
     // Force URL update
     updateState('updateRoutes', appState.routes, 'removeRoute');
+
+    // Force route buttons update
+    setTimeout(() => {
+        import('../infoPane.js').then(({ infoPane }) => {
+            infoPane.updateRouteButtons();
+        });
+    }, 50);
+
+    // After route removal and view setup, clean up suggestion boxes and reposition any remaining ones
+    setTimeout(() => {
+        Object.keys(inputManager.suggestionBoxes).forEach(id => {
+            const input = document.getElementById(id);
+            if (input && document.body.contains(input)) {
+                inputManager.positionSuggestionBox(id);
+            } else if (inputManager.suggestionBoxes[id]) {
+                // Remove orphaned suggestion boxes
+                const box = inputManager.suggestionBoxes[id];
+                if (box && document.body.contains(box)) {
+                    box.remove();
+                }
+                delete inputManager.suggestionBoxes[id];
+                delete inputManager.inputStates[id];
+            }
+        });
+    }, 100);
 };
 
 // Updated to use modal for selected routes
