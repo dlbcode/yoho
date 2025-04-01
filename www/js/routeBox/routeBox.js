@@ -477,16 +477,11 @@ const routeBox = {
         // Update inputs to reflect the new state
         setWaypointInputs(routeNumber);
         
-        // Update waypoints array for compatibility - use updateState to ensure proper sync
-        updateState('updateWaypoint', { 
-            index: routeNumber * 2, 
-            data: routeData.origin 
-        }, 'routeBox.swapButton.origin');
-        
-        updateState('updateWaypoint', { 
-            index: routeNumber * 2 + 1, 
-            data: routeData.destination 
-        }, 'routeBox.swapButton.destination');
+        // Update state directly with the updated routeData
+        updateState('updateRouteData', { 
+            routeNumber, 
+            data: routeData 
+        }, 'routeBox.swapButton');
         
         // Update routes if we have valid waypoints
         if (routeData.origin?.iata_code && routeData.destination?.iata_code) {
