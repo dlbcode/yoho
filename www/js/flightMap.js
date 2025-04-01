@@ -58,7 +58,7 @@ const flightMap = {
     getMarkerIcon(iata, type) {
         if (type === 'city') return greenDotIcon;
         
-        // Check if this iata is in any valid route as origin or destination
+        // Check if this iata is in any valid route as origin or destination in routeData
         const isInRoute = appState.routeData.some(route => 
             route && !route.isEmpty && (
                 (route.origin && route.origin.iata_code === iata) || 
@@ -66,8 +66,7 @@ const flightMap = {
             )
         );
         
-        // Fall back to waypoints check for backwards compatibility
-        return isInRoute || appState.waypoints.some(wp => wp && wp.iata_code === iata) ? magentaDotIcon : blueDotIcon;
+        return isInRoute ? magentaDotIcon : blueDotIcon;
     },
 
     handleMarkerClick(airport, clickedMarker) {
@@ -89,36 +88,71 @@ const flightMap = {
         cityName.textContent = airport.city;
         popupContent.appendChild(cityName);
 
-        const waypointIndex = appState.waypoints.findIndex(wp => wp.iata_code === airport.iata_code);
+        // Check if the airport is part of a route in routeData
+        const routeIndex = this.findAirportInRouteData(airport.iata_code);
         const button = document.createElement('button');
         button.className = 'tooltip-button';
-        button.textContent = waypointIndex === -1 ? '+' : '-';
+        button.textContent = routeIndex === -1 ? '+' : '-';
 
         button.addEventListener('click', () => {
-            const currentWaypointIndex = appState.waypoints.findIndex(wp => wp.iata_code === airport.iata_code);
-            if (currentWaypointIndex === -1) {
-                const lastWaypoint = appState.waypoints[appState.waypoints.length - 1];
-                if (appState.waypoints.length >= 2 && appState.waypoints.length % 2 === 0) {
-                    updateState('addWaypoint', lastWaypoint);
-                    updateState('addWaypoint', airport);
+            const currentRouteIndex = this.findAirportInRouteData(airport.iata_code);
+            
+            if (currentRouteIndex === -1) {
+                // Add to a route
+                if (appState.routeData.length > 0) {
+                    // Find last route that's incomplete
+                    const lastRouteIndex = appState.routeData.length - 1;
+                    const lastRoute = appState.routeData[lastRouteIndex];
+                    
+                    if (!lastRoute || lastRoute.isEmpty || (!lastRoute.origin && !lastRoute.destination)) {
+                        // Create new route with this as origin
+                        this.addToNewRoute(airport, true);
+                    } else if (lastRoute.origin && !lastRoute.destination) {
+                        // Complete the route with this as destination
+                        this.addAsDestination(lastRouteIndex, airport);
+                    } else {
+                        // Start a new route
+                        this.addToNewRoute(airport, true);
+                    }
                 } else {
-                    updateState('addWaypoint', airport);
+                    // Create first route
+                    this.addToNewRoute(airport, true);
                 }
+                
                 clickedMarker.setIcon(magentaDotIcon);
                 button.textContent = '-';
             } else {
-                if (currentWaypointIndex === appState.waypoints.length - 1 && currentWaypointIndex > 1) {
-                    updateState('removeWaypoint', currentWaypointIndex);
-                    updateState('removeWaypoint', currentWaypointIndex - 1);
+                // Remove from route
+                const { routeIndex, isOrigin } = currentRouteIndex;
+                const route = appState.routeData[routeIndex];
+                
+                if (isOrigin) {
+                    // If removing origin and destination exists, create new origin-less route
+                    if (route.destination) {
+                        updateState('updateWaypoint', {
+                            index: routeIndex * 2, // Origin index
+                            data: null
+                        });
+                    } else {
+                        // Remove whole route if it's just an origin
+                        updateState('removeWaypoints', {
+                            routeNumber: routeIndex
+                        });
+                    }
                 } else {
-                    updateState('removeWaypoint', currentWaypointIndex + 1);
-                    updateState('removeWaypoint', currentWaypointIndex);
+                    // If removing destination, just remove the destination
+                    updateState('updateWaypoint', {
+                        index: routeIndex * 2 + 1, // Destination index
+                        data: null
+                    });
                 }
+                
                 lineManager.clearLines('hover');
                 clickedMarker.setIcon(blueDotIcon);
                 this.hoverDisabled = false;
                 button.textContent = '+';
             }
+            
             updateState('selectedAirport', null);
         });
 
@@ -146,19 +180,48 @@ const flightMap = {
         });
     },
 
-    findRoute(fromIata, toIata) {
-        try {
-            for (const routes of Object.values(appState.directRoutes)) {
-                for (const route of routes) {
-                    if (route.originAirport.iata_code === fromIata && route.destinationAirport.iata_code === toIata) {
-                        return route;
-                    }
-                }
+    // New helper methods for route management
+    findAirportInRouteData(iata) {
+        for (let i = 0; i < appState.routeData.length; i++) {
+            const route = appState.routeData[i];
+            if (!route || route.isEmpty) continue;
+            
+            if (route.origin && route.origin.iata_code === iata) {
+                return { routeIndex: i, isOrigin: true };
             }
-        } catch (error) {
-            console.error(`Error finding route from ${fromIata} to ${toIata}:`, error);
+            
+            if (route.destination && route.destination.iata_code === iata) {
+                return { routeIndex: i, isOrigin: false };
+            }
         }
-        return null;
+        return -1;
+    },
+    
+    addToNewRoute(airport, asOrigin) {
+        const newRouteIndex = appState.routeData.length;
+        const newRoute = {
+            tripType: 'oneWay',
+            travelers: 1,
+        };
+        
+        if (asOrigin) {
+            newRoute.origin = airport;
+        } else {
+            newRoute.destination = airport;
+        }
+        
+        // Using updateWaypoint with calculated index based on routeData length
+        updateState('updateWaypoint', {
+            index: newRouteIndex * 2 + (asOrigin ? 0 : 1),
+            data: airport
+        });
+    },
+    
+    addAsDestination(routeIndex, airport) {
+        updateState('updateWaypoint', {
+            index: routeIndex * 2 + 1, // Destination index
+            data: airport
+        });
     },
 
     async fetchAndDisplayAirports() {
@@ -348,7 +411,7 @@ const flightMap = {
         Object.keys(this.markers).forEach(iata => {
             const marker = this.markers[iata];
             
-            // Check if this iata is in any valid route as origin or destination
+            // Check if this iata is in any valid route as origin or destination using routeData
             const isInRoute = appState.routeData.some(route => 
                 route && !route.isEmpty && (
                     (route.origin && route.origin.iata_code === iata) || 
@@ -356,16 +419,13 @@ const flightMap = {
                 )
             );
             
-            // Fall back to waypoints for backwards compatibility
-            const isWaypoint = isInRoute || appState.waypoints.some(wp => wp && wp.iata_code === iata);
-            
             const isSelectedRoute = appState.selectedRoute?.includes(iata);
-            if (isWaypoint || this.shouldDisplayAirport(marker.airportWeight, currentZoom, isSelectedRoute)) {
+            if (isInRoute || this.shouldDisplayAirport(marker.airportWeight, currentZoom, isSelectedRoute)) {
                 if (currentBounds.contains(marker.getLatLng())) {
                     if (!map.hasLayer(marker)) {
                         marker.addTo(map);
                     }
-                } else if (!isWaypoint) {
+                } else if (!isInRoute) {
                     map.removeLayer(marker);
                 }
             }
