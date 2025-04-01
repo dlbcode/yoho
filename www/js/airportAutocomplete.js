@@ -221,12 +221,15 @@ export const updateSuggestions = (inputId, airports) => {
     // Get route data to check special conditions
     const routeData = appState.routeData[routeNumber];
     
+    // Define pairWaypointType based on current field type
+    const pairWaypointType = isOrigin ? 'destination' : 'origin';
+    
     // Check if paired field has "Any" value
     const isPairAny = pairField && 
         (pairField.value === 'Anywhere' ||
          pairField.getAttribute('data-is-any-destination') === 'true' ||
          pairField.getAttribute('data-selected-iata') === 'Any') ||
-        (appState.waypoints[pairIndex]?.iata_code === 'Any');
+        (routeData && routeData[pairWaypointType]?.iata_code === 'Any');
     
     const inputField = document.getElementById(inputId);
     let hasAddedSuggestions = false;
