@@ -9,6 +9,7 @@ services:
       - nginx_logs:/var/log/nginx/
       - ./www:/var/www/   
       - /etc/letsencrypt:/etc/letsencrypt:ro
+      - certbot_www:/var/www/certbot
     ports:
       - "80:80"
       - "443:443"
