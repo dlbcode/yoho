@@ -127,24 +127,28 @@ const flightMap = {
                 const route = appState.routeData[routeIndex];
                 
                 if (isOrigin) {
-                    // If removing origin and destination exists, create new origin-less route
+                    // If removing origin and destination exists, update routeData
                     if (route.destination) {
-                        updateState('updateWaypoint', {
-                            index: routeIndex * 2, // Origin index
-                            data: null
-                        });
+                        updateState('updateRouteData', {
+                            routeNumber: routeIndex,
+                            data: {
+                                origin: null
+                            }
+                        }, 'flightMap.handleMarkerClick.removeOrigin');
                     } else {
                         // Remove whole route if it's just an origin
-                        updateState('removeWaypoints', {
+                        updateState('removeRoute', {
                             routeNumber: routeIndex
-                        });
+                        }, 'flightMap.handleMarkerClick.removeRoute');
                     }
                 } else {
                     // If removing destination, just remove the destination
-                    updateState('updateWaypoint', {
-                        index: routeIndex * 2 + 1, // Destination index
-                        data: null
-                    });
+                    updateState('updateRouteData', {
+                        routeNumber: routeIndex,
+                        data: {
+                            destination: null
+                        }
+                    }, 'flightMap.handleMarkerClick.removeDestination');
                 }
                 
                 lineManager.clearLines('hover');
@@ -210,18 +214,21 @@ const flightMap = {
             newRoute.destination = airport;
         }
         
-        // Using updateWaypoint with calculated index based on routeData length
-        updateState('updateWaypoint', {
-            index: newRouteIndex * 2 + (asOrigin ? 0 : 1),
-            data: airport
-        });
+        // Use updateRouteData instead of updateWaypoint
+        updateState('updateRouteData', {
+            routeNumber: newRouteIndex,
+            data: newRoute
+        }, 'flightMap.addToNewRoute');
     },
     
     addAsDestination(routeIndex, airport) {
-        updateState('updateWaypoint', {
-            index: routeIndex * 2 + 1, // Destination index
-            data: airport
-        });
+        // Update route data directly
+        updateState('updateRouteData', {
+            routeNumber: routeIndex,
+            data: {
+                destination: airport
+            }
+        }, 'flightMap.addAsDestination');
     },
 
     async fetchAndDisplayAirports() {

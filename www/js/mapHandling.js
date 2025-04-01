@@ -4,7 +4,7 @@ import { flightMap } from './flightMap.js';
 
 const mapHandling = {
     updateMarkerIcons: function () {
-        // Get all IATA codes from valid routes
+        // Get all IATA codes from valid routes in routeData
         const routeIataCodes = new Set();
         
         // Add all origin and destination IATAs from valid routes in routeData
@@ -19,6 +19,8 @@ const mapHandling = {
             }
         });
 
+        // No need to check legacy waypoints anymore
+        
         // Update markers based on the collected IATA codes
         Object.entries(flightMap.markers).forEach(([iata, marker]) => {
             const icon = routeIataCodes.has(iata) ? magentaDotIcon : blueDotIcon;

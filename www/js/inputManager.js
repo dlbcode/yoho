@@ -788,6 +788,29 @@ class InputManager {
         const routeNumber = Math.floor(waypointIndex / 2);
         const isOrigin = waypointIndex % 2 === 0;
         
+        // Update directly in routeData
+        if (!appState.routeData[routeNumber]) {
+            appState.routeData[routeNumber] = {
+                tripType: 'oneWay',
+                travelers: 1,
+                departDate: null,
+                returnDate: null
+            };
+        }
+        
+        // Use updateRouteData to update the field
+        const updateData = {};
+        if (isOrigin) {
+            updateData.origin = airport;
+        } else {
+            updateData.destination = airport;
+        }
+        
+        updateState('updateRouteData', {
+            routeNumber,
+            data: updateData
+        }, 'inputManager.handleAirportSelection');
+        
         // Find the paired field
         const pairIndex = isOrigin ? waypointIndex + 1 : waypointIndex - 1;
         const pairFieldId = `waypoint-input-${pairIndex + 1}`;
@@ -795,134 +818,134 @@ class InputManager {
         
         console.log(`Paired field for ${inputId} is ${pairFieldId}, exists: ${Boolean(pairField)}`);
 
-            if (this.isMobile()) {
-                console.log(`Mobile device detected, not focusing pair field`);
-                return;
-            }
-            
-            // Origin field focusing destination
-            if (isOrigin) {
-                if (pairField) {
-                    // Check for empty value - ensure we check against 'Anywhere' and empty string
-                    const pairValue = pairField.value.trim();
-                    const isAnyDestination = pairField.getAttribute('data-is-any-destination') === 'true';
-                    const iataCode = pairField.getAttribute('data-selected-iata');
-                    
-                    // Consider "Anywhere" as NOT a valid value for focusing purposes
-                    const isAnywhere = pairValue === 'Anywhere' || isAnyDestination || iataCode === 'Any';
-                    const hasValidDestination = pairValue !== '' && !isAnywhere;
-                    
-                    console.log(`Destination field check: value="${pairValue}", isAny=${isAnywhere}, hasValid=${hasValidDestination}`);
-                    
-                    // Only focus if it's truly empty or set to Anywhere and we just set the origin
-                    if (!hasValidDestination) {
-                        // Clear the "Anywhere" value before focusing to start fresh
-                        if (isAnywhere && airport.iata_code !== 'Any') {
-                            console.log(`Clearing Anywhere from destination field before focusing`);
-                            pairField.value = '';
-                            pairField.removeAttribute('data-selected-iata');
-                            pairField.removeAttribute('data-is-any-destination');
-                            pairField.readOnly = false;
-                            
-                            // Also clear from routeData
-                            const route = appState.routeData[routeNumber];
-                            if (route) {
-                                route.destination = null;
-                            }
+        if (this.isMobile()) {
+            console.log(`Mobile device detected, not focusing pair field`);
+            return;
+        }
+        
+        // Origin field focusing destination
+        if (isOrigin) {
+            if (pairField) {
+                // Check for empty value - ensure we check against 'Anywhere' and empty string
+                const pairValue = pairField.value.trim();
+                const isAnyDestination = pairField.getAttribute('data-is-any-destination') === 'true';
+                const iataCode = pairField.getAttribute('data-selected-iata');
+                
+                // Consider "Anywhere" as NOT a valid value for focusing purposes
+                const isAnywhere = pairValue === 'Anywhere' || isAnyDestination || iataCode === 'Any';
+                const hasValidDestination = pairValue !== '' && !isAnywhere;
+                
+                console.log(`Destination field check: value="${pairValue}", isAny=${isAnywhere}, hasValid=${hasValidDestination}`);
+                
+                // Only focus if it's truly empty or set to Anywhere and we just set the origin
+                if (!hasValidDestination) {
+                    // Clear the "Anywhere" value before focusing to start fresh
+                    if (isAnywhere && airport.iata_code !== 'Any') {
+                        console.log(`Clearing Anywhere from destination field before focusing`);
+                        pairField.value = '';
+                        pairField.removeAttribute('data-selected-iata');
+                        pairField.removeAttribute('data-is-any-destination');
+                        pairField.readOnly = false;
+                        
+                        // Also clear from routeData
+                        const route = appState.routeData[routeNumber];
+                        if (route) {
+                            route.destination = null;
                         }
-                        
-                        console.log(`Focusing empty/anywhere destination field ${pairFieldId}`);
-                        
-                        // Set up destination for automatic suggestions after focus
-                        const routeData = appState.routeData[routeNumber];
-                        if (routeData && routeData.origin && routeData.origin.iata_code !== 'Any') {
-                            // Set a special flag to enable automatic suggestions
-                            routeData._destinationNeedsEmptyFocus = true;
-                        }
-                        
-                        // Use direct focus here
-                        pairField.focus();
-                        
-                        // Immediate trigger for suggestions - don't wait for the normal focus event
-                        import('./airportAutocomplete.js').then(module => {
-                            module.updateSuggestions(pairFieldId, []);
-                        });
-                    } else {
-                        console.log(`Destination field ${pairFieldId} already has value: "${pairValue}"`);
                     }
+                    
+                    console.log(`Focusing empty/anywhere destination field ${pairFieldId}`);
+                    
+                    // Set up destination for automatic suggestions after focus
+                    const routeData = appState.routeData[routeNumber];
+                    if (routeData && routeData.origin && routeData.origin.iata_code !== 'Any') {
+                        // Set a special flag to enable automatic suggestions
+                        routeData._destinationNeedsEmptyFocus = true;
+                    }
+                    
+                    // Use direct focus here
+                    pairField.focus();
+                    
+                    // Immediate trigger for suggestions - don't wait for the normal focus event
+                    import('./airportAutocomplete.js').then(module => {
+                        module.updateSuggestions(pairFieldId, []);
+                    });
                 } else {
-                    console.log(`Destination field ${pairFieldId} doesn't exist`);
+                    console.log(`Destination field ${pairFieldId} already has value: "${pairValue}"`);
                 }
             } else {
-                // Handle destination field selection - may need to focus origin if it's empty
-                if (pairField) {
-                    const pairValue = pairField.value.trim();
-                    const isAnyOrigin = pairField.getAttribute('data-is-any-destination') === 'true';
-                    const iataCode = pairField.getAttribute('data-selected-iata');
+                console.log(`Destination field ${pairFieldId} doesn't exist`);
+            }
+        } else {
+            // Handle destination field selection - may need to focus origin if it's empty
+            if (pairField) {
+                const pairValue = pairField.value.trim();
+                const isAnyOrigin = pairField.getAttribute('data-is-any-destination') === 'true';
+                const iataCode = pairField.getAttribute('data-selected-iata');
+                
+                // Check if origin is empty or set to Anywhere
+                const isAnywhere = pairValue === 'Anywhere' || isAnyOrigin || iataCode === 'Any';
+                const hasValidOrigin = pairValue !== '' && !isAnywhere;
+                
+                console.log(`Origin field check: value="${pairValue}", isAny=${isAnywhere}, hasValid=${hasValidOrigin}`);
+                
+                if (!hasValidOrigin) {
+                    // If destination is set but origin is empty, focus the origin field
+                    console.log(`Focusing empty/anywhere origin field ${pairFieldId}`);
                     
-                    // Check if origin is empty or set to Anywhere
-                    const isAnywhere = pairValue === 'Anywhere' || isAnyOrigin || iataCode === 'Any';
-                    const hasValidOrigin = pairValue !== '' && !isAnywhere;
-                    
-                    console.log(`Origin field check: value="${pairValue}", isAny=${isAnywhere}, hasValid=${hasValidOrigin}`);
-                    
-                    if (!hasValidOrigin) {
-                        // If destination is set but origin is empty, focus the origin field
-                        console.log(`Focusing empty/anywhere origin field ${pairFieldId}`);
+                    // Clear the "Anywhere" value if it's set
+                    if (isAnywhere && airport.iata_code !== 'Any') {
+                        console.log(`Clearing Anywhere from origin field before focusing`);
+                        pairField.value = '';
+                        pairField.removeAttribute('data-selected-iata');
+                        pairField.removeAttribute('data-is-any-destination');
+                        pairField.readOnly = false;
                         
-                        // Clear the "Anywhere" value if it's set
-                        if (isAnywhere && airport.iata_code !== 'Any') {
-                            console.log(`Clearing Anywhere from origin field before focusing`);
-                            pairField.value = '';
-                            pairField.removeAttribute('data-selected-iata');
-                            pairField.removeAttribute('data-is-any-destination');
-                            pairField.readOnly = false;
-                            
-                            // Also clear from routeData
-                            const route = appState.routeData[routeNumber];
-                            if (route) {
-                                route.origin = null;
-                            }
+                        // Also clear from routeData
+                        const route = appState.routeData[routeNumber];
+                        if (route) {
+                            route.origin = null;
                         }
-                        
-                        // Set a flag in route data for the origin field
-                        const routeData = appState.routeData[routeNumber];
-                        if (routeData && routeData.destination && routeData.destination.iata_code !== 'Any') {
-                            routeData._originNeedsEmptyFocus = true;
-                        }
-                        
-                        // Focus the origin field
-                        pairField.focus();
-                        
-                        // Trigger suggestions immediately
-                        import('./airportAutocomplete.js').then(module => {
-                            module.updateSuggestions(pairFieldId, []);
-                        });
-                        
-                        return;
                     }
-                }
-                
-                // If not focusing the origin, check if we should create a new route
-                const nextRouteNumber = routeNumber + 1;
-                const nextOriginId = `waypoint-input-${(nextRouteNumber * 2) + 1}`;
-                const nextOriginField = document.getElementById(nextOriginId);
-                
-                // Check if we have a complete route and the next route doesn't exist yet
-                const currentRoute = appState.routeData[routeNumber];
-                
-                // Check if next route already exists in routeData
-                const nextRouteExists = appState.routeData[nextRouteNumber] && 
-                    (appState.routeData[nextRouteNumber].origin || 
-                     appState.routeData[nextRouteNumber].destination);
-                
-                if (currentRoute && currentRoute.origin && currentRoute.destination && !nextRouteExists && nextOriginField) {
-                    console.log(`Focusing next origin field ${nextOriginId}`);
-                    nextOriginField.focus();
-                } else {
-                    console.log(`No need to focus next field: complete route=${Boolean(currentRoute?.origin && currentRoute?.destination)}, nextRouteExists=${nextRouteExists}, nextOriginField=${Boolean(nextOriginField)}`);
+                    
+                    // Set a flag in route data for the origin field
+                    const routeData = appState.routeData[routeNumber];
+                    if (routeData && routeData.destination && routeData.destination.iata_code !== 'Any') {
+                        routeData._originNeedsEmptyFocus = true;
+                    }
+                    
+                    // Focus the origin field
+                    pairField.focus();
+                    
+                    // Trigger suggestions immediately
+                    import('./airportAutocomplete.js').then(module => {
+                        module.updateSuggestions(pairFieldId, []);
+                    });
+                    
+                    return;
                 }
             }
+            
+            // If not focusing the origin, check if we should create a new route
+            const nextRouteNumber = routeNumber + 1;
+            const nextOriginId = `waypoint-input-${(nextRouteNumber * 2) + 1}`;
+            const nextOriginField = document.getElementById(nextOriginId);
+            
+            // Check if we have a complete route and the next route doesn't exist yet
+            const currentRoute = appState.routeData[routeNumber];
+            
+            // Check if next route already exists in routeData
+            const nextRouteExists = appState.routeData[nextRouteNumber] && 
+                (appState.routeData[nextRouteNumber].origin || 
+                 appState.routeData[nextRouteNumber].destination);
+            
+            if (currentRoute && currentRoute.origin && currentRoute.destination && !nextRouteExists && nextOriginField) {
+                console.log(`Focusing next origin field ${nextOriginId}`);
+                nextOriginField.focus();
+            } else {
+                console.log(`No need to focus next field: complete route=${Boolean(currentRoute?.origin && currentRoute?.destination)}, nextRouteExists=${nextRouteExists}, nextOriginField=${Boolean(nextOriginField)}`);
+            }
+        }
     }
 }
 

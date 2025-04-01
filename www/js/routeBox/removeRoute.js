@@ -77,11 +77,8 @@ const removeRoute = (routeNumber) => {
     const routeBeforeRemoval = { ...appState.routeData[routeNumber] };
     console.log(`Route ${routeNumber} data before removal:`, routeBeforeRemoval);
 
-    // Completely remove the route data
-    delete appState.routeData[routeNumber];
-    
-    // No need to update legacy waypoints, just notify state manager of the change
-    updateState('removeWaypoints', { routeNumber }, 'removeRoute');
+    // Use routeData exclusively for removing routes
+    updateState('removeRoute', { routeNumber }, 'removeRoute');
 
     // Setup next view
     if (appState.currentView === 'routeDeck' && appState.currentRouteIndex === routeNumber) {

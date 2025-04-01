@@ -12,7 +12,7 @@ const routeHandling = {
         
         let newRoutes = [];
         
-        // Process each route in routeData - our source of truth
+        // Process each route in routeData - exclusively use routeData
         if (appState.routeData && appState.routeData.length > 0) {
             console.log("Processing routeData for routes:", appState.routeData);
             
@@ -22,6 +22,8 @@ const routeHandling = {
             // Process each route in routeData
             for (let i = 0; i < appState.routeData.length; i++) {
                 const route = appState.routeData[i];
+                
+                // Skip empty routes
                 if (!route || route.isEmpty) {
                     console.log(`Skipping empty route at index ${i}`);
                     continue;

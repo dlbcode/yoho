@@ -550,34 +550,20 @@ const infoPane = {
             // Format date as YYYY-MM-DD
             const formattedDate = departDate.toISOString().split('T')[0];
             
-            // Create the new route data
-            appState.routeData[newRouteIndex] = {
-                tripType: 'oneWay', // Default to one-way
-                travelers: 1, // Default to 1 traveler
-                departDate: formattedDate,
-                returnDate: null,
-                origin: originData,
-                destination: null,
-                _originAutoPopulated: originAutoPopulated, // Flag to indicate origin was auto-populated
-                _destinationNeedsEmptyFocus: originAutoPopulated // Add this flag to indicate destination should be empty-focused
-            };
-            
-            // Update routeDates for backward compatibility (we can phase this out eventually)
-            updateState('updateRouteDate', {
+            // Create the new route data using updateRouteData
+            updateState('updateRouteData', {
                 routeNumber: newRouteIndex,
-                depart: formattedDate,
-                return: null
+                data: {
+                    tripType: 'oneWay', // Default to one-way
+                    travelers: 1, // Default to 1 traveler
+                    departDate: formattedDate,
+                    returnDate: null,
+                    origin: originData,
+                    destination: null,
+                    _originAutoPopulated: originAutoPopulated, // Flag to indicate origin was auto-populated
+                    _destinationNeedsEmptyFocus: originAutoPopulated // Add this flag to indicate destination should be empty-focused
+                }
             }, 'infoPane.handlePlusButtonClick');
-            
-            // Make sure waypoints array is correctly updated
-            if (originData) {
-                updateState('updateWaypoint', {
-                    index: newRouteIndex * 2,
-                    data: originData
-                }, 'infoPane.handlePlusButtonClick');
-            }
-            
-            console.log(`Added new route at index ${newRouteIndex}:`, appState.routeData[newRouteIndex]);
         }
 
         // Set up the route box UI with the new route index
@@ -613,7 +599,7 @@ const infoPane = {
             return;
         }
         
-        // Try to get route data from either routeData or selectedRoutes
+        // Get route data directly from routeData
         const routeData = appState.routeData[routeIndex];
         const selectedRoute = appState.selectedRoutes[routeIndex];
         

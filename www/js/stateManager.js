@@ -67,33 +67,33 @@ function updateState(key, value, calledFrom) {
                 break;
 
             case 'updateRouteDate':
-                const { routeNumber, depart, return: returnDate } = value;
+                const { routeNumber: dateRouteNumber, depart, return: returnDate } = value;
                 
                 // Update in routeData structure
-                if (!appState.routeData[routeNumber]) {
-                    appState.routeData[routeNumber] = {
+                if (!appState.routeData[dateRouteNumber]) {
+                    appState.routeData[dateRouteNumber] = {
                         tripType: 'oneWay',
                         travelers: 1,
                         departDate: depart,
                         returnDate: returnDate ?? null
                     };
                 } else {
-                    appState.routeData[routeNumber].departDate = depart || appState.routeData[routeNumber].departDate;
-                    appState.routeData[routeNumber].returnDate = returnDate ?? appState.routeData[routeNumber].returnDate;
+                    appState.routeData[dateRouteNumber].departDate = depart || appState.routeData[dateRouteNumber].departDate;
+                    appState.routeData[dateRouteNumber].returnDate = returnDate ?? appState.routeData[dateRouteNumber].returnDate;
                 }
                 
                 // Update selectedRoutes if present
-                if (appState.selectedRoutes[routeNumber]) {
-                    appState.selectedRoutes[routeNumber].routeDates = { 
+                if (appState.selectedRoutes[dateRouteNumber]) {
+                    appState.selectedRoutes[dateRouteNumber].routeDates = { 
                         depart, 
                         return: returnDate ?? null
                     };
                 }
                 
                 // Update legacy routeDates for compatibility during transition
-                appState.routeDates[routeNumber] = { 
-                    depart: depart || appState.routeDates[routeNumber]?.depart, 
-                    return: returnDate ?? appState.routeDates[routeNumber]?.return 
+                appState.routeDates[dateRouteNumber] = { 
+                    depart: depart || appState.routeDates[dateRouteNumber]?.depart, 
+                    return: returnDate ?? appState.routeDates[dateRouteNumber]?.return 
                 };
                 break;
 
@@ -276,6 +276,70 @@ function updateState(key, value, calledFrom) {
                     travelers: route.travelers || 1,
                     tripType: route.tripType || appState.routes[index]?.tripType || 'oneWay'
                 }));
+                break;
+
+            case 'updateRouteData':
+                const { routeNumber, data } = value;
+                
+                // Create or update route data
+                if (!appState.routeData[routeNumber]) {
+                    appState.routeData[routeNumber] = {
+                        tripType: 'oneWay',
+                        travelers: 1,
+                        departDate: null,
+                        returnDate: null,
+                        ...data
+                    };
+                } else {
+                    // Update existing route with new data
+                    appState.routeData[routeNumber] = {
+                        ...appState.routeData[routeNumber],
+                        ...data
+                    };
+                    
+                    // If data is empty or has isEmpty flag, mark as empty
+                    if (data.isEmpty) {
+                        appState.routeData[routeNumber] = { isEmpty: true };
+                    }
+                }
+                
+                // For backward compatibility during transition, update legacy structures
+                // This code will be removed in phase 3
+                if (data.origin !== undefined) {
+                    syncWaypointToLegacyStructure(routeNumber * 2, data.origin);
+                }
+                if (data.destination !== undefined) {
+                    syncWaypointToLegacyStructure(routeNumber * 2 + 1, data.destination);
+                }
+                
+                // Update legacy routeDates if needed
+                if (data.departDate !== undefined || data.returnDate !== undefined) {
+                    if (!appState.routeDates[routeNumber]) {
+                        appState.routeDates[routeNumber] = {};
+                    }
+                    if (data.departDate !== undefined) {
+                        appState.routeDates[routeNumber].depart = data.departDate;
+                    }
+                    if (data.returnDate !== undefined) {
+                        appState.routeDates[routeNumber].return = data.returnDate;
+                    }
+                }
+                
+                break;
+
+            case 'removeRoute':
+                const routeNumberToDelete = value.routeNumber;
+                
+                // Remove route from routeData
+                if (appState.routeData[routeNumberToDelete]) {
+                    delete appState.routeData[routeNumberToDelete];
+                }
+                
+                // For backward compatibility during transition, update legacy structures
+                // This code will be removed in phase 3
+                syncRouteRemovalToLegacyStructure(routeNumberToDelete);
+                delete appState.routeDates[routeNumberToDelete];
+                
                 break;
 
             case 'clearData':

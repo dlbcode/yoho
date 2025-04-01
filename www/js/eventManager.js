@@ -34,6 +34,7 @@ const stateHandlers = {
     removeWaypoint: handleWaypointChange,
     updateWaypoint: handleWaypointChange,
     updateRouteData: handleWaypointChange, // Added handler for the new updateRouteData action
+    removeRoute: handleWaypointChange, // Added handler for the new removeRoute action
     updateRoutes: () => {
         // When routes are updated, check if they're valid and update the current view
         const hasValidRoutes = appState.routeData.some(r => r && !r.isEmpty && 
@@ -64,23 +65,14 @@ const stateHandlers = {
                 isAnyDestination: false
             };
             
-            // Update routeData
-            routeData.origin = anyOrigin;
-            
-            // Use updateRouteData action to update the entire route data
+            // Update routeData directly instead of waypoints
             updateState('updateRouteData', {
                 routeNumber,
-                data: routeData
+                data: {
+                    ...routeData,
+                    origin: anyOrigin
+                }
             }, 'eventManager.fixWaypointOrder');
-            
-            // Update the input field if it exists
-            const inputId = `waypoint-input-${routeNumber * 2 + 1}`;
-            const inputField = document.getElementById(inputId);
-            if (inputField) {
-                inputField.value = 'Anywhere';
-                inputField.setAttribute('data-selected-iata', 'Any');
-                inputField.setAttribute('data-is-any-destination', 'true');
-            }
         }
     }
 };
