@@ -217,20 +217,19 @@ const routeBox = {
             // Add a selection handler to immediately update appState when an airport is selected
             input.addEventListener('airport-selected', (event) => {
                 if (event.detail && event.detail.airport) {
-                    // Update state with the selected airport
-                    const waypointIndex = routeNumber * 2 + i;
-                    
-                    // Update routeData directly first to ensure it's immediately available
+                    // Update directly in routeData structure
                     if (isOrigin) {
                         appState.routeData[routeNumber].origin = event.detail.airport;
                     } else {
                         appState.routeData[routeNumber].destination = event.detail.airport;
                     }
                     
-                    // Then update through updateState to ensure consistency
-                    updateState('updateWaypoint', {
-                        index: waypointIndex,
-                        data: event.detail.airport
+                    // Notify stateManager of the update, but with a different action
+                    // Instead of 'updateWaypoint' which works with legacy indices,
+                    // use 'updateRouteData' which works directly with routeData
+                    updateState('updateRouteData', {
+                        routeNumber: routeNumber,
+                        data: appState.routeData[routeNumber]
                     }, 'routeBox.setupRouteBox.airportSelected');
                     
                     // Force update of the input fields to ensure they reflect the latest state
@@ -485,11 +484,40 @@ const routeBox = {
         
         // Update routes if we have valid waypoints
         if (routeData.origin?.iata_code && routeData.destination?.iata_code) {
-            routeHandling.updateRoutesArray();
+            // Use routeData directly instead of relying on routeHandling.updateRoutesArray()
+            // which might use legacy structures
+            requestAnimationFrame(() => {
+                // Import necessary modules when needed to avoid circular dependencies
+                import('../routeHandling.js').then(({ routeHandling }) => {
+                    // Call updateRoutesWithRouteData instead of updateRoutesArray to ensure
+                    // we're using the new structure
+                    if (routeHandling.updateRoutesWithRouteData) {
+                        routeHandling.updateRoutesWithRouteData();
+                    } else {
+                        // Fallback to the regular method if the new one isn't available yet
+                        routeHandling.updateRoutesArray();
+                    }
+                });
+            });
         }
         
+        // Update URL with the latest route information
         updateUrl();
     },
+    
+    // Add a utility method to work directly with routeData
+    getRouteDataForRoute(routeNumber) {
+        // Ensure routeData exists for this route
+        if (!appState.routeData[routeNumber]) {
+            appState.routeData[routeNumber] = {
+                tripType: 'oneWay',
+                travelers: 1,
+                departDate: new Date().toISOString().split('T')[0],
+                returnDate: null
+            };
+        }
+        return appState.routeData[routeNumber];
+    }
 };
 
 // Use inputManager directly
