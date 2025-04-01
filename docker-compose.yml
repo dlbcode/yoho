@@ -88,6 +88,7 @@ services:
 volumes:
   nginx_logs:
   certbot_www:
+  letsencrypt_certs:
   mongodb_data:
   mongodb_backup:
   node_modules:
