@@ -8,6 +8,7 @@ import { domManager } from '../utils/domManager.js';
 import { infoPane } from '../infoPane.js';
 import { infoPaneHeight } from '../utils/infoPaneHeightManager.js';
 import { showRouteRemovalModal } from './routeRemovalModal.js';
+import { inputManager } from '../inputManager.js'; // Add this import to fix the reference error
 
 const removeRoute = (routeNumber) => {
     // Get the infoPane element before removing content
@@ -15,8 +16,7 @@ const removeRoute = (routeNumber) => {
     
     console.log(`Removing route ${routeNumber}`);
     
-    let selectedRouteIndex = routeNumber;
-    let groupNumber = appState.selectedRoutes[selectedRouteIndex]?.group;
+    let groupNumber = appState.selectedRoutes[routeNumber]?.group;
 
     // Get a list of all input ids before removal for later cleanup
     const inputsToCleanup = Array.from(document.querySelectorAll('.waypoint-input'))
@@ -55,24 +55,15 @@ const removeRoute = (routeNumber) => {
         }
     }
 
-    // Critical fix: Make a backup of the route data before marking it as empty
+    // Critical fix: Make a backup of the route data before removal
     const routeBeforeRemoval = { ...appState.routeData[routeNumber] };
     console.log(`Route ${routeNumber} data before removal:`, routeBeforeRemoval);
 
-    // Mark the route as empty in routeData - this is the source of truth
-    if (appState.routeData[routeNumber]) {
-        // Completely remove the route data instead of just marking it empty
-        delete appState.routeData[routeNumber];
-        
-        // Update the legacy waypoints through the state manager
-        updateState('removeWaypoints', { routeNumber }, 'removeRoute');
-    } else {
-        // If routeData doesn't exist yet, just remove waypoints
-        updateState('removeWaypoints', { routeNumber }, 'removeRoute');
-    }
+    // Completely remove the route data
+    delete appState.routeData[routeNumber];
     
-    // Remove route dates
-    delete appState.routeDates[routeNumber];
+    // No need to update legacy waypoints, just notify state manager of the change
+    updateState('removeWaypoints', { routeNumber }, 'removeRoute');
 
     // Setup next view
     if (appState.currentView === 'routeDeck' && appState.currentRouteIndex === routeNumber) {
@@ -95,8 +86,8 @@ const removeRoute = (routeNumber) => {
     routeHandling.updateRoutesArray();
     adjustMapSize();
     
-    // Force URL update
-    updateState('updateRoutes', appState.routes, 'removeRoute');
+    // Force URL update using routeData only
+    updateState('updateRoutes', appState.routeData.filter(route => route && !route.isEmpty), 'removeRoute');
 
     // Force route buttons update
     setTimeout(() => {
