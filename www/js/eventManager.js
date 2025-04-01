@@ -33,6 +33,7 @@ const stateHandlers = {
     addWaypoint: handleWaypointChange,
     removeWaypoint: handleWaypointChange,
     updateWaypoint: handleWaypointChange,
+    updateRouteData: handleWaypointChange, // Added handler for the new updateRouteData action
     updateRoutes: () => {
         // When routes are updated, check if they're valid and update the current view
         const hasValidRoutes = appState.routeData.some(r => r && !r.isEmpty && 
@@ -42,10 +43,13 @@ const stateHandlers = {
             appState.currentView = 'trip';
         }
     },
-    // Fix waypoint order issues by focusing on routeData
-    fixWaypointOrder: (indices) => {
-        // Check if a destination is set but not an origin in routeData
-        const routeNumber = Math.floor(indices.destination / 2);
+    // Fix waypoint order issues by focusing on routeData directly
+    fixWaypointOrder: (routeInfo) => {
+        // Extract the route number from the destination index
+        const routeNumber = typeof routeInfo.destination === 'number' 
+            ? Math.floor(routeInfo.destination / 2) 
+            : routeInfo.routeNumber;
+            
         const routeData = appState.routeData[routeNumber];
         
         // If we have a destination but no origin in a route, add "Any" origin
@@ -61,16 +65,16 @@ const stateHandlers = {
             };
             
             // Update routeData
-            appState.routeData[routeNumber].origin = anyOrigin;
+            routeData.origin = anyOrigin;
             
-            // Explicitly use updateState to ensure proper synchronization
-            updateState('updateWaypoint', {
-                index: indices.origin,
-                data: anyOrigin
+            // Use updateRouteData action to update the entire route data
+            updateState('updateRouteData', {
+                routeNumber,
+                data: routeData
             }, 'eventManager.fixWaypointOrder');
             
             // Update the input field if it exists
-            const inputId = `waypoint-input-${indices.origin + 1}`;
+            const inputId = `waypoint-input-${routeNumber * 2 + 1}`;
             const inputField = document.getElementById(inputId);
             if (inputField) {
                 inputField.value = 'Anywhere';
@@ -142,7 +146,13 @@ const eventManager = {
         const selectedAirportIata = appState.selectedAirport?.iata_code;
         if (selectedAirportIata) {
             const marker = flightMap.markers[selectedAirportIata];
-            const isWaypoint = appState.routeData.some(r => r.origin?.iata_code === selectedAirportIata || r.destination?.iata_code === selectedAirportIata);
+            // Check if the airport is used in any route using routeData
+            const isWaypoint = appState.routeData.some(r => 
+                r && !r.isEmpty && (
+                    r.origin?.iata_code === selectedAirportIata || 
+                    r.destination?.iata_code === selectedAirportIata
+                )
+            );
             if (!isWaypoint) {
                 marker?.setIcon(blueDotIcon);
             }
