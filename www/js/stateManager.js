@@ -6,23 +6,20 @@ const appState = {
     selectedAirport: null,
     travelers: 1,
     routeDirection: defaultDirection,
-    // Route data is the primary source of truth for routes
+    // Primary source of truth
     routeData: [],
-    // Legacy arrays maintained for backward compatibility during transition
-    waypoints: [],
-    routes: [],
-    trips: [],
-    directRoutes: [],
+    // Legacy arrays - maintained with minimal data for compatibility
+    waypoints: [],  // Keep but minimize synchronization
+    routes: [],     // Keep but minimize synchronization
+    trips: [],      // Keep but minimize synchronization
+    directRoutes: {},
     selectedRoutes: {},
     tripTableData: null,
     routeDecksData: {},
     currentView: 'trip',
     currentGroupID: 0,
     highestGroupId: 0,
-    // routeDates to be phased out - dates are now in routeData
-    routeDates: {}, 
-    routeLines: [],
-    invisibleRouteLines: [],
+    routeDates: {}, // To be phased out - dates are now in routeData
     filterStates: {},
     filterThresholds: {},
 };
@@ -30,17 +27,12 @@ const appState = {
 function updateState(key, value, calledFrom) {
     console.log(`updateState called from: ${calledFrom}, key: ${key}, value:`, value);
     
-    // Log the current state of routeData for debugging
-    if (key === 'removeWaypoint' || key === 'removeWaypoints' || 
-        key === 'updateWaypoint' || key === 'addWaypoint') {
-        console.log('Before routeData update:', JSON.parse(JSON.stringify(appState.routeData)));
-    }
-    
     let shouldUpdateUrl = true;
     let shouldContinue = true;
 
     // Special handling for waypoint removal
     if (key === 'removeWaypoint') {
+        // Simplified check directly using routeData
         const waypointIndex = value;
         const routeNumber = Math.floor(waypointIndex / 2);
         const isOrigin = waypointIndex % 2 === 0;
@@ -51,8 +43,7 @@ function updateState(key, value, calledFrom) {
         
         const isAnyWaypoint = 
             (waypoint && (waypoint.iata_code === 'Any' || waypoint.isAnyDestination === true || waypoint.isAnyOrigin === true)) ||
-            window.preserveAnyDestination ||
-            document.getElementById(`waypoint-input-${waypointIndex + 1}`)?.getAttribute('data-is-any-destination') === 'true';
+            window.preserveAnyDestination;
         
         if (isAnyWaypoint) {
             console.log(`Preserving "Any" waypoint in route ${routeNumber}`);
@@ -90,11 +81,13 @@ function updateState(key, value, calledFrom) {
                     };
                 }
                 
-                // Update legacy routeDates for compatibility during transition
-                appState.routeDates[dateRouteNumber] = { 
-                    depart: depart || appState.routeDates[dateRouteNumber]?.depart, 
-                    return: returnDate ?? appState.routeDates[dateRouteNumber]?.return 
-                };
+                // Minimal legacy update - only if routeDates already exists for this route
+                if (appState.routeDates[dateRouteNumber]) {
+                    appState.routeDates[dateRouteNumber] = { 
+                        depart: depart || appState.routeDates[dateRouteNumber]?.depart, 
+                        return: returnDate ?? appState.routeDates[dateRouteNumber]?.return 
+                    };
+                }
                 break;
 
             case 'tripType':
@@ -113,12 +106,6 @@ function updateState(key, value, calledFrom) {
                     };
                 } else {
                     appState.routeData[routeNum][attrName] = attrValue;
-                }
-                
-                // Update legacy structure for tripType only
-                if (key === 'tripType') {
-                    if (!appState.routes[routeNum]) appState.routes[routeNum] = {};
-                    appState.routes[routeNum].tripType = attrValue;
                 }
                 
                 // Only update URL for tripType changes
@@ -148,10 +135,6 @@ function updateState(key, value, calledFrom) {
                     } else {
                         appState.routeData[routeNumber].destination = value.data;
                     }
-                    
-                    // Legacy waypoints update in a more controlled way
-                    // This will be removed in phase 3
-                    syncWaypointToLegacyStructure(value.index, value.data);
                 }
                 break;
 
@@ -177,9 +160,6 @@ function updateState(key, value, calledFrom) {
                     appState.routeData[newRouteNumber].destination = newWaypoint;
                 }
                 
-                // Sync to legacy structure in a controlled way
-                syncWaypointToLegacyStructure(newWaypointIndex, newWaypoint);
-                
                 appState.isEditingWaypoint = true;
                 break;
 
@@ -204,26 +184,17 @@ function updateState(key, value, calledFrom) {
                             appState.routeData[routeNumber] = { isEmpty: true };
                         }
                     }
-                    
-                    // Update legacy structure in a controlled way
-                    if (value < appState.waypoints.length) {
-                        appState.waypoints.splice(value, 1);
-                        appState.isEditingWaypoint = false;
-                    }
                 }
                 break;
 
             case 'removeWaypoints':
                 const routeToRemove = value.routeNumber;
                 
-                // Remove route from routeData completely instead of marking as empty
+                // Remove route from routeData completely
                 delete appState.routeData[routeToRemove];
                 
                 // Remove associated dates
                 delete appState.routeDates[routeToRemove];
-                
-                // Update legacy waypoints in a controlled way
-                syncRouteRemovalToLegacyStructure(routeToRemove);
                 break;
 
             case 'updateRoutes':
@@ -269,13 +240,8 @@ function updateState(key, value, calledFrom) {
                     }
                 });
                 
-                // Update legacy routes array
-                appState.routes = value.map((route, index) => ({
-                    ...appState.routes[index],
-                    ...route,
-                    travelers: route.travelers || 1,
-                    tripType: route.tripType || appState.routes[index]?.tripType || 'oneWay'
-                }));
+                // Minimal update to legacy routes array
+                appState.routes = value;
                 break;
 
             case 'updateRouteData':
@@ -302,29 +268,6 @@ function updateState(key, value, calledFrom) {
                         appState.routeData[routeNumber] = { isEmpty: true };
                     }
                 }
-                
-                // For backward compatibility during transition, update legacy structures
-                // This code will be removed in phase 3
-                if (data.origin !== undefined) {
-                    syncWaypointToLegacyStructure(routeNumber * 2, data.origin);
-                }
-                if (data.destination !== undefined) {
-                    syncWaypointToLegacyStructure(routeNumber * 2 + 1, data.destination);
-                }
-                
-                // Update legacy routeDates if needed
-                if (data.departDate !== undefined || data.returnDate !== undefined) {
-                    if (!appState.routeDates[routeNumber]) {
-                        appState.routeDates[routeNumber] = {};
-                    }
-                    if (data.departDate !== undefined) {
-                        appState.routeDates[routeNumber].depart = data.departDate;
-                    }
-                    if (data.returnDate !== undefined) {
-                        appState.routeDates[routeNumber].return = data.returnDate;
-                    }
-                }
-                
                 break;
 
             case 'removeRoute':
@@ -335,11 +278,8 @@ function updateState(key, value, calledFrom) {
                     delete appState.routeData[routeNumberToDelete];
                 }
                 
-                // For backward compatibility during transition, update legacy structures
-                // This code will be removed in phase 3
-                syncRouteRemovalToLegacyStructure(routeNumberToDelete);
+                // Remove associated dates
                 delete appState.routeDates[routeNumberToDelete];
-                
                 break;
 
             case 'clearData':
@@ -361,11 +301,6 @@ function updateState(key, value, calledFrom) {
                     appState.routeData[value.routeIndex].selectedRoute = value.routeDetails;
                     appState.routeData[value.routeIndex].departDate = value.routeDetails.routeDates?.depart;
                     appState.routeData[value.routeIndex].returnDate = value.routeDetails.routeDates?.return;
-                }
-                
-                // Update legacy routeDates
-                if (value.routeDetails.routeDates) {
-                    appState.routeDates[value.routeIndex] = value.routeDetails.routeDates;
                 }
                 break;
 
@@ -398,40 +333,6 @@ function updateState(key, value, calledFrom) {
         if (shouldUpdateUrl) {
             updateUrl();
         }
-    }
-    
-    // Log the updated state of routeData for debugging
-    if (key === 'removeWaypoint' || key === 'removeWaypoints' || 
-        key === 'updateWaypoint' || key === 'addWaypoint') {
-        console.log('After routeData update:', JSON.parse(JSON.stringify(appState.routeData)));
-        
-        // Force route button update after any waypoint changes
-        setTimeout(() => {
-            import('./infoPane.js').then(({ infoPane }) => {
-                infoPane.updateRouteButtons();
-            });
-        }, 50);
-    }
-}
-
-// Helper function to synchronize routeData changes to legacy waypoints array
-// This will be removed in phase 3
-function syncWaypointToLegacyStructure(waypointIndex, waypointData) {
-    // Ensure the waypoints array is long enough
-    while (appState.waypoints.length <= waypointIndex) {
-        appState.waypoints.push(null);
-    }
-    
-    // Update the waypoint at the specified index
-    appState.waypoints[waypointIndex] = waypointData;
-}
-
-// Helper function to synchronize route removal to legacy waypoints array
-// This will be removed in phase 3
-function syncRouteRemovalToLegacyStructure(routeNumber) {
-    const waypointStart = routeNumber * 2;
-    if (waypointStart < appState.waypoints.length) {
-        appState.waypoints.splice(waypointStart, 2);
     }
 }
 
