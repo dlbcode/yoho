@@ -441,6 +441,25 @@ const flightMap = {
             }
         }
         console.info('Route cache cleared');
+    },
+
+    findRoute(fromIata, toIata) {
+        try {
+            if (!fromIata || !toIata || !appState.directRoutes[fromIata]) {
+                return null;
+            }
+            
+            const routes = appState.directRoutes[fromIata];
+            for (const route of routes) {
+                if (route.originAirport?.iata_code === fromIata && 
+                    route.destinationAirport?.iata_code === toIata) {
+                    return route;
+                }
+            }
+        } catch (error) {
+            console.error(`Error finding route from ${fromIata} to ${toIata}:`, error);
+        }
+        return null;
     }
 };
 

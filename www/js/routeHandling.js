@@ -55,7 +55,8 @@ const routeHandling = {
                 console.log(`Route ${i} destination:`, destination);
                 
                 const routeIndex = i;
-                const isSelected = !!appState.selectedRoutes[routeIndex];
+                // Check if this route has a selected route in routeData's own structure
+                const isSelected = !!appState.routeData[routeIndex]?.selectedRoute || !!appState.selectedRoutes[routeIndex];
                 
                 // Special handling for Any origin or Any destination
                 if ((origin && origin.iata_code === 'Any') || (destination && destination.iata_code === 'Any')) {
@@ -64,10 +65,19 @@ const routeHandling = {
                         destination: destination?.iata_code || 'Any',
                         isDirect: false,
                         isSelected: isSelected,
-                        price: isSelected ? appState.selectedRoutes[routeIndex]?.displayData?.price || null : null,
+                        price: null,
                         tripType: route.tripType || 'oneWay',
                         travelers: route.travelers || 1
                     };
+                    
+                    // Get price from routeData's selectedRoute if available
+                    if (isSelected) {
+                        if (appState.routeData[routeIndex]?.selectedRoute?.displayData?.price) {
+                            routeData.price = appState.routeData[routeIndex].selectedRoute.displayData.price;
+                        } else if (appState.selectedRoutes[routeIndex]?.displayData?.price) {
+                            routeData.price = appState.selectedRoutes[routeIndex].displayData.price;
+                        }
+                    }
                     
                     // Preserve the full origin and destination objects
                     if (origin) {
@@ -95,10 +105,11 @@ const routeHandling = {
                 // Get the selected route price if available
                 let routePrice = null;
                 if (isSelected) {
-                    // Use the selected route's price from the state
-                    const selectedRoute = appState.selectedRoutes[routeIndex];
-                    if (selectedRoute && selectedRoute.displayData) {
-                        routePrice = selectedRoute.displayData.price;
+                    // Use the selected route's price from routeData first, then fall back to selectedRoutes
+                    if (appState.routeData[routeIndex]?.selectedRoute?.displayData?.price) {
+                        routePrice = appState.routeData[routeIndex].selectedRoute.displayData.price;
+                    } else if (appState.selectedRoutes[routeIndex]?.displayData?.price) {
+                        routePrice = appState.selectedRoutes[routeIndex].displayData.price;
                     }
                 }
 
@@ -168,10 +179,23 @@ const routeHandling = {
             }
         }
 
-        // Update state and redraw routes
+        // Update state with new routes but using routeData as the source of truth
         console.log("Final routes array:", newRoutes);
+        
+        // Instead of directly updating the legacy routes array, update the routeData structure
+        // with any additional route information we've calculated
+        newRoutes.forEach((newRoute, index) => {
+            if (appState.routeData[index] && !appState.routeData[index].isEmpty) {
+                // Transfer any properties we need to preserve to routeData
+                appState.routeData[index].isDirect = newRoute.isDirect;
+                appState.routeData[index].price = newRoute.price;
+            }
+        });
+        
+        // For backward compatibility during transition, still update the routes array
         updateState('updateRoutes', newRoutes, 'routeHandling.updateRoutesArray');
-        console.log('Updated routes in state:', appState.routes);
+        
+        console.log('Updated routeData with route info:', appState.routeData);
         await pathDrawing.drawLines();
     }
 };
