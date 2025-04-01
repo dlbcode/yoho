@@ -184,8 +184,7 @@ const routeHandling = {
         // Update state with new routes but using routeData as the source of truth
         console.log("Final routes array:", newRoutes);
         
-        // Instead of directly updating the legacy routes array, update the routeData structure
-        // with any additional route information we've calculated
+        // Transfer any properties we need to preserve to routeData
         newRoutes.forEach((newRoute, index) => {
             if (appState.routeData[index] && !appState.routeData[index].isEmpty) {
                 // Transfer any properties we need to preserve to routeData
