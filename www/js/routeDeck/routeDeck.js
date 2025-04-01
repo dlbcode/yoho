@@ -26,27 +26,29 @@ function buildRouteDeck(routeIndex) {
     lineManager.clearLinesByTags(['type:deck']);
     initializeFilterState();
 
-    // Get origin and destination information - first check new route structure
-    const routeData = appState.routeData[routeIndex];
-    const dateRange = routeData ? 
-        { depart: routeData.departDate, return: routeData.returnDate } : 
-        (appState.routeDates[routeIndex] ?? {});
+    // Get route data directly - our source of truth
+    const routeData = appState.routeData[routeIndex] || {};
     
-    // Get origin and destination from routeData if available, otherwise fallback to waypoints
-    let origin = routeData?.origin?.iata_code || appState.waypoints[routeIndex * 2]?.iata_code;
-    let destination = routeData?.destination?.iata_code || appState.waypoints[(routeIndex * 2) + 1]?.iata_code;
+    // Get dates directly from routeData
+    const dateRange = { 
+        depart: routeData.departDate || null, 
+        return: routeData.returnDate || null 
+    };
+    
+    // Get origin and destination exclusively from routeData
+    let origin = routeData.origin?.iata_code;
+    let destination = routeData.destination?.iata_code;
 
     // Special handling for "Any" origin searches
     if (origin === 'Any') {
-        // Create a special waypoint object that won't be cleared
-        updateState('updateWaypoint', { 
-            index: (routeIndex * 2), 
-            data: {
-                iata_code: 'Any',
-                name: 'Any Origin',
-                isAnyDestination: true // Reuse the same flag for simplicity
-            }
-        }, 'buildRouteDeck');
+        // Update the routeData directly with the Any origin information
+        appState.routeData[routeIndex].origin = {
+            iata_code: 'Any',
+            name: 'Any Origin',
+            city: 'Anywhere',
+            isAnyOrigin: true,
+            isAnyDestination: false
+        };
         
         // Mark the input field
         const originInput = document.getElementById(`waypoint-input-${(routeIndex * 2) + 1}`);
@@ -54,25 +56,18 @@ function buildRouteDeck(routeIndex) {
             originInput.value = 'Anywhere';
             originInput.setAttribute('data-is-any-destination', 'true');
         }
-        
-        // Enable protection mode
-        window.preserveAnyDestination = true;
-        setTimeout(() => {
-            window.preserveAnyDestination = false;
-        }, 1000);
     }
 
     // Special handling for "Any" destination searches
     if (destination === 'Any') {
-        // Create a special waypoint object that won't be cleared
-        updateState('updateWaypoint', { 
-            index: (routeIndex * 2) + 1, 
-            data: {
-                iata_code: 'Any',
-                name: 'Any Destination',
-                isAnyDestination: true
-            }
-        }, 'buildRouteDeck');
+        // Update the routeData directly with the Any destination information
+        appState.routeData[routeIndex].destination = {
+            iata_code: 'Any',
+            name: 'Any Destination',
+            city: 'Anywhere',
+            isAnyOrigin: false,
+            isAnyDestination: true
+        };
         
         // Mark the input field
         const destInput = document.getElementById(`waypoint-input-${(routeIndex * 2) + 2}`);
@@ -80,40 +75,30 @@ function buildRouteDeck(routeIndex) {
             destInput.value = 'Anywhere';
             destInput.setAttribute('data-is-any-destination', 'true');
         }
-        
-        // Enable protection mode
-        window.preserveAnyDestination = true;
-        setTimeout(() => {
-            window.preserveAnyDestination = false;
-        }, 1000);
     }
 
-    // Modify this section to prevent removing the "Any" waypoint
-    // If destination is 'Any', we should preserve it and not trigger a removeWaypoint action
-    if (destination === 'Any') {
-        // Make sure we have a waypoint object for "Any" to prevent it from being removed
-        if (!appState.waypoints[(routeIndex * 2) + 1]) {
-            updateState('updateWaypoint', { 
-                index: (routeIndex * 2) + 1, 
-                data: { iata_code: 'Any', isAnyDestination: true } 
-            }, 'buildRouteDeck');
-        }
-        
-        // Also update route data structure if it exists
-        if (appState.routeData[routeIndex]) {
-            appState.routeData[routeIndex].destination = {
-                iata_code: 'Any',
-                name: 'Any Destination',
-                isAnyDestination: true
-            };
-        }
-    }
-
-    // Simplify origin/destination logic
+    // If we still don't have origin or destination, try to get them from currentRoute
     if (!origin || !destination) {
         const { originAirport, destinationAirport } = appState.currentRoute || {};
-        origin = originAirport?.iata_code || origin;
-        destination = destinationAirport?.iata_code || destination;
+        
+        // Update routeData with any values we find
+        if (!origin && originAirport?.iata_code) {
+            origin = originAirport.iata_code;
+            if (!routeData.origin) {
+                appState.routeData[routeIndex].origin = {
+                    iata_code: origin
+                };
+            }
+        }
+        
+        if (!destination && destinationAirport?.iata_code) {
+            destination = destinationAirport.iata_code;
+            if (!routeData.destination) {
+                appState.routeData[routeIndex].destination = {
+                    iata_code: destination
+                };
+            }
+        }
     }
 
     document.head.appendChild(Object.assign(document.createElement('link'), { rel: 'stylesheet', type: 'text/css', href: '../css/routeDeck.css' }));
@@ -188,6 +173,13 @@ function buildRouteDeck(routeIndex) {
             setSelectedRouteCard(routeIndex);
             attachFilterListeners(cardsContainer, flightsData, routeIndex);
             applyFilters(); // This will show/hide lines based on current filters
+            
+            // Ensure routeData is properly updated with Any values if they were used
+            // (This updates the URL consistently)
+            updateState('updateRouteData', {
+                routeNumber: routeIndex,
+                data: appState.routeData[routeIndex]
+            }, 'buildRouteDeck.completion');
         })
         .catch(error => {
             console.error('Error loading data:', error);
