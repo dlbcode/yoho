@@ -7,7 +7,7 @@ const mapHandling = {
         // Get all IATA codes from valid routes
         const routeIataCodes = new Set();
         
-        // Add all origin and destination IATAs from valid routes
+        // Add all origin and destination IATAs from valid routes in routeData
         appState.routeData.forEach(route => {
             if (route && !route.isEmpty) {
                 if (route.origin?.iata_code) {
@@ -16,13 +16,6 @@ const mapHandling = {
                 if (route.destination?.iata_code) {
                     routeIataCodes.add(route.destination.iata_code);
                 }
-            }
-        });
-        
-        // For backward compatibility, also include waypoints
-        appState.waypoints.forEach(waypoint => {
-            if (waypoint?.iata_code) {
-                routeIataCodes.add(waypoint.iata_code);
             }
         });
 
