@@ -51,6 +51,8 @@ const handleSuggestionSelection = (inputId, suggestion) => {
     const inputField = document.getElementById(inputId);
     if (!inputField) return;
     
+    console.log(`Suggestion selected for ${inputId}:`, suggestion);
+    
     const isAnywhereOption = suggestion.getAttribute('data-is-anywhere') === 'true';
     const waypointIndex = getWaypointIndex(inputId);
     const routeNumber = getRouteNumber(waypointIndex);
@@ -126,20 +128,15 @@ const handleSuggestionSelection = (inputId, suggestion) => {
             data: anyDestination 
         }, 'airportAutocomplete.anywhereSelection');
 
-        // Handle focus for mobile/desktop
+        // Dispatch airportSelected event for Anywhere option - make sure this is dispatched BEFORE blur
+        console.log(`Dispatching airportSelected event for Anywhere option from ${inputId}`);
+        inputField.dispatchEvent(new CustomEvent('airportSelected', {
+            detail: { airport: anyDestination }
+        }));
+
+        // Don't attempt to handle focus internally, let inputManager do it
         setTimeout(() => {
             inputField.blur();
-            if (window.innerWidth > 600 && pairField && !pairField.value.trim()) {
-                setTimeout(() => {
-                    if (!isOrigin) {
-                        window.justSelectedAnywhereDestination = true;
-                    }
-                    pairField.focus();
-                    if (!isOrigin) {
-                        updateSuggestions(`waypoint-input-${pairIndex + 1}`, []);
-                    }
-                }, 200);
-            }
         }, 100);
     } else {
         // Handle specific airport selection
@@ -176,15 +173,24 @@ const handleSuggestionSelection = (inputId, suggestion) => {
             data: airport 
         }, 'airportAutocomplete.airportSelection');
         
-        // Trigger airport selected event and blur the field
-        document.dispatchEvent(new CustomEvent('airportSelected', { 
-            detail: { airport, fieldId: inputId } 
+        // Dispatch the airportSelected event BEFORE blur
+        console.log(`Dispatching airportSelected event for airport ${airport.iata_code} from ${inputId}`);
+        inputField.dispatchEvent(new CustomEvent('airportSelected', {
+            detail: { airport }
         }));
         
-        inputField.blur();
+        // Let the document-level event still fire for other listeners
+        document.dispatchEvent(new CustomEvent('airportSelected', { 
+            detail: { airport, fieldId: inputId, eventFromField: true } 
+        }));
+        
+        // Use a delay before blur to ensure event handlers complete
+        setTimeout(() => {
+            inputField.blur();
+        }, 100);
     }
     
-    // Hide suggestions
+    // Hide suggestions immediately
     const suggestionBox = document.getElementById(`${inputId}Suggestions`);
     if (suggestionBox) suggestionBox.style.display = 'none';
 };
@@ -208,9 +214,14 @@ export const updateSuggestions = (inputId, airports) => {
     // Determine if "Anywhere" option is needed
     const waypointIndex = getWaypointIndex(inputId);
     const isOrigin = isOriginField(waypointIndex);
+    const routeNumber = Math.floor(waypointIndex / 2);
     const pairIndex = getPairIndex(waypointIndex, isOrigin);
     const pairField = document.getElementById(`waypoint-input-${pairIndex + 1}`);
     
+    // Get route data to check special conditions
+    const routeData = appState.routeData[routeNumber];
+    
+    // Check if paired field has "Any" value
     const isPairAny = pairField && 
         (pairField.value === 'Anywhere' ||
          pairField.getAttribute('data-is-any-destination') === 'true' ||
@@ -220,17 +231,47 @@ export const updateSuggestions = (inputId, airports) => {
     const inputField = document.getElementById(inputId);
     let hasAddedSuggestions = false;
 
-    // Handle the empty input field with auto-focus scenario more explicitly
-    const routeNumber = Math.floor(waypointIndex / 2);
+    // Handle special focus cases
     const emptyInputWithFocus = 
         inputField && 
         document.activeElement === inputField && 
+        !inputField.value.trim();
+    
+    // Check for destination field that needs suggestions (after origin selection)
+    const isDestWithOrigin = 
+        !isOrigin && 
         !inputField.value.trim() && 
-        appState.routeData[routeNumber]?._destinationNeedsEmptyFocus &&
-        !isOrigin;
+        routeData && 
+        routeData.origin && 
+        (document.activeElement === inputField || routeData._destinationNeedsEmptyFocus);
+    
+    // New check for origin field that needs suggestions (after destination selection)
+    const isOriginWithDest = 
+        isOrigin && 
+        !inputField.value.trim() && 
+        routeData && 
+        routeData.destination && 
+        (document.activeElement === inputField || routeData._originNeedsEmptyFocus);
+    
+    // Reset the flags after use
+    if (routeData) {
+        if (routeData._destinationNeedsEmptyFocus) {
+            console.log('Showing suggestions for destination after origin was set');
+            delete routeData._destinationNeedsEmptyFocus;
+        }
+        if (routeData._originNeedsEmptyFocus) {
+            console.log('Showing suggestions for origin after destination was set');
+            delete routeData._originNeedsEmptyFocus;
+        }
+    }
 
-    // If this is a focused empty field or airports array is empty and pair not "Any", add "Anywhere" option
-    if ((emptyInputWithFocus || (airports.length === 0 && inputField && inputField.value.trim() === '')) && !isPairAny) {
+    // If we need to show the Anywhere option, add it
+    const showAnywhereOption = 
+        (emptyInputWithFocus || isDestWithOrigin || isOriginWithDest || 
+         (airports.length === 0 && inputField && inputField.value.trim() === '')) && 
+        !isPairAny;
+        
+    if (showAnywhereOption) {
         const anywhereDiv = document.createElement('div');
         anywhereDiv.className = 'anywhere-suggestion selected';
         anywhereDiv.textContent = 'Anywhere';
@@ -367,6 +408,68 @@ export const setupAutocompleteForField = (fieldId) => {
         inputField.setAttribute('data-show-anywhere-option', 'true');
     }
     
+    // Clear existing listeners to prevent duplicates
+    if (inputField._hasAirportListener) {
+        inputField.removeEventListener('airportSelected', inputField._airportSelectedHandler);
+    }
+    
+    // Add event listener to handle completion
+    inputField._airportSelectedHandler = (event) => {
+        console.log(`Airport selected handler triggered for ${fieldId}`);
+        
+        // Check if we need to handle special cases
+        const waypointIndex = getWaypointIndex(fieldId);
+        const isOrigin = isOriginField(waypointIndex);
+        const routeNumber = getRouteNumber(waypointIndex);
+        
+        if (isOrigin) {
+            // If origin is set, check if destination has "Anywhere" that should be cleared
+            const airport = event.detail.airport;
+            if (airport && airport.iata_code !== 'Any') {
+                const destIndex = waypointIndex + 1;
+                const destFieldId = `waypoint-input-${destIndex + 1}`;
+                const destField = document.getElementById(destFieldId);
+                
+                if (destField) {
+                    const isAnyDestination = destField.getAttribute('data-is-any-destination') === 'true';
+                    const iataCode = destField.getAttribute('data-selected-iata');
+                    
+                    if (isAnyDestination || iataCode === 'Any') {
+                        console.log(`Origin set to real airport, clearing Any destination`);
+                        setTimeout(() => {
+                            // Ensure this happens after state updates
+                            destField.focus();
+                        }, 100);
+                    }
+                }
+            }
+        } else {
+            // If destination is set, check if origin has "Anywhere" that should be cleared
+            const airport = event.detail.airport;
+            if (airport && airport.iata_code !== 'Any') {
+                const originIndex = waypointIndex - 1;
+                const originFieldId = `waypoint-input-${originIndex + 1}`;
+                const originField = document.getElementById(originFieldId);
+                
+                if (originField) {
+                    const isAnyOrigin = originField.getAttribute('data-is-any-destination') === 'true';
+                    const iataCode = originField.getAttribute('data-selected-iata');
+                    
+                    if (isAnyOrigin || iataCode === 'Any') {
+                        console.log(`Destination set to real airport, clearing Any origin`);
+                        setTimeout(() => {
+                            // Ensure this happens after state updates
+                            originField.focus();
+                        }, 100);
+                    }
+                }
+            }
+        }
+    };
+    
+    inputField.addEventListener('airportSelected', inputField._airportSelectedHandler);
+    inputField._hasAirportListener = true;
+
     // Position suggestion box
     setTimeout(() => {
         if (inputManager.suggestionBoxes[fieldId]) {
@@ -374,7 +477,12 @@ export const setupAutocompleteForField = (fieldId) => {
         }
     }, 0);
 
-    return () => inputManager.cleanupInputListeners(fieldId);
+    return () => {
+        inputManager.cleanupInputListeners(fieldId);
+        if (inputField._hasAirportListener) {
+            inputField.removeEventListener('airportSelected', inputField._airportSelectedHandler);
+        }
+    };
 };
 
 // Event listeners
@@ -382,6 +490,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // Handle airport selection for updating state and UI
     document.addEventListener('airportSelected', (event) => {
         const { airport, fieldId } = event.detail;
+        if (!fieldId) return; // Skip if fieldId is missing
+        
         const waypointIndex = getWaypointIndex(fieldId);
         const routeNumber = getRouteNumber(waypointIndex);
         const isOrigin = isOriginField(waypointIndex);
@@ -401,47 +511,22 @@ document.addEventListener('DOMContentLoaded', () => {
         // Update the appropriate field in routeData
         if (isOrigin) {
             routeData.origin = airport;
+            
+            // If destination is already Any, and origin is now real, mark for suggestion refresh
+            if (routeData.destination && routeData.destination.iata_code === 'Any' && 
+                airport.iata_code !== 'Any') {
+                routeData._destinationNeedsEmptyFocus = true;
+            }
         } else {
             routeData.destination = airport;
-        }
-        
-        // If we're setting a destination first, ensure there's an origin
-        if (!isOrigin && !routeData.origin) {
-            // Create an "Any" origin
-            const anyOrigin = {
-                iata_code: 'Any',
-                city: 'Anywhere',
-                country: '',
-                name: 'Any Origin',
-                isAnyDestination: false,
-                isAnyOrigin: true,
-            };
             
-            routeData.origin = anyOrigin;
-            
-            // Also update waypoints for compatibility
-            updateState('updateWaypoint', { 
-                index: waypointIndex - 1, 
-                data: anyOrigin 
-            }, 'airportAutocomplete.anyOriginForDestination');
-            
-            // Update the origin input field
-            const originField = document.getElementById(`waypoint-input-${waypointIndex}`);
-            if (originField) {
-                originField.value = 'Anywhere';
-                originField.setAttribute('data-selected-iata', 'Any');
-                originField.setAttribute('data-is-any-destination', 'true');
-                originField.readOnly = true;
-                
-                // Update input state
-                const originInputId = `waypoint-input-${waypointIndex}`;
-                if (inputManager.inputStates[originInputId]) {
-                    inputManager.inputStates[originInputId].previousValidValue = 'Anywhere';
-                    inputManager.inputStates[originInputId].previousIataCode = 'Any';
-                }
+            // If origin is already Any, and destination is now real, mark for suggestion refresh
+            if (routeData.origin && routeData.origin.iata_code === 'Any' && 
+                airport.iata_code !== 'Any') {
+                routeData._originNeedsEmptyFocus = true;
             }
         }
-
+        
         // Update map if location data exists
         if (airport?.latitude && airport?.longitude) {
             const latLng = L.latLng(airport.latitude, airport.longitude);
