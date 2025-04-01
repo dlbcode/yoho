@@ -8,7 +8,7 @@ import { domManager } from '../utils/domManager.js';
 import { infoPane } from '../infoPane.js';
 import { infoPaneHeight } from '../utils/infoPaneHeightManager.js';
 import { showRouteRemovalModal } from './routeRemovalModal.js';
-import { inputManager } from '../inputManager.js'; // Add this import to fix the reference error
+import { inputManager } from '../inputManager.js';
 
 const removeRoute = (routeNumber) => {
     // Get the infoPane element before removing content
@@ -22,8 +22,26 @@ const removeRoute = (routeNumber) => {
     const inputsToCleanup = Array.from(document.querySelectorAll('.waypoint-input'))
         .filter(input => input.id && input.id.startsWith(`waypoint-input-`))
         .map(input => input.id);
+    
+    // Store route-specific input IDs for cleanup
+    const routeSpecificInputIds = [
+        `waypoint-input-${routeNumber * 2 + 1}`,
+        `waypoint-input-${routeNumber * 2 + 2}`
+    ];
 
-    // Remove DOM structure first
+    // First, do immediate cleanup of the route's suggestion boxes
+    routeSpecificInputIds.forEach(id => {
+        if (inputManager.suggestionBoxes[id]) {
+            const box = inputManager.suggestionBoxes[id];
+            if (box && document.body.contains(box)) {
+                box.remove();
+            }
+            delete inputManager.suggestionBoxes[id];
+            delete inputManager.inputStates[id];
+        }
+    });
+
+    // Remove DOM structure
     domManager.removeRouteStructure(routeNumber);
 
     // Collapse the info pane
@@ -87,7 +105,20 @@ const removeRoute = (routeNumber) => {
     adjustMapSize();
     
     // Force URL update using routeData only
-    updateState('updateRoutes', appState.routeData.filter(route => route && !route.isEmpty), 'removeRoute');
+    // Fix the formatting of the routes to prevent [object Object] in buttons
+    const formattedRoutes = appState.routeData
+        .filter(route => route && !route.isEmpty)
+        .map(route => ({
+            tripType: route.tripType,
+            travelers: route.travelers,
+            origin: route.origin?.iata_code || null,
+            destination: route.destination?.iata_code || null,
+            price: route.price,
+            isDirect: route.isDirect,
+            isSelected: route.isSelected
+        }));
+    
+    updateState('updateRoutes', formattedRoutes, 'removeRoute');
 
     // Force route buttons update
     setTimeout(() => {
@@ -96,13 +127,12 @@ const removeRoute = (routeNumber) => {
         });
     }, 50);
 
-    // After route removal and view setup, clean up suggestion boxes and reposition any remaining ones
+    // After route removal and view setup, reposition remaining suggestion boxes with a more comprehensive cleanup
     setTimeout(() => {
+        // First, do a comprehensive cleanup of stale suggestion boxes
         Object.keys(inputManager.suggestionBoxes).forEach(id => {
             const input = document.getElementById(id);
-            if (input && document.body.contains(input)) {
-                inputManager.positionSuggestionBox(id);
-            } else if (inputManager.suggestionBoxes[id]) {
+            if (!input || !document.body.contains(input)) {
                 // Remove orphaned suggestion boxes
                 const box = inputManager.suggestionBoxes[id];
                 if (box && document.body.contains(box)) {
@@ -112,7 +142,15 @@ const removeRoute = (routeNumber) => {
                 delete inputManager.inputStates[id];
             }
         });
-    }, 100);
+        
+        // Then position only the suggestion boxes for inputs that still exist
+        Object.keys(inputManager.suggestionBoxes).forEach(id => {
+            const input = document.getElementById(id);
+            if (input && document.body.contains(input)) {
+                inputManager.positionSuggestionBox(id);
+            }
+        });
+    }, 200); // Increased timeout to ensure DOM is stable
 };
 
 // Updated to use modal for selected routes
