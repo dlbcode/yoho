@@ -499,21 +499,68 @@ const pathDrawing = {
         return L.latLng(latLng.lat, newLng);
     },
 
+    preloadDirectLines() {
+        // Safely handle directRoutes in case it's not initialized yet
+        if (!appState.directRoutes || typeof appState.directRoutes !== 'object') {
+            console.warn('directRoutes not initialized, skipping preload');
+            return;
+        }
+        
+        // Process direct routes in batches to avoid UI freezing
+        const directRoutes = appState.directRoutes;
+        const iataKeys = Object.keys(directRoutes);
+        
+        // Use requestAnimationFrame for better performance
+        const processNextBatch = (index) => {
+            if (index >= iataKeys.length) return;
+            
+            const iata = iataKeys[index];
+            const routes = directRoutes[iata] || [];
+            
+            routes.forEach(route => {
+                const routeId = `${route.originAirport.iata_code}-${route.destinationAirport.iata_code}`;
+                this.queueDraw(routeId, 'route', {
+                    price: route.price,
+                    date: route.date,
+                    isDirect: true
+                });
+            });
+            
+            requestAnimationFrame(() => processNextBatch(index + 1));
+        };
+        
+        if (iataKeys.length > 0) {
+            requestAnimationFrame(() => processNextBatch(0));
+        }
+    },
+
     async drawLines() {
         // Clear all existing lines first
-        lineManager.clearLines('all');
+        if (lineManager) {
+            lineManager.clearLines('all');
+        }
         
-        // Use appState.routes for drawing because it has the processed data needed
-        const promises = appState.routes.map((route, index) => {
-            if (!route.origin || !route.destination) return Promise.resolve();
+        // Use routeData directly instead of appState.routes
+        const validRoutes = appState.routeData.filter(route => 
+            route && !route.isEmpty && route.origin && route.destination
+        );
+        
+        if (!validRoutes.length) {
+            console.log('No valid routes to draw');
+            return;
+        }
+
+        // Create promises for each route
+        const promises = validRoutes.map((route, index) => {
+            if (!route.origin?.iata_code || !route.destination?.iata_code) {
+                console.log(`Skipping route ${index} with incomplete data:`, route);
+                return Promise.resolve();
+            }
             
-            const routeId = `${route.origin}-${route.destination}`;
+            const routeId = `${route.origin.iata_code}-${route.destination.iata_code}`;
+            const isSelected = !!route.selectedRoute || !!appState.selectedRoutes[index];
             
-            // Check if this is a selected route
-            const isSelected = route.isSelected || !!appState.selectedRoutes[index];
-            
-            // Always use 'route' type (solid line) for selected routes, regardless of isDirect
-            // Otherwise, use the line type based on whether it's a direct route
+            // Always use 'route' type (solid line) for selected routes, otherwise based on isDirect
             const type = isSelected ? 'route' : (route.isDirect ? 'route' : 'dashed');
             
             return this.drawLine(routeId, type, {
@@ -525,7 +572,11 @@ const pathDrawing = {
             });
         });
 
-        await Promise.all(promises);
+        try {
+            await Promise.all(promises);
+        } catch (error) {
+            console.error('Error drawing route lines:', error);
+        }
     },
 
     isSameLineState(state1, state2) {
@@ -559,33 +610,6 @@ const pathDrawing = {
                 marker.openPopup();
             }
         }, 100); // Debounce hover events by 100ms
-    },
-
-    preloadDirectLines() {
-        // Process direct routes in batches to avoid UI freezing
-        const directRoutes = appState.directRoutes;
-        const iataKeys = Object.keys(directRoutes);
-        
-        // Use requestAnimationFrame for better performance
-        const processNextBatch = (index) => {
-            if (index >= iataKeys.length) return;
-            
-            const iata = iataKeys[index];
-            const routes = directRoutes[iata] || [];
-            
-            routes.forEach(route => {
-                const routeId = `${route.originAirport.iata_code}-${route.destinationAirport.iata_code}`;
-                this.queueDraw(routeId, 'route', {
-                    price: route.price,
-                    date: route.date,
-                    isDirect: true
-                });
-            });
-            
-            requestAnimationFrame(() => processNextBatch(index + 1));
-        };
-        
-        requestAnimationFrame(() => processNextBatch(0));
     }
 };
 

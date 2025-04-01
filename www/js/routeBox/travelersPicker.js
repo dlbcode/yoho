@@ -1,12 +1,13 @@
-import { appState, updateState } from "../stateManager.js";
+import { appState } from "../stateManager.js";
 import { uiHandling } from '../uiHandling.js';
 
 export function travelersPicker(routeNumber) {
+  // Create travelers container if it doesn't exist
   const travelersContainer = document.createElement('div');
   travelersContainer.className = 'travelers-container';
 
-  // Ensure the route exists and has a defined travelers value
-  let travelersCount = appState.routes[routeNumber]?.travelers || 1;
+  // Ensure the route exists and has a defined travelers value in routeData
+  let travelersCount = appState.routeData[routeNumber]?.travelers || 1;
   if (travelersCount < 1) {
     travelersCount = 1;
   }
@@ -39,6 +40,23 @@ export function travelersPicker(routeNumber) {
   incrementButton.className = 'travelers-button';
   dropdownList.appendChild(incrementButton);
 
+  // Add event listeners
+  decrementButton.addEventListener('click', () => {
+    if (travelersCount > 1) {
+      travelersCount--;
+      updateTravelersDisplay();
+      updateRouteData();
+    }
+  });
+
+  incrementButton.addEventListener('click', () => {
+    if (travelersCount < 9) {
+      travelersCount++;
+      updateTravelersDisplay();
+      updateRouteData();
+    }
+  });
+
   dropdownBtn.addEventListener('click', () => {
     dropdownList.classList.toggle('hidden');
     if (!dropdownList.classList.contains('hidden')) {
@@ -46,43 +64,29 @@ export function travelersPicker(routeNumber) {
     }
   });
 
-  // Update position on scroll/resize
-  window.addEventListener('scroll', () => {
-    if (!dropdownList.classList.contains('hidden')) {
-      uiHandling.positionDropdown(dropdownBtn, dropdownList);
-    }
-  });
-
-  window.addEventListener('resize', () => {
-    if (!dropdownList.classList.contains('hidden')) {
-      uiHandling.positionDropdown(dropdownBtn, dropdownList);
-    }
-  });
-
-  decrementButton.addEventListener('click', () => {
-    travelersCount = Math.max(1, travelersCount - 1);
-    updateTravelersCount(travelersCount, routeNumber, dropdownBtn, travelersCountDisplay);
-  });
-
-  incrementButton.addEventListener('click', () => {
-    travelersCount = Math.min(9, travelersCount + 1);
-    updateTravelersCount(travelersCount, routeNumber, dropdownBtn, travelersCountDisplay);
-  });
-
-  travelersContainer.appendChild(dropdownList);
-
-  // Add event listener to close the dropdown when clicking outside
-  document.addEventListener('click', function (event) {
+  // Add event listener to close dropdown when clicking outside
+  document.addEventListener('click', function(event) {
     if (!travelersContainer.contains(event.target)) {
       dropdownList.classList.add('hidden');
     }
   });
 
-  return travelersContainer;  // Return the complete component
-}
+  // Helper function to update travelers count in display
+  function updateTravelersDisplay() {
+    travelersCountDisplay.textContent = travelersCount;
+    dropdownBtn.innerHTML = `<img src="assets/person.svg" alt="" class="icon-person"> ${travelersCount} <span class="icon-dropdown"></span>`;
+  }
 
-function updateTravelersCount(count, routeNumber, dropdownBtn, travelersCountDisplay) {
-  travelersCountDisplay.textContent = count;
-  dropdownBtn.innerHTML = `<img src="assets/person.svg" alt="" class="icon-person"> ${count} <span class="icon-dropdown"></span>`;
-  updateState('updateTravelers', { routeNumber, travelers: count }, 'travelersPicker.travelersPicker');
+  // Helper function to update route data
+  function updateRouteData() {
+    import('../stateManager.js').then(({ updateState }) => {
+      updateState('updateRouteData', {
+        routeNumber,
+        data: { travelers: travelersCount }
+      }, 'travelersPicker.updateRouteData');
+    });
+  }
+
+  travelersContainer.appendChild(dropdownList);
+  return travelersContainer;
 }
