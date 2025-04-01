@@ -239,31 +239,29 @@ class InputManager {
             this.revertInput(inputId);
             inputState.isExpanded = false;
         }
+
+        if (suggestionBox) suggestionBox.style.display = 'none';
         
-        setTimeout(() => {
-            if (suggestionBox) suggestionBox.style.display = 'none';
+        // Simplify readonly state management
+        inputField.readOnly = Boolean(finalValue.trim());
+        
+        if (!isAnyDestination && !window.preserveAnyDestination && 
+            finalValue === '' && !appState.isRouteSwitching && !appState.searchResultsLoading) {
             
-            // Simplify readonly state management
-            inputField.readOnly = Boolean(finalValue.trim());
+            const waypointIndex = parseInt(inputId.replace(/\D/g, ''), 10) - 1;
+            const routeNumber = Math.floor(waypointIndex / 2);
+            const isOrigin = waypointIndex % 2 === 0;
             
-            if (!isAnyDestination && !window.preserveAnyDestination && 
-                finalValue === '' && !appState.isRouteSwitching && !appState.searchResultsLoading) {
-                
-                const waypointIndex = parseInt(inputId.replace(/\D/g, ''), 10) - 1;
-                const routeNumber = Math.floor(waypointIndex / 2);
-                const isOrigin = waypointIndex % 2 === 0;
-                
-                // Check if this waypoint exists in routeData and is not "Any"
-                const route = appState.routeData[routeNumber];
-                const waypoint = isOrigin ? route?.origin : route?.destination;
-                
-                if (route && waypoint && waypoint.iata_code !== 'Any') {
-                    updateState('removeWaypoint', waypointIndex, 'inputManager.handleBlur');
-                }
+            // Check if this waypoint exists in routeData and is not "Any"
+            const route = appState.routeData[routeNumber];
+            const waypoint = isOrigin ? route?.origin : route?.destination;
+            
+            if (route && waypoint && waypoint.iata_code !== 'Any') {
+                updateState('removeWaypoint', waypointIndex, 'inputManager.handleBlur');
             }
-            
-            inputState.isProcessingBlur = false;
-        }, 300);
+        }
+        
+        inputState.isProcessingBlur = false;
     }
     
     handleKeyDown(inputId, event) {
@@ -796,9 +794,7 @@ class InputManager {
         const pairField = document.getElementById(pairFieldId);
         
         console.log(`Paired field for ${inputId} is ${pairFieldId}, exists: ${Boolean(pairField)}`);
-        
-        // Use a longer delay so UI can update fully
-        setTimeout(() => {
+
             if (this.isMobile()) {
                 console.log(`Mobile device detected, not focusing pair field`);
                 return;
@@ -927,7 +923,6 @@ class InputManager {
                     console.log(`No need to focus next field: complete route=${Boolean(currentRoute?.origin && currentRoute?.destination)}, nextRouteExists=${nextRouteExists}, nextOriginField=${Boolean(nextOriginField)}`);
                 }
             }
-        }, 300); // Increase delay for more reliable focusing
     }
 }
 
