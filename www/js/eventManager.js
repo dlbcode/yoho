@@ -43,37 +43,6 @@ const stateHandlers = {
         if (!hasValidRoutes && !appState.selectedRoutes[0]) {
             appState.currentView = 'trip';
         }
-    },
-    // Fix waypoint order issues by focusing on routeData directly
-    fixWaypointOrder: (routeInfo) => {
-        // Extract the route number from the destination index
-        const routeNumber = typeof routeInfo.destination === 'number' 
-            ? Math.floor(routeInfo.destination / 2) 
-            : routeInfo.routeNumber;
-            
-        const routeData = appState.routeData[routeNumber];
-        
-        // If we have a destination but no origin in a route, add "Any" origin
-        if (routeData && routeData.destination && !routeData.origin) {
-            // Create "Any" origin
-            const anyOrigin = {
-                iata_code: 'Any',
-                city: 'Anywhere',
-                country: '',
-                name: 'Any Origin',
-                isAnyOrigin: true,
-                isAnyDestination: false
-            };
-            
-            // Update routeData directly instead of waypoints
-            updateState('updateRouteData', {
-                routeNumber,
-                data: {
-                    ...routeData,
-                    origin: anyOrigin
-                }
-            }, 'eventManager.fixWaypointOrder');
-        }
     }
 };
 

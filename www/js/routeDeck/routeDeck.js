@@ -15,8 +15,8 @@ import { attachCardEventHandlers } from './cardEventHandlers.js';
 if (typeof window.updateState.use === 'function') {
     // Register a debugging middleware just for routeDeck
     window.updateState.use(function routeDeckDebugMiddleware(key, value, caller) {
-        if (key === 'removeWaypoint' && caller === 'buildRouteDeck') {
-            console.log(`Route deck detected waypoint removal: ${value}`);
+        if (key === 'updateRouteData' && caller === 'buildRouteDeck') {
+            console.log(`Route deck detected route data update: ${JSON.stringify(value)}`);
         }
         return true; // Always continue the chain
     });

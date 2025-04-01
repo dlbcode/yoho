@@ -6,10 +6,7 @@ export function tripTypePicker(routeNumber) {
     const tripTypeContainer = document.createElement('div');
     tripTypeContainer.className = 'trip-type-container';
 
-    if (!appState.routes[routeNumber]) {
-        appState.routes[routeNumber] = { tripType: 'oneWay' };
-    }
-    const tripType = appState.routes[routeNumber].tripType;
+    const tripType = appState.routeData[routeNumber]?.tripType || 'oneWay';
 
     const dropdownBtn = document.createElement('button');
     dropdownBtn.id = 'tripTypeDropdownBtn';
@@ -46,13 +43,17 @@ export function tripTypePicker(routeNumber) {
         const listItem = document.createElement('li');
         listItem.textContent = type;
         listItem.addEventListener('click', () => {
-            if (!appState.routes[routeNumber]) {
-                appState.routes[routeNumber] = {};
+            if (!appState.routeData[routeNumber]) {
+                appState.routeData[routeNumber] = { tripType: tripTypeValues[index], travelers: 1 };
+            } else {
+                appState.routeData[routeNumber].tripType = tripTypeValues[index];
             }
-            appState.routes[routeNumber].tripType = tripTypeValues[index];
             dropdownBtn.innerHTML = `${type} <span class="icon-dropdown"></span>`;
             dropdownList.classList.add('hidden');
-            updateState('tripType', { routeNumber, tripType: tripTypeValues[index] }, 'tripTypePicker.tripTypePicker');
+            updateState('updateRouteData', { 
+                routeNumber, 
+                data: { tripType: tripTypeValues[index] } 
+            }, 'tripTypePicker.tripTypePicker');
             handleTripTypeChange(tripTypeValues[index], routeNumber);
             document.dispatchEvent(new CustomEvent('stateChange', { detail: { key: 'tripType', value: tripTypeValues[index] } }));
         });
@@ -75,8 +76,11 @@ export function handleTripTypeChange(tripType, routeNumber) {
     // Get the route data for this route number
     const routeData = appState.routeData[routeNumber] || {};
     
-    // Update the routes array with the new trip type
-    updateState('tripType', { routeNumber: routeNumber, tripType: tripType }, 'tripTypePicker.handleTripTypeChange');
+    // Update the route data directly
+    updateState('updateRouteData', { 
+        routeNumber: routeNumber, 
+        data: { tripType: tripType }
+    }, 'tripTypePicker.handleTripTypeChange');
     
     // Check if origin is set to "Anywhere" - only use routeData
     const isOriginAny = routeData.origin?.iata_code === 'Any' || 

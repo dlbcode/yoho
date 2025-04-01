@@ -17,30 +17,23 @@ const infoPane = {
         
         // Modified logic: Use setTimeout to ensure DOM is fully ready
         setTimeout(() => {
-            // Check if there are no routes or waypoints
+            // Check if there are no routes
             const hasNoRoutes = (
                 Array.isArray(appState.routeData) && appState.routeData.length === 0 ||
                 !appState.routeData || 
                 Object.keys(appState.routeData).length === 0
             );
             
-            const hasNoWaypoints = (
-                !Array.isArray(appState.waypoints) || 
-                appState.waypoints.length === 0 || 
-                !appState.waypoints.some(wp => wp)
-            );
-            
             // Check URL for routes parameter
             const urlParams = new URLSearchParams(window.location.search);
-            const hasRoutesInUrl = urlParams.has('routes');
             
-            console.log("Initial load check - No routes:", hasNoRoutes, "No waypoints:", hasNoWaypoints, "Routes in URL:", hasRoutesInUrl);
+            console.log("Initial load check - No routes:", hasNoRoutes, "Routes in URL:", urlParams.has('routes'));
             
             // Create initial routeBox if needed
-            if (hasNoRoutes && hasNoWaypoints && !hasRoutesInUrl) {
+            if (hasNoRoutes && !urlParams.has('routes')) {
                 console.log("Creating initial routeBox");
                 this.handlePlusButtonClick();
-            } else if (hasRoutesInUrl && !document.querySelector('#routeBox')) {
+            } else if (urlParams.has('routes') && !document.querySelector('#routeBox')) {
                 // If routes are in URL but no routeBox is displayed, show the first route
                 console.log("Displaying first route from URL");
                 const firstRouteIndex = Object.keys(appState.routeData)
@@ -744,13 +737,6 @@ function setupRouteContent(routeIndex) {
                 destination: destinationData,
                 isSegment: true // Mark this as a segment for special handling
             };
-            
-            // Add to waypoints array for backwards compatibility
-            while (appState.waypoints.length <= (routeIndex * 2 + 1)) {
-                appState.waypoints.push(null);
-            }
-            appState.waypoints[routeIndex * 2] = originData;
-            appState.waypoints[routeIndex * 2 + 1] = destinationData;
             
             // Update route dates
             updateState('updateRouteDate', {

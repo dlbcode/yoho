@@ -257,7 +257,14 @@ class InputManager {
             const waypoint = isOrigin ? route?.origin : route?.destination;
             
             if (route && waypoint && waypoint.iata_code !== 'Any') {
-                updateState('removeWaypoint', waypointIndex, 'inputManager.handleBlur');
+                // Replace removeWaypoint with updateRouteData
+                const updateData = {};
+                updateData[isOrigin ? 'origin' : 'destination'] = null;
+                
+                updateState('updateRouteData', {
+                    routeNumber,
+                    data: updateData
+                }, 'inputManager.handleBlur');
             }
         }
         
@@ -502,7 +509,17 @@ class InputManager {
             }
             
             const waypointIndex = parseInt(inputId.replace(/\D/g, ''), 10) - 1;
-            updateState('removeWaypoint', waypointIndex, 'inputManager.backButton');
+            const routeNumber = Math.floor(waypointIndex / 2);
+            const isOrigin = waypointIndex % 2 === 0;
+            
+            // Update using updateRouteData instead of removeWaypoint
+            const updateData = {};
+            updateData[isOrigin ? 'origin' : 'destination'] = null;
+            
+            updateState('updateRouteData', {
+                routeNumber,
+                data: updateData
+            }, 'inputManager.backButton');
             
             inputField.blur();
         }, 300, `back-${inputId}`);
