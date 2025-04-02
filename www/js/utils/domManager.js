@@ -1,4 +1,5 @@
 import { inputManager } from '../inputManager.js';
+import { routeBox } from '../routeBox/routeBox.js'; // Added missing import
 
 export const domManager = {
     setupBaseStructure(routeIndex) {

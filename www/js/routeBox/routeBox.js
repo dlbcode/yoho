@@ -412,11 +412,11 @@ const routeBox = {
                     isAnyDestination: false
                 };
                 
-                // Update first in routeData then update waypoints for compatibility
+                // Update directly in routeData and use updateRouteData instead of updateWaypoint
                 routeData.origin = anyOrigin;
-                updateState('updateWaypoint', { 
-                    index: routeNumber * 2, 
-                    data: anyOrigin 
+                updateState('updateRouteData', { 
+                    routeNumber, 
+                    data: { origin: anyOrigin }
                 }, 'routeBox.searchButton');
             }
             
@@ -452,10 +452,11 @@ const routeBox = {
                         isAnyOrigin: false
                     };
                     
+                    // Update directly in routeData and use updateRouteData instead of updateWaypoint
                     routeData.destination = anyDestination;
-                    updateState('updateWaypoint', { 
-                        index: routeNumber * 2 + 1, 
-                        data: anyDestination 
+                    updateState('updateRouteData', { 
+                        routeNumber, 
+                        data: { destination: anyDestination }
                     }, 'routeBox.searchButton.anyDestination');
                 }
             });
@@ -484,19 +485,12 @@ const routeBox = {
         
         // Update routes if we have valid waypoints
         if (routeData.origin?.iata_code && routeData.destination?.iata_code) {
-            // Use routeData directly instead of relying on routeHandling.updateRoutesArray()
-            // which might use legacy structures
+            // Always use routeData directly - simplify this code
             requestAnimationFrame(() => {
                 // Import necessary modules when needed to avoid circular dependencies
                 import('../routeHandling.js').then(({ routeHandling }) => {
-                    // Call updateRoutesWithRouteData instead of updateRoutesArray to ensure
-                    // we're using the new structure
-                    if (routeHandling.updateRoutesWithRouteData) {
-                        routeHandling.updateRoutesWithRouteData();
-                    } else {
-                        // Fallback to the regular method if the new one isn't available yet
-                        routeHandling.updateRoutesArray();
-                    }
+                    // Use updateRoutesArray which now contains the modern implementation
+                    routeHandling.updateRoutesArray();
                 });
             });
         }

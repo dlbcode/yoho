@@ -602,6 +602,7 @@ document.addEventListener('DOMContentLoaded', () => {
         setTimeout(() => {
             // Import routeHandling dynamically to avoid circular dependencies
             import('./routeHandling.js').then(({ routeHandling }) => {
+                // Using the new implementation that works directly with routeData
                 routeHandling.updateRoutesArray();
                 console.log("Routes updated from URL data");
             });
