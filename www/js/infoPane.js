@@ -506,12 +506,6 @@ const infoPane = {
 //     button.addEventListener('click', handleRouteButtonClick);
 // });
 
-// Keep this function but remove the duplicate event binding
-function handleRouteButtonClick(event) {
-    const routeIndex = parseInt(event.target.dataset.routeIndex, 10);
-    setupRouteContent(routeIndex);
-}
-
 function setupRouteContent(routeIndex) {
     const infoPaneElement = document.getElementById('infoPane');
     const infoPaneContent = document.getElementById('infoPaneContent');

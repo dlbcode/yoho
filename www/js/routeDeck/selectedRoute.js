@@ -80,44 +80,6 @@ function generateOverallRoute(routeIndex) {
     return `${firstOrigin}-${lastDestination}`;
 }
 
-// New function to generate full journey data for the entire route
-function generateFullJourneyData(currentGroupId) {
-    // Find all routes that belong to the same group
-    const groupSegments = Object.entries(appState.selectedRoutes)
-        .filter(([_, route]) => route.group === currentGroupId)
-        .map(([idx, route]) => {
-            const [origin, destination] = route.displayData.route.split(' > ');
-            return {
-                index: parseInt(idx),
-                origin,
-                destination,
-                routeDetails: route.displayData,
-                fullData: route.fullData
-            };
-        })
-        // Sort by route index to ensure correct order
-        .sort((a, b) => a.index - b.index);
-    
-    // Calculate total price, total duration, airlines involved
-    const totalPrice = groupSegments.reduce((sum, segment) => sum + parseFloat(segment.routeDetails.price), 0);
-    const airlines = [...new Set(groupSegments.map(segment => segment.routeDetails.airline))];
-    const firstSegment = groupSegments[0];
-    const lastSegment = groupSegments[groupSegments.length - 1];
-    
-    return {
-        groupId: currentGroupId,
-        segments: groupSegments,
-        overallOrigin: firstSegment.origin,
-        overallDestination: lastSegment.destination,
-        totalPrice,
-        airlines,
-        departureDate: firstSegment.routeDetails.departure,
-        arrivalDate: lastSegment.routeDetails.arrival,
-        totalStops: groupSegments.length - 1,
-        totalSegments: groupSegments.length
-    };
-}
-
 const selectedRoute = {
     displaySelectedRouteInfo: async function(routeIndex) {
         // Remove group-route-button class from all buttons first
@@ -390,7 +352,7 @@ const selectedRoute = {
         const backButton = detailsContainer.querySelector('.change-route-button');
         backButton.addEventListener('click', () => {
             // Get the current route details to use for search
-            const selectedRouteDetails = appState.selectedRoutes[routeIndex];
+            const selectedRouteDetails = appState.routeData[routeIndex]?.selectedRoute;
             
             if (selectedRouteDetails) {
                 // Extract origin and destination from the current route
