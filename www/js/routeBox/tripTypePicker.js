@@ -55,7 +55,14 @@ export function tripTypePicker(routeNumber) {
                 data: { tripType: tripTypeValues[index] } 
             }, 'tripTypePicker.tripTypePicker');
             handleTripTypeChange(tripTypeValues[index], routeNumber);
-            document.dispatchEvent(new CustomEvent('stateChange', { detail: { key: 'tripType', value: tripTypeValues[index] } }));
+            
+            // Update to use updateRouteData key instead of tripType for consistency
+            document.dispatchEvent(new CustomEvent('stateChange', { 
+                detail: { 
+                    key: 'updateRouteData', 
+                    value: { routeNumber, data: { tripType: tripTypeValues[index] } } 
+                } 
+            }));
         });
         dropdownList.appendChild(listItem);
     });
