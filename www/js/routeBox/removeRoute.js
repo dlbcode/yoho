@@ -16,7 +16,8 @@ const removeRoute = (routeNumber) => {
     
     console.log(`Removing route ${routeNumber}`);
     
-    let groupNumber = appState.selectedRoutes[routeNumber]?.group;
+    // Get the group ID from routeData instead of selectedRoutes
+    let groupNumber = appState.routeData[routeNumber]?.selectedRoute?.group;
 
     // Get a list of all input ids before removal for later cleanup
     const inputsToCleanup = Array.from(document.querySelectorAll('.waypoint-input'))
@@ -59,12 +60,13 @@ const removeRoute = (routeNumber) => {
         lineManager.clearLines('route', routeNumber);
     }
 
-    // Remove selected route 
-    if (appState.selectedRoutes[routeNumber]) {
+    // Remove selected route - update to use routeData
+    if (appState.routeData[routeNumber]?.selectedRoute) {
         if (groupNumber) {
             // Remove all routes in the group
-            Object.keys(appState.selectedRoutes).forEach(key => {
-                if (appState.selectedRoutes[key].group === groupNumber) {
+            Object.keys(appState.routeData).forEach(key => {
+                const routeData = appState.routeData[key];
+                if (routeData?.selectedRoute?.group === groupNumber) {
                     updateState('removeSelectedRoute', parseInt(key), 'removeRoute');
                 }
             });
@@ -85,7 +87,7 @@ const removeRoute = (routeNumber) => {
         const prevRouteIndex = routeNumber - 1;
         if (prevRouteIndex >= 0) {
             setupRouteContent(prevRouteIndex);
-            if (appState.selectedRoutes[prevRouteIndex]) {
+            if (appState.routeData[prevRouteIndex]?.selectedRoute) {
                 appState.currentView = 'selectedRoute';
                 appState.currentRouteIndex = prevRouteIndex;
             } else {
@@ -158,11 +160,16 @@ const removeRouteButton = (container, routeNumber) => {
     
     // Update the click handler to check if this is a selected route
     removeButton.onclick = () => {
-        // Check if this is a selected route with a group
-        const isSelectedRoute = appState.selectedRoutes[routeNumber] !== undefined;
-        const groupNumber = appState.selectedRoutes[routeNumber]?.group;
+        // Check if this is a selected route with a group - use routeData instead of selectedRoutes
+        const selectedRouteData = appState.routeData[routeNumber]?.selectedRoute;
+        const isSelectedRoute = selectedRouteData !== undefined;
+        const groupNumber = selectedRouteData?.group;
+        
+        // Check for multiple segments using routeData
         const hasMultipleSegments = isSelectedRoute && 
-            Object.values(appState.selectedRoutes).filter(route => route.group === groupNumber).length > 1;
+            Object.values(appState.routeData)
+                .filter(route => route?.selectedRoute?.group === groupNumber)
+                .length > 1;
         
         if (isSelectedRoute && hasMultipleSegments) {
             // Show the removal modal for selected routes with multiple segments
