@@ -6,12 +6,12 @@ const appState = {
     selectedAirport: null,
     travelers: 1,
     routeDirection: defaultDirection,
-    // Primary source of truth
+    // Primary source of truth - the only structure we really need
     routeData: [],
-    // Only keeping essential legacy structures needed for API compatibility
-    routes: [],
-    directRoutes: {},
-    selectedRoutes: {},
+    // Minimal compatibility structures
+    routes: [], // Simplified version for backward compatibility
+    directRoutes: {}, // Still needed for direct routes lookup
+    selectedRoutes: {}, // Still needed for selected route handling
     tripTableData: null,
     routeDecksData: {},
     currentView: 'trip',
@@ -176,7 +176,6 @@ function updateUrl() {
     }
 }
 
-// Update the parseUrlRoutes function to handle our improved URL-safe format
 function parseUrlRoutes() {
     const params = new URLSearchParams(window.location.search);
     console.log("Parsing URL routes:", params.toString());
