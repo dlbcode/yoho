@@ -94,17 +94,16 @@ const uiHandling = {
         let tooltipTimeout;
         
         const getTooltipText = () => {
-            // First try from selectedRoute if available
-            const selectedRoute = appState.selectedRoutes[routeNumber];
-            if (selectedRoute?.displayData) {
-                const { departure, arrival } = selectedRoute.displayData;
+            // First try from selectedRoute in routeData if available
+            const routeData = appState.routeData[routeNumber];
+            if (routeData?.selectedRoute?.displayData) {
+                const { departure, arrival } = routeData.selectedRoute.displayData;
                 const options = { weekday: 'short', year: 'numeric', month: 'long', day: 'numeric', 
                                  hour: 'numeric', minute: '2-digit', hour12: true };
                 return `${new Date(departure).toLocaleString('en-US', options)} to ${new Date(arrival).toLocaleString('en-US', options)}`;
             }
             
             // Then try from routeData if available
-            const routeData = appState.routeData[routeNumber];
             if (routeData && (routeData.departDate || routeData.returnDate)) {
                 return this.formatDateRangeTooltip(routeData.departDate, routeData.returnDate);
             }
@@ -114,8 +113,8 @@ const uiHandling = {
                 return this.formatDateRangeTooltip(customDateRange.depart, customDateRange.return);
             }
             
-            // Finally fall back to legacy routeDates
-            const dateRange = appState.routeDates[routeNumber];
+            // Finally fall back to legacy routeDates (though it should be removed eventually)
+            const dateRange = appState.routeDates?.[routeNumber];
             if (dateRange) {
                 return this.formatDateRangeTooltip(dateRange.depart, dateRange.return);
             }
