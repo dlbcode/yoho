@@ -197,74 +197,14 @@ async function routeInfoCard(cardElement, fullFlightData, routeIds, routeIndex) 
     addClickListener('.layover', 'data-layover', flyToLocation);
 
     detailCard.querySelector('#selectRoute').addEventListener('click', () => {
-        appState.highestGroupId += 1;
-        const newRouteGroupId = appState.highestGroupId;
-
-        const existingRouteDetails = appState.selectedRoutes[routeIndex];
-        if (existingRouteDetails) {
-            Object.keys(appState.selectedRoutes).forEach(key => {
-                if (appState.selectedRoutes[key].group === existingRouteDetails.group) {
-                    updateState('removeSelectedRoute', parseInt(key));
-                }
-            });
-        }
-
-        lineManager.clearLines('route');
+        // Update routeData directly
+        appState.routeData[routeIndex] = {
+            ...appState.routeData[routeIndex],
+            selectedRoute: fullFlightData
+        };
 
         const intermediaryIatas = fullFlightData.route.map(segment => segment.flyFrom);
         intermediaryIatas.push(fullFlightData.route[fullFlightData.route.length - 1].flyTo);
-
-        // Track all segment indices that belong to this route group
-        const routeSegmentIndices = [];
-
-        fullFlightData.route.forEach((segmentData, idx) => {
-            const selectedRouteIndex = routeIndex + idx;
-            routeSegmentIndices.push(selectedRouteIndex); // Track this segment index
-            
-            const departureDate = segmentData.local_departure ? 
-                new Date(segmentData.local_departure).toISOString().split('T')[0] : 
-                (segmentData.dTime ? 
-                    new Date(segmentData.dTime * 1000).toISOString().split('T')[0] : 
-                    new Date().toISOString().split('T')[0]); // Fallback to current date if both are missing
-            const arrivalDate = segmentData.local_arrival ? new Date(segmentData.local_arrival).toISOString().split('T')[0] : new Date(segmentData.aTime * 1000).toISOString().split('T')[0];
-
-            // Create the selectedRoute data
-            appState.selectedRoutes[selectedRouteIndex] = {
-                displayData: {
-                    departure: departureDate,
-                    arrival: arrivalDate,
-                    price: fullFlightData.price,
-                    airline: segmentData.airline,
-                    route: `${segmentData.flyFrom} > ${segmentData.flyTo}`,
-                    deep_link: fullFlightData.deep_link
-                },
-                fullData: segmentData,
-                group: newRouteGroupId,
-                routeNumber: routeIndex,
-                routeDates: { depart: departureDate, return: null }
-            };
-
-            // Update routeData structure with the selected route
-            if (!appState.routeData[selectedRouteIndex]) {
-                appState.routeData[selectedRouteIndex] = {
-                    tripType: 'oneWay',
-                    travelers: 1,
-                    departDate: departureDate,
-                    returnDate: null,
-                    origin: { iata_code: segmentData.flyFrom },
-                    destination: { iata_code: segmentData.flyTo },
-                    selectedRoute: appState.selectedRoutes[selectedRouteIndex],
-                    isSegment: true
-                };
-            } else {
-                // Update existing routeData with the selected route info
-                appState.routeData[selectedRouteIndex].departDate = departureDate;
-                appState.routeData[selectedRouteIndex].origin = { iata_code: segmentData.flyFrom };
-                appState.routeData[selectedRouteIndex].destination = { iata_code: segmentData.flyTo };
-                appState.routeData[selectedRouteIndex].selectedRoute = appState.selectedRoutes[selectedRouteIndex];
-                appState.routeData[selectedRouteIndex].isSegment = true;
-            }
-        });
 
         replaceWaypointsForCurrentRoute(intermediaryIatas, routeIndex);
 
@@ -293,6 +233,7 @@ async function routeInfoCard(cardElement, fullFlightData, routeIds, routeIndex) 
         // Update all route buttons belonging to this group to ensure they remain selected
         setTimeout(() => {
             // Force update of route button states for all segments in this group
+            const routeSegmentIndices = fullFlightData.route.map((_, idx) => routeIndex + idx);
             routeSegmentIndices.forEach(segmentIndex => {
                 const buttonId = `route-button-${segmentIndex}`;
                 const segmentButton = document.getElementById(buttonId);
@@ -318,13 +259,24 @@ async function routeInfoCard(cardElement, fullFlightData, routeIds, routeIndex) 
                         formatFlightDate: selectedRoute.formatFlightDate
                     };
                     
-                    // Display the full journey view for the new group ID
-                    selectedRouteGroup.displayFullJourneyInfo(newRouteGroupId, formatHelpers).then(({ journeyContainer, journeyData }) => {
-                        if (journeyContainer && journeyData) {
+                    // Set a default group ID if none exists in the route
+                    if (!fullFlightData.group) {
+                        // Generate a unique group ID
+                        appState.highestGroupId = (appState.highestGroupId || 0) + 1;
+                        fullFlightData.group = appState.highestGroupId;
+                        
+                        // Update routeData with the group ID
+                        appState.routeData[routeIndex].selectedRoute.group = fullFlightData.group;
+                    }
+                    
+                    // Display the full journey view for the group ID
+                    selectedRouteGroup.displayFullJourneyInfo(fullFlightData.group || routeIndex, formatHelpers).then(result => {
+                        // Check if we received valid journey data
+                        if (result && result.journeyContainer && result.journeyData) {
                             // Set up event listeners for the journey view
                             selectedRouteGroup.setupJourneyEventListeners(
-                                journeyContainer,
-                                journeyData,
+                                result.journeyContainer,
+                                result.journeyData,
                                 {
                                     onReturnToSegment: (segmentIndex) => selectedRoute.displaySelectedRouteInfo(segmentIndex),
                                     onViewSegment: (segmentIndex) => selectedRoute.displaySelectedRouteInfo(segmentIndex)
@@ -333,7 +285,15 @@ async function routeInfoCard(cardElement, fullFlightData, routeIds, routeIndex) 
                             
                             // Update current view
                             appState.currentView = 'fullJourney';
+                        } else {
+                            // Fallback to displaying just the segment info
+                            console.warn('Could not display full journey view, falling back to segment view');
+                            selectedRoute.displaySelectedRouteInfo(routeIndex);
                         }
+                    }).catch(error => {
+                        console.error('Error displaying journey info:', error);
+                        // Fallback to segment view on error
+                        selectedRoute.displaySelectedRouteInfo(routeIndex);
                     });
                 }, 100);
             });

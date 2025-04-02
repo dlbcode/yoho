@@ -36,18 +36,8 @@ const routeHandling = {
             const originIata = route.origin.iata_code;
             const destIata = route.destination.iata_code;
             
-            // Check if we need to load routes for this origin
-            if (!appState.directRoutes[originIata]) {
-                try {
-                    // Fetch routes for this origin
-                    await flightMap.fetchAndCacheRoutes(originIata);
-                } catch (error) {
-                    console.error(`Error fetching direct routes for ${originIata}:`, error);
-                }
-            }
-            
-            // Now check if this route is direct
-            const foundRoute = flightMap.findRoute(originIata, destIata);
+            // Now check if this route is direct using flightMap directly
+            const foundRoute = await flightMap.findRoute(originIata, destIata);
             const isDirect = !!foundRoute;
             
             // If direct, update the routeData with all relevant properties from foundRoute

@@ -8,10 +8,7 @@ const appState = {
     routeDirection: defaultDirection,
     // Primary source of truth - the only structure we really need
     routeData: [],
-    // Minimal compatibility structures
-    routes: [], // Simplified version for backward compatibility
-    directRoutes: {}, // Still needed for direct routes lookup
-    selectedRoutes: {}, // Still needed for selected route handling
+    // Minimal compatibility structures removed
     tripTableData: null,
     routeDecksData: {},
     currentView: 'trip',
@@ -70,15 +67,10 @@ function updateState(key, value, calledFrom) {
         case 'clearData':
             // Clear all route-related data
             appState.routeData = [];
-            appState.routes = [];
-            appState.selectedRoutes = {};
             break;
 
         case 'updateSelectedRoute':
             // Store selected route
-            appState.selectedRoutes[value.routeIndex] = value.routeDetails;
-            
-            // Update routeData as well
             if (appState.routeData[value.routeIndex]) {
                 appState.routeData[value.routeIndex].selectedRoute = value.routeDetails;
                 appState.routeData[value.routeIndex].departDate = value.routeDetails.routeDates?.depart;
@@ -92,9 +84,6 @@ function updateState(key, value, calledFrom) {
             break;
 
         case 'removeSelectedRoute':
-            // Remove from selectedRoutes map
-            delete appState.selectedRoutes[value];
-            
             // Update routeData to reflect the removal
             if (appState.routeData[value]) {
                 delete appState.routeData[value].selectedRoute;
@@ -182,7 +171,6 @@ function parseUrlRoutes() {
     
     // Clear existing route data
     appState.routeData = [];
-    appState.routes = [];
     
     // Parse route direction if present
     if (params.has('direction')) {
@@ -322,14 +310,6 @@ function parseUrlRoutes() {
                 
                 // Store in routeData array - our single source of truth
                 appState.routeData[routeIndex] = routeData;
-                
-                // Minimally update routes array for compatibility
-                appState.routes[routeIndex] = {
-                    tripType: routeData.tripType,
-                    travelers: routeData.travelers,
-                    origin: routeData.origin?.iata_code,
-                    destination: routeData.destination?.iata_code
-                };
             });
             
             console.log("Loaded routes from URL:", appState.routeData);

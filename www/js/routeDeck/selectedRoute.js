@@ -44,7 +44,8 @@ async function getAirlineName(airlineCode) {
 
 // Generate route description for a route group
 function generateRouteDescription(routeIndex) {
-    const selectedRoute = appState.selectedRoutes[routeIndex];
+    // Use routeData instead of selectedRoutes
+    const selectedRoute = appState.routeData[routeIndex]?.selectedRoute;
     if (!selectedRoute) return '';
     
     // Use the shared function from selectedRouteGroup, but ensure we're using our own icons
@@ -54,16 +55,17 @@ function generateRouteDescription(routeIndex) {
 
 // New function to generate the overall route summary
 function generateOverallRoute(routeIndex) {
-    const selectedRoute = appState.selectedRoutes[routeIndex];
+    // Use routeData instead of selectedRoutes
+    const selectedRoute = appState.routeData[routeIndex]?.selectedRoute;
     if (!selectedRoute) return '';
 
     const currentGroupId = selectedRoute.group;
-    // Find all routes that belong to the same group
-    const routeSegments = Object.entries(appState.selectedRoutes)
-        .filter(([_, route]) => route.group === currentGroupId)
+    // Find all routes that belong to the same group in routeData
+    const routeSegments = Object.entries(appState.routeData)
+        .filter(([_, route]) => route && route.selectedRoute && route.selectedRoute.group === currentGroupId)
         .map(([_, route]) => {
             // Extract origin and destination from the route
-            const [origin, destination] = route.displayData.route.split(' > ');
+            const [origin, destination] = route.selectedRoute.displayData.route.split(' > ');
             return { origin, destination };
         })
         // Sort by route index to ensure correct order

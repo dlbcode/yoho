@@ -164,13 +164,13 @@ const flightMap = {
         clickedMarker.bindPopup(popupContent, { autoClose: false, closeOnClick: true }).openPopup();
 
         // Move line drawing after popup is bound
-        this.fetchAndCacheRoutes(airport.iata_code).then(() => {
-            if (!appState.directRoutes[airport.iata_code]) {
+        this.fetchAndCacheRoutes(airport.iata_code).then(routes => {
+            if (!routes || !routes.length) {
                 console.error('Direct routes not found for IATA:', airport.iata_code);
                 return;
             }
             lineManager.clearLines('hover');
-            pathDrawing.drawRoutePaths(airport.iata_code, appState.directRoutes, 'hover');
+            pathDrawing.drawRoutePaths(airport.iata_code, routes, 'hover');
             clickedMarker.openPopup(); // Re-open popup after drawing lines
             
             // After operations complete, restore map view if it changed
@@ -317,8 +317,8 @@ const flightMap = {
         clearTimeout(this.hoverTimeout); // Clear any existing hover timeout
 
         if (event === 'mouseover') {
-                this.fetchAndCacheRoutes(iata).then(() => {
-                    if (!appState.directRoutes[iata]) {
+                this.fetchAndCacheRoutes(iata).then(routes => {
+                    if (!routes || !routes.length) {
                         console.error('Direct routes not found for IATA:', iata);
                         return;
                     }
@@ -326,7 +326,7 @@ const flightMap = {
                     lineManager.clearLines('hover');
                     // Only draw hover paths if no marker is preserved
                     if (!this.preservedMarker) {
-                        pathDrawing.drawRoutePaths(iata, appState.directRoutes, 'hover');
+                        pathDrawing.drawRoutePaths(iata, routes, 'hover');
                     }
                     marker.openPopup();
                     marker.hovered = true;
@@ -346,49 +346,51 @@ const flightMap = {
     async fetchAndCacheRoutes(iata) {
         if (!iata) {
             console.error('IATA code is empty');
-            return;
-        }
-
-        const cacheKey = `routes_${iata}_${appState.routeDirection}`;
-        
-        // Try to get from cache first
-        const cachedRoutes = cacheManager.getFromCache(cacheKey);
-        if (cachedRoutes) {
-            appState.directRoutes[iata] = cachedRoutes;
-            console.info('Route data loaded from localStorage cache');
-            return;
+            return [];
         }
 
         try {
-            const direction = appState.routeDirection;
+            // Add the direction parameter from appState
+            const direction = appState.routeDirection || 'from';
             const response = await fetch(`https://yonderhop.com/api/directRoutes?origin=${iata}&direction=${direction}`);
-            const routes = await response.json();
             
-            if (!routes || !routes.length) {
-                console.info(`No routes found for IATA: ${iata}`);
-                // Store empty array to prevent repeated failed requests
-                appState.directRoutes[iata] = [];
-                cacheManager.storeInCache(cacheKey, []);
-                return;
+            // Check response status before trying to parse JSON
+            if (!response.ok) {
+                console.error(`Error fetching routes: ${response.status} ${response.statusText}`);
+                const text = await response.text();
+                console.error(`Response text: ${text}`);
+                return [];
             }
             
-            // Optimize data before storing
-            const optimizedRoutes = cacheManager.optimizeRouteData(routes);
-            
-            // Store the optimized routes in localStorage
-            const stored = cacheManager.storeInCache(cacheKey, optimizedRoutes);
-            if (!stored) {
-                console.warn('Could not cache routes for', iata);
+            try {
+                const routes = await response.json();
+                return Array.isArray(routes) ? routes : [];
+            } catch (jsonError) {
+                console.error('Error parsing JSON response:', jsonError);
+                return [];
             }
-            
-            // Update app state with the original full data
-            appState.directRoutes[iata] = routes;
-            console.info('Route data fetched from API and cached');
         } catch (error) {
             console.error('Error fetching routes:', error);
-            // Store empty array to prevent repeated failed requests
-            appState.directRoutes[iata] = [];
-            cacheManager.storeInCache(cacheKey, []);
+            return [];
+        }
+    },
+
+    async findRoute(fromIata, toIata) {
+        try {
+            if (!fromIata || !toIata) {
+                return null;
+            }
+            
+            const routes = await this.fetchAndCacheRoutes(fromIata);
+            if (!routes || !Array.isArray(routes)) {
+                console.warn(`No routes found for ${fromIata} or invalid response`);
+                return null;
+            }
+            
+            return routes.find(route => route.destination === toIata);
+        } catch (error) {
+            console.error(`Error finding route from ${fromIata} to ${toIata}:`, error);
+            return null;
         }
     },
 
@@ -448,25 +450,6 @@ const flightMap = {
             }
         }
         console.info('Route cache cleared');
-    },
-
-    findRoute(fromIata, toIata) {
-        try {
-            if (!fromIata || !toIata || !appState.directRoutes[fromIata]) {
-                return null;
-            }
-            
-            const routes = appState.directRoutes[fromIata];
-            for (const route of routes) {
-                if (route.originAirport?.iata_code === fromIata && 
-                    route.destinationAirport?.iata_code === toIata) {
-                    return route;
-                }
-            }
-        } catch (error) {
-            console.error(`Error finding route from ${fromIata} to ${toIata}:`, error);
-        }
-        return null;
     }
 };
 

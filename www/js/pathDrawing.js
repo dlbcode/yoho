@@ -454,6 +454,46 @@ const pathDrawing = {
         if (line.decoratedLine) line.decoratedLine.addTo(map);
     },
 
+    async drawLines() {
+        console.log("Drawing routes");
+        
+        // Create a compatibility structure for pathDrawing from routeData
+        const validRoutes = appState.routeData
+            .filter(route => route && !route.isEmpty && 
+                   route.origin?.iata_code && route.destination?.iata_code);
+
+        // Map the routeData to a format that the drawing code can work with
+        const processedRoutes = validRoutes.map((route, index) => ({
+            origin: route.origin.iata_code,
+            destination: route.destination.iata_code,
+            tripType: route.tripType || 'oneWay',
+            travelers: route.travelers || 1,
+            isDirect: route.isDirect || false,
+            isSelected: route.isSelected || false,
+            price: route.price || null,
+            routeNumber: index
+        }));
+        
+        // Use drawLine instead of drawRoute, which doesn't exist
+        const drawPromises = processedRoutes.map(route => {
+            const routeId = `${route.origin}-${route.destination}`;
+            return this.drawLine(
+                routeId, 
+                route.isDirect ? 'route' : 'dashed',
+                {
+                    price: route.price,
+                    iata: route.origin,
+                    routeNumber: route.routeNumber,
+                    isDirect: route.isDirect,
+                    isDeckRoute: false
+                }
+            );
+        });
+
+        await Promise.allSettled(drawPromises);
+        console.log(`${drawPromises.length} routes drawn`);
+    },
+
     getCacheForType(type) {
         const cacheMap = {
             'route': this.routePathCache,
@@ -531,51 +571,6 @@ const pathDrawing = {
         
         if (iataKeys.length > 0) {
             requestAnimationFrame(() => processNextBatch(0));
-        }
-    },
-
-    async drawLines() {
-        // Clear all existing lines first
-        if (lineManager) {
-            lineManager.clearLines('all');
-        }
-        
-        // Use routeData directly instead of appState.routes
-        const validRoutes = appState.routeData.filter(route => 
-            route && !route.isEmpty && route.origin && route.destination
-        );
-        
-        if (!validRoutes.length) {
-            console.log('No valid routes to draw');
-            return;
-        }
-
-        // Create promises for each route
-        const promises = validRoutes.map((route, index) => {
-            if (!route.origin?.iata_code || !route.destination?.iata_code) {
-                console.log(`Skipping route ${index} with incomplete data:`, route);
-                return Promise.resolve();
-            }
-            
-            const routeId = `${route.origin.iata_code}-${route.destination.iata_code}`;
-            const isSelected = !!route.selectedRoute || !!appState.selectedRoutes[index];
-            
-            // Always use 'route' type (solid line) for selected routes, otherwise based on isDirect
-            const type = isSelected ? 'route' : (route.isDirect ? 'route' : 'dashed');
-            
-            return this.drawLine(routeId, type, {
-                price: route.price,
-                group: appState.selectedRoutes[index]?.group,
-                isDeckRoute: false,
-                showPlane: type === 'route',
-                status: isSelected ? 'selected' : undefined
-            });
-        });
-
-        try {
-            await Promise.all(promises);
-        } catch (error) {
-            console.error('Error drawing route lines:', error);
         }
     },
 

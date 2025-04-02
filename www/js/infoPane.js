@@ -82,9 +82,9 @@ const infoPane = {
 
     // Add the missing handleRouteButtonClick method
     handleRouteButtonClick(routeIndex) {
-        const selectedRoute = appState.selectedRoutes[routeIndex];
+        const selectedRoute = appState.routeData[routeIndex];
 
-        if (selectedRoute) {
+        if (selectedRoute && selectedRoute.selectedRoute) {
             // If the route is selected, display the selected route information page
             import('./routeDeck/selectedRoute.js').then(({ selectedRoute }) => {
                 selectedRoute.displaySelectedRouteInfo(routeIndex);
@@ -100,234 +100,88 @@ const infoPane = {
         const menuBar = document.getElementById('menu-bar');
         menuBar.innerHTML = '';
 
-        // Create a set of all selected route indices to check against
-        const selectedRouteIndices = new Set();
-        
-        // First, find all segments that belong to groups and prepare segment data
-        const groupSegments = {};
-        Object.entries(appState.selectedRoutes).forEach(([index, route]) => {
-            const routeIndex = parseInt(index);
-            selectedRouteIndices.add(routeIndex);
-            
-            // If this segment belongs to a group, store it for processing
-            if (route.group !== undefined) {
-                if (!groupSegments[route.group]) {
-                    groupSegments[route.group] = [];
-                }
-                
-                // Store the segment with its index
-                groupSegments[route.group].push({
-                    index: routeIndex,
-                    route: route,
-                    displayData: route.displayData
-                });
-                
-                // Also add all segments in this group to selectedRouteIndices
-                Object.entries(appState.selectedRoutes).forEach(([otherIndex, otherRoute]) => {
-                    if (otherRoute.group === route.group) {
-                        selectedRouteIndices.add(parseInt(otherIndex));
-                    }
-                });
-            }
-        });
-        
-        // Process group segments to ensure routeData is properly created for each segment
-        Object.values(groupSegments).forEach(segments => {
-            // Sort segments by index to ensure correct order
-            segments.sort((a, b) => a.index - b.index);
-            
-            // For each segment, ensure routeData exists with correct origin/destination
-            segments.forEach((segment, i) => {
-                const routeIndex = segment.index;
-                
-                // Extract origin and destination from the segment's route data
-                const [origin, destination] = segment.displayData.route.split(' > ');
-                
-                // Create or update routeData for this segment
-                if (!appState.routeData[routeIndex] || appState.routeData[routeIndex].isEmpty) {
-                    // Get airport data for origin and destination
-                    let originData = { iata_code: origin, city: origin };
-                    let destinationData = { iata_code: destination, city: destination };
-                    
-                    // Try to get more complete airport data from cache
-                    if (window.flightMap && window.flightMap.airportDataCache) {
-                        if (window.flightMap.airportDataCache[origin]) {
-                            originData = window.flightMap.airportDataCache[origin];
-                        }
-                        if (window.flightMap.airportDataCache[destination]) {
-                            destinationData = window.flightMap.airportDataCache[destination];
-                        }
-                    }
-                    
-                    // Create routeData entry for this segment
-                    appState.routeData[routeIndex] = {
-                        tripType: 'oneWay', // Multi-segment routes use one-way segments
-                        travelers: 1, // Default value
-                        departDate: segment.displayData.departure,
-                        returnDate: null,
-                        origin: originData,
-                        destination: destinationData,
-                        isSegment: true, // Mark this as a segment
-                        isMultiSegment: true, // Mark as part of multi-segment route
-                        segmentGroup: segment.route.group, // Store the group ID
-                        segmentOrder: i // Store the order within the group
-                    };
-                    
-                    console.log(`Created routeData for segment ${routeIndex}:`, appState.routeData[routeIndex]);
-                }
-            });
-        });
+        // Create buttons for all routes in routeData
+        appState.routeData.forEach((route, index) => {
+            if (!route || route.isEmpty) return;
 
-        // Collect all route indices we need to display buttons for
-        const routeIndices = new Set();
-        
-        // First add indices from routeData
-        for (let i = 0; i < appState.routeData.length; i++) {
-            const routeData = appState.routeData[i];
-            if (routeData && !routeData.isEmpty) {
-                routeIndices.add(i);
-            }
-        }
-        
-        // Then add indices from selectedRoutes that might not be in routeData
-        Object.keys(appState.selectedRoutes).forEach(index => {
-            routeIndices.add(parseInt(index));
-        });
-        
-        // Sort indices to maintain consistent button order
-        const sortedIndices = Array.from(routeIndices).sort((a, b) => a - b);
-        
-        console.log("Creating route buttons for indices:", sortedIndices);
-        console.log("Selected route indices:", Array.from(selectedRouteIndices));
-        
-        // Create buttons for all routes in our combined set
-        for (const routeIndex of sortedIndices) {
-            // Get route data - first try routeData, then fall back to selectedRoutes
-            const routeData = appState.routeData[routeIndex];
-            const selectedRoute = appState.selectedRoutes[routeIndex];
-            
-            // Skip empty routes with no selected route
-            if ((!routeData || routeData.isEmpty) && !selectedRoute) {
-                continue;
-            }
-            
-            const buttonId = `route-button-${routeIndex}`;
+            const buttonId = `route-button-${index}`;
             let button = document.getElementById(buttonId) || document.createElement('button');
-            
-            // Get origin and destination - first try routeData, then fall back to selectedRoute
-            let origin, destination;
-            
-            if (routeData && !routeData.isEmpty) {
-                // Use data from routeData
-                origin = routeData.origin?.iata_code;
-                destination = routeData.destination?.iata_code;
-            } else if (selectedRoute) {
-                // Fall back to selectedRoute data
-                const routeParts = selectedRoute.displayData?.route?.split(' > ') || [];
-                origin = routeParts[0];
-                destination = routeParts[1];
-            } else {
-                // Skip if we can't determine origin/destination
-                continue;
-            }
-            
-            // Skip if both origin and destination are missing
-            if (!origin && !destination) continue;
-            
-            // Create or update button
+
+            const origin = route.origin?.iata_code || 'Any';
+            const destination = route.destination?.iata_code || 'Any';
+
             if (!button.id) {
                 button.id = buttonId;
                 button.className = 'route-info-button';
                 
                 // Add even-button class to alternate gradient directions
-                if (routeIndex % 2 === 1) {
+                if (index % 2 === 1) {
                     button.classList.add('even-button');
                 }
                 
                 menuBar.appendChild(button);
             }
-            
-            // Clear previous content and add structured elements for origin and destination
+
             button.innerHTML = '';
-            
-            // Create origin element (upper left)
+
             const originElement = document.createElement('span');
             originElement.className = 'origin-iata';
-            originElement.textContent = origin || 'Any';
-            
-            // Add special styling for "Any" origins
-            if (origin === 'Any' || !origin) {
+            originElement.textContent = origin;
+
+            if (origin === 'Any') {
                 originElement.classList.add('any-waypoint');
             }
-            
+
             button.appendChild(originElement);
-            
-            // Create destination element (lower right)
+
             const destElement = document.createElement('span');
             destElement.className = 'dest-iata';
-            destElement.textContent = destination || 'Any';
-            
-            // Add special styling for "Any" destinations
-            if (destination === 'Any' || !destination) {
+            destElement.textContent = destination;
+
+            if (destination === 'Any') {
                 destElement.classList.add('any-waypoint');
             }
-            
-            button.appendChild(destElement);
-            
-            // Use the method reference for the click handler
-            button.onclick = () => this.handleRouteButtonClick(routeIndex);
 
-            // Only fit map to route if we're not preventing map view changes
+            button.appendChild(destElement);
+
+            button.onclick = () => this.handleRouteButtonClick(index);
+
             if (!appState.preventMapViewChange) {
-                this.fitMapToRoute(routeIndex);
+                this.fitMapToRoute(index);
             }
 
-            // Check if this route index is in our set of selected routes
-            // This ensures all segments in a multi-segment route are properly marked
-            if (selectedRouteIndices.has(routeIndex)) {
+            if (route.selectedRoute) {
                 button.classList.add('selected-route-button');
             } else {
                 button.classList.remove('selected-route-button');
             }
-            
-            // Get date range from the best available source
-            let dateRange;
-            if (routeData && !routeData.isEmpty) {
-                dateRange = { 
-                    depart: routeData.departDate,
-                    return: routeData.returnDate
-                };
-            } else if (selectedRoute) {
-                dateRange = selectedRoute.routeDates || {
-                    depart: selectedRoute.displayData?.departure,
-                    return: selectedRoute.displayData?.arrival
-                };
-            }
-                
+
+            const dateRange = {
+                depart: route.departDate,
+                return: route.returnDate
+            };
+
             if (dateRange) {
-                uiHandling.attachDateTooltip(button, routeIndex, dateRange);
+                uiHandling.attachDateTooltip(button, index, dateRange);
             }
 
-            // Use a single event listener for both mouseover and mouseout
             button.addEventListener('mouseover', () => {
-                // Only highlight if neither origin nor destination is "Any"
-                if (origin && destination && origin !== 'Any' && destination !== 'Any') {
+                if (origin !== 'Any' && destination !== 'Any') {
                     this.applyToLines([`route:${origin}-${destination}`], 'highlight');
                 }
             });
             button.addEventListener('mouseout', () => {
-                if (origin && destination && origin !== 'Any' && destination !== 'Any') {
+                if (origin !== 'Any' && destination !== 'Any') {
                     this.applyToLines([`route:${origin}-${destination}`], 'reset');
                 }
             });
-        }
+        });
 
-        // Add plus button if appropriate - now check both structures
-        const allRoutesComplete = Object.values(appState.routeData).every(
+        const allRoutesComplete = appState.routeData.every(
             r => !r || r.isEmpty || (r.origin && r.destination)
         );
         
-        if (sortedIndices.length === 0 || allRoutesComplete) {
+        if (appState.routeData.length === 0 || allRoutesComplete) {
             this.addPlusButton();
         }
     },
@@ -474,13 +328,13 @@ const infoPane = {
             let originData = null;
             
             // Check if previous route is part of a multi-segment group
-            const prevSelectedRoute = appState.selectedRoutes[prevRouteIndex];
+            const prevSelectedRoute = appState.routeData[prevRouteIndex];
             const isMultiSegment = prevSelectedRoute && prevSelectedRoute.group !== undefined;
             
             if (isMultiSegment) {
                 // Find the last segment in this group to get the final destination
                 const groupId = prevSelectedRoute.group;
-                const groupSegments = Object.entries(appState.selectedRoutes)
+                const groupSegments = Object.entries(appState.routeData)
                     .filter(([_, route]) => route.group === groupId)
                     .map(([idx, route]) => ({
                         index: parseInt(idx),
@@ -594,36 +448,11 @@ const infoPane = {
         
         // Get route data directly from routeData
         const routeData = appState.routeData[routeIndex];
-        const selectedRoute = appState.selectedRoutes[routeIndex];
         
-        if (!routeData && !selectedRoute) return;
+        if (!routeData) return;
         
-        let originWaypoint, destinationWaypoint;
-        
-        if (routeData && !routeData.isEmpty) {
-            // Get waypoints from routeData - this is the preferred source
-            originWaypoint = routeData.origin;
-            destinationWaypoint = routeData.destination;
-        } else if (selectedRoute && selectedRoute.displayData) {
-            // Try to get waypoints from selectedRoute
-            const route = selectedRoute.displayData.route.split(' > ');
-            if (route.length >= 2) {
-                // We just have IATA codes here, not full waypoint objects
-                // We'll need to fetch the airport data
-                originWaypoint = { iata_code: route[0] };
-                destinationWaypoint = { iata_code: route[1] };
-                
-                // Try to get airport data from airportDataCache if available
-                if (window.flightMap && window.flightMap.airportDataCache) {
-                    if (window.flightMap.airportDataCache[originWaypoint.iata_code]) {
-                        originWaypoint = window.flightMap.airportDataCache[originWaypoint.iata_code];
-                    }
-                    if (window.flightMap.airportDataCache[destinationWaypoint.iata_code]) {
-                        destinationWaypoint = window.flightMap.airportDataCache[destinationWaypoint.iata_code];
-                    }
-                }
-            }
-        }
+        let originWaypoint = routeData.origin;
+        let destinationWaypoint = routeData.destination;
         
         // If either waypoint is missing or has iata_code=Any, don't adjust the map
         if (!originWaypoint || !destinationWaypoint || 
@@ -705,50 +534,6 @@ function setupRouteContent(routeIndex) {
     // Get route data from the routeData structure
     const routeData = appState.routeData[routeIndex];
     
-    // Check if this is a selected route segment without corresponding routeData
-    const selectedRouteData = appState.selectedRoutes[routeIndex];
-    if (selectedRouteData && (!routeData || routeData.isEmpty)) {
-        // This is a segment of a multi-segment route that doesn't have routeData
-        // Extract route information from the selectedRoute to create routeData
-        const routeParts = selectedRouteData.displayData.route.split(' > ');
-        if (routeParts.length === 2) {
-            const origin = routeParts[0];
-            const destination = routeParts[1];
-            
-            // Get airport data if available in the cache
-            let originData = null;
-            let destinationData = null;
-            
-            if (window.flightMap && window.flightMap.airportDataCache) {
-                originData = window.flightMap.airportDataCache[origin] || { iata_code: origin, city: origin };
-                destinationData = window.flightMap.airportDataCache[destination] || { iata_code: destination, city: destination };
-            } else {
-                originData = { iata_code: origin, city: origin };
-                destinationData = { iata_code: destination, city: destination };
-            }
-            
-            // Create routeData for this segment
-            appState.routeData[routeIndex] = {
-                tripType: 'oneWay', // Default for segments
-                travelers: 1, // Default value
-                departDate: selectedRouteData.displayData.departure,
-                returnDate: null,
-                origin: originData,
-                destination: destinationData,
-                isSegment: true // Mark this as a segment for special handling
-            };
-            
-            // Update route dates
-            updateState('updateRouteDate', {
-                routeNumber: routeIndex,
-                depart: selectedRouteData.displayData.departure,
-                return: null
-            }, 'setupRouteContent');
-            
-            console.log(`Created routeData for segment ${routeIndex}:`, appState.routeData[routeIndex]);
-        }
-    }
-
     let contentWrapper;
     let routeBoxElement;
 
