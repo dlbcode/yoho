@@ -387,10 +387,14 @@ const routeBox = {
 
         updateButtonState();
 
-        // Add state change listener for relevant waypoint changes
+        // Add state change listener for relevant waypoint changes - update to use newer event types
         const stateChangeHandler = (event) => {
-            if (['updateWaypoint', 'addWaypoint', 'removeWaypoint'].includes(event.detail.key)) {
-                requestAnimationFrame(updateButtonState);
+            // Replace legacy event names with the modern updateRouteData event
+            if (event.detail.key === 'updateRouteData') {
+                // Only update if this is for our route number
+                if (event.detail.value && event.detail.value.routeNumber === routeNumber) {
+                    requestAnimationFrame(updateButtonState);
+                }
             }
         };
         document.addEventListener('stateChange', stateChangeHandler);
