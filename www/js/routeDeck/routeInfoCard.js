@@ -264,23 +264,20 @@ async function routeInfoCard(cardElement, fullFlightData, routeIds, routeIndex) 
                 appState.routeData[selectedRouteIndex].selectedRoute = appState.selectedRoutes[selectedRouteIndex];
                 appState.routeData[selectedRouteIndex].isSegment = true;
             }
-
-            // Update legacy route dates 
-            if (!appState.routeDates[selectedRouteIndex]) appState.routeDates[selectedRouteIndex] = {};
-            appState.routeDates[selectedRouteIndex].depart = departureDate;
         });
 
         replaceWaypointsForCurrentRoute(intermediaryIatas, routeIndex);
 
-        updateState('updateRouteDate', {
+        updateState('updateRouteData', {
             routeNumber: routeIndex,
-            depart: fullFlightData.route[0].local_departure ? 
-                fullFlightData.route[0].local_departure.split('T')[0] : 
-                (fullFlightData.route[0].dTime ? 
-                    new Date(fullFlightData.route[0].dTime * 1000).toISOString().split('T')[0] : 
-                    new Date().toISOString().split('T')[0]),
-            return: null
-        });
+            data: {
+                departDate: fullFlightData.route[0].local_departure ? 
+                    fullFlightData.route[0].local_departure.split('T')[0] : 
+                    (fullFlightData.route[0].dTime ? 
+                        new Date(fullFlightData.route[0].dTime * 1000).toISOString().split('T')[0] : 
+                        new Date().toISOString().split('T')[0])
+            }
+        }, 'routeInfoCard.selectRoute');
 
         fullFlightData.route.forEach((segment, i) => {
             if (i < fullFlightData.route.length - 1) {
@@ -388,44 +385,74 @@ function flyToLocation(iata) {
 }
 
 function replaceWaypointsForCurrentRoute(intermediaryIatas, routeIndex) {
-    // Get trip type from routeData or fall back to routes
-    const routeData = appState.routeData[routeIndex];
-    const tripType = routeData?.tripType || appState.routes[routeIndex]?.tripType || 'oneWay';
+    // Since we're no longer using waypoints array, this function will directly update routeData
+    // with all the segments from the selected route
     
-    const startIndex = tripType === 'roundTrip' ? 0 : routeIndex * 2;
-    const before = appState.waypoints.slice(0, startIndex);
-    const after = tripType === 'roundTrip' ? [] : appState.waypoints.slice((routeIndex + 1) * 2);
-
-    let updatedSegment = [flightMap.airportDataCache[intermediaryIatas[0]]];
-
-    for (let i = 1; i < intermediaryIatas.length; i++) {
-        let airportData = flightMap.airportDataCache[intermediaryIatas[i]];
-        updatedSegment.push(airportData);
-        if (i < intermediaryIatas.length - 1) {
-            updatedSegment.push(airportData);
+    // Get trip type from routeData
+    const routeData = appState.routeData[routeIndex];
+    const tripType = routeData?.tripType || 'oneWay';
+    
+    // Create route data entries for each segment in the route
+    for (let i = 0; i < intermediaryIatas.length - 1; i++) {
+        const segmentIndex = routeIndex + i;
+        const originIata = intermediaryIatas[i];
+        const destIata = intermediaryIatas[i + 1];
+        
+        // Get airport data from cache
+        const originData = flightMap.airportDataCache[originIata];
+        const destData = flightMap.airportDataCache[destIata];
+        
+        if (!originData || !destData) {
+            console.error(`Missing airport data for ${originIata} or ${destIata}`);
+            continue;
+        }
+        
+        // Create or update routeData for this segment
+        if (!appState.routeData[segmentIndex]) {
+            appState.routeData[segmentIndex] = {
+                tripType: 'oneWay',
+                travelers: 1,
+                origin: { 
+                    iata_code: originIata,
+                    city: originData.city,
+                    name: originData.name || originData.city
+                },
+                destination: {
+                    iata_code: destIata,
+                    city: destData.city,
+                    name: destData.name || destData.city
+                },
+                isSegment: true
+            };
+        } else {
+            // Update existing route data
+            appState.routeData[segmentIndex].origin = {
+                iata_code: originIata,
+                city: originData.city,
+                name: originData.name || originData.city
+            };
+            appState.routeData[segmentIndex].destination = {
+                iata_code: destIata,
+                city: destData.city,
+                name: destData.name || destData.city
+            };
+            appState.routeData[segmentIndex].isSegment = true;
         }
     }
-
-    const finalDestinationIata = intermediaryIatas[intermediaryIatas.length - 1];
-    const originIata = intermediaryIatas[0];
-
-    const shouldAddOrigin = tripType === 'roundTrip' && updatedSegment[updatedSegment.length - 1].iata_code !== originIata;
-    const shouldAddDestination = tripType !== 'roundTrip' && updatedSegment[updatedSegment.length - 1].iata_code !== finalDestinationIata;
-
-    if (shouldAddOrigin) {
-        updatedSegment.push(flightMap.airportDataCache[originIata]);
-    } else if (shouldAddDestination) {
-        updatedSegment.push(flightMap.airportDataCache[finalDestinationIata]);
-    }
-
-    appState.waypoints = [...before, ...updatedSegment, ...after];
-    updateState('updateWaypoint', appState.waypoints);
+    
+    // Update UI through routeHandling
+    import('../routeHandling.js').then(({ routeHandling }) => {
+        routeHandling.updateRoutesArray();
+    });
 }
 
 function selectRoute(route) {
-    appState.selectedRoute = route.map(segment => segment.flyFrom);
-    appState.selectedRoute.push(route[route.length - 1].flyTo); // Add the final destination
-    flightMap.updateVisibleMarkers();
+    // Update the selected route using routeData approach directly
+    const selectedIatas = route.map(segment => segment.flyFrom);
+    selectedIatas.push(route[route.length - 1].flyTo); // Add the final destination
+    
+    // Instead of setting appState.selectedRoute directly, we'll update via flightMap
+    flightMap.updateVisibleMarkers(selectedIatas);
 }
 
 export { routeInfoCard, setSelectedRouteCard };
