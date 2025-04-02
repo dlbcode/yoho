@@ -39,84 +39,92 @@ async function getAirlineName(airlineCode) {
 
 // Generate full journey data for the entire route
 function generateFullJourneyData(currentGroupId) {
-    // Find all routes that belong to the same group using routeData instead of selectedRoutes
-    const groupSegments = Object.entries(appState.routeData)
-        .filter(([_, route]) => {
-            // More robust filtering to prevent undefined errors
-            return route && 
-                route.selectedRoute && 
-                route.selectedRoute.group === currentGroupId && 
-                route.selectedRoute.displayData && 
-                route.selectedRoute.displayData.route;
-        })
-        .map(([idx, route]) => {
-            try {
-                // Extract origin and destination from the selectedRoute data with error handling
-                const routeParts = route.selectedRoute.displayData.route.split(' > ');
-                
-                if (!routeParts || routeParts.length < 2) {
-                    console.warn(`Invalid route format for route ${idx}`);
-                    return null; // Skip this invalid route
+    try {
+        console.log("Generating journey data for group:", currentGroupId);
+        console.log("Available routeData:", appState.routeData.map((r, i) => 
+            r ? `${i}: ${r.selectedRoute ? 'Has selectedRoute' : 'No selectedRoute'}` : 
+            `${i}: Empty`).filter(i => i));
+        
+        // Find all routes that belong to the same group using routeData
+        const groupSegments = Object.entries(appState.routeData)
+            .filter(([_, route]) => {
+                // More robust filtering to prevent undefined errors
+                return route && 
+                    route.selectedRoute && 
+                    route.selectedRoute.group === currentGroupId && 
+                    route.selectedRoute.displayData;
+            })
+            .map(([idx, route]) => {
+                try {
+                    // Extract origin and destination safely
+                    const routeDisplayData = route.selectedRoute.displayData;
+                    if (!routeDisplayData || !routeDisplayData.route) {
+                        console.warn(`Missing displayData or route for ${idx}`);
+                        return null;
+                    }
+                    
+                    const routeParts = routeDisplayData.route.split(' > ');
+                    if (!routeParts || routeParts.length < 2) {
+                        console.warn(`Invalid route format for route ${idx}`);
+                        return null;
+                    }
+                    
+                    const [origin, destination] = routeParts;
+                    
+                    return {
+                        index: parseInt(idx),
+                        origin,
+                        destination,
+                        routeDetails: routeDisplayData,
+                        fullData: route.selectedRoute.fullData
+                    };
+                } catch (error) {
+                    console.warn(`Error processing route ${idx}:`, error);
+                    return null;
                 }
-                
-                const [origin, destination] = routeParts;
-                
-                return {
-                    index: parseInt(idx),
-                    origin,
-                    destination,
-                    routeDetails: route.selectedRoute.displayData,
-                    fullData: route.selectedRoute.fullData
-                };
-            } catch (error) {
-                console.warn(`Error processing route ${idx}:`, error);
-                return null; // Return null for invalid entries
-            }
-        })
-        .filter(segment => segment !== null) // Filter out any null entries
-        // Sort by route index to ensure correct order
-        .sort((a, b) => a.index - b.index);
-    
-    // If we have no valid segments, return early with minimal data
-    if (!groupSegments || groupSegments.length === 0) {
-        console.warn(`No valid segments found for group ${currentGroupId}`);
+            })
+            .filter(segment => segment !== null);
+        
+        // If we have no valid segments, return early
+        if (!groupSegments || groupSegments.length === 0) {
+            console.warn(`No valid segments found for group ${currentGroupId}`);
+            return null;
+        }
+        
+        // Sort by index to ensure correct order
+        groupSegments.sort((a, b) => a.index - b.index);
+        
+        // Calculate total price, total duration, airlines involved with error handling
+        const totalPrice = groupSegments.reduce((sum, segment) => {
+            const price = segment.routeDetails && 
+                          segment.routeDetails.price ? 
+                          parseFloat(segment.routeDetails.price) : 0;
+            return sum + (isNaN(price) ? 0 : price);
+        }, 0);
+        
+        const airlines = [...new Set(groupSegments
+            .filter(segment => segment.routeDetails && segment.routeDetails.airline)
+            .map(segment => segment.routeDetails.airline))];
+            
+        const firstSegment = groupSegments[0];
+        const lastSegment = groupSegments[groupSegments.length - 1];
+        
         return {
             groupId: currentGroupId,
-            segments: [],
-            totalStops: 0,
-            totalSegments: 0,
-            airlines: [],
-            totalPrice: 0
+            segments: groupSegments,
+            overallOrigin: firstSegment?.origin,
+            overallDestination: lastSegment?.destination,
+            totalPrice,
+            airlines,
+            departureDate: firstSegment?.routeDetails?.departure,
+            arrivalDate: lastSegment?.routeDetails?.arrival,
+            totalStops: groupSegments.length - 1,
+            totalSegments: groupSegments.length
         };
+    } catch (error) {
+        console.error("Error generating journey data:", error);
+        return null;
     }
-    
-    // Calculate total price, total duration, airlines involved with error handling
-    const totalPrice = groupSegments.reduce((sum, segment) => {
-        const price = segment.routeDetails && 
-                      segment.routeDetails.price ? 
-                      parseFloat(segment.routeDetails.price) : 0;
-        return sum + (isNaN(price) ? 0 : price);
-    }, 0);
-    
-    const airlines = [...new Set(groupSegments
-        .filter(segment => segment.routeDetails && segment.routeDetails.airline)
-        .map(segment => segment.routeDetails.airline))];
-        
-    const firstSegment = groupSegments[0];
-    const lastSegment = groupSegments[groupSegments.length - 1];
-    
-    return {
-        groupId: currentGroupId,
-        segments: groupSegments,
-        overallOrigin: firstSegment?.origin,
-        overallDestination: lastSegment?.destination,
-        totalPrice,
-        airlines,
-        departureDate: firstSegment?.routeDetails?.departure,
-        arrivalDate: lastSegment?.routeDetails?.arrival,
-        totalStops: groupSegments.length - 1,
-        totalSegments: groupSegments.length
-    };
 }
 
 // Generate route description for a route group - similar to the one in selectedRoute.js

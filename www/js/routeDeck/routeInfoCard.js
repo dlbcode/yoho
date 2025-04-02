@@ -197,16 +197,47 @@ async function routeInfoCard(cardElement, fullFlightData, routeIds, routeIndex) 
     addClickListener('.layover', 'data-layover', flyToLocation);
 
     detailCard.querySelector('#selectRoute').addEventListener('click', () => {
-        // Update routeData directly
+        // Create a properly formatted selectedRoute object with displayData
+        const formattedSelectedRoute = {
+            fullData: fullFlightData,
+            group: fullFlightData.group || appState.highestGroupId + 1,
+            displayData: {
+                // Create the route string in the format "Origin > Destination"
+                route: `${fullFlightData.route[0].flyFrom} > ${fullFlightData.route[fullFlightData.route.length - 1].flyTo}`,
+                airline: fullFlightData.route[0].airline,
+                price: fullFlightData.price,
+                departure: fullFlightData.route[0].local_departure || 
+                         (fullFlightData.route[0].dTime ? 
+                            new Date(fullFlightData.route[0].dTime * 1000).toISOString() : 
+                            new Date().toISOString()),
+                arrival: fullFlightData.route[fullFlightData.route.length - 1].local_arrival || 
+                        (fullFlightData.route[fullFlightData.route.length - 1].aTime ? 
+                            new Date(fullFlightData.route[fullFlightData.route.length - 1].aTime * 1000).toISOString() : 
+                            new Date().toISOString()),
+                deep_link: fullFlightData.deep_link || "#"
+            }
+        };
+
+        // Ensure we have a group ID for this flight
+        if (!fullFlightData.group) {
+            appState.highestGroupId = (appState.highestGroupId || 0) + 1;
+            formattedSelectedRoute.group = appState.highestGroupId;
+            fullFlightData.group = appState.highestGroupId;
+        }
+
+        // Update routeData with the properly structured selectedRoute
         appState.routeData[routeIndex] = {
             ...appState.routeData[routeIndex],
-            selectedRoute: fullFlightData
+            selectedRoute: formattedSelectedRoute
         };
 
         const intermediaryIatas = fullFlightData.route.map(segment => segment.flyFrom);
         intermediaryIatas.push(fullFlightData.route[fullFlightData.route.length - 1].flyTo);
 
-        replaceWaypointsForCurrentRoute(intermediaryIatas, routeIndex);
+        // Save the group ID before calling replaceWaypointsForCurrentRoute
+        const groupId = formattedSelectedRoute.group;
+        
+        replaceWaypointsForCurrentRoute(intermediaryIatas, routeIndex, groupId);
 
         updateState('updateRouteData', {
             routeNumber: routeIndex,
@@ -230,73 +261,9 @@ async function routeInfoCard(cardElement, fullFlightData, routeIds, routeIndex) 
         // Call selectRoute to update the state and markers
         selectRoute(fullFlightData.route);
         
-        // Update all route buttons belonging to this group to ensure they remain selected
-        setTimeout(() => {
-            // Force update of route button states for all segments in this group
-            const routeSegmentIndices = fullFlightData.route.map((_, idx) => routeIndex + idx);
-            routeSegmentIndices.forEach(segmentIndex => {
-                const buttonId = `route-button-${segmentIndex}`;
-                const segmentButton = document.getElementById(buttonId);
-                if (segmentButton) {
-                    segmentButton.classList.add('selected-route-button');
-                    // Preserve even-button class if present
-                    if (segmentIndex % 2 === 1) {
-                        segmentButton.classList.add('even-button');
-                    }
-                }
-            });
-        }, 200);
-        
-        // Import the selectedRouteGroup module and display the full journey info instead of just the first segment
-        import('../routeDeck/selectedRouteGroup.js').then(({ selectedRouteGroup }) => {
-            // Import the selectedRoute module to get access to the format helpers
-            import('../routeDeck/selectedRoute.js').then(({ selectedRoute }) => {
-                // Small timeout to ensure state updates are processed
-                setTimeout(() => {
-                    // Create format helpers object to pass to the selectedRouteGroup module
-                    const formatHelpers = {
-                        formatFlightTime: selectedRoute.formatFlightTime,
-                        formatFlightDate: selectedRoute.formatFlightDate
-                    };
-                    
-                    // Set a default group ID if none exists in the route
-                    if (!fullFlightData.group) {
-                        // Generate a unique group ID
-                        appState.highestGroupId = (appState.highestGroupId || 0) + 1;
-                        fullFlightData.group = appState.highestGroupId;
-                        
-                        // Update routeData with the group ID
-                        appState.routeData[routeIndex].selectedRoute.group = fullFlightData.group;
-                    }
-                    
-                    // Display the full journey view for the group ID
-                    selectedRouteGroup.displayFullJourneyInfo(fullFlightData.group || routeIndex, formatHelpers).then(result => {
-                        // Check if we received valid journey data
-                        if (result && result.journeyContainer && result.journeyData) {
-                            // Set up event listeners for the journey view
-                            selectedRouteGroup.setupJourneyEventListeners(
-                                result.journeyContainer,
-                                result.journeyData,
-                                {
-                                    onReturnToSegment: (segmentIndex) => selectedRoute.displaySelectedRouteInfo(segmentIndex),
-                                    onViewSegment: (segmentIndex) => selectedRoute.displaySelectedRouteInfo(segmentIndex)
-                                }
-                            );
-                            
-                            // Update current view
-                            appState.currentView = 'fullJourney';
-                        } else {
-                            // Fallback to displaying just the segment info
-                            console.warn('Could not display full journey view, falling back to segment view');
-                            selectedRoute.displaySelectedRouteInfo(routeIndex);
-                        }
-                    }).catch(error => {
-                        console.error('Error displaying journey info:', error);
-                        // Fallback to segment view on error
-                        selectedRoute.displaySelectedRouteInfo(routeIndex);
-                    });
-                }, 100);
-            });
+        // Skip journey view for now and go directly to segment view
+        import('../routeDeck/selectedRoute.js').then(({ selectedRoute }) => {
+            selectedRoute.displaySelectedRouteInfo(routeIndex);
         });
     });
 
@@ -344,7 +311,7 @@ function flyToLocation(iata) {
         .catch(error => console.error('Error getting airport data:', error));
 }
 
-function replaceWaypointsForCurrentRoute(intermediaryIatas, routeIndex) {
+function replaceWaypointsForCurrentRoute(intermediaryIatas, routeIndex, groupId) {
     // Since we're no longer using waypoints array, this function will directly update routeData
     // with all the segments from the selected route
     
@@ -367,6 +334,20 @@ function replaceWaypointsForCurrentRoute(intermediaryIatas, routeIndex) {
             continue;
         }
         
+        // Prepare the selectedRoute object for this segment with proper group ID
+        const segmentSelectedRoute = {
+            fullData: appState.routeData[routeIndex]?.selectedRoute?.fullData,
+            group: groupId, // Use the same groupId for all segments
+            displayData: {
+                route: `${originIata} > ${destIata}`,
+                airline: appState.routeData[routeIndex]?.selectedRoute?.displayData?.airline,
+                price: appState.routeData[routeIndex]?.selectedRoute?.displayData?.price,
+                departure: appState.routeData[routeIndex]?.selectedRoute?.displayData?.departure,
+                arrival: appState.routeData[routeIndex]?.selectedRoute?.displayData?.arrival,
+                deep_link: appState.routeData[routeIndex]?.selectedRoute?.displayData?.deep_link
+            }
+        };
+        
         // Create or update routeData for this segment
         if (!appState.routeData[segmentIndex]) {
             appState.routeData[segmentIndex] = {
@@ -382,7 +363,8 @@ function replaceWaypointsForCurrentRoute(intermediaryIatas, routeIndex) {
                     city: destData.city,
                     name: destData.name || destData.city
                 },
-                isSegment: true
+                isSegment: true,
+                selectedRoute: segmentSelectedRoute
             };
         } else {
             // Update existing route data
@@ -397,7 +379,16 @@ function replaceWaypointsForCurrentRoute(intermediaryIatas, routeIndex) {
                 name: destData.name || destData.city
             };
             appState.routeData[segmentIndex].isSegment = true;
+            appState.routeData[segmentIndex].selectedRoute = segmentSelectedRoute;
         }
+        
+        // Ensure all segments in this group have the correct group ID
+        if (appState.routeData[segmentIndex].selectedRoute) {
+            appState.routeData[segmentIndex].selectedRoute.group = groupId;
+        }
+        
+        // Log the segment creation for debugging
+        console.log(`Created segment ${segmentIndex} (${originIata}-${destIata}) in group ${groupId}`);
     }
     
     // Update UI through routeHandling

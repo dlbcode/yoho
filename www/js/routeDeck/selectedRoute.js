@@ -125,7 +125,8 @@ const selectedRoute = {
             selectedRouteGroup.removeGroupButtonStyles();
         }
         
-        const selectedRouteDetails = appState.selectedRoutes[String(routeIndex)];
+        // Use routeData instead of selectedRoutes
+        const selectedRouteDetails = appState.routeData[routeIndex]?.selectedRoute;
 
         if (!selectedRouteDetails) {
             console.error(`Selected route details not found for routeIndex: ${routeIndex}`);
@@ -141,12 +142,77 @@ const selectedRoute = {
         contentWrapper.className = 'content-wrapper';
         infoPaneContent.appendChild(contentWrapper);
 
-        // Get detailed route information
+        // Get detailed route information - add more safety checks
         const routeDetails = selectedRouteDetails.displayData;
         const fullData = selectedRouteDetails.fullData;
         
-        // Get airport information
-        const [originCode, destCode] = routeDetails.route.split(' > ');
+        // Add robust error checking for route details
+        if (!routeDetails) {
+            console.error('Missing displayData in selectedRouteDetails');
+            
+            // Create fallback route details container
+            const fallbackContainer = document.createElement('div');
+            fallbackContainer.className = 'error-container';
+            fallbackContainer.innerHTML = `
+                <h3>Error Loading Flight Details</h3>
+                <p>Unable to load flight details. The selected flight information may be incomplete.</p>
+                <button id="backToSearchButton" class="booking-button">Back to Search</button>
+            `;
+            
+            contentWrapper.appendChild(fallbackContainer);
+            
+            // Add listener to the back button
+            const backButton = fallbackContainer.querySelector('#backToSearchButton');
+            backButton.addEventListener('click', () => {
+                // Go back to route deck
+                appState.currentView = 'routeDeck';
+                appState.currentRouteIndex = routeIndex;
+                
+                import('../routeDeck/routeDeck.js').then(({ buildRouteDeck }) => {
+                    buildRouteDeck(routeIndex);
+                });
+            });
+            
+            return;
+        }
+        
+        // Get airport information - check if route exists
+        if (!routeDetails.route) {
+            console.error('Missing route in routeDetails:', routeDetails);
+            
+            // Create fallback message
+            const fallbackContainer = document.createElement('div');
+            fallbackContainer.className = 'error-container';
+            fallbackContainer.innerHTML = `
+                <h3>Invalid Route Information</h3>
+                <p>The route information for this flight is incomplete.</p>
+                <button id="backToSearchButton" class="booking-button">Back to Search</button>
+            `;
+            
+            contentWrapper.appendChild(fallbackContainer);
+            
+            // Add listener to the back button
+            const backButton = fallbackContainer.querySelector('#backToSearchButton');
+            backButton.addEventListener('click', () => {
+                // Go back to route deck
+                appState.currentView = 'routeDeck';
+                appState.currentRouteIndex = routeIndex;
+                
+                import('../routeDeck/routeDeck.js').then(({ buildRouteDeck }) => {
+                    buildRouteDeck(routeIndex);
+                });
+            });
+            
+            return;
+        }
+        
+        const routeParts = routeDetails.route.split(' > ');
+        if (routeParts.length < 2) {
+            console.error('Invalid route format:', routeDetails.route);
+            return;
+        }
+        
+        const [originCode, destCode] = routeParts;
         const originAirport = await this.getAirportInfo(originCode);
         const destAirport = await this.getAirportInfo(destCode);
         
@@ -525,8 +591,9 @@ const selectedRoute = {
 
     // New method to update the visual state of the route button
     updateRouteButtonState: function(routeIndex) {
-        // Get current selected route data 
-        const selectedRouteData = appState.selectedRoutes[routeIndex];
+        // Get current selected route data from routeData instead of selectedRoutes
+        const selectedRouteData = appState.routeData[routeIndex]?.selectedRoute;
+        
         if (!selectedRouteData) {
             console.error(`Cannot update button state - selected route data not found for index: ${routeIndex}`);
             return;
@@ -540,9 +607,9 @@ const selectedRoute = {
             button.classList.remove('active-route-button');
         });
 
-        // Find all route indices that belong to this same group in selectedRoutes
-        const groupRouteIndices = Object.entries(appState.selectedRoutes)
-            .filter(([_, route]) => route.group === currentGroupId)
+        // Find all route indices that belong to this same group in routeData
+        const groupRouteIndices = Object.entries(appState.routeData)
+            .filter(([_, route]) => route && route.selectedRoute && route.selectedRoute.group === currentGroupId)
             .map(([idx, _]) => parseInt(idx));
 
         // Mark the current route button as active
