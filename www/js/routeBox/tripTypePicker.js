@@ -120,7 +120,7 @@ export function handleTripTypeChange(tripType, routeNumber) {
         }, 500);
     }
     
-    // Rest of your code for handling trip type changes...
+    // Handle the date inputs container update
     const dateInputsContainer = document.querySelector('.date-inputs-container');
     if (dateInputsContainer) {
         dateInputsContainer.innerHTML = '';
@@ -129,7 +129,14 @@ export function handleTripTypeChange(tripType, routeNumber) {
             dateInput.classList.add('full-width');
             dateInputsContainer.appendChild(dateInput);
             initDatePicker('depart-date-input', routeNumber);
-            delete appState.routeDates[routeNumber].return;
+            
+            // Clear return date in routeData when switching to one-way
+            if (routeData.returnDate) {
+                updateState('updateRouteData', {
+                    routeNumber: routeNumber,
+                    data: { returnDate: null }
+                }, 'tripTypePicker.handleTripTypeChange.clearReturnDate');
+            }
         } else {
             const departDateInput = createDateInput('depart', routeNumber);
             const returnDateInput = createDateInput('return', routeNumber);
@@ -151,9 +158,21 @@ function createDateInput(dateType, routeNumber) {
     dateInput.type = 'text';
     dateInput.readOnly = true;
     dateInput.placeholder = `${dateType.charAt(0).toUpperCase() + dateType.slice(1)} Date`;
+    
+    // Use routeData instead of routeDates
+    const routeData = appState.routeData[routeNumber] || {};
+    
+    // Get current date and return date as defaults
     const currentDate = new Date().toISOString().split('T')[0];
     const returnDate = new Date(new Date().getTime() + 24 * 60 * 60 * 1000).toISOString().split('T')[0];
-    dateInput.value = appState.routeDates[routeNumber] ? appState.routeDates[routeNumber][dateType] : (dateType === 'depart' ? currentDate : returnDate);
+    
+    // Use the appropriate date from routeData
+    if (dateType === 'depart') {
+        dateInput.value = routeData.departDate || currentDate;
+    } else { // return
+        dateInput.value = routeData.returnDate || returnDate;
+    }
+    
     dateInput.name = `${dateType}-date-input`;
     return dateInput;
 }
