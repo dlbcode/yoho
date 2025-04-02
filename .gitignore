@@ -1,6 +1,9 @@
 *.env
 *.csv
+
 *.json
+!airlines.json
+
 *.err
 *.swp
 mongodb/
