@@ -335,19 +335,28 @@ export const updateSuggestions = (inputId, airports) => {
                     inputManager.inputStates[inputId].selectedSuggestionIndex = 
                         Array.from(this.querySelectorAll('div')).indexOf(suggestion);
                 }
+                
+                // Prevent default to avoid losing focus
+                e.preventDefault();
                 return;
             }
             
             // For click/touchend, handle selection
             if (e.type === 'click' || e.type === 'touchend') {
-                if (e.type === 'touchend') e.stopPropagation();
+                // Both click and touchend should stop propagation to prevent conflicts
+                e.stopPropagation();
+                
+                // Explicitly handle selection regardless of event type
                 handleSuggestionSelection(inputId, suggestion);
+                
+                // Prevent default action to avoid navigation issues
+                e.preventDefault();
             }
         };
         
         // Attach event listeners
         ['mousedown', 'click', 'touchstart', 'touchend'].forEach(eventType => {
-            const options = eventType.startsWith('touch') ? { passive: false } : false;
+            const options = { passive: false };  // Use non-passive for all to ensure preventDefault works
             suggestionBox.addEventListener(eventType, handleSuggestionInteraction, options);
         });
         
