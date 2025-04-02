@@ -83,105 +83,16 @@ const flightMap = {
         this.hoverDisabled = true;
         updateState('selectedAirport', airport);
 
-        const popupContent = document.createElement('div');
-        const cityName = document.createElement('p');
-        cityName.textContent = airport.city;
-        popupContent.appendChild(cityName);
-
-        // Check if the airport is part of a route in routeData
-        const routeIndex = this.findAirportInRouteData(airport.iata_code);
-        const button = document.createElement('button');
-        button.className = 'tooltip-button';
-        button.textContent = routeIndex === -1 ? '+' : '-';
-
-        button.addEventListener('click', () => {
-            const currentRouteIndex = this.findAirportInRouteData(airport.iata_code);
-            
-            if (currentRouteIndex === -1) {
-                // Add to a route
-                if (appState.routeData.length > 0) {
-                    // Find last route that's incomplete
-                    const lastRouteIndex = appState.routeData.length - 1;
-                    const lastRoute = appState.routeData[lastRouteIndex];
-                    
-                    if (!lastRoute || lastRoute.isEmpty || (!lastRoute.origin && !lastRoute.destination)) {
-                        // Create new route with this as origin
-                        this.addToNewRoute(airport, true);
-                    } else if (lastRoute.origin && !lastRoute.destination) {
-                        // Complete the route with this as destination
-                        this.addAsDestination(lastRouteIndex, airport);
-                    } else {
-                        // Start a new route
-                        this.addToNewRoute(airport, true);
-                    }
-                } else {
-                    // Create first route
-                    this.addToNewRoute(airport, true);
+        // Remove old code that references waypoints
+        if (!appState.waypoints[routeIndex * 2]) {
+            updateState('updateWaypoint', { 
+                index: routeIndex * 2, 
+                data: {
+                    iata_code: origin,
+                    city: origin,
                 }
-                
-                clickedMarker.setIcon(magentaDotIcon);
-                button.textContent = '-';
-            } else {
-                // Remove from route
-                const { routeIndex, isOrigin } = currentRouteIndex;
-                const route = appState.routeData[routeIndex];
-                
-                if (isOrigin) {
-                    // If removing origin and destination exists, update routeData
-                    if (route.destination) {
-                        updateState('updateRouteData', {
-                            routeNumber: routeIndex,
-                            data: {
-                                origin: null
-                            }
-                        }, 'flightMap.handleMarkerClick.removeOrigin');
-                    } else {
-                        // Remove whole route if it's just an origin
-                        updateState('removeRoute', {
-                            routeNumber: routeIndex
-                        }, 'flightMap.handleMarkerClick.removeRoute');
-                    }
-                } else {
-                    // If removing destination, just remove the destination
-                    updateState('updateRouteData', {
-                        routeNumber: routeIndex,
-                        data: {
-                            destination: null
-                        }
-                    }, 'flightMap.handleMarkerClick.removeDestination');
-                }
-                
-                lineManager.clearLines('hover');
-                clickedMarker.setIcon(blueDotIcon);
-                this.hoverDisabled = false;
-                button.textContent = '+';
-            }
-            
-            updateState('selectedAirport', null);
-        });
-
-        popupContent.appendChild(button);
-        clickedMarker.bindPopup(popupContent, { autoClose: false, closeOnClick: true }).openPopup();
-
-        // Move line drawing after popup is bound
-        this.fetchAndCacheRoutes(airport.iata_code).then(routes => {
-            if (!routes || !routes.length) {
-                console.error('Direct routes not found for IATA:', airport.iata_code);
-                return;
-            }
-            lineManager.clearLines('hover');
-            pathDrawing.drawRoutePaths(airport.iata_code, routes, 'hover');
-            clickedMarker.openPopup(); // Re-open popup after drawing lines
-            
-            // After operations complete, restore map view if it changed
-            setTimeout(() => {
-                if (appState.preventMapViewChange && 
-                    (!map.getCenter().equals(currentCenter) || map.getZoom() !== currentZoom)) {
-                    map.setView(currentCenter, currentZoom, { animate: false });
-                }
-                appState.preventMapViewChange = false;
-            }, 100);
-        });
+            }, 'flightMap.handleMarkerClick');
+        }
     },
 
     // New helper methods for route management
