@@ -356,7 +356,7 @@ const selectedRouteGroup = {
         const backButton = journeyContainer.querySelector('.change-route-button');
         backButton.addEventListener('click', () => {
             // Return to the first segment in the group
-            const firstSegmentIndex = journeyData.segments[0].index;
+            const firstSegmentIndex = journeyData.segments[0]?.index || 0;
             
             // Remove group-route-button class from all buttons
             this.removeGroupButtonStyles();
@@ -372,7 +372,9 @@ const selectedRouteGroup = {
         // Add click listeners to each segment's "View Segment Details" button
         const segmentButtons = journeyContainer.querySelectorAll('.view-segment-button');
         segmentButtons.forEach(button => {
-            const segmentIndex = button.getAttribute('data-segment-index');
+            const segmentIndex = parseInt(button.getAttribute('data-segment-index'));
+            if (isNaN(segmentIndex)) return; // Skip if not a valid index
+            
             button.addEventListener('click', () => {
                 // Remove group-route-button class from all buttons
                 this.removeGroupButtonStyles();
@@ -382,7 +384,7 @@ const selectedRouteGroup = {
                     button.classList.remove('active-route-button');
                 });
                 
-                callbacks.onViewSegment(parseInt(segmentIndex));
+                callbacks.onViewSegment(segmentIndex);
             });
         });
         

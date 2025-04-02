@@ -354,39 +354,40 @@ const selectedRoute = {
             // Get the current route details to use for search
             const selectedRouteDetails = appState.routeData[routeIndex]?.selectedRoute;
             
-            if (selectedRouteDetails) {
-                // Extract origin and destination from the current route
-                const [origin, destination] = selectedRouteDetails.displayData.route.split(' > ');
+            if (selectedRouteDetails && selectedRouteDetails.displayData) {
+                // Extract origin and destination safely with a fallback
+                const routeParts = selectedRouteDetails.displayData.route?.split(' > ') || [];
+                const origin = routeParts[0] || '';
+                const destination = routeParts[1] || '';
                 const departureDate = selectedRouteDetails.displayData.departure;
                 
-                // Make sure we have the waypoints in place for this route
-                if (!appState.waypoints[routeIndex * 2]) {
-                    updateState('updateWaypoint', { 
-                        index: routeIndex * 2, 
+                // No need to update waypoints as they don't exist anymore - directly update routeData
+                if (origin && destination) {
+                    // Ensure we have valid origin and destination in routeData
+                    updateState('updateRouteData', {
+                        routeNumber: routeIndex,
                         data: {
-                            iata_code: origin,
-                            city: origin,
+                            origin: {
+                                iata_code: origin,
+                                city: origin
+                            },
+                            destination: {
+                                iata_code: destination,
+                                city: destination
+                            }
                         }
                     }, 'selectedRoute.backButton');
                 }
                 
-                if (!appState.waypoints[routeIndex * 2 + 1]) {
-                    updateState('updateWaypoint', { 
-                        index: routeIndex * 2 + 1, 
-                        data: {
-                            iata_code: destination,
-                            city: destination,
-                        }
-                    }, 'selectedRoute.backButton');
-                }
-                
-                // Update the route date if needed
+                // Update the route date if needed - use updateRouteData instead of updateRouteDate
                 if (departureDate) {
                     const formattedDate = new Date(departureDate).toISOString().split('T')[0];
-                    updateState('updateRouteDate', {
+                    updateState('updateRouteData', {
                         routeNumber: routeIndex,
-                        depart: formattedDate,
-                        return: null
+                        data: {
+                            departDate: formattedDate,
+                            returnDate: null
+                        }
                     }, 'selectedRoute.backButton');
                 }
                 
@@ -394,7 +395,7 @@ const selectedRoute = {
                 appState.currentView = 'routeDeck';
                 appState.currentRouteIndex = routeIndex;
                 
-                // Start search - this will retrieve flights for this route
+                // Rest of the code remains unchanged
                 const infoPane = document.getElementById('infoPane');
                 infoPane.classList.add('search-results');
                 appState.searchResultsLoading = true;
