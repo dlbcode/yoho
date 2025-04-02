@@ -197,6 +197,30 @@ async function routeInfoCard(cardElement, fullFlightData, routeIds, routeIndex) 
     addClickListener('.layover', 'data-layover', flyToLocation);
 
     detailCard.querySelector('#selectRoute').addEventListener('click', () => {
+        // Before creating a new selected route, check if the current route is already part of a group
+        const existingSelectedRoute = appState.routeData[routeIndex]?.selectedRoute;
+        const existingGroupId = existingSelectedRoute?.group;
+
+        // If it was part of an existing group, clean up all routes in that group
+        if (existingGroupId !== undefined) {
+            console.log(`Cleaning up existing route group ${existingGroupId} before selecting new flight`);
+            
+            // Find all routes belonging to the same group and unselect them
+            Object.keys(appState.routeData).forEach(idx => {
+                const route = appState.routeData[idx];
+                if (route && route.selectedRoute && route.selectedRoute.group === existingGroupId) {
+                    console.log(`Unselecting route ${idx} from group ${existingGroupId}`);
+                    delete appState.routeData[idx].selectedRoute;
+                    
+                    // Force UI update for this route
+                    updateState('updateRouteData', {
+                        routeNumber: parseInt(idx),
+                        data: { selectedRoute: null }
+                    }, 'routeInfoCard.selectRoute.cleanupGroup');
+                }
+            });
+        }
+
         // Create a properly formatted selectedRoute object with displayData
         const formattedSelectedRoute = {
             fullData: fullFlightData,
