@@ -20,28 +20,24 @@ class InputManager {
     }
 
     initInputState(inputId) {
-        if (!this.inputStates[inputId]) {
-            this.inputStates[inputId] = {
-                isInitialFocus: true,
-                isExpanded: false,
-                isProcessingBlur: false,
-                hasSuggestions: false,
-                selectedIata: null,
-                isAnyDestination: false,
-                selectedSuggestionIndex: -1,
-                previousValidValue: '',
-                previousIataCode: null,
-            };
-        }
-        return this.inputStates[inputId];
+        return this.inputStates[inputId] ??= {
+            isInitialFocus: true,
+            isExpanded: false, 
+            isProcessingBlur: false,
+            hasSuggestions: false,
+            selectedIata: null,
+            isAnyDestination: false,
+            selectedSuggestionIndex: -1,
+            previousValidValue: '',
+            previousIataCode: null
+        };
     }
 
     setupWaypointInput(inputId, options = {}) {
         const inputField = document.getElementById(inputId);
         if (!inputField) return null;
 
-        const routeNumber = parseInt(inputId.replace(/\D/g, ''), 10) - 1;
-        const waypointIndex = routeNumber;
+        const waypointIndex = parseInt(inputId.replace(/\D/g, ''), 10) - 1;
         const isOriginField = waypointIndex % 2 === 0;
         const inputState = this.initInputState(inputId);
         
@@ -50,15 +46,14 @@ class InputManager {
         const originalPlaceholder = inputField.getAttribute('placeholder') || 
             (isOriginField ? 'From' : 'Where to?');
         
-        inputField.setAttribute('autocomplete', 'new-password');
-        inputField.setAttribute('name', `waypoint-input-${Date.now()}`);
-        inputField.setAttribute('role', 'combobox');
-        inputField.setAttribute('aria-autocomplete', 'list');
-        inputField.setAttribute('aria-expanded', 'false');
-        
-        if (originalPlaceholder) {
-            inputField.placeholder = originalPlaceholder;
-        }
+        Object.assign(inputField, {
+            autocomplete: 'new-password',
+            name: `waypoint-input-${Date.now()}`,
+            role: 'combobox',
+            'aria-autocomplete': 'list',
+            'aria-expanded': 'false',
+            placeholder: originalPlaceholder
+        });
         
         const suggestionBox = this.ensureSuggestionBox(inputId);
         
@@ -77,7 +72,6 @@ class InputManager {
         this.syncInputWithWaypoint(inputId);
         
         inputField.addEventListener('airportSelected', (event) => {
-            console.log(`airportSelected event received on ${inputId}`, event.detail);
             this.handleAirportSelection(inputId, event.detail.airport);
         });
         
@@ -86,7 +80,6 @@ class InputManager {
     
     ensureSuggestionBox(inputId) {
         let suggestionBox = document.getElementById(`${inputId}Suggestions`);
-        
         if (suggestionBox) suggestionBox.remove();
         
         suggestionBox = document.createElement('div');
@@ -130,30 +123,23 @@ class InputManager {
             }
         } else if (suggestionBox) {
             this.positionSuggestionBox(inputId);
-            
-            if (suggestionBox.children.length > 0) {
-                suggestionBox.style.display = 'block';
-            }
+            if (suggestionBox.children.length > 0) suggestionBox.style.display = 'block';
         }
         
         requestAnimationFrame(() => inputField.select());
         
-        if (suggestionBox && this.isMobile()) {
-            if (!suggestionBox._hasTouchListener) {
-                suggestionBox.addEventListener('touchstart', (e) => {
-                    if (e.target !== suggestionBox) {
-                        e.preventDefault();
-                    }
-                }, { passive: false });
-                suggestionBox._hasTouchListener = true;
-            }
+        if (suggestionBox && this.isMobile() && !suggestionBox._hasTouchListener) {
+            suggestionBox.addEventListener('touchstart', (e) => {
+                if (e.target !== suggestionBox) e.preventDefault();
+            }, { passive: false });
+            suggestionBox._hasTouchListener = true;
         }
         
         const iataCode = inputField.getAttribute('data-selected-iata');
-        if (iataCode && iataCode !== 'Any') {
+        if (iataCode && iataCode !== 'Any' && !appState.preventMapViewChange) {
             fetchAirportByIata(iataCode)
                 .then(airport => {
-                    if (!appState.preventMapViewChange && airport?.latitude && airport?.longitude) {
+                    if (airport?.latitude && airport?.longitude) {
                         map.flyTo([airport.latitude, airport.longitude], 6, { animate: true, duration: 0.5 });
                     }
                 })
@@ -187,9 +173,6 @@ class InputManager {
         
         const currentValue = inputField.value.trim();
         const selectedIata = inputField.getAttribute('data-selected-iata');
-        
-        const placeholder = inputField.placeholder;
-        
         const isValidSelection = 
             (currentValue === 'Anywhere' && selectedIata === 'Any') || 
             (selectedIata && selectedIata !== 'Any' && currentValue.includes(`(${selectedIata})`));
@@ -197,18 +180,12 @@ class InputManager {
         if (currentValue && !isValidSelection) {
             if (inputState.previousValidValue) {
                 inputField.value = inputState.previousValidValue;
-                
                 if (inputState.previousIataCode) {
                     inputField.setAttribute('data-selected-iata', inputState.previousIataCode);
                 } else {
                     inputField.removeAttribute('data-selected-iata');
                 }
-                
-                if (inputState.previousValidValue === 'Anywhere') {
-                    inputField.setAttribute('data-is-any-destination', 'true');
-                } else {
-                    inputField.removeAttribute('data-is-any-destination');
-                }
+                inputField.toggleAttribute('data-is-any-destination', inputState.previousValidValue === 'Anywhere');
             } else {
                 inputField.value = '';
                 inputField.removeAttribute('data-selected-iata');
@@ -217,9 +194,8 @@ class InputManager {
         }
         
         const finalValue = inputField.value;
-        const isAnyDestination = 
-            finalValue === 'Anywhere' ||
-            inputField.getAttribute('data-is-any-destination') === 'true';
+        const isAnyDestination = finalValue === 'Anywhere' || 
+                                 inputField.getAttribute('data-is-any-destination') === 'true';
             
         if (this.isMobile() && inputState.isExpanded) {
             this.revertInput(inputId);
@@ -227,7 +203,6 @@ class InputManager {
         }
 
         if (suggestionBox) suggestionBox.style.display = 'none';
-        
         inputField.readOnly = Boolean(finalValue.trim());
         
         if (!isAnyDestination && !window.preserveAnyDestination && 
@@ -268,13 +243,8 @@ class InputManager {
             inputState.selectedSuggestionIndex = -1;
             if (event.key === 'Enter') {
                 event.preventDefault();
-                
-                if (!this.isMobile()) {
-                    this.focusPairedInputField(inputId);
-                    return;
-                }
-                
-                event.target.blur();
+                if (!this.isMobile()) this.focusPairedInputField(inputId);
+                else event.target.blur();
             }
             return;
         }
@@ -298,11 +268,8 @@ class InputManager {
                 } else if (suggestions.length > 0) {
                     suggestions[0].click();
                 } else {
-                    if (!this.isMobile()) {
-                        this.focusPairedInputField(inputId);
-                    } else {
-                        inputField.blur();
-                    }
+                    if (!this.isMobile()) this.focusPairedInputField(inputId);
+                    else inputField.blur();
                 }
                 break;
                 
@@ -340,15 +307,11 @@ class InputManager {
         selectedItem.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
         
         const inputField = document.getElementById(inputId);
-        if (inputField) {
-            inputField.setAttribute('aria-activedescendant', selectedItem.id || '');
-        }
+        if (inputField) inputField.setAttribute('aria-activedescendant', selectedItem.id || '');
     }
     
     handleInput(inputId) {
-        if (this.inputStates[inputId]) {
-            this.inputStates[inputId].selectedSuggestionIndex = -1;
-        }
+        if (this.inputStates[inputId]) this.inputStates[inputId].selectedSuggestionIndex = -1;
     }
 
     positionSuggestionBox(inputId) {
@@ -358,28 +321,23 @@ class InputManager {
         if (!input || !suggestionBox) return;
         
         const rect = input.getBoundingClientRect();
-        
         if (rect.width === 0 && rect.height === 0) {
             suggestionBox.style.display = 'none';
             return;
         }
         
         const width = Math.max(rect.width, 200);
-        
         const spaceAbove = rect.top;
         const spaceBelow = window.innerHeight - rect.bottom;
+        let boxHeight = suggestionBox.offsetHeight || 
+                        (suggestionBox.children.length > 0 ? suggestionBox.children.length * 36 : 200);
         
-        let boxHeight = suggestionBox.offsetHeight;
-        if (boxHeight === 0 && suggestionBox.children.length > 0) {
-            boxHeight = suggestionBox.children.length * 36;
-        }
-        
-        boxHeight = boxHeight || 200;
-        
-        suggestionBox.style.position = 'fixed';
-        suggestionBox.style.left = `${rect.left}px`;
-        suggestionBox.style.width = `${width}px`;
-        suggestionBox.style.zIndex = '10000';
+        Object.assign(suggestionBox.style, {
+            position: 'fixed',
+            left: `${rect.left}px`,
+            width: `${width}px`,
+            zIndex: '10000'
+        });
         
         if (spaceAbove >= boxHeight || spaceAbove >= spaceBelow) {
             suggestionBox.style.top = `${rect.top - boxHeight}px`;
@@ -467,12 +425,9 @@ class InputManager {
             const routeNumber = Math.floor(waypointIndex / 2);
             const isOrigin = waypointIndex % 2 === 0;
             
-            const updateData = {};
-            updateData[isOrigin ? 'origin' : 'destination'] = null;
-            
             updateState('updateRouteData', {
                 routeNumber,
-                data: updateData
+                data: { [isOrigin ? 'origin' : 'destination']: null }
             }, 'inputManager.backButton');
             
             inputField.blur();
@@ -491,9 +446,7 @@ class InputManager {
         if (overlay) {
             overlay.classList.remove('active');
             setTimeout(() => {
-                if (document.body.contains(overlay)) {
-                    overlay.remove();
-                }
+                if (document.body.contains(overlay)) overlay.remove();
             }, 300);
         }
         
@@ -505,16 +458,12 @@ class InputManager {
         }
         
         const backButton = inputField.parentElement?.querySelector('.back-button');
-        if (backButton) {
-            backButton.remove();
-        }
+        if (backButton) backButton.remove();
     }
     
     createMobileOverlay() {
         const existingOverlay = document.querySelector('.route-box-overlay');
-        if (existingOverlay) {
-            existingOverlay.remove();
-        }
+        if (existingOverlay) existingOverlay.remove();
         
         if (appState.searchResultsLoading) return;
         
@@ -535,7 +484,7 @@ class InputManager {
             e.preventDefault();
             e.stopPropagation();
             
-            if (document.activeElement && document.activeElement.tagName === 'INPUT') {
+            if (document.activeElement?.tagName === 'INPUT') {
                 const input = document.activeElement;
                 const preventFocus = e => e.preventDefault();
                 input.addEventListener('focus', preventFocus, { once: true, capture: true });
@@ -548,11 +497,8 @@ class InputManager {
         overlay.addEventListener('click', handleOverlayInteraction);
         
         routeBox.appendChild(overlay);
-        
         requestAnimationFrame(() => {
-            if (overlay && document.body.contains(overlay)) {
-                overlay.classList.add('active');
-            }
+            if (overlay && document.body.contains(overlay)) overlay.classList.add('active');
         });
     }
     
@@ -562,7 +508,6 @@ class InputManager {
         
         const routeNumber = parseInt(inputId.replace(/\D/g, ''), 10) - 1;
         const isOrigin = routeNumber % 2 === 0;
-        
         const route = appState.routeData[Math.floor(routeNumber / 2)];
         if (!route) return;
         
@@ -573,16 +518,16 @@ class InputManager {
                 inputField.value = 'Anywhere';
                 inputField.setAttribute('data-selected-iata', 'Any');
                 inputField.setAttribute('data-is-any-destination', 'true');
-                inputField.readOnly = true;
             } else if (waypoint.iata_code) {
                 inputField.value = `${waypoint.city || waypoint.name || waypoint.iata_code}, (${waypoint.iata_code})`;
                 inputField.setAttribute('data-selected-iata', waypoint.iata_code);
                 inputField.removeAttribute('data-is-any-destination');
-                inputField.readOnly = true;
             } else {
                 inputField.value = '';
                 inputField.readOnly = false;
+                return;
             }
+            inputField.readOnly = true;
         } else {
             inputField.value = '';
             inputField.readOnly = false;
@@ -595,10 +540,9 @@ class InputManager {
     
     setFocusToNextUnsetInput() {
         if (this.isMobile()) return;
-
-        const waypointInputs = document.querySelectorAll('.waypoint-input[type="text"]');
         requestAnimationFrame(() => {
-            for (let input of waypointInputs) {
+            const inputs = document.querySelectorAll('.waypoint-input[type="text"]');
+            for (let input of inputs) {
                 if (!input.value) {
                     input.focus();
                     break;
@@ -608,35 +552,22 @@ class InputManager {
     }
     
     cleanupInput(inputId) {
-        console.log(`Cleaning up input ${inputId}`);
-        
         if (this.suggestionBoxes[inputId]) {
             const box = this.suggestionBoxes[inputId];
-            if (box && document.body.contains(box)) {
-                box.remove();
-            }
+            if (box && document.body.contains(box)) box.remove();
             delete this.suggestionBoxes[inputId];
         }
         
         this.cleanupInputListeners(inputId);
-        
         delete this.inputStates[inputId];
-        
         delete this.debounceTimers[`autocomplete-${inputId}`];
         delete this.debounceTimers[`input-${inputId}`];
     }
     
     cleanupAll() {
-        console.log("Cleaning up all input resources");
-        
-        Object.keys(this.suggestionBoxes).forEach(inputId => {
-            this.cleanupInput(inputId);
-        });
-        
+        Object.keys(this.suggestionBoxes).forEach(inputId => this.cleanupInput(inputId));
         document.querySelectorAll('.suggestions').forEach(box => {
-            if (box.id && box.id.includes('Suggestions')) {
-                box.remove();
-            }
+            if (box.id?.includes('Suggestions')) box.remove();
         });
         
         this.suggestionBoxes = {};
@@ -654,21 +585,14 @@ class InputManager {
         }
         
         Object.values(this.suggestionBoxes).forEach(box => {
-            if (box && document.body.contains(box)) {
-                box.remove();
-            }
+            if (box && document.body.contains(box)) box.remove();
         });
         
         this.suggestionBoxes = {};
         this.inputStates = {};
         
-        Object.keys(this.inputStates).forEach(inputId => {
-            this.cleanupInputListeners(inputId);
-        });
-        
-        document.querySelectorAll('.route-box-overlay').forEach(overlay => {
-            overlay.remove();
-        });
+        Object.keys(this.inputStates).forEach(inputId => this.cleanupInputListeners(inputId));
+        document.querySelectorAll('.route-box-overlay').forEach(overlay => overlay.remove());
     }
 
     focusPairedInputField(inputId) {
@@ -679,9 +603,7 @@ class InputManager {
         const isOriginField = waypointIndex % 2 === 0;
         
         if (isOriginField) {
-            const destId = `waypoint-input-${inputNumber + 1}`;
-            const destField = document.getElementById(destId);
-            
+            const destField = document.getElementById(`waypoint-input-${inputNumber + 1}`);
             if (destField && !destField.value.trim()) {
                 requestAnimationFrame(() => destField.focus());
             }
@@ -690,30 +612,20 @@ class InputManager {
             const nextRouteNumber = routeNumber + 1;
             
             const currentRoute = appState.routeData[routeNumber];
-            if (currentRoute && currentRoute.origin && currentRoute.destination) {
+            if (currentRoute?.origin && currentRoute?.destination) {
                 const nextRouteExists = appState.routeData[nextRouteNumber] && 
-                    (appState.routeData[nextRouteNumber].origin || 
-                     appState.routeData[nextRouteNumber].destination);
+                    (appState.routeData[nextRouteNumber].origin || appState.routeData[nextRouteNumber].destination);
                 
                 if (!nextRouteExists) {
-                    const nextOriginId = `waypoint-input-${(nextRouteNumber * 2) + 1}`;
-                    const nextOriginField = document.getElementById(nextOriginId);
-                    
-                    if (nextOriginField) {
-                        requestAnimationFrame(() => nextOriginField.focus());
-                    }
+                    const nextOriginField = document.getElementById(`waypoint-input-${(nextRouteNumber * 2) + 1}`);
+                    if (nextOriginField) requestAnimationFrame(() => nextOriginField.focus());
                 }
             }
         }
     }
 
     handleAirportSelection(inputId, airport) {
-        console.log(`Airport selected for ${inputId}:`, airport);
-        
-        if (!airport) {
-            console.warn(`Invalid airport data for ${inputId}`);
-            return;
-        }
+        if (!airport) return;
         
         const waypointIndex = parseInt(inputId.replace(/\D/g, ''), 10) - 1;
         const routeNumber = Math.floor(waypointIndex / 2);
@@ -728,112 +640,69 @@ class InputManager {
             };
         }
         
-        const updateData = {};
-        if (isOrigin) {
-            updateData.origin = airport;
-        } else {
-            updateData.destination = airport;
-        }
-        
         updateState('updateRouteData', {
             routeNumber,
-            data: updateData
+            data: { [isOrigin ? 'origin' : 'destination']: airport }
         }, 'inputManager.handleAirportSelection');
+        
+        if (this.isMobile()) return;
         
         const pairIndex = isOrigin ? waypointIndex + 1 : waypointIndex - 1;
         const pairFieldId = `waypoint-input-${pairIndex + 1}`;
         const pairField = document.getElementById(pairFieldId);
         
-        console.log(`Paired field for ${inputId} is ${pairFieldId}, exists: ${Boolean(pairField)}`);
-
-        if (this.isMobile()) {
-            console.log(`Mobile device detected, not focusing pair field`);
-            return;
-        }
-        
-        if (isOrigin) {
-            if (pairField) {
-                const pairValue = pairField.value.trim();
-                const isAnyDestination = pairField.getAttribute('data-is-any-destination') === 'true';
-                const iataCode = pairField.getAttribute('data-selected-iata');
-                
-                const isAnywhere = pairValue === 'Anywhere' || isAnyDestination || iataCode === 'Any';
-                const hasValidDestination = pairValue !== '' && !isAnywhere;
-                
-                console.log(`Destination field check: value="${pairValue}", isAny=${isAnywhere}, hasValid=${hasValidDestination}`);
-                
-                if (!hasValidDestination) {
-                    if (isAnywhere && airport.iata_code !== 'Any') {
-                        console.log(`Clearing Anywhere from destination field before focusing`);
-                        pairField.value = '';
-                        pairField.removeAttribute('data-selected-iata');
-                        pairField.removeAttribute('data-is-any-destination');
-                        pairField.readOnly = false;
-                        
-                        const route = appState.routeData[routeNumber];
-                        if (route) {
-                            route.destination = null;
-                        }
-                    }
+        if (isOrigin && pairField) {
+            const pairValue = pairField.value.trim();
+            const isAnyDestination = pairField.getAttribute('data-is-any-destination') === 'true';
+            const iataCode = pairField.getAttribute('data-selected-iata');
+            const isAnywhere = pairValue === 'Anywhere' || isAnyDestination || iataCode === 'Any';
+            const hasValidDestination = pairValue !== '' && !isAnywhere;
+            
+            if (!hasValidDestination) {
+                if (isAnywhere && airport.iata_code !== 'Any') {
+                    pairField.value = '';
+                    pairField.removeAttribute('data-selected-iata');
+                    pairField.removeAttribute('data-is-any-destination');
+                    pairField.readOnly = false;
                     
-                    console.log(`Focusing empty/anywhere destination field ${pairFieldId}`);
-                    
-                    const routeData = appState.routeData[routeNumber];
-                    if (routeData && routeData.origin && routeData.origin.iata_code !== 'Any') {
-                        routeData._destinationNeedsEmptyFocus = true;
-                    }
-                    
-                    pairField.focus();
-                    
-                    import('./airportAutocomplete.js').then(module => {
-                        module.updateSuggestions(pairFieldId, []);
-                    });
-                } else {
-                    console.log(`Destination field ${pairFieldId} already has value: "${pairValue}"`);
+                    const route = appState.routeData[routeNumber];
+                    if (route) route.destination = null;
                 }
-            } else {
-                console.log(`Destination field ${pairFieldId} doesn't exist`);
+                
+                const routeData = appState.routeData[routeNumber];
+                if (routeData?.origin && routeData.origin.iata_code !== 'Any') {
+                    routeData._destinationNeedsEmptyFocus = true;
+                }
+                
+                pairField.focus();
+                import('./airportAutocomplete.js').then(module => module.updateSuggestions(pairFieldId, []));
             }
-        } else {
-            if (pairField) {
-                const pairValue = pairField.value.trim();
-                const isAnyOrigin = pairField.getAttribute('data-is-any-destination') === 'true';
-                const iataCode = pairField.getAttribute('data-selected-iata');
-                
-                const isAnywhere = pairValue === 'Anywhere' || isAnyOrigin || iataCode === 'Any';
-                const hasValidOrigin = pairValue !== '' && !isAnywhere;
-                
-                console.log(`Origin field check: value="${pairValue}", isAny=${isAnywhere}, hasValid=${hasValidOrigin}`);
-                
-                if (!hasValidOrigin) {
-                    console.log(`Focusing empty/anywhere origin field ${pairFieldId}`);
+        } else if (!isOrigin && pairField) {
+            const pairValue = pairField.value.trim();
+            const isAnyOrigin = pairField.getAttribute('data-is-any-destination') === 'true';
+            const iataCode = pairField.getAttribute('data-selected-iata');
+            const isAnywhere = pairValue === 'Anywhere' || isAnyOrigin || iataCode === 'Any';
+            const hasValidOrigin = pairValue !== '' && !isAnywhere;
+            
+            if (!hasValidOrigin) {
+                if (isAnywhere && airport.iata_code !== 'Any') {
+                    pairField.value = '';
+                    pairField.removeAttribute('data-selected-iata');
+                    pairField.removeAttribute('data-is-any-destination');
+                    pairField.readOnly = false;
                     
-                    if (isAnywhere && airport.iata_code !== 'Any') {
-                        console.log(`Clearing Anywhere from origin field before focusing`);
-                        pairField.value = '';
-                        pairField.removeAttribute('data-selected-iata');
-                        pairField.removeAttribute('data-is-any-destination');
-                        pairField.readOnly = false;
-                        
-                        const route = appState.routeData[routeNumber];
-                        if (route) {
-                            route.origin = null;
-                        }
-                    }
-                    
-                    const routeData = appState.routeData[routeNumber];
-                    if (routeData && routeData.destination && routeData.destination.iata_code !== 'Any') {
-                        routeData._originNeedsEmptyFocus = true;
-                    }
-                    
-                    pairField.focus();
-                    
-                    import('./airportAutocomplete.js').then(module => {
-                        module.updateSuggestions(pairFieldId, []);
-                    });
-                    
-                    return;
+                    const route = appState.routeData[routeNumber];
+                    if (route) route.origin = null;
                 }
+                
+                const routeData = appState.routeData[routeNumber];
+                if (routeData?.destination && routeData.destination.iata_code !== 'Any') {
+                    routeData._originNeedsEmptyFocus = true;
+                }
+                
+                pairField.focus();
+                import('./airportAutocomplete.js').then(module => module.updateSuggestions(pairFieldId, []));
+                return;
             }
             
             const nextRouteNumber = routeNumber + 1;
@@ -841,16 +710,11 @@ class InputManager {
             const nextOriginField = document.getElementById(nextOriginId);
             
             const currentRoute = appState.routeData[routeNumber];
-            
             const nextRouteExists = appState.routeData[nextRouteNumber] && 
-                (appState.routeData[nextRouteNumber].origin || 
-                 appState.routeData[nextRouteNumber].destination);
+                (appState.routeData[nextRouteNumber].origin || appState.routeData[nextRouteNumber].destination);
             
-            if (currentRoute && currentRoute.origin && currentRoute.destination && !nextRouteExists && nextOriginField) {
-                console.log(`Focusing next origin field ${nextOriginId}`);
+            if (currentRoute?.origin && currentRoute?.destination && !nextRouteExists && nextOriginField) {
                 nextOriginField.focus();
-            } else {
-                console.log(`No need to focus next field: complete route=${Boolean(currentRoute?.origin && currentRoute?.destination)}, nextRouteExists=${nextRouteExists}, nextOriginField=${Boolean(nextOriginField)}`);
             }
         }
     }
@@ -863,17 +727,12 @@ class InputManager {
         
         this.setupResizeObservers();
         this.setupMutationObserver();
-        
-        console.log("InputManager initialized");
     }
     
     setupResizeObservers() {
         const infoPaneElement = document.getElementById('infoPane');
         if (infoPaneElement && window.ResizeObserver) {
-            const observer = new ResizeObserver(() => {
-                this.repositionAllSuggestionBoxes();
-            });
-            
+            const observer = new ResizeObserver(() => this.repositionAllSuggestionBoxes());
             observer.observe(infoPaneElement);
             this.resizeObservers.push(observer);
         }
@@ -881,31 +740,23 @@ class InputManager {
         const resizeHandle = document.getElementById('resizeHandle');
         if (resizeHandle) {
             resizeHandle.addEventListener('mousedown', () => {
-                const dragInterval = setInterval(() => {
-                    this.repositionAllSuggestionBoxes();
-                }, 10);
-                
+                const dragInterval = setInterval(() => this.repositionAllSuggestionBoxes(), 10);
                 const stopDragging = () => {
                     clearInterval(dragInterval);
                     document.removeEventListener('mouseup', stopDragging);
                     this.repositionAllSuggestionBoxes();
                 };
-                
                 document.addEventListener('mouseup', stopDragging);
             });
         }
         
         if (infoPaneElement) {
-            infoPaneElement.addEventListener('transitionend', () => {
-                this.repositionAllSuggestionBoxes();
-            });
+            infoPaneElement.addEventListener('transitionend', () => this.repositionAllSuggestionBoxes());
         }
     }
     
     setupMutationObserver() {
-        if (this.mutationObserver) {
-            this.mutationObserver.disconnect();
-        }
+        if (this.mutationObserver) this.mutationObserver.disconnect();
         
         this.mutationObserver = new MutationObserver((mutations) => {
             let needsUpdate = false;
@@ -923,20 +774,16 @@ class InputManager {
                 
                 if (mutation.type === 'attributes' && 
                     (mutation.attributeName === 'style' || mutation.attributeName === 'class')) {
-                    const isRelevantElement = mutation.target.id === 'infoPane' ||
+                    if (mutation.target.id === 'infoPane' ||
                         mutation.target.classList?.contains('route-box') ||
-                        mutation.target.classList?.contains('input-wrapper');
-                        
-                    if (isRelevantElement) {
+                        mutation.target.classList?.contains('input-wrapper')) {
                         needsUpdate = true;
                         break;
                     }
                 }
             }
             
-            if (needsUpdate) {
-                this.repositionAllSuggestionBoxes();
-            }
+            if (needsUpdate) this.repositionAllSuggestionBoxes();
         });
         
         const infoPane = document.getElementById('infoPane');
@@ -953,8 +800,6 @@ class InputManager {
 
 const inputManager = new InputManager();
 
-document.addEventListener('DOMContentLoaded', () => {
-    inputManager.init();
-});
+document.addEventListener('DOMContentLoaded', () => inputManager.init());
 
 export { inputManager };
