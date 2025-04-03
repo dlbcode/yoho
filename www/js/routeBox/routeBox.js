@@ -66,8 +66,6 @@ const setWaypointInputs = (routeNumber) => {
         const routeData = appState.routeData[routeNumber];
         const waypoint = isOrigin ? routeData?.origin : routeData?.destination;
         
-        console.log(`Syncing input ${inputId} with ${isOrigin ? 'origin' : 'destination'} waypoint:`, waypoint);
-        
         const inputField = document.getElementById(inputId);
         if (!inputField) return;
         
@@ -121,20 +119,8 @@ const routeBox = {
     },
 
     setupRouteBox(routeBoxElement, routeNumber) {
-        // Initialize route data if needed - simplify this since we only need one initialization path
-        if (!appState.routeData[routeNumber]) {
-            appState.routeData[routeNumber] = { 
-                tripType: 'oneWay', 
-                travelers: 1,
-                departDate: new Date().toISOString().split('T')[0],
-                returnDate: null
-            };
-        }
-
-        console.log(`Setting up route box for route ${routeNumber} with data:`, appState.routeData[routeNumber]);
-
-        // Get the route data for this route - ensure it exists
-        const routeData = appState.routeData[routeNumber];
+        // Initialize route data using helper
+        const routeData = this.getRouteDataForRoute(routeNumber);
 
         const container = createElement('div', { className: 'routeBoxElements' });
 
@@ -153,8 +139,6 @@ const routeBox = {
         ['From', 'Where to?'].forEach((placeholder, i) => {
             const isOrigin = i === 0;
             const waypoint = isOrigin ? routeData?.origin : routeData?.destination;
-            
-            console.log(`Creating input for ${isOrigin ? 'origin' : 'destination'}:`, waypoint);
             
             const index = routeNumber * 2 + i;
             const { inputWrapper, input } = createWaypointInput(index, placeholder, waypoint);
@@ -275,7 +259,6 @@ const routeBox = {
             
             // If we have an origin (either auto-populated or not) but no destination, focus the destination field
             if (hasOrigin && !hasDestination) {
-                console.log("Origin present but no destination, focusing destination input");
                 // Use a slightly longer timeout to ensure DOM is ready
                 setTimeout(() => {
                     if (destInput) {
@@ -295,7 +278,6 @@ const routeBox = {
                         } else {
                             destInput.focus();
                         }
-                        console.log("Destination input focused");
                     }
                 }, 150);
             }
@@ -319,7 +301,6 @@ const routeBox = {
                 const destInput = inputElements[1];
                 if (destInput) {
                     destInput.focus();
-                    console.log("Destination input focused via special hook");
                 }
                 delete routeBoxElement._needsFocusOnDestination;
             }, 150);
