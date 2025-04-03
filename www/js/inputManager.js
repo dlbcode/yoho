@@ -384,26 +384,43 @@ class InputManager {
             return;
         }
         
-        // Default to positioning above the input element
-        // Calculate the position for the suggestion box
-        const left = rect.left;
-        const top = rect.top;
+        // Set a minimum width for the suggestion box based on input width
         const width = Math.max(rect.width, 200); // Minimum width of 200px
-
-        // Get the actual height of the suggestion box
-        const boxHeight = suggestionBox.offsetHeight || 200; // Default height if not rendered yet
-
-        // Position the box above the input by default
+        
+        // Get actual dimensions and available space
+        const spaceAbove = rect.top;
+        const spaceBelow = window.innerHeight - rect.bottom;
+        
+        // Get the actual height of the suggestion box (or use a reasonable estimate)
+        let boxHeight = suggestionBox.offsetHeight;
+        if (boxHeight === 0 && suggestionBox.children.length > 0) {
+            // Estimate height based on number of items
+            boxHeight = suggestionBox.children.length * 36; // Rough estimate
+        }
+        
+        // Use a minimum height if we still don't have a height
+        boxHeight = boxHeight || 200; // Default minimum height
+        
+        // Base styling that's always applied
         suggestionBox.style.position = 'fixed';
-        suggestionBox.style.left = `${left}px`;
+        suggestionBox.style.left = `${rect.left}px`;
         suggestionBox.style.width = `${width}px`;
-        suggestionBox.style.top = `${top - boxHeight}px`; // Position above the input
-        suggestionBox.style.bottom = 'auto';
         suggestionBox.style.zIndex = '10000'; // Ensure it's always on top
         
-        // Add appropriate class for styling
-        suggestionBox.classList.add('suggestions-above');
-        suggestionBox.classList.remove('suggestions-below');
+        // Position above the input if there's enough space or more space above than below
+        if (spaceAbove >= boxHeight || spaceAbove >= spaceBelow) {
+            // Position above
+            suggestionBox.style.top = `${rect.top - boxHeight}px`;
+            suggestionBox.style.bottom = 'auto';
+            suggestionBox.classList.add('suggestions-above');
+            suggestionBox.classList.remove('suggestions-below');
+        } else {
+            // Position below
+            suggestionBox.style.top = `${rect.bottom}px`;
+            suggestionBox.style.bottom = 'auto';
+            suggestionBox.classList.add('suggestions-below');
+            suggestionBox.classList.remove('suggestions-above');
+        }
         
         // Show the box if suggestions exist and should be shown
         if (this.inputStates[inputId]?.showSuggestions && 
@@ -571,69 +588,44 @@ class InputManager {
         });
     }
     
-    // Helper method to get a waypoint from routeData
-    getWaypointFromRouteData(waypointIndex) {
-        const routeNumber = Math.floor(waypointIndex / 2);
-        const isOrigin = waypointIndex % 2 === 0;
-        const route = appState.routeData[routeNumber];
-        
-        if (!route || route.isEmpty) return null;
-        
-        return isOrigin ? route.origin : route.destination;
-    }
-    
-    // Helper method to determine if a route exists and has origin/destination
-    doesRouteExist(routeNumber) {
-        const route = appState.routeData[routeNumber];
-        return route && !route.isEmpty && (route.origin || route.destination);
-    }
-    
-    // Update to use routeData directly
     syncInputWithWaypoint(inputId) {
         const inputField = document.getElementById(inputId);
         if (!inputField) return;
         
-        const waypointIndex = parseInt(inputId.replace(/\D/g, ''), 10) - 1;
-        const waypoint = this.getWaypointFromRouteData(waypointIndex);
-        const inputState = this.inputStates[inputId] || {};
+        // Parse the waypoint index directly from the input ID
+        const routeNumber = parseInt(inputId.replace(/\D/g, ''), 10) - 1;
+        const isOrigin = routeNumber % 2 === 0;
         
-        // Reset if no waypoint
-        if (!waypoint) {
-            inputField.value = '';
-            inputField.removeAttribute('data-selected-iata');
-            inputField.removeAttribute('data-is-any-destination');
-            inputField.readOnly = false;
-            
-            if (this.inputStates[inputId]) {
-                this.inputStates[inputId].previousValidValue = '';
-                this.inputStates[inputId].previousIataCode = null;
+        // Check if we have route data for this input
+        const route = appState.routeData[Math.floor(routeNumber/2)];
+        if (!route) return;
+        
+        const waypoint = isOrigin ? route.origin : route.destination;
+        
+        if (waypoint) {
+            // Handle "Any" waypoint
+            if (waypoint.iata_code === 'Any') {
+                inputField.value = 'Anywhere';
+                inputField.setAttribute('data-selected-iata', 'Any');
+                inputField.setAttribute('data-is-any-destination', 'true');
+                inputField.readOnly = true;
+            } 
+            // Handle normal airport waypoint
+            else if (waypoint.iata_code) {
+                inputField.value = `${waypoint.city || waypoint.name || waypoint.iata_code}, (${waypoint.iata_code})`;
+                inputField.setAttribute('data-selected-iata', waypoint.iata_code);
+                inputField.removeAttribute('data-is-any-destination');
+                inputField.readOnly = true;
             }
-            return;
-        }
-        
-        // Handle "Anywhere" case - make this check more explicit to avoid false positives
-        const isAnyDestination = waypoint.iata_code === 'Any' || 
-                               waypoint.isAnyDestination === true || 
-                               waypoint.isAnyOrigin === true;
-        
-        // Set all values at once - make the logic more explicit for regular airports
-        if (isAnyDestination) {
-            inputField.value = 'Anywhere';
-            inputField.setAttribute('data-selected-iata', 'Any');
-            inputField.setAttribute('data-is-any-destination', 'true');
+            // Handle empty waypoint
+            else {
+                inputField.value = '';
+                inputField.readOnly = false;
+            }
         } else {
-            // For regular airports, always use city and iata code
-            inputField.value = `${waypoint.city}, (${waypoint.iata_code})`;
-            inputField.setAttribute('data-selected-iata', waypoint.iata_code);
-            inputField.removeAttribute('data-is-any-destination');
-        }
-        
-        inputField.readOnly = true;
-        
-        // Update input state
-        if (this.inputStates[inputId]) {
-            this.inputStates[inputId].previousValidValue = inputField.value;
-            this.inputStates[inputId].previousIataCode = waypoint.iata_code;
+            // No waypoint - clear the field
+            inputField.value = '';
+            inputField.readOnly = false;
         }
     }
     
@@ -944,17 +936,20 @@ class InputManager {
     }
 
     init() {
-        // Set up event listeners for window events
+        // Clean up any existing observers and handlers
+        this.cleanup();
+        
+        // Set up event listeners for viewport changes
         window.addEventListener('resize', () => this.repositionAllSuggestionBoxes());
         window.addEventListener('scroll', () => this.repositionAllSuggestionBoxes());
         
-        // Set up observers for InfoPane resizing
+        // Set up resize observers for InfoPane
         this.setupResizeObservers();
         
         // Set up mutation observer for DOM changes
         this.setupMutationObserver();
         
-        console.log("InputManager initialized with positioning enhancement");
+        console.log("InputManager initialized");
     }
     
     setupResizeObservers() {
