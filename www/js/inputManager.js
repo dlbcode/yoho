@@ -33,18 +33,34 @@ class InputManager {
         };
     }
 
+    getWaypointInfo(inputId) {
+        const waypointIndex = parseInt(inputId.replace(/\D/g, ''), 10) - 1;
+        return {
+            waypointIndex,
+            routeNumber: Math.floor(waypointIndex / 2),
+            isOrigin: waypointIndex % 2 === 0
+        };
+    }
+
+    getElements(inputId) {
+        return {
+            inputField: document.getElementById(inputId),
+            inputState: this.inputStates[inputId],
+            suggestionBox: this.suggestionBoxes[inputId]
+        };
+    }
+
     setupWaypointInput(inputId, options = {}) {
-        const inputField = document.getElementById(inputId);
+        const { inputField } = this.getElements(inputId);
+        const { waypointIndex, isOrigin } = this.getWaypointInfo(inputId);
         if (!inputField) return null;
 
-        const waypointIndex = parseInt(inputId.replace(/\D/g, ''), 10) - 1;
-        const isOriginField = waypointIndex % 2 === 0;
         const inputState = this.initInputState(inputId);
         
         this.cleanupInputListeners(inputId);
         
         const originalPlaceholder = inputField.getAttribute('placeholder') || 
-            (isOriginField ? 'From' : 'Where to?');
+            (isOrigin ? 'From' : 'Where to?');
         
         Object.assign(inputField, {
             autocomplete: 'new-password',
@@ -94,8 +110,7 @@ class InputManager {
     }
     
     cleanupInputListeners(inputId) {
-        const inputField = document.getElementById(inputId);
-        const inputState = this.inputStates[inputId];
+        const { inputField, inputState } = this.getElements(inputId);
         
         if (inputField && inputState?.handlers) {
             Object.entries(inputState.handlers).forEach(([event, handler]) => {
@@ -105,9 +120,8 @@ class InputManager {
     }
     
     handleFocus(inputId, event) {
-        const inputField = document.getElementById(inputId);
-        const inputState = this.inputStates[inputId];
-        const suggestionBox = this.suggestionBoxes[inputId];     
+        const { inputField, inputState, suggestionBox } = this.getElements(inputId);
+        const { waypointIndex, routeNumber, isOrigin } = this.getWaypointInfo(inputId);
         if (!inputField || !inputState) return;
         
         inputState.previousValidValue = inputField.value;
@@ -147,10 +161,6 @@ class InputManager {
         }
 
         if (!inputField.value.trim()) {
-            const waypointIndex = parseInt(inputId.replace(/\D/g, ''), 10) - 1;
-            const routeNumber = Math.floor(waypointIndex / 2);
-            const isOrigin = waypointIndex % 2 === 0;
-            
             if (!isOrigin && appState.routeData[routeNumber]?.origin) {
                 appState.routeData[routeNumber]._destinationNeedsEmptyFocus = true;
             }
@@ -163,10 +173,8 @@ class InputManager {
     }
     
     handleBlur(inputId, event) {
-        const inputField = document.getElementById(inputId);
-        const inputState = this.inputStates[inputId];
-        const suggestionBox = this.suggestionBoxes[inputId];
-        
+        const { inputField, inputState, suggestionBox } = this.getElements(inputId);
+        const { waypointIndex, routeNumber, isOrigin } = this.getWaypointInfo(inputId);
         if (!inputField || !inputState) return;
         
         inputState.isProcessingBlur = true;
@@ -208,10 +216,6 @@ class InputManager {
         if (!isAnyDestination && !window.preserveAnyDestination && 
             finalValue === '' && !appState.isRouteSwitching && !appState.searchResultsLoading) {
             
-            const waypointIndex = parseInt(inputId.replace(/\D/g, ''), 10) - 1;
-            const routeNumber = Math.floor(waypointIndex / 2);
-            const isOrigin = waypointIndex % 2 === 0;
-            
             const route = appState.routeData[routeNumber];
             const waypoint = isOrigin ? route?.origin : route?.destination;
             
@@ -230,9 +234,7 @@ class InputManager {
     }
     
     handleKeyDown(inputId, event) {
-        const inputField = document.getElementById(inputId);
-        const suggestionBox = this.suggestionBoxes[inputId];
-        const inputState = this.inputStates[inputId];
+        const { inputField, suggestionBox, inputState } = this.getElements(inputId);
         
         if (!suggestionBox || !inputField || !inputState) return;
         
@@ -287,8 +289,7 @@ class InputManager {
     }
     
     navigateSuggestion(inputId, direction) {
-        const suggestionBox = this.suggestionBoxes[inputId];
-        const inputState = this.inputStates[inputId];
+        const { suggestionBox, inputState } = this.getElements(inputId);
         
         if (!suggestionBox || !inputState) return;
         
@@ -306,7 +307,7 @@ class InputManager {
         selectedItem.classList.add('selected');
         selectedItem.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
         
-        const inputField = document.getElementById(inputId);
+        const { inputField } = this.getElements(inputId);
         if (inputField) inputField.setAttribute('aria-activedescendant', selectedItem.id || '');
     }
     
@@ -315,19 +316,18 @@ class InputManager {
     }
 
     positionSuggestionBox(inputId) {
-        const input = document.getElementById(inputId);
-        const suggestionBox = this.suggestionBoxes[inputId];
+        const { inputField, suggestionBox } = this.getElements(inputId);
         
-        if (!input || !suggestionBox) return;
+        if (!inputField || !suggestionBox) return;
         
-        const rect = input.getBoundingClientRect();
+        const rect = inputField.getBoundingClientRect();
         if (rect.width === 0 && rect.height === 0) {
             suggestionBox.style.display = 'none';
             return;
         }
         
         // Find the waypoint-inputs-container and get its width
-        const waypointContainer = input.closest('.waypoint-inputs-container');
+        const waypointContainer = inputField.closest('.waypoint-inputs-container');
         const containerWidth = waypointContainer ? waypointContainer.offsetWidth : rect.width;
         
         // Get the left position of the container for alignment
@@ -409,8 +409,7 @@ class InputManager {
     }
 
     expandInput(inputId) {
-        const inputField = document.getElementById(inputId);
-        const suggestionBox = this.suggestionBoxes[inputId];
+        const { inputField, suggestionBox } = this.getElements(inputId);
         
         if (!inputField) return;
         
@@ -436,7 +435,7 @@ class InputManager {
     }
     
     addBackButton(inputId) {
-        const inputField = document.getElementById(inputId);
+        const { inputField } = this.getElements(inputId);
         if (!inputField || inputField.parentElement.querySelector('.back-button')) return;
         
         const backButton = document.createElement('button');
@@ -461,9 +460,7 @@ class InputManager {
                 setTimeout(() => overlay.remove(), 200);
             }
             
-            const waypointIndex = parseInt(inputId.replace(/\D/g, ''), 10) - 1;
-            const routeNumber = Math.floor(waypointIndex / 2);
-            const isOrigin = waypointIndex % 2 === 0;
+            const { waypointIndex, routeNumber, isOrigin } = this.getWaypointInfo(inputId);
             
             updateState('updateRouteData', {
                 routeNumber,
@@ -477,8 +474,7 @@ class InputManager {
     }
     
     revertInput(inputId) {
-        const inputField = document.getElementById(inputId);
-        const suggestionBox = this.suggestionBoxes[inputId];
+        const { inputField, suggestionBox } = this.getElements(inputId);
         
         if (!inputField) return;
         
@@ -543,12 +539,11 @@ class InputManager {
     }
     
     syncInputWithWaypoint(inputId) {
-        const inputField = document.getElementById(inputId);
+        const { inputField } = this.getElements(inputId);
         if (!inputField) return;
         
-        const routeNumber = parseInt(inputId.replace(/\D/g, ''), 10) - 1;
-        const isOrigin = routeNumber % 2 === 0;
-        const route = appState.routeData[Math.floor(routeNumber / 2)];
+        const { routeNumber, isOrigin } = this.getWaypointInfo(inputId);
+        const route = appState.routeData[routeNumber];
         if (!route) return;
         
         const waypoint = isOrigin ? route.origin : route.destination;
@@ -638,17 +633,14 @@ class InputManager {
     focusPairedInputField(inputId) {
         if (this.isMobile()) return;
         
-        const inputNumber = parseInt(inputId.replace(/\D/g, ''), 10);
-        const waypointIndex = inputNumber - 1;
-        const isOriginField = waypointIndex % 2 === 0;
+        const { waypointIndex, routeNumber, isOrigin } = this.getWaypointInfo(inputId);
         
-        if (isOriginField) {
-            const destField = document.getElementById(`waypoint-input-${inputNumber + 1}`);
+        if (isOrigin) {
+            const destField = document.getElementById(`waypoint-input-${waypointIndex + 2}`);
             if (destField && !destField.value.trim()) {
                 requestAnimationFrame(() => destField.focus());
             }
         } else {
-            const routeNumber = Math.floor(waypointIndex / 2);
             const nextRouteNumber = routeNumber + 1;
             
             const currentRoute = appState.routeData[routeNumber];
@@ -667,9 +659,7 @@ class InputManager {
     handleAirportSelection(inputId, airport) {
         if (!airport) return;
         
-        const waypointIndex = parseInt(inputId.replace(/\D/g, ''), 10) - 1;
-        const routeNumber = Math.floor(waypointIndex / 2);
-        const isOrigin = waypointIndex % 2 === 0;
+        const { waypointIndex, routeNumber, isOrigin } = this.getWaypointInfo(inputId);
         
         if (!appState.routeData[routeNumber]) {
             appState.routeData[routeNumber] = {
