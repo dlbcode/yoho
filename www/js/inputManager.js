@@ -326,19 +326,26 @@ class InputManager {
             return;
         }
         
-        const width = Math.max(rect.width, 200);
+        // Find the waypoint-inputs-container and get its width
+        const waypointContainer = input.closest('.waypoint-inputs-container');
+        const containerWidth = waypointContainer ? waypointContainer.offsetWidth : rect.width;
+        
+        // Get the left position of the container for alignment
+        const containerRect = waypointContainer ? waypointContainer.getBoundingClientRect() : rect;
+        
+        Object.assign(suggestionBox.style, {
+            position: 'fixed',
+            left: `${containerRect.left}px`,
+            width: `${containerWidth}px`,
+            zIndex: '10000'
+        });
+        
         const spaceAbove = rect.top;
         const spaceBelow = window.innerHeight - rect.bottom;
         let boxHeight = suggestionBox.offsetHeight || 
                         (suggestionBox.children.length > 0 ? suggestionBox.children.length * 36 : 200);
         
-        Object.assign(suggestionBox.style, {
-            position: 'fixed',
-            left: `${rect.left}px`,
-            width: `${width}px`,
-            zIndex: '10000'
-        });
-        
+        // Position vertically based on available space
         if (spaceAbove >= boxHeight || spaceAbove >= spaceBelow) {
             suggestionBox.style.top = `${rect.top - boxHeight}px`;
             suggestionBox.style.bottom = 'auto';
