@@ -169,12 +169,34 @@ const routeBox = {
             waypointInputsContainer.append(inputWrapper);
             inputElements.push(input);
             
-            // Create suggestions div
-            const suggestionsDiv = createElement('div', { 
-                id: `waypoint-input-${index + 1}Suggestions`, 
-                className: 'suggestions' 
+            // Check for existing suggestion box before creating a new one
+            const suggestionId = `waypoint-input-${index + 1}Suggestions`;
+            let suggestionsDiv = document.getElementById(suggestionId);
+            
+            // Remove all duplicate suggestion divs with this ID
+            document.querySelectorAll(`div[id="${suggestionId}"]`).forEach((div, idx) => {
+                if (idx > 0) { // Keep the first one, remove duplicates
+                    div.remove();
+                }
             });
-            document.body.appendChild(suggestionsDiv);
+            
+            // If no suggestion box exists, create a new one
+            if (!suggestionsDiv) {
+                suggestionsDiv = createElement('div', { 
+                    id: suggestionId, 
+                    className: 'suggestions' 
+                });
+                document.body.appendChild(suggestionsDiv);
+            } else {
+                // Reset existing suggestion box
+                suggestionsDiv.innerHTML = '';
+                suggestionsDiv.className = 'suggestions';
+                
+                // Ensure it's in the body
+                if (suggestionsDiv.parentElement !== document.body) {
+                    document.body.appendChild(suggestionsDiv);
+                }
+            }
             
             // Add a selection handler to immediately update appState when an airport is selected
             input.addEventListener('airport-selected', (event) => {
@@ -405,7 +427,32 @@ const routeBox = {
                     infoPaneElement.classList.remove('collapsed');
                     infoPaneElement.classList.add('expanded');
                     adjustMapSize();
-                    setTimeout(() => appState.searchResultsLoading = false, 500);
+                    
+                    // Reposition all suggestion boxes after the DOM has been updated
+                    setTimeout(() => {
+                        // First update appState.searchResultsLoading
+                        appState.searchResultsLoading = false;
+                        
+                        // Clean up duplicate suggestion boxes
+                        ['waypoint-input-1Suggestions', 'waypoint-input-2Suggestions'].forEach(id => {
+                            const boxes = document.querySelectorAll(`div[id="${id}"]`);
+                            if (boxes.length > 1) {
+                                // Keep only the first one with proper attributes
+                                const mainBox = Array.from(boxes).find(box => 
+                                    box.hasAttribute('role') && box.style.position === 'fixed'
+                                ) || boxes[0];
+                                
+                                boxes.forEach(box => {
+                                    if (box !== mainBox) box.remove();
+                                });
+                            }
+                        });
+                        
+                        // Then reposition all suggestion boxes
+                        Object.keys(inputManager.suggestionBoxes || {}).forEach(id => {
+                            inputManager.positionSuggestionBox(id);
+                        });
+                    }, 500);
                 });
 
                 // Set destination to 'Any' if empty

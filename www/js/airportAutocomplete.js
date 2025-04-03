@@ -194,6 +194,19 @@ const handleSuggestionSelection = (inputId, suggestion) => {
 
 // Update suggestions in the suggestion box
 export const updateSuggestions = (inputId, airports) => {
+    // First, clean up duplicate suggestion boxes with the same ID
+    const suggestionBoxes = document.querySelectorAll(`div[id="${inputId}Suggestions"]`);
+    if (suggestionBoxes.length > 1) {
+        // Keep the one with proper attributes or the first one
+        const mainBox = Array.from(suggestionBoxes).find(box => 
+            box.hasAttribute('role') && box.style.position === 'fixed'
+        ) || suggestionBoxes[0];
+        
+        suggestionBoxes.forEach(box => {
+            if (box !== mainBox) box.remove();
+        });
+    }
+
     const suggestionBox = document.getElementById(`${inputId}Suggestions`);
     if (!suggestionBox) return;
 
@@ -203,9 +216,19 @@ export const updateSuggestions = (inputId, airports) => {
         inputManager.inputStates[inputId].selectedSuggestionIndex = -1;
     }
     
-    // Ensure box is in document
+    // Ensure box is in document and has proper attributes
     if (suggestionBox.parentElement !== document.body) {
         document.body.appendChild(suggestionBox);
+    }
+    
+    // Ensure box has proper role attribute
+    if (!suggestionBox.hasAttribute('role')) {
+        suggestionBox.setAttribute('role', 'listbox');
+    }
+    
+    // Add appropriate class if missing
+    if (!suggestionBox.classList.contains('suggestions-above')) {
+        suggestionBox.classList.add('suggestions-above');
     }
 
     // Determine if "Anywhere" option is needed
@@ -383,12 +406,27 @@ export const updateSuggestions = (inputId, airports) => {
     // Update UI state
     inputField.setAttribute('aria-expanded', suggestionBox.children.length > 0 ? 'true' : 'false');
     suggestionBox.style.display = suggestionBox.children.length > 0 ? 'block' : 'none';
-    suggestionBox.style.zIndex = '90';
+    suggestionBox.style.zIndex = '10000'; // Use consistent z-index
+    
+    // Always position the suggestion box regardless of content state
     inputManager.positionSuggestionBox(inputId);
 };
 
 // Setup autocomplete for a field
 export const setupAutocompleteForField = (fieldId) => {
+    // Clean up duplicate suggestion boxes before setup
+    const suggestionId = `${fieldId}Suggestions`;
+    const boxes = document.querySelectorAll(`div[id="${suggestionId}"]`);
+    if (boxes.length > 1) {
+        const mainBox = Array.from(boxes).find(box => 
+            box.hasAttribute('role') && box.style.position === 'fixed'
+        ) || boxes[0];
+        
+        boxes.forEach(box => {
+            if (box !== mainBox) box.remove();
+        });
+    }
+
     const inputField = inputManager.setupWaypointInput(fieldId);
     if (!inputField) return;
 
