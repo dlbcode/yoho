@@ -19,28 +19,18 @@ const removeRoute = (routeNumber) => {
     // Get the group ID from routeData instead of selectedRoutes
     let groupNumber = appState.routeData[routeNumber]?.selectedRoute?.group;
 
-    // Get a list of all input ids before removal for later cleanup
-    const inputsToCleanup = Array.from(document.querySelectorAll('.waypoint-input'))
-        .filter(input => input.id && input.id.startsWith(`waypoint-input-`))
-        .map(input => input.id);
-    
-    // Store route-specific input IDs for cleanup
-    const routeSpecificInputIds = [
-        `waypoint-input-${routeNumber * 2 + 1}`,
-        `waypoint-input-${routeNumber * 2 + 2}`
-    ];
-
-    // First, do immediate cleanup of the route's suggestion boxes
-    routeSpecificInputIds.forEach(id => {
-        if (inputManager.suggestionBoxes[id]) {
+    // CRITICAL FIX: Remove all suggestion boxes BEFORE DOM changes
+    // This prevents orphaned elements and incorrect positioning
+    if (inputManager.recreateSuggestionBoxes) {
+        // First completely remove all suggestion boxes
+        Object.keys(inputManager.suggestionBoxes).forEach(id => {
             const box = inputManager.suggestionBoxes[id];
             if (box && document.body.contains(box)) {
                 box.remove();
             }
-            delete inputManager.suggestionBoxes[id];
-            delete inputManager.inputStates[id];
-        }
-    });
+        });
+        inputManager.suggestionBoxes = {};
+    }
 
     // Remove DOM structure
     domManager.removeRouteStructure(routeNumber);
@@ -75,10 +65,6 @@ const removeRoute = (routeNumber) => {
         }
     }
 
-    // Critical fix: Make a backup of the route data before removal
-    const routeBeforeRemoval = { ...appState.routeData[routeNumber] };
-    console.log(`Route ${routeNumber} data before removal:`, routeBeforeRemoval);
-
     // Use routeData exclusively for removing routes
     updateState('removeRoute', { routeNumber }, 'removeRoute');
 
@@ -104,7 +90,6 @@ const removeRoute = (routeNumber) => {
     adjustMapSize();
     
     // Force URL update using routeData only
-    // Fix the formatting of the routes to prevent [object Object] in buttons
     const formattedRoutes = appState.routeData
         .filter(route => route && !route.isEmpty)
         .map(route => ({
@@ -120,36 +105,15 @@ const removeRoute = (routeNumber) => {
     updateState('updateRoutes', formattedRoutes, 'removeRoute');
 
     // Force route buttons update
-    setTimeout(() => {
-        import('../infoPane.js').then(({ infoPane }) => {
-            infoPane.updateRouteButtons();
-        });
-    }, 50);
-
-    // After route removal and view setup, reposition remaining suggestion boxes with a more comprehensive cleanup
-    setTimeout(() => {
-        // First, do a comprehensive cleanup of stale suggestion boxes
-        Object.keys(inputManager.suggestionBoxes).forEach(id => {
-            const input = document.getElementById(id);
-            if (!input || !document.body.contains(input)) {
-                // Remove orphaned suggestion boxes
-                const box = inputManager.suggestionBoxes[id];
-                if (box && document.body.contains(box)) {
-                    box.remove();
-                }
-                delete inputManager.suggestionBoxes[id];
-                delete inputManager.inputStates[id];
-            }
-        });
+    import('../infoPane.js').then(({ infoPane }) => {
+        infoPane.updateRouteButtons();
         
-        // Then position only the suggestion boxes for inputs that still exist
-        Object.keys(inputManager.suggestionBoxes).forEach(id => {
-            const input = document.getElementById(id);
-            if (input && document.body.contains(input)) {
-                inputManager.positionSuggestionBox(id);
-            }
-        });
-    }, 200); // Increased timeout to ensure DOM is stable
+        // CRITICAL FIX: Recreate suggestion boxes AFTER all DOM updates are done
+        if (inputManager.recreateSuggestionBoxes) {
+            console.log('Recreating suggestion boxes after route removal');
+            inputManager.recreateSuggestionBoxes();
+        }
+    });
 };
 
 // Updated to use modal for selected routes

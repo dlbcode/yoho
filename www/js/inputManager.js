@@ -358,12 +358,45 @@ class InputManager {
     }
 
     repositionAllSuggestionBoxes() {
+        const inputIds = [...Object.keys(this.suggestionBoxes)];
+        
+        inputIds.forEach(id => {
+            const input = document.getElementById(id);
+            
+            if (!input || !document.body.contains(input)) {
+                const box = this.suggestionBoxes[id];
+                if (box && document.body.contains(box)) {
+                    box.remove();
+                }
+                delete this.suggestionBoxes[id];
+                delete this.inputStates[id];
+            }
+        });
+        
         Object.keys(this.suggestionBoxes).forEach(id => {
             const input = document.getElementById(id);
-            const box = this.suggestionBoxes[id];
-            
-            if (input && document.body.contains(input) && box) {
+            if (input && document.body.contains(input)) {
                 this.positionSuggestionBox(id);
+            }
+        });
+    }
+
+    recreateSuggestionBoxes() {
+        Object.keys(this.suggestionBoxes).forEach(id => {
+            const box = this.suggestionBoxes[id];
+            if (box && document.body.contains(box)) {
+                box.remove();
+            }
+        });
+        
+        this.suggestionBoxes = {};
+        
+        const waypointInputs = document.querySelectorAll('.waypoint-input[type="text"]');
+        
+        waypointInputs.forEach(input => {
+            if (input.id && document.body.contains(input)) {
+                this.ensureSuggestionBox(input.id);
+                this.positionSuggestionBox(input.id);
             }
         });
     }
@@ -759,31 +792,57 @@ class InputManager {
         if (this.mutationObserver) this.mutationObserver.disconnect();
         
         this.mutationObserver = new MutationObserver((mutations) => {
-            let needsUpdate = false;
+            let domStructureChanged = false;
+            let needsRepositioning = false;
             
             for (const mutation of mutations) {
-                const affectsInputs = mutation.target.id === 'infoPaneContent' || 
-                    mutation.target.id === 'routeBoxContainer' ||
-                    mutation.target.classList?.contains('input-wrapper') ||
-                    mutation.target.querySelector('.waypoint-input');
+                if (mutation.type === 'childList' && 
+                   (mutation.addedNodes.length > 0 || mutation.removedNodes.length > 0)) {
                     
-                if (affectsInputs) {
-                    needsUpdate = true;
-                    break;
+                    if (mutation.removedNodes.length > 0) {
+                        for (const node of mutation.removedNodes) {
+                            if (node.nodeType === Node.ELEMENT_NODE) {
+                                if (node.tagName === 'INPUT' || 
+                                    node.classList?.contains('input-wrapper') ||
+                                    node.querySelector('input')) {
+                                    domStructureChanged = true;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    
+                    if (!domStructureChanged && mutation.addedNodes.length > 0) {
+                        for (const node of mutation.addedNodes) {
+                            if (node.nodeType === Node.ELEMENT_NODE) {
+                                if (node.tagName === 'INPUT' || 
+                                    node.classList?.contains('input-wrapper') ||
+                                    node.querySelector('input')) {
+                                    domStructureChanged = true;
+                                    break;
+                                }
+                            }
+                        }
+                    }
                 }
                 
-                if (mutation.type === 'attributes' && 
-                    (mutation.attributeName === 'style' || mutation.attributeName === 'class')) {
+                if (!domStructureChanged && mutation.type === 'attributes' && 
+                   (mutation.attributeName === 'style' || mutation.attributeName === 'class')) {
                     if (mutation.target.id === 'infoPane' ||
                         mutation.target.classList?.contains('route-box') ||
                         mutation.target.classList?.contains('input-wrapper')) {
-                        needsUpdate = true;
-                        break;
+                        needsRepositioning = true;
                     }
                 }
             }
             
-            if (needsUpdate) this.repositionAllSuggestionBoxes();
+            if (domStructureChanged) {
+                console.log('Major DOM structure change detected - recreating suggestion boxes');
+                this.recreateSuggestionBoxes();
+            } 
+            else if (needsRepositioning) {
+                this.repositionAllSuggestionBoxes();
+            }
         });
         
         const infoPane = document.getElementById('infoPane');
