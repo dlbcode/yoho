@@ -14,8 +14,6 @@ const clearLinesForView = (view) =>
 const handleWaypointChange = () => {
     mapHandling.updateMarkerIcons();
     
-    // Don't clear deck lines if we're just handling an "Any" destination
-    // or if we're in the middle of a route switch
     const isAnyDestinationChange = appState.routeData.some(r => r && !r.isEmpty && (
         (r.origin?.iata_code === 'Any') || 
         (r.destination?.iata_code === 'Any')
@@ -34,7 +32,6 @@ const stateHandlers = {
     addWaypoint: handleWaypointChange,
     removeWaypoint: handleWaypointChange,
     updateRouteData: (value) => {
-        // Clear lines specific to this route before updating
         if (value && typeof value.routeNumber === 'number') {
             lineManager.clearLinesByRouteNumber(value.routeNumber);
         }
@@ -42,7 +39,6 @@ const stateHandlers = {
     },
     removeRoute: handleWaypointChange,
     updateRoutes: () => {
-        // When routes are updated, check if they're valid and update the current view
         const hasValidRoutes = appState.routeData.some(r => r && !r.isEmpty && 
             ((r.origin && r.origin.iata_code) || (r.destination && r.destination.iata_code)));
         
@@ -58,7 +54,6 @@ const handleStateChange = (event) => {
     if (key === 'updateWaypoint' || key === 'updateRoutes' || key === 'removeRoute') {
         eventManager.updateRoutes();
     } else if (key === 'updateRouteData') {
-        // Handle updateRouteData with the specialized handler
         stateHandlers[key]?.(value);
     } else {
         stateHandlers[key]?.(value);
@@ -69,7 +64,6 @@ const eventManager = {
     init() {
         document.addEventListener('stateChange', handleStateChange);
         
-        // Add ability to disable hover on markers when a popup is open
         map.addEventListener('popupclose', () => {
             flightMap.hoverDisabled = false;
             flightMap.preservedMarker = null;
@@ -81,10 +75,8 @@ const eventManager = {
                 flightMap.hoverDisabled = false;
                 flightMap.preservedMarker = null;
                 
-                // Close any open popups
                 map.closePopup();
                 
-                // Remove any selected airport
                 if (appState.selectedAirport) {
                     updateState('selectedAirport', null, 'eventManager.escKey');
                 }
@@ -103,7 +95,6 @@ const eventManager = {
     },
 
     handlePopState(event) {
-        // Use the new URL parsing function from stateManager
         parseUrlRoutes();
         
         document.querySelector('.airport-selection').innerHTML = '';
@@ -138,13 +129,11 @@ const eventManager = {
     },
 
     handleMapClick() {
-        // First set the flag to prevent any view changes
         appState.preventMapViewChange = true;
         
         const selectedAirportIata = appState.selectedAirport?.iata_code;
         if (selectedAirportIata) {
             const marker = flightMap.markers[selectedAirportIata];
-            // Check if the airport is used in any route using routeData
             const isWaypoint = appState.routeData.some(r => 
                 r && !r.isEmpty && (
                     r.origin?.iata_code === selectedAirportIata || 
@@ -156,27 +145,20 @@ const eventManager = {
             }
         }
         
-        // Reset all state properly
         flightMap.selectedMarker = null;
         flightMap.preservedMarker = null;
-        flightMap.hoverDisabled = false; // Ensure hover is enabled
+        flightMap.hoverDisabled = false;
         
-        // Store the current map view before any state changes
         const currentCenter = map.getCenter();
         const currentZoom = map.getZoom();
         
-        // Update state
         updateState('selectedAirport', null, 'eventManager.handleMapClick');
         
-        // Only clear hover lines
         lineManager.clearLines('hover');
         
-        // Ensure lines can be drawn on subsequent hovers and clicks
         flightMap.hoverDisabled = false;
         
-        // After a short delay, restore the map view if it changed and reset the flag
         setTimeout(() => {
-            // Check if view changed and restore if needed
             if (appState.preventMapViewChange && 
                 (!map.getCenter().equals(currentCenter) || map.getZoom() !== currentZoom)) {
                 map.setView(currentCenter, currentZoom, { animate: false });
@@ -208,12 +190,10 @@ const eventManager = {
     },
 
     updateRoutes() {
-        // Filter out routes with empty or undefined data
         const validRoutes = appState.routeData
             .filter(route => route && !route.isEmpty && 
                    route.origin && route.destination);
         
-        // Process each route
         validRoutes.forEach(route => {
             const origin = route.origin?.iata_code;
             const destination = route.destination?.iata_code;
@@ -244,7 +224,7 @@ const eventManager = {
     },
 
     onMarkerClick(iata, marker, airport, e) {
-        e.originalEvent.stopPropagation(); // Prevent bubbling
+        e.originalEvent.stopPropagation();
         flightMap.handleMarkerClick(airport, marker);
     }
 };
