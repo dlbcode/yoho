@@ -6,27 +6,28 @@ const routeList = {
         this.addStateChangeListener();
     },
 
-    updateEstPrice: function() {
-        let estPrice = 0;
-        appState.routes.forEach(route => {
-            estPrice += route.price;
-        });
+    updateEstPrice() {
+        const totalPrice = appState.routeData
+            .filter(route => route && !route.isEmpty && route.price)
+            .reduce((sum, route) => sum + route.price, 0);
     
-        estPrice = Math.round(estPrice * appState.numTravelers);
+        const estPrice = Math.round(totalPrice * appState.numTravelers);
         const estPriceElement = document.getElementById('estPrice');
         const estPriceValueElement = document.getElementById('estPriceValue');
         
         if (estPrice > 0) {
             estPriceValueElement.innerHTML = `$${estPrice}`;
-            estPriceElement.style.display = 'flex'; // Make sure the box is visible if the price is greater than 0
+            estPriceElement.style.display = 'flex';
         } else {
-            estPriceElement.style.display = 'none'; // Hide the box if the price is 0
+            estPriceElement.style.display = 'none';
         }
     },    
 
     addStateChangeListener() {
         document.addEventListener('stateChange', (event) => {
-            if (event.detail.key === 'numTravelers' || event.detail.key === 'routes') {
+            if (event.detail.key === 'numTravelers' || 
+                event.detail.key === 'updateRouteData' || 
+                event.detail.key === 'removeRoute') {
                 this.updateEstPrice();
             }
         });

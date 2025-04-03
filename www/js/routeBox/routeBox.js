@@ -121,9 +121,8 @@ const routeBox = {
     },
 
     setupRouteBox(routeBoxElement, routeNumber) {
-        // Initialize route data if needed
+        // Initialize route data if needed - simplify this since we only need one initialization path
         if (!appState.routeData[routeNumber]) {
-            // Create a default route data structure with reasonable defaults
             appState.routeData[routeNumber] = { 
                 tripType: 'oneWay', 
                 travelers: 1,
@@ -134,13 +133,8 @@ const routeBox = {
 
         console.log(`Setting up route box for route ${routeNumber} with data:`, appState.routeData[routeNumber]);
 
-        // Get the route data for this route - ensure it's defined before using it
-        const routeData = appState.routeData[routeNumber] || {
-            tripType: 'oneWay',
-            travelers: 1,
-            departDate: new Date().toISOString().split('T')[0],
-            returnDate: null
-        };
+        // Get the route data for this route - ensure it exists
+        const routeData = appState.routeData[routeNumber];
 
         const container = createElement('div', { className: 'routeBoxElements' });
 

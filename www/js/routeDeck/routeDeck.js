@@ -79,25 +79,13 @@ function buildRouteDeck(routeIndex) {
 
     // If we still don't have origin or destination, try to get them from currentRoute
     if (!origin || !destination) {
-        const { originAirport, destinationAirport } = appState.currentRoute || {};
-        
-        // Update routeData with any values we find
-        if (!origin && originAirport?.iata_code) {
-            origin = originAirport.iata_code;
-            if (!routeData.origin) {
-                appState.routeData[routeIndex].origin = {
-                    iata_code: origin
-                };
-            }
+        // Remove legacy currentRoute reference and only use routeData
+        if (!origin && routeData.origin?.iata_code) {
+            origin = routeData.origin.iata_code;
         }
         
-        if (!destination && destinationAirport?.iata_code) {
-            destination = destinationAirport.iata_code;
-            if (!routeData.destination) {
-                appState.routeData[routeIndex].destination = {
-                    iata_code: destination
-                };
-            }
+        if (!destination && routeData.destination?.iata_code) {
+            destination = routeData.destination.iata_code;
         }
     }
 

@@ -33,9 +33,8 @@ const stateHandlers = {
     changeView: clearLinesForView,
     addWaypoint: handleWaypointChange,
     removeWaypoint: handleWaypointChange,
-    updateWaypoint: handleWaypointChange,
-    updateRouteData: handleWaypointChange, // Added handler for the new updateRouteData action
-    removeRoute: handleWaypointChange, // Added handler for the new removeRoute action
+    updateRouteData: handleWaypointChange,
+    removeRoute: handleWaypointChange,
     updateRoutes: () => {
         // When routes are updated, check if they're valid and update the current view
         const hasValidRoutes = appState.routeData.some(r => r && !r.isEmpty && 

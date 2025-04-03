@@ -426,7 +426,7 @@ function selectRoute(route) {
     const selectedIatas = route.map(segment => segment.flyFrom);
     selectedIatas.push(route[route.length - 1].flyTo); // Add the final destination
     
-    // Instead of setting appState.selectedRoute directly, we'll update via flightMap
+    // Remove legacy selectedRoute reference and only update via flightMap
     flightMap.updateVisibleMarkers(selectedIatas);
 }
 

@@ -133,8 +133,8 @@ const handleSuggestionSelection = (inputId, suggestion) => {
         inputField.dispatchEvent(new CustomEvent('airportSelected', {
             detail: { airport: anyDestination }
         }));
-
-        // Don't attempt to handle focus internally, let inputManager do it
+        
+        // Use a delay before blur to ensure event handlers complete
         setTimeout(() => {
             inputField.blur();
         }, 100);
@@ -143,12 +143,10 @@ const handleSuggestionSelection = (inputId, suggestion) => {
         const airport = suggestion._airport;
         if (!airport) return;
         
-        // Ensure we don't have isAnyDestination/isAnyOrigin flags set
-        airport.isAnyDestination = false;
-        airport.isAnyOrigin = false;
-        
         // Update input field with airport data
         inputField.value = `${airport.city}, (${airport.iata_code})`;
+        airport.isAnyDestination = false;
+        airport.isAnyOrigin = false;
         inputField.setAttribute('data-selected-iata', airport.iata_code);
         inputField.removeAttribute('data-is-any-destination');
         inputField.removeAttribute('data-paired-with-anywhere');
@@ -167,7 +165,6 @@ const handleSuggestionSelection = (inputId, suggestion) => {
             routeData.destination = airport;
         }
         
-        // Update waypoints for compatibility
         updateState('updateWaypoint', { 
             index: waypointIndex, 
             data: airport 
@@ -531,13 +528,13 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         } else {
             routeData.destination = airport;
-            
-            // If origin is already Any, and destination is now real, mark for suggestion refresh
-            if (routeData.origin && routeData.origin.iata_code === 'Any' && 
-                airport.iata_code !== 'Any') {
-                routeData._originNeedsEmptyFocus = true;
-            }
         }
+        
+        // Update state using only updateRouteData (remove updateWaypoint call)
+        updateState('updateRouteData', {
+            routeNumber: routeNumber,
+            data: isOrigin ? { origin: airport } : { destination: airport }
+        }, 'airportAutocomplete.handleAirportSelection');
         
         // Update map if location data exists
         if (airport?.latitude && airport?.longitude) {

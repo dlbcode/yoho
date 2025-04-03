@@ -94,9 +94,6 @@ const routeHandling = {
         
         console.log(`Updated ${processedRoutes.length} routes with direct route checking`);
         
-        // Ensure we have a consistent internal representation
-        appState.routes = processedRoutes;
-        
         // Draw the lines for the routes
         await pathDrawing.drawLines();
         

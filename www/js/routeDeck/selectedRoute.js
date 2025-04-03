@@ -53,14 +53,14 @@ function generateRouteDescription(routeIndex) {
     return generateGroupRouteDescription(selectedRoute.group, routeIndex);
 }
 
-// New function to generate the overall route summary
+// Replace legacy helper function
 function generateOverallRoute(routeIndex) {
-    // Use routeData instead of selectedRoutes
+    // Use routeData exclusively
     const selectedRoute = appState.routeData[routeIndex]?.selectedRoute;
     if (!selectedRoute) return '';
 
     const currentGroupId = selectedRoute.group;
-    // Find all routes that belong to the same group in routeData
+    // Find all routes that belong to the same group in routeData only
     const routeSegments = Object.entries(appState.routeData)
         .filter(([_, route]) => route && route.selectedRoute && route.selectedRoute.group === currentGroupId)
         .map(([_, route]) => {
@@ -68,7 +68,6 @@ function generateOverallRoute(routeIndex) {
             const [origin, destination] = route.selectedRoute.displayData.route.split(' > ');
             return { origin, destination };
         })
-        // Sort by route index to ensure correct order
         .sort((a, b) => a.index - b.index);
     
     if (routeSegments.length === 0) return '';

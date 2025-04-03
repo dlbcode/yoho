@@ -8,9 +8,6 @@ const appState = {
     routeDirection: defaultDirection,
     // Primary source of truth - the only structure we really need
     routeData: [],
-    // Minimal compatibility structures removed
-    tripTableData: null,
-    routeDecksData: {},
     currentView: 'trip',
     currentGroupID: 0,
     highestGroupId: 0,
@@ -32,27 +29,12 @@ function updateState(key, value, calledFrom) {
         case 'updateRouteData':
             const { routeNumber, data } = value;
             
-            // Create or update route data
             if (!appState.routeData[routeNumber]) {
-                appState.routeData[routeNumber] = {
-                    tripType: 'oneWay',
-                    travelers: 1,
-                    departDate: null,
-                    returnDate: null,
-                    ...data
-                };
-            } else {
-                // Update existing route with new data
-                appState.routeData[routeNumber] = {
-                    ...appState.routeData[routeNumber],
-                    ...data
-                };
-                
-                // If data is empty or has isEmpty flag, mark as empty
-                if (data.isEmpty) {
-                    appState.routeData[routeNumber] = { isEmpty: true };
-                }
+                appState.routeData[routeNumber] = {};
             }
+            
+            // Update the route data with the provided values
+            Object.assign(appState.routeData[routeNumber], data);
             break;
 
         case 'removeRoute':
