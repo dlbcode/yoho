@@ -33,7 +33,13 @@ const stateHandlers = {
     changeView: clearLinesForView,
     addWaypoint: handleWaypointChange,
     removeWaypoint: handleWaypointChange,
-    updateRouteData: handleWaypointChange,
+    updateRouteData: (value) => {
+        // Clear lines specific to this route before updating
+        if (value && typeof value.routeNumber === 'number') {
+            lineManager.clearLinesByRouteNumber(value.routeNumber);
+        }
+        handleWaypointChange();
+    },
     removeRoute: handleWaypointChange,
     updateRoutes: () => {
         // When routes are updated, check if they're valid and update the current view
@@ -49,9 +55,11 @@ const stateHandlers = {
 const handleStateChange = (event) => {
     const { key, value } = event.detail;
     
-    if (key === 'updateWaypoint' || key === 'updateRouteData' || 
-        key === 'updateRoutes' || key === 'removeRoute') {
+    if (key === 'updateWaypoint' || key === 'updateRoutes' || key === 'removeRoute') {
         eventManager.updateRoutes();
+    } else if (key === 'updateRouteData') {
+        // Handle updateRouteData with the specialized handler
+        stateHandlers[key]?.(value);
     } else {
         stateHandlers[key]?.(value);
     }
