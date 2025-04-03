@@ -136,10 +136,7 @@ const handleSuggestionSelection = (inputId, suggestion) => {
         inputField.dispatchEvent(new CustomEvent('airportSelected', {
             detail: { airport: anyDestination }
         }));
-        
-        setTimeout(() => {
-            inputField.blur();
-        }, 100);
+        inputField.blur();
     } else {
         const airport = suggestion._airport;
         if (!airport) return;
@@ -175,10 +172,7 @@ const handleSuggestionSelection = (inputId, suggestion) => {
         document.dispatchEvent(new CustomEvent('airportSelected', { 
             detail: { airport, fieldId: inputId, eventFromField: true } 
         }));
-        
-        setTimeout(() => {
-            inputField.blur();
-        }, 100);
+        inputField.blur();
     }
     
     const suggestionBox = document.getElementById(`${inputId}Suggestions`);
@@ -411,9 +405,7 @@ export const setupAutocompleteForField = (fieldId) => {
                     const iataCode = destField.getAttribute('data-selected-iata');
                     
                     if (isAnyDestination || iataCode === 'Any') {
-                        setTimeout(() => {
                             destField.focus();
-                        }, 100);
                     }
                 }
             }
@@ -428,9 +420,7 @@ export const setupAutocompleteForField = (fieldId) => {
                     const iataCode = originField.getAttribute('data-selected-iata');
                     
                     if (isAnyOrigin || iataCode === 'Any') {
-                        setTimeout(() => {
                             originField.focus();
-                        }, 100);
                     }
                 }
             }
@@ -439,12 +429,9 @@ export const setupAutocompleteForField = (fieldId) => {
     
     inputField.addEventListener('airportSelected', inputField._airportSelectedHandler);
     inputField._hasAirportListener = true;
-
-    setTimeout(() => {
-        if (inputManager.suggestionBoxes[fieldId]) {
-            inputManager.positionSuggestionBox(fieldId);
-        }
-    }, 0);
+    if (inputManager.suggestionBoxes[fieldId]) {
+        inputManager.positionSuggestionBox(fieldId);
+    }
 
     return () => {
         inputManager.cleanupInputListeners(fieldId);
