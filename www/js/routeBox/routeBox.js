@@ -123,45 +123,13 @@ const routeBox = {
     setupRouteBox(routeBoxElement, routeNumber) {
         // Initialize route data if needed
         if (!appState.routeData[routeNumber]) {
-            // Check if there's a selectedRoute with this index first
-            const selectedRoute = appState.selectedRoutes[routeNumber];
-            if (selectedRoute && selectedRoute.displayData) {
-                // Extract route information from the selectedRoute
-                const routeParts = selectedRoute.displayData.route.split(' > ');
-                if (routeParts.length === 2) {
-                    const origin = routeParts[0];
-                    const destination = routeParts[1];
-                    
-                    // Create minimal routeData from the selected route
-                    appState.routeData[routeNumber] = {
-                        tripType: 'oneWay', // Segments are typically one-way
-                        travelers: 1, // Default value
-                        departDate: selectedRoute.displayData.departure,
-                        returnDate: null,
-                        origin: { iata_code: origin },
-                        destination: { iata_code: destination },
-                        isSegment: true
-                    };
-                    
-                    console.log(`Created routeData for segment ${routeNumber} from selectedRoute:`, appState.routeData[routeNumber]);
-                } else {
-                    // Default initialization if route format is unexpected
-                    appState.routeData[routeNumber] = { 
-                        tripType: 'oneWay', 
-                        travelers: 1,
-                        departDate: new Date().toISOString().split('T')[0],
-                        returnDate: null
-                    };
-                }
-            } else {
-                // No selectedRoute, use default initialization
-                appState.routeData[routeNumber] = { 
-                    tripType: 'oneWay', 
-                    travelers: 1,
-                    departDate: new Date().toISOString().split('T')[0],
-                    returnDate: null
-                };
-            }
+            // Create a default route data structure with reasonable defaults
+            appState.routeData[routeNumber] = { 
+                tripType: 'oneWay', 
+                travelers: 1,
+                departDate: new Date().toISOString().split('T')[0],
+                returnDate: null
+            };
         }
 
         console.log(`Setting up route box for route ${routeNumber} with data:`, appState.routeData[routeNumber]);
