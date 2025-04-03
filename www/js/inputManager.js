@@ -47,18 +47,15 @@ class InputManager {
         
         this.cleanupInputListeners(inputId);
         
-        // Store the original placeholder
         const originalPlaceholder = inputField.getAttribute('placeholder') || 
             (isOriginField ? 'From' : 'Where to?');
         
-        // Set necessary attributes
         inputField.setAttribute('autocomplete', 'new-password');
         inputField.setAttribute('name', `waypoint-input-${Date.now()}`);
         inputField.setAttribute('role', 'combobox');
         inputField.setAttribute('aria-autocomplete', 'list');
         inputField.setAttribute('aria-expanded', 'false');
         
-        // Set placeholder once - the CSS will handle visibility
         if (originalPlaceholder) {
             inputField.placeholder = originalPlaceholder;
         }
@@ -79,7 +76,6 @@ class InputManager {
         inputState.handlers = handlers;
         this.syncInputWithWaypoint(inputId);
         
-        // Add a custom event listener for airport selection
         inputField.addEventListener('airportSelected', (event) => {
             console.log(`airportSelected event received on ${inputId}`, event.detail);
             this.handleAirportSelection(inputId, event.detail.airport);
@@ -121,11 +117,9 @@ class InputManager {
         const suggestionBox = this.suggestionBoxes[inputId];     
         if (!inputField || !inputState) return;
         
-        // Save previous value
         inputState.previousValidValue = inputField.value;
         inputState.previousIataCode = inputField.getAttribute('data-selected-iata');
         
-        // Always remove readonly on focus
         inputField.removeAttribute('readonly');
         
         if (this.isMobile()) {
@@ -135,10 +129,8 @@ class InputManager {
                 inputState.isExpanded = true;
             }
         } else if (suggestionBox) {
-            // Always position the suggestion box on focus, even if empty
             this.positionSuggestionBox(inputId);
             
-            // Only show if it has content
             if (suggestionBox.children.length > 0) {
                 suggestionBox.style.display = 'block';
             }
@@ -146,11 +138,9 @@ class InputManager {
         
         requestAnimationFrame(() => inputField.select());
         
-        // Add touchstart event to suggestion box for better mobile interaction
         if (suggestionBox && this.isMobile()) {
             if (!suggestionBox._hasTouchListener) {
                 suggestionBox.addEventListener('touchstart', (e) => {
-                    // Prevent default to avoid additional events
                     if (e.target !== suggestionBox) {
                         e.preventDefault();
                     }
@@ -170,16 +160,12 @@ class InputManager {
                 .catch(error => console.warn('Error flying to airport:', error));
         }
 
-        // Always show empty suggestions on focus if field is empty
         if (!inputField.value.trim()) {
-            // Important: This needs to handle the special case of destination-after-origin focus
             const waypointIndex = parseInt(inputId.replace(/\D/g, ''), 10) - 1;
             const routeNumber = Math.floor(waypointIndex / 2);
             const isOrigin = waypointIndex % 2 === 0;
             
-            // If we're a destination field and the corresponding origin is set
             if (!isOrigin && appState.routeData[routeNumber]?.origin) {
-                // Mark that we need suggestions (this is used in updateSuggestions)
                 appState.routeData[routeNumber]._destinationNeedsEmptyFocus = true;
             }
             
@@ -202,7 +188,6 @@ class InputManager {
         const currentValue = inputField.value.trim();
         const selectedIata = inputField.getAttribute('data-selected-iata');
         
-        // Cache the placeholder - no need to set it again if already present
         const placeholder = inputField.placeholder;
         
         const isValidSelection = 
@@ -243,7 +228,6 @@ class InputManager {
 
         if (suggestionBox) suggestionBox.style.display = 'none';
         
-        // Simplify readonly state management
         inputField.readOnly = Boolean(finalValue.trim());
         
         if (!isAnyDestination && !window.preserveAnyDestination && 
@@ -253,12 +237,10 @@ class InputManager {
             const routeNumber = Math.floor(waypointIndex / 2);
             const isOrigin = waypointIndex % 2 === 0;
             
-            // Check if this waypoint exists in routeData and is not "Any"
             const route = appState.routeData[routeNumber];
             const waypoint = isOrigin ? route?.origin : route?.destination;
             
             if (route && waypoint && waypoint.iata_code !== 'Any') {
-                // Replace removeWaypoint with updateRouteData
                 const updateData = {};
                 updateData[isOrigin ? 'origin' : 'destination'] = null;
                 
@@ -375,54 +357,42 @@ class InputManager {
         
         if (!input || !suggestionBox) return;
         
-        // Get the most accurate position using getBoundingClientRect
         const rect = input.getBoundingClientRect();
         
-        // Check if input is actually visible
         if (rect.width === 0 && rect.height === 0) {
             suggestionBox.style.display = 'none';
             return;
         }
         
-        // Set a minimum width for the suggestion box based on input width
-        const width = Math.max(rect.width, 200); // Minimum width of 200px
+        const width = Math.max(rect.width, 200);
         
-        // Get actual dimensions and available space
         const spaceAbove = rect.top;
         const spaceBelow = window.innerHeight - rect.bottom;
         
-        // Get the actual height of the suggestion box (or use a reasonable estimate)
         let boxHeight = suggestionBox.offsetHeight;
         if (boxHeight === 0 && suggestionBox.children.length > 0) {
-            // Estimate height based on number of items
-            boxHeight = suggestionBox.children.length * 36; // Rough estimate
+            boxHeight = suggestionBox.children.length * 36;
         }
         
-        // Use a minimum height if we still don't have a height
-        boxHeight = boxHeight || 200; // Default minimum height
+        boxHeight = boxHeight || 200;
         
-        // Base styling that's always applied
         suggestionBox.style.position = 'fixed';
         suggestionBox.style.left = `${rect.left}px`;
         suggestionBox.style.width = `${width}px`;
-        suggestionBox.style.zIndex = '10000'; // Ensure it's always on top
+        suggestionBox.style.zIndex = '10000';
         
-        // Position above the input if there's enough space or more space above than below
         if (spaceAbove >= boxHeight || spaceAbove >= spaceBelow) {
-            // Position above
             suggestionBox.style.top = `${rect.top - boxHeight}px`;
             suggestionBox.style.bottom = 'auto';
             suggestionBox.classList.add('suggestions-above');
             suggestionBox.classList.remove('suggestions-below');
         } else {
-            // Position below
             suggestionBox.style.top = `${rect.bottom}px`;
             suggestionBox.style.bottom = 'auto';
             suggestionBox.classList.add('suggestions-below');
             suggestionBox.classList.remove('suggestions-above');
         }
         
-        // Show the box if suggestions exist and should be shown
         if (this.inputStates[inputId]?.showSuggestions && 
             this.inputStates[inputId]?.suggestions?.length > 0) {
             suggestionBox.style.display = 'block';
@@ -497,7 +467,6 @@ class InputManager {
             const routeNumber = Math.floor(waypointIndex / 2);
             const isOrigin = waypointIndex % 2 === 0;
             
-            // Update using updateRouteData instead of removeWaypoint
             const updateData = {};
             updateData[isOrigin ? 'origin' : 'destination'] = null;
             
@@ -549,7 +518,6 @@ class InputManager {
         
         if (appState.searchResultsLoading) return;
         
-        // Check if there are any active routes in routeData
         const hasActiveRoutes = appState.routeData.some(route => 
             route && !route.isEmpty && (route.origin || route.destination)
         );
@@ -592,38 +560,30 @@ class InputManager {
         const inputField = document.getElementById(inputId);
         if (!inputField) return;
         
-        // Parse the waypoint index directly from the input ID
         const routeNumber = parseInt(inputId.replace(/\D/g, ''), 10) - 1;
         const isOrigin = routeNumber % 2 === 0;
         
-        // Check if we have route data for this input
-        const route = appState.routeData[Math.floor(routeNumber/2)];
+        const route = appState.routeData[Math.floor(routeNumber / 2)];
         if (!route) return;
         
         const waypoint = isOrigin ? route.origin : route.destination;
         
         if (waypoint) {
-            // Handle "Any" waypoint
             if (waypoint.iata_code === 'Any') {
                 inputField.value = 'Anywhere';
                 inputField.setAttribute('data-selected-iata', 'Any');
                 inputField.setAttribute('data-is-any-destination', 'true');
                 inputField.readOnly = true;
-            } 
-            // Handle normal airport waypoint
-            else if (waypoint.iata_code) {
+            } else if (waypoint.iata_code) {
                 inputField.value = `${waypoint.city || waypoint.name || waypoint.iata_code}, (${waypoint.iata_code})`;
                 inputField.setAttribute('data-selected-iata', waypoint.iata_code);
                 inputField.removeAttribute('data-is-any-destination');
                 inputField.readOnly = true;
-            }
-            // Handle empty waypoint
-            else {
+            } else {
                 inputField.value = '';
                 inputField.readOnly = false;
             }
         } else {
-            // No waypoint - clear the field
             inputField.value = '';
             inputField.readOnly = false;
         }
@@ -650,7 +610,6 @@ class InputManager {
     cleanupInput(inputId) {
         console.log(`Cleaning up input ${inputId}`);
         
-        // Remove suggestion box
         if (this.suggestionBoxes[inputId]) {
             const box = this.suggestionBoxes[inputId];
             if (box && document.body.contains(box)) {
@@ -659,13 +618,10 @@ class InputManager {
             delete this.suggestionBoxes[inputId];
         }
         
-        // Clean up event listeners
         this.cleanupInputListeners(inputId);
         
-        // Remove input state
         delete this.inputStates[inputId];
         
-        // Clear debounce timers
         delete this.debounceTimers[`autocomplete-${inputId}`];
         delete this.debounceTimers[`input-${inputId}`];
     }
@@ -673,12 +629,10 @@ class InputManager {
     cleanupAll() {
         console.log("Cleaning up all input resources");
         
-        // Clean up all suggestion boxes
         Object.keys(this.suggestionBoxes).forEach(inputId => {
             this.cleanupInput(inputId);
         });
         
-        // Additional cleanup of any suggestion divs left in DOM
         document.querySelectorAll('.suggestions').forEach(box => {
             if (box.id && box.id.includes('Suggestions')) {
                 box.remove();
@@ -691,17 +645,14 @@ class InputManager {
     }
     
     cleanup() {
-        // Disconnect all resize observers
         this.resizeObservers.forEach(observer => observer.disconnect());
         this.resizeObservers = [];
         
-        // Disconnect mutation observer
         if (this.mutationObserver) {
             this.mutationObserver.disconnect();
             this.mutationObserver = null;
         }
         
-        // Clean up suggestion boxes
         Object.values(this.suggestionBoxes).forEach(box => {
             if (box && document.body.contains(box)) {
                 box.remove();
@@ -728,7 +679,6 @@ class InputManager {
         const isOriginField = waypointIndex % 2 === 0;
         
         if (isOriginField) {
-            // If this is an origin field, focus the destination field
             const destId = `waypoint-input-${inputNumber + 1}`;
             const destField = document.getElementById(destId);
             
@@ -736,20 +686,16 @@ class InputManager {
                 requestAnimationFrame(() => destField.focus());
             }
         } else {
-            // If this is a destination field, check if we need to create a new route
             const routeNumber = Math.floor(waypointIndex / 2);
             const nextRouteNumber = routeNumber + 1;
             
-            // Check if we have a complete route (both origin and destination)
             const currentRoute = appState.routeData[routeNumber];
             if (currentRoute && currentRoute.origin && currentRoute.destination) {
-                // Check if next route already exists
                 const nextRouteExists = appState.routeData[nextRouteNumber] && 
                     (appState.routeData[nextRouteNumber].origin || 
                      appState.routeData[nextRouteNumber].destination);
                 
                 if (!nextRouteExists) {
-                    // Focus the next origin field
                     const nextOriginId = `waypoint-input-${(nextRouteNumber * 2) + 1}`;
                     const nextOriginField = document.getElementById(nextOriginId);
                     
@@ -764,18 +710,15 @@ class InputManager {
     handleAirportSelection(inputId, airport) {
         console.log(`Airport selected for ${inputId}:`, airport);
         
-        // Check if the airport data is valid before proceeding
         if (!airport) {
             console.warn(`Invalid airport data for ${inputId}`);
             return;
         }
         
-        // Get information about the current field
         const waypointIndex = parseInt(inputId.replace(/\D/g, ''), 10) - 1;
         const routeNumber = Math.floor(waypointIndex / 2);
         const isOrigin = waypointIndex % 2 === 0;
         
-        // Update directly in routeData
         if (!appState.routeData[routeNumber]) {
             appState.routeData[routeNumber] = {
                 tripType: 'oneWay',
@@ -785,7 +728,6 @@ class InputManager {
             };
         }
         
-        // Use updateRouteData to update the field
         const updateData = {};
         if (isOrigin) {
             updateData.origin = airport;
@@ -798,7 +740,6 @@ class InputManager {
             data: updateData
         }, 'inputManager.handleAirportSelection');
         
-        // Find the paired field
         const pairIndex = isOrigin ? waypointIndex + 1 : waypointIndex - 1;
         const pairFieldId = `waypoint-input-${pairIndex + 1}`;
         const pairField = document.getElementById(pairFieldId);
@@ -810,23 +751,18 @@ class InputManager {
             return;
         }
         
-        // Origin field focusing destination
         if (isOrigin) {
             if (pairField) {
-                // Check for empty value - ensure we check against 'Anywhere' and empty string
                 const pairValue = pairField.value.trim();
                 const isAnyDestination = pairField.getAttribute('data-is-any-destination') === 'true';
                 const iataCode = pairField.getAttribute('data-selected-iata');
                 
-                // Consider "Anywhere" as NOT a valid value for focusing purposes
                 const isAnywhere = pairValue === 'Anywhere' || isAnyDestination || iataCode === 'Any';
                 const hasValidDestination = pairValue !== '' && !isAnywhere;
                 
                 console.log(`Destination field check: value="${pairValue}", isAny=${isAnywhere}, hasValid=${hasValidDestination}`);
                 
-                // Only focus if it's truly empty or set to Anywhere and we just set the origin
                 if (!hasValidDestination) {
-                    // Clear the "Anywhere" value before focusing to start fresh
                     if (isAnywhere && airport.iata_code !== 'Any') {
                         console.log(`Clearing Anywhere from destination field before focusing`);
                         pairField.value = '';
@@ -834,7 +770,6 @@ class InputManager {
                         pairField.removeAttribute('data-is-any-destination');
                         pairField.readOnly = false;
                         
-                        // Also clear from routeData
                         const route = appState.routeData[routeNumber];
                         if (route) {
                             route.destination = null;
@@ -843,17 +778,13 @@ class InputManager {
                     
                     console.log(`Focusing empty/anywhere destination field ${pairFieldId}`);
                     
-                    // Set up destination for automatic suggestions after focus
                     const routeData = appState.routeData[routeNumber];
                     if (routeData && routeData.origin && routeData.origin.iata_code !== 'Any') {
-                        // Set a special flag to enable automatic suggestions
                         routeData._destinationNeedsEmptyFocus = true;
                     }
                     
-                    // Use direct focus here
                     pairField.focus();
                     
-                    // Immediate trigger for suggestions - don't wait for the normal focus event
                     import('./airportAutocomplete.js').then(module => {
                         module.updateSuggestions(pairFieldId, []);
                     });
@@ -864,23 +795,19 @@ class InputManager {
                 console.log(`Destination field ${pairFieldId} doesn't exist`);
             }
         } else {
-            // Handle destination field selection - may need to focus origin if it's empty
             if (pairField) {
                 const pairValue = pairField.value.trim();
                 const isAnyOrigin = pairField.getAttribute('data-is-any-destination') === 'true';
                 const iataCode = pairField.getAttribute('data-selected-iata');
                 
-                // Check if origin is empty or set to Anywhere
                 const isAnywhere = pairValue === 'Anywhere' || isAnyOrigin || iataCode === 'Any';
                 const hasValidOrigin = pairValue !== '' && !isAnywhere;
                 
                 console.log(`Origin field check: value="${pairValue}", isAny=${isAnywhere}, hasValid=${hasValidOrigin}`);
                 
                 if (!hasValidOrigin) {
-                    // If destination is set but origin is empty, focus the origin field
                     console.log(`Focusing empty/anywhere origin field ${pairFieldId}`);
                     
-                    // Clear the "Anywhere" value if it's set
                     if (isAnywhere && airport.iata_code !== 'Any') {
                         console.log(`Clearing Anywhere from origin field before focusing`);
                         pairField.value = '';
@@ -888,23 +815,19 @@ class InputManager {
                         pairField.removeAttribute('data-is-any-destination');
                         pairField.readOnly = false;
                         
-                        // Also clear from routeData
                         const route = appState.routeData[routeNumber];
                         if (route) {
                             route.origin = null;
                         }
                     }
                     
-                    // Set a flag in route data for the origin field
                     const routeData = appState.routeData[routeNumber];
                     if (routeData && routeData.destination && routeData.destination.iata_code !== 'Any') {
                         routeData._originNeedsEmptyFocus = true;
                     }
                     
-                    // Focus the origin field
                     pairField.focus();
                     
-                    // Trigger suggestions immediately
                     import('./airportAutocomplete.js').then(module => {
                         module.updateSuggestions(pairFieldId, []);
                     });
@@ -913,15 +836,12 @@ class InputManager {
                 }
             }
             
-            // If not focusing the origin, check if we should create a new route
             const nextRouteNumber = routeNumber + 1;
             const nextOriginId = `waypoint-input-${(nextRouteNumber * 2) + 1}`;
             const nextOriginField = document.getElementById(nextOriginId);
             
-            // Check if we have a complete route and the next route doesn't exist yet
             const currentRoute = appState.routeData[routeNumber];
             
-            // Check if next route already exists in routeData
             const nextRouteExists = appState.routeData[nextRouteNumber] && 
                 (appState.routeData[nextRouteNumber].origin || 
                  appState.routeData[nextRouteNumber].destination);
@@ -936,17 +856,12 @@ class InputManager {
     }
 
     init() {
-        // Clean up any existing observers and handlers
         this.cleanup();
         
-        // Set up event listeners for viewport changes
         window.addEventListener('resize', () => this.repositionAllSuggestionBoxes());
         window.addEventListener('scroll', () => this.repositionAllSuggestionBoxes());
         
-        // Set up resize observers for InfoPane
         this.setupResizeObservers();
-        
-        // Set up mutation observer for DOM changes
         this.setupMutationObserver();
         
         console.log("InputManager initialized");
@@ -963,27 +878,23 @@ class InputManager {
             this.resizeObservers.push(observer);
         }
         
-        // Also observe the resize handle for drag operations
         const resizeHandle = document.getElementById('resizeHandle');
         if (resizeHandle) {
             resizeHandle.addEventListener('mousedown', () => {
-                // Track dragging with an interval for continuous updates
                 const dragInterval = setInterval(() => {
                     this.repositionAllSuggestionBoxes();
                 }, 10);
                 
-                // Clear interval when dragging stops
                 const stopDragging = () => {
                     clearInterval(dragInterval);
                     document.removeEventListener('mouseup', stopDragging);
-                    this.repositionAllSuggestionBoxes(); // One final update
+                    this.repositionAllSuggestionBoxes();
                 };
                 
                 document.addEventListener('mouseup', stopDragging);
             });
         }
         
-        // Monitor transitions on the InfoPane
         if (infoPaneElement) {
             infoPaneElement.addEventListener('transitionend', () => {
                 this.repositionAllSuggestionBoxes();
@@ -1000,7 +911,6 @@ class InputManager {
             let needsUpdate = false;
             
             for (const mutation of mutations) {
-                // Check if the mutation involves one of our input fields or their ancestors
                 const affectsInputs = mutation.target.id === 'infoPaneContent' || 
                     mutation.target.id === 'routeBoxContainer' ||
                     mutation.target.classList?.contains('input-wrapper') ||
@@ -1011,7 +921,6 @@ class InputManager {
                     break;
                 }
                 
-                // Also check if style or class attributes changed that could affect position
                 if (mutation.type === 'attributes' && 
                     (mutation.attributeName === 'style' || mutation.attributeName === 'class')) {
                     const isRelevantElement = mutation.target.id === 'infoPane' ||
@@ -1030,7 +939,6 @@ class InputManager {
             }
         });
         
-        // Observe the entire infoPane for changes
         const infoPane = document.getElementById('infoPane');
         if (infoPane) {
             this.mutationObserver.observe(infoPane, { 
@@ -1045,7 +953,6 @@ class InputManager {
 
 const inputManager = new InputManager();
 
-// Initialize on DOMContentLoaded
 document.addEventListener('DOMContentLoaded', () => {
     inputManager.init();
 });
