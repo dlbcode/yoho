@@ -95,6 +95,13 @@ export const infoPaneHeight = {
 
         infoPane.style.height = `${height}px`;
         adjustMapSize();
+
+        // Reposition suggestion boxes after height changes
+        setTimeout(() => {
+            import('../inputManager.js').then(({ inputManager }) => {
+                inputManager.repositionAllSuggestionBoxes();
+            }).catch(console.error);
+        }, 50); // Short timeout to ensure DOM updates
     },
 
     setHeightRatio(ratio) {
@@ -111,6 +118,13 @@ export const infoPaneHeight = {
                 this.setHeight('content', { contentElement: routeBox });
             }
         }
+
+        // Reposition suggestion boxes after height changes
+        setTimeout(() => {
+            import('../inputManager.js').then(({ inputManager }) => {
+                inputManager.repositionAllSuggestionBoxes();
+            }).catch(console.error);
+        }, 300); // After transition completes
     },
 
     // Add a new standardized method for route details views

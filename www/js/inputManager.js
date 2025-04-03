@@ -7,6 +7,7 @@ class InputManager {
         this.debounceTimers = {};
         this.suggestionBoxes = {};
         this.inputStates = {};
+        this.resizeObservers = [];
     }
 
     debounce(func, delay, id) {
@@ -367,94 +368,61 @@ class InputManager {
             this.inputStates[inputId].selectedSuggestionIndex = -1;
         }
     }
-    
-    // Optimize the positionSuggestionBox method which is called frequently
+
     positionSuggestionBox(inputId) {
-        const inputField = document.getElementById(inputId);
+        const input = document.getElementById(inputId);
         const suggestionBox = this.suggestionBoxes[inputId];
         
-        if (!suggestionBox) return;
+        if (!input || !suggestionBox) return;
         
-        // If input doesn't exist anymore, clean up this suggestion box
-        if (!inputField || !document.body.contains(inputField)) {
-            console.log(`Input ${inputId} not found, cleaning up suggestion box`);
-            if (suggestionBox && document.body.contains(suggestionBox)) {
-                suggestionBox.remove();
+        // Get the most accurate position using getBoundingClientRect
+        const rect = input.getBoundingClientRect();
+        
+        // Check if input is actually visible
+        if (rect.width === 0 && rect.height === 0) {
+            suggestionBox.style.display = 'none';
+            return;
+        }
+        
+        // Default to positioning above the input element
+        // Calculate the position for the suggestion box
+        const left = rect.left;
+        const top = rect.top;
+        const width = Math.max(rect.width, 200); // Minimum width of 200px
+
+        // Get the actual height of the suggestion box
+        const boxHeight = suggestionBox.offsetHeight || 200; // Default height if not rendered yet
+
+        // Position the box above the input by default
+        suggestionBox.style.position = 'fixed';
+        suggestionBox.style.left = `${left}px`;
+        suggestionBox.style.width = `${width}px`;
+        suggestionBox.style.top = `${top - boxHeight}px`; // Position above the input
+        suggestionBox.style.bottom = 'auto';
+        suggestionBox.style.zIndex = '10000'; // Ensure it's always on top
+        
+        // Add appropriate class for styling
+        suggestionBox.classList.add('suggestions-above');
+        suggestionBox.classList.remove('suggestions-below');
+        
+        // Show the box if suggestions exist and should be shown
+        if (this.inputStates[inputId]?.showSuggestions && 
+            this.inputStates[inputId]?.suggestions?.length > 0) {
+            suggestionBox.style.display = 'block';
+        }
+    }
+
+    repositionAllSuggestionBoxes() {
+        Object.keys(this.suggestionBoxes).forEach(id => {
+            const input = document.getElementById(id);
+            const box = this.suggestionBoxes[id];
+            
+            if (input && document.body.contains(input) && box) {
+                this.positionSuggestionBox(id);
             }
-            delete this.suggestionBoxes[inputId];
-            delete this.inputStates[inputId];
-            return;
-        }
-    
-        const isMobile = this.isMobile();
-        
-        // Mobile optimization - use fixed positioning for all mobile suggestion boxes
-        if (isMobile) {
-            Object.assign(suggestionBox.style, {
-                position: 'fixed',
-                zIndex: '10000',
-                display: suggestionBox.children.length > 0 ? 'block' : 'none',
-                top: '50px',
-                left: '0',
-                width: '100%',
-                maxHeight: 'calc(100vh - 50px)',
-                minHeight: 'none',
-            });
-            return;
-        }
-        
-        // Desktop positioning - optimize calculations
-        const inputRect = inputField.getBoundingClientRect();
-        let waypointContainer = inputField.closest('.waypoint-inputs-container');
-        
-        // If container not found in current DOM, find any other container as fallback
-        if (!waypointContainer) {
-            waypointContainer = document.querySelector('.waypoint-inputs-container');
-        }
-        
-        // Ensure we have a valid container to calculate from
-        if (!waypointContainer) {
-            // Fallback positioning if container not found
-            Object.assign(suggestionBox.style, {
-                position: 'fixed',
-                zIndex: '10000',
-                display: suggestionBox.children.length > 0 ? 'block' : 'none',
-                width: `${inputRect.width}px`,
-                left: `${inputRect.left}px`,
-                maxHeight: '200px',
-                top: `${inputRect.bottom}px`,
-                bottom: 'auto',
-            });
-            return;
-        }
-        
-        const containerRect = waypointContainer.getBoundingClientRect();
-        const viewportHeight = window.innerHeight;
-        const maxMenuHeight = 200;
-        const spaceBelow = viewportHeight - inputRect.bottom;
-        const spaceAbove = inputRect.top;
-        const showAbove = spaceBelow < maxMenuHeight && spaceAbove >= maxMenuHeight;
-        
-        const waypointIndex = parseInt(inputField.id.replace(/\D/g, ''), 10) - 1;
-        const isOriginField = waypointIndex % 2 === 0;
-        
-        const suggestionWidth = containerRect.width;
-        let left = isOriginField ? inputRect.left : (inputRect.right - suggestionWidth);
-        left = Math.max(0, Math.min(left, window.innerWidth - suggestionWidth));
-        
-        // Apply all styles at once for better performance
-        Object.assign(suggestionBox.style, {
-            position: 'fixed',
-            zIndex: '10000',
-            display: suggestionBox.children.length > 0 ? 'block' : 'none',
-            width: `${suggestionWidth}px`,
-            left: `${left}px`,
-            maxHeight: `${Math.min(maxMenuHeight, showAbove ? spaceAbove : spaceBelow)}px`,
-            [showAbove ? 'bottom' : 'top']: `${showAbove ? viewportHeight - inputRect.top : inputRect.bottom}px`,
-            [showAbove ? 'top' : 'bottom']: 'auto',
         });
     }
-    
+
     expandInput(inputId) {
         const inputField = document.getElementById(inputId);
         const suggestionBox = this.suggestionBoxes[inputId];
@@ -731,23 +699,33 @@ class InputManager {
     }
     
     cleanup() {
+        // Disconnect all resize observers
+        this.resizeObservers.forEach(observer => observer.disconnect());
+        this.resizeObservers = [];
+        
+        // Disconnect mutation observer
+        if (this.mutationObserver) {
+            this.mutationObserver.disconnect();
+            this.mutationObserver = null;
+        }
+        
+        // Clean up suggestion boxes
         Object.values(this.suggestionBoxes).forEach(box => {
             if (box && document.body.contains(box)) {
                 box.remove();
             }
         });
         
-        document.querySelectorAll('.route-box-overlay').forEach(overlay => {
-            overlay.remove();
-        });
+        this.suggestionBoxes = {};
+        this.inputStates = {};
         
         Object.keys(this.inputStates).forEach(inputId => {
             this.cleanupInputListeners(inputId);
         });
         
-        this.suggestionBoxes = {};
-        this.inputStates = {};
-        this.debounceTimers = {};
+        document.querySelectorAll('.route-box-overlay').forEach(overlay => {
+            overlay.remove();
+        });
     }
 
     focusPairedInputField(inputId) {
@@ -964,8 +942,117 @@ class InputManager {
             }
         }
     }
+
+    init() {
+        // Set up event listeners for window events
+        window.addEventListener('resize', () => this.repositionAllSuggestionBoxes());
+        window.addEventListener('scroll', () => this.repositionAllSuggestionBoxes());
+        
+        // Set up observers for InfoPane resizing
+        this.setupResizeObservers();
+        
+        // Set up mutation observer for DOM changes
+        this.setupMutationObserver();
+        
+        console.log("InputManager initialized with positioning enhancement");
+    }
+    
+    setupResizeObservers() {
+        const infoPaneElement = document.getElementById('infoPane');
+        if (infoPaneElement && window.ResizeObserver) {
+            const observer = new ResizeObserver(() => {
+                this.repositionAllSuggestionBoxes();
+            });
+            
+            observer.observe(infoPaneElement);
+            this.resizeObservers.push(observer);
+        }
+        
+        // Also observe the resize handle for drag operations
+        const resizeHandle = document.getElementById('resizeHandle');
+        if (resizeHandle) {
+            resizeHandle.addEventListener('mousedown', () => {
+                // Track dragging with an interval for continuous updates
+                const dragInterval = setInterval(() => {
+                    this.repositionAllSuggestionBoxes();
+                }, 10);
+                
+                // Clear interval when dragging stops
+                const stopDragging = () => {
+                    clearInterval(dragInterval);
+                    document.removeEventListener('mouseup', stopDragging);
+                    this.repositionAllSuggestionBoxes(); // One final update
+                };
+                
+                document.addEventListener('mouseup', stopDragging);
+            });
+        }
+        
+        // Monitor transitions on the InfoPane
+        if (infoPaneElement) {
+            infoPaneElement.addEventListener('transitionend', () => {
+                this.repositionAllSuggestionBoxes();
+            });
+        }
+    }
+    
+    setupMutationObserver() {
+        if (this.mutationObserver) {
+            this.mutationObserver.disconnect();
+        }
+        
+        this.mutationObserver = new MutationObserver((mutations) => {
+            let needsUpdate = false;
+            
+            for (const mutation of mutations) {
+                // Check if the mutation involves one of our input fields or their ancestors
+                const affectsInputs = mutation.target.id === 'infoPaneContent' || 
+                    mutation.target.id === 'routeBoxContainer' ||
+                    mutation.target.classList?.contains('input-wrapper') ||
+                    mutation.target.querySelector('.waypoint-input');
+                    
+                if (affectsInputs) {
+                    needsUpdate = true;
+                    break;
+                }
+                
+                // Also check if style or class attributes changed that could affect position
+                if (mutation.type === 'attributes' && 
+                    (mutation.attributeName === 'style' || mutation.attributeName === 'class')) {
+                    const isRelevantElement = mutation.target.id === 'infoPane' ||
+                        mutation.target.classList?.contains('route-box') ||
+                        mutation.target.classList?.contains('input-wrapper');
+                        
+                    if (isRelevantElement) {
+                        needsUpdate = true;
+                        break;
+                    }
+                }
+            }
+            
+            if (needsUpdate) {
+                this.repositionAllSuggestionBoxes();
+            }
+        });
+        
+        // Observe the entire infoPane for changes
+        const infoPane = document.getElementById('infoPane');
+        if (infoPane) {
+            this.mutationObserver.observe(infoPane, { 
+                childList: true, 
+                subtree: true, 
+                attributes: true,
+                attributeFilter: ['style', 'class'] 
+            });
+        }
+    }
 }
 
 const inputManager = new InputManager();
+
+// Initialize on DOMContentLoaded
+document.addEventListener('DOMContentLoaded', () => {
+    inputManager.init();
+});
 
 export { inputManager };
