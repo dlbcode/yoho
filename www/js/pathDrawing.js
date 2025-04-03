@@ -74,14 +74,17 @@ class Line {
     }
 
     getBaseLineOptions(isInvisible = false) {
-        return {
+        const baseOptions = {
             weight: isInvisible ? 10 : this.weight,
             opacity: isInvisible ? 0.1 : 1,
             color: this.color,
             wrap: false,
-            noClip: true, // Prevent clipping
-            ...(this.type === 'dashed' ? { dashArray: '5, 10' } : {})
+            noClip: true
         };
+        if (!isInvisible && this.type === 'dashed') {
+            baseOptions.dashArray = '5, 10';
+        }
+        return baseOptions;
     }
 
     adjustForAntimeridian(latLng1, latLng2) {
