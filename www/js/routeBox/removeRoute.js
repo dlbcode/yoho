@@ -160,27 +160,50 @@ const removeRouteButton = (container, routeNumber) => {
     
     // Update the click handler to check if this is a selected route
     removeButton.onclick = () => {
+        // Add debug logging to see what's happening
+        console.log(`Remove button clicked for route ${routeNumber}`);
+        console.log(`Route data:`, appState.routeData[routeNumber]);
+        
         // Check if this is a selected route with a group - use routeData instead of selectedRoutes
         const selectedRouteData = appState.routeData[routeNumber]?.selectedRoute;
         const isSelectedRoute = selectedRouteData !== undefined;
         const groupNumber = selectedRouteData?.group;
         
-        // Check for multiple segments using routeData
-        const hasMultipleSegments = isSelectedRoute && 
-            Object.values(appState.routeData)
-                .filter(route => route?.selectedRoute?.group === groupNumber)
-                .length > 1;
+        console.log(`Is selected route: ${isSelectedRoute}, Group number: ${groupNumber}`);
         
-        if (isSelectedRoute && hasMultipleSegments) {
+        // Nothing happens if there's no group, so make sure we check for that
+        if (!isSelectedRoute || groupNumber === undefined) {
+            console.log(`Route ${routeNumber} is not a selected route or has no group, removing directly`);
+            removeRoute(routeNumber);
+            return;
+        }
+        
+        // Check for multiple segments using routeData - with clearer logging
+        const groupSegments = Object.entries(appState.routeData)
+            .filter(([_, route]) => {
+                const isInGroup = route?.selectedRoute?.group === groupNumber;
+                if (isInGroup) {
+                    console.log(`Found route in group ${groupNumber}:`, route);
+                }
+                return isInGroup;
+            });
+            
+        const hasMultipleSegments = groupSegments.length > 1;
+        
+        console.log(`Group ${groupNumber} has ${groupSegments.length} segments`);
+        
+        if (hasMultipleSegments) {
             // Show the removal modal for selected routes with multiple segments
+            console.log(`Showing removal modal for route ${routeNumber} in group ${groupNumber}`);
             showRouteRemovalModal(routeNumber);
         } else {
             // Perform direct removal for non-selected routes or single-segment routes
+            console.log(`Removing route ${routeNumber} directly (single segment or no group)`);
             removeRoute(routeNumber);
         }
     };
     
-    removeButton.innerHTML = `<img src="./assets/trash_icon.svg" alt="Remove" style="width: 20px; height: 20px;">`; // Use trash icon
+    removeButton.innerHTML = `<img src="./assets/trash_icon.svg" alt="Remove" style="width: 20px; height: 20px;">`;
     if (container instanceof HTMLElement) {
         container.appendChild(removeButton);
     } else {

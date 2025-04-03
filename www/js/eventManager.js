@@ -4,6 +4,7 @@ import { appState, updateState, parseUrlRoutes } from './stateManager.js';
 import { routeHandling } from './routeHandling.js';
 import { mapHandling } from './mapHandling.js';
 import { lineManager } from './lineManager.js';
+import { pathDrawing } from './pathDrawing.js';
 
 const clearLinesForView = (view) => 
     view === 'routeDeck' 
@@ -40,7 +41,7 @@ const stateHandlers = {
         const hasValidRoutes = appState.routeData.some(r => r && !r.isEmpty && 
             ((r.origin && r.origin.iata_code) || (r.destination && r.destination.iata_code)));
         
-        if (!hasValidRoutes && !appState.selectedRoutes[0]) {
+        if (!hasValidRoutes) {
             appState.currentView = 'trip';
         }
     }
@@ -48,11 +49,41 @@ const stateHandlers = {
 
 const handleStateChange = (event) => {
     const { key, value } = event.detail;
-    stateHandlers[key]?.(value);
+    
+    if (key === 'updateWaypoint' || key === 'updateRouteData' || 
+        key === 'updateRoutes' || key === 'removeRoute') {
+        eventManager.updateRoutes();
+    } else {
+        stateHandlers[key]?.(value);
+    }
 };
 
 const eventManager = {
     init() {
+        document.addEventListener('stateChange', handleStateChange);
+        
+        // Add ability to disable hover on markers when a popup is open
+        map.addEventListener('popupclose', () => {
+            flightMap.hoverDisabled = false;
+            flightMap.preservedMarker = null;
+        });
+        
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                lineManager.clearLines('hover');
+                flightMap.hoverDisabled = false;
+                flightMap.preservedMarker = null;
+                
+                // Close any open popups
+                map.closePopup();
+                
+                // Remove any selected airport
+                if (appState.selectedAirport) {
+                    updateState('selectedAirport', null, 'eventManager.escKey');
+                }
+            }
+        });
+
         this.allPathsBtn = document.getElementById('allPathsBtn');
         this.setupEventListeners();
     },
@@ -61,7 +92,6 @@ const eventManager = {
         this.setupMapEventListeners();
         this.setupAllPathsButtonEventListener();
         this.setupDocumentEventListeners();
-        document.addEventListener('stateChange', handleStateChange);
         window.onpopstate = this.handlePopState;
     },
 
@@ -159,21 +189,56 @@ const eventManager = {
     },
 
     attachMarkerEventListeners(iata, marker, airport) {
-        const events = {
-            mouseover: () => flightMap.markerHoverHandler(iata, 'mouseover'),
-            mouseout: () => flightMap.markerHoverHandler(iata, 'mouseout'),
-            click: () => flightMap.handleMarkerClick(airport, marker)
-        };
-
-        Object.entries(events).forEach(([event, handler]) => {
-            marker.on(event, handler);
-        });
+        marker.addEventListener('mouseover', () => this.onMarkerMouseOver(iata, airport));
+        marker.addEventListener('mouseout', () => this.onMarkerMouseOut(iata, airport));
+        marker.addEventListener('click', e => this.onMarkerClick(iata, marker, airport, e));
     },
 
     emitCustomEvent(eventName, data) {
         if (eventName === 'markerCreated') {
             this.attachMarkerEventListeners(data.iata, data.marker, data.airport);
         }
+    },
+
+    updateRoutes() {
+        // Filter out routes with empty or undefined data
+        const validRoutes = appState.routeData
+            .filter(route => route && !route.isEmpty && 
+                   route.origin && route.destination);
+        
+        // Process each route
+        validRoutes.forEach(route => {
+            const origin = route.origin?.iata_code;
+            const destination = route.destination?.iata_code;
+            
+            if (origin && destination) {
+                flightMap.getAirportDataByIata(origin).then(originAirport => {
+                    flightMap.getAirportDataByIata(destination).then(destAirport => {
+                        if (originAirport && destAirport) {
+                            const routeId = `${origin}-${destination}`;
+                            pathDrawing.drawLine(routeId, 'route', {
+                                price: route.price,
+                                routeNumber: appState.routeData.indexOf(route),
+                                isDirect: route.isDirect || false
+                            });
+                        }
+                    });
+                });
+            }
+        });
+    },
+
+    onMarkerMouseOver(iata, airport) {
+        flightMap.markerHoverHandler(iata, 'mouseover');
+    },
+
+    onMarkerMouseOut(iata, airport) {
+        flightMap.markerHoverHandler(iata, 'mouseout');
+    },
+
+    onMarkerClick(iata, marker, airport, e) {
+        e.originalEvent.stopPropagation(); // Prevent bubbling
+        flightMap.handleMarkerClick(airport, marker);
     }
 };
 
