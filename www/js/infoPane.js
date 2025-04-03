@@ -104,11 +104,19 @@ const infoPane = {
         appState.routeData.forEach((route, index) => {
             if (!route || route.isEmpty) return;
 
+            // Skip creating buttons for routes that don't have at least one valid waypoint
+            const origin = route.origin?.iata_code || null;
+            const destination = route.destination?.iata_code || null;
+            
+            // Check if we have at least one specific location (not "Any" and not null)
+            const hasValidOrigin = origin && origin !== 'Any';
+            const hasValidDestination = destination && destination !== 'Any';
+            
+            // Skip this route if neither origin nor destination is a specific location
+            if (!hasValidOrigin && !hasValidDestination) return;
+
             const buttonId = `route-button-${index}`;
             let button = document.getElementById(buttonId) || document.createElement('button');
-
-            const origin = route.origin?.iata_code || 'Any';
-            const destination = route.destination?.iata_code || 'Any';
 
             if (!button.id) {
                 button.id = buttonId;
@@ -126,9 +134,9 @@ const infoPane = {
 
             const originElement = document.createElement('span');
             originElement.className = 'origin-iata';
-            originElement.textContent = origin;
+            originElement.textContent = origin || 'Any';
 
-            if (origin === 'Any') {
+            if (origin === 'Any' || !origin) {
                 originElement.classList.add('any-waypoint');
             }
 
@@ -136,9 +144,9 @@ const infoPane = {
 
             const destElement = document.createElement('span');
             destElement.className = 'dest-iata';
-            destElement.textContent = destination;
+            destElement.textContent = destination || 'Any';
 
-            if (destination === 'Any') {
+            if (destination === 'Any' || !destination) {
                 destElement.classList.add('any-waypoint');
             }
 
@@ -166,17 +174,18 @@ const infoPane = {
             }
 
             button.addEventListener('mouseover', () => {
-                if (origin !== 'Any' && destination !== 'Any') {
+                if (origin && origin !== 'Any' && destination && destination !== 'Any') {
                     this.applyToLines([`route:${origin}-${destination}`], 'highlight');
                 }
             });
             button.addEventListener('mouseout', () => {
-                if (origin !== 'Any' && destination !== 'Any') {
+                if (origin && origin !== 'Any' && destination && destination !== 'Any') {
                     this.applyToLines([`route:${origin}-${destination}`], 'reset');
                 }
             });
         });
 
+        // Only show the plus button if all routes are complete or there are no routes
         const allRoutesComplete = appState.routeData.every(
             r => !r || r.isEmpty || (r.origin && r.destination)
         );
