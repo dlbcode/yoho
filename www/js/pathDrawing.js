@@ -549,12 +549,6 @@ const pathDrawing = {
         if (!flightMap.directRoutes.length) {
             return;
         }
-
-        // Safely handle directRoutes in case it's not initialized yet
-        if (!appState.directRoutes || typeof appState.directRoutes !== 'object') {
-            console.warn('directRoutes not initialized, skipping preload');
-            return;
-        }
         
         // Process direct routes in batches to avoid UI freezing
         const directRoutes = appState.directRoutes;
