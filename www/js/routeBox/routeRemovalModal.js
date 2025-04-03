@@ -9,7 +9,6 @@ import { removeRoute } from './removeRoute.js';
         link.rel = 'stylesheet';
         link.href = './css/routeRemovalModal.css'; // Use relative path
         document.head.appendChild(link);
-        console.log("Modal CSS loaded");
     }
 })();
 
@@ -18,8 +17,6 @@ import { removeRoute } from './removeRoute.js';
  * @param {number} routeNumber - The route index to potentially remove
  */
 export function showRouteRemovalModal(routeNumber) {
-    console.log(`Showing route removal modal for route ${routeNumber}`);
-    
     // Create or reuse the modal container
     let modalContainer = document.getElementById('route-removal-modal');
     if (!modalContainer) {
@@ -41,7 +38,6 @@ export function showRouteRemovalModal(routeNumber) {
 
     // Get the group ID
     const groupId = selectedRouteData.group;
-    console.log(`Route ${routeNumber} belongs to group ${groupId}`);
 
     // Find all routes in this group using the new routeData structure
     const groupSegments = Object.entries(appState.routeData)

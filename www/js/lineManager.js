@@ -41,12 +41,8 @@ const lineManager = {
             return;
         }
         
-        console.log('Clearing lines by tags:', tags);
-        
         // Use getLinesByTags to get lines instead of this.lines
         const linesToRemove = this.getLinesByTags(tags);
-        
-        console.log('Found', linesToRemove.length, 'lines to clear');
         
         // Create removeLine method if it doesn't exist or use an alternative approach
         linesToRemove.forEach(line => {
@@ -61,7 +57,6 @@ const lineManager = {
     },
 
     clearLines(type) {
-        console.log('Clearing lines:', type);
         const clearTypes = {
             all: () => this.clearLinesByTags(['type:route', 'type:hover'], 
                         { excludeTags: ['type:deck', 'status:selected'] }),
@@ -75,7 +70,6 @@ const lineManager = {
     },
 
     clearLinesByRouteNumber(routeNumber) {
-        console.log('Clearing lines by route number:', routeNumber);
         const tags = [`group:${routeNumber}`];
         return this.clearLinesByTags(tags);
     },
@@ -117,7 +111,6 @@ const lineManager = {
         this.clearPopups('route');
         const popup = this.createPopup(event.latlng, content)
             .on('remove', () => {
-                console.log('Popup removed');
                 this.linesWithPopups.delete(visibleLine);
                 pathDrawing.popupFromClick = false;
                 document.removeEventListener('click', this.outsideClickListener);

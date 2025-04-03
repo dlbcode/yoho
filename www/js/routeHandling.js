@@ -57,8 +57,6 @@ const routeHandling = {
                     if (foundRoute.lineColor) route.lineColor = foundRoute.lineColor;
                     if (foundRoute.lineStyle) route.lineStyle = foundRoute.lineStyle;
                     if (foundRoute.lineWidth) route.lineWidth = foundRoute.lineWidth;
-                    
-                    console.log(`Direct route ${originIata}-${destIata} found with price: ${foundRoute.price}`);
                 }
             }
             
@@ -91,8 +89,6 @@ const routeHandling = {
             
             processedRoutes.push(processedRoute);
         }
-        
-        console.log(`Updated ${processedRoutes.length} routes with direct route checking`);
         
         // Draw the lines for the routes
         await pathDrawing.drawLines();

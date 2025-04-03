@@ -458,8 +458,6 @@ const pathDrawing = {
     },
 
     async drawLines() {
-        console.log("Drawing routes");
-        
         // Create a compatibility structure for pathDrawing from routeData
         const validRoutes = appState.routeData
             .filter(route => route && !route.isEmpty && 
@@ -494,7 +492,6 @@ const pathDrawing = {
         });
 
         await Promise.allSettled(drawPromises);
-        console.log(`${drawPromises.length} routes drawn`);
     },
 
     getCacheForType(type) {
