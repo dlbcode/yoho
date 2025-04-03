@@ -844,7 +844,6 @@ class InputManager {
             }
             
             if (domStructureChanged) {
-                console.log('Major DOM structure change detected - recreating suggestion boxes');
                 this.recreateSuggestionBoxes();
             } 
             else if (needsRepositioning) {
