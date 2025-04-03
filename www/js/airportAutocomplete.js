@@ -8,6 +8,32 @@ const isOriginField = (waypointIndex) => waypointIndex % 2 === 0;
 const getPairIndex = (waypointIndex, isOrigin) => isOrigin ? waypointIndex + 1 : waypointIndex - 1;
 const getRouteNumber = (waypointIndex) => Math.floor(waypointIndex / 2);
 
+const getOrCreateRouteData = (routeNumber) => {
+    let routeData = appState.routeData[routeNumber];
+    if (!routeData) {
+        routeData = {
+            tripType: 'oneWay',
+            travelers: 1,
+            departDate: null,
+            returnDate: null
+        };
+        appState.routeData[routeNumber] = routeData;
+    }
+    return routeData;
+};
+
+const removeDuplicateSuggestionBoxes = (selector) => {
+    const boxes = document.querySelectorAll(selector);
+    if (boxes.length > 1) {
+        const mainBox = Array.from(boxes).find(box =>
+            box.hasAttribute('role') && box.style.position === 'fixed'
+        ) || boxes[0];
+        boxes.forEach(box => {
+            if (box !== mainBox) box.remove();
+        });
+    }
+};
+
 // Simplified API functions with shared fetch logic
 const fetchAirportsBase = async (params) => {
     try {
@@ -51,33 +77,17 @@ const handleSuggestionSelection = (inputId, suggestion) => {
     const inputField = document.getElementById(inputId);
     if (!inputField) return;
     
-    console.log(`Suggestion selected for ${inputId}:`, suggestion);
-    
     const isAnywhereOption = suggestion.getAttribute('data-is-anywhere') === 'true';
     const waypointIndex = getWaypointIndex(inputId);
     const routeNumber = getRouteNumber(waypointIndex);
+    const routeData = getOrCreateRouteData(routeNumber);
     const isOrigin = isOriginField(waypointIndex);
     
-    // Get route data for this route
-    let routeData = appState.routeData[routeNumber];
-    if (!routeData) {
-        routeData = {
-            tripType: 'oneWay',
-            travelers: 1,
-            departDate: null,
-            returnDate: null
-        };
-        appState.routeData[routeNumber] = routeData;
-    }
-    
-    // Get pair field info
     const pairIndex = getPairIndex(waypointIndex, isOrigin);
     const pairField = document.getElementById(`waypoint-input-${pairIndex + 1}`);
     const pairWaypointType = isOrigin ? 'destination' : 'origin';
     
-    // Handle "Anywhere" option or airport selection
     if (isAnywhereOption) {
-        // Check if pair is also "Any" - prevent both being "Any"
         const isPairAny = pairField && 
             (pairField.value === 'Anywhere' || 
              pairField.getAttribute('data-is-any-destination') === 'true' || 
@@ -89,7 +99,6 @@ const handleSuggestionSelection = (inputId, suggestion) => {
             return;
         }
         
-        // Create "Anywhere" waypoint object
         const anyDestination = {
             iata_code: 'Any',
             city: 'Anywhere',
@@ -99,13 +108,11 @@ const handleSuggestionSelection = (inputId, suggestion) => {
             isAnyOrigin: isOrigin,
         };
 
-        // Update field attributes
         inputField.value = 'Anywhere';
         inputField.setAttribute('data-selected-iata', 'Any');
         inputField.setAttribute('data-is-any-destination', 'true');
         inputField.readOnly = true;
 
-        // Update input state if available
         if (inputManager.inputStates[inputId]) {
             inputManager.inputStates[inputId].previousValidValue = 'Anywhere';
             inputManager.inputStates[inputId].previousIataCode = 'Any';
@@ -115,35 +122,28 @@ const handleSuggestionSelection = (inputId, suggestion) => {
             pairField.setAttribute('data-paired-with-anywhere', 'true');
         }
 
-        // Update app state - both routeData and waypoints
         if (isOrigin) {
             routeData.origin = anyDestination;
         } else {
             routeData.destination = anyDestination;
         }
         
-        // Also update waypoints for compatibility
         updateState('updateWaypoint', { 
             index: waypointIndex, 
             data: anyDestination 
         }, 'airportAutocomplete.anywhereSelection');
 
-        // Dispatch airportSelected event for Anywhere option - make sure this is dispatched BEFORE blur
-        console.log(`Dispatching airportSelected event for Anywhere option from ${inputId}`);
         inputField.dispatchEvent(new CustomEvent('airportSelected', {
             detail: { airport: anyDestination }
         }));
         
-        // Use a delay before blur to ensure event handlers complete
         setTimeout(() => {
             inputField.blur();
         }, 100);
     } else {
-        // Handle specific airport selection
         const airport = suggestion._airport;
         if (!airport) return;
         
-        // Update input field with airport data
         inputField.value = `${airport.city}, (${airport.iata_code})`;
         airport.isAnyDestination = false;
         airport.isAnyOrigin = false;
@@ -152,13 +152,11 @@ const handleSuggestionSelection = (inputId, suggestion) => {
         inputField.removeAttribute('data-paired-with-anywhere');
         inputField.readOnly = true;
         
-        // Update input state if available
         if (inputManager.inputStates[inputId]) {
             inputManager.inputStates[inputId].previousValidValue = inputField.value;
             inputManager.inputStates[inputId].previousIataCode = airport.iata_code;
         }
         
-        // Update route data
         if (isOrigin) {
             routeData.origin = airport;
         } else {
@@ -170,81 +168,54 @@ const handleSuggestionSelection = (inputId, suggestion) => {
             data: airport 
         }, 'airportAutocomplete.airportSelection');
         
-        // Dispatch the airportSelected event BEFORE blur
-        console.log(`Dispatching airportSelected event for airport ${airport.iata_code} from ${inputId}`);
         inputField.dispatchEvent(new CustomEvent('airportSelected', {
             detail: { airport }
         }));
         
-        // Let the document-level event still fire for other listeners
         document.dispatchEvent(new CustomEvent('airportSelected', { 
             detail: { airport, fieldId: inputId, eventFromField: true } 
         }));
         
-        // Use a delay before blur to ensure event handlers complete
         setTimeout(() => {
             inputField.blur();
         }, 100);
     }
     
-    // Hide suggestions immediately
     const suggestionBox = document.getElementById(`${inputId}Suggestions`);
     if (suggestionBox) suggestionBox.style.display = 'none';
 };
 
 // Update suggestions in the suggestion box
 export const updateSuggestions = (inputId, airports) => {
-    // First, clean up duplicate suggestion boxes with the same ID
-    const suggestionBoxes = document.querySelectorAll(`div[id="${inputId}Suggestions"]`);
-    if (suggestionBoxes.length > 1) {
-        // Keep the one with proper attributes or the first one
-        const mainBox = Array.from(suggestionBoxes).find(box => 
-            box.hasAttribute('role') && box.style.position === 'fixed'
-        ) || suggestionBoxes[0];
-        
-        suggestionBoxes.forEach(box => {
-            if (box !== mainBox) box.remove();
-        });
-    }
+    removeDuplicateSuggestionBoxes(`div[id="${inputId}Suggestions"]`);
 
     const suggestionBox = document.getElementById(`${inputId}Suggestions`);
     if (!suggestionBox) return;
 
-    // Clear suggestions and reset state
     suggestionBox.innerHTML = '';
     if (inputManager.inputStates[inputId]) {
         inputManager.inputStates[inputId].selectedSuggestionIndex = -1;
     }
     
-    // Ensure box is in document and has proper attributes
     if (suggestionBox.parentElement !== document.body) {
         document.body.appendChild(suggestionBox);
     }
     
-    // Ensure box has proper role attribute
     if (!suggestionBox.hasAttribute('role')) {
         suggestionBox.setAttribute('role', 'listbox');
     }
     
-    // Add appropriate class if missing
     if (!suggestionBox.classList.contains('suggestions-above')) {
         suggestionBox.classList.add('suggestions-above');
     }
 
-    // Determine if "Anywhere" option is needed
     const waypointIndex = getWaypointIndex(inputId);
     const isOrigin = isOriginField(waypointIndex);
-    const routeNumber = Math.floor(waypointIndex / 2);
+    const routeNumber = getRouteNumber(waypointIndex);
     const pairIndex = getPairIndex(waypointIndex, isOrigin);
     const pairField = document.getElementById(`waypoint-input-${pairIndex + 1}`);
-    
-    // Get route data to check special conditions
     const routeData = appState.routeData[routeNumber];
-    
-    // Define pairWaypointType based on current field type
     const pairWaypointType = isOrigin ? 'destination' : 'origin';
-    
-    // Check if paired field has "Any" value
     const isPairAny = pairField && 
         (pairField.value === 'Anywhere' ||
          pairField.getAttribute('data-is-any-destination') === 'true' ||
@@ -254,13 +225,11 @@ export const updateSuggestions = (inputId, airports) => {
     const inputField = document.getElementById(inputId);
     let hasAddedSuggestions = false;
 
-    // Handle special focus cases
     const emptyInputWithFocus = 
         inputField && 
         document.activeElement === inputField && 
         !inputField.value.trim();
     
-    // Check for destination field that needs suggestions (after origin selection)
     const isDestWithOrigin = 
         !isOrigin && 
         !inputField.value.trim() && 
@@ -268,7 +237,6 @@ export const updateSuggestions = (inputId, airports) => {
         routeData.origin && 
         (document.activeElement === inputField || routeData._destinationNeedsEmptyFocus);
     
-    // New check for origin field that needs suggestions (after destination selection)
     const isOriginWithDest = 
         isOrigin && 
         !inputField.value.trim() && 
@@ -276,19 +244,15 @@ export const updateSuggestions = (inputId, airports) => {
         routeData.destination && 
         (document.activeElement === inputField || routeData._originNeedsEmptyFocus);
     
-    // Reset the flags after use
     if (routeData) {
         if (routeData._destinationNeedsEmptyFocus) {
-            console.log('Showing suggestions for destination after origin was set');
             delete routeData._destinationNeedsEmptyFocus;
         }
         if (routeData._originNeedsEmptyFocus) {
-            console.log('Showing suggestions for origin after destination was set');
             delete routeData._originNeedsEmptyFocus;
         }
     }
 
-    // If we need to show the Anywhere option, add it
     const showAnywhereOption = 
         (emptyInputWithFocus || isDestWithOrigin || isOriginWithDest || 
          (airports.length === 0 && inputField && inputField.value.trim() === '')) && 
@@ -309,12 +273,10 @@ export const updateSuggestions = (inputId, airports) => {
             inputManager.inputStates[inputId].selectedSuggestionIndex = 0;
         }
         
-        // Make sure suggestion box is visible for empty focused field
         suggestionBox.style.display = 'block';
         inputManager.positionSuggestionBox(inputId);
     }
 
-    // Add airport suggestions
     airports.forEach((airport, index) => {
         const div = document.createElement('div');
         div.textContent = `${airport.name} (${airport.iata_code}) - ${airport.city}, ${airport.country}`;
@@ -335,9 +297,7 @@ export const updateSuggestions = (inputId, airports) => {
         suggestionBox.appendChild(div);
     });
 
-    // Add event delegation if not already present
     if (!suggestionBox._hasEventListeners) {
-        // Single handler for all interactions
         const handleSuggestionInteraction = function(e) {
             if (e.type.startsWith('touch') && e.cancelable) {
                 e.preventDefault();
@@ -346,7 +306,6 @@ export const updateSuggestions = (inputId, airports) => {
             const suggestion = e.target.closest('div');
             if (!suggestion) return;
             
-            // For mousedown/touchstart, just highlight the item
             if (e.type === 'mousedown' || e.type === 'touchstart') {
                 Array.from(this.querySelectorAll('div')).forEach(item => item.classList.remove('selected'));
                 suggestion.classList.add('selected');
@@ -356,31 +315,22 @@ export const updateSuggestions = (inputId, airports) => {
                         Array.from(this.querySelectorAll('div')).indexOf(suggestion);
                 }
                 
-                // Prevent default to avoid losing focus
                 e.preventDefault();
                 return;
             }
             
-            // For click/touchend, handle selection
             if (e.type === 'click' || e.type === 'touchend') {
-                // Both click and touchend should stop propagation to prevent conflicts
                 e.stopPropagation();
-                
-                // Explicitly handle selection regardless of event type
                 handleSuggestionSelection(inputId, suggestion);
-                
-                // Prevent default action to avoid navigation issues
                 e.preventDefault();
             }
         };
         
-        // Attach event listeners
         ['mousedown', 'click', 'touchstart', 'touchend'].forEach(eventType => {
-            const options = { passive: false };  // Use non-passive for all to ensure preventDefault works
+            const options = { passive: false };
             suggestionBox.addEventListener(eventType, handleSuggestionInteraction, options);
         });
         
-        // Add hover behavior
         suggestionBox.addEventListener('mouseover', function(e) {
             const suggestion = e.target.closest('div');
             if (!suggestion) return;
@@ -397,40 +347,26 @@ export const updateSuggestions = (inputId, airports) => {
         suggestionBox._hasEventListeners = true;
     }
 
-    // Position the suggestion box even for empty inputs when needed
     if (emptyInputWithFocus && suggestionBox.children.length > 0) {
         inputManager.positionSuggestionBox(inputId);
         suggestionBox.style.display = 'block';
     }
 
-    // Update UI state
     inputField.setAttribute('aria-expanded', suggestionBox.children.length > 0 ? 'true' : 'false');
     suggestionBox.style.display = suggestionBox.children.length > 0 ? 'block' : 'none';
-    suggestionBox.style.zIndex = '10000'; // Use consistent z-index
+    suggestionBox.style.zIndex = '10000';
     
-    // Always position the suggestion box regardless of content state
     inputManager.positionSuggestionBox(inputId);
 };
 
 // Setup autocomplete for a field
 export const setupAutocompleteForField = (fieldId) => {
-    // Clean up duplicate suggestion boxes before setup
     const suggestionId = `${fieldId}Suggestions`;
-    const boxes = document.querySelectorAll(`div[id="${suggestionId}"]`);
-    if (boxes.length > 1) {
-        const mainBox = Array.from(boxes).find(box => 
-            box.hasAttribute('role') && box.style.position === 'fixed'
-        ) || boxes[0];
-        
-        boxes.forEach(box => {
-            if (box !== mainBox) box.remove();
-        });
-    }
+    removeDuplicateSuggestionBoxes(`div[id="${suggestionId}"]`);
 
     const inputField = inputManager.setupWaypointInput(fieldId);
     if (!inputField) return;
 
-    // Debounce input handling
     const debouncedInputHandler = inputManager.debounce(async () => {
         const query = inputField.value;
         if (query.length >= 2) {
@@ -440,7 +376,6 @@ export const setupAutocompleteForField = (fieldId) => {
         }
     }, 200, `autocomplete-${fieldId}`);
 
-    // Override inputManager's input handler
     inputField.removeEventListener('input', inputManager.inputStates[fieldId].handlers.input);
     inputField.addEventListener('input', (e) => {
         if (inputManager.inputStates[fieldId]) {
@@ -455,23 +390,17 @@ export const setupAutocompleteForField = (fieldId) => {
         inputField.setAttribute('data-show-anywhere-option', 'true');
     }
     
-    // Clear existing listeners to prevent duplicates
     if (inputField._hasAirportListener) {
         inputField.removeEventListener('airportSelected', inputField._airportSelectedHandler);
     }
     
-    // Add event listener to handle completion
     inputField._airportSelectedHandler = (event) => {
-        console.log(`Airport selected handler triggered for ${fieldId}`);
-        
-        // Check if we need to handle special cases
         const waypointIndex = getWaypointIndex(fieldId);
-        const isOrigin = isOriginField(waypointIndex);
         const routeNumber = getRouteNumber(waypointIndex);
-        
+        const isOrigin = isOriginField(waypointIndex);
+        const airport = event.detail.airport;
+
         if (isOrigin) {
-            // If origin is set, check if destination has "Anywhere" that should be cleared
-            const airport = event.detail.airport;
             if (airport && airport.iata_code !== 'Any') {
                 const destIndex = waypointIndex + 1;
                 const destFieldId = `waypoint-input-${destIndex + 1}`;
@@ -482,17 +411,13 @@ export const setupAutocompleteForField = (fieldId) => {
                     const iataCode = destField.getAttribute('data-selected-iata');
                     
                     if (isAnyDestination || iataCode === 'Any') {
-                        console.log(`Origin set to real airport, clearing Any destination`);
                         setTimeout(() => {
-                            // Ensure this happens after state updates
                             destField.focus();
                         }, 100);
                     }
                 }
             }
         } else {
-            // If destination is set, check if origin has "Anywhere" that should be cleared
-            const airport = event.detail.airport;
             if (airport && airport.iata_code !== 'Any') {
                 const originIndex = waypointIndex - 1;
                 const originFieldId = `waypoint-input-${originIndex + 1}`;
@@ -503,9 +428,7 @@ export const setupAutocompleteForField = (fieldId) => {
                     const iataCode = originField.getAttribute('data-selected-iata');
                     
                     if (isAnyOrigin || iataCode === 'Any') {
-                        console.log(`Destination set to real airport, clearing Any origin`);
                         setTimeout(() => {
-                            // Ensure this happens after state updates
                             originField.focus();
                         }, 100);
                     }
@@ -517,7 +440,6 @@ export const setupAutocompleteForField = (fieldId) => {
     inputField.addEventListener('airportSelected', inputField._airportSelectedHandler);
     inputField._hasAirportListener = true;
 
-    // Position suggestion box
     setTimeout(() => {
         if (inputManager.suggestionBoxes[fieldId]) {
             inputManager.positionSuggestionBox(fieldId);
@@ -534,32 +456,18 @@ export const setupAutocompleteForField = (fieldId) => {
 
 // Event listeners
 document.addEventListener('DOMContentLoaded', () => {
-    // Handle airport selection for updating state and UI
     document.addEventListener('airportSelected', (event) => {
         const { airport, fieldId } = event.detail;
-        if (!fieldId) return; // Skip if fieldId is missing
+        if (!fieldId) return;
         
         const waypointIndex = getWaypointIndex(fieldId);
         const routeNumber = getRouteNumber(waypointIndex);
         const isOrigin = isOriginField(waypointIndex);
+        const routeData = getOrCreateRouteData(routeNumber);
         
-        // Get or create route data
-        let routeData = appState.routeData[routeNumber];
-        if (!routeData) {
-            routeData = {
-                tripType: 'oneWay',
-                travelers: 1,
-                departDate: null,
-                returnDate: null
-            };
-            appState.routeData[routeNumber] = routeData;
-        }
-        
-        // Update the appropriate field in routeData
         if (isOrigin) {
             routeData.origin = airport;
             
-            // If destination is already Any, and origin is now real, mark for suggestion refresh
             if (routeData.destination && routeData.destination.iata_code === 'Any' && 
                 airport.iata_code !== 'Any') {
                 routeData._destinationNeedsEmptyFocus = true;
@@ -568,18 +476,15 @@ document.addEventListener('DOMContentLoaded', () => {
             routeData.destination = airport;
         }
         
-        // Update state using only updateRouteData (remove updateWaypoint call)
         updateState('updateRouteData', {
             routeNumber: routeNumber,
             data: isOrigin ? { origin: airport } : { destination: airport }
         }, 'airportAutocomplete.handleAirportSelection');
         
-        // Update map if location data exists
         if (airport?.latitude && airport?.longitude) {
             const latLng = L.latLng(airport.latitude, airport.longitude);
             const currentLatLng = map.getCenter();
             
-            // Handle date line crossing
             let targetLng = latLng.lng;
             const lngDifference = targetLng - currentLatLng.lng;
             if (lngDifference > 180) targetLng -= 360;
@@ -588,19 +493,16 @@ document.addEventListener('DOMContentLoaded', () => {
             map.flyTo(L.latLng(latLng.lat, targetLng), 4, { animate: true, duration: 0.5 });
         }
 
-        // Focus next empty input field on desktop
         if (window.innerWidth > 600) {
             inputManager.setFocusToNextUnsetInput();
         }
     });
 
-    // Set up autocomplete for new waypoints
     document.addEventListener('stateChange', (event) => {
         if (event.detail.key === 'updateRouteDate' || 
             event.detail.key === 'addWaypoint' || 
             event.detail.key === 'updateWaypoint') {
                 
-            // Find all input fields that need autocomplete
             const inputFields = document.querySelectorAll('.waypoint-input');
             inputFields.forEach(field => {
                 if (field.id) {
