@@ -27,15 +27,11 @@ const infoPane = {
             // Check URL for routes parameter
             const urlParams = new URLSearchParams(window.location.search);
             
-            console.log("Initial load check - No routes:", hasNoRoutes, "Routes in URL:", urlParams.has('routes'));
-            
             // Create initial routeBox if needed
             if (hasNoRoutes && !urlParams.has('routes')) {
-                console.log("Creating initial routeBox");
                 this.handlePlusButtonClick();
             } else if (urlParams.has('routes') && !document.querySelector('#routeBox')) {
                 // If routes are in URL but no routeBox is displayed, show the first route
-                console.log("Displaying first route from URL");
                 const firstRouteIndex = Object.keys(appState.routeData)
                     .filter(key => appState.routeData[key] && !appState.routeData[key].isEmpty)
                     .sort((a, b) => parseInt(a) - parseInt(b))[0] || 0;
@@ -75,9 +71,7 @@ const infoPane = {
     },
 
     displayContent() {
-        //const infoPaneContent = document.getElementById('infoPaneContent'); //Unused variable
-        //const routeBox = document.getElementById('routeBox'); //Unused variable
-        //const currentView = appState.currentView; //Unused variable
+        // Remove commented-out lines and unused variables
     },
 
     // Add the missing handleRouteButtonClick method
@@ -290,15 +284,12 @@ const infoPane = {
                     const lastSegmentRoute = lastSegment.route.displayData.route;
                     const finalDestIata = lastSegmentRoute.split(' > ')[1]; // Get destination part
                     
-                    console.log(`Found multi-segment route, final destination: ${finalDestIata}`);
-                    
                     // Try to get detailed airport data
                     if (window.flightMap && window.flightMap.airportDataCache && finalDestIata) {
                         originData = window.flightMap.airportDataCache[finalDestIata] || { 
                             iata_code: finalDestIata,
                             city: finalDestIata
                         };
-                        console.log(`Using multi-segment final destination as origin:`, originData);
                         originAutoPopulated = true;
                     }
                 }
@@ -317,13 +308,10 @@ const infoPane = {
                 
                 // Make sure iata_code is preserved and not "Any"
                 if (originData.iata_code === 'Any') {
-                    console.log("Cannot use 'Any' destination as origin for new route");
                     originData = null;
                 } else {
                     originAutoPopulated = true;
                 }
-                
-                console.log(`Using previous route destination as origin:`, originData);
             }
             
             // Calculate departure date (day after previous route's return or departure date)
@@ -365,7 +353,6 @@ const infoPane = {
             setTimeout(() => {
                 const destInput = document.getElementById(`waypoint-input-${newRouteIndex * 2 + 2}`);
                 if (destInput) {
-                    console.log("Focusing destination input after auto-populating origin");
                     // Clear any pre-filled value before focusing
                     destInput.value = '';
                     destInput.readOnly = false;
@@ -385,7 +372,6 @@ const infoPane = {
     fitMapToRoute(routeIndex) {
         // Skip if map view changes are prevented
         if (appState.preventMapViewChange) {
-            console.log("Map view change prevented by flag");
             return;
         }
         
@@ -444,13 +430,7 @@ const infoPane = {
     }
 };
 
-// Remove the redundant event listeners since we now handle this in the infoPane object
-// document.querySelectorAll('.routeButton').forEach(button => {
-//     button.addEventListener('click', handleRouteButtonClick);
-// });
-
 function setupRouteContent(routeIndex) {
-    const infoPaneElement = document.getElementById('infoPane');
     const infoPaneContent = document.getElementById('infoPaneContent');
     infoPaneContent.innerHTML = '';
 
