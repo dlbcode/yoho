@@ -333,8 +333,8 @@ const flightMap = {
     },
 
     markerHoverHandler(iata, event) {
-        // Skip hover effects if there's a preserved marker and this isn't it
-        if (this.preservedMarker && this.markers[iata] !== this.preservedMarker) {
+        // Skip hover effects if an airport is selected or there's a preserved marker and this isn't it
+        if (appState.selectedAirport || (this.preservedMarker && this.markers[iata] !== this.preservedMarker)) {
             return;
         }
 
