@@ -233,21 +233,22 @@ const lineManager = {
     },
 
     onMouseOut(line) {
-        if (pathDrawing.popupFromClick || this.linesWithPopups.has(line.visibleLine)) return;
+        // Always clear hover popups
+        this.clearPopups('hover');
         
-        if (line.routeData?.cardId) {
-            const routeLines = Object.values(pathDrawing.routePathCache)
-                .flat()
-                .filter(l => l.routeData?.cardId === line.routeData.cardId);
-                
-            routeLines.forEach(routeLine => {
-                routeLine instanceof Line && routeLine.reset();
+        // Reset the specific line being moused out
+        if (line instanceof Line && !line.tags.has('status:highlighted')) {
+            line.reset();
+        } else if (line.visibleLine && !this.linesWithPopups.has(line.visibleLine)) {
+            // Reset non-Line objects to their default style
+            line.visibleLine.setStyle({
+                color: line.color || 'blue',
+                weight: line.weight || 1,
+                opacity: 1
             });
-        } else {
-            line instanceof Line && line.reset();
         }
         
-        this.clearPopups('hover');
+        // Reset the hoveredLine reference
         this.hoveredLine = null;
     },
 
