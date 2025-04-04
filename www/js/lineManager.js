@@ -28,11 +28,19 @@ const lineManager = {
             // Clear state
             pathDrawing.popupFromClick = false;
             
-            // Clear any preserved marker state
+            // Close all marker popups and reset preserved marker
             if (flightMap.preservedMarker) {
+                flightMap.preservedMarker.closePopup();
                 flightMap.preservedMarker = null;
                 flightMap.hoverDisabled = false;
             }
+            
+            // Also close popups on any other markers that might be open
+            Object.values(flightMap.markers || {}).forEach(marker => {
+                if (marker && marker._popup && marker._popup.isOpen()) {
+                    marker.closePopup();
+                }
+            });
             
             // Clear route lines
             lineManager.clearLinesByTags(['type:route']);
