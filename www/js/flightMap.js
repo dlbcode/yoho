@@ -83,16 +83,24 @@ const flightMap = {
         this.hoverDisabled = true;
         updateState('selectedAirport', airport);
 
-        // Remove old code that references waypoints
-        if (!appState.waypoints[routeIndex * 2]) {
-            updateState('updateWaypoint', { 
-                index: routeIndex * 2, 
-                data: {
-                    iata_code: origin,
-                    city: origin,
-                }
-            }, 'flightMap.handleMarkerClick');
+        // Check if the airport is already in a route
+        const routeInfo = this.findAirportInRouteData(airport.iata_code);
+        
+        // If not in a route and we have a selected airport from before, try to create a route
+        if (routeInfo === -1 && appState.selectedAirport) {
+            // Logic for handling new route creation will go here
+            // For now, just log that we detected the click
+            console.log(`Airport ${airport.iata_code} selected`);
         }
+
+        // Restore map view if needed
+        setTimeout(() => {
+            if (appState.preventMapViewChange && 
+                (!map.getCenter().equals(currentCenter) || map.getZoom() !== currentZoom)) {
+                map.setView(currentCenter, currentZoom, { animate: false });
+            }
+            appState.preventMapViewChange = false;
+        }, 100);
     },
 
     // New helper methods for route management
