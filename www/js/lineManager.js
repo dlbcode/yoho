@@ -177,8 +177,6 @@ const lineManager = {
     },
 
     onMouseOver(e, line) {
-        if (pathDrawing.popupFromClick) return;
-
         if (this.hoveredLine && this.hoveredLine !== line) {
             this.hoveredLine instanceof Line && this.hoveredLine.reset();
             this.clearPopups('hover');
