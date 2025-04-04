@@ -226,20 +226,33 @@ const flightMap = {
         clearTimeout(this.hoverTimeout); // Clear any existing hover timeout
 
         if (event === 'mouseover') {
-                this.fetchAndCacheRoutes(iata).then(routes => {
-                    if (!routes || !routes.length) {
-                        console.error('Direct routes not found for IATA:', iata);
-                        return;
-                    }
-                    // Clear existing hover lines before drawing new ones
-                    lineManager.clearLines('hover');
-                    // Only draw hover paths if no marker is preserved
-                    if (!this.preservedMarker) {
-                        pathDrawing.drawRoutePaths(iata, routes, 'hover');
-                    }
-                    marker.openPopup();
-                    marker.hovered = true;
-                });
+            this.fetchAndCacheRoutes(iata).then(routes => {
+                if (!routes || !routes.length) {
+                    console.error('Direct routes not found for IATA:', iata);
+                    return;
+                }
+                // Construct the directRoutes object expected by pathDrawing.drawRoutePaths
+                const directRoutes = {
+                    [iata]: routes.map(route => ({
+                        destinationAirport: {
+                            iata_code: route.destination,
+                            city: route.cityTo,
+                            name: route.nameTo
+                        },
+                        price: route.price,
+                        date: route.date
+                    }))
+                };
+
+                // Clear existing hover lines before drawing new ones
+                lineManager.clearLines('hover');
+                // Only draw hover paths if no marker is preserved
+                if (!this.preservedMarker) {
+                    pathDrawing.drawRoutePaths(iata, directRoutes, 'hover');
+                }
+                marker.openPopup();
+                marker.hovered = true;
+            });
         } else if (event === 'mouseout' && !this.preservedMarker) {
             this.hoverTimeout = setTimeout(() => {
                 lineManager.clearLines('hover');
