@@ -41,17 +41,15 @@ const lineManager = {
             return;
         }
         
-        // Use getLinesByTags to get lines instead of this.lines
         const linesToRemove = this.getLinesByTags(tags);
-        
-        // Create removeLine method if it doesn't exist or use an alternative approach
         linesToRemove.forEach(line => {
             if (line instanceof Line) {
-                line.remove();
+                line.remove(); // This removes visible, invisible, and decorated lines
             } else if (line.visibleLine) {
                 // For non-Line objects that might have visibleLine property
                 map.removeLayer(line.visibleLine);
                 if (line.invisibleLine) map.removeLayer(line.invisibleLine);
+                if (line.decoratedLine) map.removeLayer(line.decoratedLine); // Ensure decorated lines are removed
             }
         });
     },

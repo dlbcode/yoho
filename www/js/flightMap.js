@@ -159,30 +159,28 @@ const flightMap = {
     async fetchAndCacheAirports(currentZoom) {
         const cacheKey = `airports_${currentZoom}`;
         const cachedData = localStorage.getItem(cacheKey); 
-    
+        
         if (cachedData && (Date.now() - JSON.parse(cachedData).timestamp < this.cacheDuration)) {
             const { data } = JSON.parse(cachedData); 
             this.airportDataCache = data.reduce((acc, airport) => {
                 acc[airport.iata_code] = airport;
                 return acc;
             }, {});
-            console.info('Airport data loaded from localStorage');
             return this.airportDataCache;
         }
-    
+        
         try {
             const response = await fetch(`https://yonderhop.com/api/airports?zoom=${currentZoom}`);
             const data = await response.json();
             
             // Store the data in localStorage with a timestamp
             localStorage.setItem(cacheKey, JSON.stringify({ data, timestamp: Date.now() })); 
-    
+
             this.airportDataCache = data.reduce((acc, airport) => {
                 acc[airport.iata_code] = airport;
                 return acc;
             }, {});
-    
-            console.info('Airport data fetched from API and cached');
+            
             return this.airportDataCache;
         } catch (error) {
             console.error('Error fetching airports:', error);
