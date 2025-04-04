@@ -162,7 +162,12 @@ const flightMap = {
         });
 
         popupContent.appendChild(button);
-        clickedMarker.bindPopup(popupContent, { autoClose: false, closeOnClick: true }).openPopup();
+        
+        // Fix: Set closeOnClick to false to prevent popup from closing when clicked
+        clickedMarker.bindPopup(popupContent, { 
+            autoClose: false, 
+            closeOnClick: false  // Changed from true to false
+        }).openPopup();
 
         // Move line drawing after popup is bound
         this.fetchAndCacheRoutes(airport.iata_code).then(routes => {
@@ -185,8 +190,22 @@ const flightMap = {
             };
             
             lineManager.clearLines('hover');
-            pathDrawing.drawRoutePaths(airport.iata_code, directRoutes, 'hover');
+            
+            // Fix: Change 'hover' to 'route' type to prevent clearing on mouseout
+            pathDrawing.drawRoutePaths(airport.iata_code, directRoutes, 'route');
+            
+            // Set flag to indicate we have clicked popups
+            pathDrawing.popupFromClick = true;
+            
             clickedMarker.openPopup(); // Re-open popup after drawing lines
+            
+            // Register the outsideClickListener with a small delay to avoid 
+            // the current click triggering it immediately
+            setTimeout(() => {
+                if (lineManager.outsideClickListener) {
+                    document.addEventListener('click', lineManager.outsideClickListener);
+                }
+            }, 10);
             
             // After operations complete, restore map view if it changed
             setTimeout(() => {
@@ -349,10 +368,12 @@ const flightMap = {
 
                 // Clear existing hover lines before drawing new ones
                 lineManager.clearLines('hover');
-                // Only draw hover paths if no marker is preserved
-                if (!this.preservedMarker) {
+                
+                // Only draw hover paths if no marker is preserved or if this is the preserved marker
+                if (!this.preservedMarker || this.markers[iata] === this.preservedMarker) {
                     pathDrawing.drawRoutePaths(iata, directRoutes, 'hover');
                 }
+                
                 marker.openPopup();
                 marker.hovered = true;
             });

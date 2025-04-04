@@ -1,5 +1,6 @@
 import { map } from './map.js';
 import { pathDrawing, Line } from './pathDrawing.js';
+import { flightMap } from './flightMap.js';
 
 const lineManager = {
     popups: {
@@ -8,6 +9,41 @@ const lineManager = {
     },
     hoveredLine: null,
     linesWithPopups: new Set(),
+    
+    outsideClickListener: function(e) {
+        // Improved detection for clicks outside popup
+        const target = e.target || e.srcElement;
+        
+        // Check if click is on a popup or a marker
+        const isOnPopup = target.closest('.leaflet-popup') || 
+                          target.closest('.leaflet-popup-pane');
+        const isOnMarker = target.closest('.leaflet-marker-icon') ||
+                          target.closest('.leaflet-marker-pane');
+                          
+        // Consider it an outside click if not on popup and not on marker
+        if (!isOnPopup && !isOnMarker) {
+            // First close any popups
+            map.closePopup();
+            
+            // Clear state
+            pathDrawing.popupFromClick = false;
+            
+            // Clear any preserved marker state
+            if (flightMap.preservedMarker) {
+                flightMap.preservedMarker = null;
+                flightMap.hoverDisabled = false;
+            }
+            
+            // Clear route lines
+            lineManager.clearLinesByTags(['type:route']);
+            
+            // Remove this listener to avoid memory leaks
+            document.removeEventListener('click', lineManager.outsideClickListener);
+            
+            // Also remove map click listeners that might interfere
+            map.off('click', this.mapClickHandler);
+        }
+    },
 
     getLinesByTags(tags, cache = 'all') {
         const cacheMap = {
@@ -36,20 +72,24 @@ const lineManager = {
     },
 
     clearLinesByTags(tags, options = {}) {
-        // Skip clearing deck lines during "Any" destination searches
         if (tags.includes('type:deck') && window.preserveAnyDestination) {
+            return;
+        }
+        
+        if (pathDrawing.popupFromClick && !tags.includes('type:hover')) {
             return;
         }
         
         const linesToRemove = this.getLinesByTags(tags);
         linesToRemove.forEach(line => {
-            if (line instanceof Line) {
-                line.remove(); // This removes visible, invisible, and decorated lines
-            } else if (line.visibleLine) {
-                // For non-Line objects that might have visibleLine property
-                map.removeLayer(line.visibleLine);
-                if (line.invisibleLine) map.removeLayer(line.invisibleLine);
-                if (line.decoratedLine) map.removeLayer(line.decoratedLine); // Ensure decorated lines are removed
+            if (!this.linesWithPopups.has(line)) {
+                if (line instanceof Line) {
+                    line.remove();
+                } else if (line.visibleLine) {
+                    map.removeLayer(line.visibleLine);
+                    if (line.invisibleLine) map.removeLayer(line.invisibleLine);
+                    if (line.decoratedLine) map.removeLayer(line.decoratedLine);
+                }
             }
         });
     },
@@ -57,14 +97,13 @@ const lineManager = {
     clearLines(type) {
         const clearTypes = {
             all: () => this.clearLinesByTags(['type:route', 'type:hover'], 
-                        { excludeTags: ['type:deck', 'status:selected'] }),
+                        { excludeTags: ['type:deck', 'status:selected', 'status:clicked'] }),
             hover: () => this.clearLinesByTags(['type:hover']),
             route: () => this.clearLinesByTags(['type:route'], 
-                        { excludeTags: ['type:deck', 'status:selected'] })
+                        { excludeTags: ['type:deck', 'status:selected', 'status:clicked'] })
         };
 
         (clearTypes[type] || clearTypes.all)();
-        map.closePopup();
     },
 
     clearLinesByRouteNumber(routeNumber) {
@@ -83,14 +122,12 @@ const lineManager = {
     },
 
     showRoutePopup(event, routeData, visibleLine, invisibleLine) {
-        // Use the full route information instead of segment info
         const { originAirport, destinationAirport, price, date, fullRoute } = routeData.routeInfo;
         
         const formattedDate = date ? new Date(date).toLocaleDateString("en-US", {
             year: 'numeric', month: 'long', day: 'numeric'
         }) : '';
 
-        // Add layover information if it exists
         const layovers = fullRoute.length > 1 
             ? fullRoute.slice(1, -1).map(segment => 
                 `<br><strong>Layover:</strong> ${segment.cityFrom} (${segment.flyFrom})`)
@@ -114,7 +151,6 @@ const lineManager = {
                 document.removeEventListener('click', this.outsideClickListener);
                 
                 if (routeData?.cardId) {
-                    // Reset all lines with the same cardId
                     const routeLines = Object.values(pathDrawing.routePathCache)
                         .flat()
                         .filter(l => l.routeData?.cardId === routeData.cardId);
@@ -129,7 +165,11 @@ const lineManager = {
                     line && !map.hasLayer(line) && line.addTo(map));
                 this.linesWithPopups.add(visibleLine);
                 pathDrawing.popupFromClick = true;
-                document.addEventListener('click', this.outsideClickListener);
+                
+                // Make sure we use timeout to add click listener after current click event completes
+                setTimeout(() => {
+                    document.addEventListener('click', this.outsideClickListener);
+                }, 10);
             });
 
         setTimeout(() => popup.openOn(map), 100);
@@ -146,16 +186,14 @@ const lineManager = {
 
         this.hoveredLine = line;
 
-        // Find and highlight all lines in the same route
         if (line.routeData?.cardId) {
-            // Get all lines with the same cardId
             const routeLines = Object.values(pathDrawing.routePathCache)
                 .flat()
                 .filter(l => l.routeData?.cardId === line.routeData.cardId);
                 
             routeLines.forEach(routeLine => {
                 if (routeLine instanceof Line) {
-                    routeLine.highlight(); // This now includes bringing to front
+                    routeLine.highlight();
                 } else if (routeLine.visibleLine) {
                     routeLine.visibleLine.setStyle({ color: 'white', weight: 2, opacity: 1 });
                     routeLine.visibleLine.setZIndexOffset(1000);
@@ -163,9 +201,8 @@ const lineManager = {
                 }
             });
         } else {
-            // Single line highlight
             if (line instanceof Line) {
-                line.highlight(); // This now includes bringing to front
+                line.highlight();
             } else if (line.visibleLine) {
                 line.visibleLine.setStyle({ color: 'white', weight: 2, opacity: 1 });
                 line.visibleLine.setZIndexOffset(1000);
@@ -173,7 +210,6 @@ const lineManager = {
             }
         }
 
-        // Extract price from tags
         const priceTag = Array.from(line.tags).find(tag => tag.startsWith('price:'));
         const price = priceTag ? priceTag.split(':')[1] : 'N/A';
 
@@ -194,7 +230,6 @@ const lineManager = {
         if (pathDrawing.popupFromClick || this.linesWithPopups.has(line.visibleLine)) return;
         
         if (line.routeData?.cardId) {
-            // Reset all lines with the same cardId
             const routeLines = Object.values(pathDrawing.routePathCache)
                 .flat()
                 .filter(l => l.routeData?.cardId === line.routeData.cardId);
@@ -203,7 +238,6 @@ const lineManager = {
                 routeLine instanceof Line && routeLine.reset();
             });
         } else {
-            // Single line reset (existing behavior)
             line instanceof Line && line.reset();
         }
         
@@ -215,7 +249,6 @@ const lineManager = {
         this.clearPopups('hover');
         pathDrawing.popupFromClick = true;
 
-        // Reset previously highlighted lines
         const allDeckLines = Object.values(pathDrawing.routePathCache)
             .flat()
             .filter(l => l instanceof Line && l.tags.has('status:highlighted'));
@@ -225,7 +258,6 @@ const lineManager = {
             previousLine.reset();
         });
 
-        // Find and highlight all lines with the same cardId
         if (line.routeData?.cardId) {
             const routeLines = Object.values(pathDrawing.routePathCache)
                 .flat()
@@ -237,18 +269,14 @@ const lineManager = {
             });
         }
 
-        // Handle deck route expansion when clicking a line
         if (line.routeData?.cardId) {
             const card = document.querySelector(`div.route-card[data-card-id="${line.routeData.cardId}"]`);
             if (card) {
-                // Trigger the click event on the card to open it
                 card.click();
-                // Scroll card into view
                 card.scrollIntoView({ behavior: 'smooth', block: 'center' });
             }
         }
 
-        // Show route popup
         if (line.routeData) {
             this.showRoutePopup(e, line.routeData, line.visibleLine, line.invisibleLine);
         } else {

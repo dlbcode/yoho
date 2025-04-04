@@ -129,6 +129,12 @@ const eventManager = {
     },
 
     handleMapClick() {
+        // Check if we have an active popup - if so, let outsideClickListener handle it
+        if (pathDrawing.popupFromClick && lineManager.outsideClickListener) {
+            return;
+        }
+        
+        // First set the flag to prevent any view changes
         appState.preventMapViewChange = true;
         
         const selectedAirportIata = appState.selectedAirport?.iata_code;
@@ -178,9 +184,15 @@ const eventManager = {
     },
 
     attachMarkerEventListeners(iata, marker, airport) {
-        marker.addEventListener('mouseover', () => this.onMarkerMouseOver(iata, airport));
-        marker.addEventListener('mouseout', () => this.onMarkerMouseOut(iata, airport));
-        marker.addEventListener('click', e => this.onMarkerClick(iata, marker, airport, e));
+        const events = {
+            mouseover: () => flightMap.markerHoverHandler(iata, 'mouseover'),
+            mouseout: () => flightMap.markerHoverHandler(iata, 'mouseout'),
+            click: () => flightMap.handleMarkerClick(airport, marker)
+        };
+
+        Object.entries(events).forEach(([event, handler]) => {
+            marker.on(event, handler);
+        });
     },
 
     emitCustomEvent(eventName, data) {
