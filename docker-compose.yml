@@ -10,6 +10,7 @@ services:
       - ./www:/var/www/   
       - letsencrypt_certs:/etc/letsencrypt:ro
       - certbot_www:/var/www/certbot
+      - nginx_cache:/var/cache/nginx
     ports:
       - "80:80"
       - "443:443"
@@ -86,24 +87,6 @@ services:
           cpus: '1'
           memory: '512M'
 
-  squid:
-    image: ubuntu/squid:latest
-    container_name: yh-squid
-    ports:
-      - "3128:3128"
-    volumes:
-      - ./services/squid/squid.conf:/etc/squid/squid.conf
-      - squid_cache:/var/spool/squid
-    restart: unless-stopped
-    deploy:
-      resources:
-        limits:
-          cpus: '1'
-          memory: '256M'
-        reservations:
-          cpus: '1'
-          memory: '128M'
-
 volumes:
   nginx_logs:
   certbot_www:
@@ -112,4 +95,4 @@ volumes:
   mongodb_backup:
   node_modules:
   nodejs_app:
-  squid_cache:
+  nginx_cache:
