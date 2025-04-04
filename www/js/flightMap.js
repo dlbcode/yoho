@@ -175,7 +175,11 @@ const flightMap = {
                 console.error('Direct routes not found for IATA:', airport.iata_code);
                 return;
             }
-            
+
+            // Clear any existing route popups and hover lines
+            lineManager.clearLines('hover');
+            lineManager.clearPopups('route');
+
             // Construct the directRoutes object expected by pathDrawing.drawRoutePaths
             const directRoutes = {
                 [airport.iata_code]: routes.map(route => ({
@@ -188,25 +192,19 @@ const flightMap = {
                     date: route.date
                 }))
             };
-            
-            lineManager.clearLines('hover');
-            
-            // Fix: Change 'hover' to 'route' type to prevent clearing on mouseout
+
+            // Draw direct route lines and set popupFromClick
             pathDrawing.drawRoutePaths(airport.iata_code, directRoutes, 'route');
-            
-            // Set flag to indicate we have clicked popups
             pathDrawing.popupFromClick = true;
-            
-            clickedMarker.openPopup(); // Re-open popup after drawing lines
-            
-            // Register the outsideClickListener with a small delay to avoid 
-            // the current click triggering it immediately
+
+            // Show the marker's popup
+            clickedMarker.openPopup();
+
+            // Listen for clicks outside popups/markers to clear lines
             setTimeout(() => {
-                if (lineManager.outsideClickListener) {
-                    document.addEventListener('click', lineManager.outsideClickListener);
-                }
+                document.addEventListener('click', lineManager.outsideClickListener);
             }, 10);
-            
+
             // After operations complete, restore map view if it changed
             setTimeout(() => {
                 if (appState.preventMapViewChange && 
