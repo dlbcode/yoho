@@ -27,7 +27,7 @@ const map = L.map('map', {
     worldCopyJump: true
 }).setView([0, 0], 4);
 
-L.tileLayer('https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png', {
+L.tileLayer('/map-proxy/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png', {
     maxZoom: 19,
     attribution: '© OpenStreetMap contributors'
 }).addTo(map);

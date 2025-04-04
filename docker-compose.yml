@@ -32,7 +32,7 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '0.25'
+          cpus: '1'
           memory: '128M'
         reservations:
           cpus: '0.125'
@@ -55,7 +55,7 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '2'
+          cpus: '1'
           memory: '2G'
         reservations:
           cpus: '1'
@@ -80,11 +80,29 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '2'
+          cpus: '1'
           memory: '1G'
         reservations:
           cpus: '1'
           memory: '512M'
+
+  squid:
+    image: ubuntu/squid:latest
+    container_name: yh-squid
+    ports:
+      - "3128:3128"
+    volumes:
+      - ./services/squid/squid.conf:/etc/squid/squid.conf
+      - squid_cache:/var/spool/squid
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: '256M'
+        reservations:
+          cpus: '1'
+          memory: '128M'
 
 volumes:
   nginx_logs:
@@ -94,3 +112,4 @@ volumes:
   mongodb_backup:
   node_modules:
   nodejs_app:
+  squid_cache:
