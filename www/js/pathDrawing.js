@@ -138,8 +138,10 @@ class Line {
     }
 
     createDecoratedLine() {
+        if (this.type !== 'route') return null; // Only add plane icon for route lines
+
         const planeIcon = L.icon({
-            iconUrl: '../assets/plane_icon.png',
+            iconUrl: '../assets/plane_icon.png', // Ensure this path is correct
             iconSize: [16, 16],
             iconAnchor: [8, 12]
         });
@@ -151,11 +153,14 @@ class Line {
             }
         });
 
-        return L.polylineDecorator(this.visibleLine, {
+        const decoratedLine = L.polylineDecorator(this.visibleLine, {
             patterns: [
                 { offset: '50%', repeat: 0, symbol: planeSymbol }
             ]
-        }).addTo(this.map);
+        });
+
+        decoratedLine.addTo(this.map); // Add to the map
+        return decoratedLine;
     }
 
     bindEvents() {
@@ -420,6 +425,7 @@ const pathDrawing = {
         // Create and store the new line
         const line = new Line(originAirport, destinationAirport, routeId, type, {
             ...options,
+            showPlane: type === 'route', // Ensure plane icon is only added for route lines
             routeData
         });
 
@@ -428,7 +434,7 @@ const pathDrawing = {
         // Add the line to the map
         line.visibleLine.addTo(map);
         if (line.invisibleLine) line.invisibleLine.addTo(map);
-        if (line.decoratedLine) line.decoratedLine.addTo(map);
+        if (line.decoratedLine) line.decoratedLine.addTo(map); // Ensure decorated line is added
     },
 
     async drawLines() {
