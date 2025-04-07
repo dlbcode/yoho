@@ -15,6 +15,7 @@ class Line {
         this.defaultColor = this.getColorBasedOnPrice(options.price);
         this.color = options.color || this.defaultColor;
         this.weight = options.weight || this.defaultWeight;
+        this.isDeckRoute = options.isDeckRoute || false; // Store isDeckRoute flag
         this.visibleLine = this.createVisibleLine();
         this.invisibleLine = this.createInvisibleLine();
         this.decoratedLine = options.showPlane ? this.createDecoratedLine() : null;
@@ -138,10 +139,13 @@ class Line {
     }
 
     createDecoratedLine() {
-        if (this.type !== 'route') return null; // Only add plane icon for route lines
+        // Don't add plane icon for deck lines or non-route lines
+        if (this.type !== 'route' || this.isDeckRoute) {
+            return null;
+        }
 
         const planeIcon = L.icon({
-            iconUrl: '../assets/plane_icon.png', // Ensure this path is correct
+            iconUrl: '../assets/plane_icon.png',
             iconSize: [16, 16],
             iconAnchor: [8, 12]
         });
@@ -159,7 +163,7 @@ class Line {
             ]
         });
 
-        decoratedLine.addTo(this.map); // Add to the map
+        decoratedLine.addTo(this.map);
         return decoratedLine;
     }
 
@@ -436,7 +440,7 @@ const pathDrawing = {
         // Create and store the new line
         const line = new Line(originAirport, destinationAirport, routeId, type, {
             ...options,
-            showPlane: type === 'route',
+            showPlane: type === 'route' && !options.isDeckRoute, // Only show plane if it's a route and not a deck line
             routeData
         });
 
