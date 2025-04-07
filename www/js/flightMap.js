@@ -12,6 +12,7 @@ const flightMap = {
     hoverDisabled: false, // Add this flag
     preservedMarker: null,  // Add tracking for preserved marker
     hoverTimeout: null, // Add hoverTimeout to debounce hover events
+    clearHoverLinesTimeout: null, // Add a timeout for debouncing the clearing
 
     init() {
         if (typeof map !== 'undefined') {
@@ -344,6 +345,7 @@ const flightMap = {
         if (!airport) return;
 
         clearTimeout(this.hoverTimeout); // Clear any existing hover timeout
+        clearTimeout(this.clearHoverLinesTimeout); // Clear any existing clear timeout
 
         if (event === 'mouseover') {
             this.fetchAndCacheRoutes(iata).then(routes => {
@@ -351,7 +353,6 @@ const flightMap = {
                     console.error('Direct routes not found for IATA:', iata);
                     return;
                 }
-                // Construct the directRoutes object expected by pathDrawing.drawRoutePaths
                 const directRoutes = {
                     [iata]: routes.map(route => ({
                         destinationAirport: {
@@ -364,10 +365,8 @@ const flightMap = {
                     }))
                 };
 
-                // Clear existing hover lines before drawing new ones
                 lineManager.clearLines('hover');
-                
-                // Only draw hover paths if no marker is preserved or if this is the preserved marker
+
                 if (!this.preservedMarker || this.markers[iata] === this.preservedMarker) {
                     pathDrawing.drawRoutePaths(iata, directRoutes, 'hover');
                 }
@@ -376,8 +375,8 @@ const flightMap = {
                 marker.hovered = true;
             });
         } else if (event === 'mouseout' && !this.preservedMarker) {
-            this.hoverTimeout = setTimeout(() => {
-                lineManager.clearLines('hover');
+            this.clearHoverLinesTimeout = setTimeout(() => {
+                pathDrawing.clearHoverLines();
                 marker.closePopup();
             }, 200);
         }

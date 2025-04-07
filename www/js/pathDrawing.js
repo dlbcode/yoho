@@ -258,10 +258,21 @@ const pathDrawing = {
     hoverLines: [],
     drawQueue: new Set(),
     isDrawing: false,
+    linesDrawing: 0,
+    drawingCompleteCallback: null,
 
-    // Add a map to track current line states
-    lineStates: new Map(),
-    hoverTimeout: null,
+    clearHoverLines() {
+        this.hoverLines.forEach(line => {
+            if (line instanceof Line) {
+                line.remove();
+            } else if (line.visibleLine) {
+                map.removeLayer(line.visibleLine);
+                if (line.invisibleLine) map.removeLayer(line.invisibleLine);
+                if (line.decoratedLine) map.removeLayer(line.decoratedLine);
+            }
+        });
+        this.hoverLines = []; // Clear the array after removing lines
+    },
 
     queueDraw(routeId, type, options) {
         this.drawQueue.add({ routeId, type, options });
@@ -425,7 +436,7 @@ const pathDrawing = {
         // Create and store the new line
         const line = new Line(originAirport, destinationAirport, routeId, type, {
             ...options,
-            showPlane: type === 'route', // Ensure plane icon is only added for route lines
+            showPlane: type === 'route',
             routeData
         });
 
@@ -435,6 +446,12 @@ const pathDrawing = {
         line.visibleLine.addTo(map);
         if (line.invisibleLine) line.invisibleLine.addTo(map);
         if (line.decoratedLine) line.decoratedLine.addTo(map); // Ensure decorated line is added
+
+        if (type === 'hover') {
+            this.hoverLines.push(line); // Track hover lines
+        }
+
+        return line; // Return the created line
     },
 
     async drawLines() {
@@ -495,13 +512,15 @@ const pathDrawing = {
 
     drawRoutePaths(iata, directRoutes, type = 'route') {
         directRoutes[iata]?.forEach(route => {
-            // Fix: Use proper routeId construction
             const routeId = `${iata}-${route.destinationAirport.iata_code}`;
-            
             this.drawLine(routeId, type, {
                 price: route.price,
                 iata: iata,
                 isDeckRoute: type === 'route'
+            }).then(line => {
+                if (type === 'hover' && line) {
+                    this.hoverLines.push(line); // Track hover lines
+                }
             });
         });
     },
