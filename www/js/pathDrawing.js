@@ -437,6 +437,11 @@ const pathDrawing = {
             }
         };
 
+        // Append to the existing array if it exists
+        if (!this.routePathCache[routeId]) {
+            this.routePathCache[routeId] = [];
+        }
+
         // Create and store the new line
         const line = new Line(originAirport, destinationAirport, routeId, type, {
             ...options,
@@ -444,7 +449,8 @@ const pathDrawing = {
             routeData
         });
 
-        this.routePathCache[routeId] = [line];
+        // Add to the cache array
+        this.routePathCache[routeId].push(line);
 
         // Add the line to the map
         line.visibleLine.addTo(map);
