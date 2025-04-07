@@ -236,16 +236,36 @@ const lineManager = {
         // Always clear hover popups
         this.clearPopups('hover');
         
-        // Reset the specific line being moused out
-        if (line instanceof Line && !line.tags.has('status:highlighted')) {
-            line.reset();
-        } else if (line.visibleLine && !this.linesWithPopups.has(line.visibleLine)) {
-            // Reset non-Line objects to their default style
-            line.visibleLine.setStyle({
-                color: line.color || 'blue',
-                weight: line.weight || 1,
-                opacity: 1
+        // If this is part of a multi-segment flight with a cardId
+        if (line.routeData?.cardId) {
+            // Find all line segments with the same cardId
+            const routeLines = Object.values(pathDrawing.routePathCache)
+                .flat()
+                .filter(l => l.routeData?.cardId === line.routeData.cardId);
+                
+            // Reset all segments that aren't explicitly marked as highlighted
+            routeLines.forEach(routeLine => {
+                if (routeLine instanceof Line && !routeLine.tags.has('status:highlighted')) {
+                    routeLine.reset();
+                } else if (routeLine.visibleLine && !this.linesWithPopups.has(routeLine.visibleLine)) {
+                    routeLine.visibleLine.setStyle({
+                        color: routeLine.color || 'blue',
+                        weight: routeLine.weight || 1,
+                        opacity: 1
+                    });
+                }
             });
+        } else {
+            // Original single-segment handling
+            if (line instanceof Line && !line.tags.has('status:highlighted')) {
+                line.reset();
+            } else if (line.visibleLine && !this.linesWithPopups.has(line.visibleLine)) {
+                line.visibleLine.setStyle({
+                    color: line.color || 'blue',
+                    weight: line.weight || 1,
+                    opacity: 1
+                });
+            }
         }
         
         // Reset the hoveredLine reference
