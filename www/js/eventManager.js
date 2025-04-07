@@ -67,6 +67,7 @@ const eventManager = {
         map.addEventListener('popupclose', () => {
             flightMap.hoverDisabled = false;
             flightMap.preservedMarker = null;
+            updateState('selectedAirport', null, 'eventManager.popupclose');
         });
         
         document.addEventListener('keydown', (e) => {
