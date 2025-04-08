@@ -51,8 +51,12 @@ const lineManager = {
             // Remove this listener to avoid memory leaks
             document.removeEventListener('click', lineManager.outsideClickListener);
             
-            // Also remove map click listeners that might interfere
-            map.off('click', this.mapClickHandler);
+            // Don't try to remove undefined map click handler
+            if (map._events && map._events.click) {
+                map._events.click = map._events.click.filter(handler => 
+                    handler.fn !== this.mapClickHandler
+                );
+            }
         }
     },
 
