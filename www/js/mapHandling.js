@@ -61,33 +61,62 @@ var mc = new Hammer(document.getElementById('map'));
 mc.get('pan').set({ direction: Hammer.DIRECTION_ALL });
 
 let lastElement = null;
+let lastMouseOutElement = null;
 
-mc.on('pan', function (ev) {
+function getElementsFromPoint(x, y) {
+    return document.elementsFromPoint(x, y).filter(el => 
+        el.classList.contains('leaflet-interactive') || 
+        el.closest('.leaflet-interactive')
+    );
+}
+
+function simulateMouseEvent(eventType, center, target, bubbles = true) {
+    if (!target) return;
+    
+    const simulatedEvent = new MouseEvent(eventType, {
+        view: window,
+        bubbles,
+        cancelable: true,
+        clientX: center.x,
+        clientY: center.y,
+        screenX: center.x,
+        screenY: center.y
+    });
+    
+    target.dispatchEvent(simulatedEvent);
+}
+
+mc.on('panstart', function(ev) {
     if (appState.selectedAirport) {
-        let element = document.elementFromPoint(ev.center.x, ev.center.y);
-
-        // Simulate mouseover if moving to a new element
-        if (element !== lastElement) {
-            if (lastElement) {
-                simulateMouseEvent('mouseout', ev.center, lastElement);
-            }
-            simulateMouseEvent('mouseover', ev.center, element);
-            lastElement = element;
-        }
-
-        simulateMouseEvent("mousemove", ev.center, element);
+        lastElement = null;
+        lastMouseOutElement = null;
     }
 });
 
-function simulateMouseEvent(eventType, center, target) {
-    let simulatedEvent = new MouseEvent(eventType, {
-        view: window,
-        bubbles: true,
-        cancelable: true,
-        clientX: center.x,
-        clientY: center.y
-    });
-    target.dispatchEvent(simulatedEvent);
-}
+mc.on('pan', function(ev) {
+    if (appState.selectedAirport) {
+        const elements = getElementsFromPoint(ev.center.x, ev.center.y);
+        const currentElement = elements[0];
+
+        if (lastElement && currentElement !== lastElement) {
+            simulateMouseEvent('mouseout', ev.center, lastElement);
+            lastMouseOutElement = lastElement;
+        }
+
+        if (currentElement && currentElement !== lastElement) {
+            simulateMouseEvent('mouseover', ev.center, currentElement);
+            simulateMouseEvent('mousemove', ev.center, currentElement);
+        }
+
+        lastElement = currentElement;
+    }
+});
+
+mc.on('panend', function(ev) {
+    if (appState.selectedAirport) {
+        lastElement = null;
+        lastMouseOutElement = null;
+    }
+});
 
 export { mapHandling };

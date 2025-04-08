@@ -61,10 +61,23 @@ const handleStateChange = (event) => {
 };
 
 const eventManager = {
+    isTouch: false,
+
     init() {
         document.addEventListener('stateChange', handleStateChange);
         
-        map.addEventListener('popupclose', () => {
+        // Add touch detection
+        document.addEventListener('touchstart', () => this.isTouch = true, { passive: true });
+        document.addEventListener('touchend', () => {
+            setTimeout(() => this.isTouch = false, 100);
+        }, { passive: true });
+        
+        map.addEventListener('popupclose', (e) => {
+            // Prevent popup close from affecting selected airport during touch
+            if (this.isTouch && appState.selectedAirport) {
+                return;
+            }
+            
             flightMap.hoverDisabled = false;
             flightMap.preservedMarker = null;
             updateState('selectedAirport', null, 'eventManager.popupclose');

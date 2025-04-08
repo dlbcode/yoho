@@ -186,8 +186,11 @@ const lineManager = {
 
     onMouseOver(e, line) {
         if (this.hoveredLine && this.hoveredLine !== line) {
-            this.hoveredLine instanceof Line && this.hoveredLine.reset();
-            this.clearPopups('hover');
+            // Don't reset previous line if we're in a touch interaction
+            if (!e.touches) {
+                this.hoveredLine instanceof Line && this.hoveredLine.reset();
+                this.clearPopups('hover');
+            }
         }
 
         this.hoveredLine = line;
@@ -233,17 +236,19 @@ const lineManager = {
     },
 
     onMouseOut(line) {
-        // Always clear hover popups
+        // Don't clear hover states during touch interactions
+        if (window.event && window.event.touches) {
+            return;
+        }
+
+        // Clear hover popups
         this.clearPopups('hover');
         
-        // If this is part of a multi-segment flight with a cardId
         if (line.routeData?.cardId) {
-            // Find all line segments with the same cardId
             const routeLines = Object.values(pathDrawing.routePathCache)
                 .flat()
                 .filter(l => l.routeData?.cardId === line.routeData.cardId);
                 
-            // Reset all segments that aren't explicitly marked as highlighted
             routeLines.forEach(routeLine => {
                 if (routeLine instanceof Line && !routeLine.tags.has('status:highlighted')) {
                     routeLine.reset();
@@ -256,7 +261,6 @@ const lineManager = {
                 }
             });
         } else {
-            // Original single-segment handling
             if (line instanceof Line && !line.tags.has('status:highlighted')) {
                 line.reset();
             } else if (line.visibleLine && !this.linesWithPopups.has(line.visibleLine)) {
@@ -268,7 +272,6 @@ const lineManager = {
             }
         }
         
-        // Reset the hoveredLine reference
         this.hoveredLine = null;
     },
 
