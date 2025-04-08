@@ -51,6 +51,15 @@ const stateHandlers = {
 const handleStateChange = (event) => {
     const { key, value } = event.detail;
     
+    if (key === 'selectedAirport') {
+        if (value) {
+            map.dragging.disable();
+        } else {
+            map.dragging.enable();
+            map.touchZoom.enable();
+        }
+    }
+    
     if (key === 'updateWaypoint' || key === 'updateRoutes' || key === 'removeRoute') {
         eventManager.updateRoutes();
     } else if (key === 'updateRouteData') {

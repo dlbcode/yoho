@@ -35,6 +35,9 @@ const lineManager = {
                 flightMap.hoverDisabled = false;
             }
             
+            // Clear selectedAirport state to re-enable map panning
+            updateState('selectedAirport', null, 'lineManager.outsideClickListener');
+            
             // Also close popups on any other markers that might be open
             Object.values(flightMap.markers || {}).forEach(marker => {
                 if (marker && marker._popup && marker._popup.isOpen()) {
@@ -198,7 +201,7 @@ const lineManager = {
         if (line.routeData?.cardId) {
             const routeLines = Object.values(pathDrawing.routePathCache)
                 .flat()
-                .filter(l => l.routeData?.cardId === line.routeData.cardId);
+                .filter(l => l.routeData.cardId === line.routeData.cardId);
                 
             routeLines.forEach(routeLine => {
                 if (routeLine instanceof Line) {
