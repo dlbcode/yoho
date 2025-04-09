@@ -1,6 +1,7 @@
 import { map } from './map.js';
 import { pathDrawing, Line } from './pathDrawing.js';
 import { flightMap } from './flightMap.js';
+import { appState, updateState } from './stateManager.js';  // Add this import
 
 const lineManager = {
     popups: {
@@ -11,50 +12,56 @@ const lineManager = {
     linesWithPopups: new Set(),
     
     outsideClickListener: function(e) {
-        // Improved detection for clicks outside popup
         const target = e.target || e.srcElement;
         
-        // Check if click is on a popup or a marker
         const isOnPopup = target.closest('.leaflet-popup') || 
                           target.closest('.leaflet-popup-pane');
         const isOnMarker = target.closest('.leaflet-marker-icon') ||
                           target.closest('.leaflet-marker-pane');
                           
-        // Consider it an outside click if not on popup and not on marker
         if (!isOnPopup && !isOnMarker) {
-            // First close any popups
             map.closePopup();
-            
-            // Clear state
             pathDrawing.popupFromClick = false;
             
-            // Close all marker popups and reset preserved marker
             if (flightMap.preservedMarker) {
                 flightMap.preservedMarker.closePopup();
                 flightMap.preservedMarker = null;
                 flightMap.hoverDisabled = false;
             }
             
-            // Clear selectedAirport state to re-enable map panning
             updateState('selectedAirport', null, 'lineManager.outsideClickListener');
             
-            // Also close popups on any other markers that might be open
             Object.values(flightMap.markers || {}).forEach(marker => {
                 if (marker && marker._popup && marker._popup.isOpen()) {
                     marker.closePopup();
                 }
             });
+
+            const linesToClear = lineManager.getLinesByTags(['type:route']).filter(line => {
+                return !appState.routeData.some(route => {
+                    if (!route || route.isEmpty) return false;
+                    const routeId = `${route.origin?.iata_code}-${route.destination?.iata_code}`;
+                    return line.routeId === routeId;
+                });
+            });
+
+            linesToClear.forEach(line => {
+                if (!lineManager.linesWithPopups.has(line)) {  // Use self here too
+                    if (line instanceof Line) {
+                        line.remove();
+                    } else if (line.visibleLine) {
+                        map.removeLayer(line.visibleLine);
+                        if (line.invisibleLine) map.removeLayer(line.invisibleLine);
+                        if (line.decoratedLine) map.removeLayer(line.decoratedLine);
+                    }
+                }
+            });
             
-            // Clear route lines
-            lineManager.clearLinesByTags(['type:route']);
-            
-            // Remove this listener to avoid memory leaks
             document.removeEventListener('click', lineManager.outsideClickListener);
             
-            // Don't try to remove undefined map click handler
             if (map._events && map._events.click) {
                 map._events.click = map._events.click.filter(handler => 
-                    handler.fn !== this.mapClickHandler
+                    handler.fn !== self.mapClickHandler  // And here
                 );
             }
         }
