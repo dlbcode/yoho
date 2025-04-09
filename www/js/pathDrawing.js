@@ -442,10 +442,18 @@ const pathDrawing = {
             this.routePathCache[routeId] = [];
         }
 
+        // Check if this route exists in appState.routeData
+        const [routeOriginIata, routeDestIata] = routeId.split('-');
+        const isInRouteData = appState.routeData.some(route => 
+            route && !route.isEmpty && 
+            ((route.origin?.iata_code === routeOriginIata && route.destination?.iata_code === routeDestIata) ||
+             (route.origin?.iata_code === routeDestIata && route.destination?.iata_code === routeOriginIata))
+        );
+
         // Create and store the new line
         const line = new Line(originAirport, destinationAirport, routeId, type, {
             ...options,
-            showPlane: type === 'route' && !options.isDeckRoute, // Only show plane if it's a route and not a deck line
+            showPlane: type === 'route' && !options.isDeckRoute && isInRouteData, // Add isInRouteData check
             routeData
         });
 
