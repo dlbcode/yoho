@@ -523,14 +523,26 @@ const pathDrawing = {
     drawRoutePaths(iata, directRoutes, type = 'route') {
         directRoutes[iata]?.forEach(route => {
             const routeId = `${iata}-${route.destinationAirport.iata_code}`;
+            
+            // Skip drawing hover lines if a route line already exists for this route ID
+            if (type === 'hover' && this.routePathCache[routeId]?.some(line => 
+                line.tags.has('type:route'))) {
+                return;
+            }
+
             this.drawLine(routeId, type, {
-                price: route.price,
-                iata: iata,
-                isDeckRoute: type === 'route'
-            }).then(line => {
-                if (type === 'hover' && line) {
-                    this.hoverLines.push(line); // Track hover lines
-                }
+                routeData: {
+                    routeInfo: {
+                        originAirport: {
+                            cityFrom: iata,
+                            flyFrom: iata
+                        },
+                        destinationAirport: route.destinationAirport,
+                        price: route.price,
+                        date: route.date
+                    }
+                },
+                price: route.price
             });
         });
     },
