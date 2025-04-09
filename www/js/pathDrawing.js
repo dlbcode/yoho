@@ -16,6 +16,7 @@ class Line {
         this.color = options.color || this.defaultColor;
         this.weight = options.weight || this.defaultWeight;
         this.isDeckRoute = options.isDeckRoute || false; // Store isDeckRoute flag
+        this.preventMapMovement = options.preventMapMovement || false; // Add this line
         this.visibleLine = this.createVisibleLine();
         this.invisibleLine = this.createInvisibleLine();
         this.decoratedLine = options.showPlane ? this.createDecoratedLine() : null;
@@ -104,7 +105,14 @@ class Line {
         const latLngOne = L.latLng(this.origin.latitude, this.origin.longitude);
         const latLngTwo = L.latLng(this.destination.latitude, this.destination.longitude);
         
-        const baseLine = new L.Geodesic([latLngOne, latLngTwo], this.getBaseLineOptions());
+        const baseOptions = {
+            ...this.getBaseLineOptions(),
+            noWrap: true,
+            // Add this to prevent map fitting for hover lines
+            fitMapOnAdd: !this.preventMapMovement
+        };
+
+        const baseLine = new L.Geodesic([latLngOne, latLngTwo], baseOptions);
         this.lineOffsetCopies = [-360, 0, 360].map(offset => {
             if (offset === 0) {
                 return baseLine.addTo(this.map);

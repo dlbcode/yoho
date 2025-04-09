@@ -72,12 +72,14 @@ export function drawFlightLines(flight, routeIndex, isTemporary = false) {
         if (!pathCache[routeId]) {
             const routeData = createRouteData(flight, segment, nextSegment, cardId);
 
+            // Add preventMapMovement option when isTemporary is true
             const line = pathDrawing.drawLine(routeId, 'route', {
                 price: flight.price,
                 iata: segment.flyFrom,
                 isDeckRoute: true,
                 isTemporary,
-                type: 'deck', // Add for consistent tagging
+                type: 'deck',
+                preventMapMovement: isTemporary, // Add this flag
                 routeData
             });
 
