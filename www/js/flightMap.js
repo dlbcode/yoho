@@ -335,7 +335,9 @@ const flightMap = {
 
     markerHoverHandler(iata, event) {
         // Skip hover effects if an airport is selected or there's a preserved marker and this isn't it
-        if (appState.selectedAirport || (this.preservedMarker && this.markers[iata] !== this.preservedMarker)) {
+        if (this.hoverDisabled || 
+            appState.selectedAirport || 
+            (this.preservedMarker && this.markers[iata] !== this.preservedMarker)) {
             return;
         }
 
@@ -344,45 +346,66 @@ const flightMap = {
         const airport = this.airportDataCache[iata];
         if (!airport) return;
 
-        clearTimeout(this.hoverTimeout); // Clear any existing hover timeout
-        clearTimeout(this.clearHoverLinesTimeout); // Clear any existing clear timeout
-
-        if (event === 'mouseover') {
-            this.fetchAndCacheRoutes(iata).then(routes => {
-                if (!routes || !routes.length) {
-                    console.error('Direct routes not found for IATA:', iata);
-                    return;
-                }
-                const directRoutes = {
-                    [iata]: routes.map(route => ({
-                        destinationAirport: {
-                            iata_code: route.destination,
-                            city: route.cityTo,
-                            name: route.nameTo
-                        },
-                        price: route.price,
-                        date: route.date
-                    }))
-                };
-
-                lineManager.clearLines('hover');
-
-                if (!this.preservedMarker || this.markers[iata] === this.preservedMarker) {
-                    pathDrawing.drawRoutePaths(iata, directRoutes, 'hover');
-                }
-                
-                marker.openPopup();
-                marker.hovered = true;
-            });
-        } else if (event === 'mouseout' && !this.preservedMarker) {
-            this.clearHoverLinesTimeout = setTimeout(() => {
-                pathDrawing.clearHoverLines();
-                marker.closePopup();
-            }, 200);
+        // Clear any existing hover timeout to prevent race conditions
+        if (this.hoverTimeout) {
+            clearTimeout(this.hoverTimeout);
+            this.hoverTimeout = null;
         }
 
-        if (appState.selectedAirport && appState.selectedAirport.iata_code === iata) {
+        if (event === 'mouseover') {
+            // Show popup immediately for better responsiveness
             marker.openPopup();
+            
+            // Use a shorter timeout for route lines to improve responsiveness
+            // but still prevent excessive API calls
+            this.hoverTimeout = setTimeout(() => {
+                this.fetchAndCacheRoutes(iata).then(routes => {
+                    if (!routes || !routes.length) {
+                        console.error('Direct routes not found for IATA:', iata);
+                        return;
+                    }
+                    
+                    // Skip drawing routes if the state changed while waiting
+                    if (this.hoverDisabled || 
+                        appState.selectedAirport || 
+                        (this.preservedMarker && this.markers[iata] !== this.preservedMarker)) {
+                        return;
+                    }
+                    
+                    const directRoutes = {
+                        [iata]: routes.map(route => ({
+                            destinationAirport: {
+                                iata_code: route.destination,
+                                city: route.cityTo,
+                                name: route.nameTo
+                            },
+                            price: route.price,
+                            date: route.date
+                        }))
+                    };
+
+                    lineManager.clearLines('hover');
+                    
+                    if (!this.preservedMarker || this.markers[iata] === this.preservedMarker) {
+                        pathDrawing.drawRoutePaths(iata, directRoutes, 'hover');
+                    }
+                });
+            }, 75); // Reduced from 150ms to 100ms for better responsiveness
+            
+        } else if (event === 'mouseout') {
+            // Close popup immediately on mouseout
+            marker.closePopup();
+            
+            // Clear any potential pending hover effect
+            if (this.hoverTimeout) {
+                clearTimeout(this.hoverTimeout);
+                this.hoverTimeout = null;
+            }
+            
+            // Only clear lines if there's no preserved marker
+            if (!this.preservedMarker) {
+                lineManager.clearLines('hover');
+            }
         }
     },
 
