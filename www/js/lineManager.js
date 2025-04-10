@@ -265,7 +265,8 @@ const lineManager = {
                 
             routeLines.forEach(routeLine => {
                 if (routeLine instanceof Line && !routeLine.tags.has('status:highlighted')) {
-                    routeLine.reset();
+                    // Add preventMapMovement flag to reset
+                    routeLine.reset({ preventMapMovement: true });
                 } else if (routeLine.visibleLine && !this.linesWithPopups.has(routeLine.visibleLine)) {
                     routeLine.visibleLine.setStyle({
                         color: routeLine.color || 'blue',
@@ -276,7 +277,8 @@ const lineManager = {
             });
         } else {
             if (line instanceof Line && !line.tags.has('status:highlighted')) {
-                line.reset();
+                // Add preventMapMovement flag to reset
+                line.reset({ preventMapMovement: true });
             } else if (line.visibleLine && !this.linesWithPopups.has(line.visibleLine)) {
                 line.visibleLine.setStyle({
                     color: line.color || 'blue',

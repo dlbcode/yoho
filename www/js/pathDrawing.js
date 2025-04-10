@@ -236,12 +236,17 @@ class Line {
         this.updateLineStyles(this._lineArray, style);
     }
 
-    reset() {
+    reset(options = {}) {
         const style = {
             color: this.color,
             weight: this.weight,
             opacity: 1
         };
+        
+        // Pass the preventMapMovement option to the line options
+        if (options.preventMapMovement) {
+            style.fitMapOnAdd = false;
+        }
         
         // Use the cached line array from highlight()
         this.updateLineStyles(this._lineArray || [...this.lineOffsetCopies, this.invisibleLine, this.decoratedLine], style);
