@@ -4,6 +4,11 @@ import { flightMap } from './flightMap.js';
 
 const mapHandling = {
     updateMarkerIcons: function () {
+        // Skip marker updates when in selected route views
+        if (['selectedRoute', 'fullJourney'].includes(appState.currentView)) {
+            return;
+        }
+
         // Get all IATA codes from valid routes in routeData
         const routeIataCodes = new Set();
         

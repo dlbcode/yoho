@@ -152,9 +152,6 @@ const eventManager = {
     },
 
     handleMapClick() {
-        // Clear any stuck popups first
-        lineManager.closeAllPopups();
-        
         // Rest of existing code...
         if (pathDrawing.popupFromClick && lineManager.outsideClickListener) {
             return;
@@ -162,21 +159,24 @@ const eventManager = {
         
         appState.preventMapViewChange = true;
         
-        const selectedAirportIata = appState.selectedAirport?.iata_code;
-        if (selectedAirportIata) {
-            const marker = flightMap.markers[selectedAirportIata];
-            const isWaypoint = appState.routeData.some(r => 
-                r && !r.isEmpty && (
-                    r.origin?.iata_code === selectedAirportIata || 
-                    r.destination?.iata_code === selectedAirportIata
-                )
-            );
-            if (!isWaypoint) {
-                marker?.setIcon(blueDotIcon);
+        // Don't reset route buttons if we're in a selected route view
+        if (!['selectedRoute', 'fullJourney'].includes(appState.currentView)) {
+            const selectedAirportIata = appState.selectedAirport?.iata_code;
+            if (selectedAirportIata) {
+                const marker = flightMap.markers[selectedAirportIata];
+                const isWaypoint = appState.routeData.some(r => 
+                    r && !r.isEmpty && (
+                        r.origin?.iata_code === selectedAirportIata || 
+                        r.destination?.iata_code === selectedAirportIata
+                    )
+                );
+                if (!isWaypoint) {
+                    marker?.setIcon(blueDotIcon);
+                }
+                
+                // Close any open popup on the marker
+                marker?.closePopup();
             }
-            
-            // Close any open popup on the marker
-            marker?.closePopup();
         }
         
         // Clear hover timer if exists
@@ -185,25 +185,19 @@ const eventManager = {
             flightMap.markerHoverTimer = null;
         }
         
-        // Rest of existing code...
-        flightMap.selectedMarker = null;
-        flightMap.preservedMarker = null;
-        flightMap.hoverDisabled = false;
-        
-        const currentCenter = map.getCenter();
-        const currentZoom = map.getZoom();
-        
-        updateState('selectedAirport', null, 'eventManager.handleMapClick');
+        // Don't reset selected marker if we're in a selected route view
+        if (!['selectedRoute', 'fullJourney'].includes(appState.currentView)) {
+            flightMap.selectedMarker = null;
+            flightMap.preservedMarker = null;
+            flightMap.hoverDisabled = false;
+            
+            const currentCenter = map.getCenter();
+            const currentZoom = map.getZoom();
+            
+            updateState('selectedAirport', null, 'eventManager.handleMapClick');
+        }
         
         lineManager.clearLines('hover');
-        
-        flightMap.hoverDisabled = false;
-        
-        if (appState.preventMapViewChange && 
-            (!map.getCenter().equals(currentCenter) || map.getZoom() !== currentZoom)) {
-            map.setView(currentCenter, currentZoom, { animate: false });
-        }
-        appState.preventMapViewChange = false;
     },
 
     setupAllPathsButtonEventListener() {
