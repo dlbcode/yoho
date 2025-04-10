@@ -468,9 +468,19 @@ const flightMap = {
     },
 
     updateVisibleMarkers() {
+        // Check if map movement is prevented (e.g. when viewing a selected route)
+        if (appState.preventMapMovement) {
+            return;
+        }
+        
+        // Cache current bounds and zoom to avoid repeated calls to map methods
         const currentZoom = map.getZoom();
         const currentBounds = map.getBounds();
+        // Store original map center and zoom level to restore after updates
+        const originalCenter = map.getCenter();
+        const originalZoom = currentZoom;
 
+        // Process airport data based on current view
         Object.values(this.airportDataCache).forEach(airport => {
             const isSelectedRoute = appState.selectedRoute?.includes(airport.iata_code);
             if (this.shouldDisplayAirport(airport.weight, currentZoom, isSelectedRoute) &&
@@ -483,6 +493,7 @@ const flightMap = {
             }
         });
 
+        // Update marker visibility based on current view
         Object.keys(this.markers).forEach(iata => {
             const marker = this.markers[iata];
             
@@ -495,6 +506,8 @@ const flightMap = {
             );
             
             const isSelectedRoute = appState.selectedRoute?.includes(iata);
+            
+            // Only update marker visibility without changing map view
             if (isInRoute || this.shouldDisplayAirport(marker.airportWeight, currentZoom, isSelectedRoute)) {
                 if (currentBounds.contains(marker.getLatLng())) {
                     if (!map.hasLayer(marker)) {
@@ -505,6 +518,11 @@ const flightMap = {
                 }
             }
         });
+        
+        // Restore original map view if it was changed
+        if (!originalCenter.equals(map.getCenter()) || originalZoom !== map.getZoom()) {
+            map.setView(originalCenter, originalZoom, { animate: false });
+        }
     },
 
     clearRouteCache() {

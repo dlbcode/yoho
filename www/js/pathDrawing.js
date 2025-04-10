@@ -16,7 +16,7 @@ class Line {
         this.color = options.color || this.defaultColor;
         this.weight = options.weight || this.defaultWeight;
         this.isDeckRoute = options.isDeckRoute || false; // Store isDeckRoute flag
-        this.preventMapMovement = options.preventMapMovement || false; // Add this line
+        this.preventMapMovement = options.preventMapMovement || true; // Make this default to true for all lines
         this.visibleLine = this.createVisibleLine();
         this.invisibleLine = this.createInvisibleLine();
         this.decoratedLine = options.showPlane ? this.createDecoratedLine() : null;
@@ -108,8 +108,8 @@ class Line {
         const baseOptions = {
             ...this.getBaseLineOptions(),
             noWrap: true,
-            // Add this to prevent map fitting for hover lines
-            fitMapOnAdd: !this.preventMapMovement
+            // Always prevent map fitting for all lines
+            fitMapOnAdd: false
         };
 
         const baseLine = new L.Geodesic([latLngOne, latLngTwo], baseOptions);
