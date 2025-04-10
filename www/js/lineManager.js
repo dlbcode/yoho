@@ -30,7 +30,10 @@ const lineManager = {
                 flightMap.hoverDisabled = false;
             }
             
-            updateState('selectedAirport', null, 'lineManager.outsideClickListener');
+            // Only clear selectedAirport state if not in a selected route view
+            if (!['selectedRoute', 'fullJourney'].includes(appState.currentView)) {
+                updateState('selectedAirport', null, 'lineManager.outsideClickListener');
+            }
             
             Object.values(flightMap.markers || {}).forEach(marker => {
                 if (marker && marker._popup && marker._popup.isOpen()) {
@@ -47,7 +50,7 @@ const lineManager = {
             });
 
             linesToClear.forEach(line => {
-                if (!lineManager.linesWithPopups.has(line)) {  // Use self here too
+                if (!lineManager.linesWithPopups.has(line)) {
                     if (line instanceof Line) {
                         line.remove();
                     } else if (line.visibleLine) {
@@ -62,7 +65,7 @@ const lineManager = {
             
             if (map._events && map._events.click) {
                 map._events.click = map._events.click.filter(handler => 
-                    handler.fn !== self.mapClickHandler  // And here
+                    handler.fn !== self.mapClickHandler
                 );
             }
         }
@@ -271,9 +274,7 @@ const lineManager = {
 
     onMouseOut(line) {
         // Don't clear hover states during touch interactions
-        if (window.event && window.event.touches) {
-            return;
-        }
+        if (window.event && window.event.touches) return;
 
         // Clear hover popups
         this.clearPopups('hover');
@@ -284,8 +285,9 @@ const lineManager = {
                 .filter(l => l.routeData?.cardId === line.routeData.cardId);
                 
             routeLines.forEach(routeLine => {
-                if (routeLine instanceof Line && !routeLine.tags.has('status:highlighted')) {
-                    // Add preventMapMovement flag to reset
+                // Don't reset highlighted state when in selected views
+                if (routeLine instanceof Line && !routeLine.tags.has('status:highlighted') && 
+                    !['selectedRoute', 'fullJourney'].includes(appState.currentView)) {
                     routeLine.reset({ preventMapMovement: true });
                 } else if (routeLine.visibleLine && !this.linesWithPopups.has(routeLine.visibleLine)) {
                     routeLine.visibleLine.setStyle({
@@ -296,8 +298,9 @@ const lineManager = {
                 }
             });
         } else {
-            if (line instanceof Line && !line.tags.has('status:highlighted')) {
-                // Add preventMapMovement flag to reset
+            // Don't reset highlighted state when in selected views
+            if (line instanceof Line && !line.tags.has('status:highlighted') && 
+                !['selectedRoute', 'fullJourney'].includes(appState.currentView)) {
                 line.reset({ preventMapMovement: true });
             } else if (line.visibleLine && !this.linesWithPopups.has(line.visibleLine)) {
                 line.visibleLine.setStyle({
