@@ -10,6 +10,7 @@ const lineManager = {
     },
     hoveredLine: null,
     linesWithPopups: new Set(),
+    allPopups: new Set(), // Add a Set to track all popups
     
     outsideClickListener: function(e) {
         const target = e.target || e.srcElement;
@@ -134,13 +135,32 @@ const lineManager = {
     },
 
     createPopup(latlng, content, options = {}) {
-        return L.popup({
+        const popup = L.popup({
             autoClose: false,
             closeOnClick: false,
             ...options
         })
         .setLatLng(latlng)
         .setContent(content);
+        
+        // Add to tracking Set
+        this.allPopups.add(popup);
+        
+        // Add remove handler to clean up tracking
+        popup.on('remove', () => {
+            this.allPopups.delete(popup);
+        });
+        
+        return popup;
+    },
+
+    closeAllPopups() {
+        this.allPopups.forEach(popup => {
+            if (popup && map.hasLayer(popup)) {
+                map.closePopup(popup);
+            }
+        });
+        this.allPopups.clear();
     },
 
     showRoutePopup(event, routeData, visibleLine, invisibleLine) {

@@ -152,12 +152,14 @@ const eventManager = {
     },
 
     handleMapClick() {
-        // Check if we have an active popup - if so, let outsideClickListener handle it
+        // Clear any stuck popups first
+        lineManager.closeAllPopups();
+        
+        // Rest of existing code...
         if (pathDrawing.popupFromClick && lineManager.outsideClickListener) {
             return;
         }
         
-        // First set the flag to prevent any view changes
         appState.preventMapViewChange = true;
         
         const selectedAirportIata = appState.selectedAirport?.iata_code;
@@ -172,8 +174,18 @@ const eventManager = {
             if (!isWaypoint) {
                 marker?.setIcon(blueDotIcon);
             }
+            
+            // Close any open popup on the marker
+            marker?.closePopup();
         }
         
+        // Clear hover timer if exists
+        if (flightMap.markerHoverTimer) {
+            clearTimeout(flightMap.markerHoverTimer);
+            flightMap.markerHoverTimer = null;
+        }
+        
+        // Rest of existing code...
         flightMap.selectedMarker = null;
         flightMap.preservedMarker = null;
         flightMap.hoverDisabled = false;
@@ -187,13 +199,11 @@ const eventManager = {
         
         flightMap.hoverDisabled = false;
         
-        setTimeout(() => {
-            if (appState.preventMapViewChange && 
-                (!map.getCenter().equals(currentCenter) || map.getZoom() !== currentZoom)) {
-                map.setView(currentCenter, currentZoom, { animate: false });
-            }
-            appState.preventMapViewChange = false;
-        }, 100);
+        if (appState.preventMapViewChange && 
+            (!map.getCenter().equals(currentCenter) || map.getZoom() !== currentZoom)) {
+            map.setView(currentCenter, currentZoom, { animate: false });
+        }
+        appState.preventMapViewChange = false;
     },
 
     setupAllPathsButtonEventListener() {
