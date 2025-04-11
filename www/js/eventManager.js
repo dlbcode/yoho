@@ -155,8 +155,6 @@ const eventManager = {
             return;
         }
         
-        appState.preventMapViewChange = true;
-        
         // Skip marker and state changes in selected route views
         if (!['selectedRoute', 'fullJourney'].includes(appState.currentView)) {
             const selectedAirportIata = appState.selectedAirport?.iata_code;
